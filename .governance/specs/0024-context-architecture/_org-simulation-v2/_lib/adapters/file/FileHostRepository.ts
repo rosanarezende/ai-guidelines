@@ -99,7 +99,9 @@ interface RegisterFile {
   "updated-at"?: string;
 }
 interface TriageItemFile {
-  question: string;
+  id: string;
+  title: string;
+  "from-doubt"?: string;
   disposition?: Disposition;
   "explore-point"?: { id: string; title: string; details?: string };
   answer?: string;
@@ -226,7 +228,9 @@ const fromRegister = (r: Register): RegisterFile => ({
 
 const toTriage = (f: TriageFile): Triage => ({
   items: f.items?.map((it) => ({
-    question: it.question,
+    id: it.id,
+    title: it.title,
+    fromDoubt: it["from-doubt"],
     disposition: it.disposition,
     explorePoint: it["explore-point"],
     answer: it.answer,
@@ -239,7 +243,9 @@ const toTriage = (f: TriageFile): Triage => ({
 });
 const fromTriage = (t: Triage): TriageFile => ({
   items: t.items?.map((it) => ({
-    question: it.question,
+    id: it.id,
+    title: it.title,
+    "from-doubt": it.fromDoubt,
     disposition: it.disposition,
     "explore-point": it.explorePoint,
     answer: it.answer,

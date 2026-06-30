@@ -15,14 +15,17 @@ const MATCHERS = [
   { kind: "gemini-api", label: "integração · Gemini API", model: "gemini-2.5-flash" },
 ];
 
-// TRIAGEM (engenharia): lê o registro, dispõe cada dúvida, SIMULA o matcher (léxico/LLM local/API) com os campos
-// editados, valida contratos, avalia viabilidade e decide o GATE (promover/descartar). D7/D8/D9/D10.
+type Provided = { name: string; kind: string; provider: string; description?: string };
+
+// TRIAGEM (engenharia): lê o registro, levanta/dispõe os ITENS (das dúvidas de negócio OU da própria eng), SIMULA o
+// matcher com os campos editados, VALIDA contratos (dos providos pelos repos), avalia viabilidade e decide o GATE.
 export function TriageDetail() {
   const { id = "" } = useParams();
   const nav = useNavigate();
   const [reg, setReg] = useState<Register | null>(null);
   const [items, setItems] = useState<TriageItem[]>([]);
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [provided, setProvided] = useState<Provided[]>([]);
   const [viability, setViability] = useState("");
   const [rationale, setRationale] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -37,13 +40,29 @@ export function TriageDetail() {
   const [matchError, setMatchError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([api.register(id), api.triage(id)])
-      .then(([r, t]) => {
+    Promise.all([api.register(id), api.triage(id), api.manifests()])
+      .then(([r, t, manifests]) => {
         setReg(r);
         setViability(t.viability ?? "");
         setContracts(t.contracts ?? []);
-        const existing = new Map((t.items ?? []).map((it) => [it.question, it]));
-        setItems((r.openQuestions ?? []).map((q) => existing.get(q.id) ?? { question: q.id }));
+        // itens: os já salvos + as dúvidas de negócio ainda não cobertas
+        const savedItems = t.items ?? [];
+        const covered = new Set(savedItems.map((it) => it.fromDoubt).filter(Boolean));
+        const fromDoubts: TriageItem[] = (r.openQuestions ?? [])
+          .filter((q) => !covered.has(q.id))
+          .map((q) => ({ id: `t${rand16()}`, title: q.question, fromDoubt: q.id }));
+        setItems([...savedItems, ...fromDoubts]);
+        // contratos disponíveis = o que cada repo PROVÊ (manifestos)
+        setProvided(
+          manifests.flatMap((m) =>
+            (m.provides ?? []).map((p) => ({
+              name: p.name,
+              kind: p.kind,
+              provider: m.repo,
+              description: p.description,
+            }))
+          )
+        );
       })
       .catch((e: unknown) => setError(String(e instanceof Error ? e.message : e)));
   }, [id]);
@@ -51,13 +70,9 @@ export function TriageDetail() {
   if (error) return <p className="error">Erro: {error}</p>;
   if (!reg) return <p className="muted">carregando…</p>;
 
-  const questionText = (qid: string): string =>
-    reg.openQuestions?.find((q) => q.id === qid)?.question ?? qid;
-  // o NEED de cada dúvida usa os campos JÁ EDITADOS: descrição (contexto) + a dúvida + o detalhe do explore-point.
+  // o NEED de cada item usa os campos JÁ EDITADOS: descrição (contexto) + o título do item + o detalhe do explore-point.
   const needText = (it: TriageItem): string =>
-    [reg.description, questionText(it.question), it.explorePoint?.details]
-      .filter(Boolean)
-      .join(" — ");
+    [reg.description, it.title, it.explorePoint?.details].filter(Boolean).join(" — ");
   const suggestionsFor = (key: string) =>
     (match?.results.find((r) => r.key === key)?.ranked ?? []).filter((m) => m.score > 0);
 
@@ -69,7 +84,7 @@ export function TriageDetail() {
     if (!it) return;
     const patch: Partial<TriageItem> = { disposition: d };
     if (d === "exploration" && !it.explorePoint)
-      patch.explorePoint = { id: `e${rand16()}`, title: questionText(it.question), details: "" };
+      patch.explorePoint = { id: `e${rand16()}`, title: it.title, details: "" };
     if (d === "needs-info" && !it.blockedSince) patch.blockedSince = today();
     setItem(i, patch);
   }
@@ -78,9 +93,11 @@ export function TriageDetail() {
     setMatching(true);
     setMatchError(null);
     try {
-      const needs = items.map((it) => ({ key: it.question, text: needText(it) }));
+      const needs = items
+        .filter((it) => it.title.trim())
+        .map((it) => ({ key: it.id, text: needText(it) }));
       if (needs.length === 0) {
-        setMatchError("não há dúvidas para casar (o registro não trouxe dúvidas).");
+        setMatchError("não há itens com título para casar.");
         return;
       }
       setMatch(await api.match({ needs, kind: mKind, model: mModel || undefined }));
@@ -93,7 +110,7 @@ export function TriageDetail() {
   }
 
   const buildTriage = () => ({
-    items,
+    items: items.filter((it) => it.title.trim()),
     contracts,
     viability: viability.trim() || undefined,
     updatedAt: today(),
@@ -188,8 +205,8 @@ export function TriageDetail() {
 
       <h3>simular matcher</h3>
       <p className="field-hint">
-        Usa os campos já editados (descrição + dúvidas + detalhes) p/ sugerir os repos. Escolha o
-        backend e rode — o mesmo need, do léxico ao LLM.{" "}
+        Usa os campos já editados (descrição + título do item + detalhe) p/ sugerir os repos.
+        Escolha o backend e rode — o mesmo need, do léxico ao LLM.{" "}
         <i>(Ollama precisa estar no ar; a integração precisa de key configurada.)</i>
       </p>
       <div className="field-row">
@@ -232,14 +249,30 @@ export function TriageDetail() {
         </p>
       )}
 
-      <h3>triagem das dúvidas</h3>
-      {items.length === 0 && <p className="muted">(o registro não trouxe dúvidas)</p>}
+      <h3>itens da triagem</h3>
+      <p className="field-hint">
+        Cada item é algo a investigar/decidir. Vêm das <b>dúvidas do negócio</b> ou você{" "}
+        <b>adiciona</b> os que surgem na engenharia. Dispõe cada um: vira exploration · responde
+        direto · falta info.
+      </p>
       {items.map((it, i) => {
-        const sugg = suggestionsFor(it.question);
+        const sugg = suggestionsFor(it.id);
         return (
-          <div className="explore-edit" key={it.question}>
-            <div className="meta">
-              <b>{questionText(it.question)}</b> <span className="exp-id">{it.question}</span>
+          <div className="explore-edit" key={it.id}>
+            <div className="edit-row">
+              <input
+                value={it.title}
+                onChange={(e) => setItem(i, { title: e.target.value })}
+                placeholder="o que investigar/decidir"
+              />
+              <span className="exp-id">{it.fromDoubt ? "do negócio" : "da eng"}</span>
+              <button
+                type="button"
+                className="btn-icon"
+                onClick={() => setItems((xs) => xs.filter((_, j) => j !== i))}
+              >
+                ✕
+              </button>
             </div>
             <div className="field-row">
               <label className="field">
@@ -305,42 +338,79 @@ export function TriageDetail() {
           </div>
         );
       })}
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={() => setItems((xs) => [...xs, { id: `t${rand16()}`, title: "" }])}
+      >
+        + item (levantado na engenharia)
+      </button>
 
-      <h3>contratos / conexões validados</h3>
-      {contracts.map((c, i) => (
-        <div className="edit-row" key={i}>
-          <input
-            value={c.name}
-            onChange={(e) =>
-              setContracts((cs) => cs.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))
-            }
-            placeholder="nome do contrato"
-          />
-          <input
-            className="narrow"
-            value={c.awaits ?? ""}
-            onChange={(e) =>
-              setContracts((cs) =>
-                cs.map((x, j) => (j === i ? { ...x, awaits: e.target.value || undefined } : x))
-              )
-            }
-            placeholder="aguarda"
-          />
-          <button
-            type="button"
-            className="btn-icon"
-            onClick={() => setContracts((cs) => cs.filter((_, j) => j !== i))}
-          >
-            ✕
-          </button>
+      <h3>contratos / conexões</h3>
+      <p className="field-hint">
+        Um <b>contrato</b> é um ponto de <b>interface compartilhado entre repos</b> (componente ·
+        api · evento · serviço) que a iniciativa coordena — ex.: <code>form-component</code>{" "}
+        (provido pelo design-system, consumido pelos MFEs). Adicione dos <b>providos pelos repos</b>{" "}
+        abaixo, ou um proposto.
+      </p>
+      {provided.filter((pc) => !contracts.some((c) => c.name === pc.name)).length > 0 && (
+        <div className="chips">
+          {provided
+            .filter((pc) => !contracts.some((c) => c.name === pc.name))
+            .map((pc) => (
+              <button
+                type="button"
+                className="chip chip-btn"
+                key={`${pc.provider}/${pc.name}`}
+                title={`${pc.kind} · ${pc.provider}${pc.description ? " · " + pc.description : ""}`}
+                onClick={() => setContracts((cs) => [...cs, { name: pc.name }])}
+              >
+                + {pc.name}{" "}
+                <span className="muted">
+                  ({pc.kind} · {pc.provider})
+                </span>
+              </button>
+            ))}
         </div>
-      ))}
+      )}
+      <div className="vstack">
+        {contracts.map((c, i) => (
+          <div className="edit-row" key={i}>
+            <input
+              value={c.name}
+              onChange={(e) =>
+                setContracts((cs) =>
+                  cs.map((x, j) => (j === i ? { ...x, name: e.target.value } : x))
+                )
+              }
+              placeholder="nome do contrato (ex.: form-component)"
+            />
+            <input
+              className="narrow"
+              value={c.awaits ?? ""}
+              onChange={(e) =>
+                setContracts((cs) =>
+                  cs.map((x, j) => (j === i ? { ...x, awaits: e.target.value || undefined } : x))
+                )
+              }
+              placeholder="aguarda"
+            />
+            <button
+              type="button"
+              className="btn-icon"
+              onClick={() => setContracts((cs) => cs.filter((_, j) => j !== i))}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
       <button
         type="button"
         className="btn-secondary"
         onClick={() => setContracts((cs) => [...cs, { name: "" }])}
       >
-        + contrato
+        + contrato proposto
       </button>
 
       <h3>viabilidade</h3>

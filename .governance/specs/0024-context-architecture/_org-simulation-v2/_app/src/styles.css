@@ -488,3 +488,21 @@ button.btn {
   line-height: 1.5;
   margin: 0.2rem 0 0.8rem;
 }
+.chip-btn {
+  cursor: pointer;
+  border: 1px dashed var(--line);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.74rem;
+}
+.chip-btn:hover {
+  border-style: solid;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.vstack {
+  display: flex;
+  flex-direction: column;
+  margin: 0.4rem 0;
+}

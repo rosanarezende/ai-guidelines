@@ -3,9 +3,11 @@
 node: triage
 updated-at: 2026-NN-NN
 
-# para cada dúvida (open-question) do register, a disposição da engenharia:
+# itens a investigar/decidir: cada um vem de uma dúvida do NEGÓCIO (from-doubt) OU é levantado pela ENG na triagem.
 items:
-  - question: <open-question-id> # ref à dúvida no register
+  - id: <rand> # chave própria do item
+    title: "<o que investigar/decidir>"
+    from-doubt: <open-question-id> # opcional: a dúvida de negócio de origem (ausente = levantado pela eng na fase)
     disposition: exploration # exploration | answered | needs-info
     # se exploration → o explore-point refinado (vira a exploration, DISPARADA no repo de trabalho):
     explore-point:
@@ -20,9 +22,11 @@ items:
     # assignee: "@quem-de-negocio"
     # blocked-since: 2026-NN-NN
 
-# contratos/conexões VALIDADOS depois de rodar o matcher (aceitos / corrigidos / adicionados / removidos):
+# CONTRATOS que a iniciativa coordena = pontos de INTERFACE compartilhados entre repos (componente / api / evento /
+# serviço). Ex.: `form-component` (provido pelo design-system, consumido pelos MFEs). O `name` casa com um `provides`
+# de algum manifesto. A eng VALIDA aqui (após o matcher): aceita / corrige / adiciona / remove.
 contracts:
-  - { name: <contrato>, awaits: <explore-id> }
+  - { name: <contrato>, awaits: <explore-id> } # awaits opcional: o explore-point que precisa resolver p/ ficar known
 
 viability:
   | # notas de viabilidade (a investigação pode mostrar que a intent é INVIÁVEL → descartar no gate)

@@ -178,7 +178,9 @@ export interface Register {
 /** a disposição de uma dúvida na triagem: vira exploration · respondida direto · falta-info (volta pro negócio). */
 export type Disposition = "exploration" | "answered" | "needs-info";
 export interface TriageItem {
-  question: string; // ref ao openQuestions[].id da register
+  id: string; // chave própria do item de triagem
+  title: string; // o que investigar/decidir — de uma dúvida de NEGÓCIO OU levantado pela ENG na triagem
+  fromDoubt?: string; // origem: o openQuestion id da register (ausente = levantado na triagem, pela eng)
   disposition?: Disposition;
   explorePoint?: ExplorePoint; // se exploration: o explore-point refinado pela eng
   answer?: string; // se answered: a resposta direta do eng

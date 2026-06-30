@@ -74,5 +74,6 @@ export const api = {
     json<{ ok: boolean }>(`/api/registers/${enc(id)}/discard`, post(g)),
 
   repos: () => json<string[]>("/api/repos"),
+  manifests: () => json<Manifest[]>("/api/manifests"),
   graph: () => json<OrgGraph>("/api/graph"),
 };
