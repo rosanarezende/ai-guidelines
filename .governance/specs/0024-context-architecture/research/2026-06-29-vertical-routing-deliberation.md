@@ -137,6 +137,10 @@ quiser plugar embeddings/LLM depois). Esse é o critério de aceite do v1.
 - **dogfood `routing-check.ts` VERDE**: o léxico REPRODUZIU as escolhas humanas (e1→DS · e2→support 6>identity 4 ·
   form-component→DS · failure-event→identity). Advisory: não toca o gate.
 
-**Pendente:** (a) a **viz** (cards de roteamento + grafo repo×tag na tela) → vai pra a **rodada do `_viewer`** (o app
-vai ser bem mexido; os dados já estão no `db.json`, evita view dupla). (b) **v2 — adapter `LlmMatcher` LOCAL** (Ollama;
-trocar o matcher = 1 linha no `build`).
+**✅ v2 (LLM LOCAL) FEITO** (commits `da5a17bf` foundation + `98b57b88` tier 2/bench) — rodou no Ollama da owner (RTX
+3060): porta async + `OllamaEmbedMatcher` (tier 1) + `OllamaGenerateMatcher` (tier 2) + `matcher.yml` (raiz do host) +
+`routing-bench.ts` + build resiliente (LLM fora → léxico). **Medido:** léxico/embed(`nomic`) **4/4** (0.0s / 0.6s warm);
+generativo + lento e **não** + exato (o `qwen3:4b` regrediu p/ 3/4) → **embeddings é o workhorse** (ver `../_org-simulation-v2/MATCHER.md`).
+
+**Pendente:** a **viz** (cards de roteamento + grafo repo×tag na tela) → vai pra a **rodada do `_viewer`** (o app vai
+ser bem mexido; os dados já estão no `db.json`, evita view dupla).
