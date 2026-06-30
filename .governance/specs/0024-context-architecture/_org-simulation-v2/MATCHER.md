@@ -76,7 +76,24 @@ importa, não pro ranking puro. Critério: reproduzir e1→DS · e2→support ·
 > **org/repo GIGANTE** — dezenas de repos, capabilities **ambíguas/sobrepostas**, **sinônimos/paráfrase**, **texto
 > livre sem tags**, multilíngue — onde o léxico tende a **degradar** e embedding/LLM (local **ou hosted**:
 > Claude/OpenAI/…) devem **abrir vantagem**. A conclusão acima vale **só pra este caso**; o **stress test** (escala +
-> texto-livre + modelos hosted) está **PENDENTE**.
+> texto-livre) está **medido abaixo** ↓ (os modelos **hosted** seguem pendentes).
+
+## Stress scenario (escala + texto-livre + distractors) — `node _bench/stress-bench.ts`
+
+12 repos fictícios + 8 needs em **paráfrase** (overlap de token ~0 com o repo certo), **texto-livre (SEM tags)**, com
+**distractors** e 1 **cross-lingual** (PT need × capability EN). Isolado do `login_1`; ground-truth conhecido.
+
+| matcher                       | acertos | latência | leitura                                                              |
+| ----------------------------- | ------- | -------- | -------------------------------------------------------------------- |
+| `lexical` (t0)                | **2/8** | 0.0s     | **colapsa** — sem tags + paráfrase, cai pro repo de + tokens         |
+| embed `nomic-embed-text` (t1) | **1/8** | 7s       | colapsa **porque o `nomic` é inglês** — em PT não separa (≠ falha)   |
+| gen `gemma3:12b` (t2)         | **8/8** | 489s     | **acerta tudo** (cross-lingual + distractors); entende PT, mas LENTO |
+
+**Leitura (o oposto do caso limpo):** no difícil, **o barato COLAPSA e o LLM ganha** — a hipótese da owner. Dois
+alertas: (1) o `nomic` é EN → o tier 1 precisa de um **embed multilíngue** (ex.: `bge-m3`) pra ser justo em PT; (2) o
+`gemma3:12b` acerta 8/8 mas a **489s** → abre a pergunta dos **modelos hosted** (mesma acurácia, mais rápido?).
+Reforça o **gerador de capabilities**: capabilities bem-escritas fariam os tiers baratos recuperarem (garbage-in → só
+o LLM sobrevive).
 
 ## Determinismo
 
