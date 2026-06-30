@@ -100,11 +100,11 @@ o LLM sobrevive).
 
 Delega a um agente JÁ INSTALADO em modo headless (usa o plano/login — sem API tokens; ⚠️ ToS). No MESMO stress:
 
-| matcher (3b)          | acertos | latência | nota                                                               |
-| --------------------- | ------- | -------- | ------------------------------------------------------------------ |
-| `claude -p` (Claude)  | **8/8** | 77s      | JSON limpo                                                         |
-| `codex exec` (OpenAI) | **8/8** | 56s      | precisa `--skip-git-repo-check`; ecoa o prompt (pega o último {…}) |
-| `agy -p` (Gemini)     | ⏳      | —        | output murky — pendente de tuning da invocação/parse               |
+| matcher (3b)          | acertos | latência | nota                                                                                                                                       |
+| --------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `claude -p` (Claude)  | **8/8** | 77s      | JSON limpo                                                                                                                                 |
+| `codex exec` (OpenAI) | **8/8** | 56s      | precisa `--skip-git-repo-check`; ecoa o prompt (pega o último {…})                                                                         |
+| `agy -p` (Gemini)     | ⏳      | —        | **trava headless** (espera aprovação de permissão; o bypass `--dangerously-skip-permissions` precisa de autorização — ⚠️ decisão da owner) |
 
 **Leitura:** no difícil, os hosted-via-plano (Claude **8/8 77s** · OpenAI **8/8 56s**) dão a MESMA acurácia do
 `gemma3:12b` local (8/8) **~6–8× mais rápido** e **SEM tokens** (plano). O trade-off real: **local** = soberania mas
