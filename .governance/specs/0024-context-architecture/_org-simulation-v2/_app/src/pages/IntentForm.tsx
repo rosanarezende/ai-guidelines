@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, type Intent } from "../api.ts";
 import type {
@@ -21,9 +21,21 @@ const slugify = (s: string): string =>
 const clean = <T,>(arr: T[]): T[] | undefined => (arr.length ? arr : undefined);
 const REF_TYPES = ["modeling", "spec", "design", "benchmark", "dashboard", "alignment", "other"];
 
+// rótulo com selo de obrigatoriedade
+function Lbl({ children, req, rec }: { children: ReactNode; req?: boolean; rec?: boolean }) {
+  return (
+    <span>
+      {children}
+      {req && <em className="req-tag">obrigatório</em>}
+      {rec && <em className="rec-tag">recomendado</em>}
+    </span>
+  );
+}
+const Nudge = ({ show, children }: { show: boolean; children: ReactNode }): ReactNode =>
+  show ? <small className="nudge">{children}</small> : null;
+
 // Cadastro/edição de INICIATIVA — grava o intent.yml de verdade (via _lib). Forma rica deliberada em
-// research/2026-06-30-intent-authoring-shape-deliberation.md: enquadramento + pessoas + explore-points; nasce draft;
-// contratos NÃO se digitam (o matcher sugere no detalhe).
+// research/2026-06-30-intent-authoring-shape-deliberation.md. Nasce draft; contratos NÃO se digitam (matcher sugere).
 export function IntentForm() {
   const { id: editId } = useParams();
   const editing = Boolean(editId);
@@ -72,6 +84,8 @@ export function IntentForm() {
   }, [editId]);
 
   const effectiveId = editing ? id : id || (title ? `${slugify(title)}_${rand16()}` : "");
+  const problemEmpty = !pBusiness.trim() && !pCustomer.trim();
+  const exploresEmpty = explores.filter((e) => e.title.trim()).length === 0;
 
   const setStk = (i: number, patch: Partial<Stakeholder>): void =>
     setStakeholders((xs) => xs.map((x, j) => (j === i ? { ...x, ...patch } : x)));
@@ -130,11 +144,11 @@ export function IntentForm() {
       <h2>{editing ? `Editar ${title || editId}` : "Nova iniciativa"}</h2>
 
       <label className="field">
-        <span>título *</span>
+        <Lbl req>título</Lbl>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Sistema de login"
+          placeholder="ex.: Sistema de login (multi-repo)"
         />
       </label>
       <div className="field-row">
@@ -154,7 +168,7 @@ export function IntentForm() {
         ) : (
           <label className="field">
             <span>status</span>
-            <input value="draft (nasce como rascunho → ativa depois)" disabled />
+            <input value="draft (nasce rascunho → ativa depois)" disabled />
           </label>
         )}
       </div>
@@ -166,12 +180,21 @@ export function IntentForm() {
           <input
             value={registeredBy}
             onChange={(e) => setRegisteredBy(e.target.value)}
-            placeholder="@você"
+            placeholder="ex.: @você"
           />
         </label>
         <label className="field">
-          <span>dona (accountable)</span>
-          <input value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="@ana-pm" />
+          <Lbl rec>responsável (accountable)</Lbl>
+          <input
+            value={owner}
+            onChange={(e) => setOwner(e.target.value)}
+            placeholder="ex.: @ana-pm ou @squad-growth"
+          />
+          <small className="field-hint">
+            quem RESPONDE pela iniciativa — pessoa (o PM) ou papel/time. Solo? você mesma. (A
+            BU/time é a pasta na governança, não este campo.)
+          </small>
+          <Nudge show={!owner.trim()}>defina quem responde pela iniciativa.</Nudge>
         </label>
       </div>
       <div className="field">
@@ -182,12 +205,12 @@ export function IntentForm() {
               className="narrow"
               value={s.role}
               onChange={(e) => setStk(i, { role: e.target.value })}
-              placeholder="papel"
+              placeholder="ex.: PM"
             />
             <input
               value={s.who}
               onChange={(e) => setStk(i, { who: e.target.value })}
-              placeholder="@quem / time"
+              placeholder="ex.: @ana / @squad-design"
             />
             <button
               type="button"
@@ -208,27 +231,57 @@ export function IntentForm() {
       </div>
 
       <h3>enquadramento</h3>
+      <p className="info-banner">
+        💡 Quanto melhor você descrever o <b>problema</b> e os <b>explore-points</b>, melhores as{" "}
+        <b>conexões e contratos</b> que o matcher vai sugerir (é desse texto que ele parte).
+      </p>
       <label className="field">
-        <span>problema de negócio</span>
-        <textarea value={pBusiness} onChange={(e) => setPBusiness(e.target.value)} rows={2} />
+        <Lbl rec>problema de negócio</Lbl>
+        <textarea
+          value={pBusiness}
+          onChange={(e) => setPBusiness(e.target.value)}
+          rows={2}
+          placeholder="ex.: a adoção do plano Pro está estagnada há 2 trimestres"
+        />
       </label>
       <label className="field">
-        <span>problema do cliente</span>
-        <textarea value={pCustomer} onChange={(e) => setPCustomer(e.target.value)} rows={2} />
+        <Lbl rec>problema do cliente</Lbl>
+        <textarea
+          value={pCustomer}
+          onChange={(e) => setPCustomer(e.target.value)}
+          rows={2}
+          placeholder="ex.: clientes não percebem o valor das features premium e não fazem upgrade"
+        />
+        <Nudge show={problemEmpty}>
+          descreva o problema para o matcher sugerir melhores conexões/contratos.
+        </Nudge>
       </label>
       <div className="field-row">
         <label className="field">
           <span>driver estratégico</span>
-          <input value={bcDriver} onChange={(e) => setBcDriver(e.target.value)} />
+          <input
+            value={bcDriver}
+            onChange={(e) => setBcDriver(e.target.value)}
+            placeholder="ex.: ampliar a receita do plano Pro"
+          />
         </label>
         <label className="field">
           <span>métrica de negócio impactada</span>
-          <input value={bcMetric} onChange={(e) => setBcMetric(e.target.value)} />
+          <input
+            value={bcMetric}
+            onChange={(e) => setBcMetric(e.target.value)}
+            placeholder="ex.: taxa de upgrade Free→Pro"
+          />
         </label>
       </div>
       <label className="field">
         <span>detalhes</span>
-        <textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} />
+        <textarea
+          value={details}
+          onChange={(e) => setDetails(e.target.value)}
+          rows={3}
+          placeholder="contexto livre, premissas, o porquê do status…"
+        />
       </label>
       <div className="field">
         <span>referências / links</span>
@@ -246,7 +299,7 @@ export function IntentForm() {
             <input
               value={r.label}
               onChange={(e) => setRef(i, { label: e.target.value })}
-              placeholder="rótulo"
+              placeholder="ex.: modelagem no Figma"
             />
             <input
               value={r.url ?? ""}
@@ -271,14 +324,16 @@ export function IntentForm() {
         </button>
       </div>
 
-      <h3>explore-points · o que investigar (abre as explorations)</h3>
+      <h3>
+        <Lbl rec>explore-points</Lbl> · o que investigar (abre as explorations)
+      </h3>
       {explores.map((e, i) => (
         <div className="explore-edit" key={e.id}>
           <div className="edit-row">
             <input
               value={e.title}
               onChange={(ev) => setExp(i, { title: ev.target.value })}
-              placeholder="título — o que investigar"
+              placeholder="ex.: o design system tem um formulário validado?"
             />
             <span className="exp-id">{e.id}</span>
             <button
@@ -293,10 +348,13 @@ export function IntentForm() {
             value={e.details ?? ""}
             onChange={(ev) => setExp(i, { details: ev.target.value || undefined })}
             rows={2}
-            placeholder="detalhes — o que a exploration precisa responder (alimenta o matcher)"
+            placeholder="ex.: valida e-mail/telefone? é acessível? cada MFE reimplementa?"
           />
         </div>
       ))}
+      <Nudge show={exploresEmpty}>
+        adicione ao menos 1 explore-point — é o que o matcher usa para sugerir onde investigar.
+      </Nudge>
       <button
         type="button"
         className="btn-secondary"

@@ -17,7 +17,7 @@ closed-at: # só quando terminal (done | dropped); vazio em active/paused
 
 # ===== pessoas (3 papéis distintos) =====
 registered-by: # quem CADASTROU a intent (autoria/registro)
-owner: # a DONA accountable — responde pela iniciativa (papel ou pessoa)
+owner: # o ACCOUNTABLE — quem RESPONDE pela iniciativa (pessoa OU papel/time; solo = você). A BU/time é a PASTA, não este campo.
 stakeholders: # cargos/pessoas relacionadas (o "alinhamento com stakeholders")
   - { role: <papel>, who: <pessoa/time> }
 

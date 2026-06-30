@@ -416,3 +416,45 @@ textarea {
 button.btn {
   font-family: inherit;
 }
+
+/* ── guia de preenchimento ── */
+.req-tag,
+.rec-tag {
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.03rem 0.4rem;
+  border-radius: 5px;
+  margin-left: 0.45rem;
+  vertical-align: middle;
+}
+.req-tag {
+  background: #c0392b22;
+  color: #c0392b;
+}
+.rec-tag {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+.field-hint {
+  font-size: 0.72rem;
+  opacity: 0.6;
+  margin-top: 0.15rem;
+  line-height: 1.4;
+}
+.nudge {
+  display: block;
+  font-size: 0.74rem;
+  color: #c9770f;
+  margin-top: 0.25rem;
+}
+.info-banner {
+  font-size: 0.82rem;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  margin: 0.4rem 0 1rem;
+}
