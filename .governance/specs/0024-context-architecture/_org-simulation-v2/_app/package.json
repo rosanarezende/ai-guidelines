@@ -1,0 +1,26 @@
+{
+  "name": "org-sim-v2-app",
+  "private": true,
+  "type": "module",
+  "description": "App da org (sim v2): times cadastram/editam intents e proposals + visualizam os grafos da organização. Backend FINO sobre a _lib (file-first, sem modelo próprio).",
+  "scripts": {
+    "server": "node server.ts",
+    "web": "vite",
+    "dev": "concurrently -k -n srv,web \"npm:server\" \"npm:web\"",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0"
+  }
+}
