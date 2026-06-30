@@ -71,6 +71,13 @@ baratíssimos. O **generativo é mais lento e _não_ mais exato** aqui (o `qwen3
 a research: **embeddings é o workhorse**; o generativo (tier 2) só compensa quando o **"porquê" em linguagem natural**
 importa, não pro ranking puro. Critério: reproduzir e1→DS · e2→support · contratos via provides.
 
+> ⚠️ **Ressalva — NÃO generalizar.** Este é um caso **pequeno e limpo**: poucos repos, capabilities **1-1 bem
+> descritas + tags certas** → o léxico acerta fácil (ainda mais com o boost de tag). Ele **não testa** o cenário de
+> **org/repo GIGANTE** — dezenas de repos, capabilities **ambíguas/sobrepostas**, **sinônimos/paráfrase**, **texto
+> livre sem tags**, multilíngue — onde o léxico tende a **degradar** e embedding/LLM (local **ou hosted**:
+> Claude/OpenAI/…) devem **abrir vantagem**. A conclusão acima vale **só pra este caso**; o **stress test** (escala +
+> texto-livre + modelos hosted) está **PENDENTE**.
+
 ## Determinismo
 
 Léxico = determinístico (poderia ir versionado). Embedding/LLM = **overlay runtime** (advisory, **não-versionado**) —
