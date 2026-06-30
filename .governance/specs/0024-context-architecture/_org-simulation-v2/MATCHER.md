@@ -53,6 +53,24 @@ Sem `matcher.yml`, o matcher é **léxico**, zero infra. `node _lib/build.ts` lo
 > **Docker (opcional, paridade):** o Ollama pode rodar em container **no HOST** (`acme-governance`, não num work-repo —
 > o matcher é host-level), mas exige o nvidia-container-toolkit pro GPU passthrough. **Nativo é mais simples.**
 
+### tier 3b — hosted via PLANO/login (SEM API tokens)
+
+Delega a uma **CLI de agente que você já paga** (sem API key/tokens) em modo headless. Rode no stress:
+`node _bench/cli-bench.ts [claude|codex|agy]`.
+
+| provedor                   | comando headless                              | estado                                                                      |
+| -------------------------- | --------------------------------------------- | --------------------------------------------------------------------------- |
+| **Claude** (plano Claude)  | `claude -p '<prompt>'`                        | ✅ out-of-the-box (JSON limpo)                                              |
+| **OpenAI** (plano ChatGPT) | `codex exec --skip-git-repo-check '<prompt>'` | ✅ funciona (ecoa o prompt → o parser pega o último `{…}`)                  |
+| **Gemini** (login Google)  | `agy --dangerously-skip-permissions -p '…'`   | ⏳ a CLI não retornou output headless aqui (quirk); ⚠️ a flag desliga gates |
+
+Como **matcher de verdade** (não só bench): um `kind: agent` no `matcher.yml` (planejado) com o `command`. O
+`CliDelegateMatcher` roda a CLI num `cwd` **neutro** (o agente não mexe no repo) e parseia o JSON da resposta.
+
+> ⚠️ **ToS:** usar uma assinatura de coding-agent pra workload de app é **gray-area** — ok pra dev/pessoal; conferir os
+> termos pra produção. Pra a tarefa do matcher, o **local (tier 1/2)** evita isso de vez (e o `--dangerously-skip-permissions`
+> do `agy` **desliga os gates de aprovação** — autorize conscientemente).
+
 ## Escada de viabilidade (RTX 3060 12GB) — medido via `node _lib/routing-bench.ts`
 
 | matcher                     | reproduz o dogfood | latência\* | nota                                       |
@@ -100,11 +118,11 @@ o LLM sobrevive).
 
 Delega a um agente JÁ INSTALADO em modo headless (usa o plano/login — sem API tokens; ⚠️ ToS). No MESMO stress:
 
-| matcher (3b)          | acertos | latência | nota                                                                                                                                       |
-| --------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `claude -p` (Claude)  | **8/8** | 77s      | JSON limpo                                                                                                                                 |
-| `codex exec` (OpenAI) | **8/8** | 56s      | precisa `--skip-git-repo-check`; ecoa o prompt (pega o último {…})                                                                         |
-| `agy -p` (Gemini)     | ⏳      | —        | **trava headless** (espera aprovação de permissão; o bypass `--dangerously-skip-permissions` precisa de autorização — ⚠️ decisão da owner) |
+| matcher (3b)          | acertos | latência | nota                                                                                                              |
+| --------------------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `claude -p` (Claude)  | **8/8** | 77s      | JSON limpo                                                                                                        |
+| `codex exec` (OpenAI) | **8/8** | 56s      | precisa `--skip-git-repo-check`; ecoa o prompt (pega o último {…})                                                |
+| `agy -p` (Gemini)     | ⏳      | —        | **trava headless mesmo com `--dangerously-skip-permissions`** (autorizado) — sem output; quirk da CLI Antigravity |
 
 **Leitura:** no difícil, os hosted-via-plano (Claude **8/8 77s** · OpenAI **8/8 56s**) dão a MESMA acurácia do
 `gemma3:12b` local (8/8) **~6–8× mais rápido** e **SEM tokens** (plano). O trade-off real: **local** = soberania mas

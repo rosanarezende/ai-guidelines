@@ -14,12 +14,7 @@ const candidates: MatchCandidate[] = REPOS.map((r) => ({
 const matchers: { label: string; matcher: Matcher }[] = [
   { label: "lexical (tier 0)", matcher: new LexicalMatcher() },
   { label: "embed nomic [EN] (t1)", matcher: new OllamaEmbedMatcher(O, "nomic-embed-text") },
-  // NOTA: nesta máquina há DOIS daemons Ollama — ::1 (= localhost p/ o node) tem nomic/gemma3; 127.0.0.1 tem o bge-m3.
-  // Por isso o bge-m3 aponta explícito p/ IPv4. Num setup de 1 daemon só, troque por `O`.
-  {
-    label: "embed bge-m3 [multi] (t1)",
-    matcher: new OllamaEmbedMatcher("http://127.0.0.1:11434", "bge-m3"),
-  },
+  { label: "embed bge-m3 [multi] (t1)", matcher: new OllamaEmbedMatcher(O, "bge-m3") },
   { label: "gen gemma3:12b (t2)", matcher: new OllamaGenerateMatcher(O, "gemma3:12b") },
 ];
 
