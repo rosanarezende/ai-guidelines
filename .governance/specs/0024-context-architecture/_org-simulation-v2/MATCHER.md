@@ -128,6 +128,21 @@ Delega a um agente JÁ INSTALADO em modo headless (usa o plano/login — sem API
 `gemma3:12b` local (8/8) **~6–8× mais rápido** e **SEM tokens** (plano). O trade-off real: **local** = soberania mas
 lento na 3060; **hosted-via-plano** = rápido + sem custo de token, ao preço de **mandar o texto pra fora** (⚠️ + ToS).
 
+### tier 3a (API hosted) no stress — `node _bench/api-bench.ts`
+
+API direta (key free do AI Studio; gasta cota). No MESMO stress:
+
+| modelo                         | acertos | latência | nota                                                     |
+| ------------------------------ | ------- | -------- | -------------------------------------------------------- |
+| `gemini-2.5-flash-lite` (free) | **6/8** | **15s**  | pequeno/rápido — bom, mas < os grandes (8/8); o + rápido |
+| `gemini-flash-latest` (free)   | —       | —        | 503 (overload transitório do Google)                     |
+| `gemini-2.5-pro`               | —       | —        | **free=0** (pro exige billing pago)                      |
+
+**Leitura:** um LLM hosted **pequeno e FREE** (flash-lite) já dá **6/8** — bem acima dos embeddings (1–4/8), mas abaixo
+dos LLMs grandes (Claude/OpenAI/`gemma3:12b` = 8/8). E é o **mais rápido** (15s). Trade-off **tamanho × acurácia**
+dentro do próprio hosted. ⚠️ o free tier do Gemini é **por modelo**: `flash-lite`/`latest` têm cota; `2.0-flash` e
+`pro` = free 0 → exigem billing. (Key via header, gitignored; ver tier 3a no "Como rodar".)
+
 ## Determinismo
 
 Léxico = determinístico (poderia ir versionado). Embedding/LLM = **overlay runtime** (advisory, **não-versionado**) —
