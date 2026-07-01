@@ -1,0 +1,238 @@
+# model.yml — SSOT DA MODELAGEM (o grafo tipado do trabalho). v0 (esqueleto, seed do tracker v2).
+#
+# Este arquivo é a FONTE DA VERDADE do MODELO (nós, famílias, dimensões, arestas, estados, envelope,
+# fronteiras). O artefato navegável é GERADO daqui. O `tracker.md` passa a ser EMBASAMENTO (o porquê /
+# o log de decisões que justifica cada escolha), não a fonte. As provocações entram como mudanças
+# versionadas AQUI (ver `open-questions`).
+#
+# Natureza: não-autoridade de processo (em divergência vencem state.yml/gates/Git); é a autoridade
+# do CONTEÚDO do modelo. Org fictícia ANONIMIZADA (acme-*); nenhuma fonte/nome confidencial.
+
+meta:
+  version: 0
+  status: skeleton # seed do v2; será refinado pelas provocações
+  grounded-by: tracker.md # embasamento (as 9 lentes narram o porquê; aqui é o grafo real)
+  generates: [_map/] # o artefato navegável nasce deste arquivo (gerador a fazer)
+
+# ───────────────────────── FAMÍLIAS (agrupam os nós pela natureza da saída) ─────────────────────────
+families:
+  - id: capacidade
+    produces: valor de produto (cria/mantém capacidade)
+    test: "entrega valor de produto? SIM"
+    members: [delivery, maintenance]
+  - id: aprendizado
+    produces: conhecimento (reduz incerteza)
+    test: "entrega valor de produto? NÃO (produz decisão/resposta)"
+    members: [exploration, experiment] # ⚠ P1 ABERTO: experiment é candidato a sair daqui (ver open-questions)
+  - id: resposta
+    produces: contenção reativa
+    test: "entrega valor de produto? NÃO (o valor vem do que ela gera)"
+    members: [incident]
+  - id: intake
+    produces: captura + triagem
+    members: [proposal, register]
+  - id: deliberacao
+    produces: o raciocínio (q → r → d) — o coração
+    members: [question, research, decision]
+
+# ───────────────────────── NÓS (os membros; cada um pertence a uma família) ─────────────────────────
+nodes:
+  - id: delivery
+    family: capacidade
+    produces: capacidade permanente (comprometida)
+    ships-to-users: true
+    status-own: [draft, active, done]
+    lifecycle: [abrir, "q/r/d", merge, "verificar valor"]
+  - id: maintenance
+    family: capacidade
+    produces: capacidade preservada/restaurada/adaptada
+    ships-to-users: true
+    own-fields: [maintenance-mode, reason]
+    lifecycle: [brief-leve, merge, verificar]
+    note: colapsa os antigos fix + patch (viraram presets); discriminador = dimensão maintenance-mode
+  - id: exploration
+    family: aprendizado
+    produces: uma resposta (verdict) a uma pergunta falsificável
+    ships-to-users: false # descoberta pura — POC/spike throwaway; NÃO vai a usuários
+    own-fields: [timebox, stop-rule, fate] # fate: throwaway | promoted | parked
+    lifecycle: [abrir, timebox, investigar, answer]
+  - id: experiment
+    family: aprendizado # ⚠ P1 ABERTO (ver open-questions): candidato a família-ponte OU membro de capacidade
+    produces: um VEREDITO (won/lost/inconclusive) + um output BIFURCADO (valor OU só aprendizado)
+    ships-to-users: true # intervenção real em produção, atrás de flag (A/B ou critérios-de-sucesso)
+    own-fields:
+      [hypothesis, metrics, feature-flag, exposure, guardrails, decision-rule, outcome, cleanup]
+    outcome: [won, lost, inconclusive]
+    lifecycle: [modelagem-hipotese, flag, rodando, validando, "veredito", "fork(shape-up|clean-up)"]
+    note: >
+      difere da exploration por SHIPPAR valor a usuários reais. won → shape-up (vira capacidade;
+      às vezes mantém o próprio código) · lost → clean-up (maintenance de remoção) · inconclusive →
+      novo experiment/exploration. A natureza do output é FORKED — daí a dúvida P1 de família.
+  - id: incident
+    family: resposta
+    produces: contenção + não-repetir
+    source: reactive # não sai de breakdown planejado
+    own-fields: [severity, status] # declarar → mitigar → resolver → postmortem
+    generates: [maintenance, proposal] # e liga-se por occurred-during/caused-by/related-to
+  - id: proposal
+    family: intake
+    produces: uma ideia/problema capturado + triado
+    own-fields: [impact, confidence, effort, promote-to] # ICE; promote-to = PromotableMember
+    disposition: [open, promoted, dismissed]
+  - id: register
+    family: intake
+    produces: uma iniciativa candidata (enquadramento de negócio)
+    phases: [registrada, triagem, investigacao] # → gate → ativada (vira intent)
+  - id: question
+    family: deliberacao
+    produces: a pergunta (+ modo + opções)
+  - id: research
+    family: deliberacao
+    produces: investigação de 1+ questions (aresta investigates)
+  - id: decision
+    family: deliberacao
+    produces: uma decisão append-only (resolve N questions; supersedível)
+
+# a intent é a camada ACIMA dos works (objetivo durável); NÃO delibera (tem gate de ativação).
+intent:
+  produces: o objetivo durável; breaks-into N works
+  status: [draft, active, paused, done, dropped]
+  note: herda só o ENQUADRAMENTO (problema/negócio/refs/pessoas); a riqueza pesada é do work experiment
+
+# ───────────────────────── DIMENSÕES (ortogonais; cortam as famílias) ─────────────────────────
+dimensions:
+  - id: source
+    values: [planned, reactive]
+    applies-to: all
+  - id: visibility
+    values: [user-visible, internal, operator-visible, security-visible]
+    applies-to: all
+  - id: maintenance-mode
+    values: [corrective, adaptive, perfective, preventive] # ISO 14764
+    applies-to: [maintenance]
+  - id: change-class
+    values: [standard, normal, emergency] # ITIL
+    applies-to: all
+  - id: service-class
+    values: [expedite, fixed-date, standard, intangible] # Kanban
+    applies-to: all
+  - id: planned-in
+    value: a intent
+    derived: true # = Work.intent (NÃO duplicar)
+enforcement: cada dimensão precisa afetar workflow/lint/dashboard, senão é tag decorativa
+
+presets: # UX, não ontologia — expandem p/ membro + dimensões
+  fix:
+    { member: maintenance, dimensions: { maintenance-mode: corrective, visibility: user-visible } }
+  security-patch:
+    {
+      member: maintenance,
+      dimensions: { maintenance-mode: corrective, visibility: security-visible },
+    }
+  dep-bump:
+    { member: maintenance, dimensions: { maintenance-mode: adaptive, visibility: internal } }
+
+# ───────────────────────── ARESTAS (o grafo; anota-se 1 lado, o reverso é derivado) ─────────────────────────
+edges:
+  - { id: breaks-into, from: intent, to: work, cardinality: 1:N, category: estrutura }
+  - { id: derives-from, from: node, to: node, inverse: results-in, category: proveniencia }
+  - { id: raises, from: node, to: proposal, category: proveniencia }
+  - { id: blocked-by, from: work, to: work, inverse: blocks, category: dependencia }
+  - { id: depends-on, from: work, to: "plataforma/versão", category: dependencia }
+  - {
+      id: coordinates-with,
+      from: work,
+      to: contract,
+      category: dependencia,
+      note: "contract = nó versionado",
+    }
+  - { id: answers, from: exploration, to: "intent#question", category: investigacao }
+  - { id: supported-by, from: decision, to: "research|exploration", category: investigacao }
+  - {
+      id: explore-resolution,
+      from: intent,
+      to: exploration,
+      derived: true,
+      values: [unanswered, answered, pursued, not-pursued],
+      category: investigacao,
+    }
+  - { id: closed-by, from: node, to: "answer|outcome|postmortem", category: fecho }
+  - { id: supersedes, from: decision, to: decision, category: historico }
+  - { id: duplicate-of, from: register, to: register, category: historico }
+  - { id: revived-from, from: register, to: register, category: historico }
+  - { id: occurred-during, from: incident, to: "work|intent", category: resposta }
+  - { id: caused-by, from: incident, to: node, category: resposta }
+  - { id: related-to, from: incident, to: node, category: resposta }
+
+# ───────────────────────── ESTADOS ─────────────────────────
+states:
+  own: [draft, active, done] # active EXIGE assignee + início
+  derived: [blocked, paused] # de blocked-by + status dos bloqueadores (não guardados)
+
+# ───────────────────────── ENVELOPE (L8 · toda mutação/publicação carrega) ─────────────────────────
+envelope:
+  quem: [actor, authority]
+  base: [base-revision, idempotency-key, revision]
+  origem: [schema-version, source-commit, producer, ttl]
+  seguranca: [classification, visibility, access] # egress amarrado à classification
+  invalidacao: [invalidates]
+
+# ───────────────────────── CONFIANÇA & POLÍTICA (L9) + as 3 leis ─────────────────────────
+trust:
+  boundary: entidade de 1ª classe (matcher/agente/backend/API são fronteiras)
+  policy-artifacts:
+    [threat-model, egress-policy, agent-delegation-policy, policy-catalog, red-team-corpus]
+  controls:
+    [
+      egress-por-taint,
+      input-hostil,
+      delegacao-formal,
+      verificacao-vs-autocert,
+      anti-gaming,
+      supply-chain,
+    ]
+  laws:
+    - id: fallback-break-glass
+      says: todo controle que bloqueia precisa de saída segura e rastreável
+    - id: independencia
+      says: enforça-se quem VERIFICA (SoD requester≠approver≠owner-attester), não a verdade de quem declara; vale no fluxo (X) e no meta/oráculo (O1)
+    - id: dependencia-verificavel
+      says: nenhuma ação derivada é aceita sem validar as revisões (dados/política/schema/projeção) que a sustentam
+
+# ───────────────────────── FLUXO (L2 · a espinha ponta-a-ponta) ─────────────────────────
+flow:
+  - { phase: registro, role: negocio }
+  - { phase: triagem, role: eng, does: [itens, matcher-advisory, valida-contratos] }
+  - { phase: investigacao, does: [explorations rodam, viabilidade testada] }
+  - { phase: gate, role: humano, kind: append-only }
+  - { phase: ativacao, does: [consolida, move p/ intents/] }
+  - { phase: breakdown, role: dono, emits: [delivery, maintenance, exploration, experiment] }
+
+# ───────────────────────── FÍSICO (L7 · onde vive) ─────────────────────────
+physical:
+  candidata: acme-governance/registers/candidates/<id>/{register,triage,gate}.yml
+  ativada: acme-governance/intents/<id>/intent.yml
+  archived: acme-governance/registers/archived/<id>/
+  por-repo: .governance/{manifest,registry/<kind>,works,explorations,context.json,backend.yml}
+  host: acme-governance agrega os context.json publicados
+  identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
+  backend: [file, sqlite, neo4j, mongo] # mesma porta
+
+# ───────────────────────── PROVOCAÇÕES ABERTAS (as mudanças em discussão) ─────────────────────────
+open-questions:
+  - id: P1
+    about: família do `experiment` (sai de APRENDIZADO)
+    status: open
+    fato: hoje experiment é membro de aprendizado, ao lado de exploration
+    provocacao: experiment SHIPPA valor real (produção/usuários/receita; won→shape-up mantém código) — difere da exploration (descoberta pura)
+    options:
+      - id: A
+        label: família-ponte própria (validação/experimentação)
+        impact: 6 famílias; nomeia o output FORKED (won→capacidade · lost→aprendizado); teste das outras famílias fica limpo
+        recommended: true
+      - id: B
+        label: membro de CAPACIDADE (delivery/maintenance/experiment)
+        impact: 5 famílias; casa direto com "entrega valor"; mas borra o teste de capacidade (membro com valor condicional)
+    invariant-either-way:
+      - exploration vira a única de APRENDIZADO (descoberta pura, não-shippa)
+      - shape-up/clean-up viram arestas de 1ª classe (fork do veredito)
