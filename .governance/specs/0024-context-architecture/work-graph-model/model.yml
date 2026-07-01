@@ -336,39 +336,56 @@ simulation:
     id: F-governance-scaling
     says: "o fluxo e a Lei da Independência (X/O1) assumem TIME COMPLETO. Precisam ESCALAR PARA BAIXO por role-collapse — espelho do execution-unit-collapse (cerimônia proporcional ao tamanho da org E do trabalho). full-team: SoD holds. trio: independência TÉCNICA fica com gaps de autocertificação (mitigar com revisão cruzada / trusted-source externo). solo: SoD impossível → self-governed + trade-off logado (break-glass). Conecta as leis fallback/break-glass + independência."
 
-# ═════════════════════ BUSINESS TIER (proposto · P9) — nós de negócio ACIMA da intent ═════════════════════
-# O planejamento estratégico ANTES das iniciativas (input) + a base dos dashboards (output). Anonimizado.
+# ═════════════════════ BUSINESS TIER (P9 · consolidado c/ Codex) — nós de negócio ACIMA da intent ═════════════════════
+# Core PEQUENO + RECURSIVO (não a árvore fixa strategy/driver/priority). Input (planejamento) + output (dashboards). Anonimizado.
 business-tier:
   status: proposed
   provocation: P9
-  is: "o upstream de planejamento (estratégia → tese → prioridade → iniciativa) + o downstream de dashboards de negócio"
+  source: "codex + reconciliação claude (substitui a proposta anterior de tier fixo de 5 nós)"
+  core-idea: "strategy / driver / priority são o MESMO tipo (business-objective) em nível/horizonte diferente → nó RECURSIVO. Não uma árvore de 5 tipos."
   nodes:
-    strategy: "estratégia de PRODUTO & ENGENHARIA da empresa (N direcionadores)"
-    driver: "estratégia da BU/tribo (um driver); CORRELATES-TO uma strategy da empresa"
-    thesis: "hipótese de negócio ('ao ofertar X à base Y, impactamos a métrica Z')"
-    thematic: "ângulo de ataque de uma tese"
-    priority: "prioridade (P1/P2/P3) com TARGET mensurável + budget"
-    metric: "a métrica + a meta (target); o actual vem dos outcomes das iniciativas"
-  cascade-input: "strategy → driver(bu) → thesis → thematic → priority → INTENT (a iniciativa/experimento nasce aqui)"
+    business-objective: "compromisso de negócio, RECURSIVO (cascades-to si mesmo). Campos: level · period · owner · parent · status. Ex. level: company-strategy | area-driver | team-priority. É o que dá a flexibilidade anual (ver annual-flexibility)."
+    thesis: "hipótese CAUSAL de negócio (por que ações X devem mover a métrica Z). NÃO é objetivo — nó separado."
+    opportunity-area: "espaço de ataque/opção (era 'thematic'). OPCIONAL."
+    intent: "1ª unidade governada de trabalho (já existe; entra nas 3 camadas)."
+    metric-definition: "definição ESTÁVEL da métrica: unidade · source · aggregation · owner."
+    target: "binding métrica + nó + período + valor esperado. ≠ metric-definition. actual = DERIVADO dos outcomes."
+    allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority; vira nó só se precisar."
   edges:
-    - { id: correlates-to, from: driver, to: strategy }
-    - {
-        id: breaks-into,
-        from: "strategy|driver|thesis|thematic",
-        to: "next tier down",
-        note: "cascata até a intent",
-      }
-    - { id: measured-by, from: priority, to: metric }
+    - { id: cascades-to, from: business-objective, to: business-objective }
+    - { id: framed-by, from: business-objective, to: thesis }
+    - { id: explores, from: thesis, to: opportunity-area }
+    - { id: authorizes, from: business-objective, to: intent }
+    - { id: measured-by, from: business-objective, to: target }
+    - { id: uses, from: target, to: metric-definition }
     - {
         id: contributes-to,
-        from: "intent/execution-unit outcome",
-        to: "priority.target",
-        note: "rollup p/ o dashboard",
+        from: "outcome (execution-unit)",
+        to: target,
+        note: "ENTRA no rollup/dashboard; exige regra de agregação declarada",
       }
-  output-dashboards: "dashboards de negócio = projeções DERIVADAS que sobem o grafo (priority target×actual · iniciativas que alimentam · outcomes) → VISÃO GERAL do negócio p/ stakeholders. Usa a plumbing 'host agrega projeções publicadas'."
-  flexibility: "a PROFUNDIDADE do tier escala com a org (como o role-collapse / execution-unit-collapse): startup pode ter só priority→intent; solo, nenhum tier. Conecta F-governance-scaling."
-  symmetry: "os MESMOS nós estruturam a ENTRADA (planejamento) e a SAÍDA (dashboards) — 'correlaciona tanto na entrada como na saída'."
-  connects: "features.md P2 (governança de portfólio: RICE/ICE, roadmap, priorização)"
+    - {
+        id: aligns-with,
+        from: node,
+        to: business-objective,
+        note: "alinhamento NARRATIVO; NÃO entra em rollup (evita contabilidade falsa)",
+      }
+  rollup-rule: "cada intent/outcome tem UM objetivo PRIMÁRIO de rollup (contributes-to); secundários = aligns-with (contexto, não soma) — senão uma iniciativa que 'apoia' 3 prioridades vira resultado TRIPLICADO."
+  input-vs-output:
+    input: "business-objective → thesis → opportunity-area → intent"
+    output: "outcome → target.actual → dashboard do objective (sobe SÓ por contributes-to, com agregação declarada)"
+  annual-flexibility: "objetivos versionados POR CICLO: novo ciclo = novos business-objective (status closed/active · continues-from/supersedes/split/merge), NÃO mudança de schema. level/nomes = LABEL configurável. Usa o envelope L8 (append-only/supersedes) → mudança anual vira DADO, preserva histórico/comparação; não é migração ontológica."
+  fork-resolvido: "core FIXO + níveis CONFIGURÁVEIS (nem 5 nós fixos, nem grafo plugável livre). Core = business-objective · thesis · opportunity-area · metric-definition/target · intent. Domínio configura business-objective.level. Tipo NOVO só com CONTRATO (owner · lifecycle · arestas · rollup · regra-de-colapso · impacto-no-dashboard)."
+  two-hypotheses: "não conflar: thesis = hipótese de NEGÓCIO (estratégica) ≠ experiment-run.hypothesis = hipótese TÁTICA (da execution-unit). Níveis diferentes."
+  connects: "features.md P2 (portfólio: RICE/ICE, roadmap, priorização)"
+
+# ═════════════════════ LEI ÚNICA DE ESCALA (Codex — generaliza F-governance-scaling) ═════════════════════
+scaling-law:
+  status: proposed
+  says: "crie um NÓ separado só quando muda pelo menos um: owner · cadência · target próprio · allocation própria · lifecycle próprio · audiência de dashboard. Se nada muda, COLAPSE."
+  applies-to: [business-tier, execution-unit, "roles/SoD"]
+  generalizes: "F-governance-scaling + execution-unit-collapse — um princípio só p/ camadas de trabalho + tier de negócio + papéis"
+  new-sod: "quem DEFINE o target não deve ser o único a ATESTAR o actual (fonte/analytics independente)"
 
 # ═════════════════════ PROVOCAÇÕES ═════════════════════
 open-questions:
