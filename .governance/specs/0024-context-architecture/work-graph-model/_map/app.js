@@ -141,6 +141,80 @@ function SimExplorer() {
   </div>`;
 }
 
+function ObjectiveChain({ objective }) {
+  return html`<div className="intent">
+    <div className="hd">
+      <span className="lvl">business-objective</span>
+      <span className="tag">recursivo · cascades-to</span>
+    </div>
+    ${objective.map(
+      (o, i) =>
+        html`<div className="w" key=${i} style=${{ marginTop: "6px", marginLeft: i * 14 + "px" }}>
+          <span className="r">${o.title}</span><span className="pp create">${o.level}</span>
+          <div className="d">${o.period}${o.meta ? " · " + o.meta : ""}</div>
+        </div>`
+    )}
+  </div>`;
+}
+
+function GraphView() {
+  const g = MODEL.graph;
+  const down = (t) => html`<div className="down">↓ ${t}</div>`;
+  return html`<div>
+    <p className="cap">o grafo completo (do negócio à peça)</p>
+    <${ObjectiveChain} objective=${g.objective} />
+    <div className="side"><span className="chip">framed-by · thesis: ${g.thesis}</span></div>
+    <div className="side">
+      ${g.opportunities.map(
+        (o, i) => html`<span className="chip" key=${i}>opportunity-area · ${o}</span>`
+      )}
+    </div>
+    ${down("authorizes")}
+    <div className="intent">
+      <div className="hd">
+        <span className="lvl">intent</span> ${g.intent.title}
+        <span className="tag">${g.intent.strategy}</span>
+      </div>
+    </div>
+    ${down("breaks-into")}
+    <div className="unit">
+      <div className="hd">
+        <span className="lvl">execution-unit</span> ${g.unit.title}
+        <span className="tag">${g.unit.kind} · ${g.unit.verdict}</span>
+      </div>
+      <div className="works">
+        ${g.works.map(
+          (w, i) =>
+            html`<div className="w" key=${i}>
+              <span className="r">${w.r}</span><span className=${"pp " + w.p}>${w.p}</span>
+              <div className="d">${w.d}</div>
+            </div>`
+        )}
+      </div>
+    </div>
+    ${down("outcome → rollup")}
+    <div className="intent dashed">
+      <div className="hd"><span className="lvl">dashboard</span> medição + rollup</div>
+      <p className="sub">metric-definition: ${g.measurement.metric}</p>
+      <p className="sub">target: ${g.measurement.target}</p>
+      <div className="works">
+        <div className="w">
+          <span className="r">contributes-to</span><span className="pp create">soma</span>
+          <div className="d">${g.rollup.contributes}</div>
+        </div>
+        <div className="w">
+          <span className="r">aligns-with</span><span className="pp sustain">não soma</span>
+          <div className="d">${g.rollup.aligns}</div>
+        </div>
+      </div>
+    </div>
+    <div className="intent" style=${{ marginTop: "10px" }}>
+      <div className="hd"><span className="lvl">lei de escala</span></div>
+      <p className="note" style=${{ borderTop: "none", paddingTop: "2px" }}>${MODEL.scalingLaw}</p>
+    </div>
+  </div>`;
+}
+
 function App() {
   return html`<div className="wrap">
     <h1>Modelo do trabalho — 3 camadas</h1>
@@ -151,6 +225,7 @@ function App() {
     <${LayerLegend} />
     <${ExampleExplorer} />
     <${SimExplorer} />
+    <${GraphView} />
     <div className="foot">
       <span><b>contrato</b> — nó de coordenação/versionamento (janela de compat mora nele)</span>
       <span><b>q/r/d</b> — anexável a qualquer nó</span>

@@ -232,4 +232,39 @@ window.MODEL = {
 
   finding:
     "o fluxo e a Lei da Independência (X/O1) assumem TIME COMPLETO — precisam escalar PARA BAIXO por role-collapse (espelho do execution-unit-collapse; cerimônia proporcional ao tamanho da org E do trabalho). full-team: SoD holds. trio: independência técnica com gaps de autocertificação. solo: SoD impossível → self-governed + trade-off logado.",
+
+  graph: {
+    objective: [
+      { level: "company-strategy", title: "crescer receita via plataforma", period: "2027" },
+      { level: "area-driver", title: "cross-sell entre produtos", period: "2027-H1" },
+      {
+        level: "team-priority",
+        title: "P1 · +X% de conversão de cross-sell",
+        period: "2027-H1",
+        meta: "target: conversion-rate · budget: orçamento H1",
+      },
+    ],
+    thesis:
+      "ofertar o produto B à base do produto A, evidenciando o uso conjunto, move a conversão",
+    opportunities: ["jornada de cross-sell unificada", "personalização da oferta"],
+    intent: { title: "testar CTA contextual de upgrade", strategy: "experiment-led" },
+    unit: { kind: "experiment-run", title: "CTA contextual v1", verdict: "won" },
+    works: [
+      { r: "acme-mfe-billing", p: "create", d: "UI do CTA atrás da flag" },
+      { r: "acme-analytics", p: "operate", d: "eventos + baseline (mede a métrica)" },
+      { r: "acme-web-host", p: "sustain", d: "adapta o contrato compartilhado" },
+    ],
+    measurement: {
+      metric: "conversion-rate · source: acme-analytics · owner: acme-data",
+      target: "H1: +X% · actual = DERIVADO dos outcomes (não à mão)",
+    },
+    rollup: {
+      contributes:
+        "o outcome CONTRIBUI (mensurável) p/ a priority P1 → entra no dashboard (rollup primário)",
+      aligns: "e ALINHA (narrativo) com a company-strategy → contexto, NÃO soma no dashboard",
+    },
+  },
+
+  scalingLaw:
+    "crie um nó separado só quando muda pelo menos um: owner · cadência · target próprio · allocation própria · lifecycle próprio · audiência de dashboard. Senão, COLAPSE. (vale p/ business-tier, execution-unit e papéis)",
 };
