@@ -28,6 +28,20 @@ _(Da auditoria rodada 3 — o buraco sistêmico. Ver [Lente 8](tracker.md) + [`_
 - ⬜ **`context.json` com envelope** — schema-version/source-commit/producer/ttl/hash; o host **valida** ao agregar.
 - ⬜ **Matcher accountability** — o gate registra `followed|overrode` + rationale; a sugestão fica versionada (score/why/unknown/freshness).
 
+## P0 · Confiança, política & red-team (Lente 9 — o que a autocertificação não resolve)
+
+_(Da auditoria rodada 4. Ver [Lente 9](tracker.md) + [`_audits/round-4-trust-boundaries.md`](_audits/round-4-trust-boundaries.md). **Segurança precisa de controle NORMATIVO versionado**, não "inspira-não-define".)_
+
+- ⬜ **Artefatos de política governados:** `threat-model.yml` · `egress-policy.yml` · `agent-delegation-policy.yml` · `policy-catalog.yml` · `red-team-corpus/` (register malicioso · capability envenenada · prompt injection).
+- ⬜ **Trust boundary de 1ª classe** — modelar onde a confiança termina, quem atravessa, com qual prova (matcher/agente/backend/API são fronteiras).
+- ⬜ **Egress por taint/classificação derivada** — nó que usa contexto restrito herda **teto de egress**; matcher externo só recebe fatias aprovadas por política (fecha o vazamento por **inferência**).
+- ⬜ **Matcher como input hostil** — validação estrutural da saída do matcher/agente; nunca vira ação direta; harness de red-team no CI.
+- ⬜ **Delegação formal do agente** — `actor=agent` → principal humano · workload-id · escopo · TTL · policy-id · max-mutations · confirmação-humana p/ gate/egress/escalation.
+- ⬜ **Verificação vs autocertificação** — trusted-producers · provenance (SLSA/transparência) · policy-check antes de aceitar `context.json`. **Capability** com `evidence`/`owner-attested-by`/`observed-from`/`last-verified` (IA só abre PR).
+- ⬜ **Anti-gaming (invariantes + quotas)** — `expedite` budget por time · `incident` exige evento/severidade/telemetria · downgrade de `classification` exige approver separado.
+- ⬜ **Hardening dos backends/matchers** — allowlist · secrets fora do YAML · least-privilege no DB · TLS/pin fora da sim · CLI-delegate em **sandbox** (sem rede/home/tokens). _(sim atual: `simsim123`/CORS `*`/`/match` client-config — só p/ sim.)_
+- ⬜ **Retenção & remoção** — `retention-class` · `purge-redaction-event` · anexos fora do git · secret-scanning antes de publicar contexto (append-only/tombstone × direito de remoção).
+
 ## P1 · Lifecycles próprios (cada família com o seu)
 
 - ⬜ **`experiment` — lifecycle operacional:** `experiment-brief` sela **hipótese + métricas**; roda atrás de **feature-flag** com **exposição · guardrails · duração · decision-rule**; fecha em **`experiment-outcome`** (won/lost/inconclusive) + **cleanup** (flag/variante morta). `won → delivery`.
