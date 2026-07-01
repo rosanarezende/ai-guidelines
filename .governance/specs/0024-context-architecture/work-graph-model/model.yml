@@ -1,4 +1,4 @@
-# model.yml — SSOT DA MODELAGEM (o grafo tipado do trabalho). v1 — modelo de 3 CAMADAS.
+# model.yml — SSOT DA MODELAGEM (o grafo tipado do trabalho). v2 — 3 camadas + tier de negócio.
 #
 # FONTE DA VERDADE do modelo. O `tracker.md` é EMBASAMENTO (o porquê). O artefato navegável
 # (_map/model-map.html) reflete este arquivo. As provocações entram como mudanças aqui.
@@ -9,8 +9,8 @@
 # Anonimizado (acme-*). Naming (P4): ids em EN, labels/descrição em PT.
 
 meta:
-  version: 1
-  status: iterating # 3 camadas aplicadas; owner validando via _map + este arquivo
+  version: 2
+  status: iterating # 3 camadas + business-tier + scaling-law APLICADOS (gate owner 2026-07-01); P10 em curso
   grounded-by: tracker.md
   artifact: _map/model-map.html # navegável; hoje mantido em sync à mão (gerador = próximo passo)
 
@@ -64,6 +64,7 @@ contract:
 deliberation:
   is: "q/r/d (question → research → decision) — ANEXÁVEL a qualquer nó, não uma camada"
   attaches-to: [intent, execution-unit, repo-work, contract]
+  enforcement: "OPCIONAL por decisão da owner (coração do framework, sem obrigatoriedade). Mutação PERIGOSA (target-change · rollup-change · compatibility-window · verdict-override · break-glass) dispara ALERTA: ou anexa q/r/d, ou registra justificativa append-only de por que não usou (auditável). Decisão do gate G11/P10 (2026-07-01)"
 
 intake:
   is: "funil PRÉ-intent (register → triagem → gate) — fora das 3 camadas"
@@ -339,7 +340,7 @@ simulation:
 # ═════════════════════ BUSINESS TIER (P9 · consolidado c/ Codex) — nós de negócio ACIMA da intent ═════════════════════
 # Core PEQUENO + RECURSIVO (não a árvore fixa strategy/driver/priority). Input (planejamento) + output (dashboards). Anonimizado.
 business-tier:
-  status: proposed
+  status: applied # gate owner 2026-07-01 — aceito junto com a scaling-law; mecanização = bloco A da P10
   provocation: P9
   source: "codex + reconciliação claude (substitui a proposta anterior de tier fixo de 5 nós)"
   core-idea: "strategy / driver / priority são o MESMO tipo (business-objective) em nível/horizonte diferente → nó RECURSIVO. Não uma árvore de 5 tipos."
@@ -381,7 +382,7 @@ business-tier:
 
 # ═════════════════════ LEI ÚNICA DE ESCALA (Codex — generaliza F-governance-scaling) ═════════════════════
 scaling-law:
-  status: proposed
+  status: applied # gate owner 2026-07-01
   says: "crie um NÓ separado só quando muda pelo menos um: owner · cadência · target próprio · allocation própria · lifecycle próprio · audiência de dashboard. Se nada muda, COLAPSE."
   applies-to: [business-tier, execution-unit, "roles/SoD"]
   generalizes: "F-governance-scaling + execution-unit-collapse — um princípio só p/ camadas de trabalho + tier de negócio + papéis"
@@ -390,10 +391,10 @@ scaling-law:
 # ═════════════════════ VALIDAÇÃO DE FLUXO (P10 · rodada Codex big-company → solo) ═════════════════════
 # Gaps RECONCILIADOS contra este arquivo (repo vence): aceito · parcial (o modelo já cobre parte — a
 # correção diz o quê) · tensão (choca com decisão anterior da owner). Severidade = do Codex
-# (P0 crítico · P1 importante · P2 menor — NÃO confundir com ids de provocação). NADA aplicado ainda —
-# tudo aguarda gate da owner (priorização em curso).
+# (P0 crítico · P1 importante · P2 menor — NÃO confundir com ids de provocação).
 flow-validation:
-  status: open
+  status: in-progress
+  gate: "owner 2026-07-01 — bloco A (G3+G4+G5) AUTORIZADO · G11 DECIDIDO (alerta + justificativa logada; não obrigatório) · business-tier + scaling-law ACEITOS (proposed → applied). Abertos: bloco B (G1+G2) · bloco C (G6+G13) · fila P1 (G7·G8·G9·G10·G12) · G14"
   provocation: P10
   source: "codex (validação ponta-a-ponta + caça a gaps, big → solo) + reconciliação claude 2026-07-01"
   verdict-codex: "coerente como mapa conceitual do big-company ao solo; NÃO pronto como framework ponta-a-ponta — falta mecanizar business-tier + rollup (ecoa o achado-mestre do red-team: o modelo é SUB-mecanizado, não over-engineered)"
@@ -476,6 +477,7 @@ flow-validation:
       scale: [big, mid, trio]
       reconciliation: "TENSÃO — decisão anterior da owner: q/r/d é o coração, porém OPCIONAL (pular = abrir mão dos benefícios, com trade-off explícito). Caminho compatível: gatilho obrigatório SÓ p/ mutações de alto risco torna o trade-off explícito sem enforçar q/r/d geral. Owner decide"
       suggestion: "exigir decision p/ mudança de target, rollup primário, compat-window, verdict override e break-glass"
+      decision: "owner 2026-07-01: NÃO obrigatória — mutação perigosa dispara ALERTA e, se q/r/d não for usado, exige justificativa LOGADA (append-only) do porquê, p/ auditabilidade. Registrado em deliberation.enforcement"
     - id: G12
       about: "allocation indefinido como campo/nó"
       where: "planejamento/priorização"
