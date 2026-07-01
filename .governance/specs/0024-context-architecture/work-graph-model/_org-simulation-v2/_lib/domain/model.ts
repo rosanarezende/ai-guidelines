@@ -101,9 +101,10 @@ export function normalizeLegacyKind(kind: string): { member: GraphMember; dimens
   }
 }
 
-/** @deprecated durante a migração P0 — estreita p/ CapabilityMember ("delivery" | "maintenance") no commit de ripple.
- *  Hoje ainda = os 5 kinds legados p/ manter os consumidores compilando. */
-export type WorkKind = LegacyWorkKind;
+/** `WorkKind` = os membros da família CAPACIDADE que são "work" no breakdown (delivery cria · maintenance preserva).
+ *  exploration/experiment=APRENDIZADO · incident=RESPOSTA · proposal/register=INTAKE (tipos próprios, fora de Work).
+ *  O legado (fix/patch/experiment/incident em dados/refs antigos) entra pelo `normalizeLegacyKind` na borda de leitura. */
+export type WorkKind = CapabilityMember;
 export type WorkStatus = "draft" | "active" | "done"; // bloqueado/pausado = DERIVADO, não guardado
 export type Weight = "S" | "M" | "L" | "XL";
 export type Level = "low" | "medium" | "high";
@@ -164,7 +165,7 @@ export interface Proposal {
   confidence: Level;
   effort: Level; // ICE
   evidence?: string[]; // refs ao que embasa (ex.: o exploration-answer)
-  promoteTo?: WorkKind | "experiment" | "exploration"; // o tipo que vira ao promover
+  promoteTo?: PromotableMember; // o membro que vira ao promover (INTAKE → capacidade/aprendizado; `incident` saiu — é reativo)
   opensIntent?: string; // se promovida p/ experiment/objetivo
   discardReason?: string;
   createdAt: string;

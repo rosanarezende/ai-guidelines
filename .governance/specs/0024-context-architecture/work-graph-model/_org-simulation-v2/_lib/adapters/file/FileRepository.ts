@@ -5,14 +5,21 @@ import type { Repository } from "../../ports.ts";
 import type {
   Work,
   WorkKind,
+  LegacyWorkKind,
+  Dimensions,
   Exploration,
   Question,
   Research,
   Decision,
 } from "../../domain/model.ts";
+import { normalizeLegacyKind } from "../../domain/model.ts";
 import { exists, readYaml, writeYaml, readMarkdown, writeMarkdown, listMarkdown } from "./io.ts";
 
-const WORK_KINDS: WorkKind[] = ["delivery", "experiment", "incident", "fix", "patch"];
+// `kind` é identidade FÍSICA (registry/<kind>.yml · works/<kind>/<id>). Grava-se CANÔNICO; lê-se canônico + legado
+// (fix/patch → maintenance via normalizeLegacyKind). experiment/incident saíram de Work (viraram APRENDIZADO/RESPOSTA).
+type StorageKind = WorkKind | LegacyWorkKind;
+const CANONICAL_WORK_KINDS: WorkKind[] = ["delivery", "maintenance"];
+const LEGACY_READ_KINDS: LegacyWorkKind[] = ["fix", "patch"];
 
 // ───────────────────────── shapes do ARQUIVO ─────────────────────────
 
@@ -21,11 +28,12 @@ interface RegistryFile {
 }
 interface WorkEntry {
   id: string;
-  kind?: WorkKind;
+  kind?: StorageKind; // no arquivo pode vir legado (fix/patch); normaliza-se na leitura
   title?: string;
   status: Work["status"];
   assignee?: string | null;
   weight?: Work["weight"];
+  dimensions?: Dimensions;
   intent?: string | null;
   "blocked-by"?: string[];
   "depends-on"?: string[];
@@ -79,23 +87,28 @@ interface DecisionEntry {
 
 // ───────────────────────── mappers (arquivo ↔ domínio) ─────────────────────────
 
-const toWork = (kind: WorkKind, e: WorkEntry): Work => ({
-  id: e.id,
-  kind,
-  title: e.title ?? e.id,
-  status: e.status,
-  assignee: e.assignee,
-  weight: e.weight,
-  intent: e.intent,
-  blockedBy: e["blocked-by"],
-  dependsOn: e["depends-on"],
-  coordinatesWith: e["coordinates-with"],
-  derivesFrom: e["derives-from"],
-  closedBy: e["closed-by"],
-  createdAt: e["created-at"] ?? "",
-  updatedAt: e["updated-at"],
-  closedAt: e["closed-at"],
-});
+const toWork = (fileKind: StorageKind, e: WorkEntry): Work => {
+  const norm = normalizeLegacyKind(e.kind ?? fileKind); // fix/patch → maintenance (+dims); canônico passa igual
+  const dims = { ...norm.dimensions, ...(e.dimensions ?? {}) }; // dims do preset legado + as gravadas (arquivo vence)
+  return {
+    id: e.id,
+    kind: norm.member as WorkKind, // só delivery/maintenance chegam aqui (experiment/incident não são scan de Work)
+    title: e.title ?? e.id,
+    status: e.status,
+    assignee: e.assignee,
+    weight: e.weight,
+    dimensions: Object.keys(dims).length ? dims : undefined,
+    intent: e.intent,
+    blockedBy: e["blocked-by"],
+    dependsOn: e["depends-on"],
+    coordinatesWith: e["coordinates-with"],
+    derivesFrom: e["derives-from"],
+    closedBy: e["closed-by"],
+    createdAt: e["created-at"] ?? "",
+    updatedAt: e["updated-at"],
+    closedAt: e["closed-at"],
+  };
+};
 
 const fromWork = (w: Work): WorkEntry => ({
   id: w.id,
@@ -103,6 +116,7 @@ const fromWork = (w: Work): WorkEntry => ({
   status: w.status,
   assignee: w.assignee,
   weight: w.weight,
+  dimensions: w.dimensions,
   intent: w.intent,
   "blocked-by": w.blockedBy,
   "depends-on": w.dependsOn,
@@ -160,13 +174,13 @@ export class FileRepository implements Repository {
     this.repo = repo;
   }
 
-  private registry(kind: WorkKind): string {
+  private registry(kind: StorageKind): string {
     return `${this.repo}/.governance/registry/${kind}.yml`;
   }
-  private workDir(kind: WorkKind, id: string): string {
+  private workDir(kind: StorageKind, id: string): string {
     return `${this.repo}/.governance/works/${kind}/${id}`;
   }
-  private readRegistry(kind: WorkKind): WorkEntry[] {
+  private readRegistry(kind: StorageKind): WorkEntry[] {
     const rel = this.registry(kind);
     return exists(rel) ? (readYaml<RegistryFile>(rel).entries ?? []) : [];
   }
@@ -174,7 +188,8 @@ export class FileRepository implements Repository {
   // ── trabalho ──
 
   async listWorks(): Promise<Work[]> {
-    return WORK_KINDS.flatMap((kind) => this.readRegistry(kind).map((e) => toWork(kind, e)));
+    const kinds: StorageKind[] = [...CANONICAL_WORK_KINDS, ...LEGACY_READ_KINDS];
+    return kinds.flatMap((kind) => this.readRegistry(kind).map((e) => toWork(kind, e)));
   }
 
   async getWork(id: string): Promise<Work | null> {

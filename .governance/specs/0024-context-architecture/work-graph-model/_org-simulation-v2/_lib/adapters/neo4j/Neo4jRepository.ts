@@ -15,6 +15,7 @@ import type {
   Research,
   Decision,
 } from "../../domain/model.ts";
+import { normalizeLegacyKind } from "../../domain/model.ts";
 
 /** cria um driver Neo4j (bolt). A conexão é gerida por quem instancia (abre 1, fecha no fim). */
 export function neo4jDriver(uri: string, user: string, password: string): Driver {
@@ -28,7 +29,7 @@ const clean = (o: Props): Props =>
 // ── mappers domínio ↔ propriedades de nó ──
 const toWork = (p: Props): Work => ({
   id: p.id as string,
-  kind: p.kind as WorkKind,
+  kind: normalizeLegacyKind(p.kind as string).member as WorkKind, // props guardam string; normaliza legado → canônico
   title: p.title as string,
   status: p.status as WorkStatus,
   assignee: p.assignee as string | undefined,

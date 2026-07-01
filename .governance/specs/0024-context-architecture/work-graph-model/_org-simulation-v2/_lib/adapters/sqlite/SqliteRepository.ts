@@ -16,6 +16,7 @@ import type {
   Research,
   Decision,
 } from "../../domain/model.ts";
+import { normalizeLegacyKind } from "../../domain/model.ts";
 
 const SIM_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
@@ -36,7 +37,7 @@ const str = (v: unknown): string | undefined =>
 
 const toWork = (r: Row): Work => ({
   id: r.id as string,
-  kind: r.kind as WorkKind,
+  kind: normalizeLegacyKind(r.kind as string).member as WorkKind, // DB guarda string; normaliza legado → canônico
   title: r.title as string,
   status: r.status as WorkStatus,
   assignee: str(r.assignee),

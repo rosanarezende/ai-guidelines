@@ -124,7 +124,7 @@ export function deriveContext(
   return {
     repo,
     works: works.map((w) => ({
-      ref: `${repo}/${w.kind}/${w.id}`,
+      ref: `${repo}/${w.kind}/${w.id}`, // w.kind já é canônico (WorkKind = delivery|maintenance; normalizado na borda do adapter)
       status: w.status,
       intent: w.intent,
       coordinatesWith: w.coordinatesWith,
