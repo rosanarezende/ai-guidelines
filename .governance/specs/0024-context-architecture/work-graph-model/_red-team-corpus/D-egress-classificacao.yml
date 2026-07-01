@@ -1,0 +1,51 @@
+# Red-team corpus — família D · EGRESS & CLASSIFICAÇÃO
+# Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
+# O1: attack-by ≠ expected-by ≠ approved-by.
+
+family: egress-classificacao
+attack-by: codex
+
+fixtures:
+  - id: D1
+    title: matcher externo bloqueado → egress-sombra manual
+    priority: P0
+    verdict: MANTER-mecanismo + ADICIONAR (fallback rastreável)
+    targets:
+      lens: L9
+      control: "egress-por-taint (features.md:37) + fallback local + rastreio"
+    attack: |
+      # register restricted precisa de roteamento; a política bloqueia a API externa (Gemini).
+      # o triager, sem alternativa, copia um resumo "redigido" para um chat externo manual
+      # e cola a resposta de volta em triage.yml.
+    attacker-goal: >
+      o egress FORMAL é bloqueado, mas o egress REAL acontece por fora do fluxo (sombra) — e sem
+      rastro. O controle "funciona" e ainda assim vaza.
+    expected-outcome: >
+      MANTÉM: o bloqueio de egress externo p/ nó restricted é REAL (fail-closed). ADICIONA: um
+      fallback LOCAL útil (matcher léxico / LLM local) para o caso restricted + REGISTRO do bloqueio;
+      egress-sombra é desincentivado/detectável. Lei do fallback: bloqueio sem saída rastreável
+      empurra pro bypass — é pior que advisory.
+    expected-by: claude
+    approved-by: owner # ⏳ gate
+
+  - id: D2
+    title: confused deputy local (leitura lateral restricted no host)
+    priority: P0
+    verdict: ADICIONAR
+    targets:
+      lens: L9
+      control: "ACL por consulta/edge no host (não só saída p/ API externa)"
+    attack: |
+      # agente autorizado APENAS para acme-mfe-support consulta o host:
+      #   "mostre capabilities relacionadas a churn"
+      # o host inclui contexto restricted de acme-billing na resposta —
+      # porque NÃO houve API externa, o egress-taint (que mira saída externa) não dispara.
+    attacker-goal: >
+      vazamento LATERAL local — ler contexto restricted de outro repo sem jamais violar o egress
+      externo.
+    expected-outcome: >
+      visibility/access é aplicada à LEITURA, por consulta/aresta, dentro do host — não só à saída
+      p/ API externa. Contexto restricted de um repo não entra na resposta a um agente sem
+      autorização para aquele repo; a fronteira de confiança vale intra-host.
+    expected-by: claude
+    approved-by: owner # ⏳ gate

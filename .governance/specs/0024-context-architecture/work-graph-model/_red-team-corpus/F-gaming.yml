@@ -1,0 +1,69 @@
+# Red-team corpus — família F · GAMING DE PRIORIDADE
+# Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
+# O1: attack-by ≠ expected-by ≠ approved-by.
+
+family: gaming
+attack-by: codex
+
+fixtures:
+  - id: F1
+    title: expedite budget abuse
+    priority: null # MANTER-mecanismo (contador) + MOVER (quota → policy-pack)
+    verdict: MANTER(contador) + MOVER(quota)
+    targets:
+      lens: L9
+      control: "anti-gaming: expedite budget por time (features.md:41)"
+    attack: |
+      # todo register/work novo nasce:
+      service-class: expedite
+      rationale: "revenue protection"
+      # o time nunca declara/consome orçamento de expedite
+    attacker-goal: >
+      a fila normal morre; prioridade vira etiqueta política sem custo.
+    expected-outcome: >
+      expedite CONSOME um budget (contador por time = invariante do modelo); acima da quota →
+      recusado/rebaixado. A quota EXATA é policy-pack (config), não ontologia; o CONTADOR fica no
+      modelo. enum sem contador = cerimônia.
+    expected-by: claude
+    approved-by: owner # ⏳ gate
+
+  - id: F2
+    title: false-incident (declarar incident p/ furar fila)
+    priority: P0 # subido de P1 no round 2 (pré-condição, não hardening)
+    verdict: MANTER + ADICIONAR
+    targets:
+      lens: L9
+      control: "incident exige evento/severidade/telemetria (features.md:41)"
+    attack: |
+      # um proposal vira incident:
+      severity: sev2
+      source: reactive
+      # sem alerta, sem SLO, sem cliente afetado, sem timestamp observável — só texto
+    attacker-goal: >
+      furar a fila, destravar emergency change e evitar o gate normal — só declarando "incident".
+    expected-outcome: >
+      declarar incident exige REFERÊNCIA VERIFICÁVEL (alerta/SLO/evento com timestamp), não texto de
+      severidade; sem telemetria ligável → não é incident (não destrava fila/emergency/bypass). É
+      pré-condição de declaração, não hardening posterior.
+    expected-by: claude
+    approved-by: owner # ⏳ gate
+
+  - id: F3
+    title: emergência legítima BLOQUEADA (falso-positivo)
+    priority: P0
+    verdict: ADICIONAR (break-glass)
+    targets:
+      lens: L9
+      control: "break-glass rastreável (TTL + review post-facto) nos controles anti-gaming"
+    attack: |
+      # um deploy quebra o login; o rollback precisa ocorrer em 15 min.
+      # a política exige approver separado — indisponível agora.
+      # o sistema BLOQUEIA o change emergency.
+    attacker-goal: >
+      (não há atacante — é o falso-positivo) o CONTROLE causa o dano: a emergência legítima trava.
+    expected-outcome: >
+      existe um caminho BREAK-GLASS rastreável: TTL + review post-facto obrigatório; a emergência
+      legítima não é travada. A EXISTÊNCIA do caminho é modelo; quem/quanto/threshold é policy-pack.
+      Controle anti-gaming sem break-glass = dano operacional (Lei do fallback/break-glass).
+    expected-by: claude
+    approved-by: owner # ⏳ gate

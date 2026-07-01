@@ -1,0 +1,52 @@
+# Red-team corpus — família E · PROVENIÊNCIA DE PROJEÇÃO
+# Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
+# O1: attack-by ≠ expected-by ≠ approved-by.
+
+family: proveniencia
+attack-by: codex
+
+fixtures:
+  - id: E1
+    title: context.json assinado-mas-mentiroso
+    priority: P0 # subido de P1 no round 2 (conteúdo org-wide)
+    verdict: MANTER + ADICIONAR
+    targets:
+      lens: L9
+      control: "trusted-producers/provenance (features.md:40) + invariantes de conteúdo"
+    attack: |
+      # projeção publicada por produtor COMPROMETIDO — envelope/hash VÁLIDOS
+      producer: acme-payments-builder
+      hash: <ok>
+      schema-version: 2
+      # conteúdo mentiroso:
+      status: stable          # na verdade experimental
+      consumes: []            # OMITE consumes: risk-api (que o código importa)
+    attacker-goal: >
+      o host deriva um grafo FALSO e autoriza uma iniciativa incompatível — tudo com assinatura
+      válida (mentira bem-formada).
+    expected-outcome: >
+      MANTÉM: provenance/trusted-producer valida a ORIGEM. ADICIONA: invariantes de CONTEÚDO —
+      context.json é cruzado com código/contratos/fonte (consumes declarados vs imports reais;
+      status vs maturidade observada); divergência → REJEITA/quarentena, não deriva. Provenance
+      prova origem, não verdade.
+    expected-by: claude
+    approved-by: owner # ⏳ gate
+
+  - id: E2
+    title: produtor confiável aposentado (revogação/namespace)
+    priority: P1
+    verdict: ADICIONAR
+    targets:
+      lens: L7+L9
+      control: "revogação/expiração de trusted-producer + tombstone/GlobalRef"
+    attack: |
+      # acme-checkout foi ARQUIVADO; o atacante publica context.json assinado com a CHAVE ANTIGA.
+      # um novo repo usa namespace parecido: acme-checkout-v2
+    attacker-goal: >
+      reviver autoridade morta e poluir matches/contracts; confundir o resolver por namespace-reuse.
+    expected-outcome: >
+      o trust store EXPIRA/REVOGA produtores: repo arquivado → tombstone + chave revogada; snapshot
+      de produtor morto/revogado → REJEITADO; namespace-reuse (checkout vs checkout-v2) é detectado
+      pelo resolver (GlobalRef), sem colisão silenciosa.
+    expected-by: claude
+    approved-by: owner # ⏳ gate

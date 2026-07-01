@@ -1,0 +1,47 @@
+# Red-team corpus — família G · SSOT & CONSISTÊNCIA
+# Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
+# O1: attack-by ≠ expected-by ≠ approved-by.
+
+family: ssot
+attack-by: codex
+
+fixtures:
+  - id: G1
+    title: import Jira/Linear split-brain
+    priority: P2
+    verdict: ADICIONAR
+    targets:
+      lens: L7
+      control: "adapter-contract: campo autoritativo por sistema + direção de sync + resolução + freeze-window"
+    attack: |
+      # Jira PAY-17 = Done; o YAML importado = active.
+      # enquanto o sync roda: alguém REABRE no Jira e outro PROMOVE no YAML (update concorrente).
+    attacker-goal: >
+      duas verdades válidas ao mesmo tempo; o grafo cria work a partir de um item já fechado.
+    expected-outcome: >
+      adapter-contract declara: qual campo é autoritativo POR SISTEMA (status é do Jira? do YAML?),
+      a direção do sync, a resolução de conflito e uma freeze-window durante o sync; conflito é
+      reconciliado por regra declarada, não last-write. (adoção/escala, não segurança pura.)
+    expected-by: claude
+    approved-by: owner # ⏳ gate
+
+  - id: G2
+    title: projeção derivada vira fonte de ação
+    priority: P1
+    verdict: ADICIONAR
+    targets:
+      lens: L1+L7
+      control: "derived-only: bloquear ação sem source-revision atual (Query-API c/ proveniência)"
+    attack: |
+      # o agente consulta o dashboard/Neo4j STALE:
+      #   vê "acme-support owns notifications" (desatualizado)
+      # e cria um work SEM reler o YAML/context fresco.
+    attacker-goal: >
+      o read-model vira SSOT operacional — decisão sobre dado velho, contra o princípio "banco
+      DERIVADO / advisory nunca decide".
+    expected-outcome: >
+      ação derivada exige source-revision ATUAL: a Query-API carrega proveniência + revisão; ação
+      sobre snapshot stale (revisão < atual) é BLOQUEADA/revalidada. O read-model nunca é a fonte
+      de verdade operacional. (Lei da dependência verificável.)
+    expected-by: claude
+    approved-by: owner # ⏳ gate
