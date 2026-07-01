@@ -270,6 +270,72 @@ examples:
     repo-works: [{ repo: acme-reports, purpose: create, desc: "botão + geração do PDF" }]
     note: "feature comum = intent direct-delivery → repo-work create (execution-unit colapsa)"
 
+# ═════════════════════ SIMULAÇÃO (fluxo ponta-a-ponta × forma de org) ═════════════════════
+simulation:
+  purpose: "quem faz o quê no fluxo de governança, em 3 formas de org — estressa SoD/independência e a cerimônia"
+  phases:
+    [registro, triagem, investigacao, gate, ativacao, breakdown, execucao, coordenacao, veredito]
+  orgs:
+    - id: full-team
+      label: "empresa com time completo"
+      roles: [PM, Design, "Team Lead", Principal, "Tech Lead", "devs Sr/Pl", "devs Jr"]
+      participation:
+        registro: "PM (registered-by + owner accountable); Design + Team Lead como stakeholders"
+        triagem: "Tech Lead (dispositions · matcher · valida contratos) + Principal (arquitetura/cross-repo)"
+        investigacao: "devs Sr / Tech Lead rodam discover (spikes); Principal avalia viabilidade"
+        gate: "PM (owner) decide promover×descartar; append-only"
+        ativacao: "Team Lead / PM consolidam + movem p/ intents/"
+        breakdown: "Tech Lead materializa execution-units + repo-works; Principal p/ contratos cross-repo"
+        execucao: "devs Sr/Pl (create/sustain/discover); Jr (peças menores + pair)"
+        coordenacao: "Principal / contract-owners; devs = consumers"
+        veredito: "PM + dados (experiment-run); Tech Lead conduz shape-up/cleanup"
+      sod: "HOLDS — requester (PM/dev) ≠ approver (TL/Principal) ≠ owner-attester (dono do domínio)"
+      gaps:
+        - "quem é dono do `operate`/monitoramento (risco de SRE-gap — cai no Principal/dev por omissão)"
+        - "sobrecarga do Tech Lead (triagem + breakdown + coordenação num papel só)"
+        - "dono da matcher-accountability (quem assina seguir/contrariar a sugestão)"
+        - "Design como owner de contrato de design-system (fica implícito)"
+    - id: trio
+      label: "trio: negócio · design · engenharia"
+      roles: [Negócio, Design, Engenharia]
+      participation:
+        registro: "Negócio (registered-by + owner); Design stakeholder"
+        triagem: "Engenharia (tudo: dispositions · matcher · contratos)"
+        investigacao: "Engenharia (discover)"
+        gate: "Negócio (owner) decide — dá a independência do lado de NEGÓCIO"
+        ativacao: "Negócio + Engenharia"
+        breakdown: "Engenharia"
+        execucao: "Engenharia (todas as peças: create/sustain/discover/operate)"
+        coordenacao: "Engenharia é owner E consumer do contrato (auto-coordenação)"
+        veredito: "Negócio + Engenharia"
+      sod: "PARCIAL — Negócio dá independência no gate; mas o lado TÉCNICO é auto-certificado (Eng = requester + approver + owner-attester)"
+      gaps:
+        - "autocertificação técnica: owner-attested-by sem verificador independente (o risco central da L9, agora ESTRUTURAL por falta de gente)"
+        - "contrato sem revisão independente (mesma pessoa provê e consome)"
+        - "q/r/d sem par que conteste"
+        - "`operate`/monitoramento recai sobre a única pessoa de Eng"
+    - id: solo
+      label: "dev solo"
+      roles: ["a mesma pessoa em tudo"]
+      participation:
+        registro: "self"
+        triagem: "self (quase sempre implícito)"
+        investigacao: "self"
+        gate: "self — 'o humano confirma' é o mesmo humano que propôs"
+        ativacao: "self"
+        breakdown: "self"
+        execucao: "self"
+        coordenacao: "self (contratos internos)"
+        veredito: "self"
+      sod: "IMPOSSÍVEL — todas as arestas de independência (X) e o oráculo (O1) colapsam no self"
+      gaps:
+        - "colapso TOTAL de independência: não há requester≠approver≠owner-attester"
+        - "gate/oráculo = self → nenhuma verificação externa possível"
+      degenerate-mode: "a cerimônia COLAPSA (como a execution-unit no trivial); o grafo ainda registra append-only (self-log), e a independência é EXPLICITAMENTE dispensada com trade-off LOGADO (break-glass) — não se bloqueia o solo"
+  finding:
+    id: F-governance-scaling
+    says: "o fluxo e a Lei da Independência (X/O1) assumem TIME COMPLETO. Precisam ESCALAR PARA BAIXO por role-collapse — espelho do execution-unit-collapse (cerimônia proporcional ao tamanho da org E do trabalho). full-team: SoD holds. trio: independência TÉCNICA fica com gaps de autocertificação (mitigar com revisão cruzada / trusted-source externo). solo: SoD impossível → self-governed + trade-off logado (break-glass). Conecta as leis fallback/break-glass + independência."
+
 # ═════════════════════ PROVOCAÇÕES ═════════════════════
 open-questions:
   - {

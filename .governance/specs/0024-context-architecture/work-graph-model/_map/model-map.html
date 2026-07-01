@@ -324,6 +324,11 @@
       <div class="tabs" id="tabs"></div>
       <div id="panel"></div>
 
+      <p class="cap">simulação de fluxo × papéis (3 formas de org)</p>
+      <div class="tabs" id="orgtabs"></div>
+      <div id="orgpanel"></div>
+      <div class="intent" style="margin-top: 10px" id="finding"></div>
+
       <div class="foot">
         <span><b>contrato</b> — nó de coordenação/versionamento (janela de compat mora nele)</span>
         <span><b>q/r/d</b> — anexável a qualquer nó</span>
@@ -565,6 +570,143 @@
         );
       }
       show(0);
+
+      const SIM = [
+        {
+          label: "empresa com time completo",
+          sod: "HOLDS — requester (PM/dev) ≠ approver (TL/Principal) ≠ owner-attester (dono do domínio)",
+          participation: [
+            {
+              phase: "registro",
+              who: "PM (registered-by + owner); Design + Team Lead stakeholders",
+            },
+            {
+              phase: "triagem",
+              who: "Tech Lead (dispositions · matcher · contratos) + Principal (arquitetura)",
+            },
+            {
+              phase: "investigação",
+              who: "devs Sr / Tech Lead rodam discover; Principal avalia viabilidade",
+            },
+            { phase: "gate", who: "PM (owner) decide promover × descartar (append-only)" },
+            { phase: "ativação", who: "Team Lead / PM consolidam" },
+            {
+              phase: "breakdown",
+              who: "Tech Lead materializa execution-units + repo-works; Principal p/ contratos",
+            },
+            {
+              phase: "execução",
+              who: "devs Sr/Pl (create/sustain/discover); Jr (peças menores + pair)",
+            },
+            { phase: "coordenação", who: "Principal / contract-owners; devs = consumers" },
+            {
+              phase: "veredito",
+              who: "PM + dados (experiment); Tech Lead conduz shape-up/cleanup",
+            },
+          ],
+          gaps: [
+            "quem é dono do operate/monitoramento (risco de SRE-gap)",
+            "sobrecarga do Tech Lead (triagem + breakdown + coordenação)",
+            "dono da matcher-accountability (assina seguir/contrariar a sugestão)",
+            "Design como owner de contrato de design-system (fica implícito)",
+          ],
+        },
+        {
+          label: "trio: negócio · design · engenharia",
+          sod: "PARCIAL — Negócio dá independência no gate; o lado TÉCNICO é auto-certificado (Eng = requester + approver + owner-attester)",
+          participation: [
+            { phase: "registro", who: "Negócio (registered-by + owner); Design stakeholder" },
+            { phase: "triagem", who: "Engenharia (tudo: dispositions · matcher · contratos)" },
+            { phase: "investigação", who: "Engenharia (discover)" },
+            { phase: "gate", who: "Negócio (owner) decide — independência do lado de negócio" },
+            { phase: "ativação", who: "Negócio + Engenharia" },
+            { phase: "breakdown", who: "Engenharia" },
+            { phase: "execução", who: "Engenharia (create/sustain/discover/operate)" },
+            { phase: "coordenação", who: "Engenharia é owner E consumer do contrato (auto)" },
+            { phase: "veredito", who: "Negócio + Engenharia" },
+          ],
+          gaps: [
+            "autocertificação técnica: owner-attested-by sem verificador independente (o risco central da L9, agora ESTRUTURAL)",
+            "contrato sem revisão independente (mesma pessoa provê e consome)",
+            "q/r/d sem par que conteste",
+            "operate/monitoramento recai sobre a única pessoa de Eng",
+          ],
+        },
+        {
+          label: "dev solo",
+          sod: "IMPOSSÍVEL — toda a independência (X) e o oráculo (O1) colapsam no self",
+          participation: [
+            {
+              phase: "registro → veredito",
+              who: "a MESMA pessoa em todas as fases (o 'humano confirma' é quem propôs)",
+            },
+          ],
+          gaps: [
+            "colapso TOTAL de independência: não há requester ≠ approver ≠ owner-attester",
+            "gate/oráculo = self → nenhuma verificação externa possível",
+          ],
+          degenerate:
+            "a cerimônia COLAPSA (como a execution-unit no trivial); o grafo ainda registra append-only (self-log) e a independência é EXPLICITAMENTE dispensada com trade-off LOGADO (break-glass) — não se bloqueia o solo",
+        },
+      ];
+      const FINDING =
+        "o fluxo e a Lei da Independência (X/O1) assumem TIME COMPLETO — precisam escalar PARA BAIXO por role-collapse (espelho do execution-unit-collapse; cerimônia proporcional ao tamanho da org E do trabalho). full-team: SoD holds. trio: independência técnica com gaps de autocertificação. solo: SoD impossível → self-governed + trade-off logado.";
+
+      const otabs = document.getElementById("orgtabs");
+      const opanel = document.getElementById("orgpanel");
+      SIM.forEach((o, i) => {
+        const b = document.createElement("button");
+        b.className = "tab";
+        b.textContent = o.label;
+        b.onclick = () => oshow(i);
+        otabs.appendChild(b);
+      });
+      function renderOrg(o) {
+        const phases =
+          '<div class="works">' +
+          o.participation
+            .map(
+              (p) =>
+                '<div class="w"><span class="r">' +
+                esc(p.phase) +
+                '</span><div class="d">' +
+                esc(p.who) +
+                "</div></div>"
+            )
+            .join("") +
+          "</div>";
+        const gaps =
+          '<p class="note"><b>gaps</b></p><ul style="margin:4px 0 0;padding-left:18px">' +
+          o.gaps
+            .map(
+              (g) => '<li style="font-size:12px;color:var(--ink2);margin:2px 0">' + esc(g) + "</li>"
+            )
+            .join("") +
+          "</ul>";
+        const deg = o.degenerate ? '<p class="note">' + esc(o.degenerate) + "</p>" : "";
+        return (
+          '<div class="intent"><div class="hd">' +
+          esc(o.label) +
+          '</div><div class="side"><span class="chip">SoD: ' +
+          esc(o.sod) +
+          "</span></div>" +
+          phases +
+          gaps +
+          deg +
+          "</div>"
+        );
+      }
+      function oshow(i) {
+        opanel.innerHTML = renderOrg(SIM[i]);
+        [...otabs.children].forEach((t, n) =>
+          t.setAttribute("aria-current", n === i ? "true" : "false")
+        );
+      }
+      document.getElementById("finding").innerHTML =
+        '<div class="hd"><span class="lvl">achado</span> escala da governança · F-governance-scaling</div><p class="note" style="border-top:none;padding-top:2px">' +
+        esc(FINDING) +
+        "</p>";
+      oshow(0);
     </script>
   </body>
 </html>
