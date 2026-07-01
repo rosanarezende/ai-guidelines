@@ -1,6 +1,6 @@
 # Red-team corpus — família D · EGRESS & CLASSIFICAÇÃO
 # Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
-# O1: attack-by ≠ expected-by ≠ approved-by.
+# O1: attack-by ≠ expected-by ≠ approval.
 
 family: egress-classificacao
 attack-by: codex
@@ -9,29 +9,34 @@ fixtures:
   - id: D1
     title: matcher externo bloqueado → egress-sombra manual
     priority: P0
-    verdict: MANTER-mecanismo + ADICIONAR (fallback rastreável)
+    verdicts: [MANTER-mecanismo, ADICIONAR]
+    verdict-note: "MANTER o bloqueio de egress; ADICIONAR o fallback local rastreável."
     targets:
       lens: L9
-      control: "egress-por-taint (features.md:37) + fallback local + rastreio"
+      control: "egress-por-taint (features.md:37) + fallback local + registro do bloqueio"
     attack: |
       # register restricted precisa de roteamento; a política bloqueia a API externa (Gemini).
       # o triager, sem alternativa, copia um resumo "redigido" para um chat externo manual
       # e cola a resposta de volta em triage.yml.
     attacker-goal: >
       o egress FORMAL é bloqueado, mas o egress REAL acontece por fora do fluxo (sombra) — e sem
-      rastro. O controle "funciona" e ainda assim vaza.
+      rastro. O controle "funciona" e ainda assim empurra o humano pro bypass manual.
     expected-outcome: >
-      MANTÉM: o bloqueio de egress externo p/ nó restricted é REAL (fail-closed). ADICIONA: um
-      fallback LOCAL útil (matcher léxico / LLM local) para o caso restricted + REGISTRO do bloqueio;
-      egress-sombra é desincentivado/detectável. Lei do fallback: bloqueio sem saída rastreável
-      empurra pro bypass — é pior que advisory.
+      asserts do que o sistema CONTROLA (falsificável): (1) egress p/ API externa é BLOQUEADO
+      (fail-closed) p/ nó restricted; (2) o bloqueio gera um EVENTO registrado; (3) um fallback
+      LOCAL (léxico/LLM local) é oferecido para o caso restricted; (4) nenhuma sugestão externa é
+      aceita sem provenance. NÃO promete detectar o copy/paste manual fora do sistema — isso é
+      RISCO RESIDUAL, não assert de detecção. (Lei do fallback: sem saída local útil, o controle
+      só empurra pro bypass — mas a suite testa o controlável, não o invisível.)
     expected-by: claude
-    approved-by: owner # ⏳ gate
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
 
   - id: D2
     title: confused deputy local (leitura lateral restricted no host)
     priority: P0
-    verdict: ADICIONAR
+    verdicts: [ADICIONAR]
     targets:
       lens: L9
       control: "ACL por consulta/edge no host (não só saída p/ API externa)"
@@ -45,7 +50,9 @@ fixtures:
       externo.
     expected-outcome: >
       visibility/access é aplicada à LEITURA, por consulta/aresta, dentro do host — não só à saída
-      p/ API externa. Contexto restricted de um repo não entra na resposta a um agente sem
-      autorização para aquele repo; a fronteira de confiança vale intra-host.
+      p/ API externa. Contexto restricted de acme-billing NÃO entra na resposta a um agente
+      autorizado só p/ acme-mfe-support; a fronteira de confiança vale intra-host (fail-closed).
     expected-by: claude
-    approved-by: owner # ⏳ gate
+    approved-by: null
+    approval-role: owner
+    approval-status: pending

@@ -1,6 +1,6 @@
 # Red-team corpus — família E · PROVENIÊNCIA DE PROJEÇÃO
 # Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
-# O1: attack-by ≠ expected-by ≠ approved-by.
+# O1: attack-by ≠ expected-by ≠ approval.
 
 family: proveniencia
 attack-by: codex
@@ -9,7 +9,8 @@ fixtures:
   - id: E1
     title: context.json assinado-mas-mentiroso
     priority: P0 # subido de P1 no round 2 (conteúdo org-wide)
-    verdict: MANTER + ADICIONAR
+    verdicts: [MANTER-mecanismo, ADICIONAR]
+    verdict-note: "MANTER provenance/origem; ADICIONAR invariantes de conteúdo (cross-check)."
     targets:
       lens: L9
       control: "trusted-producers/provenance (features.md:40) + invariantes de conteúdo"
@@ -18,24 +19,29 @@ fixtures:
       producer: acme-payments-builder
       hash: <ok>
       schema-version: 2
-      # conteúdo mentiroso:
+      # conteúdo mentiroso no context.json:
       status: stable          # na verdade experimental
-      consumes: []            # OMITE consumes: risk-api (que o código importa)
+      consumes: []            # OMITE risk-api
+      # --- FONTE do repo que o runner compara (evidência concreta) ---
+      # src/charge.ts:  import { charge } from '@acme/risk-api'
+      # contrato real:  consumes: [risk-api]
     attacker-goal: >
       o host deriva um grafo FALSO e autoriza uma iniciativa incompatível — tudo com assinatura
       válida (mentira bem-formada).
     expected-outcome: >
-      MANTÉM: provenance/trusted-producer valida a ORIGEM. ADICIONA: invariantes de CONTEÚDO —
-      context.json é cruzado com código/contratos/fonte (consumes declarados vs imports reais;
-      status vs maturidade observada); divergência → REJEITA/quarentena, não deriva. Provenance
-      prova origem, não verdade.
+      MANTÉM: provenance/trusted-producer valida a ORIGEM. ADICIONA: invariantes de CONTEÚDO — o
+      snapshot é cruzado com código/contratos; divergência ESPECÍFICA detectada (context.json
+      consumes:[] × código importa risk-api) → snapshot vai para QUARENTENA, não deriva o grafo.
+      Provenance prova origem, não verdade.
     expected-by: claude
-    approved-by: owner # ⏳ gate
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
 
   - id: E2
     title: produtor confiável aposentado (revogação/namespace)
     priority: P1
-    verdict: ADICIONAR
+    verdicts: [ADICIONAR]
     targets:
       lens: L7+L9
       control: "revogação/expiração de trusted-producer + tombstone/GlobalRef"
@@ -49,4 +55,6 @@ fixtures:
       de produtor morto/revogado → REJEITADO; namespace-reuse (checkout vs checkout-v2) é detectado
       pelo resolver (GlobalRef), sem colisão silenciosa.
     expected-by: claude
-    approved-by: owner # ⏳ gate
+    approved-by: null
+    approval-role: owner
+    approval-status: pending

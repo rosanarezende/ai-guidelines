@@ -1,6 +1,6 @@
 # Red-team corpus — família F · GAMING DE PRIORIDADE
 # Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
-# O1: attack-by ≠ expected-by ≠ approved-by.
+# O1: attack-by ≠ expected-by ≠ approval.
 
 family: gaming
 attack-by: codex
@@ -8,29 +8,35 @@ attack-by: codex
 fixtures:
   - id: F1
     title: expedite budget abuse
-    priority: null # MANTER-mecanismo (contador) + MOVER (quota → policy-pack)
-    verdict: MANTER(contador) + MOVER(quota)
+    priority: none
+    verdicts: [MANTER-mecanismo, MOVER]
+    verdict-note: "MANTER o contador de budget; MOVER a quota exata p/ policy-pack."
     targets:
       lens: L9
       control: "anti-gaming: expedite budget por time (features.md:41)"
     attack: |
-      # todo register/work novo nasce:
+      # policy-pack (amostra, config — NÃO ontologia):
+      #   expedite-quota: 2/semana por time
+      # ataque: o time acme-growth marca TODOS os itens da semana como expedite:
       service-class: expedite
       rationale: "revenue protection"
-      # o time nunca declara/consome orçamento de expedite
+      # 1º item: expedite · 2º item: expedite · 3º item: expedite (mesma semana)
     attacker-goal: >
       a fila normal morre; prioridade vira etiqueta política sem custo.
     expected-outcome: >
-      expedite CONSOME um budget (contador por time = invariante do modelo); acima da quota →
-      recusado/rebaixado. A quota EXATA é policy-pack (config), não ontologia; o CONTADOR fica no
-      modelo. enum sem contador = cerimônia.
+      expedite CONSOME um budget (contador por time = invariante do modelo); com a quota de amostra
+      (2/semana), o 3º item expedite da semana é RECUSADO ou rebaixado p/ standard. A quota EXATA é
+      policy-pack (config); o CONTADOR fica no modelo. enum sem contador = cerimônia.
     expected-by: claude
-    approved-by: owner # ⏳ gate
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
 
   - id: F2
     title: false-incident (declarar incident p/ furar fila)
     priority: P0 # subido de P1 no round 2 (pré-condição, não hardening)
-    verdict: MANTER + ADICIONAR
+    verdicts: [MANTER-mecanismo, ADICIONAR]
+    verdict-note: "MANTER exigência de evento/severidade; ADICIONAR telemetria = referência verificável."
     targets:
       lens: L9
       control: "incident exige evento/severidade/telemetria (features.md:41)"
@@ -42,16 +48,19 @@ fixtures:
     attacker-goal: >
       furar a fila, destravar emergency change e evitar o gate normal — só declarando "incident".
     expected-outcome: >
-      declarar incident exige REFERÊNCIA VERIFICÁVEL (alerta/SLO/evento com timestamp), não texto de
-      severidade; sem telemetria ligável → não é incident (não destrava fila/emergency/bypass). É
-      pré-condição de declaração, não hardening posterior.
+      declarar incident exige REFERÊNCIA VERIFICÁVEL (alerta/SLO/evento com timestamp resolvível),
+      não texto de severidade; sem telemetria ligável → não é incident (não destrava fila/emergency/
+      bypass). É pré-condição de declaração, não hardening posterior.
     expected-by: claude
-    approved-by: owner # ⏳ gate
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
 
   - id: F3
     title: emergência legítima BLOQUEADA (falso-positivo)
     priority: P0
-    verdict: ADICIONAR (break-glass)
+    verdicts: [ADICIONAR]
+    verdict-note: "break-glass como lei de design; quem/quanto/threshold vai p/ policy-pack."
     targets:
       lens: L9
       control: "break-glass rastreável (TTL + review post-facto) nos controles anti-gaming"
@@ -62,8 +71,11 @@ fixtures:
     attacker-goal: >
       (não há atacante — é o falso-positivo) o CONTROLE causa o dano: a emergência legítima trava.
     expected-outcome: >
-      existe um caminho BREAK-GLASS rastreável: TTL + review post-facto obrigatório; a emergência
-      legítima não é travada. A EXISTÊNCIA do caminho é modelo; quem/quanto/threshold é policy-pack.
-      Controle anti-gaming sem break-glass = dano operacional (Lei do fallback/break-glass).
+      existe um caminho BREAK-GLASS rastreável: a emergência legítima procede com single-actor +
+      TTL + review post-facto OBRIGATÓRIO (registrado). A EXISTÊNCIA do caminho é modelo; quem pode
+      usar / por quanto / o threshold é policy-pack. Controle anti-gaming sem break-glass = dano
+      operacional (Lei do fallback/break-glass).
     expected-by: claude
-    approved-by: owner # ⏳ gate
+    approved-by: null
+    approval-role: owner
+    approval-status: pending

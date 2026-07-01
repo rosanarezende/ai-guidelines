@@ -20,14 +20,17 @@ attack-by: codex # quem gerou o ataque (round 1) — o adversário
 fixtures:
   - id: A1 # o id da deliberação
     title: <o vetor, curto>
-    priority: P0 | P1 | P2
-    verdict: ADICIONAR | MANTER-mecanismo | REBAIXAR | MOVER # round 2 (reconciliado)
+    priority: P0 | P1 | P2 | none # none = MANTER puro (sem gap novo)
+    verdicts: [ADICIONAR, MANTER-mecanismo, REBAIXAR, MOVER] # lista (round 2, reconciliado)
+    verdict-note: "<a nuance, quando composto>" # opcional
     targets: { lens: L8 | L9 | ..., control: "<o controle mirado>" }
     attack: | # o caso concreto (YAML/estado/sequência) — o payload hostil
     attacker-goal: <o que o atacante ganha se funcionar>
-    expected-outcome: <o que o sistema CORRETO deve fazer — falsificável>
+    expected-outcome: <o que o sistema CORRETO deve fazer — falsificável, pass/fail>
     expected-by: claude # quem escreveu o expected (consolidação) — ≠ attack-by (O1)
-    approved-by: <owner — ⏳ gate> # a aprovação independente (O1)
+    approved-by: null # a aprovação independente (O1) — preenchido no gate
+    approval-role: owner
+    approval-status: pending # pending | approved
 ```
 
 ## Índice das fixtures (21)
