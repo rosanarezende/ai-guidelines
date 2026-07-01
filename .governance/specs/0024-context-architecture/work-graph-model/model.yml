@@ -351,6 +351,7 @@ business-tier:
     intent: "1ª unidade governada de trabalho (já existe; entra nas 3 camadas)."
     metric-definition: "definição ESTÁVEL da métrica: unidade · source · aggregation · owner."
     target: "binding métrica + nó + período + valor esperado. ≠ metric-definition. actual = DERIVADO dos outcomes."
+    outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit (usa envelope L8). Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard."
     allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority; vira nó só se precisar."
   edges:
     - { id: cascades-to, from: business-objective, to: business-objective }
@@ -360,10 +361,16 @@ business-tier:
     - { id: measured-by, from: business-objective, to: target }
     - { id: uses, from: target, to: metric-definition }
     - {
+        id: emits,
+        from: execution-unit,
+        to: outcome,
+        note: "no veredito/fecho da unit; repo-work standalone → G14 (aberto)",
+      }
+    - {
         id: contributes-to,
-        from: "outcome (execution-unit)",
+        from: outcome,
         to: target,
-        note: "ENTRA no rollup/dashboard; exige regra de agregação declarada",
+        note: "ENTRA no rollup/dashboard; exige regra de agregação declarada (lint em rollup-mechanics)",
       }
     - {
         id: aligns-with,
@@ -372,6 +379,19 @@ business-tier:
         note: "alinhamento NARRATIVO; NÃO entra em rollup (evita contabilidade falsa)",
       }
   rollup-rule: "cada intent/outcome tem UM objetivo PRIMÁRIO de rollup (contributes-to); secundários = aligns-with (contexto, não soma) — senão uma iniciativa que 'apoia' 3 prioridades vira resultado TRIPLICADO."
+  measurement-roles: # G4 (bloco A) — o SoD da medição vira papel NOMEADO
+    target-definer: "define o target (binding métrica × nó × período × valor)"
+    metric-owner: "dono da metric-definition (unidade · source · aggregation)"
+    actual-attester: "atesta o outcome — o número E a fonte/revision que o sustenta"
+    dashboard-consumer: "audiência que lê o rollup (só lê, não muda)"
+    sod: "target-definer NÃO pode ser o ÚNICO actual-attester (fonte/analytics independente — a lei da independência aplicada à medição; era o new-sod da scaling-law)"
+    role-collapse: "pela scaling-law: trio → o attester tende a colapsar na mesma eng (gap LOGADO); solo → colapso total, dispensa EXPLÍCITA logada (break-glass) e o dashboard marca self-attested"
+  rollup-mechanics: # G5 (bloco A) — regras VERIFICÁVEIS (lint), não prosa
+    lint:
+      - "exatamente 1 contributes-to (rollup primário) por outcome/intent — 2+ = ERRO (contabilidade dupla)"
+      - "contributes-to sem aggregation declarada = ERRO (o outcome não entra no dashboard)"
+      - "aligns-with NUNCA soma — o dashboard ignora (contexto narrativo)"
+      - "outcome sem attested-by OU com revision stale/incompatível → número marcado unverified/stale no dashboard (falha VISÍVEL, não silenciosa — lei dependencia-verificavel)"
   input-vs-output:
     input: "business-objective → thesis → opportunity-area → intent"
     output: "outcome → target.actual → dashboard do objective (sobe SÓ por contributes-to, com agregação declarada)"
@@ -394,7 +414,7 @@ scaling-law:
 # (P0 crítico · P1 importante · P2 menor — NÃO confundir com ids de provocação).
 flow-validation:
   status: in-progress
-  gate: "owner 2026-07-01 — bloco A (G3+G4+G5) AUTORIZADO · G11 DECIDIDO (alerta + justificativa logada; não obrigatório) · business-tier + scaling-law ACEITOS (proposed → applied). Abertos: bloco B (G1+G2) · bloco C (G6+G13) · fila P1 (G7·G8·G9·G10·G12) · G14"
+  gate: "owner 2026-07-01 — bloco A (G3+G4+G5) AUTORIZADO e APLICADO (ver resolution de cada gap) · G11 DECIDIDO (alerta + justificativa logada; não obrigatório) · business-tier + scaling-law ACEITOS (proposed → applied). Abertos: bloco B (G1+G2) · bloco C (G6+G13) · fila P1 (G7·G8·G9·G10·G12) · G14"
   provocation: P10
   source: "codex (validação ponta-a-ponta + caça a gaps, big → solo) + reconciliação claude 2026-07-01"
   verdict-codex: "coerente como mapa conceitual do big-company ao solo; NÃO pronto como framework ponta-a-ponta — falta mecanizar business-tier + rollup (ecoa o achado-mestre do red-team: o modelo é SUB-mecanizado, não over-engineered)"
@@ -421,6 +441,7 @@ flow-validation:
       scale: [big, mid, trio]
       reconciliation: "aceito (o master-gap) — FATO que REFORÇA: outcome já é citado 2× no modelo (closed-by → 'answer|outcome|postmortem' · contributes-to parte de 'outcome (execution-unit)') e definido em lugar NENHUM"
       suggestion: "outcome como evento/nó governado: source · janela · métrica · agregação · attester · revision"
+      resolution: "APLICADO (bloco A) — business-tier.nodes.outcome + aresta emits (execution-unit → outcome)"
     - id: G4
       about: "o SoD novo do target está só DECLARADO"
       where: "planejamento + dashboard"
@@ -428,6 +449,7 @@ flow-validation:
       scale: [big, mid, trio, solo]
       reconciliation: "aceito — FATO: scaling-law.new-sod declara sem mapear papéis; a barra do red-team r2 já disse 'P0 nomeado sem mecanismo = cerimônia'"
       suggestion: "papéis: target-definer · metric-owner · actual-attester · dashboard-consumer; no solo, colapso EXPLÍCITO logado"
+      resolution: "APLICADO (bloco A) — business-tier.measurement-roles (4 papéis + sod + role-collapse)"
     - id: G5
       about: "contributes-to × aligns-with não está mecanizado"
       where: "breakdown · veredito · rollup"
@@ -435,6 +457,7 @@ flow-validation:
       scale: [big, mid]
       reconciliation: "aceito — FATO: rollup-rule é textual; o próprio modelo exige enforcement p/ dimensões ('senão é tag decorativa') — o mesmo princípio vale p/ o rollup"
       suggestion: "lint: exatamente 1 rollup primário por outcome/intent; dashboard ignora aligns-with; agregação obrigatória"
+      resolution: "APLICADO (bloco A) — business-tier.rollup-mechanics (4 regras de lint)"
     - id: G6
       about: "scaling-law é princípio, não perfil executável"
       where: "todas as fases"
