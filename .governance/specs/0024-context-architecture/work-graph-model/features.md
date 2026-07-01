@@ -13,6 +13,21 @@
 - ⬜ **Migração da sim + templates** — os `registry-entry`/briefs; migrar os works existentes (login) p/ a forma nova.
 - ⬜ **Tirar `incident` das promoções planejadas** (proposal `promote-to`, breakdown) — incident nasce por gatilho.
 
+## P0 · Integridade transacional & segurança (o envelope — o que torna o file-first confiável)
+
+_(Da auditoria rodada 3 — o buraco sistêmico. Ver [Lente 8](tracker.md) + [`_audits/`](_audits/).)_
+
+- ⬜ **Envelope universal** em toda mutação/publicação: `actor` · `authority` · `base-revision` · `command-id`/`idempotency-key` · `revision`/`etag` · `schema-version` · `source-commit` · `generated-at` · `ttl` · `invalidates`.
+- ⬜ **Classificação & egress** — `classification` (public/internal/confidential/restricted) + `visibility/access` por nó; a escolha do matcher **léxico-local × API externa** se **amarra à classificação** (sensível não sai da máquina) + redaction.
+- ⬜ **Gate append-only + reversal** — `gate-decision` + `gate-reversal` + nova decisão; nunca overwrite.
+- ⬜ **`explore-resolution` ≠ gate** — renomear a derivada (`deriveGovernance`) p/ `unanswered|answered|pursued|not-pursued`; `accepted/rejected` só pro humano.
+- ⬜ **Stale-invalidation** — triage/gate guardam `base-revision`/digest do register; mudança **invalida** ou exige re-triagem.
+- ⬜ **Move idempotente com recuperação** — `promote`/`discard` como transação (`command-id`); falha no meio → retoma sem intent-órfã; lock curto por candidato.
+- ⬜ **`GlobalRef` + tombstone** — `family:namespace/id#anchor@revision`; random maior; tombstone p/ descartados; resolver desambiguador (candidate/intent/archived) + colisão.
+- ⬜ **Contrato = nó versionado** — owner/provider/consumers/compatibility/lifecycle/change-windows (não string); referenciado por GlobalRef.
+- ⬜ **`context.json` com envelope** — schema-version/source-commit/producer/ttl/hash; o host **valida** ao agregar.
+- ⬜ **Matcher accountability** — o gate registra `followed|overrode` + rationale; a sugestão fica versionada (score/why/unknown/freshness).
+
 ## P1 · Lifecycles próprios (cada família com o seu)
 
 - ⬜ **`experiment` — lifecycle operacional:** `experiment-brief` sela **hipótese + métricas**; roda atrás de **feature-flag** com **exposição · guardrails · duração · decision-rule**; fecha em **`experiment-outcome`** (won/lost/inconclusive) + **cleanup** (flag/variante morta). `won → delivery`.
