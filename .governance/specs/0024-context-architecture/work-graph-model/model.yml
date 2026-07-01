@@ -236,3 +236,56 @@ open-questions:
     invariant-either-way:
       - exploration vira a única de APRENDIZADO (descoberta pura, não-shippa)
       - shape-up/clean-up viram arestas de 1ª classe (fork do veredito)
+
+  - id: P2
+    about: o teste da família "entrega valor de produto?" é ambíguo p/ maintenance
+    status: open
+    fato: capacidade = {delivery, maintenance} com teste "entrega valor de produto? SIM"
+    provocacao: atualizar versão de biblioteca ou refatorar legado (trocar linguagem) NÃO responde esse teste como um delivery — não entrega valor NOVO, preserva/adapta. O teste não discrimina delivery × maintenance.
+    diagnostico: o teste mistura CRIAR valor novo com PRESERVAR o existente
+
+  - id: P3
+    about: delivery e experiment têm mais relação entre si do que com maintenance
+    status: open
+    provocacao: delivery e experiment CRIAM/shippam valor novo; maintenance PRESERVA. O agrupamento certo é por relação com a capacidade, não "produz valor sim/não".
+
+  - id: P4
+    about: nomes das famílias misturam EN e PT (problemático)
+    status: open
+    fato: famílias hoje = capacidade/aprendizado/resposta/intake(EN)/deliberação; membros = todos EN (delivery/maintenance/...)
+    proposta: escolher UMA língua canônica pros ids do grafo. Recomendo EN nos ids (casa com os membros e com o model.ts) + label/description em PT p/ humanos.
+
+# ── SÍNTESE de P1+P2+P3 (proposta; aguarda reação da owner antes de aplicar em families/nodes) ──
+proposed-restructure:
+  status: proposed
+  trigger: [P1, P2, P3]
+  new-discriminator: "qual a RELAÇÃO com a capacidade do produto? (não mais entrega-valor sim/não)"
+  families:
+    - id: create
+      rel: "cria capacidade nova (shippa valor novo)"
+      members: [delivery, experiment]
+      was: "capacidade (parte)"
+    - id: sustain
+      rel: "preserva/adapta a capacidade existente"
+      members: [maintenance]
+      was: "capacidade (parte)"
+    - id: discover
+      rel: "reduz incerteza — NÃO shippa/mexe"
+      members: [exploration]
+      was: "aprendizado"
+    - id: respond
+      rel: "contenção reativa"
+      members: [incident]
+    - id: intake
+      rel: "capta + tria"
+      members: [proposal, register]
+    - id: deliberate
+      rel: "o raciocínio q/r/d"
+      members: [question, research, decision]
+  resolves:
+    P1: "experiment sai de aprendizado e vai p/ create junto de delivery (provisório × comprometido = dimensão, não família)"
+    P2: "maintenance vira família própria (sustain) → some a ambiguidade do teste"
+    P3: "delivery + experiment juntos em create"
+  delivery-vs-experiment: "mesma família (create); a distinção é provisório/sob-hipótese/veredito — dimensão ou lifecycle, não família"
+  naming: "ids em EN (P4); labels em PT"
+  open: "nomes finais das famílias são provisórios (create/sustain/discover/...)"
