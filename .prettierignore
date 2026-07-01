@@ -40,4 +40,10 @@ packages/*/dist/
 
 # Projeção PUBLICADA da sim (context.json): a forma é OWNED pelo `build.ts` (deriveContext) e a paridade é
 # gateada por `freshness.ts` (compara o DADO, não os bytes). Prettier reformatar criaria diff falso vs o build.
-.governance/specs/0024-context-architecture/_org-simulation-v2/**/.governance/context.json
+.governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v2/**/.governance/context.json
+
+# Artefatos GERADOS/CACHE da sim (gitignored, derivados por build.ts/viewer): read-models, dashboards e
+# snapshots. Não são fonte — prettier não deve gateá-los (evita falhar o `validate` local em arquivo gerado).
+**/.cache/
+.governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v2/_viewer/db.json
+.governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v2/_viewer/public/snapshot.json
