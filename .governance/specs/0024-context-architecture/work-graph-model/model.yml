@@ -387,6 +387,117 @@ scaling-law:
   generalizes: "F-governance-scaling + execution-unit-collapse — um princípio só p/ camadas de trabalho + tier de negócio + papéis"
   new-sod: "quem DEFINE o target não deve ser o único a ATESTAR o actual (fonte/analytics independente)"
 
+# ═════════════════════ VALIDAÇÃO DE FLUXO (P10 · rodada Codex big-company → solo) ═════════════════════
+# Gaps RECONCILIADOS contra este arquivo (repo vence): aceito · parcial (o modelo já cobre parte — a
+# correção diz o quê) · tensão (choca com decisão anterior da owner). Severidade = do Codex
+# (P0 crítico · P1 importante · P2 menor — NÃO confundir com ids de provocação). NADA aplicado ainda —
+# tudo aguarda gate da owner (priorização em curso).
+flow-validation:
+  status: open
+  provocation: P10
+  source: "codex (validação ponta-a-ponta + caça a gaps, big → solo) + reconciliação claude 2026-07-01"
+  verdict-codex: "coerente como mapa conceitual do big-company ao solo; NÃO pronto como framework ponta-a-ponta — falta mecanizar business-tier + rollup (ecoa o achado-mestre do red-team: o modelo é SUB-mecanizado, não over-engineered)"
+  master-gap: "outcome → target.actual → dashboard: o modelo diz que actual é DERIVADO e que só contributes-to soma, mas NÃO define o que é um outcome GOVERNADO, quem atesta o actual, que revisão/fonte sustenta o número, nem como o dashboard falha com evidência stale. Sem isso o business-tier vira painel narrativo, não governança. (= G3 + G4 + G5)"
+  gaps:
+    - id: G1
+      about: "business-tier existe como grafo, mas não como FLUXO operacional"
+      where: "antes de registro — criação/aprovação de objective · thesis · target · allocation"
+      severity: P0
+      scale: [big, mid]
+      reconciliation: "aceito — FATO: flow (L2) começa em registro; nenhuma fase cobre o planejamento; business-tier tem input-vs-output mas não diz QUEM cria/aprova QUANDO"
+      suggestion: "fases leves de planejamento (define-objective · define-target · authorize-intake), colapsáveis em org menor"
+    - id: G2
+      about: "intake não está ligado ao business-tier"
+      where: "registro → gate → ativação"
+      severity: P0
+      scale: [big, mid, trio]
+      reconciliation: "aceito — FATO: a aresta authorizes (objective → intent) existe, mas proposal/register não declaram vínculo; o gate não valida objective/target/allocation. Os exemplos com intent nula mostram que 'standalone' precisa ser DECLARÁVEL (não inferido)"
+      suggestion: "register/proposal declara authorized-by OU standalone; gate valida objective primário + target + allocation"
+    - id: G3
+      about: "target.actual é 'derivado', mas falta a entidade/processo de OUTCOME"
+      where: "veredito → dashboard"
+      severity: P0
+      scale: [big, mid, trio]
+      reconciliation: "aceito (o master-gap) — FATO que REFORÇA: outcome já é citado 2× no modelo (closed-by → 'answer|outcome|postmortem' · contributes-to parte de 'outcome (execution-unit)') e definido em lugar NENHUM"
+      suggestion: "outcome como evento/nó governado: source · janela · métrica · agregação · attester · revision"
+    - id: G4
+      about: "o SoD novo do target está só DECLARADO"
+      where: "planejamento + dashboard"
+      severity: P0
+      scale: [big, mid, trio, solo]
+      reconciliation: "aceito — FATO: scaling-law.new-sod declara sem mapear papéis; a barra do red-team r2 já disse 'P0 nomeado sem mecanismo = cerimônia'"
+      suggestion: "papéis: target-definer · metric-owner · actual-attester · dashboard-consumer; no solo, colapso EXPLÍCITO logado"
+    - id: G5
+      about: "contributes-to × aligns-with não está mecanizado"
+      where: "breakdown · veredito · rollup"
+      severity: P0
+      scale: [big, mid]
+      reconciliation: "aceito — FATO: rollup-rule é textual; o próprio modelo exige enforcement p/ dimensões ('senão é tag decorativa') — o mesmo princípio vale p/ o rollup"
+      suggestion: "lint: exatamente 1 rollup primário por outcome/intent; dashboard ignora aligns-with; agregação obrigatória"
+    - id: G6
+      about: "scaling-law é princípio, não perfil executável"
+      where: "todas as fases"
+      severity: P0
+      scale: [mid, trio, solo]
+      reconciliation: "aceito — governance-profile é a materialização EXECUTÁVEL da scaling-law (conecta F-governance-scaling + degenerate-mode do solo)"
+      suggestion: "governance-profile (full · compact · solo): nós mínimos, gates colapsados e campos obrigatórios por perfil"
+    - id: G7
+      about: "gate único não cobre decisões por tier"
+      where: "objective approval · activation · rollout · verdict"
+      severity: P1
+      scale: [big, mid]
+      reconciliation: "aceito — FATO: o fluxo tem UM gate (pré-ativação); verdict/rollout/aprovação-de-objective não têm decision-point governado"
+      suggestion: "decision-points separados (approve-objective · activate-intent · release/rollout · accept-verdict), todos colapsáveis"
+    - id: G8
+      about: "states genéricos demais p/ o business-tier"
+      where: "objective anual · target · reopen/supersede"
+      severity: P1
+      scale: [big, mid]
+      reconciliation: "parcial — o annual-flexibility JÁ nomeia closed/active + continues-from/supersedes/split/merge; o gap REAL é esse lifecycle viver só em prosa (fora do catálogo states e das edges)"
+      suggestion: "lifecycle próprio de objective/target (proposed · active · closed · superseded · dropped) + as arestas continues-from/split-from/merged-into no catálogo"
+    - id: G9
+      about: "envelope L8 sem catálogo de mutações por tier"
+      where: "toda mutação — em especial target/objective"
+      severity: P1
+      scale: [big, mid, trio]
+      reconciliation: "aceito — FATO: o envelope define grupos de CAMPOS, não TIPOS de mutação"
+      suggestion: "mutation types declarados: objective-create · target-change · actual-publish · rollup-change · allocation-change"
+    - id: G10
+      about: "contratos coordenam repo-work, mas não bloqueiam rollup"
+      where: "coordenação → veredito"
+      severity: P1
+      scale: [big, mid]
+      reconciliation: "parcial — a lei dependencia-verificavel (L9) JÁ cobre em princípio (rollup É ação derivada); o gap REAL é a mecanização: nada liga outcome a contract-revision nem marca o dashboard como stale"
+      suggestion: "outcome que depende de contrato cita a contract revision; dashboard marca blocked/stale se incompatível"
+    - id: G11
+      about: "q/r/d anexável, mas sem gatilhos obrigatórios"
+      where: "triagem · target change · verdict override"
+      severity: P1
+      scale: [big, mid, trio]
+      reconciliation: "TENSÃO — decisão anterior da owner: q/r/d é o coração, porém OPCIONAL (pular = abrir mão dos benefícios, com trade-off explícito). Caminho compatível: gatilho obrigatório SÓ p/ mutações de alto risco torna o trade-off explícito sem enforçar q/r/d geral. Owner decide"
+      suggestion: "exigir decision p/ mudança de target, rollup primário, compat-window, verdict override e break-glass"
+    - id: G12
+      about: "allocation indefinido como campo/nó"
+      where: "planejamento/priorização"
+      severity: P1
+      scale: [big, mid]
+      reconciliation: "parcial — o modelo JÁ define o default (campo do objective; 'vira nó só se precisar') e a scaling-law dá o critério de promoção; o gap REAL são os campos mínimos e a promoção não estar amarrada EXPLICITAMENTE à scaling-law"
+      suggestion: "campo por default com unidade · período · owner obrigatórios; vira nó quando ganha lifecycle/owner/consumo próprio"
+    - id: G13
+      about: "média empresa não tem perfil próprio"
+      where: "escala"
+      severity: P1
+      scale: [mid]
+      reconciliation: "aceito — a sim tem full-team/trio/solo; nota: 'role-collapse parametrizado' CONVERGE com a scaling-law aplicada a papéis — o perfil mid talvez DERIVE do G6 (governance-profile) em vez de ser um 4º arquétipo fixo"
+      suggestion: "arquétipo small-team (PM + TL + Eng) OU role-collapse parametrizado via governance-profile"
+    - id: G14
+      about: "trabalho standalone some do dashboard"
+      where: "bug · dep-bump · incident · trabalho solo"
+      severity: P2
+      scale: [big, mid, trio, solo]
+      reconciliation: "aceito — FATO: bug/dep-bump (intent nula) não têm caminho até dashboard algum; compatível com 'não se bloqueia o solo' — visível como custo/risco operacional, não forçado a um objective"
+      suggestion: "permitir repo-work outcome contributes-to target OU classificar como custo/risco operacional fora de objective"
+
 # ═════════════════════ PROVOCAÇÕES ═════════════════════
 open-questions:
   - {
