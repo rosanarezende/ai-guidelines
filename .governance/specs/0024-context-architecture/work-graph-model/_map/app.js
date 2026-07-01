@@ -192,11 +192,21 @@ function GraphView() {
         )}
       </div>
     </div>
-    ${down("outcome → rollup")}
+    ${down("emits · no veredito")}
+    <div className="unit">
+      <div className="hd">
+        <span className="lvl">outcome</span> ${g.outcome.title}
+        <span className="tag">governado · append-only</span>
+      </div>
+      <p className="sub">${g.outcome.fields}</p>
+      <p className="note">${g.outcome.note}</p>
+    </div>
+    ${down("contributes-to → rollup")}
     <div className="intent dashed">
       <div className="hd"><span className="lvl">dashboard</span> medição + rollup</div>
       <p className="sub">metric-definition: ${g.measurement.metric}</p>
       <p className="sub">target: ${g.measurement.target}</p>
+      <p className="sub">${g.measurement.roles}</p>
       <div className="works">
         <div className="w">
           <span className="r">contributes-to</span><span className="pp create">soma</span>
@@ -207,6 +217,7 @@ function GraphView() {
           <div className="d">${g.rollup.aligns}</div>
         </div>
       </div>
+      <p className="note">${g.rollup.lint}</p>
     </div>
     <div className="intent" style=${{ marginTop: "10px" }}>
       <div className="hd"><span className="lvl">lei de escala</span></div>
@@ -217,10 +228,11 @@ function GraphView() {
 
 function App() {
   return html`<div className="wrap">
-    <h1>Modelo do trabalho — 3 camadas</h1>
+    <h1>Modelo do trabalho — do negócio à peça</h1>
     <p className="lead">
-      intent (estratégia) → execution-unit (tipo, cross-repo) → repo-work (propósito, por repo).
-      Troque as situações e as formas de org nas abas.
+      business-objective (negócio, recursivo) → intent (estratégia) → execution-unit (tipo,
+      cross-repo) → repo-work (propósito, por repo) → outcome (resultado governado). Troque as
+      situações e as formas de org nas abas.
     </p>
     <${LayerLegend} />
     <${ExampleExplorer} />

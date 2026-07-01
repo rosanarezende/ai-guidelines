@@ -254,14 +254,23 @@ window.MODEL = {
       { r: "acme-analytics", p: "operate", d: "eventos + baseline (mede a métrica)" },
       { r: "acme-web-host", p: "sustain", d: "adapta o contrato compartilhado" },
     ],
+    outcome: {
+      title: "resultado do experimento (won)",
+      fields:
+        "source: acme-analytics · janela: H1 · valor: +X% · attested-by: acme-data (≠ quem definiu o target) · revision: dados@rev",
+      note: "único insumo do target.actual — sem attester independente ou com revision stale, o dashboard marca unverified/stale (falha visível, não silenciosa)",
+    },
     measurement: {
       metric: "conversion-rate · source: acme-analytics · owner: acme-data",
       target: "H1: +X% · actual = DERIVADO dos outcomes (não à mão)",
+      roles:
+        "papéis: target-definer · metric-owner · actual-attester · dashboard-consumer — quem define o target NÃO é o único a atestar o actual",
     },
     rollup: {
       contributes:
         "o outcome CONTRIBUI (mensurável) p/ a priority P1 → entra no dashboard (rollup primário)",
       aligns: "e ALINHA (narrativo) com a company-strategy → contexto, NÃO soma no dashboard",
+      lint: "lint: exatamente 1 rollup primário por outcome/intent · aggregation obrigatória · aligns-with nunca soma",
     },
   },
 
