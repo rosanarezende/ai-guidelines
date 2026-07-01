@@ -255,6 +255,24 @@ open-questions:
     fato: famílias hoje = capacidade/aprendizado/resposta/intake(EN)/deliberação; membros = todos EN (delivery/maintenance/...)
     proposta: escolher UMA língua canônica pros ids do grafo. Recomendo EN nos ids (casa com os membros e com o model.ts) + label/description em PT p/ humanos.
 
+  - id: P5
+    about: o breakdown modelado é estreito (só testamos intent → exploration → deliveries)
+    status: open
+    provocacao: "iniciativas reais quebram em trabalho HETEROGÊNEO e cross-repo; falta modelar a granularidade e as famílias MISTAS que o breakdown emite"
+
+  - id: P6
+    about: um experimento de growth é UM só, mas atravessa N repos — em que NÍVEL ele vive?
+    status: open
+    provocacao: "se o experimento é um (uma hipótese/flag/veredito), as peças por repo NÃO são cada uma um experiment; são peças coordenadas por contrato"
+    hypothesis: "experiment = NATUREZA da INICIATIVA (carrega hipótese/veredito), não um work-kind por repo — revisa P1/P3"
+    impact: "pode tirar experiment das work-families e criar uma tipologia de INICIATIVA (feature/experiment/redesign) separada das famílias de work (create/sustain/discover)"
+
+  - id: P7
+    about: iniciativa heterogênea (redesign = port from→to + novidades) e contratos entre iniciativas
+    status: open
+    provocacao: "um redesign quebra em MIX (sustain=port + create=novo) → família é da PEÇA, não da iniciativa"
+    cross-initiative: "vários times fazendo redesign coordenam por CONTRATO compartilhado (nó com N consumers) → coordenação entre iniciativas é DERIVADA do contrato, sem aresta iniciativa↔iniciativa nova"
+
 # ── SÍNTESE de P1+P2+P3 (proposta; aguarda reação da owner antes de aplicar em families/nodes) ──
 proposed-restructure:
   status: proposed
