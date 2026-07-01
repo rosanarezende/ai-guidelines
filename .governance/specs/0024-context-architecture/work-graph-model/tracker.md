@@ -1,6 +1,8 @@
-# Tracker v2 — o modelo do trabalho como grafo tipado (8 lentes, do amplo ao genérico)
+# Tracker v2 — o modelo do trabalho como grafo tipado (9 lentes, do amplo ao genérico)
 
-> **SSOT vivo desta frente.** Síntese **refinada** do que aprendemos na v1 ([`tracker-v1.md`](tracker-v1.md)) — sem o histórico de "era isso → virou isso". As 8 lentes vão do **mais amplo** (propósito) ao **mais genérico** (primitivos: dimensões · arestas · camadas físicas · o envelope transacional).
+> **SSOT vivo desta frente.** Síntese **refinada** do que aprendemos na v1 ([`tracker-v1.md`](tracker-v1.md)) — sem o histórico de "era isso → virou isso". As 9 lentes vão do **mais amplo** (propósito) ao **mais genérico** (primitivos: dimensões · arestas · camadas físicas · o envelope transacional · as fronteiras de confiança).
+>
+> **▶ ESTADO ATUAL (2026-07-01 · pra retomar pós-compactação):** modelo **v2 fechado em 9 lentes** (a taxonomia em famílias/dimensões + o envelope L8 + a confiança L9). **4 auditorias adversariais** feitas e incorporadas ([`_audits/`](_audits/)). O **código** ainda está **pré-migração** (P0 em [`features.md`](features.md): `model.ts` tem os 5 kinds antigos, sem dimensões/envelope/política). **PRÓXIMA FASE (decidida):** **simulação ADVERSARIAL** (red-team: register com injection · capability envenenada · agente super-autorizado · matcher bloqueado por classificação · `context.json` assinado-mas-malicioso · `expedite` abusado · import Jira com conflito de SSOT) — **não** mais auditoria. A sim é a forcing function contra over-engineering.
 > **Regras:** recência vence · conferir o já-decidido antes de desenhar · uma pergunta por vez · linguagem simples · docs externos **inspiram, não definem** (nem se versionam/citam) · **modelar todos os fluxos** (a implementação se faseia em [`features.md`](features.md), o modelo não).
 > Org fictícia ANONIMIZADA (`acme-*`). 🟢 = decidido · 🔶 = a estressar. Não-autoridade; em divergência vencem `state.yml`/gates/Git.
 
@@ -127,6 +129,21 @@ Conjunto fechado de arestas, cada uma com critério único (anota-se 1 lado; o r
 
 **Consequências no modelo (🟢):** gate **append-only** (decisão + reversal) · **move idempotente com recuperação** · **matcher accountability** (o gate registra se seguiu/contrariou a sugestão + rationale) · **concorrência** (lock curto por candidato / detecção de conflito por `revision`) · **loop-budget** nos instrumentos de aprendizado. _(Mecanismos de implementação: [`features.md`](features.md).)_
 
+## Lente 9 · Fronteiras de confiança & política (autenticidade × integridade — o que a L8 não resolve)
+
+> A auditoria rodada 4 ([`_audits/`](_audits/)) achou que a L8 garante **integridade** (o dado é consistente/fresco), mas **tudo é AUTOCERTIFICADO** — `classification`/`authority`/`actor`/`hash` o próprio ator preenche. O envelope prova **quem declarou**, não que é **verdadeiro/autorizado/independente** → "auditoria de mentiras bem-formadas". Falta representar **onde termina a confiança** e como o sistema reage quando um ator autorizado **mente**.
+
+- **Trust boundary = entidade de 1ª classe:** onde a confiança termina · quem atravessa · com qual **prova** · o que acontece na travessia (o matcher/agente/backend/API são **fronteiras**).
+- **Política NORMATIVA governada (≠ ontologia):** segurança precisa de controle **versionado**, não de "inspira-não-define". Artefatos: `threat-model.yml` · `egress-policy.yml` · `agent-delegation-policy.yml` · `policy-catalog.yml` · `red-team-corpus/`.
+- **Egress por taint/classificação derivada:** um nó que usa contexto restrito herda **teto de egress**; o matcher externo só recebe **fatias aprovadas por política** (resolve o vazamento por **inferência** — capabilities internas reconstruindo o segredo).
+- **Input hostil (prompt injection no plano de governança):** `register`/`triage`/capability entram **crus** no matcher/agente → o matcher é **não-confiável**; nunca vira ação sem **validação estrutural**. `red-team-corpus/` (register malicioso, capability envenenada).
+- **Delegação formal (agente como ator):** `actor=agent` exige vínculo verificável — **principal humano → workload-id do agente → escopo → TTL → policy-id → max-mutations → confirmação-humana** p/ gate/egress/escalation.
+- **Verificação × autocertificação:** trusted-producers · provenance (estilo SLSA/transparência) · verificar **policy** antes de aceitar `context.json` (assinatura sem policy ≠ confiança). **Capability** ganha `evidence`/`owner-attested-by`/`observed-from`/`last-verified` (IA só abre PR, não atualiza o SSOT).
+- **Anti-gaming (invariantes + quotas):** `expedite` tem orçamento por time · `incident` exige evento/severidade/telemetria · downgrade de `classification` exige **approver separado**.
+- **Supply-chain dos backends/matchers:** allowlist · secrets fora do YAML · least-privilege no DB · TLS/pin fora da sim · CLI-delegate em **sandbox** (sem rede/home/tokens). _(hoje a sim tem `simsim123`/CORS `*`/`/match` client-config — ok pra sim, **não** pra "robusta".)_
+
+**⚠️ Risco que a própria auditoria apontou — "governance theater":** se o custo de preencher envelopes/políticas exceder o valor percebido, os times bypassam. **O modelo cobre tudo; a simulação ADVERSARIAL decide o que é enforcement real × cerimônia.**
+
 ---
 
 ## Ponteiros
@@ -135,13 +152,14 @@ Conjunto fechado de arestas, cada uma com critério único (anota-se 1 lado; o r
 - **Deliberações (q/r/d):** [`deliberation/`](deliberation/) — taxonomia · registro-triagem-gate · intent-não-delibera · manifest-shape · projeções-publicadas · roteamento-vertical.
 - **Fluxo & researches:** [`research/2026-06-30-initiative-to-works-flow.md`](research/2026-06-30-initiative-to-works-flow.md) + [`research/`](research/).
 - **Features a implementar (roadmap):** [`features.md`](features.md).
+- **Auditorias adversariais (evidência):** [`_audits/`](_audits/) — 4 rodadas (benchmark · taxonomia · ponta-a-ponta · fronteiras de confiança).
 - **Simulação & templates:** [`_org-simulation-v2/`](_org-simulation-v2/) · [`_templates/`](_templates/).
 
-## 🔶 Abertos (a validar/estressar — depois: simular robusto)
+## 🔶 Abertos & próxima fase
 
-> _As 3 auditorias adversariais estão em [`_audits/`](_audits/); a rodada 3 (ponta-a-ponta) virou a **Lente 8** + as correções (explore-resolution, gate append-only, contrato-nó, GlobalRef, loop-budget, classificação). Rodada 4 (régua mais alta) pendente._
+> _As **4 auditorias** ([`_audits/`](_audits/)) foram incorporadas: r1→`source`/incidente · r2→famílias · r3→**Lente 8** (envelope) · r4→**Lente 9** (confiança/política). Auditar **encerrado** (retorno decrescente + risco de "theater"). **Próxima fase = simulação ADVERSARIAL.**_
 
-1. **Enforcement** de cada dimensão + do envelope (lint/workflow/dashboard) — é o que separa "modelado" de "confiável" (→ `features.md`).
-2. **O breakdown** (Lente 2/3): quais famílias saem do plano · granularidade (1 explore-point → 1 delivery? N→1?) · quem faz (dono × eng) · política de slicing + aprovação do contract-owner.
-3. **Materializar** as arestas/primitivos novos (incident `occurred-during`/`caused-by` · `explore-resolution` · contrato-nó · `GlobalRef`/tombstone · envelope).
-4. **A nova simulação robusta** sobre a taxonomia v2 + o envelope — **só depois** de validarmos as lentes aqui (e da rodada 4).
+1. **▶ Simulação ADVERSARIAL (a fazer agora):** re-modelar a sim sobre a v2, com cenários red-team primeiro (injection no register · capability envenenada · agente super-autorizado · matcher bloqueado por classificação · `context.json` malicioso · `expedite` abusado · import Jira/SSOT). É a **forcing function**: mostra o que é enforcement real × cerimônia. Arquivar a `_org-simulation-v2` atual se preciso.
+2. **Migração P0 do código** (em paralelo/depois): `model.ts` famílias+dimensões+envelope+política (ver `features.md`).
+3. **Enforcement** de cada dimensão/envelope/política (lint/workflow/dashboard) — o que separa "modelado" de "confiável".
+4. **Breakdown** (L2/L3): granularidade (1 explore-point → N works?) · quem faz (dono × eng) · slicing + aprovação do contract-owner.
