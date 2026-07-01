@@ -336,6 +336,40 @@ simulation:
     id: F-governance-scaling
     says: "o fluxo e a Lei da Independência (X/O1) assumem TIME COMPLETO. Precisam ESCALAR PARA BAIXO por role-collapse — espelho do execution-unit-collapse (cerimônia proporcional ao tamanho da org E do trabalho). full-team: SoD holds. trio: independência TÉCNICA fica com gaps de autocertificação (mitigar com revisão cruzada / trusted-source externo). solo: SoD impossível → self-governed + trade-off logado (break-glass). Conecta as leis fallback/break-glass + independência."
 
+# ═════════════════════ BUSINESS TIER (proposto · P9) — nós de negócio ACIMA da intent ═════════════════════
+# O planejamento estratégico ANTES das iniciativas (input) + a base dos dashboards (output). Anonimizado.
+business-tier:
+  status: proposed
+  provocation: P9
+  is: "o upstream de planejamento (estratégia → tese → prioridade → iniciativa) + o downstream de dashboards de negócio"
+  nodes:
+    strategy: "estratégia de PRODUTO & ENGENHARIA da empresa (N direcionadores)"
+    driver: "estratégia da BU/tribo (um driver); CORRELATES-TO uma strategy da empresa"
+    thesis: "hipótese de negócio ('ao ofertar X à base Y, impactamos a métrica Z')"
+    thematic: "ângulo de ataque de uma tese"
+    priority: "prioridade (P1/P2/P3) com TARGET mensurável + budget"
+    metric: "a métrica + a meta (target); o actual vem dos outcomes das iniciativas"
+  cascade-input: "strategy → driver(bu) → thesis → thematic → priority → INTENT (a iniciativa/experimento nasce aqui)"
+  edges:
+    - { id: correlates-to, from: driver, to: strategy }
+    - {
+        id: breaks-into,
+        from: "strategy|driver|thesis|thematic",
+        to: "next tier down",
+        note: "cascata até a intent",
+      }
+    - { id: measured-by, from: priority, to: metric }
+    - {
+        id: contributes-to,
+        from: "intent/execution-unit outcome",
+        to: "priority.target",
+        note: "rollup p/ o dashboard",
+      }
+  output-dashboards: "dashboards de negócio = projeções DERIVADAS que sobem o grafo (priority target×actual · iniciativas que alimentam · outcomes) → VISÃO GERAL do negócio p/ stakeholders. Usa a plumbing 'host agrega projeções publicadas'."
+  flexibility: "a PROFUNDIDADE do tier escala com a org (como o role-collapse / execution-unit-collapse): startup pode ter só priority→intent; solo, nenhum tier. Conecta F-governance-scaling."
+  symmetry: "os MESMOS nós estruturam a ENTRADA (planejamento) e a SAÍDA (dashboards) — 'correlaciona tanto na entrada como na saída'."
+  connects: "features.md P2 (governança de portfólio: RICE/ICE, roadmap, priorização)"
+
 # ═════════════════════ PROVOCAÇÕES ═════════════════════
 open-questions:
   - {
