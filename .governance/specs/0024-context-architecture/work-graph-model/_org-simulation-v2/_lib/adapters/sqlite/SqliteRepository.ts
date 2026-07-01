@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import type { Repository } from "../../ports.ts";
 import type {
   Work,
-  WorkKind,
+  Dimensions,
   Weight,
   WorkStatus,
   Exploration,
@@ -16,12 +16,12 @@ import type {
   Research,
   Decision,
 } from "../../domain/model.ts";
-import { normalizeLegacyKind } from "../../domain/model.ts";
+import { normalizeWorkKind } from "../../domain/model.ts";
 
 const SIM_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
 const SCHEMA = `
-CREATE TABLE IF NOT EXISTS works (id TEXT PRIMARY KEY, kind TEXT, title TEXT, status TEXT, assignee TEXT, weight TEXT, intent TEXT, blockedBy TEXT, dependsOn TEXT, coordinatesWith TEXT, derivesFrom TEXT, closedBy TEXT, createdAt TEXT, updatedAt TEXT, closedAt TEXT);
+CREATE TABLE IF NOT EXISTS works (id TEXT PRIMARY KEY, kind TEXT, title TEXT, status TEXT, assignee TEXT, weight TEXT, dimensions TEXT, intent TEXT, blockedBy TEXT, dependsOn TEXT, coordinatesWith TEXT, derivesFrom TEXT, closedBy TEXT, createdAt TEXT, updatedAt TEXT, closedAt TEXT);
 CREATE TABLE IF NOT EXISTS explorations (id TEXT PRIMARY KEY, explores TEXT, answers TEXT, status TEXT, assignee TEXT, fate TEXT, derivesFrom TEXT, closedBy TEXT, verdict TEXT, createdAt TEXT, updatedAt TEXT, closedAt TEXT);
 CREATE TABLE IF NOT EXISTS questions (workId TEXT, id TEXT, mode TEXT, raisedBy TEXT, body TEXT, PRIMARY KEY (workId, id));
 CREATE TABLE IF NOT EXISTS researches (workId TEXT, id TEXT, investigates TEXT, method TEXT, body TEXT, PRIMARY KEY (workId, id));
@@ -35,23 +35,30 @@ const arr = (s: unknown): string[] | undefined =>
 const str = (v: unknown): string | undefined =>
   v === null || v === undefined ? undefined : String(v);
 
-const toWork = (r: Row): Work => ({
-  id: r.id as string,
-  kind: normalizeLegacyKind(r.kind as string).member as WorkKind, // DB guarda string; normaliza legado → canônico
-  title: r.title as string,
-  status: r.status as WorkStatus,
-  assignee: str(r.assignee),
-  weight: str(r.weight) as Weight | undefined,
-  intent: str(r.intent),
-  blockedBy: arr(r.blockedBy),
-  dependsOn: arr(r.dependsOn),
-  coordinatesWith: arr(r.coordinatesWith),
-  derivesFrom: arr(r.derivesFrom),
-  closedBy: str(r.closedBy),
-  createdAt: (r.createdAt as string) ?? "",
-  updatedAt: str(r.updatedAt),
-  closedAt: str(r.closedAt),
-});
+const toWork = (r: Row): Work | null => {
+  const norm = normalizeWorkKind(r.kind as string); // DB guarda string; não-work/desconhecido → null (fail-closed)
+  if (!norm) return null;
+  const stored = r.dimensions ? (JSON.parse(r.dimensions as string) as Dimensions) : {};
+  const dims = { ...norm.dimensions, ...stored };
+  return {
+    id: r.id as string,
+    kind: norm.kind,
+    title: r.title as string,
+    status: r.status as WorkStatus,
+    assignee: str(r.assignee),
+    weight: str(r.weight) as Weight | undefined,
+    dimensions: Object.keys(dims).length ? dims : undefined,
+    intent: str(r.intent),
+    blockedBy: arr(r.blockedBy),
+    dependsOn: arr(r.dependsOn),
+    coordinatesWith: arr(r.coordinatesWith),
+    derivesFrom: arr(r.derivesFrom),
+    closedBy: str(r.closedBy),
+    createdAt: (r.createdAt as string) ?? "",
+    updatedAt: str(r.updatedAt),
+    closedAt: str(r.closedAt),
+  };
+};
 const toExploration = (r: Row): Exploration => ({
   id: r.id as string,
   explores: str(r.explores),
@@ -106,7 +113,9 @@ export class SqliteRepository implements Repository {
   }
 
   async listWorks(): Promise<Work[]> {
-    return (this.#db.prepare("SELECT * FROM works ORDER BY id").all() as Row[]).map(toWork);
+    return (this.#db.prepare("SELECT * FROM works ORDER BY id").all() as Row[])
+      .map(toWork)
+      .filter((w): w is Work => w !== null);
   }
   async getWork(id: string): Promise<Work | null> {
     const r = this.#db.prepare("SELECT * FROM works WHERE id = ?").get(id) as Row | undefined;
@@ -115,7 +124,7 @@ export class SqliteRepository implements Repository {
   async saveWork(w: Work): Promise<void> {
     this.#db
       .prepare(
-        "INSERT OR REPLACE INTO works (id,kind,title,status,assignee,weight,intent,blockedBy,dependsOn,coordinatesWith,derivesFrom,closedBy,createdAt,updatedAt,closedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        "INSERT OR REPLACE INTO works (id,kind,title,status,assignee,weight,dimensions,intent,blockedBy,dependsOn,coordinatesWith,derivesFrom,closedBy,createdAt,updatedAt,closedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
       )
       .run(
         w.id,
@@ -124,6 +133,7 @@ export class SqliteRepository implements Repository {
         w.status,
         w.assignee ?? null,
         w.weight ?? null,
+        j(w.dimensions),
         w.intent ?? null,
         j(w.blockedBy),
         j(w.dependsOn),

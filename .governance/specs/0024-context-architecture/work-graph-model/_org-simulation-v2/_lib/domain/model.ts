@@ -77,8 +77,10 @@ export type PromotableMember = "delivery" | "maintenance" | "experiment" | "expl
 
 // ── LEGACY (back-compat da migração): os 5 kinds antigos + normalizador p/ {membro, dimensões}. ──
 export type LegacyWorkKind = "delivery" | "experiment" | "incident" | "fix" | "patch";
-/** Normaliza um kind legado (dados/refs antigos) p/ o par membro+dimensões da v2. fix/patch → maintenance. */
-export function normalizeLegacyKind(kind: string): { member: GraphMember; dimensions: Dimensions } {
+/** Normaliza um kind (canônico OU legado) p/ {membro, dimensões}, ou `null` se DESCONHECIDO (fail-closed — não inventa membro). */
+export function normalizeLegacyKind(
+  kind: string
+): { member: GraphMember; dimensions: Dimensions } | null {
   switch (kind) {
     case "fix":
       return {
@@ -90,6 +92,8 @@ export function normalizeLegacyKind(kind: string): { member: GraphMember; dimens
         member: "maintenance",
         dimensions: { maintenanceMode: "corrective", visibility: "internal" },
       };
+    case "maintenance":
+      return { member: "maintenance", dimensions: {} };
     case "experiment":
       return { member: "experiment", dimensions: {} };
     case "incident":
@@ -97,8 +101,18 @@ export function normalizeLegacyKind(kind: string): { member: GraphMember; dimens
     case "delivery":
       return { member: "delivery", dimensions: {} };
     default:
-      return { member: kind as GraphMember, dimensions: {} };
+      return null; // desconhecido → fail-closed; o chamador decide (pular + avisar)
   }
+}
+
+/** Guarda da BORDA de leitura de WORK: normaliza um kind p/ um `WorkKind` da família CAPACIDADE (delivery|maintenance),
+ *  ou `null` se NÃO for work (experiment/exploration=aprendizado · incident=resposta) ou desconhecido. Fail-closed:
+ *  kind inválido NÃO vira Work — o adapter FILTRA (não deixa domínio inválido escapar da borda). */
+export function normalizeWorkKind(kind: string): { kind: WorkKind; dimensions: Dimensions } | null {
+  const n = normalizeLegacyKind(kind);
+  if (n && (n.member === "delivery" || n.member === "maintenance"))
+    return { kind: n.member, dimensions: n.dimensions };
+  return null;
 }
 
 /** `WorkKind` = os membros da família CAPACIDADE que são "work" no breakdown (delivery cria · maintenance preserva).

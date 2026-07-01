@@ -7,7 +7,7 @@ import type { Driver } from "neo4j-driver";
 import type { Repository } from "../../ports.ts";
 import type {
   Work,
-  WorkKind,
+  Dimensions,
   Weight,
   WorkStatus,
   Exploration,
@@ -15,7 +15,7 @@ import type {
   Research,
   Decision,
 } from "../../domain/model.ts";
-import { normalizeLegacyKind } from "../../domain/model.ts";
+import { normalizeWorkKind } from "../../domain/model.ts";
 
 /** cria um driver Neo4j (bolt). A conexão é gerida por quem instancia (abre 1, fecha no fim). */
 export function neo4jDriver(uri: string, user: string, password: string): Driver {
@@ -27,23 +27,30 @@ const clean = (o: Props): Props =>
   Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== null));
 
 // ── mappers domínio ↔ propriedades de nó ──
-const toWork = (p: Props): Work => ({
-  id: p.id as string,
-  kind: normalizeLegacyKind(p.kind as string).member as WorkKind, // props guardam string; normaliza legado → canônico
-  title: p.title as string,
-  status: p.status as WorkStatus,
-  assignee: p.assignee as string | undefined,
-  weight: p.weight as Weight | undefined,
-  intent: p.intent as string | undefined,
-  blockedBy: p.blockedBy as string[] | undefined,
-  dependsOn: p.dependsOn as string[] | undefined,
-  coordinatesWith: p.coordinatesWith as string[] | undefined,
-  derivesFrom: p.derivesFrom as string[] | undefined,
-  closedBy: p.closedBy as string | undefined,
-  createdAt: (p.createdAt as string) ?? "",
-  updatedAt: p.updatedAt as string | undefined,
-  closedAt: p.closedAt as string | undefined,
-});
+const toWork = (p: Props): Work | null => {
+  const norm = normalizeWorkKind(p.kind as string); // props guardam string; não-work/desconhecido → null (fail-closed)
+  if (!norm) return null;
+  const stored = p.dimensions ? (JSON.parse(p.dimensions as string) as Dimensions) : {};
+  const dims = { ...norm.dimensions, ...stored };
+  return {
+    id: p.id as string,
+    kind: norm.kind,
+    title: p.title as string,
+    status: p.status as WorkStatus,
+    assignee: p.assignee as string | undefined,
+    weight: p.weight as Weight | undefined,
+    dimensions: Object.keys(dims).length ? dims : undefined,
+    intent: p.intent as string | undefined,
+    blockedBy: p.blockedBy as string[] | undefined,
+    dependsOn: p.dependsOn as string[] | undefined,
+    coordinatesWith: p.coordinatesWith as string[] | undefined,
+    derivesFrom: p.derivesFrom as string[] | undefined,
+    closedBy: p.closedBy as string | undefined,
+    createdAt: (p.createdAt as string) ?? "",
+    updatedAt: p.updatedAt as string | undefined,
+    closedAt: p.closedAt as string | undefined,
+  };
+};
 
 const toExploration = (p: Props): Exploration => ({
   id: p.id as string,
@@ -114,17 +121,27 @@ export class Neo4jRepository implements Repository {
   }
 
   // ── trabalho ──
-  listWorks(): Promise<Work[]> {
-    return this.#read("MATCH (n:Work {repo: $repo}) RETURN n ORDER BY n.id", {}, toWork);
+  async listWorks(): Promise<Work[]> {
+    const rows = await this.#read(
+      "MATCH (n:Work {repo: $repo}) RETURN n ORDER BY n.id",
+      {},
+      toWork
+    );
+    return rows.filter((w): w is Work => w !== null);
   }
   async getWork(id: string): Promise<Work | null> {
     const r = await this.#read("MATCH (n:Work {repo: $repo, id: $id}) RETURN n", { id }, toWork);
     return r[0] ?? null;
   }
   saveWork(w: Work): Promise<void> {
+    // Neo4j não aceita map aninhado como propriedade de nó → serializa dimensions em JSON (reidratado no toWork).
     return this.#write("MERGE (n:Work {repo: $repo, id: $id}) SET n = $props", {
       id: w.id,
-      props: clean({ repo: this.repo, ...w }),
+      props: clean({
+        repo: this.repo,
+        ...w,
+        dimensions: w.dimensions ? JSON.stringify(w.dimensions) : undefined,
+      }),
     });
   }
 

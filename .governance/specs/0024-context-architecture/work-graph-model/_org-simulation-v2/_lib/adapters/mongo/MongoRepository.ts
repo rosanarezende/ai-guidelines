@@ -4,11 +4,20 @@
 import type { Db } from "mongodb";
 import type { Repository } from "../../ports.ts";
 import type { Work, Exploration, Question, Research, Decision } from "../../domain/model.ts";
+import { normalizeWorkKind } from "../../domain/model.ts";
 
 /** tira os campos de infra do documento (`_id`, `repo`, `workId`) → devolve a entidade pura do domínio. */
 function strip<T>(doc: Record<string, unknown>): T {
   const { _id, repo, workId, ...rest } = doc;
   return rest as T;
+}
+
+/** BORDA de leitura de work: normaliza o kind (string legada → canônico) + funde dims; `null` se não for work (fail-closed). */
+function normWork(w: Work): Work | null {
+  const norm = normalizeWorkKind(w.kind as string);
+  if (!norm) return null;
+  const dims = { ...norm.dimensions, ...(w.dimensions ?? {}) };
+  return { ...w, kind: norm.kind, dimensions: Object.keys(dims).length ? dims : undefined };
 }
 
 export class MongoRepository implements Repository {
@@ -27,11 +36,11 @@ export class MongoRepository implements Repository {
   // ── trabalho ──
   async listWorks(): Promise<Work[]> {
     const ds = await this.#col("works").find({ repo: this.repo }).sort({ id: 1 }).toArray();
-    return ds.map((d) => strip<Work>(d));
+    return ds.map((d) => normWork(strip<Work>(d))).filter((w): w is Work => w !== null);
   }
   async getWork(id: string): Promise<Work | null> {
     const d = await this.#col("works").findOne({ repo: this.repo, id });
-    return d ? strip<Work>(d) : null;
+    return d ? normWork(strip<Work>(d)) : null;
   }
   async saveWork(w: Work): Promise<void> {
     await this.#col("works").replaceOne(

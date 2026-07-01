@@ -12,7 +12,7 @@ import type {
   Research,
   Decision,
 } from "../../domain/model.ts";
-import { normalizeLegacyKind } from "../../domain/model.ts";
+import { normalizeWorkKind } from "../../domain/model.ts";
 import { exists, readYaml, writeYaml, readMarkdown, writeMarkdown, listMarkdown } from "./io.ts";
 
 // `kind` é identidade FÍSICA (registry/<kind>.yml · works/<kind>/<id>). Grava-se CANÔNICO; lê-se canônico + legado
@@ -87,12 +87,13 @@ interface DecisionEntry {
 
 // ───────────────────────── mappers (arquivo ↔ domínio) ─────────────────────────
 
-const toWork = (fileKind: StorageKind, e: WorkEntry): Work => {
-  const norm = normalizeLegacyKind(e.kind ?? fileKind); // fix/patch → maintenance (+dims); canônico passa igual
+const toWork = (fileKind: StorageKind, e: WorkEntry): Work | null => {
+  const norm = normalizeWorkKind(e.kind ?? fileKind); // fix/patch → maintenance (+dims); não-work/desconhecido → null (fail-closed)
+  if (!norm) return null;
   const dims = { ...norm.dimensions, ...(e.dimensions ?? {}) }; // dims do preset legado + as gravadas (arquivo vence)
   return {
     id: e.id,
-    kind: norm.member as WorkKind, // só delivery/maintenance chegam aqui (experiment/incident não são scan de Work)
+    kind: norm.kind,
     title: e.title ?? e.id,
     status: e.status,
     assignee: e.assignee,
@@ -189,7 +190,11 @@ export class FileRepository implements Repository {
 
   async listWorks(): Promise<Work[]> {
     const kinds: StorageKind[] = [...CANONICAL_WORK_KINDS, ...LEGACY_READ_KINDS];
-    return kinds.flatMap((kind) => this.readRegistry(kind).map((e) => toWork(kind, e)));
+    return kinds.flatMap((kind) =>
+      this.readRegistry(kind)
+        .map((e) => toWork(kind, e))
+        .filter((w): w is Work => w !== null)
+    );
   }
 
   async getWork(id: string): Promise<Work | null> {
@@ -197,6 +202,18 @@ export class FileRepository implements Repository {
   }
 
   async saveWork(work: Work): Promise<void> {
+    // purga o id de QUALQUER outro registry (canônico não-alvo + legado fix/patch) — evita órfão/duplicata
+    // quando um work é reclassificado (ex.: fix legado relido como maintenance e re-salvo).
+    const others: StorageKind[] = [...CANONICAL_WORK_KINDS, ...LEGACY_READ_KINDS].filter(
+      (k) => k !== work.kind
+    );
+    for (const k of others) {
+      const relK = this.registry(k);
+      if (!exists(relK)) continue;
+      const cur = this.readRegistry(k);
+      const kept = cur.filter((e) => e.id !== work.id);
+      if (kept.length !== cur.length) writeYaml(relK, { entries: kept });
+    }
     const rel = this.registry(work.kind);
     const entries = this.readRegistry(work.kind).filter((e) => e.id !== work.id);
     entries.push(fromWork(work));
@@ -244,10 +261,22 @@ export class FileRepository implements Repository {
     return (await this.getWork(workId))?.kind ?? null;
   }
 
-  async listQuestions(workId: string): Promise<Question[]> {
+  /** dir físico do q/r/d p/ LEITURA: o canônico (kindOf) ou, p/ conteúdo LEGADO, o dir fix/patch se for lá que mora.
+   *  (grava-se sempre canônico — writes usam workDir(kind); isto é só back-compat de leitura.) */
+  private async readWorkDir(workId: string): Promise<string | null> {
     const kind = await this.kindOf(workId);
-    if (!kind) return [];
-    const dir = `${this.workDir(kind, workId)}/questions`;
+    if (!kind) return null;
+    for (const k of [kind, ...LEGACY_READ_KINDS] as StorageKind[]) {
+      const dir = this.workDir(k, workId);
+      if (exists(dir)) return dir;
+    }
+    return this.workDir(kind, workId); // canônico (mesmo que ainda vazio)
+  }
+
+  async listQuestions(workId: string): Promise<Question[]> {
+    const base = await this.readWorkDir(workId);
+    if (!base) return [];
+    const dir = `${base}/questions`;
     return listMarkdown(dir).map((f) => {
       const { frontmatter, body } = readMarkdown<QuestionFront>(`${dir}/${f}`);
       return {
@@ -272,9 +301,9 @@ export class FileRepository implements Repository {
   }
 
   async listResearches(workId: string): Promise<Research[]> {
-    const kind = await this.kindOf(workId);
-    if (!kind) return [];
-    const dir = `${this.workDir(kind, workId)}/research`;
+    const base = await this.readWorkDir(workId);
+    if (!base) return [];
+    const dir = `${base}/research`;
     return listMarkdown(dir).map((f) => {
       const { frontmatter, body } = readMarkdown<ResearchFront>(`${dir}/${f}`);
       return {
@@ -299,9 +328,9 @@ export class FileRepository implements Repository {
   }
 
   async listDecisions(workId: string): Promise<Decision[]> {
-    const kind = await this.kindOf(workId);
-    if (!kind) return [];
-    const rel = `${this.workDir(kind, workId)}/deliberation.yml`;
+    const base = await this.readWorkDir(workId);
+    if (!base) return [];
+    const rel = `${base}/deliberation.yml`;
     const decisions = exists(rel) ? (readYaml<DeliberationFile>(rel).decisions ?? []) : [];
     return decisions.map(toDecision);
   }
