@@ -42,6 +42,30 @@ _(Da auditoria rodada 4. Ver [Lente 9](tracker.md) + [`_audits/round-4-trust-bou
 - ⬜ **Hardening dos backends/matchers** — allowlist · secrets fora do YAML · least-privilege no DB · TLS/pin fora da sim · CLI-delegate em **sandbox** (sem rede/home/tokens). _(sim atual: `simsim123`/CORS `*`/`/match` client-config — só p/ sim.)_
 - ⬜ **Retenção & remoção** — `retention-class` · `purge-redaction-event` · anexos fora do git · secret-scanning antes de publicar contexto (append-only/tombstone × direito de remoção).
 
+## P0/P1/P2 · Achados da simulação adversarial (red-team 2026-07-01)
+
+_(Da sim adversarial rounds 1+2 — [deliberação](deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md). Veredito: o modelo está **sub-mecanizado, não over-engineered**. **Barra:** um controle só conta como enforcement quando especifica **resolver/invariante + fail-closed + evidência independente** — "controle nomeado" (acima) sem mecanismo ainda é cerimônia. Nada a **podar**; as 3 leis viram princípios na [Lente 9](tracker.md).)_
+
+**P0 — dar dente (cerimônia = perigo):**
+
+- ⬜ **A1 · contrato de aceitação do matcher** — a saída do matcher/agente só vira ação com evidência exigida · `unknown` · threshold · **comparação com capability/contrato** (afia o "matcher como input hostil" acima; advisory+gate humano sozinho ainda é carimbo).
+- ⬜ **B1 · evidência mínima com dente** — capability sem `owner-attested-by` **independente** / `evidence` / `observed-from` fresco → **excluída ou `unknown`** (não usada com peso igual). A _verdade_ semântica fica advisory + drift (rebaixada).
+- ⬜ **C2 · anti-replay da delegação** — revogação/nonce/TTL por `authority-ref` (idempotência L8 só barra duplicata, não replay pós-expiração).
+- ⬜ **D1 · fallback local rastreável** — quando o egress externo é bloqueado, oferecer alternativa local útil **e registrar o bloqueio** (Lei do fallback: senão o humano faz egress-sombra manual).
+- ⬜ **D2 · ACL por edge/consulta (deputy local)** — `visibility/access` no host por consulta/aresta, não só na saída p/ API externa (bloquear leitura lateral `restricted` entre repos).
+- ⬜ **E1 · invariantes de conteúdo** — validar `context.json` assinado contra código/contratos/fonte (provenance prova origem, não verdade; conteúdo org-wide).
+- ⬜ **F2 · telemetria verificável no incident** — `incident` exige **referência verificável** a alerta/SLO (não texto de severidade) como **pré-condição de declaração**.
+- ⬜ **F3 · break-glass** — todo controle anti-gaming que bloqueia emergência precisa de caminho break-glass rastreável (TTL + review post-facto); a _existência_ do caminho é modelo, o _threshold_ é policy-pack.
+- ⬜ **H1 · prevenção de segredo (pre-commit)** — secret-scan **pre-commit/pre-receive/quarantine** + purge de VCS/projeções (a reclassificação tardia não recupera git/archive/cache).
+- ⬜ **X · separação de deveres (SoD)** — `authority` carrega independência de 1ª classe: `requester ≠ approver ≠ owner-attester` p/ ações sensíveis (não só papel nominal).
+- ⬜ **O1 · independência do oráculo** — `red-team-corpus`/`policy-catalog`/expected-outcomes com autoria/aprovação **independente** dos atores que governam (o SoD no meta-nível).
+
+**P1:** ⬜ A2 (fetch/scan/egress de link externo) · ⬜ B2 (detecção de capability **subdeclarada** via `observed-from`×provides/código) · ⬜ C3 (risk-budget agregado/amostragem além do `max-mutations`) · ⬜ E2 (revogação/expiração de trusted-producer + namespace-reuse) · ⬜ G2 (bloquear ação sobre projeção derivada **stale** sem `source-revision` atual) · ⬜ H2 (`invalidates` inclui `policy-revision`).
+
+**P2:** ⬜ G1 (adapter-contract de import Jira/Linear: campo autoritativo/direção-sync/resolução/freeze-window) · ⬜ H3 (migrator-registry + fail-closed + log de perda semântica no salto de schema).
+
+**MOVER → policy-pack (config, não ontologia):** quota exata de `expedite` (F1 — o **contador** fica no modelo) · scoring/amostragem (C3) · regras finas de break-glass (F3).
+
 ## P1 · Lifecycles próprios (cada família com o seu)
 
 - ⬜ **`experiment` — lifecycle operacional:** `experiment-brief` sela **hipótese + métricas**; roda atrás de **feature-flag** com **exposição · guardrails · duração · decision-rule**; fecha em **`experiment-outcome`** (won/lost/inconclusive) + **cleanup** (flag/variante morta). `won → delivery`.
