@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Modelo do trabalho — 3 camadas (mapa navegável)</title>
+    <style>
+      :root {
+        --bg: #faf9f6;
+        --card: #ffffff;
+        --card2: #f4f2ec;
+        --ink: #23231f;
+        --ink2: #5f5e58;
+        --ink3: #8a887f;
+        --line: #e4e1d7;
+        --line2: #cfccc0;
+        --accent-bg: #e6f1fb;
+        --accent-tx: #0c447c;
+        --create-bg: #e1f5ee;
+        --create-tx: #085041;
+        --sustain-bg: #faece7;
+        --sustain-tx: #712b13;
+        --discover-bg: #eeedfe;
+        --discover-tx: #3c3489;
+        --operate-bg: #fbeaf0;
+        --operate-tx: #72243e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #23231f;
+          --card: #2f2e2a;
+          --card2: #3a3934;
+          --ink: #eceae0;
+          --ink2: #b9b7ad;
+          --ink3: #8a887f;
+          --line: #45443e;
+          --line2: #5a584f;
+          --accent-bg: #0c447c;
+          --accent-tx: #cfe3fa;
+          --create-bg: #0f6e56;
+          --create-tx: #d7f2e8;
+          --sustain-bg: #7a3a22;
+          --sustain-tx: #f6d8cb;
+          --discover-bg: #3c3489;
+          --discover-tx: #ded9fb;
+          --operate-bg: #72243e;
+          --operate-tx: #f6d0df;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          15px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 28px 20px 60px;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 600;
+        margin: 0 0 4px;
+      }
+      .lead {
+        color: var(--ink2);
+        font-size: 14px;
+        margin: 0 0 22px;
+      }
+      .cap {
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--ink3);
+        margin: 22px 0 8px;
+      }
+      .band {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px 14px;
+        margin-bottom: 8px;
+      }
+      .band .h {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        flex-wrap: wrap;
+      }
+      .band .t {
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .band .ax {
+        color: var(--ink3);
+        font-size: 13px;
+      }
+      .vals {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 6px;
+      }
+      .v {
+        font-size: 12px;
+        padding: 2px 9px;
+        border-radius: 999px;
+        background: var(--card2);
+        color: var(--ink2);
+      }
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 6px 0 14px;
+      }
+      .tab {
+        font: inherit;
+        font-size: 13px;
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--ink2);
+        cursor: pointer;
+      }
+      .tab[aria-current="true"] {
+        border-color: var(--accent-tx);
+        background: var(--accent-bg);
+        color: var(--accent-tx);
+      }
+      .intent {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--card);
+        padding: 13px 15px;
+      }
+      .intent.dashed {
+        border-style: dashed;
+      }
+      .hd {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        flex-wrap: wrap;
+        font-weight: 600;
+      }
+      .lvl {
+        font-size: 11px;
+        color: var(--ink3);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .tag {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: var(--accent-bg);
+        color: var(--accent-tx);
+        font-weight: 400;
+      }
+      .sub {
+        color: var(--ink2);
+        font-size: 13px;
+        margin: 4px 0 0;
+      }
+      .unit {
+        border: 1px solid var(--line2);
+        border-radius: 12px;
+        background: var(--card2);
+        padding: 11px 13px;
+        margin-top: 11px;
+      }
+      .works {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .w {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--card);
+        padding: 8px 10px;
+      }
+      .w .r {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .pp {
+        font-size: 11px;
+        padding: 1px 8px;
+        border-radius: 999px;
+        margin-left: 6px;
+        font-weight: 400;
+      }
+      .w .d {
+        font-size: 12px;
+        color: var(--ink2);
+        margin-top: 3px;
+      }
+      .create {
+        background: var(--create-bg);
+        color: var(--create-tx);
+      }
+      .sustain {
+        background: var(--sustain-bg);
+        color: var(--sustain-tx);
+      }
+      .discover {
+        background: var(--discover-bg);
+        color: var(--discover-tx);
+      }
+      .operate {
+        background: var(--operate-bg);
+        color: var(--operate-tx);
+      }
+      .side {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .chip {
+        font-size: 12px;
+        padding: 5px 10px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--card2);
+        color: var(--ink2);
+      }
+      .note {
+        font-size: 12px;
+        color: var(--ink2);
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--line);
+      }
+      .collapsed {
+        font-size: 12px;
+        color: var(--ink3);
+        font-style: italic;
+        margin-top: 8px;
+      }
+      .foot {
+        margin-top: 22px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+        font-size: 12px;
+        color: var(--ink3);
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      .foot b {
+        color: var(--ink2);
+        font-weight: 600;
+      }
+      .src {
+        font-size: 12px;
+        color: var(--ink3);
+        margin-top: 6px;
+      }
+      code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 0.92em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Modelo do trabalho — 3 camadas</h1>
+      <p class="lead">
+        intent (estratégia) → execution-unit (tipo, cross-repo) → repo-work (propósito, por repo).
+        Troque as situações nas abas.
+      </p>
+
+      <p class="cap">a estrutura</p>
+      <div class="band">
+        <div class="h">
+          <span class="t">intent</span
+          ><span class="ax">— estratégia · dona do gate de negócio · uma por objetivo</span>
+        </div>
+        <div class="vals">
+          <span class="v">experiment-led</span><span class="v">direct-delivery</span
+          ><span class="v">migration-led</span><span class="v">reliability-led</span>
+        </div>
+      </div>
+      <div class="band">
+        <div class="h">
+          <span class="t">execution-unit</span
+          ><span class="ax"
+            >— tipo · cross-repo, "a coisa é UMA" · lifecycle próprio · colapsa no trivial</span
+          >
+        </div>
+        <div class="vals">
+          <span class="v">experiment-run</span><span class="v">migration-wave</span
+          ><span class="v">feature-slice</span><span class="v">incident-response</span
+          ><span class="v">shape-up</span><span class="v">cleanup</span
+          ><span class="v">rollout-slice</span>
+        </div>
+      </div>
+      <div class="band">
+        <div class="h">
+          <span class="t">repo-work</span
+          ><span class="ax">— propósito · a peça por repo · dona da execução</span>
+        </div>
+        <div class="vals">
+          <span class="v create">create</span><span class="v sustain">sustain</span
+          ><span class="v discover">discover</span><span class="v operate">operate</span>
+        </div>
+      </div>
+
+      <p class="cap">as situações</p>
+      <div class="tabs" id="tabs"></div>
+      <div id="panel"></div>
+
+      <div class="foot">
+        <span><b>contrato</b> — nó de coordenação/versionamento (janela de compat mora nele)</span>
+        <span><b>q/r/d</b> — anexável a qualquer nó</span>
+        <span><b>intake</b> — funil pré-intent</span>
+      </div>
+      <p class="src">
+        Gerado a partir de <code>../model.yml</code> (seção <code>examples</code>). Não editar à
+        mão.
+      </p>
+    </div>
+
+    <script>
+      const EX = [
+        {
+          id: "experiment-cross-repo",
+          label: "experimento cross-repo",
+          intent: { title: "aumentar conversão trial → paid", strategy: "experiment-led" },
+          unit: {
+            kind: "experiment-run",
+            title: "CTA contextual v1",
+            owns: "hipótese (CTA ↑ 5%) · flag · métricas (conversion, activation) · guardrails (churn) · veredito: pending",
+          },
+          works: [
+            { r: "acme-mfe-billing", p: "create", d: "UI do CTA atrás da flag" },
+            { r: "acme-api-billing", p: "create", d: "elegibilidade + endpoint" },
+            { r: "acme-analytics", p: "operate", d: "eventos + baseline" },
+            { r: "acme-web-host", p: "sustain", d: "adaptar contexto/contrato" },
+            { r: "acme-growth-ops", p: "operate", d: "monitoramento pós-release" },
+          ],
+          contract: "acme-user-context@v3",
+          note: "o veredito vive na unit (não por repo): won → shape-up/feature-slice · lost → cleanup · inconclusive → novo",
+        },
+        {
+          id: "redesign-misto",
+          label: "redesign misto",
+          intent: { title: "redesign do checkout", strategy: "migration-led" },
+          unit: {
+            kind: "migration-wave",
+            title: "checkout-ui v2",
+            owns: "from legacy-stack → to new-stack · janela de compatibilidade: v1 + v2",
+          },
+          works: [
+            { r: "acme-checkout", p: "sustain", d: "portar fluxo existente (from→to)" },
+            { r: "acme-design-system", p: "create", d: "novos componentes" },
+            { r: "(spike)", p: "discover", d: "viabilidade da migração" },
+            { r: "acme-platform", p: "sustain", d: "adapta contrato compartilhado" },
+            { r: "acme-checkout", p: "operate", d: "rollout + monitor" },
+          ],
+          contract: "acme-user-context@v3",
+          note: "peças MISTAS sob a mesma wave — a família é da PEÇA, não da iniciativa",
+        },
+        {
+          id: "contrato-compartilhado",
+          label: "contrato compartilhado",
+          contractCard: {
+            id: "acme-user-context@v3",
+            sub: "owner: acme-platform · consumers: acme-mfe-billing, acme-mfe-support · compatibility-window: v2, v3 até 2026-08-15",
+            unit: { kind: "migrations", title: "as iniciativas que dependem dele" },
+            works: [
+              {
+                r: "intent · redesign-checkout",
+                p: "sustain",
+                d: "migration-led — adapta o contrato",
+              },
+              {
+                r: "intent · growth-upgrade",
+                p: "create",
+                d: "experiment-led — consome o contrato",
+              },
+            ],
+            note: "coordenação entre iniciativas = via o contrato (derivada); a janela de compatibilidade NÃO é derivável → mora aqui",
+          },
+        },
+        {
+          id: "bug",
+          label: "um bug",
+          intent: null,
+          unit: null,
+          works: [
+            {
+              r: "acme-checkout",
+              p: "sustain",
+              d: "corrige cálculo do total · preset fix (corrective + user-visible)",
+            },
+          ],
+          note: "bug simples = 1 repo-work sustain, SEM intent nem execution-unit — as duas camadas de cima colapsam",
+        },
+        {
+          id: "dep-bump",
+          label: "atualização de biblioteca",
+          intent: null,
+          unit: null,
+          works: [
+            {
+              r: "acme-web-host",
+              p: "sustain",
+              d: "atualiza lib X 3.x → 4.x · preset dep-bump (adaptive + internal)",
+            },
+          ],
+          note: "era a P2: NÃO 'entrega valor de produto' — preserva/adapta. sustain standalone.",
+        },
+        {
+          id: "exploration-sem-intent",
+          label: "exploration sem intent",
+          intent: null,
+          unit: null,
+          works: [
+            {
+              r: "acme-platform",
+              p: "discover",
+              d: "spike: viável trocar o motor de busca? · timebox + pergunta falsificável → answer + fate",
+            },
+          ],
+          note: "discover standalone, sem intent vinculada; não shippa; fate = throwaway/promoted/parked",
+        },
+        {
+          id: "experiment-lost",
+          label: "experimento → lost",
+          intent: { title: "aumentar ativação via onboarding", strategy: "experiment-led" },
+          unit: {
+            kind: "experiment-run",
+            title: "onboarding guiado v1",
+            owns: "veredito: LOST (não bateu a métrica)",
+          },
+          works: [
+            { r: "acme-mfe-onboarding", p: "create", d: "fluxo guiado atrás da flag" },
+            { r: "acme-analytics", p: "operate", d: "eventos + baseline" },
+          ],
+          fork: "lost → gera uma execution-unit cleanup (repo-works sustain removem a flag/variante)",
+          note: "o valor durável foi só APRENDIZADO — nenhuma capacidade permanente ficou",
+        },
+        {
+          id: "delivery-tradicional",
+          label: "delivery tradicional",
+          intent: { title: "exportar relatório em PDF", strategy: "direct-delivery" },
+          unit: null,
+          works: [{ r: "acme-reports", p: "create", d: "botão + geração do PDF" }],
+          note: "feature comum = intent direct-delivery → repo-work create (execution-unit colapsa; seria feature-slice se cross-repo)",
+        },
+      ];
+
+      const esc = (s) =>
+        String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+      const worksHtml = (works) =>
+        '<div class="works">' +
+        works
+          .map(
+            (w) =>
+              '<div class="w"><span class="r">' +
+              esc(w.r) +
+              '</span><span class="pp ' +
+              w.p +
+              '">' +
+              w.p +
+              '</span><div class="d">' +
+              esc(w.d) +
+              "</div></div>"
+          )
+          .join("") +
+        "</div>";
+
+      function render(ex) {
+        if (ex.contractCard) {
+          const c = ex.contractCard;
+          return (
+            '<div class="intent dashed"><div class="hd"><span class="lvl">contrato</span> ' +
+            esc(c.id) +
+            ' <span class="tag">nó versionado</span></div><p class="sub">' +
+            esc(c.sub) +
+            '</p><div class="unit"><div class="hd"><span class="lvl">' +
+            esc(c.unit.kind) +
+            "</span> " +
+            esc(c.unit.title) +
+            "</div>" +
+            worksHtml(c.works) +
+            '</div><p class="note">' +
+            esc(c.note) +
+            "</p></div>"
+          );
+        }
+        let inner = "";
+        if (ex.unit) {
+          inner =
+            '<div class="unit"><div class="hd"><span class="lvl">execution-unit</span> ' +
+            esc(ex.unit.title) +
+            ' <span class="tag">' +
+            esc(ex.unit.kind) +
+            '</span></div><p class="sub">dona: ' +
+            esc(ex.unit.owns) +
+            "</p>" +
+            worksHtml(ex.works) +
+            "</div>";
+        } else {
+          inner =
+            '<p class="collapsed">execution-unit colapsa (trivial) — a intent liga direto na peça</p>' +
+            worksHtml(ex.works);
+        }
+        let head;
+        if (ex.intent) {
+          head =
+            '<div class="hd"><span class="lvl">intent</span> ' +
+            esc(ex.intent.title) +
+            ' <span class="tag">' +
+            esc(ex.intent.strategy) +
+            "</span></div>";
+        } else {
+          head =
+            '<div class="hd"><span class="lvl">intent</span> <span class="tag">— (nenhuma · trabalho standalone)</span></div>';
+        }
+        const side = ex.contract
+          ? '<div class="side"><span class="chip">contrato · ' + esc(ex.contract) + "</span></div>"
+          : "";
+        const fork = ex.fork ? '<p class="note">' + esc(ex.fork) + "</p>" : "";
+        return (
+          '<div class="intent">' +
+          head +
+          inner +
+          side +
+          fork +
+          '<p class="note">' +
+          esc(ex.note) +
+          "</p></div>"
+        );
+      }
+
+      const tabs = document.getElementById("tabs");
+      const panel = document.getElementById("panel");
+      EX.forEach((ex, i) => {
+        const b = document.createElement("button");
+        b.className = "tab";
+        b.textContent = ex.label;
+        b.onclick = () => show(i);
+        tabs.appendChild(b);
+      });
+      function show(i) {
+        panel.innerHTML = render(EX[i]);
+        [...tabs.children].forEach((t, n) =>
+          t.setAttribute("aria-current", n === i ? "true" : "false")
+        );
+      }
+      show(0);
+    </script>
+  </body>
+</html>

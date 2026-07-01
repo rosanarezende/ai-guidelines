@@ -1,332 +1,332 @@
-# model.yml — SSOT DA MODELAGEM (o grafo tipado do trabalho). v0 (esqueleto, seed do tracker v2).
+# model.yml — SSOT DA MODELAGEM (o grafo tipado do trabalho). v1 — modelo de 3 CAMADAS.
 #
-# Este arquivo é a FONTE DA VERDADE do MODELO (nós, famílias, dimensões, arestas, estados, envelope,
-# fronteiras). O artefato navegável é GERADO daqui. O `tracker.md` passa a ser EMBASAMENTO (o porquê /
-# o log de decisões que justifica cada escolha), não a fonte. As provocações entram como mudanças
-# versionadas AQUI (ver `open-questions`).
+# FONTE DA VERDADE do modelo. O `tracker.md` é EMBASAMENTO (o porquê). O artefato navegável
+# (_map/model-map.html) reflete este arquivo. As provocações entram como mudanças aqui.
 #
-# Natureza: não-autoridade de processo (em divergência vencem state.yml/gates/Git); é a autoridade
-# do CONTEÚDO do modelo. Org fictícia ANONIMIZADA (acme-*); nenhuma fonte/nome confidencial.
+# Estrutura: intent (estratégia) → execution-unit (tipo, cross-repo) → repo-work (propósito, por repo)
+#   + contract (coordenação/versionamento) + q/r/d (anexável a qualquer nó) + intake (funil pré-intent).
+# Perspectiva do Codex reconciliada (substitui a taxonomia "famílias" v0). Ainda ITERANDO (open-questions).
+# Anonimizado (acme-*). Naming (P4): ids em EN, labels/descrição em PT.
 
 meta:
-  version: 0
-  status: skeleton # seed do v2; será refinado pelas provocações
-  grounded-by: tracker.md # embasamento (as 9 lentes narram o porquê; aqui é o grafo real)
-  generates: [_map/] # o artefato navegável nasce deste arquivo (gerador a fazer)
+  version: 1
+  status: iterating # 3 camadas aplicadas; owner validando via _map + este arquivo
+  grounded-by: tracker.md
+  artifact: _map/model-map.html # navegável; hoje mantido em sync à mão (gerador = próximo passo)
 
-# ───────────────────────── FAMÍLIAS (agrupam os nós pela natureza da saída) ─────────────────────────
-families:
-  - id: capacidade
-    produces: valor de produto (cria/mantém capacidade)
-    test: "entrega valor de produto? SIM"
-    members: [delivery, maintenance]
-  - id: aprendizado
-    produces: conhecimento (reduz incerteza)
-    test: "entrega valor de produto? NÃO (produz decisão/resposta)"
-    members: [exploration, experiment] # ⚠ P1 ABERTO: experiment é candidato a sair daqui (ver open-questions)
-  - id: resposta
-    produces: contenção reativa
-    test: "entrega valor de produto? NÃO (o valor vem do que ela gera)"
-    members: [incident]
-  - id: intake
-    produces: captura + triagem
-    members: [proposal, register]
-  - id: deliberacao
-    produces: o raciocínio (q → r → d) — o coração
-    members: [question, research, decision]
+# ═════════════════════ AS 3 CAMADAS ═════════════════════
+layers:
+  intent:
+    is: "o objetivo de negócio durável (uma por objetivo); NÃO delibera — tem gate de ativação"
+    owns: [enquadramento, objetivo, target-outcome, decision-gate]
+    strategy: [experiment-led, direct-delivery, migration-led, reliability-led]
+    strategy-note: "candidato a DERIVADO das execution-units contidas (open)"
+    breaks-into: [execution-unit, repo-work] # repo-work direto quando trivial (intent pode até ser nula em trabalho reativo)
 
-# ───────────────────────── NÓS (os membros; cada um pertence a uma família) ─────────────────────────
-nodes:
-  - id: delivery
-    family: capacidade
-    produces: capacidade permanente (comprometida)
-    ships-to-users: true
-    status-own: [draft, active, done]
-    lifecycle: [abrir, "q/r/d", merge, "verificar valor"]
-  - id: maintenance
-    family: capacidade
-    produces: capacidade preservada/restaurada/adaptada
-    ships-to-users: true
-    own-fields: [maintenance-mode, reason]
-    lifecycle: [brief-leve, merge, verificar]
-    note: colapsa os antigos fix + patch (viraram presets); discriminador = dimensão maintenance-mode
-  - id: exploration
-    family: aprendizado
-    produces: uma resposta (verdict) a uma pergunta falsificável
-    ships-to-users: false # descoberta pura — POC/spike throwaway; NÃO vai a usuários
-    own-fields: [timebox, stop-rule, fate] # fate: throwaway | promoted | parked
-    lifecycle: [abrir, timebox, investigar, answer]
-  - id: experiment
-    family: aprendizado # ⚠ P1 ABERTO (ver open-questions): candidato a família-ponte OU membro de capacidade
-    produces: um VEREDITO (won/lost/inconclusive) + um output BIFURCADO (valor OU só aprendizado)
-    ships-to-users: true # intervenção real em produção, atrás de flag (A/B ou critérios-de-sucesso)
-    own-fields:
-      [hypothesis, metrics, feature-flag, exposure, guardrails, decision-rule, outcome, cleanup]
-    outcome: [won, lost, inconclusive]
-    lifecycle: [modelagem-hipotese, flag, rodando, validando, "veredito", "fork(shape-up|clean-up)"]
-    note: >
-      difere da exploration por SHIPPAR valor a usuários reais. won → shape-up (vira capacidade;
-      às vezes mantém o próprio código) · lost → clean-up (maintenance de remoção) · inconclusive →
-      novo experiment/exploration. A natureza do output é FORKED — daí a dúvida P1 de família.
-  - id: incident
-    family: resposta
-    produces: contenção + não-repetir
-    source: reactive # não sai de breakdown planejado
-    own-fields: [severity, status] # declarar → mitigar → resolver → postmortem
-    generates: [maintenance, proposal] # e liga-se por occurred-during/caused-by/related-to
-  - id: proposal
-    family: intake
-    produces: uma ideia/problema capturado + triado
-    own-fields: [impact, confidence, effort, promote-to] # ICE; promote-to = PromotableMember
-    disposition: [open, promoted, dismissed]
-  - id: register
-    family: intake
-    produces: uma iniciativa candidata (enquadramento de negócio)
-    phases: [registrada, triagem, investigacao] # → gate → ativada (vira intent)
-  - id: question
-    family: deliberacao
-    produces: a pergunta (+ modo + opções)
-  - id: research
-    family: deliberacao
-    produces: investigação de 1+ questions (aresta investigates)
-  - id: decision
-    family: deliberacao
-    produces: uma decisão append-only (resolve N questions; supersedível)
+  execution-unit:
+    is: "unidade CROSS-REPO com lifecycle próprio + unidade semântica (a coisa é UMA)"
+    optional: "COLAPSA no trivial (1 repo, sem lifecycle próprio) — aí intent liga direto no repo-work"
+    kinds:
+      experiment-run:
+        owns: [hypothesis, flag, exposure, metrics, guardrails, decision-rule, verdict]
+        verdict: [pending, won, lost, inconclusive]
+        fork: "won → shape-up/feature-slice · lost → cleanup · inconclusive → novo experiment/exploration"
+      migration-wave:
+        owns: [from, to, compatibility-window]
+      feature-slice:
+        owns: ["entrega coordenada cross-repo"]
+      incident-response:
+        owns: [severity, declare, mitigate, resolve, postmortem]
+        source: reactive
+      shape-up:
+        owns: ["sistematização pós-veredito won (vira capacidade permanente)"]
+      cleanup:
+        owns: ["remoção pós-veredito lost / parcial"]
+      rollout-slice:
+        owns: ["fase de release/canary"]
+    breaks-into: [repo-work]
 
-# a intent é a camada ACIMA dos works (objetivo durável); NÃO delibera (tem gate de ativação).
-intent:
-  produces: o objetivo durável; breaks-into N works
-  status: [draft, active, paused, done, dropped]
-  note: herda só o ENQUADRAMENTO (problema/negócio/refs/pessoas); a riqueza pesada é do work experiment
+  repo-work:
+    is: "a peça executável num repo"
+    owns: [execução, status-próprio]
+    purpose:
+      create: "cria capacidade nova (shippa valor novo)"
+      sustain: "preserva/adapta a existente (fix · dep-bump · refactor · porte from→to)"
+      discover: "reduz incerteza — NÃO shippa (POC/spike; timebox + pergunta falsificável + fate)"
+      operate: "rollout · monitoramento · instrumentação · baseline (novo — do playbook de growth)"
 
-# ───────────────────────── DIMENSÕES (ortogonais; cortam as famílias) ─────────────────────────
+# ═════════════════════ NÓS DE APOIO (não são camadas) ═════════════════════
+contract:
+  is: "nó de coordenação/versionamento — DENTRO e ENTRE iniciativas"
+  fields: [owner, provider, consumers, revision, compatibility-window, migrations]
+  note: "coordenação entre iniciativas = via contrato compartilhado (derivada); a janela-de-compat NÃO é derivável — mora aqui"
+
+deliberation:
+  is: "q/r/d (question → research → decision) — ANEXÁVEL a qualquer nó, não uma camada"
+  attaches-to: [intent, execution-unit, repo-work, contract]
+
+intake:
+  is: "funil PRÉ-intent (register → triagem → gate) — fora das 3 camadas"
+  members: [proposal, register]
+
+# ═════════════════════ DIMENSÕES (ortogonais; cortam repo-work/execution-unit) ═════════════════════
 dimensions:
-  - id: source
-    values: [planned, reactive]
-    applies-to: all
-  - id: visibility
-    values: [user-visible, internal, operator-visible, security-visible]
-    applies-to: all
-  - id: maintenance-mode
-    values: [corrective, adaptive, perfective, preventive] # ISO 14764
-    applies-to: [maintenance]
-  - id: change-class
-    values: [standard, normal, emergency] # ITIL
-    applies-to: all
-  - id: service-class
-    values: [expedite, fixed-date, standard, intangible] # Kanban
-    applies-to: all
-  - id: planned-in
-    value: a intent
-    derived: true # = Work.intent (NÃO duplicar)
-enforcement: cada dimensão precisa afetar workflow/lint/dashboard, senão é tag decorativa
+  source: [planned, reactive]
+  visibility: [user-visible, internal, operator-visible, security-visible]
+  maintenance-mode: [corrective, adaptive, perfective, preventive] # só sustain (ISO 14764)
+  change-class: [standard, normal, emergency] # ITIL
+  service-class: [expedite, fixed-date, standard, intangible] # Kanban
+enforcement: "cada dimensão precisa afetar workflow/lint/dashboard, senão é tag decorativa"
+presets: # UX: expandem p/ purpose + dimensões
+  fix: { purpose: sustain, maintenance-mode: corrective, visibility: user-visible }
+  security-patch: { purpose: sustain, maintenance-mode: corrective, visibility: security-visible }
+  dep-bump: { purpose: sustain, maintenance-mode: adaptive, visibility: internal }
 
-presets: # UX, não ontologia — expandem p/ membro + dimensões
-  fix:
-    { member: maintenance, dimensions: { maintenance-mode: corrective, visibility: user-visible } }
-  security-patch:
-    {
-      member: maintenance,
-      dimensions: { maintenance-mode: corrective, visibility: security-visible },
-    }
-  dep-bump:
-    { member: maintenance, dimensions: { maintenance-mode: adaptive, visibility: internal } }
-
-# ───────────────────────── ARESTAS (o grafo; anota-se 1 lado, o reverso é derivado) ─────────────────────────
+# ═════════════════════ ARESTAS (o grafo; anota-se 1 lado, o reverso deriva) ═════════════════════
 edges:
-  - { id: breaks-into, from: intent, to: work, cardinality: 1:N, category: estrutura }
-  - { id: derives-from, from: node, to: node, inverse: results-in, category: proveniencia }
-  - { id: raises, from: node, to: proposal, category: proveniencia }
-  - { id: blocked-by, from: work, to: work, inverse: blocks, category: dependencia }
-  - { id: depends-on, from: work, to: "plataforma/versão", category: dependencia }
   - {
-      id: coordinates-with,
-      from: work,
-      to: contract,
-      category: dependencia,
-      note: "contract = nó versionado",
-    }
-  - { id: answers, from: exploration, to: "intent#question", category: investigacao }
-  - { id: supported-by, from: decision, to: "research|exploration", category: investigacao }
-  - {
-      id: explore-resolution,
+      id: breaks-into,
       from: intent,
-      to: exploration,
-      derived: true,
-      values: [unanswered, answered, pursued, not-pursued],
-      category: investigacao,
+      to: [execution-unit, repo-work],
+      cardinality: "1:N",
+      category: estrutura,
     }
+  - { id: contains, from: execution-unit, to: repo-work, cardinality: "1:N", category: estrutura }
+  - { id: coordinates-with, from: repo-work, to: contract, category: dependência }
+  - { id: blocked-by, from: repo-work, to: repo-work, inverse: blocks, category: dependência }
+  - {
+      id: results-in,
+      from: execution-unit,
+      to: execution-unit,
+      inverse: derives-from,
+      category: proveniência,
+      note: "won→shape-up · lost→cleanup",
+    }
+  - { id: raises, from: node, to: proposal, category: proveniência }
+  - { id: answers, from: "repo-work(discover)", to: "question", category: investigação }
+  - { id: supported-by, from: decision, to: "research|discover", category: investigação }
   - { id: closed-by, from: node, to: "answer|outcome|postmortem", category: fecho }
-  - { id: supersedes, from: decision, to: decision, category: historico }
-  - { id: duplicate-of, from: register, to: register, category: historico }
-  - { id: revived-from, from: register, to: register, category: historico }
-  - { id: occurred-during, from: incident, to: "work|intent", category: resposta }
-  - { id: caused-by, from: incident, to: node, category: resposta }
-  - { id: related-to, from: incident, to: node, category: resposta }
+  - { id: supersedes, from: decision, to: decision, category: histórico }
+  - { id: occurred-during, from: incident-response, to: node, category: resposta }
+  - { id: caused-by, from: incident-response, to: node, category: resposta }
 
-# ───────────────────────── ESTADOS ─────────────────────────
 states:
   own: [draft, active, done] # active EXIGE assignee + início
-  derived: [blocked, paused] # de blocked-by + status dos bloqueadores (não guardados)
+  derived: [blocked, paused]
 
-# ───────────────────────── ENVELOPE (L8 · toda mutação/publicação carrega) ─────────────────────────
+# ═════════════════════ ENVELOPE (L8) + CONFIANÇA (L9) — inalterados do tracker ═════════════════════
 envelope:
   quem: [actor, authority]
   base: [base-revision, idempotency-key, revision]
   origem: [schema-version, source-commit, producer, ttl]
-  seguranca: [classification, visibility, access] # egress amarrado à classification
+  seguranca: [classification, visibility, access]
   invalidacao: [invalidates]
-
-# ───────────────────────── CONFIANÇA & POLÍTICA (L9) + as 3 leis ─────────────────────────
 trust:
-  boundary: entidade de 1ª classe (matcher/agente/backend/API são fronteiras)
+  boundary: "entidade de 1ª classe (matcher/agente/backend/API são fronteiras)"
   policy-artifacts:
     [threat-model, egress-policy, agent-delegation-policy, policy-catalog, red-team-corpus]
-  controls:
-    [
-      egress-por-taint,
-      input-hostil,
-      delegacao-formal,
-      verificacao-vs-autocert,
-      anti-gaming,
-      supply-chain,
-    ]
   laws:
-    - id: fallback-break-glass
-      says: todo controle que bloqueia precisa de saída segura e rastreável
-    - id: independencia
-      says: enforça-se quem VERIFICA (SoD requester≠approver≠owner-attester), não a verdade de quem declara; vale no fluxo (X) e no meta/oráculo (O1)
-    - id: dependencia-verificavel
-      says: nenhuma ação derivada é aceita sem validar as revisões (dados/política/schema/projeção) que a sustentam
+    - {
+        id: fallback-break-glass,
+        says: "todo controle que bloqueia precisa de saída segura e rastreável",
+      }
+    - {
+        id: independencia,
+        says: "enforça-se quem VERIFICA (SoD requester≠approver≠owner-attester), não a verdade de quem declara (X no fluxo + O1 no oráculo)",
+      }
+    - {
+        id: dependencia-verificavel,
+        says: "nenhuma ação derivada é aceita sem validar as revisões (dados/política/schema/projeção) que a sustentam",
+      }
 
-# ───────────────────────── FLUXO (L2 · a espinha ponta-a-ponta) ─────────────────────────
+# ═════════════════════ FLUXO (L2) + FÍSICO (L7) ═════════════════════
 flow:
   - { phase: registro, role: negocio }
   - { phase: triagem, role: eng, does: [itens, matcher-advisory, valida-contratos] }
-  - { phase: investigacao, does: [explorations rodam, viabilidade testada] }
+  - { phase: investigacao, does: ["discover roda; viabilidade testada"] }
   - { phase: gate, role: humano, kind: append-only }
-  - { phase: ativacao, does: [consolida, move p/ intents/] }
-  - { phase: breakdown, role: dono, emits: [delivery, maintenance, exploration, experiment] }
-
-# ───────────────────────── FÍSICO (L7 · onde vive) ─────────────────────────
+  - { phase: ativacao, does: [consolida, "move p/ intents/"] }
+  - { phase: breakdown, role: dono, emits: ["execution-units + repo-works (heterogêneo)"] }
 physical:
-  candidata: acme-governance/registers/candidates/<id>/{register,triage,gate}.yml
-  ativada: acme-governance/intents/<id>/intent.yml
-  archived: acme-governance/registers/archived/<id>/
-  por-repo: .governance/{manifest,registry/<kind>,works,explorations,context.json,backend.yml}
-  host: acme-governance agrega os context.json publicados
+  candidata: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml"
+  ativada: "acme-governance/intents/<id>/intent.yml"
+  por-repo: ".governance/{manifest,registry,works,context.json,backend.yml}"
+  host: "acme-governance agrega os context.json publicados"
   identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
-  backend: [file, sqlite, neo4j, mongo] # mesma porta
+  backend: [file, sqlite, neo4j, mongo]
 
-# ───────────────────────── PROVOCAÇÕES ABERTAS (as mudanças em discussão) ─────────────────────────
+# ═════════════════════ EXEMPLOS (validam o modelo; o _map desenha estes) ═════════════════════
+examples:
+  - id: experiment-cross-repo
+    label: "experimento cross-repo (growth)"
+    intent: { title: "aumentar conversão trial → paid", strategy: experiment-led }
+    execution-unit:
+      {
+        kind: experiment-run,
+        title: "CTA contextual v1",
+        owns: "hipótese (CTA ↑ 5%) · flag · métricas (conversion, activation) · guardrails (churn) · veredito: pending",
+      }
+    repo-works:
+      - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atrás da flag" }
+      - { repo: acme-api-billing, purpose: create, desc: "elegibilidade + endpoint" }
+      - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline" }
+      - { repo: acme-web-host, purpose: sustain, desc: "adaptar contexto/contrato" }
+      - { repo: acme-growth-ops, purpose: operate, desc: "monitoramento pós-release" }
+    contract: "acme-user-context@v3"
+    note: "veredito na unit (não por repo); won→shape-up · lost→cleanup · inconclusive→novo"
+
+  - id: redesign-misto
+    label: "redesign misto (migração)"
+    intent: { title: "redesign do checkout", strategy: migration-led }
+    execution-unit:
+      {
+        kind: migration-wave,
+        title: "checkout-ui v2",
+        owns: "from legacy-stack → to new-stack · janela de compat: v1 + v2",
+      }
+    repo-works:
+      - { repo: acme-checkout, purpose: sustain, desc: "portar fluxo existente (from→to)" }
+      - { repo: acme-design-system, purpose: create, desc: "novos componentes" }
+      - { repo: "(spike)", purpose: discover, desc: "viabilidade da migração" }
+      - { repo: acme-platform, purpose: sustain, desc: "adapta contrato compartilhado" }
+      - { repo: acme-checkout, purpose: operate, desc: "rollout + monitor" }
+    contract: "acme-user-context@v3"
+    note: "peças MISTAS sob a mesma wave — a família é da PEÇA, não da iniciativa"
+
+  - id: contrato-compartilhado
+    label: "contrato compartilhado (entre iniciativas)"
+    contract:
+      id: "acme-user-context@v3"
+      owner: acme-platform
+      consumers: "acme-mfe-billing, acme-mfe-support"
+      compatibility-window: "v2, v3 até 2026-08-15"
+    migrations:
+      ["intent redesign-checkout (migration-led)", "intent growth-upgrade (experiment-led)"]
+    note: "coordenação entre iniciativas = via o contrato (derivada); a janela mora nele (não é derivável)"
+
+  # ── 5 situações novas (casos-limite que estressam o modelo) ──
+  - id: bug
+    label: "um bug"
+    intent: null # standalone (ou disparado por um incident-response)
+    execution-unit: null # colapsa
+    repo-works:
+      [
+        {
+          repo: acme-checkout,
+          purpose: sustain,
+          desc: "corrige cálculo do total · preset fix (corrective + user-visible)",
+        },
+      ]
+    note: "bug simples = 1 repo-work sustain, SEM intent nem execution-unit (as camadas colapsam)"
+
+  - id: dep-bump
+    label: "atualização de biblioteca"
+    intent: null
+    execution-unit: null
+    repo-works:
+      [
+        {
+          repo: acme-web-host,
+          purpose: sustain,
+          desc: "atualiza lib X 3.x → 4.x · preset dep-bump (adaptive + internal)",
+        },
+      ]
+    note: "era a P2: NÃO 'entrega valor de produto' — preserva/adapta. sustain standalone."
+
+  - id: exploration-sem-intent
+    label: "exploration sem intent"
+    intent: null # descoberta independente, não amarrada a um objetivo durável
+    execution-unit: null # (viraria uma discovery-unit só se fosse cross-repo)
+    repo-works:
+      [
+        {
+          repo: acme-platform,
+          purpose: discover,
+          desc: "spike: viável trocar o motor de busca? · timebox + pergunta falsificável → answer + fate",
+        },
+      ]
+    note: "discover standalone, sem intent; não shippa; fate = throwaway/promoted/parked"
+
+  - id: experiment-lost
+    label: "experimento que termina em lost"
+    intent: { title: "aumentar ativação via onboarding", strategy: experiment-led }
+    execution-unit:
+      {
+        kind: experiment-run,
+        title: "onboarding guiado v1",
+        owns: "veredito: LOST (não bateu a métrica)",
+      }
+    repo-works:
+      - { repo: acme-mfe-onboarding, purpose: create, desc: "fluxo guiado atrás da flag" }
+      - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline" }
+    fork:
+      { kind: cleanup, desc: "execution-unit cleanup → repo-works sustain removem flag/variante" }
+    note: "lost → gera uma execution-unit CLEANUP; o valor durável foi só APRENDIZADO (nenhuma capacidade permanente)"
+
+  - id: delivery-tradicional
+    label: "delivery tradicional"
+    intent: { title: "exportar relatório em PDF", strategy: direct-delivery }
+    execution-unit: null # colapsa (1 repo); seria feature-slice se cross-repo
+    repo-works: [{ repo: acme-reports, purpose: create, desc: "botão + geração do PDF" }]
+    note: "feature comum = intent direct-delivery → repo-work create (execution-unit colapsa)"
+
+# ═════════════════════ PROVOCAÇÕES ═════════════════════
 open-questions:
-  - id: P1
-    about: família do `experiment` (sai de APRENDIZADO)
-    status: open
-    fato: hoje experiment é membro de aprendizado, ao lado de exploration
-    provocacao: experiment SHIPPA valor real (produção/usuários/receita; won→shape-up mantém código) — difere da exploration (descoberta pura)
-    options:
-      - id: A
-        label: família-ponte própria (validação/experimentação)
-        impact: 6 famílias; nomeia o output FORKED (won→capacidade · lost→aprendizado); teste das outras famílias fica limpo
-        recommended: true
-      - id: B
-        label: membro de CAPACIDADE (delivery/maintenance/experiment)
-        impact: 5 famílias; casa direto com "entrega valor"; mas borra o teste de capacidade (membro com valor condicional)
-    invariant-either-way:
-      - exploration vira a única de APRENDIZADO (descoberta pura, não-shippa)
-      - shape-up/clean-up viram arestas de 1ª classe (fork do veredito)
-
-  - id: P2
-    about: o teste da família "entrega valor de produto?" é ambíguo p/ maintenance
-    status: open
-    fato: capacidade = {delivery, maintenance} com teste "entrega valor de produto? SIM"
-    provocacao: atualizar versão de biblioteca ou refatorar legado (trocar linguagem) NÃO responde esse teste como um delivery — não entrega valor NOVO, preserva/adapta. O teste não discrimina delivery × maintenance.
-    diagnostico: o teste mistura CRIAR valor novo com PRESERVAR o existente
-
-  - id: P3
-    about: delivery e experiment têm mais relação entre si do que com maintenance
-    status: open
-    provocacao: delivery e experiment CRIAM/shippam valor novo; maintenance PRESERVA. O agrupamento certo é por relação com a capacidade, não "produz valor sim/não".
-
-  - id: P4
-    about: nomes das famílias misturam EN e PT (problemático)
-    status: open
-    fato: famílias hoje = capacidade/aprendizado/resposta/intake(EN)/deliberação; membros = todos EN (delivery/maintenance/...)
-    proposta: escolher UMA língua canônica pros ids do grafo. Recomendo EN nos ids (casa com os membros e com o model.ts) + label/description em PT p/ humanos.
-
-  - id: P5
-    about: o breakdown modelado é estreito (só testamos intent → exploration → deliveries)
-    status: open
-    provocacao: "iniciativas reais quebram em trabalho HETEROGÊNEO e cross-repo; falta modelar a granularidade e as famílias MISTAS que o breakdown emite"
-
-  - id: P6
-    about: um experimento de growth é UM só, mas atravessa N repos — em que NÍVEL ele vive?
-    status: open
-    provocacao: "se o experimento é um (uma hipótese/flag/veredito), as peças por repo NÃO são cada uma um experiment; são peças coordenadas por contrato"
-    hypothesis: "experiment = NATUREZA da INICIATIVA (carrega hipótese/veredito), não um work-kind por repo — revisa P1/P3"
-    impact: "pode tirar experiment das work-families e criar uma tipologia de INICIATIVA (feature/experiment/redesign) separada das famílias de work (create/sustain/discover)"
-
-  - id: P7
-    about: iniciativa heterogênea (redesign = port from→to + novidades) e contratos entre iniciativas
-    status: open
-    provocacao: "um redesign quebra em MIX (sustain=port + create=novo) → família é da PEÇA, não da iniciativa"
-    cross-initiative: "vários times fazendo redesign coordenam por CONTRATO compartilhado (nó com N consumers) → coordenação entre iniciativas é DERIVADA do contrato, sem aresta iniciativa↔iniciativa nova"
-
-# ── PROPOSTA (perspectiva do Codex, reconciliada; status proposed — aguarda owner) ──
-# Substitui a proposta anterior create/sustain (que vira a CAMADA repo-work). Trigger: P1,P2,P3,P5,P6,P7.
-proposed-restructure:
-  status: proposed
-  source: "codex + reconciliação claude"
-  insight: "3 EIXOS DIFERENTES, um por camada — não um enum plano de 'natureza'. feature(resultado) × experiment(método) × redesign(transformação) NÃO são do mesmo tipo."
-  layers:
-    - id: intent
-      owns: "enquadramento de negócio, objetivo, target outcome, gate de decisão"
-      strategy: [experiment-led, direct-delivery, migration-led, reliability-led]
-      claude-note: "strategy talvez DERIVADO das execution-units contidas (evitar enum guardado que dança)"
-    - id: execution-unit
-      owns: "unidade CROSS-REPO com lifecycle próprio + unidade semântica (o experimento é UM)"
-      optional: "colapsa quando o trabalho é trivial (1 repo, sem lifecycle próprio)"
-      kinds:
-        - {
-            id: experiment-run,
-            owns: "hipótese/flag/exposição/métricas/guardrails/decision-rule/veredito",
-          }
-        - { id: migration-wave, owns: "from/to/janela-de-compatibilidade" }
-        - { id: feature-slice, owns: "fatia de entrega coordenada" }
-        - {
-            id: incident-response,
-            owns: "severidade/declarar→mitigar→resolver→postmortem",
-            source: reactive,
-          }
-        - { id: shape-up, owns: "sistematização pós-veredito won" }
-        - { id: cleanup, owns: "remoção pós-veredito lost/parcial" }
-        - { id: rollout-slice, owns: "fase de release/canary" }
-    - id: repo-work
-      owns: "execução numa peça por repo"
-      purpose: [create, sustain, discover, operate] # operate = rollout/monitoramento/instrumentação (novo, do playbook)
-      note: "esta camada É a proposta create/sustain anterior + discover + operate"
-  contract:
-    role: "nó de coordenação/versionamento — DENTRO e ENTRE iniciativas"
-    fields: [owner, provider, consumers, revision, compatibility-window, migrations]
-    note: "coordenação entre iniciativas = via contrato compartilhado; a janela-de-compat NÃO é derivável (mora aqui)"
-  deliberation: "q/r/d = ANEXÁVEL a qualquer nó (intent/execution-unit/repo-work/contract), não uma família"
-  intake: "proposal/register = funil PRÉ-intent (register→triagem→gate), fora das 3 camadas"
-  lifecycle-ownership: # o conserto do MAIOR RISCO (níveis certos exigem enums certos)
-    intent: "gate de negócio"
-    experiment-run: "hipótese/veredito"
-    migration-wave: "from/to/compatibilidade"
-    repo-work: "execução por repo"
-    contract: "coordenação/versionamento"
-  resolves:
-    P1-P3: "experiment = execution-unit (experiment-run); NÃO work-kind nem só natureza-de-iniciativa"
-    P2: "some o teste ambíguo — repo-work.purpose (create/sustain/discover/operate) é o eixo da PEÇA"
-    P5: "breakdown = intent → execution-units → repo-works (heterogêneo)"
-    P6: "o experimento é UM (a execution-unit); as peças por repo são repo-works subordinados, coordenados por contrato"
-    P7: "redesign = migration-wave (port=sustain + novo=create + spikes=discover + monitor=operate); contratos coordenam entre iniciativas"
-  maior-risco: "níveis CERTOS com ENUMS ERRADOS — se virar lista plana feature/experiment/redesign, mistura objetivo/método/transformação. Travar lifecycle-por-camada antes dos enums."
-  open:
-    - "nomes finais dos ids (EN, P4)"
-    - "intent.strategy: guardado × derivado"
-    - "feature-slice/rollout-slice puxam peso próprio × colapsam no trivial?"
-    - "onde exploration grande (cross-repo) vive: discover repo-work × discovery execution-unit?"
+  - {
+      id: P1,
+      about: "família do experiment",
+      status: resolved,
+      by: "3-layer: experiment = execution-unit (experiment-run)",
+    }
+  - {
+      id: P2,
+      about: "teste 'entrega valor?' ambíguo p/ maintenance",
+      status: resolved,
+      by: "3-layer: repo-work.purpose (create/sustain/discover/operate); dep-bump = sustain",
+    }
+  - {
+      id: P3,
+      about: "delivery ~ experiment > maintenance",
+      status: resolved,
+      by: "3-layer: delivery=create/direct-delivery; experiment=execution-unit; sustain à parte",
+    }
+  - { id: P4, about: "nomes EN/PT", status: decided, by: "ids EN + labels PT" }
+  - {
+      id: P5,
+      about: "breakdown estreito",
+      status: resolved,
+      by: "3-layer: intent → execution-units → repo-works (heterogêneo)",
+    }
+  - {
+      id: P6,
+      about: "experimento é UM, cross-repo",
+      status: resolved,
+      by: "3-layer: a execution-unit é a unidade; peças por repo subordinadas",
+    }
+  - {
+      id: P7,
+      about: "redesign misto + contratos entre iniciativas",
+      status: resolved,
+      by: "3-layer: migration-wave com peças mistas; contrato compartilhado coordena",
+    }
+  # ainda abertas:
+  - {
+      id: Q-strategy,
+      about: "intent.strategy é guardado ou DERIVADO das execution-units?",
+      status: open,
+    }
+  - {
+      id: Q-collapse,
+      about: "regra exata de quando a execution-unit colapsa (trivial)",
+      status: open,
+    }
+  - {
+      id: Q-discover-level,
+      about: "exploration grande (cross-repo) = discover repo-work × discovery execution-unit?",
+      status: open,
+    }
+  - {
+      id: Q-names,
+      about: "nomes finais dos kinds/purposes (feature-slice? rollout-slice puxa peso?)",
+      status: open,
+    }
