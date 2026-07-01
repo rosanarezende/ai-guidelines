@@ -24,4 +24,4 @@ id: <slug>_<num> # mesmo id da abertura
 
 ## Follow-ups
 
-<gera `fix` / `patch` / `proposal`>
+<gera `maintenance` (preset fix/security-patch) / `proposal`>

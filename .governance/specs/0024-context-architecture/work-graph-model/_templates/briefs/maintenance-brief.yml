@@ -1,0 +1,20 @@
+node: work-brief
+kind: maintenance
+id: <slug>_<num>
+references: []
+
+# maintenance PRESERVA/RESTAURA/ADAPTA capacidade existente (colapsa os antigos fix + patch — Lente 3).
+# O discriminador virou DIMENSÃO: `maintenance-mode` (ISO 14764). Presets humanos (UX, não ontologia):
+#   "fix" = corrective + user-visible · "security-patch" = corrective + security-visible · "dep-bump" = adaptive + internal.
+maintenance-mode: # corrective | adaptive | perfective | preventive  ← o discriminador (obrigatório)
+reason: # bug | dívida | segurança | higiene | obsolescência         ← anti-buraco-negro (obrigatório)
+
+# CORRETIVA (o usuário vê) → descreva sintoma/esperado; ADAPTATIVA/PERFECTIVA/PREVENTIVA (invisível) → o-quê/por-quê.
+symptom: # (corrective) o sintoma que o usuário vê   · (outras) deixe vazio
+expected: # (corrective) o comportamento esperado
+what: # (adaptive/perfective/preventive) o que muda (invisível): dep bump | refactor | lint | hardening
+origin: # report cliente/interno · percebido durante X · disparado por um incident/alerta
+done-when: # corrigido/aplicado + verificado, sem regressão visível
+
+details: |
+  <nuance opcional — ex.: se passa a CRIAR capacidade vira delivery; se veio reativo, ligue ao incident (occurred-during/caused-by)>

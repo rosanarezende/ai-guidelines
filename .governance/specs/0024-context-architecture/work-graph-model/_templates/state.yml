@@ -1,6 +1,6 @@
 # state.yml — progresso/topologia do trabalho (mutado por comando, não à mão).
 work: <id-do-trabalho>
-kind: <delivery | experiment | exploration | incident | fix | patch>
+kind: <delivery | maintenance | experiment | exploration | incident> # membro (v2); fix/patch → maintenance (presets)
 stage: <deciding | executing> # ⚠️ a Lente 2 (os "momentos" do ciclo) ainda está aberta — esses 2 estágios podem virar mais/outros (iterar)
 cursor:
   node: <q-NNN aberta | checkpoint ativo>

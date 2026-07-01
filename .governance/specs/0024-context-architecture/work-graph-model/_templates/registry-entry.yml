@@ -1,12 +1,13 @@
 # registry/registry-entry.yml — SCHEMA BASE de uma entrada de índice (não é um registry de uso).
-# CRIE um registry/<kind>.yml (delivery/experiment/exploration/incident/fix/patch) com base neste;
+# CRIE um registry/<kind>.yml de WORK (delivery | maintenance) com base neste;
 # documente APENAS os campos próprios do kind (lista no fim). Os comuns não têm extras → só `entries: []`.
 id: <slug>_<num> # slug LEGÍVEL + numérico embutido (form-component_1); SEM prefixo de tipo nem diminutivo — o TIPO vem do registry/<kind>.yml + da pasta works/<kind>/. o _num é a chave estável (≈16-bit, por repo) que sobrevive a rename
-kind: <delivery | experiment | exploration | incident | fix | patch>
+kind: <delivery | maintenance> # WORK (família CAPACIDADE). exploration/experiment/incident/proposal = famílias próprias (templates próprios)
 title: <curto>
 status: <draft | active | done> # progresso PRÓPRIO; NASCE draft no breakdown; "bloqueado"/"pausado" são DERIVADOS (não guardados)
 assignee: <@quem | null> # quem ASSUMIU o trabalho. `active` EXIGE assignee + início real; sem assignee = draft (ready/blocked, esperando alguém pegar). Vale p/ TODO work, incl. exploration
 weight: <S | M | L | XL> # peso/tamanho do trabalho — p/ medir + o caminho crítico ponderado (planning do breakdown)
+dimensions: # ortogonais (Lente 4; opcionais, exigidas por família): source <planned|reactive> · visibility <user-visible|internal|operator-visible|security-visible> · maintenance-mode <corrective|adaptive|perfective|preventive> (só maintenance) · change-class <standard|normal|emergency> · service-class <expedite|fixed-date|standard|intangible>. planned-in = a intent (não duplicar → é o `intent` acima)
 workspace: works/<kind>/<slug>_<num>/ # relativo a .governance/; TRABALHO vai em works/<kind>/ (a ferramenta exploration vai em explorations/ — ver exploration.yml); só quando a densidade pede
 intent: <intent-id | null> # a intent dona (back-ref); null = reativo/standalone
 
@@ -28,9 +29,10 @@ closed-at: <YYYY-MM-DD> # só quando terminal (done/resolved) — vale p/ qualqu
 closed-by: <ref ao artefato de fecho> # ref ao answer/outcome/postmortem (quando há fecho denso) — o registry referencia; o doc é só conteúdo
 
 
-# campos PRÓPRIOS por kind (documente só o extra ao criar o registry/<kind>.yml):
-#   delivery · fix · patch → nenhum (só a base)
-#   experiment            → outcome (won | lost | inconclusive) = disposição terminal (paralelo a exploration→fate)
-#   incident              → severity (low|medium|high|critical) · status (mitigating|mitigated|resolved) · merge-priority-until · ci-bypass-until
-#   exploration           → fate (throwaway|promoted|parked) · answers: <repo>/<intent-id>#<qN> (a question que esta exploration responde — ANCORADA AQUI; a intent DERIVA `answered-by`, A+ anti-drift). Conteúdo (question/verdict/timebox) → exploration-brief/answer; `raises` derivado (proposal.raised-by). _(exploration diverge → template próprio: registry/exploration.yml)_
-#   proposal              → NÃO é work: schema próprio em registry/proposal.yml
+# campos PRÓPRIOS por kind de WORK (documente só o extra ao criar o registry/<kind>.yml):
+#   delivery    → nenhum (só a base)
+#   maintenance → maintenance-mode (corrective|adaptive|perfective|preventive, ISO 14764) + reason (anti-buraco-negro). Presets UX: "fix"/"security-patch"/"dep-bump" → maintenance + dimensões.
+# Outras FAMÍLIAS têm registry/template próprio (não são work da base):
+#   exploration → registry/exploration.yml (fate + answers: <repo>/<intent-id>#<qN>; conteúdo → exploration-brief/answer)
+#   experiment  → APRENDIZADO (outcome won|lost|inconclusive) · incident → RESPOSTA (severity · status · bypass-com-prazo; não sai de breakdown)
+#   proposal    → INTAKE: schema próprio em registry/proposal.yml

@@ -14,7 +14,7 @@ entries: []
 #     effort: <low | medium | high> # custo estimado
 #     evidence: [<link/ref>, …] # dado/print/doc que sustenta a ideia
 #     # --- na disposição ---
-#     promote-to: <delivery | experiment | exploration | patch | fix> # se promovida, o tipo que vira
+#     promote-to: <delivery | maintenance | experiment | exploration> # se promovida, o membro que vira (PromotableMember; incident NÃO — é reativo)
 #     opens-intent: <intent-id> # se promove pra experiment/objetivo → a intent aberta (às vezes paralela)
 #     discard-reason: "<se descartada, por quê>"
 #     created-at: <YYYY-MM-DD>

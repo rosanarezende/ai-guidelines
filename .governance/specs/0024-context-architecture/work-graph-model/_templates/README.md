@@ -1,4 +1,4 @@
-# \_templates — os moldes do modelo (5 trabalho + 2 ferramentas), adaptados às 4 lentes
+# \_templates — os moldes do modelo (taxonomia v2: famílias + dimensões), adaptados às lentes
 
 > Coletânea **canônica** dos moldes, adaptada às decisões do `tracker.md`.
 > Não-autoridade (o template vivo real, pós-DEC, vai para `.core/governance/templates/`).
@@ -28,14 +28,13 @@ _templates/
 > Mesmo nó no grafo (abertura uniforme), forma sob medida por kind. Ao escolher o tipo, o molde já vem
 > direcionado — e a pessoa logo percebe se escolheu o caminho errado.
 
-| Molde                   | Abre          | Forma                                                         |
-| ----------------------- | ------------- | ------------------------------------------------------------- |
-| `delivery-brief.yml`    | `delivery`    | kernel + espinha + corpo (sealed)                             |
-| `experiment-brief.yml`  | `experiment`  | kernel + ⊛ hipótese/métricas (sealed — pré-registro)          |
-| `exploration-brief.yml` | `exploration` | kernel + ⊛ timebox; saída = a **resposta**                    |
-| `incident-brief.yml`    | `incident`    | registro rápido (severidade + status) + bypass-com-prazo      |
-| `fix-brief.yml`         | `fix`         | simples — sintoma (o usuário vê) → esperado → origem → pronto |
-| `patch-brief.yml`       | `patch`       | simples — o-quê (invisível) → por quê → pronto                |
+| Molde                   | Abre          | Forma                                                                                                          |
+| ----------------------- | ------------- | -------------------------------------------------------------------------------------------------------------- |
+| `delivery-brief.yml`    | `delivery`    | kernel + espinha + corpo (sealed)                                                                              |
+| `experiment-brief.yml`  | `experiment`  | kernel + ⊛ hipótese/métricas (sealed — pré-registro)                                                           |
+| `exploration-brief.yml` | `exploration` | kernel + ⊛ timebox; saída = a **resposta**                                                                     |
+| `incident-brief.yml`    | `incident`    | registro rápido (severidade + status) + bypass-com-prazo                                                       |
+| `maintenance-brief.yml` | `maintenance` | preserva/restaura/adapta; `maintenance-mode` + reason (colapsa fix+patch; presets fix/security-patch/dep-bump) |
 
 **Índice (projeção, não abertura)**
 
@@ -71,9 +70,9 @@ _templates/
 ## Mudanças desta rodada (vs antes)
 
 - 🆕 **Camada `intent`** (`intent.yml`) acima dos trabalhos — o `node` dos briefs passou de `intent-brief` → `work-brief` (intent é a camada de cima; o que era "intent-brief" era só o `<kind>-brief`).
+- 🆕 **Taxonomia v2 (migração P0):** `fix`/`patch` **colapsaram** em `maintenance-brief.yml` — o discriminador virou a dimensão `maintenance-mode` (ISO 14764); fix/security-patch/dep-bump viram **presets** (UX, não ontologia). `registry-entry`/`state`/`proposal` passam a listar os membros v2 (delivery|maintenance + famílias próprias) + bloco `dimensions`.
 - 🔀 **Abertura = moldes** `<kind>-brief.yml` (todos `node: work-brief`) — aposentados `intent-brief.md`
-  (genérico) e `incident.md` (bundle); `fix`/`patch` ganham brief próprio (não "abrem como registry" — isso era o
-  pensamento Virtual, que caiu).
+  (genérico) e `incident.md` (bundle).
 - ✂️ **`incident` separado em abertura × fechamento:** `incident-brief.md` (registro) + `incident-postmortem.md`
   (causa-raiz). Simétrico a experiment-outcome / exploration-answer.
 - ✏️ **`registry-entry.yml`** reposicionado como **índice** (entrada de `registry/<kind>.yml`), não abertura.
@@ -84,7 +83,7 @@ _templates/
 
 ## Validação dos templates (tracker)
 
-> Inventário dos **18 moldes**, **agrupado pela pasta** e **ordenado por status** (✅ → 🔶 → ❓) pra escanear rápido. **Confirmar 1 a 1** com a owner — o status é **leitura proposta** (rever detalhes é permitido mesmo nos ✅). Legenda: **✅** validado · **🔶** 1ª passada / parcial · **❓** não revisado (ou bloqueado por frente aberta).
+> Inventário dos **17 moldes**, **agrupado pela pasta** e **ordenado por status** (✅ → 🔶 → ❓) pra escanear rápido. **Confirmar 1 a 1** com a owner — o status é **leitura proposta** (rever detalhes é permitido mesmo nos ✅). Legenda: **✅** validado · **🔶** 1ª passada / parcial · **❓** não revisado (ou bloqueado por frente aberta).
 
 ### Raiz — estrutura / índice / referência
 
@@ -104,8 +103,7 @@ _templates/
 | `exploration-brief.yml` | ✅     | `question` (= open-question da intent) + timebox + approach/success-signal; **referencia o registry via `exploration:`** (não duplica id). |
 | `experiment-brief.yml`  | 🔶     | falta rever ⊛ hipótese/métricas + `sealed`/pré-registro.                                                                                   |
 | `incident-brief.yml`    | 🔶     | enums EN; ⚠️ tirar campos de ÍNDICE (`severity`/`status`/datas) → registry (frente do incident).                                           |
-| `fix-brief.yml`         | 🔶     | confirmar sintoma→esperado→origem→pronto.                                                                                                  |
-| `patch-brief.yml`       | 🔶     | confirmar o-quê→por quê→pronto.                                                                                                            |
+| `maintenance-brief.yml` | ✅     | colapsa fix+patch; `maintenance-mode` (ISO 14764) + reason; corretiva usa sintoma/esperado, demais o-quê/por-quê; presets UX.              |
 
 ### `closings/` — conteúdo de fecho (sem arestas)
 
