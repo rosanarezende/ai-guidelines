@@ -1,6 +1,6 @@
 # Research — casamento de `capabilities` (texto + tags + grafo) e o adapter de Matcher por LLM (incl. modelos LOCAIS)
 
-- Data: 2026-06-29 · Spec 0024 · Natureza: **research, não-autoridade** (embasa a **Q2** da [deliberação do roteamento vertical](2026-06-29-vertical-routing-deliberation.md)).
+- Data: 2026-06-29 · Spec 0024 · Natureza: **research, não-autoridade** (embasa a **Q2** da [deliberação do roteamento vertical](../deliberation/2026-06-29-vertical-routing-deliberation.md)).
 - **Investiga** (decisão da owner no gate): (A) o **shape de `capabilities`** (texto livre vs `{texto, tags}` — o híbrido A+C) e (B) a **porta `Matcher`** com um **adapter de IA local**.
 - Método: **análise + benchmark** de prior art **pública**. Anonimizado (`acme-*`).
 
@@ -38,7 +38,7 @@ capabilities:
 
 **Custo / contras.** (1) **curadoria** (alguém cuida do vocabulário; risco de _tag sprawl_). (2) estende o **check
 de freshness** (uma tag órfã/duplicada? — um **registry de tags** + check, futuro). (3) **reabre o shape de
-`capabilities`** (sub-decisão da [deliberação do manifesto](2026-06-29-manifest-shape-deliberation.md), D2) — mas
+`capabilities`** (sub-decisão da [deliberação do manifesto](../deliberation/2026-06-29-manifest-shape-deliberation.md), D2) — mas
 é **aditivo e retrocompatível** (tags **opcionais**; o léxico segue usando o `text`).
 
 **Mitigação (caminho de adoção):** começar **folksonomy** (tags livres, sem registry) → deixar o vocabulário

@@ -1,6 +1,6 @@
 # Fluxo da iniciativa aos trabalhos — registro · triagem · investigação · gate · intent · breakdown (5 tipos)
 
-- Data: 2026-06-30 · Spec 0024 · Natureza: **síntese de referência, não-autoridade** (companion do tracker `2026-06-25-work-graph-model.md`).
+- Data: 2026-06-30 · Spec 0024 · Natureza: **síntese de referência, não-autoridade** (companion do tracker `tracker.md`).
 - **O tracker continua o SSOT das decisões.** Este doc DESCREVE o fluxo ponta-a-ponta (sintetiza o decidido) e marca o que ainda é **🔶 hipótese a estressar** (sobretudo o breakdown nos 5 tipos). Em divergência vencem `state.yml`/tracker/gates/Git.
 - Org fictícia ANONIMIZADA (`acme-*`). Nenhum nome/fonte confidencial é versionado.
 - **Como usar:** alimentar junto com o tracker; cada 🔶 que fechar vira decisão no tracker; cada gap que o benchmark achar entra aqui.
@@ -44,7 +44,7 @@
 
 - **Quem:** negócio (PM, product, quem tem a dor). **Onde:** `registers/candidates/<id>/register.yml`.
 - **O quê (o "quê" da iniciativa):** **título** + **descrição** (o par mais importante) · **enquadramento** (problema de negócio / do cliente · driver estratégico / métrica) · **pessoas** (`registered-by` = quem cadastrou · `owner` = accountable · `stakeholders`) · **referências/links** · **dúvidas em linguagem de negócio** (`open-questions`).
-- **O que NÃO entra aqui:** contratos, explore-points técnicos, roteamento. Isso é triagem (engenharia). _(D9/D10 da [deliberação](2026-06-30-intent-authoring-shape-deliberation.md).)_
+- **O que NÃO entra aqui:** contratos, explore-points técnicos, roteamento. Isso é triagem (engenharia). _(D9/D10 da [deliberação](../deliberation/2026-06-30-intent-authoring-shape-deliberation.md).)_
 - **id:** gerado no submit (`slug-do-título_<random ~16-bit>`), não editável.
 - **Pós-registro:** vai pro **detalhe da candidata** (ver/editar) — **não** direto pra triagem (quem registra pode não ser quem tria). Lá um botão **inicia a triagem**.
 
@@ -56,7 +56,7 @@
   - **`exploration`** → precisa investigar → vira um **explore-point** (`{id, title, details}`) que será **DISPARADO como uma `exploration`** no work-repo certo.
   - **`answered`** → o eng **responde direto** (já sabe; não precisa investigar).
   - **`needs-info`** → falta informação → **volta pro NEGÓCIO** com um **`assignee`** + `blocked-since` → o read-model deriva **quem** segura e **por quanto tempo** o fluxo está bloqueado (D8; a dor do remoto, agora medível).
-- **Matcher (advisory):** a eng **simula** o matcher (léxico · LLM local · API) sobre os campos editados (descrição + título do item + detalhe) → **sugere os repos**. Nunca decide (a Q4 do [roteamento](2026-06-29-vertical-routing-deliberation.md)); o humano confirma.
+- **Matcher (advisory):** a eng **simula** o matcher (léxico · LLM local · API) sobre os campos editados (descrição + título do item + detalhe) → **sugere os repos**. Nunca decide (a Q4 do [roteamento](../deliberation/2026-06-29-vertical-routing-deliberation.md)); o humano confirma.
 - **Contratos validados:** um **contrato** é um **ponto de interface compartilhado entre repos** (componente · api · evento · serviço) que a iniciativa coordena (ex.: `form-component` provido pelo design-system, consumido pelos MFEs). A eng valida os contratos (a partir dos `provides` reais dos manifestos) — aceita/corrige/adiciona/remove.
 - **Viabilidade:** notas que se acumulam.
 

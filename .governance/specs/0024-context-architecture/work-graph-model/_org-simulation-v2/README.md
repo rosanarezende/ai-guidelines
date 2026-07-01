@@ -6,7 +6,7 @@
 > necessidade aparece.
 >
 > O modelo canônico (as **5 lentes**, decisões 🔴 abertas / 🟢 fechadas) vive no **tracker**:
-> [`research/2026-06-25-work-graph-model.md`](../research/2026-06-25-work-graph-model.md). **Esta simulação reflete o
+> [`tracker.md`](../tracker.md). **Esta simulação reflete o
 > tracker** — em divergência, o tracker vence.
 
 ---

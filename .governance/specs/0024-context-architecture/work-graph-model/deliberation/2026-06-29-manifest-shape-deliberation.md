@@ -1,7 +1,7 @@
 # Deliberação — shape do manifesto-por-repo (em formato q/r/d)
 
 - Data: 2026-06-29 · Spec 0024 · Natureza: **research/deliberação, não-autoridade** (insumo de DEC; não decide sozinho).
-- Continua [`2026-06-29-cross-repo-comms-manifest-and-discovery.md`](2026-06-29-cross-repo-comms-manifest-and-discovery.md) (que PROPÔS o manifesto-por-repo). Aqui se **delibera o shape**.
+- Continua [`2026-06-29-cross-repo-comms-manifest-and-discovery.md`](../research/2026-06-29-cross-repo-comms-manifest-and-discovery.md) (que PROPÔS o manifesto-por-repo). Aqui se **delibera o shape**.
 - Em divergência vencem `state.yml`/`tasks.md`/`decision-brief.md`/gates/Git. Prior art **pública** nas referências.
 
 > **O método q/r/d, refinado (insight da owner 2026-06-29) — esta deliberação é um exemplo VIVO dele:**

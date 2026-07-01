@@ -1,6 +1,6 @@
 # \_templates — os moldes do modelo (5 trabalho + 2 ferramentas), adaptados às 4 lentes
 
-> Coletânea **canônica** dos moldes, adaptada às decisões do `research/2026-06-25-work-graph-model.md`.
+> Coletânea **canônica** dos moldes, adaptada às decisões do `tracker.md`.
 > Não-autoridade (o template vivo real, pós-DEC, vai para `.core/governance/templates/`).
 
 ## Estrutura da pasta

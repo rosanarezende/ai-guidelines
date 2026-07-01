@@ -5,7 +5,7 @@
 - Em divergência vencem `state.yml`/`tasks.md`/`decision-brief.md`/gates/Git. Prior art **pública** nas referências.
 
 > **GATE 1 (owner, 2026-06-29):** **Q1/Q3/Q4 DECIDIDAS** · **Q2 em ITERAÇÃO** (a owner pediu aprofundar: `capabilities`
-> `{ texto, tags }` + adapter LLM **local** → embasado em [`2026-06-29-capability-matching-and-llm-research.md`](2026-06-29-capability-matching-and-llm-research.md);
+> `{ texto, tags }` + adapter LLM **local** → embasado em [`2026-06-29-capability-matching-and-llm-research.md`](../research/2026-06-29-capability-matching-and-llm-research.md);
 > a Q2 refinada **volta ao gate**) · **Q5 NOVA** (parqueada). No método q/r/d: a `question` é **iterativa** (as opções
 > amadurecem na pesquisa) · as `researches` **embasam** · a `decision` **só nasce no gate humano**.
 
@@ -86,7 +86,7 @@ provê mas intents pedem → **gap** → `proposal`; contrato `beta` muito consu
 virando **fonte de `proposal`/insight** (conecta com a ferramenta `proposal` + o experiment "proativo" parqueado).
 
 **Status:** 🅿️ **PARQUEADA** — "ainda preciso entender isso melhor" (owner). **Precisa da própria deliberação**;
-não se desenha aqui. _(embasamento inicial: a seção "thread adiante" da [research de matching](2026-06-29-capability-matching-and-llm-research.md).)_
+não se desenha aqui. _(embasamento inicial: a seção "thread adiante" da [research de matching](../research/2026-06-29-capability-matching-and-llm-research.md).)_
 
 ---
 
@@ -105,7 +105,7 @@ não se desenha aqui. _(embasamento inicial: a seção "thread adiante" da [rese
   (quem entrega/breakdown). Mesma máquina (need × oferta).
 - **D2 (Q2) ✅ DECIDIDA (gate 2) — D refinado:** matcher **plugável** com **default léxico** + `capabilities` vira
   **`{ text, tags? }`** (híbrido A+C → habilita o **grafo** repo×tag) + **adapter LLM LOCAL em sequência (v2)**.
-  Embasado em [`2026-06-29-capability-matching-and-llm-research.md`](2026-06-29-capability-matching-and-llm-research.md).
+  Embasado em [`2026-06-29-capability-matching-and-llm-research.md`](../research/2026-06-29-capability-matching-and-llm-research.md).
   **v1 (léxico+tags) FEITO e dogfood VERDE** ↓; **v2 (LLM local)** é o próximo passo.
 - **D3 (Q3) ✅ DECIDIDA — A:** roteamento é **view derivada no read-model do host** (não versionada). _(brotou a **Q5**:
   consultas periódicas → proposals/insights — parqueada.)_

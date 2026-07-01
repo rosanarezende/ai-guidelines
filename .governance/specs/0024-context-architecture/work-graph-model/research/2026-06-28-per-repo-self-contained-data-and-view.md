@@ -86,6 +86,6 @@ O desenho do §7 foi **implementado e provado** na `_org-simulation-v2/`. As per
 | neo4j   | grafo (Docker + volume, persistente) | Docker  | acme-mfe-support   |
 | mongo   | documento                            | Docker  | smoke              |
 
-Uso + como rodar cada um: **`_org-simulation-v2/README.md`**. Estado e ponto de retomada: o **tracker** (`2026-06-25-work-graph-model.md`).
+Uso + como rodar cada um: **`_org-simulation-v2/README.md`**. Estado e ponto de retomada: o **tracker** (`tracker.md`).
 
 _Refinamentos abertos:_ as arestas da Lente 3 como **relações** no grafo (hoje nós-only) · `Neo4jHostRepository` · fiar o **app vivo** do `_viewer` à lib nova.

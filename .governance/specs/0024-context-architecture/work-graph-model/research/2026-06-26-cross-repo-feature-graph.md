@@ -8,7 +8,7 @@ method: assessment
 
 # Grafo de trabalho cross-repo — feature multi-repo (estresse via micro-frontends)
 
-> **Não-autoridade.** Insumo da **Lente 3** (ligações) do `2026-06-25-work-graph-model.md` e da frente
+> **Não-autoridade.** Insumo da **Lente 3** (ligações) do `tracker.md` e da frente
 > **identidade cross-repo + banco + dashboards de valor**. Em divergência, vence o tracker / `state.yml` / gates.
 > **Anonimizado:** o exemplo se inspira numa arquitetura de micro-frontends real, mas **nomes, URLs e a empresa não
 > aparecem** — só os aprendizados, com nomes genéricos `acme-*`.

@@ -1,7 +1,7 @@
 # Deliberação — o host agrega PROJEÇÕES PUBLICADAS (não bancos vivos) + context.json VERSIONADO — em q/r/d
 
 - Data: 2026-06-29 · Spec 0024 · Natureza: **research/deliberação, não-autoridade** (insumo de DEC).
-- O **embasamento detalhado** vive na research [`2026-06-29-governance-aggregates-published-projections.md`](2026-06-29-governance-aggregates-published-projections.md); aqui é a deliberação em q/r/d.
+- O **embasamento detalhado** vive na research [`2026-06-29-governance-aggregates-published-projections.md`](../research/2026-06-29-governance-aggregates-published-projections.md); aqui é a deliberação em q/r/d.
 - Em divergência vencem `state.yml`/`tasks.md`/`decision-brief.md`/gates/Git.
 
 ---
