@@ -273,37 +273,60 @@ open-questions:
     provocacao: "um redesign quebra em MIX (sustain=port + create=novo) → família é da PEÇA, não da iniciativa"
     cross-initiative: "vários times fazendo redesign coordenam por CONTRATO compartilhado (nó com N consumers) → coordenação entre iniciativas é DERIVADA do contrato, sem aresta iniciativa↔iniciativa nova"
 
-# ── SÍNTESE de P1+P2+P3 (proposta; aguarda reação da owner antes de aplicar em families/nodes) ──
+# ── PROPOSTA (perspectiva do Codex, reconciliada; status proposed — aguarda owner) ──
+# Substitui a proposta anterior create/sustain (que vira a CAMADA repo-work). Trigger: P1,P2,P3,P5,P6,P7.
 proposed-restructure:
   status: proposed
-  trigger: [P1, P2, P3]
-  new-discriminator: "qual a RELAÇÃO com a capacidade do produto? (não mais entrega-valor sim/não)"
-  families:
-    - id: create
-      rel: "cria capacidade nova (shippa valor novo)"
-      members: [delivery, experiment]
-      was: "capacidade (parte)"
-    - id: sustain
-      rel: "preserva/adapta a capacidade existente"
-      members: [maintenance]
-      was: "capacidade (parte)"
-    - id: discover
-      rel: "reduz incerteza — NÃO shippa/mexe"
-      members: [exploration]
-      was: "aprendizado"
-    - id: respond
-      rel: "contenção reativa"
-      members: [incident]
-    - id: intake
-      rel: "capta + tria"
-      members: [proposal, register]
-    - id: deliberate
-      rel: "o raciocínio q/r/d"
-      members: [question, research, decision]
+  source: "codex + reconciliação claude"
+  insight: "3 EIXOS DIFERENTES, um por camada — não um enum plano de 'natureza'. feature(resultado) × experiment(método) × redesign(transformação) NÃO são do mesmo tipo."
+  layers:
+    - id: intent
+      owns: "enquadramento de negócio, objetivo, target outcome, gate de decisão"
+      strategy: [experiment-led, direct-delivery, migration-led, reliability-led]
+      claude-note: "strategy talvez DERIVADO das execution-units contidas (evitar enum guardado que dança)"
+    - id: execution-unit
+      owns: "unidade CROSS-REPO com lifecycle próprio + unidade semântica (o experimento é UM)"
+      optional: "colapsa quando o trabalho é trivial (1 repo, sem lifecycle próprio)"
+      kinds:
+        - {
+            id: experiment-run,
+            owns: "hipótese/flag/exposição/métricas/guardrails/decision-rule/veredito",
+          }
+        - { id: migration-wave, owns: "from/to/janela-de-compatibilidade" }
+        - { id: feature-slice, owns: "fatia de entrega coordenada" }
+        - {
+            id: incident-response,
+            owns: "severidade/declarar→mitigar→resolver→postmortem",
+            source: reactive,
+          }
+        - { id: shape-up, owns: "sistematização pós-veredito won" }
+        - { id: cleanup, owns: "remoção pós-veredito lost/parcial" }
+        - { id: rollout-slice, owns: "fase de release/canary" }
+    - id: repo-work
+      owns: "execução numa peça por repo"
+      purpose: [create, sustain, discover, operate] # operate = rollout/monitoramento/instrumentação (novo, do playbook)
+      note: "esta camada É a proposta create/sustain anterior + discover + operate"
+  contract:
+    role: "nó de coordenação/versionamento — DENTRO e ENTRE iniciativas"
+    fields: [owner, provider, consumers, revision, compatibility-window, migrations]
+    note: "coordenação entre iniciativas = via contrato compartilhado; a janela-de-compat NÃO é derivável (mora aqui)"
+  deliberation: "q/r/d = ANEXÁVEL a qualquer nó (intent/execution-unit/repo-work/contract), não uma família"
+  intake: "proposal/register = funil PRÉ-intent (register→triagem→gate), fora das 3 camadas"
+  lifecycle-ownership: # o conserto do MAIOR RISCO (níveis certos exigem enums certos)
+    intent: "gate de negócio"
+    experiment-run: "hipótese/veredito"
+    migration-wave: "from/to/compatibilidade"
+    repo-work: "execução por repo"
+    contract: "coordenação/versionamento"
   resolves:
-    P1: "experiment sai de aprendizado e vai p/ create junto de delivery (provisório × comprometido = dimensão, não família)"
-    P2: "maintenance vira família própria (sustain) → some a ambiguidade do teste"
-    P3: "delivery + experiment juntos em create"
-  delivery-vs-experiment: "mesma família (create); a distinção é provisório/sob-hipótese/veredito — dimensão ou lifecycle, não família"
-  naming: "ids em EN (P4); labels em PT"
-  open: "nomes finais das famílias são provisórios (create/sustain/discover/...)"
+    P1-P3: "experiment = execution-unit (experiment-run); NÃO work-kind nem só natureza-de-iniciativa"
+    P2: "some o teste ambíguo — repo-work.purpose (create/sustain/discover/operate) é o eixo da PEÇA"
+    P5: "breakdown = intent → execution-units → repo-works (heterogêneo)"
+    P6: "o experimento é UM (a execution-unit); as peças por repo são repo-works subordinados, coordenados por contrato"
+    P7: "redesign = migration-wave (port=sustain + novo=create + spikes=discover + monitor=operate); contratos coordenam entre iniciativas"
+  maior-risco: "níveis CERTOS com ENUMS ERRADOS — se virar lista plana feature/experiment/redesign, mistura objetivo/método/transformação. Travar lifecycle-por-camada antes dos enums."
+  open:
+    - "nomes finais dos ids (EN, P4)"
+    - "intent.strategy: guardado × derivado"
+    - "feature-slice/rollout-slice puxam peso próprio × colapsam no trivial?"
+    - "onde exploration grande (cross-repo) vive: discover repo-work × discovery execution-unit?"
