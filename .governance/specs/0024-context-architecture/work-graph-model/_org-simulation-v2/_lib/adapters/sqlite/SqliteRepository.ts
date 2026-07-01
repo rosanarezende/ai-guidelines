@@ -106,6 +106,13 @@ export class SqliteRepository implements Repository {
     fs.mkdirSync(path.dirname(dbPath), { recursive: true }); // o .db é CACHE/store → .cache/ (gitignored)
     this.#db = new DatabaseSync(dbPath);
     this.#db.exec(SCHEMA);
+    // migração defensiva: um cache .db antigo (pré-taxonomia v2) não tem a coluna `dimensions`
+    // (CREATE TABLE IF NOT EXISTS não altera tabela existente) → adiciona, idempotente.
+    try {
+      this.#db.exec("ALTER TABLE works ADD COLUMN dimensions TEXT");
+    } catch {
+      /* coluna já existe (schema novo) — ok */
+    }
   }
 
   close(): void {
