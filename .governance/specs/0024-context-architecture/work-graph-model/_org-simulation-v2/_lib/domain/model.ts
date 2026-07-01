@@ -1,7 +1,109 @@
 // model.ts — o MODELO do domínio (entidades + arestas da Lente 3). PURO: não conhece persistência (file/Neo4j).
 // As arestas seguem a Lente 3 do tracker (anota-se 1 lado; o reverso é DERIVADO no banco). Ref cross-repo = o CAMINHO.
 
-export type WorkKind = "delivery" | "experiment" | "incident" | "fix" | "patch";
+// ═══════════ TAXONOMIA v2 (Lentes 3-4): famílias + membros + dimensões + presets ═══════════
+// Migração P0 (features.md): esta fatia introduz o VOCABULÁRIO (aditivo); os consumidores
+// migram no commit de ripple. `Work.kind` estreita p/ CapabilityMember lá; aqui WorkKind ainda
+// = os 5 kinds legados p/ manter tudo compilando.
+
+/** Os MEMBROS do grafo, agrupados por FAMÍLIA (natureza da saída — Lente 3). */
+export type CapabilityMember = "delivery" | "maintenance";
+export type LearningMember = "exploration" | "experiment";
+export type ResponseMember = "incident";
+export type IntakeMember = "proposal" | "register";
+export type DeliberationMember = "question" | "research" | "decision";
+export type GraphMember =
+  | CapabilityMember
+  | LearningMember
+  | ResponseMember
+  | IntakeMember
+  | DeliberationMember;
+
+export type GraphFamily = "capacidade" | "aprendizado" | "resposta" | "intake" | "deliberacao";
+
+/** family DERIVADA do membro (não digitada; anota-se 1 lado só). */
+export const FAMILY_BY_MEMBER: Record<GraphMember, GraphFamily> = {
+  delivery: "capacidade",
+  maintenance: "capacidade",
+  exploration: "aprendizado",
+  experiment: "aprendizado",
+  incident: "resposta",
+  proposal: "intake",
+  register: "intake",
+  question: "deliberacao",
+  research: "deliberacao",
+  decision: "deliberacao",
+};
+export const familyOf = (m: GraphMember): GraphFamily => FAMILY_BY_MEMBER[m];
+
+/** As DIMENSÕES ortogonais (Lente 4). Opcionais no modelo; exigidas por família via enforcement (depois).
+ *  `planned-in` NÃO mora aqui: é `Work.intent` (evita 2ª SSOT — derivado). */
+export type SourceDim = "planned" | "reactive";
+export type VisibilityDim = "user-visible" | "internal" | "operator-visible" | "security-visible";
+export type MaintenanceMode = "corrective" | "adaptive" | "perfective" | "preventive"; // ISO 14764 — só maintenance
+export type ChangeClass = "standard" | "normal" | "emergency"; // ITIL
+export type ServiceClass = "expedite" | "fixed-date" | "standard" | "intangible"; // Kanban
+export interface Dimensions {
+  source?: SourceDim;
+  visibility?: VisibilityDim;
+  maintenanceMode?: MaintenanceMode;
+  changeClass?: ChangeClass;
+  serviceClass?: ServiceClass;
+}
+
+/** PRESETS (UX, não ontologia): expandem p/ membro + dimensões. Lookup PURO — não se armazena o preset (evita drift). */
+export interface Preset {
+  member: GraphMember;
+  dimensions: Dimensions;
+}
+export const PRESETS: Record<string, Preset> = {
+  fix: {
+    member: "maintenance",
+    dimensions: { maintenanceMode: "corrective", visibility: "user-visible" },
+  },
+  "security-patch": {
+    member: "maintenance",
+    dimensions: { maintenanceMode: "corrective", visibility: "security-visible" },
+  },
+  "dep-bump": {
+    member: "maintenance",
+    dimensions: { maintenanceMode: "adaptive", visibility: "internal" },
+  },
+};
+
+/** Membros que um `proposal` pode virar ao promover (INTAKE → capacidade/aprendizado).
+ *  `incident` REMOVIDO: é reativo, não sai de promoção planejada. */
+export type PromotableMember = "delivery" | "maintenance" | "experiment" | "exploration";
+
+// ── LEGACY (back-compat da migração): os 5 kinds antigos + normalizador p/ {membro, dimensões}. ──
+export type LegacyWorkKind = "delivery" | "experiment" | "incident" | "fix" | "patch";
+/** Normaliza um kind legado (dados/refs antigos) p/ o par membro+dimensões da v2. fix/patch → maintenance. */
+export function normalizeLegacyKind(kind: string): { member: GraphMember; dimensions: Dimensions } {
+  switch (kind) {
+    case "fix":
+      return {
+        member: "maintenance",
+        dimensions: { maintenanceMode: "corrective", visibility: "user-visible" },
+      };
+    case "patch":
+      return {
+        member: "maintenance",
+        dimensions: { maintenanceMode: "corrective", visibility: "internal" },
+      };
+    case "experiment":
+      return { member: "experiment", dimensions: {} };
+    case "incident":
+      return { member: "incident", dimensions: { source: "reactive" } };
+    case "delivery":
+      return { member: "delivery", dimensions: {} };
+    default:
+      return { member: kind as GraphMember, dimensions: {} };
+  }
+}
+
+/** @deprecated durante a migração P0 — estreita p/ CapabilityMember ("delivery" | "maintenance") no commit de ripple.
+ *  Hoje ainda = os 5 kinds legados p/ manter os consumidores compilando. */
+export type WorkKind = LegacyWorkKind;
 export type WorkStatus = "draft" | "active" | "done"; // bloqueado/pausado = DERIVADO, não guardado
 export type Weight = "S" | "M" | "L" | "XL";
 export type Level = "low" | "medium" | "high";
@@ -19,6 +121,7 @@ export interface Work {
   status: WorkStatus;
   assignee?: string | null; // `active` EXIGE assignee + início
   weight?: Weight;
+  dimensions?: Dimensions; // Lente 4 (ortogonais; opcionais nesta fatia — enforcement depois). `planned-in` = `intent` (não duplicar).
   intent?: string | null; // back-ref à intent dona (null = reativo/standalone)
   // arestas (Lente 3, agrupadas):
   blockedBy?: Ref[]; // espera TRABALHOS concluírem (⟷ blocks)
