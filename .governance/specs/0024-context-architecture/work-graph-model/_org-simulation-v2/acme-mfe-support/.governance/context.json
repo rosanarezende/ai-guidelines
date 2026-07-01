@@ -5,15 +5,9 @@
       "ref": "acme-mfe-support/delivery/help-on-demand_1",
       "status": "draft",
       "intent": "login_1",
-      "coordinatesWith": [
-        "failure-event"
-      ],
-      "blockedBy": [
-        "acme-design-system/delivery/form-component_1"
-      ],
-      "derivesFrom": [
-        "acme-mfe-support/exploration/proactive-support_1"
-      ]
+      "coordinatesWith": ["failure-event"],
+      "blockedBy": ["acme-design-system/delivery/form-component_1"],
+      "derivesFrom": ["acme-mfe-support/exploration/proactive-support_1"]
     }
   ],
   "answers": [
