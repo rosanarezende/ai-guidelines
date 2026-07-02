@@ -647,6 +647,81 @@ flow-validation:
       suggestion: "permitir repo-work outcome contributes-to target OU classificar como custo/risco operacional fora de objective"
       resolution: "APLICADO — repo-work standalone também emite outcome (aresta emits) + rollup-mechanics.standalone (bucket operacional do dashboard; nada some)"
 
+# ═════════════════════ REVISÃO ADVERSARIAL (P11 · rodada Codex técnica/arquitetural, pós-P10) ═════════════════════
+# Findings RECONCILIADOS contra este arquivo (repo vence). NADA aplicado — aguarda priorização/gate da owner.
+adversarial-review:
+  status: open
+  provocation: P11
+  source: "codex (revisão adversarial do modelo v2, HEAD 9a60e288) + reconciliação claude 2026-07-01"
+  verdict-codex: "coerente como arquitetura conceitual; NÃO pronto ponta-a-ponta na barra do red-team ('mecanismo pega' = resolver + fail-closed + evidência independente). Maior fragilidade: o dashboard ainda pode virar 'verdade por texto bem-formado' — falta o resolver independente que prova que número, fonte, revisão e autoridade são válidos"
+  reconciliation-note: "12 aceitos · 1 parcial (F9). F11 toca a decisão do G11: marcar dangerous-unreviewed é COMPATÍVEL com a decisão da owner (auditabilidade); BLOQUEAR sem reviewer no perfil full = NOVA decisão dela"
+  findings:
+    - id: F1
+      about: "outcome sem schema/resolver fail-closed — attested-by/revision/source/contract-revision são TEXTO"
+      severity: P0
+      reconciliation: "aceito — follow-up direto da barra do red-team; o físico JÁ tem GlobalRef (family:namespace/id#anchor@revision + tombstone) p/ ancorar as refs"
+      suggestion: "schema do outcome com refs RESOLVÍVEIS (GlobalRef) · attested-by como authority · resolver obrigatório que marca invalid/stale"
+    - id: F2
+      about: "rollup primário da INTENT conflado com contributes-to do OUTCOME (outcome pode somar num target que não é o da intent)"
+      severity: P0
+      reconciliation: "aceito — FATO: a aresta contributes-to é outcome → target, mas o rollup-rule fala 'por outcome/intent'; a intent não tem campo primary-target"
+      suggestion: "separar intent.primary-target (vem do authorizes) do contributes-to do outcome; outcome só soma se compatível com o primary-target OU com decision explícita"
+    - id: F3
+      about: "mutation-types burlável: dangerous é string e faltam tipos (profile-change · metric-definition-change · business-link-change · aggregation-change · break-glass como tipo real)"
+      severity: P0
+      reconciliation: "aceito — inconsistência interna CONFIRMADA: governance-profiles.law exige 'mudar de perfil = mutação L8' mas profile-change não existe no catálogo"
+      suggestion: "dangerous como lista ENUMERADA · adicionar os tipos ausentes · fail-closed p/ mutação desconhecida ou incompatível com o diff"
+    - id: F4
+      about: "decision-points são nome + descrição, sem requisitos verificáveis por gate"
+      severity: P1
+      reconciliation: "aceito — accept-verdict sem outcome verificável, release-rollout sem evidência de guardrail, approve-objective sem target/metric-definition"
+      suggestion: "por decision-point: subject-ref · prerequisites · required-evidence · authorized-approver · block/fallback"
+    - id: F5
+      about: "perfil autodeclarado vira bypass: org grande se declara compact/solo e escapa do SoD"
+      severity: P0
+      reconciliation: "aceito — a law atual só pede 'declarar perfil + desvios'; sem escopo/elegibilidade/approver/TTL. Compatível com 'não se bloqueia o solo': a elegibilidade restringe org GRANDE, não o dev solo"
+      suggestion: "profile-declaration com escopo · elegibilidade · approver externo · TTL/revisão periódica · badge visível nos dashboards"
+    - id: F6
+      about: "attester como 'fonte de dados' (compact) pode ser autocertificação disfarçada (o time constrói a fonte, define o target e a usa como attester)"
+      severity: P1
+      reconciliation: "aceito — refina o measurement-roles: máquina só atesta se o producer/owner da fonte for INDEPENDENTE de quem define o target"
+      suggestion: "actual-attester = authority/trust-boundary com owner; machine-attestation só vale com producer independente, senão marcada collapsed/self-attested"
+    - id: F7
+      about: "emissão de outcome por repo-work standalone vive em NOTA, não na aresta formal (emits parte só de execution-unit)"
+      severity: P1
+      reconciliation: "aceito — FATO: a resolution do G14 diz 'repo-work standalone também emite' mas a aresta formal não tem repo-work no from"
+      suggestion: "formalizar emits: from [execution-unit, repo-work] → outcome (ou aresta própria reports-outcome)"
+    - id: F8
+      about: "dependência de contrato AUTODECLARADA no outcome ('quando depende') — omitir contract-revision passa despercebido"
+      severity: P1
+      reconciliation: "aceito — mecanização boa: as revisões requeridas são DERIVÁVEIS da ancestralidade (repo-work coordinates-with contract)"
+      suggestion: "resolver deriva required-contract-revisions do grafo; se o outcome omitir, fail-closed/stale"
+    - id: F9
+      about: "virada de ciclo pode misturar target antigo e novo (actual em dois dashboards)"
+      severity: P1
+      reconciliation: "PARCIAL — states.business-tier JÁ cobre target (fechamento existe); o que falta é CONTINUIDADE (continues-from/supersedes p/ target) + freeze do target ao fechar o ciclo"
+      suggestion: "target com período imutável + freeze no fechamento do ciclo + arestas de continuidade também p/ target"
+    - id: F10
+      about: "simulação de papéis não cobre as fases business (define-objective/define-target/authorize-intake sem accountable por escala)"
+      severity: P1
+      reconciliation: "aceito — FATO: simulation.phases ainda é registro→veredito; o flow ganhou as fases business no bloco B e a matriz não acompanhou"
+      suggestion: "estender simulation/profiles com as business phases (quem define objective/target/allocation em full/trio/solo)"
+    - id: F11
+      about: "alerta de mutação perigosa só DETECTA, não bloqueia — e precisa ser rotulado como tal"
+      severity: P1
+      reconciliation: "aceito com NUANCE — marcar dangerous-unreviewed no dashboard/linter é COMPATÍVEL com a decisão do G11 (auditabilidade); BLOQUEAR sem reviewer no perfil full AMPLIA a decisão → gate da owner"
+      suggestion: "dashboard/linter marcam dangerous-unreviewed; opcional (decisão owner): no perfil full, bloquear sem reviewer/decision"
+    - id: F12
+      about: "loop do mapa garante sync só do SUBCONJUNTO projetado, e o --check não roda no validate/CI"
+      severity: P1
+      reconciliation: "aceito — FATO conferido: o validate do package.json não chama generate.mjs --check; o gerador não projeta mutation-types/rollup-mechanics/envelope/trust. Mexer no contrato de scripts = gate da owner"
+      suggestion: "adicionar o --check ao contrato de validação + coverage manifest (o gerador declara o que projeta e o que omite; seção crítica mudou sem projeção → falha)"
+    - id: F13
+      about: "Q-collapse e Q-discover-level abertas deixam 2 jornadas ambíguas (feature trivial · discovery cross-repo)"
+      severity: P2
+      reconciliation: "aceito — já registradas como open-questions; a mecanização adicional deveria esperar essas regras mínimas"
+      suggestion: "fechar regra mínima de collapse + discovery-unit antes de mecanizar mais"
+
 # ═════════════════════ PROVOCAÇÕES ═════════════════════
 open-questions:
   - {
