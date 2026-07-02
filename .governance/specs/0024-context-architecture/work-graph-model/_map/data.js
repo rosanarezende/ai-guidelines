@@ -670,6 +670,16 @@ window.MODEL = {
           derived:
             "migration-wave — porta de → para em 3 repos; janela de compatibilidade do contrato acme-user-context; consumidores avisados; corte gradual → release-rollout",
         },
+        {
+          id: "intent-p99-hardening",
+          team: "time-sre",
+          "authorized-by": "obj-efficiency",
+          title: "derrubar o p99 da plataforma (timeouts, retries, cache)",
+          approach: "direct",
+          signal: "operational-target",
+          derived:
+            "quase sempre COLAPSA — peças sustain (preventivo) e operate direto nos repos; o placar é OPERACIONAL (SLO p99, incidentes), não métrica de produto; guardrails no dashboard",
+        },
       ],
     },
     derivation: [
