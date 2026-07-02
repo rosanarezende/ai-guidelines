@@ -7,6 +7,22 @@ const base = loadOrg();
 const clone = () => structuredClone(base);
 const intent = (o, id) => o.intents.find((i) => i.id === id);
 const work = (o, iid, wid) => intent(o, iid).works.find((w) => w.id === wid);
+// outcome VÁLIDO de referência (bloco J): emitido pelo CTA, atestado por fonte independente
+const validOutcome = (over = {}) => ({
+  id: "out-teste",
+  "emitted-by": "intent-cta-upgrade",
+  source: "acme-analytics/conversion@rev42",
+  window: { start: "2027-01-01", end: "2027-03-31" },
+  metric: "conversion-rate",
+  value: "+2 %",
+  aggregation: "avg",
+  "attested-by": "acme-analytics",
+  revision: "warehouse@rev42",
+  "contract-revisions": [],
+  "contributes-to": "tgt-billing-conv",
+  envelope: { actor: "ana-dev", authority: "pm-growth", "idempotency-key": "out-teste-1" },
+  ...over,
+});
 
 const CASES = [
   { id: "baseline sem erros (warns são permitidos)", expect: null, mutate: () => clone() },
@@ -111,6 +127,92 @@ const CASES = [
     mutate: () => {
       const o = clone();
       work(o, "intent-cta-upgrade", "contas-legadas").module = "mod-nao-existe";
+      return o;
+    },
+  },
+  // ── bloco J: o resolver de outcomes ──
+  {
+    id: "J·0 outcome VÁLIDO passa (positivo)",
+    expect: null,
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(validOutcome());
+      return o;
+    },
+  },
+  {
+    id: "J·1 agregação ≠ metric-definition",
+    expect: "aggregation-mismatch",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(validOutcome({ aggregation: "sum" }));
+      return o;
+    },
+  },
+  {
+    id: "J·2 attester do PRÓPRIO time medido (self-attested não soma)",
+    expect: "self-attested",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(validOutcome({ "attested-by": "acme-mfe-billing" }));
+      return o;
+    },
+  },
+  {
+    id: "J·3 intent muda contrato e o outcome não cita a revision (BLOCKED)",
+    expect: "blocked-contract",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(
+        validOutcome({
+          id: "out-checkout",
+          "emitted-by": "intent-checkout-stack",
+          metric: "cost-to-serve",
+          value: "-3 R$/pedido",
+          "attested-by": "acme-data-pipeline",
+          "contributes-to": "tgt-checkout-stack",
+          "contract-revisions": [],
+        })
+      );
+      return o;
+    },
+  },
+  {
+    id: "J·4 janela invertida",
+    expect: "window-invalid",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(validOutcome({ window: { start: "2027-06-01", end: "2027-01-01" } }));
+      return o;
+    },
+  },
+  {
+    id: "J·5 target FROZEN não recebe actual",
+    expect: "target-frozen",
+    mutate: () => {
+      const o = clone();
+      o.targets.find((t) => t.id === "tgt-billing-conv").status = "closed";
+      o.outcomes.push(validOutcome());
+      return o;
+    },
+  },
+  {
+    id: "J·6 outcome somando fora do primary-target da intent",
+    expect: "rollup-coherence",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(validOutcome({ "contributes-to": "tgt-onboarding-act" }));
+      return o;
+    },
+  },
+  {
+    id: "J·7 envelope sem actor (actual-publish é mutação perigosa)",
+    expect: "envelope",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(
+        validOutcome({ envelope: { authority: "pm-growth", "idempotency-key": "k9" } })
+      );
       return o;
     },
   },

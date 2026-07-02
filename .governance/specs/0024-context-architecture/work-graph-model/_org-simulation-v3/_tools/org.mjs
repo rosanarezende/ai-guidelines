@@ -387,11 +387,100 @@ export function validateOrg(o) {
   return issues;
 }
 
-// ═════════ RESOLVER DE OUTCOMES (bloco J — preenchido a seguir) ═════════
+// ═════════ RESOLVER DE OUTCOMES (bloco J da F5) — FAIL-CLOSED p/ somar, VISÍVEL p/ exibir ═════════
+// O único insumo do target.actual é um outcome que passe AQUI. Texto bem-formado não é evidência.
 function resolveOutcomes(o, ix, { err, warn }) {
   for (const out of o.outcomes) {
+    // refs resolvem
     if (!ix.ids.metric.has(out.metric)) err("refs", out.id, `metric "${out.metric}" não existe`);
     if (!ix.ids.target.has(out["contributes-to"]))
       err("refs", out.id, `contributes-to "${out["contributes-to"]}" não existe`);
+    const emitter =
+      ix.intentById[out["emitted-by"]] ||
+      o.standalone.find((s) => s.id === out["emitted-by"]) ||
+      null;
+    if (!emitter)
+      err("refs", out.id, `emitted-by "${out["emitted-by"]}" não é intent nem standalone`);
+
+    // janela fechada e válida
+    const w = out.window || {};
+    if (!w.start || !w.end || String(w.start) >= String(w.end))
+      err("window-invalid", out.id, `window inválida (start "${w.start}" · end "${w.end}")`);
+
+    const m = ix.metricById[out.metric];
+    if (m) {
+      // agregação DEVE bater com a metric-definition
+      if (out.aggregation !== m.aggregation)
+        err(
+          "aggregation-mismatch",
+          out.id,
+          `aggregation "${out.aggregation}" ≠ da metric-definition ("${m.aggregation}")`
+        );
+      // unidade do value deve aparecer no value (coerência fraca — warn)
+      if (m.unit && !String(out.value).includes(m.unit))
+        warn("unit-mismatch", out.id, `value "${out.value}" não aparenta a unidade "${m.unit}"`);
+      // fonte: o attester deveria ser a source da métrica
+      if (out["attested-by"] !== m.source)
+        warn(
+          "attester-source",
+          out.id,
+          `attested-by "${out["attested-by"]}" ≠ source da métrica ("${m.source}")`
+        );
+    }
+
+    const t = ix.targetById[out["contributes-to"]];
+    if (t) {
+      // target FROZEN não recebe actual (F9 da P11)
+      if (t.status !== "active")
+        err(
+          "target-frozen",
+          out.id,
+          `target "${t.id}" está "${t.status}" — não recebe actual novo (vai ao continuador ou fica unassigned VISÍVEL)`
+        );
+      // independência REAL do attester (cadeia de ownership) — no perfil full, self-attested NÃO soma
+      const attRepo = ix.repoById[out["attested-by"]];
+      const attOwner = attRepo ? attRepo.owner : null;
+      if (out["attested-by"] === t.definer || (attOwner && attOwner === t.node))
+        err(
+          "self-attested",
+          out.id,
+          `attester "${out["attested-by"]}"${attOwner ? ` (owner: ${attOwner})` : ""} colapsa com quem define/é medido — self-attested NÃO soma no perfil full`
+        );
+    }
+
+    // rollup: o outcome soma no primary-target da intent emissora (F2) — desvio exige decision
+    if (emitter && ix.intentById[out["emitted-by"]]) {
+      const it = ix.intentById[out["emitted-by"]];
+      if (it["primary-target"] && out["contributes-to"] !== it["primary-target"])
+        err(
+          "rollup-coherence",
+          out.id,
+          `outcome soma em "${out["contributes-to"]}" mas o primary-target da intent é "${it["primary-target"]}" (desvio exige decision explícita)`
+        );
+      // contratos: os MUDADOS pela intent DEVEM estar citados com revisão (derivado, não autodeclarado)
+      for (const c of it["contracts-changed"] || []) {
+        const cited = (out["contract-revisions"] || []).some((cr) =>
+          String(cr).startsWith(c + "@")
+        );
+        if (!cited)
+          err(
+            "blocked-contract",
+            out.id,
+            `a intent muda o contrato "${c}" mas o outcome não cita "${c}@<revision>" — BLOCKED (dependência verificável)`
+          );
+      }
+    }
+    // toda contract-revision citada deve referir contrato existente
+    for (const cr of out["contract-revisions"] || []) {
+      const cid = String(cr).split("@")[0];
+      if (!ix.ids.contract.has(cid))
+        err("refs", out.id, `contract-revision "${cr}" refere contrato inexistente`);
+    }
+
+    // envelope L8 mínimo (conteúdo; a RESOLUÇÃO da authority entra no bloco K)
+    const env = out.envelope || {};
+    for (const f of ["actor", "authority", "idempotency-key"])
+      if (!env[f])
+        err("envelope", out.id, `envelope sem "${f}" — actual-publish é mutação PERIGOSA`);
   }
 }
