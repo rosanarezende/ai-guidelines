@@ -7,7 +7,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
-import { loadOrg, validateOrg } from "./org.mjs";
+import { deriveIntent, loadOrg, validateOrg } from "./org.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const APPS = path.join(here, "..", "_apps");
@@ -30,6 +30,13 @@ for (const x of o.areas) {
 for (const x of o.theses || []) {
   N(x.id, "thesis", x.says, x);
   E(x.frames, x.id, "framed-by");
+}
+for (const x of o.proposals || []) {
+  N(x.id, "proposal", x.title, x);
+  E(x["authorized-by"], x.id, "authorizes");
+  if (x.target) E(x.id, x.target, "proposes-for");
+  const [kind, id] = String(x["raised-by"] || "").split(":");
+  if (kind && id) E(id, x.id, "raises");
 }
 for (const x of o.authorities || []) {
   N(x.id, "authority", x.id, x);
@@ -74,7 +81,7 @@ for (const x of o.targets) {
     E(x["attestation-collapse"]["approved-by"], x.id, "approves-collapse");
 }
 for (const it of o.intents) {
-  N(it.id, "intent", it.title, it);
+  N(it.id, "intent", it.title, { ...it, derived: deriveIntent(it, o) });
   E(it["authorized-by"], it.id, "authorizes");
   E(it.team, it.id, "runs");
   if (it["primary-target"]) E(it.id, it["primary-target"], "primary-target");
@@ -95,6 +102,10 @@ for (const it of o.intents) {
 for (const s of o.standalone) {
   N(s.id, "standalone", `${s.kind}: ${s.id}`, s);
   E(s.id, s.repo, "in-repo");
+  for (const f of s["follow-ups"] || []) {
+    const [kind, id] = String(f.ref || "").split(":");
+    if (kind && id) E(s.id, id, "raises");
+  }
 }
 
 // perfis de governança (snapshot do model.yml) — p/ o app das empresas

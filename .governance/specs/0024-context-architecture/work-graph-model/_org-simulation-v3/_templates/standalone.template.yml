@@ -4,6 +4,17 @@ id: <slug>
 kind: fix # fix | incident-response (só por ALERTA verificável) | dep-bump | <preset>
 repo: <repo>
 origin: "<de onde veio: suporte · alerta · rotina>"
+# routing:
+#   matcher: local-capability-matcher
+#   query: "<texto usado no roteamento>"
+#   selected-repo: <repo>
+#   decision: followed # followed | overrode
+#   decided-by: <authority>
+#   suggestions:
+#     - { repo: <repo>, score: 0.0, unknown: false, evidence: [<cap/evidência>] }
 review: interno # derivado como sempre (repo de outro time → externo)
 placar: operational-bucket
-# incident-response acrescenta: severity · mttr · postmortem · follow-ups (viram peças/intake)
+# incident-response acrescenta: severity · mttr · postmortem · follow-ups (refs resolvíveis)
+# follow-ups:
+#   - { ref: standalone:<id>, kind: fix, reason: "<por que nasceu>" }
+#   - { ref: proposal:<id>, kind: proposal, reason: "<por que volta ao intake>" }

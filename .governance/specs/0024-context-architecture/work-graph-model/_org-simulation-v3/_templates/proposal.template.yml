@@ -1,0 +1,8 @@
+# TEMPLATE proposal — intake pré-intent. Não é compromisso de execução.
+id: prop-<slug>
+title: "<ideia/demanda>"
+raised-by: standalone:<id> # GlobalRef simples: standalone:<id> | proposal:<id> | intent:<id>
+authorized-by: <objective>
+target: <target-opcional>
+status: proposed
+note: "<contexto suficiente para triagem/gate>"

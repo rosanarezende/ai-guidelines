@@ -31,7 +31,7 @@
 - **Bloco J — resolver de verdade (P0) · ✅ APLICADO:** resolver de outcome completo (refs · janela · unidade · revision · attester · contract-revisions derivadas) + independência REAL do attester (cadeia de ownership: fonte × métrica × nó medido) + UI só afirma o que o resolver provou.
 - **Bloco K — authority & envelope (P0) · ✅ APLICADO:** registry de authorities/trust-boundaries (pessoas · times · fontes com owner resolvível) + envelope L8 mínimo nas mutações perigosas (contract-revision · actual-publish · profile-change · verdict · break-glass). **Decisão posterior aplicada:** os 3 targets self-attested de plataforma/observabilidade ficam na sim com `attestation-collapse` logado, aprovado por sponsor e visível no dashboard; sem esse log, o validador falha.
 - **Bloco L — coordenação (P1) · ✅ APLICADO:** fila de revisão por contrato (`revision-proposals`: breaking? · consumers · owner-approval · decision) — a contenção `checkout-stack × consent-center × acme-user-context` vira caso resolvível — + deps cross-intent resolvíveis com ciclo no grafo inteiro.
-- **Bloco M — derivação & fluxo (P1):** observed-form/approach-drift/signal-drift/collapse lint + follow-ups→proposal resolvível (aresta raises) + stub do matcher (score · unknown · evidence · followed/overrode).
+- **Bloco M — derivação & fluxo (P1) · ✅ APLICADO:** observed-form/approach-drift/signal-drift/collapse lint calculado (warning, não campo editável) + follow-ups→standalone/proposal resolvíveis (aresta raises) + stub do matcher (score · unknown · evidence · followed/overrode).
 - **Bloco N — infra (P1):** vendor/SRI p/ os apps (+ CSP) · separação load→normalize→resolve→lint no tooling.
 
 ## Arquitetura (propostas do Codex, aceitas em princípio)

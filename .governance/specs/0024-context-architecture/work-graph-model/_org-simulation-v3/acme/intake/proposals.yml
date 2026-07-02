@@ -1,0 +1,10 @@
+# proposals.yml — intake mínimo da v3. Proposal é pré-intent: registra uma demanda levantada
+# por standalone/incident sem fingir que já virou iniciativa aprovada.
+proposals:
+  - id: prop-checkout-hardening
+    title: "hardening planejado do checkout pós-incidente"
+    raised-by: standalone:incidente-checkout
+    authorized-by: obj-efficiency
+    target: tgt-sre-incidents
+    status: proposed
+    note: "vem do postmortem do incidente; pode virar intent reliability/operacional ou ser descartada no gate"

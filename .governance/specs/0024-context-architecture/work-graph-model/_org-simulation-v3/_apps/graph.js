@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "7ce3ab9dd6b8",
+  contentHash: "39680e192ec8",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -178,6 +178,20 @@ window.GRAPH = {
         frames: "obj-trust",
         says: "minimizar dados coletados e dar controle ao cliente reduz risco e constrói confiança",
         owner: "head-platform",
+      },
+    },
+    {
+      id: "prop-checkout-hardening",
+      type: "proposal",
+      label: "hardening planejado do checkout pós-incidente",
+      data: {
+        id: "prop-checkout-hardening",
+        title: "hardening planejado do checkout pós-incidente",
+        "raised-by": "standalone:incidente-checkout",
+        "authorized-by": "obj-efficiency",
+        target: "tgt-sre-incidents",
+        status: "proposed",
+        note: "vem do postmortem do incidente; pode virar intent reliability/operacional ou ser descartada no gate",
       },
     },
     {
@@ -990,6 +1004,14 @@ window.GRAPH = {
             gate: "accept-verdict",
           },
         ],
+        derived: {
+          observedApproach: "validate-first",
+          observedSignal: "none",
+          observedForm: "experiment-run",
+          collapse: "unit",
+          repoCount: 3,
+          reason: "multi-repo, validate-first ou contrato acorda coordination unit",
+        },
       },
     },
     {
@@ -1117,6 +1139,14 @@ window.GRAPH = {
             then: "fecha a janela, desliga o legado; outcome sobe no placar do custo de servir",
           },
         ],
+        derived: {
+          observedApproach: "direct",
+          observedSignal: "touches-contract",
+          observedForm: "migration-wave",
+          collapse: "unit",
+          repoCount: 6,
+          reason: "multi-repo, validate-first ou contrato acorda coordination unit",
+        },
       },
     },
     {
@@ -1271,6 +1301,14 @@ window.GRAPH = {
             then: "decision explícita: uma revisão v4 única OU janelas encadeadas",
           },
         ],
+        derived: {
+          observedApproach: "direct",
+          observedSignal: "touches-contract",
+          observedForm: "migration-wave",
+          collapse: "unit",
+          repoCount: 3,
+          reason: "multi-repo, validate-first ou contrato acorda coordination unit",
+        },
       },
     },
     {
@@ -1388,6 +1426,14 @@ window.GRAPH = {
             gate: "accept-verdict",
           },
         ],
+        derived: {
+          observedApproach: "validate-first",
+          observedSignal: "none",
+          observedForm: "experiment-run",
+          collapse: "unit",
+          repoCount: 4,
+          reason: "multi-repo, validate-first ou contrato acorda coordination unit",
+        },
       },
     },
     {
@@ -1511,6 +1557,14 @@ window.GRAPH = {
             then: "escala: vira experimento (validate-first) de formato",
           },
         ],
+        derived: {
+          observedApproach: "direct",
+          observedSignal: "none",
+          observedForm: "delivery-slice",
+          collapse: "unit",
+          repoCount: 2,
+          reason: "multi-repo, validate-first ou contrato acorda coordination unit",
+        },
       },
     },
     {
@@ -1603,6 +1657,14 @@ window.GRAPH = {
             gate: "accept-verdict",
           },
         ],
+        derived: {
+          observedApproach: "validate-first",
+          observedSignal: "none",
+          observedForm: "experiment-run",
+          collapse: "unit",
+          repoCount: 2,
+          reason: "multi-repo, validate-first ou contrato acorda coordination unit",
+        },
       },
     },
     {
@@ -1682,6 +1744,14 @@ window.GRAPH = {
             then: "escala: vira descoberta (investigar causa) OU experimento de performance (validate-first)",
           },
         ],
+        derived: {
+          observedApproach: "direct",
+          observedSignal: "operational-target",
+          observedForm: "operational-sustain",
+          collapse: "collapsed",
+          repoCount: 3,
+          reason: "scaling-law colapsa em repo-work/standalone",
+        },
       },
     },
     {
@@ -1734,7 +1804,27 @@ window.GRAPH = {
         kind: "fix",
         repo: "acme-checkout",
         origin: "suporte reporta: cupom duplo zera o frete",
-        "routed-by": "matcher (caps: cupom · frete) — humano confirmou (followed)",
+        routing: {
+          matcher: "local-capability-matcher",
+          query: "cupom duplo zera frete",
+          "selected-repo": "acme-checkout",
+          decision: "followed",
+          "decided-by": "lead-checkout",
+          suggestions: [
+            {
+              repo: "acme-checkout",
+              score: 0.91,
+              unknown: false,
+              evidence: ["cap:cupom", "cap:frete", "owner:time-checkout"],
+            },
+            {
+              repo: "acme-checkout-api",
+              score: 0.44,
+              unknown: true,
+              evidence: [],
+            },
+          ],
+        },
         review: "interno",
         placar: "operational-bucket",
       },
@@ -1752,10 +1842,32 @@ window.GRAPH = {
         mttr: "43min",
         postmortem: "blameless",
         "follow-ups": [
-          "fix (peça sustain no acme-checkout-api)",
-          "proposta de hardening → intake (com authorized-by ou standalone)",
+          {
+            ref: "standalone:fix-checkout-timeout",
+            kind: "fix",
+            reason: "ajustar timeouts que agravaram a mitigação",
+          },
+          {
+            ref: "proposal:prop-checkout-hardening",
+            kind: "proposal",
+            reason: "avaliar hardening planejado pós-postmortem",
+          },
         ],
         placar: "operational-bucket + MTTR",
+      },
+    },
+    {
+      id: "fix-checkout-timeout",
+      type: "standalone",
+      label: "fix: fix-checkout-timeout",
+      data: {
+        id: "fix-checkout-timeout",
+        kind: "fix",
+        repo: "acme-checkout-api",
+        origin:
+          "follow-up de standalone:incidente-checkout — reduzir timeout e fallback do checkout",
+        review: "interno",
+        placar: "operational-bucket",
       },
     },
     {
@@ -1850,6 +1962,24 @@ window.GRAPH = {
       source: "obj-trust",
       target: "tese-privacidade",
       type: "framed-by",
+    },
+    {
+      id: "authorizes:obj-efficiency->prop-checkout-hardening",
+      source: "obj-efficiency",
+      target: "prop-checkout-hardening",
+      type: "authorizes",
+    },
+    {
+      id: "proposes-for:prop-checkout-hardening->tgt-sre-incidents",
+      source: "prop-checkout-hardening",
+      target: "tgt-sre-incidents",
+      type: "proposes-for",
+    },
+    {
+      id: "raises:incidente-checkout->prop-checkout-hardening",
+      source: "incidente-checkout",
+      target: "prop-checkout-hardening",
+      type: "raises",
     },
     {
       id: "belongs-to:head-growth->area-growth",
@@ -3162,6 +3292,24 @@ window.GRAPH = {
     {
       id: "in-repo:incidente-checkout->acme-checkout-api",
       source: "incidente-checkout",
+      target: "acme-checkout-api",
+      type: "in-repo",
+    },
+    {
+      id: "raises:incidente-checkout->fix-checkout-timeout",
+      source: "incidente-checkout",
+      target: "fix-checkout-timeout",
+      type: "raises",
+    },
+    {
+      id: "raises:incidente-checkout->prop-checkout-hardening",
+      source: "incidente-checkout",
+      target: "prop-checkout-hardening",
+      type: "raises",
+    },
+    {
+      id: "in-repo:fix-checkout-timeout->acme-checkout-api",
+      source: "fix-checkout-timeout",
       target: "acme-checkout-api",
       type: "in-repo",
     },

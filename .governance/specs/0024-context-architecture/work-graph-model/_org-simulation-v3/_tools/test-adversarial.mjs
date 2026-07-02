@@ -376,6 +376,58 @@ const CASES = [
       return o;
     },
   },
+  // ── bloco M: derivação/drift + follow-ups + matcher stub ──
+  {
+    id: "M·1 approach-drift é detectado sem bloquear",
+    expect: "approach-drift",
+    mutate: () => {
+      const o = clone();
+      const it = intent(o, "intent-help-selfservice");
+      it.hypothesis = "self-service reduz ticket sem piorar satisfação";
+      it["decision-rule"] = "ganha se ticket-cost cai sem churn subir";
+      return o;
+    },
+  },
+  {
+    id: "M·2 signal-drift é detectado sem bloquear",
+    expect: "signal-drift",
+    mutate: () => {
+      const o = clone();
+      intent(o, "intent-p99-hardening").signal = "none";
+      return o;
+    },
+  },
+  {
+    id: "M·3 follow-up de incidente para proposal fantasma falha",
+    expect: "refs",
+    mutate: () => {
+      const o = clone();
+      o.standalone
+        .find((s) => s.id === "incidente-checkout")
+        ["follow-ups"].find((f) => f.kind === "proposal").ref = "proposal:fantasma";
+      return o;
+    },
+  },
+  {
+    id: "M·4 matcher seguido em sugestão unknown falha",
+    expect: "matcher-routing",
+    mutate: () => {
+      const o = clone();
+      const routing = o.standalone.find((s) => s.id === "bug-frete").routing;
+      routing.suggestions[0].unknown = true;
+      return o;
+    },
+  },
+  {
+    id: "M·5 matcher sem evidence independente falha",
+    expect: "matcher-evidence",
+    mutate: () => {
+      const o = clone();
+      const routing = o.standalone.find((s) => s.id === "bug-frete").routing;
+      routing.suggestions[0].evidence = [];
+      return o;
+    },
+  },
 ];
 
 export function run(cases) {
@@ -391,7 +443,7 @@ export function run(cases) {
         errs.slice(0, 6).forEach((e) => console.log("    ", e.rule, "·", e.node, "—", e.msg));
       }
     } else {
-      const ok = errs.some((i) => i.rule === c.expect);
+      const ok = issues.some((i) => i.rule === c.expect);
       console.log(
         `${ok ? "✓" : "✗"} ${c.id} → "${c.expect}"${ok ? " pego" : " — PASSOU SEM PEGAR!"}`
       );

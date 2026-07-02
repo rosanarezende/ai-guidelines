@@ -14,6 +14,7 @@ const targets = nodesBy("target");
 const intents = nodesBy("intent");
 const standalone = nodesBy("standalone");
 const contracts = nodesBy("contract");
+const proposals = nodesBy("proposal");
 
 const PROFILE_LABEL = { full: "grande (full)", compact: "média (compact)", solo: "solo" };
 
@@ -93,7 +94,9 @@ function Home({ go }) {
         <div className="kv">
           <span className="big">${standalone.length}</span>itens reativos/avulsos
         </div>
-        <div className="kv">${standalone.map((s) => s.data.kind).join(" · ")}</div>
+        <div className="kv">
+          ${standalone.map((s) => s.data.kind).join(" · ")} · ${proposals.length} proposal(s)
+        </div>
       </div>
       <div className="card click" onClick=${() => go("perfil", null)}>
         <h2>governança</h2>
@@ -227,6 +230,13 @@ function Intents({ sel, go }) {
             <b>muda contrato:</b> ${inf.changed.join(" · ")} — abre janela de compatibilidade
           </div>`
         : null}
+      ${it.data.derived
+        ? html`<div className="kv">
+            <b>derivado:</b> form=${it.data.derived.observedForm} ·
+            approach=${it.data.derived.observedApproach} · signal=${it.data.derived.observedSignal}
+            · ${it.data.derived.collapse}
+          </div>`
+        : null}
       <div className="kv"><b>gate à frente:</b> ${inf.gate}</div>
     </div>
     <div className="card">
@@ -260,6 +270,11 @@ function Intents({ sel, go }) {
 
 // ─── operacional ────────────────────────────────────────────────────────────
 function Operacional() {
+  const refLabel = (ref) => {
+    const [, id] = String(ref || "").split(":");
+    const n = node(id);
+    return n ? `${ref} — ${n.label}` : ref;
+  };
   return html`<div>
     ${standalone.map(
       (s) =>
@@ -271,15 +286,26 @@ function Operacional() {
                 <b>severidade:</b> ${s.data.severity} · MTTR: ${s.data.mttr}
               </div>`
             : null}
-          ${s.data["routed-by"]
-            ? html`<div className="kv"><b>roteado:</b> ${s.data["routed-by"]}</div>`
+          ${s.data.routing
+            ? html`<div className="kv">
+                <b>matcher:</b> ${s.data.routing.matcher} · ${s.data.routing.decision} · escolhido:
+                ${s.data.routing["selected-repo"]} · por ${s.data.routing["decided-by"]}
+                <br />
+                <span className="muted">
+                  top score: ${s.data.routing.suggestions[0].score} · unknown:
+                  ${String(s.data.routing.suggestions[0].unknown)} · evidence:
+                  ${s.data.routing.suggestions[0].evidence.join(" · ") || "sem evidência"}
+                </span>
+              </div>`
             : null}
           ${s.data.review ? html`<div className="kv"><b>review:</b> ${s.data.review}</div>` : null}
           ${(s.data["follow-ups"] || []).length
             ? html`<div className="kv">
                 <b>follow-ups:</b>
                 <ul>
-                  ${s.data["follow-ups"].map((f, k) => html`<li key=${k}>${f}</li>`)}
+                  ${s.data["follow-ups"].map(
+                    (f, k) => html`<li key=${k}>${refLabel(f.ref)} — ${f.reason}</li>`
+                  )}
                 </ul>
               </div>`
             : null}
@@ -288,6 +314,20 @@ function Operacional() {
           </div>
         </div>`
     )}
+    ${proposals.length
+      ? html`<div className="card">
+          <h2>intake levantado por operação</h2>
+          ${proposals.map(
+            (p) =>
+              html`<div className="row" key=${p.id}>
+                <b>${p.label}</b> <span className="pill">${p.data.status}</span><br />
+                <span className="muted">
+                  raised-by: ${p.data["raised-by"]} · authorized-by: ${p.data["authorized-by"]}
+                </span>
+              </div>`
+          )}
+        </div>`
+      : null}
   </div>`;
 }
 

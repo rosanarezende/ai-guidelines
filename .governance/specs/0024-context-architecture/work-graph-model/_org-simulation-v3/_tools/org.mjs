@@ -22,6 +22,7 @@ export function loadOrg() {
     targets: load("business/targets.yml").targets,
     repos: load("repos/repos.yml").repos,
     contracts: load("contracts/contracts.yml").contracts,
+    proposals: load("intake/proposals.yml").proposals,
     intents: readdirSync(path.join(ACME, "intents"))
       .filter((f) => f.endsWith(".yml"))
       .map((f) => load("intents/" + f)),
@@ -38,6 +39,9 @@ const LIFECYCLE = ["proposed", "active", "closed", "superseded", "dropped"];
 const STANDALONE_KINDS = ["fix", "dep-bump", "incident-response"];
 const AGGREGATIONS = ["sum", "avg", "p99", "last"];
 const CONTRACT_DECISIONS = ["single-revision", "sequenced-windows", "split", "rejected", "pending"];
+const ROUTING_DECISIONS = ["followed", "overrode"];
+const FOLLOWUP_KINDS = ["fix", "proposal"];
+const OPERATIONAL_METRICS = ["p99-latency", "incident-count", "cost-to-serve"];
 
 const SCHEMAS = {
   objective: {
@@ -48,6 +52,11 @@ const SCHEMAS = {
   area: { required: ["id", "title", "cascades-from", "driver", "owner"], optional: [] },
   team: { required: ["id", "area", "lead"], optional: [] },
   thesis: { required: ["id", "frames", "says", "owner"], optional: [] },
+  proposal: {
+    required: ["id", "title", "raised-by", "authorized-by", "status"],
+    optional: ["target", "note"],
+    enums: { status: LIFECYCLE },
+  },
   metric: {
     required: ["id", "unit", "source", "aggregation", "owner"],
     optional: [],
@@ -114,8 +123,22 @@ const SCHEMAS = {
   next: { required: ["when", "then"], optional: ["gate"] },
   standalone: {
     required: ["id", "kind", "repo", "origin", "placar"],
-    optional: ["review", "routed-by", "severity", "mttr", "postmortem", "follow-ups"],
+    optional: ["review", "routing", "severity", "mttr", "postmortem", "follow-ups"],
     enums: { kind: STANDALONE_KINDS },
+  },
+  routing: {
+    required: ["matcher", "query", "selected-repo", "decision", "decided-by", "suggestions"],
+    optional: ["reason"],
+    enums: { decision: ROUTING_DECISIONS },
+  },
+  "matcher-suggestion": {
+    required: ["repo", "score", "unknown", "evidence"],
+    optional: [],
+  },
+  "follow-up": {
+    required: ["ref", "kind", "reason"],
+    optional: [],
+    enums: { kind: FOLLOWUP_KINDS },
   },
   outcome: {
     required: [
@@ -187,6 +210,7 @@ function checkAllSchemas(o, issues) {
   for (const x of o.areas) checkSchema("area", x, x.id, issues);
   for (const x of o.teams) checkSchema("team", x, x.id, issues);
   for (const x of o.theses || []) checkSchema("thesis", x, x.id, issues);
+  for (const x of o.proposals || []) checkSchema("proposal", x, x.id, issues);
   for (const x of o.metrics) checkSchema("metric", x, x.id, issues);
   for (const x of o.targets) {
     checkSchema("target", x, x.id, issues);
@@ -213,12 +237,68 @@ function checkAllSchemas(o, issues) {
     for (const [k, n] of (it.next || []).entries())
       checkSchema("next", n, `${it.id}::next[${k}]`, issues);
   }
-  for (const x of o.standalone) checkSchema("standalone", x, x.id, issues);
+  for (const x of o.standalone) {
+    checkSchema("standalone", x, x.id, issues);
+    if (x.routing) {
+      checkSchema("routing", x.routing, `${x.id}::routing`, issues);
+      for (const [k, s] of (x.routing.suggestions || []).entries())
+        checkSchema("matcher-suggestion", s, `${x.id}::routing.suggestions[${k}]`, issues);
+    }
+    for (const [k, f] of (x["follow-ups"] || []).entries())
+      checkSchema("follow-up", f, `${x.id}::follow-ups[${k}]`, issues);
+  }
   for (const x of o.authorities || []) checkSchema("authority", x, x.id, issues);
   for (const x of o.outcomes) {
     checkSchema("outcome", x, x.id, issues);
     if (x.envelope) checkSchema("envelope", x.envelope, `${x.id}::envelope`, issues);
   }
+}
+
+export function deriveIntent(it, o) {
+  const works = it.works || [];
+  const repos = new Set(works.map((w) => w.repo));
+  const target = (o.targets || []).find((t) => t.id === it["primary-target"]);
+  const metric = target ? (o.metrics || []).find((m) => m.id === target.metric) : null;
+  const hasDecisionEvidence = Boolean(it.hypothesis || it["decision-rule"]);
+  const observedApproach = hasDecisionEvidence ? "validate-first" : "direct";
+  let observedSignal = "none";
+  if ((it["contracts-changed"] || []).length > 0) observedSignal = "touches-contract";
+  else if (
+    works.length > 0 &&
+    works.every((w) => ["sustain", "operate"].includes(w.purpose)) &&
+    metric &&
+    OPERATIONAL_METRICS.includes(metric.id)
+  )
+    observedSignal = "operational-target";
+
+  const multiRepo = repos.size > 1;
+  let observedForm = "repo-work";
+  let collapse = "collapsed";
+  if (observedApproach === "validate-first") {
+    observedForm = "experiment-run";
+    collapse = "unit";
+  } else if (observedSignal === "touches-contract" && multiRepo) {
+    observedForm = "migration-wave";
+    collapse = "unit";
+  } else if (observedSignal === "none" && multiRepo) {
+    observedForm = "delivery-slice";
+    collapse = "unit";
+  } else if (observedSignal === "operational-target") {
+    observedForm = "operational-sustain";
+  } else if (observedSignal === "touches-contract") {
+    observedForm = "contract-sustain";
+  }
+  return {
+    observedApproach,
+    observedSignal,
+    observedForm,
+    collapse,
+    repoCount: repos.size,
+    reason:
+      collapse === "unit"
+        ? "multi-repo, validate-first ou contrato acorda coordination unit"
+        : "scaling-law colapsa em repo-work/standalone",
+  };
 }
 
 // ═════════ VALIDAÇÃO SEMÂNTICA (refs · SoD · regra de ouro · sinais · deps · review EXATO) ═════════
@@ -238,6 +318,7 @@ export function validateOrg(o) {
     target: new Set(o.targets.map((x) => x.id)),
     contract: new Set(o.contracts.map((x) => x.id)),
     thesis: new Set((o.theses || []).map((x) => x.id)),
+    proposal: new Set((o.proposals || []).map((x) => x.id)),
     intent: new Set(o.intents.map((x) => x.id)),
     standalone: new Set(o.standalone.map((x) => x.id)),
   };
@@ -245,7 +326,21 @@ export function validateOrg(o) {
   const targetById = Object.fromEntries(o.targets.map((t) => [t.id, t]));
   const metricById = Object.fromEntries(o.metrics.map((m) => [m.id, m]));
   const intentById = Object.fromEntries(o.intents.map((i) => [i.id, i]));
+  const proposalById = Object.fromEntries((o.proposals || []).map((p) => [p.id, p]));
   const authById = Object.fromEntries((o.authorities || []).map((a) => [a.id, a]));
+  const resolveGlobalRef = (ref, node, field) => {
+    const [kind, id, ...rest] = String(ref || "").split(":");
+    if (!kind || !id || rest.length)
+      return err(
+        "refs",
+        node,
+        `${field} "${ref}" deve usar GlobalRef simples kind:id (standalone|proposal|intent)`
+      );
+    const registry = { standalone: ids.standalone, proposal: ids.proposal, intent: ids.intent };
+    if (!registry[kind])
+      return err("refs", node, `${field} "${ref}" usa kind não suportado "${kind}"`);
+    if (!registry[kind].has(id)) return err("refs", node, `${field} "${ref}" não resolve`);
+  };
 
   // refs básicas
   for (const a of o.areas)
@@ -317,6 +412,12 @@ export function validateOrg(o) {
   for (const th of o.theses || [])
     if (!ids.obj.has(th.frames))
       err("refs", th.id, `frames "${th.frames}" não existe em objectives`);
+  for (const p of o.proposals || []) {
+    resolveGlobalRef(p["raised-by"], p.id, "raised-by");
+    if (!ids.obj.has(p["authorized-by"]))
+      err("refs", p.id, `authorized-by "${p["authorized-by"]}" não existe em objectives`);
+    if (p.target && !ids.target.has(p.target)) err("refs", p.id, `target "${p.target}" não existe`);
+  }
 
   // bloco K — AUTORIDADES resolvem no registry: owner/lead/definer/approver não são texto
   const resolveAuth = (id, node, field) => {
@@ -447,6 +548,13 @@ export function validateOrg(o) {
         it.id,
         "validate-first EXIGE hypothesis + decision-rule (senão é cerimônia)"
       );
+    const derived = deriveIntent(it, o);
+    if (it.approach !== derived.observedApproach)
+      warn(
+        "approach-drift",
+        it.id,
+        `approach declarado "${it.approach}" diverge do observado "${derived.observedApproach}" (hypothesis/decision-rule)`
+      );
     const changed = it["contracts-changed"] || [];
     const consumed = it["contracts-consumed"] || [];
     for (const c of [...changed, ...consumed])
@@ -460,6 +568,12 @@ export function validateOrg(o) {
       err("signal-contract", it.id, "muda contrato mas o sinal não é touches-contract");
     if (it.signal === "touches-contract" && changed.length === 0)
       err("signal-contract", it.id, "sinal touches-contract sem nenhum contracts-changed");
+    if (it.signal !== derived.observedSignal)
+      warn(
+        "signal-drift",
+        it.id,
+        `signal declarado "${it.signal}" diverge do observado "${derived.observedSignal}" (${derived.observedForm})`
+      );
 
     // peças
     const works = it.works || [];
@@ -580,6 +694,65 @@ export function validateOrg(o) {
         s.id,
         "incident-response sem severity (a declaração exige telemetria)"
       );
+    if (s.routing) {
+      if (!ids.repo.has(s.routing["selected-repo"]))
+        err("matcher-routing", s.id, `selected-repo "${s.routing["selected-repo"]}" não existe`);
+      if (s.routing["selected-repo"] && s.routing["selected-repo"] !== s.repo)
+        err(
+          "matcher-routing",
+          s.id,
+          `selected-repo "${s.routing["selected-repo"]}" diverge do repo executado "${s.repo}"`
+        );
+      if (!authById[s.routing["decided-by"]])
+        err(
+          "refs-authority",
+          s.id,
+          `routing.decided-by "${s.routing["decided-by"]}" não resolve no registry`
+        );
+      const suggestions = s.routing.suggestions || [];
+      if (!Array.isArray(suggestions) || suggestions.length === 0)
+        err("matcher-routing", s.id, "routing sem suggestions — matcher sem evidência");
+      for (const [idx, sug] of suggestions.entries()) {
+        if (!ids.repo.has(sug.repo))
+          err("matcher-routing", s.id, `suggestion[${idx}].repo "${sug.repo}" não existe`);
+        if (sug.unknown !== true && (!Array.isArray(sug.evidence) || sug.evidence.length === 0))
+          err(
+            "matcher-evidence",
+            s.id,
+            `suggestion[${idx}] para "${sug.repo}" tem unknown=false sem evidence`
+          );
+      }
+      const top = suggestions[0] || {};
+      if (s.routing.decision === "followed") {
+        if (top.repo !== s.routing["selected-repo"])
+          err(
+            "matcher-routing",
+            s.id,
+            `decision=followed mas selected-repo "${s.routing["selected-repo"]}" não é a primeira sugestão`
+          );
+        if (top.unknown === true)
+          err("matcher-routing", s.id, "decision=followed em sugestão marcada unknown");
+      }
+      if (s.routing.decision === "overrode" && !s.routing.reason)
+        err("matcher-routing", s.id, "decision=overrode exige reason logado");
+    }
+    for (const f of s["follow-ups"] || []) {
+      resolveGlobalRef(f.ref, s.id, "follow-up.ref");
+      if (f.kind === "proposal" && !String(f.ref).startsWith("proposal:"))
+        err("follow-up-ref", s.id, `follow-up kind=proposal aponta para "${f.ref}"`);
+      if (f.kind === "proposal" && String(f.ref).startsWith("proposal:")) {
+        const pid = String(f.ref).slice("proposal:".length);
+        const p = proposalById[pid];
+        if (p && p["raised-by"] !== `standalone:${s.id}`)
+          err(
+            "follow-up-ref",
+            s.id,
+            `proposal "${pid}" raised-by="${p["raised-by"]}" não volta para standalone:${s.id}`
+          );
+      }
+      if (f.kind === "fix" && !String(f.ref).startsWith("standalone:"))
+        err("follow-up-ref", s.id, `follow-up kind=fix aponta para "${f.ref}"`);
+    }
   }
 
   // outcomes — resolver (bloco J entra aqui)
