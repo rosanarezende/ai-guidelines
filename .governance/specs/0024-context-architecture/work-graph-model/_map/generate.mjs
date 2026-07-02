@@ -134,7 +134,32 @@ const profiles = {
 
 const decisionPoints = Object.keys(m["decision-points"]).join(" · ");
 
-const MODEL = { layers, examples, sim, finding, graph, scalingLaw, profiles, decisionPoints };
+// proposta P12 (approach × nature) → alimenta o flow-explorer.html
+const ap = m["approach-proposal"];
+const flowExplorer = ap
+  ? {
+      status: ap.status,
+      provocation: ap.provocation,
+      approach: ap.approach,
+      nature: ap.nature,
+      derivation: ap.derivation,
+      consequences: ap.consequences,
+      noApproach: ap["no-approach-paths"],
+      renames: ap.renames,
+    }
+  : null;
+
+const MODEL = {
+  layers,
+  examples,
+  sim,
+  finding,
+  graph,
+  scalingLaw,
+  profiles,
+  decisionPoints,
+  flowExplorer,
+};
 
 // ── cobertura (F12) — o gerador DECLARA o que projeta e imprime o que omite a cada run.
 // "em sinc" no --check vale só p/ o SUBCONJUNTO projetado; mudança em seção omitida não altera o _map.
@@ -147,6 +172,7 @@ const PROJECTED_KEYS = new Set([
   "scaling-law",
   "governance-profiles",
   "decision-points", // só os nomes
+  "approach-proposal", // → flow-explorer.html
 ]);
 const omitted = Object.keys(m).filter((k) => !PROJECTED_KEYS.has(k));
 console.log(`ℹ coverage — NÃO projetadas no mapa: ${omitted.join(", ")}`);

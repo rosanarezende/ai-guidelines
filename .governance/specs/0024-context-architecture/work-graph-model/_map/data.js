@@ -546,4 +546,136 @@ window.MODEL = {
     ],
   },
   decisionPoints: "approve-objective · activate-intent · release-rollout · accept-verdict",
+  flowExplorer: {
+    status: "proposed",
+    provocation: "P12",
+    approach: {
+      id: "approach",
+      label: "abordagem",
+      values: {
+        "validate-first": "validar antes — o compromisso permanente DEPENDE da evidência",
+        "deliver-direct":
+          "entregar direto — a mudança já está decidida; métricas só protegem qualidade/rollout",
+      },
+      "golden-rule":
+        "é validate-first SÓ se a evidência decide a mudança permanente; canary, guardrail e spike NÃO tornam nada validate-first",
+      lint: "validate-first exige hipótese + decision-rule na unit líder; sem isso, alerta (dá dente à regra de ouro)",
+      applicability:
+        "só intent PLANEJADA que pretende mudança governada; bug, reativo, descoberta avulsa e operação não têm o campo — a camada colapsa (não existe 'não se aplica' em dropdown)",
+      drift:
+        "unidades divergindo da abordagem declarada → alerta approach-drift (não bloqueia; substitui o strategy-drift)",
+      "naming-note":
+        "deliver-direct aguardando ok da owner (alternativas: direct · direct-delivery); approach e graduation já aprovados",
+    },
+    nature: {
+      is: "o que o trabalho faz com o que existe — DERIVADA, nunca aposta: na autoria a IA SUGERE da descrição (assisted-authoring); em execução vem das peças como RETRATO (principal + observadas, com revision do resolver); divergência = alerta nature-drift. O redesign misto prova que valor único mente",
+      values: {
+        create: {
+          label: "criar novo",
+          says: "capacidade que não existia",
+          impacts: [
+            "sem cerimônia extra — o caminho mais curto do modelo",
+            "peças típicas: create (+ operate p/ instrumentação, se mede algo)",
+            "release gradual opcional → release-rollout",
+          ],
+        },
+        replace: {
+          label: "substituir (a antiga 'migração')",
+          says: "troca algo de que outros dependem",
+          impacts: [
+            "contratos tocados entram em jogo: janela de compatibilidade (que mora no CONTRATO) + consumidores avisados",
+            "peças típicas: sustain (portar de → para) + create (partes novas) + operate (rollout/monitor)",
+            "dashboard: progresso da onda; blocked/stale se contrato incompatível",
+          ],
+        },
+        harden: {
+          label: "endurecer (a antiga 'confiabilidade')",
+          says: "melhora robustez/custo/operação do que existe",
+          impacts: [
+            "o alvo no placar tende a ser SLO/risco/custo operacional (bucket operacional quando avulso)",
+            "peças típicas: sustain (preventivo) + operate (guardrails, alertas)",
+            "quase sempre COLAPSA — raramente precisa de unit coordenada",
+          ],
+        },
+      },
+    },
+    derivation: [
+      {
+        approach: "validate-first",
+        nature: "any",
+        form: "experiment-run",
+        note: "a natureza diz O QUE se valida: criar = experimento de produto · substituir = migração com canary DECISÓRIO · endurecer = experimento de performance",
+      },
+      {
+        approach: "deliver-direct",
+        nature: "create",
+        "multi-repo": true,
+        form: "delivery-slice",
+      },
+      {
+        approach: "deliver-direct",
+        nature: "create",
+        "multi-repo": false,
+        form: "colapsa — repo-work create",
+      },
+      {
+        approach: "deliver-direct",
+        nature: "replace",
+        "multi-repo": true,
+        form: "migration-wave",
+      },
+      {
+        approach: "deliver-direct",
+        nature: "replace",
+        "multi-repo": false,
+        form: "colapsa — repo-work sustain (porte simples)",
+      },
+      {
+        approach: "deliver-direct",
+        nature: "harden",
+        "multi-repo": "any",
+        form: "quase sempre colapsa — sustain/operate; unit só com coordenação real",
+      },
+    ],
+    consequences:
+      "veredito ganhou → graduation (efetivação) · perdeu → cleanup (limpeza) · release gradual → release-rollout · alerta/evento → incident-response (reativo, fora da abordagem)",
+    noApproach: [
+      "bug/reativo → resposta a incidente OU peça sustain direto",
+      "descoberta avulsa (1 repo) → peça discover (timebox + pergunta falsificável + fate)",
+      "pergunta compartilhada cross-repo → discovery (unit derivada; fecha a Q-discover-level)",
+      "operação avulsa → peça operate (outcome no bucket operacional)",
+    ],
+    renames: [
+      {
+        from: "strategy",
+        to: "approach",
+        label: "abordagem",
+        note: "campo da intent; 4 valores → 2",
+      },
+      {
+        from: "feature-slice",
+        to: "delivery-slice",
+        label: "fatia de entrega",
+        note: "nem toda entrega é feature",
+      },
+      {
+        from: "shape-up",
+        to: "graduation",
+        label: "efetivação",
+        note: "termo do mundo de feature flags; o antigo era jargão de outro método",
+      },
+      {
+        from: "rollout-slice",
+        to: "release-rollout",
+        label: "rollout de release",
+        note: "fase; só vira unit com vida própria",
+      },
+      {
+        from: null,
+        to: "discovery",
+        label: "descoberta",
+        note: "NOVO — pergunta compartilhada cross-repo",
+      },
+    ],
+  },
 };
