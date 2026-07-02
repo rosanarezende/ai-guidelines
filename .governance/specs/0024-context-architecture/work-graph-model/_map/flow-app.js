@@ -1,9 +1,8 @@
-// flow-app.js — explorador do fluxo (proposta P12): negócio → intent (abordagem) → sinais → forma.
-// Dados GERADOS de ../model.yml (§ approach-proposal + business-tier.example) por generate.mjs.
+// flow-app.js — explorador do fluxo (proposta P12): org-exemplo (negócio → intent) + abordagem × sinais → forma.
+// Dados GERADOS de ../model.yml § approach-proposal por generate.mjs — editar lá e regenerar.
 const html = htm.bind(React.createElement);
 const { useState } = React;
 const FX = window.MODEL.flowExplorer;
-const G = window.MODEL.graph;
 
 function Id({ children }) {
   return html`<span className="tag">${children}</span>`;
@@ -25,27 +24,67 @@ function Tabs({ items, active, onPick }) {
   </div>`;
 }
 
-function BusinessStrip() {
-  const top = G.objective[0];
-  const leaf = G.objective[G.objective.length - 1];
+function ExampleOrg() {
+  const org = FX.exampleOrg;
+  const objTitle = (id) => (org.objectives.find((o) => o.id === id) || {}).title;
   return html`<div>
-    <p className="cap">a camada de negócio (validada na P9)</p>
-    <div className="intent dashed">
+    <p className="cap">
+      org-exemplo: ${org.company} — 2 objetivos de empresa · 2 áreas · 5 times (a base p/ validar
+      camada a camada)
+    </p>
+    <div className="intent org-company">
       <div className="hd">
-        <span className="lvl">objetivo</span> ${top.title}
-        <${Id}>business-objective<//>
+        <span className="lvl">empresa</span> os objetivos do ciclo
+        <${Id}>business-objective · company<//>
       </div>
-      <p className="sub">
-        cadeia recursiva: ${G.objective.map((o) => o.level).join(" → ")} · na ponta: "${leaf.title}"
-      </p>
-      <p className="sub">
-        meta: ${G.measurement.target} <${Id}>target<//> <${Id}>metric-definition<//>
-      </p>
+      ${org.objectives.map(
+        (o, i) => html`<p className="sub" key=${i}>◦ ${o.title} — ${o.period}</p>`
+      )}
     </div>
+    <div className="down">↓ cada área traduz p/ um driver seu <${Id}>cascades-to<//></div>
+    ${org.areas.map(
+      (a, i) =>
+        html`<div className="intent" key=${i}>
+          <div className="hd">
+            <span className="lvl">área</span> ${a.title}
+            <${Id}>business-objective · area<//>
+          </div>
+          <p className="sub">driver: ${a.driver} · nasce de: "${objTitle(a["cascades-from"])}"</p>
+          <div className="works">
+            ${org.teams
+              .filter((t) => t.area === a.id)
+              .map(
+                (t, j) =>
+                  html`<div className="w" key=${j}>
+                    <span className="r">${t.id}</span>
+                    <div className="d">${t.priority}</div>
+                  </div>`
+              )}
+          </div>
+          <p className="note">
+            prioridades dos times — cada uma com placar próprio
+            <${Id}>business-objective · team-priority<//> <${Id}>target<//>
+          </p>
+        </div>`
+    )}
     <div className="down">
-      ↓ autoriza a intent e diz em qual PLACAR o resultado conta <${Id}>authorizes<//>
+      ↓ o objetivo autoriza a intent e entrega o placar <${Id}>authorizes<//>
       <${Id}>primary-target<//>
     </div>
+    ${org.intents.map(
+      (it, i) =>
+        html`<div className="unit" key=${i}>
+          <div className="hd">
+            <span className="lvl">intent</span> ${it.title}
+            <${Id}>approach: ${it.approach}<//>
+          </div>
+          <p className="sub">
+            ${it.team} · autorizada por: "${objTitle(it["authorized-by"])}" · sinal detectado:
+            <${Id}>${it.signal}<//>
+          </p>
+          <p className="note">deriva: ${it.derived}</p>
+        </div>`
+    )}
   </div>`;
 }
 
@@ -66,19 +105,16 @@ function SignalCard({ s }) {
         <span className="pp sustain">colapsa — vira peça direto no repo</span>
       </div>
     </div>
-    <p className="note">
-      etiqueta derivada (só resumo p/ portfólio): ${s["tag-label"]} <${Id}>${s.tag}<//>
-    </p>
   </div>`;
 }
 
-function DeliverDirectView() {
+function DirectView() {
   return html`<div>
     <p className="sub" style=${{ margin: "6px 0 10px" }}>
       aqui o humano NÃO escolhe mais nada — o sistema lê os SINAIS da descrição e das peças, e cada
       sinal acorda um mecanismo:
     </p>
-    ${FX.nature.signals.map((s, i) => html`<${SignalCard} key=${i} s=${s} />`)}
+    ${FX.signals.list.map((s, i) => html`<${SignalCard} key=${i} s=${s} />`)}
   </div>`;
 }
 
@@ -93,38 +129,27 @@ function ValidateFirstView() {
       <p className="sub">${lead ? lead.note : ""}</p>
       <p className="sub">${FX.approach.lint} <${Id}>accept-verdict<//></p>
     </div>
-    <div className="band">
-      <div className="h"><span className="t">os mesmos sinais dizem O QUE se valida</span></div>
-      <div className="vals">
-        ${FX.nature.signals.map(
-          (s, i) => html`<span key=${i} className="v">${s["tag-label"]}</span>`
-        )}
-      </div>
-    </div>
   </div>`;
 }
 
 function App() {
   const keys = Object.keys(FX.approach.values);
-  const [i, setI] = useState(keys.indexOf("deliver-direct"));
+  const [i, setI] = useState(keys.indexOf("direct"));
   const k = keys[i];
   return html`<div className="wrap">
     <h1>Explorador do fluxo — do negócio à forma</h1>
     <p className="lead">
       Proposta ${FX.provocation} (status: ${FX.status} — nada aplicado nas camadas). Cada elemento
       carrega a etiqueta do id atual, p/ você julgar os nomes. A única escolha estrutural do humano
-      é a abordagem.
+      é a abordagem; o resto deriva de SINAIS (o conceito "natureza" foi removido).
     </p>
-    <${BusinessStrip} />
+    <${ExampleOrg} />
+    <p className="cap" style=${{ marginTop: "18px" }}>explore genericamente (qualquer intent)</p>
     <div className="intent">
       <div className="hd">
-        <span className="lvl">intent</span> o que queremos alcançar
-        <${Id}>intent<//>
+        <span className="lvl">intent</span> a escolha humana: a abordagem <${Id}>approach<//>
+        <${Id}>assisted-authoring<//>
       </div>
-      <p className="sub">
-        escolha humana (assistível <${Id}>assisted-authoring<//>): a abordagem
-        <${Id}>approach<//>
-      </p>
       <${Tabs}
         items=${keys.map((key) => `${FX.approach.values[key].split(" — ")[0]} · ${key}`)}
         active=${i}
@@ -134,7 +159,7 @@ function App() {
       <p className="note">${FX.approach["golden-rule"]} · ${FX.approach.applicability}</p>
     </div>
     <div className="down">↓ o que deriva da abordagem escolhida</div>
-    ${k === "validate-first" ? html`<${ValidateFirstView} />` : html`<${DeliverDirectView} />`}
+    ${k === "validate-first" ? html`<${ValidateFirstView} />` : html`<${DirectView} />`}
     <div className="intent" style=${{ marginTop: "10px" }}>
       <div className="hd"><span className="lvl">depois, sem ninguém escolher</span></div>
       <p className="note" style=${{ borderTop: "none", paddingTop: "2px" }}>${FX.consequences}</p>

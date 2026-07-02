@@ -554,7 +554,7 @@ window.MODEL = {
       label: "abordagem",
       values: {
         "validate-first": "validar antes — o compromisso permanente DEPENDE da evidência",
-        "deliver-direct":
+        direct:
           "entregar direto — a mudança já está decidida; métricas só protegem qualidade/rollout",
       },
       "golden-rule":
@@ -565,29 +565,23 @@ window.MODEL = {
       drift:
         "unidades divergindo da abordagem declarada → alerta approach-drift (não bloqueia; substitui o strategy-drift)",
       "naming-note":
-        "deliver-direct aguardando ok da owner (alternativas: direct · direct-delivery); approach e graduation já aprovados",
+        "nomes decididos pela owner: approach · graduation · direct (bet, commit-direct e deliver-direct REJEITADOS — conotação de jogo/git)",
     },
-    nature: {
-      is: "ETIQUETA derivada — NÃO é um passo do fluxo nem uma escolha. Os MECANISMOS não são ligados pela etiqueta: são ligados por SINAIS concretos do trabalho descrito (abaixo). A etiqueta só RESUME esses sinais p/ o portfólio (quanto do trabalho é novo × substituição × robustez) e p/ a conferência (nature-drift: o retrato observado das peças divergiu do sugerido na autoria)",
-      "open-with-owner":
-        "a owner ainda não vê motivo p/ o conceito existir — decisão em aberto: manter como etiqueta de portfólio OU REMOVER o conceito e ficar só com os sinais (os mecanismos não mudam em nada nas duas opções)",
-      signals: [
+    signals: {
+      is: "SINAIS concretos do trabalho descrito ligam os mecanismos — SEM conceito intermediário. A 'natureza' foi REMOVIDA (decisão owner 2026-07-02: dois vocabulários p/ a mesma coisa = fricção; os sinais bastam). O portfólio agrega POR SINAL (quanto do trabalho toca contrato × meta operacional × caminho curto); divergência entre o sugerido na autoria e o observado nas peças = alerta signal-drift",
+      list: [
         {
           id: "touches-contract",
           signal: "as peças portam algo de → para, OU tocam contrato de que outros dependem",
           wakes:
             "janela de compatibilidade (mora no CONTRATO) + consumidores avisados + dashboard de onda (blocked/stale se incompatível)",
           "form-if-multi-repo": "migration-wave",
-          tag: "replace",
-          "tag-label": "substituir",
         },
         {
           id: "operational-target",
           signal: "a meta é SLO / risco / custo operacional (não métrica de produto)",
           wakes: "o placar vira OPERACIONAL + guardrails; peças sustain (preventivo) e operate",
           "form-if-multi-repo": "quase nunca vira unit — colapsa em peças",
-          tag: "harden",
-          "tag-label": "endurecer",
         },
         {
           id: "none",
@@ -595,45 +589,123 @@ window.MODEL = {
           wakes:
             "caminho CURTO — nenhuma cerimônia extra; release gradual opcional (release-rollout)",
           "form-if-multi-repo": "delivery-slice",
-          tag: "create",
-          "tag-label": "criar novo",
+        },
+      ],
+    },
+    exampleOrg: {
+      company: "acme",
+      objectives: [
+        {
+          id: "obj-revenue",
+          level: "company",
+          title: "crescer receita via cross-sell",
+          period: "2027",
+        },
+        {
+          id: "obj-efficiency",
+          level: "company",
+          title: "reduzir o custo de servir",
+          period: "2027",
+        },
+      ],
+      areas: [
+        {
+          id: "area-growth",
+          title: "área de growth",
+          "cascades-from": "obj-revenue",
+          driver: "cross-sell entre os produtos",
+        },
+        {
+          id: "area-platform",
+          title: "área de plataforma",
+          "cascades-from": "obj-efficiency",
+          driver: "eficiência e confiabilidade da plataforma",
+        },
+      ],
+      teams: [
+        {
+          id: "time-billing",
+          area: "area-growth",
+          priority: "P1 · +X% de conversão de cross-sell",
+        },
+        {
+          id: "time-onboarding",
+          area: "area-growth",
+          priority: "P2 · +Y% de ativação no onboarding",
+        },
+        {
+          id: "time-checkout",
+          area: "area-platform",
+          priority: "P1 · checkout no stack novo até o fim do H2",
+        },
+        {
+          id: "time-data",
+          area: "area-platform",
+          priority: "P2 · -Z% no custo da infra de dados",
+        },
+        {
+          id: "time-sre",
+          area: "area-platform",
+          priority: "P1 · p99 abaixo de N ms · -30% de incidentes",
+        },
+      ],
+      intents: [
+        {
+          id: "intent-cta-upgrade",
+          team: "time-billing",
+          "authorized-by": "obj-revenue",
+          title: "CTA contextual de upgrade no billing",
+          approach: "validate-first",
+          signal: "none",
+          derived:
+            "experiment-run — hipótese (CTA ↑ conversão em X%) + flag + métricas + guardrails; veredito: ganhou → graduation · perdeu → cleanup",
+        },
+        {
+          id: "intent-checkout-stack",
+          team: "time-checkout",
+          "authorized-by": "obj-efficiency",
+          title: "migrar o checkout para o stack novo",
+          approach: "direct",
+          signal: "touches-contract",
+          derived:
+            "migration-wave — porta de → para em 3 repos; janela de compatibilidade do contrato acme-user-context; consumidores avisados; corte gradual → release-rollout",
         },
       ],
     },
     derivation: [
       {
         approach: "validate-first",
-        nature: "any",
+        signal: "any",
         form: "experiment-run",
-        note: "a natureza diz O QUE se valida: criar = experimento de produto · substituir = migração com canary DECISÓRIO · endurecer = experimento de performance",
+        note: "o sinal diz O QUE se valida: none = experimento de produto · touches-contract = migração com canary DECISÓRIO · operational-target = experimento de performance",
       },
       {
-        approach: "deliver-direct",
-        nature: "create",
+        approach: "direct",
+        signal: "none",
         "multi-repo": true,
         form: "delivery-slice",
       },
       {
-        approach: "deliver-direct",
-        nature: "create",
+        approach: "direct",
+        signal: "none",
         "multi-repo": false,
         form: "colapsa — repo-work create",
       },
       {
-        approach: "deliver-direct",
-        nature: "replace",
+        approach: "direct",
+        signal: "touches-contract",
         "multi-repo": true,
         form: "migration-wave",
       },
       {
-        approach: "deliver-direct",
-        nature: "replace",
+        approach: "direct",
+        signal: "touches-contract",
         "multi-repo": false,
         form: "colapsa — repo-work sustain (porte simples)",
       },
       {
-        approach: "deliver-direct",
-        nature: "harden",
+        approach: "direct",
+        signal: "operational-target",
         "multi-repo": "any",
         form: "quase sempre colapsa — sustain/operate; unit só com coordenação real",
       },

@@ -282,3 +282,24 @@ code {
   font-size: 12px;
   margin: 7px 0;
 }
+
+.org-company {
+  background: #faeeda;
+  border-color: #ba7517;
+}
+.org-company .hd,
+.org-company .sub,
+.org-company .note {
+  color: #633806;
+}
+@media (prefers-color-scheme: dark) {
+  .org-company {
+    background: #4d3007;
+    border-color: #ba7517;
+  }
+  .org-company .hd,
+  .org-company .sub,
+  .org-company .note {
+    color: #fae3bd;
+  }
+}
