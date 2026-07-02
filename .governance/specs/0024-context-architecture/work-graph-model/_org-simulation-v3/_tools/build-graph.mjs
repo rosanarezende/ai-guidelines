@@ -1,6 +1,8 @@
 // build-graph.mjs — projeta a org file-first num GRAFO tipado + issues do validador,
 // e escreve _apps/graph.js (window.GRAPH) p/ os apps (file:// não deixa fetch — mesmo truque do _map).
 // Uso: node _tools/build-graph.mjs
+// F14 (revisão F5): sem timestamp — a versão é HASH do conteúdo (rodar sem mudança não suja o repo).
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -82,8 +84,11 @@ for (const s of o.standalone) {
 const model = parse(readFileSync(MODEL, "utf8"));
 const profiles = model["governance-profiles"] || null;
 
+const body = { company: o.org.company, nodes, edges, issues, profiles };
+const contentHash = createHash("sha256").update(JSON.stringify(body)).digest("hex").slice(0, 12);
+
 const GRAPH = {
-  generatedAt: new Date().toISOString(),
+  contentHash,
   company: o.org.company,
   profileDeclaration: o.org["profile-declaration"],
   nodes,

@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  generatedAt: "2026-07-02T18:59:09.660Z",
+  contentHash: "5b73796c7bac",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",

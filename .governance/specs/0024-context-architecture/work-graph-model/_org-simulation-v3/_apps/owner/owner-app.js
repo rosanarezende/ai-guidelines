@@ -133,9 +133,7 @@ function NodePanel({ selId, onGo }) {
   if (!selId)
     return html`<div>
       <h2>acme — ${G.nodes.length} nós · ${G.edges.length} arestas</h2>
-      <p className="muted">
-        clique num nó p/ detalhes e conexões · gerado em ${G.generatedAt.slice(0, 16)}
-      </p>
+      <p className="muted">clique num nó p/ detalhes e conexões · versão ${G.contentHash}</p>
       <p className="muted"><b>perfil:</b> ${G.profileDeclaration.badge}</p>
       <h2 style=${{ marginTop: "14px" }}>issues do validador (${G.issues.length})</h2>
       ${G.issues.length === 0

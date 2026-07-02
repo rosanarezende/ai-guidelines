@@ -132,7 +132,8 @@ function Objetivos({ sel, go }) {
           html`<div className="row" key=${t.id}>
             <b>${t.data.node}</b>: ${t.label} <span className="pill">${t.data.metric}</span><br />
             <span className="muted">
-              define: ${t.data.definer} · atesta: ${t.data.attester} (independente) ·
+              define: ${t.data.definer} · atesta: ${t.data.attester} · independência: NÃO verificada
+              (resolver pendente — bloco J da F5) ·
               <b> actual: aguardando</b> — melhor vazio que mentira
             </span>
           </div>`
@@ -345,7 +346,7 @@ function App() {
     <h1>acme — portal da empresa</h1>
     <p className="muted">
       tudo derivado do grafo (${G.nodes.length} nós · ${G.edges.length} arestas) · gerado em
-      ${" " + G.generatedAt.slice(0, 16)} · ${G.profiles ? G.profiles.law : ""}
+      ${" versão " + G.contentHash} · ${G.profiles ? G.profiles.law : ""}
     </p>
     <div className="tabs">
       ${Object.entries(VIEWS).map(
