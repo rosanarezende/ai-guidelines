@@ -1,0 +1,6 @@
+# TEMPLATE authority — entrada do registry (quem pode aprovar/definir/liderar).
+# Regra: profile-declaration.approved-by DEVE ser sponsor (fora do escopo operacional).
+id: <slug>
+kind: role # sponsor | role
+of: "<área ou time a que pertence — obrigatório p/ role, proibido p/ sponsor>"
+# note: "<contexto opcional>"

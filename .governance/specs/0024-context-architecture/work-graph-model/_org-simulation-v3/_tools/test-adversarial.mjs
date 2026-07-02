@@ -216,6 +216,74 @@ const CASES = [
       return o;
     },
   },
+  // ── bloco K: registry de autoridades + envelope resolvido ──
+  {
+    id: "F5·5/K·1 approver do perfil é TIME de dentro do escopo",
+    expect: "profile-approver",
+    mutate: () => {
+      const o = clone();
+      o.org["profile-declaration"]["approved-by"] = "time-sre";
+      return o;
+    },
+  },
+  {
+    id: "K·2 approver do perfil é ROLE interna (head-platform)",
+    expect: "profile-approver",
+    mutate: () => {
+      const o = clone();
+      o.org["profile-declaration"]["approved-by"] = "head-platform";
+      return o;
+    },
+  },
+  {
+    id: "K·3 definer de target não resolve no registry",
+    expect: "refs-authority",
+    mutate: () => {
+      const o = clone();
+      o.targets[0].definer = "fulano-qualquer";
+      return o;
+    },
+  },
+  {
+    id: "K·4 envelope.authority não resolve no registry",
+    expect: "refs-authority",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(
+        validOutcome({
+          envelope: { actor: "ana-dev", authority: "autoridade-fantasma", "idempotency-key": "k4" },
+        })
+      );
+      return o;
+    },
+  },
+  {
+    id: "K·5 chave desconhecida DENTRO do envelope",
+    expect: "schema-unknown-key",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(
+        validOutcome({
+          envelope: {
+            actor: "ana-dev",
+            authority: "pm-growth",
+            "idempotency-key": "k5",
+            "campo-esquisito": true,
+          },
+        })
+      );
+      return o;
+    },
+  },
+  {
+    id: "K·6 lead de time fantasma",
+    expect: "refs-authority",
+    mutate: () => {
+      const o = clone();
+      o.teams[0].lead = "lead-fantasma";
+      return o;
+    },
+  },
 ];
 
 export function run(cases) {

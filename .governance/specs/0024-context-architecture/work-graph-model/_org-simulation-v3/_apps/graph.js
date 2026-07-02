@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "b5bf1b281f37",
+  contentHash: "cb5c2c08d56e",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -178,6 +178,126 @@ window.GRAPH = {
         frames: "obj-trust",
         says: "minimizar dados coletados e dar controle ao cliente reduz risco e constrói confiança",
         owner: "head-platform",
+      },
+    },
+    {
+      id: "sponsor-acme",
+      type: "authority",
+      label: "sponsor-acme",
+      data: {
+        id: "sponsor-acme",
+        kind: "sponsor",
+        note: "aprova perfil e objetivos company — fora da operação",
+      },
+    },
+    {
+      id: "head-growth",
+      type: "authority",
+      label: "head-growth",
+      data: {
+        id: "head-growth",
+        kind: "role",
+        of: "area-growth",
+      },
+    },
+    {
+      id: "head-platform",
+      type: "authority",
+      label: "head-platform",
+      data: {
+        id: "head-platform",
+        kind: "role",
+        of: "area-platform",
+      },
+    },
+    {
+      id: "head-cx",
+      type: "authority",
+      label: "head-cx",
+      data: {
+        id: "head-cx",
+        kind: "role",
+        of: "area-cx",
+      },
+    },
+    {
+      id: "pm-growth",
+      type: "authority",
+      label: "pm-growth",
+      data: {
+        id: "pm-growth",
+        kind: "role",
+        of: "area-growth",
+      },
+    },
+    {
+      id: "lead-billing",
+      type: "authority",
+      label: "lead-billing",
+      data: {
+        id: "lead-billing",
+        kind: "role",
+        of: "time-billing",
+      },
+    },
+    {
+      id: "lead-onboarding",
+      type: "authority",
+      label: "lead-onboarding",
+      data: {
+        id: "lead-onboarding",
+        kind: "role",
+        of: "time-onboarding",
+      },
+    },
+    {
+      id: "lead-checkout",
+      type: "authority",
+      label: "lead-checkout",
+      data: {
+        id: "lead-checkout",
+        kind: "role",
+        of: "time-checkout",
+      },
+    },
+    {
+      id: "lead-data",
+      type: "authority",
+      label: "lead-data",
+      data: {
+        id: "lead-data",
+        kind: "role",
+        of: "time-data",
+      },
+    },
+    {
+      id: "lead-sre",
+      type: "authority",
+      label: "lead-sre",
+      data: {
+        id: "lead-sre",
+        kind: "role",
+        of: "time-sre",
+      },
+    },
+    {
+      id: "lead-identity",
+      type: "authority",
+      label: "lead-identity",
+      data: {
+        id: "lead-identity",
+        kind: "role",
+        of: "time-identity",
+      },
+    },
+    {
+      id: "lead-support",
+      type: "authority",
+      label: "lead-support",
+      data: {
+        id: "lead-support",
+        kind: "role",
+        of: "time-support",
       },
     },
     {
@@ -1680,6 +1800,72 @@ window.GRAPH = {
       type: "framed-by",
     },
     {
+      id: "belongs-to:head-growth->area-growth",
+      source: "head-growth",
+      target: "area-growth",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:head-platform->area-platform",
+      source: "head-platform",
+      target: "area-platform",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:head-cx->area-cx",
+      source: "head-cx",
+      target: "area-cx",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:pm-growth->area-growth",
+      source: "pm-growth",
+      target: "area-growth",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:lead-billing->time-billing",
+      source: "lead-billing",
+      target: "time-billing",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:lead-onboarding->time-onboarding",
+      source: "lead-onboarding",
+      target: "time-onboarding",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:lead-checkout->time-checkout",
+      source: "lead-checkout",
+      target: "time-checkout",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:lead-data->time-data",
+      source: "lead-data",
+      target: "time-data",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:lead-sre->time-sre",
+      source: "lead-sre",
+      target: "time-sre",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:lead-identity->time-identity",
+      source: "lead-identity",
+      target: "time-identity",
+      type: "belongs-to",
+    },
+    {
+      id: "belongs-to:lead-support->time-support",
+      source: "lead-support",
+      target: "time-support",
+      type: "belongs-to",
+    },
+    {
       id: "has-team:area-growth->time-billing",
       source: "area-growth",
       target: "time-billing",
@@ -1944,6 +2130,12 @@ window.GRAPH = {
       type: "contributes-to",
     },
     {
+      id: "defines:pm-growth->tgt-billing-conv",
+      source: "pm-growth",
+      target: "tgt-billing-conv",
+      type: "defines",
+    },
+    {
       id: "has-target:time-onboarding->tgt-onboarding-act",
       source: "time-onboarding",
       target: "tgt-onboarding-act",
@@ -1960,6 +2152,12 @@ window.GRAPH = {
       source: "tgt-onboarding-act",
       target: "obj-revenue",
       type: "contributes-to",
+    },
+    {
+      id: "defines:pm-growth->tgt-onboarding-act",
+      source: "pm-growth",
+      target: "tgt-onboarding-act",
+      type: "defines",
     },
     {
       id: "has-target:time-checkout->tgt-checkout-stack",
@@ -1980,6 +2178,12 @@ window.GRAPH = {
       type: "contributes-to",
     },
     {
+      id: "defines:head-platform->tgt-checkout-stack",
+      source: "head-platform",
+      target: "tgt-checkout-stack",
+      type: "defines",
+    },
+    {
       id: "has-target:time-data->tgt-data-cost",
       source: "time-data",
       target: "tgt-data-cost",
@@ -1996,6 +2200,12 @@ window.GRAPH = {
       source: "tgt-data-cost",
       target: "obj-efficiency",
       type: "contributes-to",
+    },
+    {
+      id: "defines:head-platform->tgt-data-cost",
+      source: "head-platform",
+      target: "tgt-data-cost",
+      type: "defines",
     },
     {
       id: "has-target:time-sre->tgt-sre-p99",
@@ -2016,6 +2226,12 @@ window.GRAPH = {
       type: "contributes-to",
     },
     {
+      id: "defines:head-platform->tgt-sre-p99",
+      source: "head-platform",
+      target: "tgt-sre-p99",
+      type: "defines",
+    },
+    {
       id: "has-target:time-sre->tgt-sre-incidents",
       source: "time-sre",
       target: "tgt-sre-incidents",
@@ -2032,6 +2248,12 @@ window.GRAPH = {
       source: "tgt-sre-incidents",
       target: "obj-efficiency",
       type: "contributes-to",
+    },
+    {
+      id: "defines:head-platform->tgt-sre-incidents",
+      source: "head-platform",
+      target: "tgt-sre-incidents",
+      type: "defines",
     },
     {
       id: "has-target:time-checkout->tgt-checkout-conv",
@@ -2052,6 +2274,12 @@ window.GRAPH = {
       type: "contributes-to",
     },
     {
+      id: "defines:pm-growth->tgt-checkout-conv",
+      source: "pm-growth",
+      target: "tgt-checkout-conv",
+      type: "defines",
+    },
+    {
       id: "has-target:time-onboarding->tgt-onboarding-churn",
       source: "time-onboarding",
       target: "tgt-onboarding-churn",
@@ -2068,6 +2296,12 @@ window.GRAPH = {
       source: "tgt-onboarding-churn",
       target: "obj-retention",
       type: "contributes-to",
+    },
+    {
+      id: "defines:pm-growth->tgt-onboarding-churn",
+      source: "pm-growth",
+      target: "tgt-onboarding-churn",
+      type: "defines",
     },
     {
       id: "has-target:time-support->tgt-support-churn",
@@ -2088,6 +2322,12 @@ window.GRAPH = {
       type: "contributes-to",
     },
     {
+      id: "defines:head-cx->tgt-support-churn",
+      source: "head-cx",
+      target: "tgt-support-churn",
+      type: "defines",
+    },
+    {
       id: "has-target:time-support->tgt-support-cost",
       source: "time-support",
       target: "tgt-support-cost",
@@ -2106,6 +2346,12 @@ window.GRAPH = {
       type: "contributes-to",
     },
     {
+      id: "defines:head-cx->tgt-support-cost",
+      source: "head-cx",
+      target: "tgt-support-cost",
+      type: "defines",
+    },
+    {
       id: "has-target:time-identity->tgt-identity-consent",
       source: "time-identity",
       target: "tgt-identity-consent",
@@ -2122,6 +2368,12 @@ window.GRAPH = {
       source: "tgt-identity-consent",
       target: "obj-trust",
       type: "contributes-to",
+    },
+    {
+      id: "defines:head-platform->tgt-identity-consent",
+      source: "head-platform",
+      target: "tgt-identity-consent",
+      type: "defines",
     },
     {
       id: "authorizes:obj-revenue->intent-checkout-1click",

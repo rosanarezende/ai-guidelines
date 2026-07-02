@@ -17,6 +17,7 @@ const TYPE_COLOR = {
   target: "#7f77dd",
   metric: "#afa9ec",
   standalone: "#d85a30",
+  authority: "#d3d1c7",
 };
 const TYPE_SHAPE = {
   objective: "round-rectangle",
@@ -31,6 +32,7 @@ const TYPE_SHAPE = {
   target: "round-tag",
   metric: "tag",
   standalone: "octagon",
+  authority: "tag",
 };
 const EDGE_DASH = { "delivery-after": [6, 3], "consumed-by": [2, 3], consumes: [2, 3] };
 const ALL_TYPES = Object.keys(TYPE_COLOR);

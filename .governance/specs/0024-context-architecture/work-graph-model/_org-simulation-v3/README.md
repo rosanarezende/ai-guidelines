@@ -22,6 +22,7 @@
 cd _org-simulation-v3
 node _tools/validate.mjs        # lints da org (exit 1 se houver ERRO)
 node _tools/build-graph.mjs     # regenera _apps/graph.js (grafo + issues embutidos)
+node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada DEVE ser pega
 # abrir _apps/owner/index.html e _apps/company/index.html no navegador
 ```
 

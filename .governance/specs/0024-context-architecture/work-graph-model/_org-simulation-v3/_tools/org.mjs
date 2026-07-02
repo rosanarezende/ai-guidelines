@@ -13,6 +13,7 @@ const load = (p) => parse(readFileSync(path.join(ACME, p), "utf8"));
 export function loadOrg() {
   return {
     org: load("org.yml"),
+    authorities: load("authorities.yml").authorities,
     objectives: load("business/objectives.yml").objectives,
     areas: load("business/areas.yml").areas,
     teams: load("business/teams.yml").teams,
@@ -121,6 +122,15 @@ const SCHEMAS = {
     optional: ["badge"],
     enums: { profile: ["full", "compact", "solo"] },
   },
+  authority: {
+    required: ["id", "kind"],
+    optional: ["of", "note"],
+    enums: { kind: ["sponsor", "role"] },
+  },
+  envelope: {
+    required: ["actor", "authority", "idempotency-key"],
+    optional: ["base-revision", "source-commit"],
+  },
 };
 
 function checkSchema(type, obj, nodeId, issues) {
@@ -173,7 +183,11 @@ function checkAllSchemas(o, issues) {
       checkSchema("next", n, `${it.id}::next[${k}]`, issues);
   }
   for (const x of o.standalone) checkSchema("standalone", x, x.id, issues);
-  for (const x of o.outcomes) checkSchema("outcome", x, x.id, issues);
+  for (const x of o.authorities || []) checkSchema("authority", x, x.id, issues);
+  for (const x of o.outcomes) {
+    checkSchema("outcome", x, x.id, issues);
+    if (x.envelope) checkSchema("envelope", x.envelope, `${x.id}::envelope`, issues);
+  }
 }
 
 // ═════════ VALIDAÇÃO SEMÂNTICA (refs · SoD · regra de ouro · sinais · deps · review EXATO) ═════════
@@ -228,6 +242,38 @@ export function validateOrg(o) {
   for (const th of o.theses || [])
     if (!ids.obj.has(th.frames))
       err("refs", th.id, `frames "${th.frames}" não existe em objectives`);
+
+  // bloco K — AUTORIDADES resolvem no registry: owner/lead/definer/approver não são texto
+  const authById = Object.fromEntries((o.authorities || []).map((a) => [a.id, a]));
+  const resolveAuth = (id, node, field) => {
+    if (id && !authById[id])
+      err("refs-authority", node, `${field} "${id}" não resolve no registry de autoridades`);
+  };
+  for (const x of o.objectives) resolveAuth(x.owner, x.id, "owner");
+  for (const x of o.areas) resolveAuth(x.owner, x.id, "owner");
+  for (const x of o.theses || []) resolveAuth(x.owner, x.id, "owner");
+  for (const x of o.teams) resolveAuth(x.lead, x.id, "lead");
+  for (const t of o.targets) resolveAuth(t.definer, t.id, "definer");
+  // o approver do PERFIL deve estar FORA do escopo operacional (sponsor) — F5/K
+  const pd = o.org["profile-declaration"] || {};
+  if (pd["approved-by"]) {
+    const approver = authById[pd["approved-by"]];
+    if (!approver) {
+      if (ids.team.has(pd["approved-by"]) || ids.area.has(pd["approved-by"]))
+        err(
+          "profile-approver",
+          "org",
+          `approved-by "${pd["approved-by"]}" é time/área DENTRO do escopo — o perfil exige approver EXTERNO (sponsor)`
+        );
+      else
+        err("refs-authority", "org", `approved-by "${pd["approved-by"]}" não resolve no registry`);
+    } else if (approver.kind !== "sponsor")
+      err(
+        "profile-approver",
+        "org",
+        `approved-by "${pd["approved-by"]}" (${approver.kind}${approver.of ? " de " + approver.of : ""}) está DENTRO do escopo — o perfil da org inteira exige sponsor`
+      );
+  }
 
   // targets: refs + SoD da medição + attester×fonte + independência de FATO (F9)
   for (const t of o.targets) {
@@ -382,7 +428,11 @@ export function validateOrg(o) {
   }
 
   // outcomes — resolver (bloco J entra aqui)
-  resolveOutcomes(o, { ids, targetById, metricById, intentById, repoById }, { err, warn });
+  resolveOutcomes(
+    o,
+    { ids, targetById, metricById, intentById, repoById, authById },
+    { err, warn }
+  );
 
   return issues;
 }
@@ -482,5 +532,11 @@ function resolveOutcomes(o, ix, { err, warn }) {
     for (const f of ["actor", "authority", "idempotency-key"])
       if (!env[f])
         err("envelope", out.id, `envelope sem "${f}" — actual-publish é mutação PERIGOSA`);
+    if (env.authority && !ix.authById[env.authority])
+      err(
+        "refs-authority",
+        out.id,
+        `envelope.authority "${env.authority}" não resolve no registry (bloco K)`
+      );
   }
 }
