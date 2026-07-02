@@ -198,11 +198,35 @@ flow:
   - { phase: gate, role: humano, kind: append-only, note: "= decision-points.activate-intent" }
   - { phase: ativacao, does: [consolida, "move p/ intents/"] }
   - { phase: breakdown, role: dono, emits: ["execution-units + repo-works (heterogêneo)"] }
-decision-points: # G7 — gates NOMEADOS por tier (o gate do fluxo era só o de ativação); todos append-only e colapsáveis por perfil
-  approve-objective: "aprova/encerra o business-objective do ciclo (owner do nível acima; no topo, o sponsor)"
-  activate-intent: "o gate que já existia no fluxo (promove candidata → intent)"
-  release-rollout: "autoriza exposição (rollout-slice/canary); change-class emergency passa por break-glass LOGADO"
-  accept-verdict: "aceita o veredito do experiment-run + o fork (won → shape-up · lost → cleanup); override = mutação perigosa (alerta q/r/d)"
+decision-points: # G7 + F4 — gates NOMEADOS com requisitos VERIFICÁVEIS; todos append-only e colapsáveis por perfil
+  approve-objective:
+    is: "aprova/encerra o business-objective do ciclo"
+    subject: business-objective
+    prerequisites: "target + metric-definition definidos · allocation com unidade/período/owner"
+    evidence: "objective draft + targets propostos"
+    approver: "owner do nível acima (no topo, o sponsor)"
+    on-block: "objective fica proposed; fallback = revisar e reapresentar"
+  activate-intent:
+    is: "o gate que já existia no fluxo (promove candidata → intent)"
+    subject: intent
+    prerequisites: "business-link validado (authorized-by ativo + target + allocation, OU standalone declarado)"
+    evidence: "register + triagem + investigação (quando houve)"
+    approver: "owner do objective autorizador (no solo: self, logado)"
+    on-block: "candidata permanece no funil; fallback = rework ou descarte"
+  release-rollout:
+    is: "autoriza exposição (rollout-slice/canary)"
+    subject: "execution-unit (rollout-slice)"
+    prerequisites: "guardrails declarados + plano de reversão (lei fallback/break-glass)"
+    evidence: "baseline das métricas de guardrail + flag/canary configurados"
+    approver: "dono da unit + owner do domínio exposto"
+    on-block: "sem exposição; change-class emergency passa por break-glass LOGADO"
+  accept-verdict:
+    is: "aceita o veredito do experiment-run + o fork (won → shape-up · lost → cleanup)"
+    subject: "execution-unit (experiment-run)"
+    prerequisites: "outcome VÁLIDO pelo resolver (não invalid/stale; self-attested só com colapso logado)"
+    evidence: "outcome publicado + decision-rule aplicada"
+    approver: "owner da intent + attester independente do actual"
+    on-block: "veredito segue pending; override = mutação verdict-override (dangerous, alerta q/r/d)"
 physical:
   candidata: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml"
   ativada: "acme-governance/intents/<id>/intent.yml"
@@ -338,13 +362,29 @@ examples:
 # ═════════════════════ SIMULAÇÃO (fluxo ponta-a-ponta × forma de org) ═════════════════════
 simulation:
   purpose: "quem faz o quê no fluxo de governança, em 3 formas de org — estressa SoD/independência e a cerimônia"
-  phases:
-    [registro, triagem, investigacao, gate, ativacao, breakdown, execucao, coordenacao, veredito]
+  phases: # F10 — inclui as fases business (bloco B)
+    [
+      define-objective,
+      define-target,
+      authorize-intake,
+      registro,
+      triagem,
+      investigacao,
+      gate,
+      ativacao,
+      breakdown,
+      execucao,
+      coordenacao,
+      veredito,
+    ]
   orgs:
     - id: full-team
       label: "empresa com time completo"
       roles: [PM, Design, "Team Lead", Principal, "Tech Lead", "devs Sr/Pl", "devs Jr"]
       participation:
+        define-objective: "sponsor/liderança define company/area; PM traduz p/ team-priority (approve-objective no nível acima)"
+        define-target: "PM (target-definer) + time de dados (metric-owner); attester ≠ definer (SoD da medição)"
+        authorize-intake: "PM (owner do objective): quais objectives aceitam propostas + allocation disponível"
         registro: "PM (registered-by + owner accountable); Design + Team Lead como stakeholders"
         triagem: "Tech Lead (dispositions · matcher · valida contratos) + Principal (arquitetura/cross-repo)"
         investigacao: "devs Sr / Tech Lead rodam discover (spikes); Principal avalia viabilidade"
@@ -364,6 +404,9 @@ simulation:
       label: "trio: negócio · design · engenharia"
       roles: [Negócio, Design, Engenharia]
       participation:
+        define-objective: "Negócio (1-2 níveis no máximo — scaling-law)"
+        define-target: "Negócio define; a FONTE de dados atesta — com a ressalva F6: fonte construída pela própria Eng = self-attested"
+        authorize-intake: "Negócio"
         registro: "Negócio (registered-by + owner); Design stakeholder"
         triagem: "Engenharia (tudo: dispositions · matcher · contratos)"
         investigacao: "Engenharia (discover)"
@@ -383,6 +426,9 @@ simulation:
       label: "dev solo"
       roles: ["a mesma pessoa em tudo"]
       participation:
+        define-objective: "self (objective opcional — perfil solo)"
+        define-target: "self (target self-attested, badge no dashboard)"
+        authorize-intake: "self"
         registro: "self"
         triagem: "self (quase sempre implícito)"
         investigacao: "self"
@@ -455,7 +501,7 @@ business-tier:
   measurement-roles: # G4 (bloco A) — o SoD da medição vira papel NOMEADO
     target-definer: "define o target (binding métrica × nó × período × valor)"
     metric-owner: "dono da metric-definition (unidade · source · aggregation)"
-    actual-attester: "atesta o outcome — o número E a fonte/revision que o sustenta"
+    actual-attester: "atesta o outcome — o número E a fonte/revision que o sustenta. É uma AUTHORITY resolvível (pessoa OU trust-boundary com owner — F6); MÁQUINA só atesta se o producer/owner da fonte for INDEPENDENTE de quem define o target — senão a atestação é marcada collapsed/self-attested"
     dashboard-consumer: "audiência que lê o rollup (só lê, não muda)"
     sod: "target-definer NÃO pode ser o ÚNICO actual-attester (fonte/analytics independente — a lei da independência aplicada à medição; era o new-sod da scaling-law)"
     role-collapse: "pela scaling-law: trio → o attester tende a colapsar na mesma eng (gap LOGADO); solo → colapso total, dispensa EXPLÍCITA logada (break-glass) e o dashboard marca self-attested"
@@ -468,6 +514,7 @@ business-tier:
       - "outcome que depende de contrato CITA a contract-revision; revision fora da compatibility-window → dashboard marca blocked/stale (G10 — a lei dependencia-verificavel mecanizada p/ o rollup)"
       - "coerência intent × outcome (F2): outcome de unit sob uma intent só soma no primary-target DELA; somar noutro target exige decision explícita registrada — senão INVALID"
       - "target FROZEN/closed não recebe actual novo (F9) — outcome com window fora do período do target vai p/ o target continuador (continues-from) ou fica unassigned VISÍVEL"
+      - "mutação dangerous com justificativa mas SEM q/r/d anexado → o nó/número afetado carrega a marca dangerous-unreviewed no dashboard até reviewer/decision fechar (F11 — detecção; bloquear no perfil full = decisão em aberto, ver research F11)"
     standalone: "G14 — trabalho sem objective TAMBÉM emite outcome: ou contributes-to um target (quando fizer sentido) ou cai no bucket OPERACIONAL do dashboard (custo/risco) — visível, fora do rollup de objectives; nada some"
   outcome-schema: # F1+F8 (bloco D) — o outcome deixa de ser prosa: campos TIPADOS + refs resolvíveis + resolver fail-closed
     fields:
@@ -721,6 +768,7 @@ adversarial-review:
       severity: P1
       reconciliation: "aceito — accept-verdict sem outcome verificável, release-rollout sem evidência de guardrail, approve-objective sem target/metric-definition"
       suggestion: "por decision-point: subject-ref · prerequisites · required-evidence · authorized-approver · block/fallback"
+      resolution: "APLICADO (bloco G) — os 4 decision-points viraram mapas com subject/prerequisites/evidence/approver/on-block"
     - id: F5
       about: "perfil autodeclarado vira bypass: org grande se declara compact/solo e escapa do SoD"
       severity: P0
@@ -732,6 +780,7 @@ adversarial-review:
       severity: P1
       reconciliation: "aceito — refina o measurement-roles: máquina só atesta se o producer/owner da fonte for INDEPENDENTE de quem define o target"
       suggestion: "actual-attester = authority/trust-boundary com owner; machine-attestation só vale com producer independente, senão marcada collapsed/self-attested"
+      resolution: "APLICADO (bloco G) — measurement-roles.actual-attester refinado (authority resolvível; máquina só com producer independente) + ressalva na sim do trio"
     - id: F7
       about: "emissão de outcome por repo-work standalone vive em NOTA, não na aresta formal (emits parte só de execution-unit)"
       severity: P1
@@ -754,11 +803,13 @@ adversarial-review:
       severity: P1
       reconciliation: "aceito — FATO: simulation.phases ainda é registro→veredito; o flow ganhou as fases business no bloco B e a matriz não acompanhou"
       suggestion: "estender simulation/profiles com as business phases (quem define objective/target/allocation em full/trio/solo)"
+      resolution: "APLICADO (bloco G) — simulation.phases + participation das 3 orgs ganham define-objective/define-target/authorize-intake"
     - id: F11
       about: "alerta de mutação perigosa só DETECTA, não bloqueia — e precisa ser rotulado como tal"
       severity: P1
       reconciliation: "aceito com NUANCE — marcar dangerous-unreviewed no dashboard/linter é COMPATÍVEL com a decisão do G11 (auditabilidade); BLOQUEAR sem reviewer no perfil full AMPLIA a decisão → gate da owner"
       suggestion: "dashboard/linter marcam dangerous-unreviewed; opcional (decisão owner): no perfil full, bloquear sem reviewer/decision"
+      resolution: "PARCIAL (bloco G) — marca dangerous-unreviewed aplicada em rollup-mechanics; BLOQUEAR no perfil full = decisão da owner em aberto (ver research/2026-07-01-benchmark-f11-dangerous-mutation-enforcement.md)"
     - id: F12
       about: "loop do mapa garante sync só do SUBCONJUNTO projetado, e o --check não roda no validate/CI"
       severity: P1

@@ -273,6 +273,18 @@ window.MODEL = {
       sod: "HOLDS — requester (PM/dev) ≠ approver (TL/Principal) ≠ owner-attester (dono do domínio)",
       participation: [
         {
+          phase: "define-objective",
+          who: "sponsor/liderança define company/area; PM traduz p/ team-priority (approve-objective no nível acima)",
+        },
+        {
+          phase: "define-target",
+          who: "PM (target-definer) + time de dados (metric-owner); attester ≠ definer (SoD da medição)",
+        },
+        {
+          phase: "authorize-intake",
+          who: "PM (owner do objective): quais objectives aceitam propostas + allocation disponível",
+        },
+        {
           phase: "registro",
           who: "PM (registered-by + owner accountable); Design + Team Lead como stakeholders",
         },
@@ -320,6 +332,18 @@ window.MODEL = {
       label: "trio: negócio · design · engenharia",
       sod: "PARCIAL — Negócio dá independência no gate; mas o lado TÉCNICO é auto-certificado (Eng = requester + approver + owner-attester)",
       participation: [
+        {
+          phase: "define-objective",
+          who: "Negócio (1-2 níveis no máximo — scaling-law)",
+        },
+        {
+          phase: "define-target",
+          who: "Negócio define; a FONTE de dados atesta — com a ressalva F6: fonte construída pela própria Eng = self-attested",
+        },
+        {
+          phase: "authorize-intake",
+          who: "Negócio",
+        },
         {
           phase: "registro",
           who: "Negócio (registered-by + owner); Design stakeholder",
@@ -369,7 +393,15 @@ window.MODEL = {
       sod: "IMPOSSÍVEL — todas as arestas de independência (X) e o oráculo (O1) colapsam no self",
       participation: [
         {
-          phase: "registro",
+          phase: "define-objective",
+          who: "self (objective opcional — perfil solo)",
+        },
+        {
+          phase: "define-target",
+          who: "self (target self-attested, badge no dashboard)",
+        },
+        {
+          phase: "authorize-intake → registro",
           who: "self",
         },
         {
@@ -477,7 +509,7 @@ window.MODEL = {
   scalingLaw:
     "crie um NÓ separado só quando muda pelo menos um: owner · cadência · target próprio · allocation própria · lifecycle próprio · audiência de dashboard. Se nada muda, COLAPSE. (aplica-se a: business-tier · execution-unit · roles/SoD — executada por governance-profiles)",
   profiles: {
-    law: "a org declara UM perfil + desvios EXPLÍCITOS; mudar de perfil = mutação com envelope L8. Perfis derivam por role-collapse parametrizado (G13) — o compact cobre o small-team (PM+TL+eng) sem um 4º arquétipo fixo",
+    law: "a org declara UM perfil + desvios EXPLÍCITOS; mudar de perfil = mutação profile-change (dangerous). Perfis derivam por role-collapse parametrizado (G13) — o compact cobre o small-team (PM+TL+eng) sem um 4º arquétipo fixo",
     items: [
       {
         id: "full",
