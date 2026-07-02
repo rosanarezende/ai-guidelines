@@ -391,8 +391,8 @@ business-tier:
     intent: "1ª unidade governada de trabalho (já existe; entra nas 3 camadas)."
     metric-definition: "definição ESTÁVEL da métrica: unidade · source · aggregation · owner."
     target: "binding métrica + nó + período + valor esperado. ≠ metric-definition. actual = DERIVADO dos outcomes."
-    outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit (usa envelope L8). Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard."
-    allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority; vira nó só se precisar."
+    outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit (usa envelope L8). Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número) · contract-revision (quando o resultado depende de um contrato — G10). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard."
+    allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority com unidade · período · owner OBRIGATÓRIOS (G12); vira nó quando ganha lifecycle/owner/consumo PRÓPRIOS (o critério é a scaling-law)."
   edges:
     - { id: cascades-to, from: business-objective, to: business-objective }
     - {
@@ -412,7 +412,7 @@ business-tier:
         id: emits,
         from: execution-unit,
         to: outcome,
-        note: "no veredito/fecho da unit; repo-work standalone → G14 (aberto)",
+        note: "no veredito/fecho da unit; repo-work STANDALONE também emite (G14)",
       }
     - {
         id: contributes-to,
@@ -440,6 +440,8 @@ business-tier:
       - "contributes-to sem aggregation declarada = ERRO (o outcome não entra no dashboard)"
       - "aligns-with NUNCA soma — o dashboard ignora (contexto narrativo)"
       - "outcome sem attested-by OU com revision stale/incompatível → número marcado unverified/stale no dashboard (falha VISÍVEL, não silenciosa — lei dependencia-verificavel)"
+      - "outcome que depende de contrato CITA a contract-revision; revision fora da compatibility-window → dashboard marca blocked/stale (G10 — a lei dependencia-verificavel mecanizada p/ o rollup)"
+    standalone: "G14 — trabalho sem objective TAMBÉM emite outcome: ou contributes-to um target (quando fizer sentido) ou cai no bucket OPERACIONAL do dashboard (custo/risco) — visível, fora do rollup de objectives; nada some"
   input-vs-output:
     input: "business-objective → thesis → opportunity-area → intent"
     output: "outcome → target.actual → dashboard do objective (sobe SÓ por contributes-to, com agregação declarada)"
@@ -486,8 +488,8 @@ governance-profiles:
 # correção diz o quê) · tensão (choca com decisão anterior da owner). Severidade = do Codex
 # (P0 crítico · P1 importante · P2 menor — NÃO confundir com ids de provocação).
 flow-validation:
-  status: in-progress
-  gate: "owner 2026-07-01 — bloco A (G3+G4+G5) AUTORIZADO e APLICADO (ver resolution de cada gap) · G11 DECIDIDO (alerta + justificativa logada; não obrigatório) · business-tier + scaling-law ACEITOS (proposed → applied). Abertos: bloco B (G1+G2) · bloco C (G6+G13) · fila P1 (G7·G8·G9·G10·G12) · G14"
+  status: applied # todos os 14 gaps têm resolution (G11 = decision); resta o hardening via revisão adversarial
+  gate: "owner 2026-07-01 (1º) — bloco A (G3+G4+G5) AUTORIZADO e APLICADO · G11 DECIDIDO (alerta + justificativa logada; não obrigatório) · business-tier + scaling-law ACEITOS (proposed → applied). owner 2026-07-01 (2º) — TODAS as frentes: blocos B (G1+G2) e C (G6+G13), fila P1 (G7·G8·G9·G10·G12) e G14 APLICADOS (ver resolution por gap) + gerador model.yml → _map. Próximo: revisão adversarial técnica/arquitetural (Codex)"
   provocation: P10
   source: "codex (validação ponta-a-ponta + caça a gaps, big → solo) + reconciliação claude 2026-07-01"
   verdict-codex: "coerente como mapa conceitual do big-company ao solo; NÃO pronto como framework ponta-a-ponta — falta mecanizar business-tier + rollup (ecoa o achado-mestre do red-team: o modelo é SUB-mecanizado, não over-engineered)"
@@ -572,6 +574,7 @@ flow-validation:
       scale: [big, mid]
       reconciliation: "parcial — a lei dependencia-verificavel (L9) JÁ cobre em princípio (rollup É ação derivada); o gap REAL é a mecanização: nada liga outcome a contract-revision nem marca o dashboard como stale"
       suggestion: "outcome que depende de contrato cita a contract revision; dashboard marca blocked/stale se incompatível"
+      resolution: "APLICADO (fila P1) — campo contract-revision no outcome + lint blocked/stale em rollup-mechanics"
     - id: G11
       about: "q/r/d anexável, mas sem gatilhos obrigatórios"
       where: "triagem · target change · verdict override"
@@ -587,6 +590,7 @@ flow-validation:
       scale: [big, mid]
       reconciliation: "parcial — o modelo JÁ define o default (campo do objective; 'vira nó só se precisar') e a scaling-law dá o critério de promoção; o gap REAL são os campos mínimos e a promoção não estar amarrada EXPLICITAMENTE à scaling-law"
       suggestion: "campo por default com unidade · período · owner obrigatórios; vira nó quando ganha lifecycle/owner/consumo próprio"
+      resolution: "APLICADO (fila P1) — nodes.allocation: unidade · período · owner obrigatórios; promoção a nó amarrada à scaling-law"
     - id: G13
       about: "média empresa não tem perfil próprio"
       where: "escala"
@@ -602,6 +606,7 @@ flow-validation:
       scale: [big, mid, trio, solo]
       reconciliation: "aceito — FATO: bug/dep-bump (intent nula) não têm caminho até dashboard algum; compatível com 'não se bloqueia o solo' — visível como custo/risco operacional, não forçado a um objective"
       suggestion: "permitir repo-work outcome contributes-to target OU classificar como custo/risco operacional fora de objective"
+      resolution: "APLICADO — repo-work standalone também emite outcome (aresta emits) + rollup-mechanics.standalone (bucket operacional do dashboard; nada some)"
 
 # ═════════════════════ PROVOCAÇÕES ═════════════════════
 open-questions:
