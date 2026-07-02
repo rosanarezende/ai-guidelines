@@ -69,6 +69,7 @@ deliberation:
 intake:
   is: "funil PRÉ-intent (register → triagem → gate) — fora das 3 camadas"
   members: [proposal, register]
+  business-link: "G2 (bloco B): todo register/proposal DECLARA authorized-by (um business-objective ativo) OU standalone — vínculo declarado, nunca inferido. No gate: com authorized-by, valida-se objective ativo + target + allocation; standalone entra como custo/risco operacional (ver G14), não some do dashboard"
 
 # ═════════════════════ DIMENSÕES (ortogonais; cortam repo-work/execution-unit) ═════════════════════
 dimensions:
@@ -142,6 +143,25 @@ trust:
 
 # ═════════════════════ FLUXO (L2) + FÍSICO (L7) ═════════════════════
 flow:
+  # tier de negócio (G1 · bloco B): fases LEVES de planejamento ANTES do registro — colapsáveis por perfil (scaling-law)
+  - {
+      phase: define-objective,
+      tier: business,
+      role: negocio,
+      does: ["cria/revisa os business-objectives do ciclo (cascades-to; envelope L8)"],
+    }
+  - {
+      phase: define-target,
+      tier: business,
+      role: "negocio + dados",
+      does: ["metric-definitions + targets por objective (SoD: definer ≠ attester)"],
+    }
+  - {
+      phase: authorize-intake,
+      tier: business,
+      role: "owner do objective",
+      does: ["abre a porta: quais objectives aceitam propostas + allocation disponível"],
+    }
   - { phase: registro, role: negocio }
   - { phase: triagem, role: eng, does: [itens, matcher-advisory, valida-contratos] }
   - { phase: investigacao, does: ["discover roda; viabilidade testada"] }
@@ -427,6 +447,7 @@ flow-validation:
       scale: [big, mid]
       reconciliation: "aceito — FATO: flow (L2) começa em registro; nenhuma fase cobre o planejamento; business-tier tem input-vs-output mas não diz QUEM cria/aprova QUANDO"
       suggestion: "fases leves de planejamento (define-objective · define-target · authorize-intake), colapsáveis em org menor"
+      resolution: "APLICADO (bloco B) — flow ganha as 3 fases de tier business (define-objective · define-target · authorize-intake), colapsáveis por perfil"
     - id: G2
       about: "intake não está ligado ao business-tier"
       where: "registro → gate → ativação"
@@ -434,6 +455,7 @@ flow-validation:
       scale: [big, mid, trio]
       reconciliation: "aceito — FATO: a aresta authorizes (objective → intent) existe, mas proposal/register não declaram vínculo; o gate não valida objective/target/allocation. Os exemplos com intent nula mostram que 'standalone' precisa ser DECLARÁVEL (não inferido)"
       suggestion: "register/proposal declara authorized-by OU standalone; gate valida objective primário + target + allocation"
+      resolution: "APLICADO (bloco B) — intake.business-link (authorized-by OU standalone, declarado; gate valida objective ativo + target + allocation)"
     - id: G3
       about: "target.actual é 'derivado', mas falta a entidade/processo de OUTCOME"
       where: "veredito → dashboard"
