@@ -1,6 +1,6 @@
 # Benchmark — mutação perigosa sem revisão: BLOQUEAR ou só DETECTAR? (F11 · P11)
 
-- **status:** research concluído · **decisão PENDENTE (Human Gate — owner)**
+- **status:** research concluído · **decisão TOMADA (owner, 2026-07-01): opção C aceita**
 - **question:** no perfil `full`, uma mutação `dangerous` (target-change, rollup-change, verdict-override, profile-change, metric-definition-change, aggregation-change, break-glass…) feita **sem reviewer** deve ser **bloqueada** (controle preventivo) ou apenas **marcada** `dangerous-unreviewed` (controle detectivo)?
 - **por que importa:** decide se o modelo confia em auditoria a posteriori ou exige um segundo par de olhos ANTES, nas mudanças de maior risco. A owner pediu: direção do mercado + impacto na segurança do projeto.
 - **proveniência:** compilado do conhecimento do assistente (corte jan/2026) sobre frameworks públicos estáveis; sem fetch externo nesta rodada. Fontes nomeadas genericamente; nenhum material confidencial.
@@ -36,4 +36,4 @@
 
 ## Decisão
 
-**PENDENTE — Human Gate (owner).** Quando decidida, registrar em `model.yml § adversarial-review.F11` (resolution) e mecanizar em `deliberation.enforcement` + `governance-profiles.full`.
+**DECIDIDA (owner, 2026-07-01): opção C aceita.** Mecanizada no `model.yml`: subconjunto `ruler-authority` em `envelope.mutation-types` (metric-definition-change · aggregation-change · profile-change · verdict-override · break-glass) · camada F11 em `deliberation.enforcement` (soft-mandatory no perfil full: par OU break-glass logado + revisão retroativa; NÃO exige q/r/d — preserva o G11) · campo `enforcement` por perfil em `governance-profiles` · resolution do F11 em `adversarial-review`.

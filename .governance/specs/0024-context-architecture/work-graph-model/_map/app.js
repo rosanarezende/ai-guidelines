@@ -167,6 +167,10 @@ function ProfilesView() {
           <span className="r">obrigatório</span>
           <div className="d">${it.required}</div>
         </div>
+        <div className="w">
+          <span className="r">enforcement</span>
+          <div className="d">${it.enforcement}</div>
+        </div>
       </div>
       <p className="note">${p.law}</p>
     </div>

@@ -128,6 +128,7 @@ const profiles = {
     gates: Array.isArray(p.gates) ? p.gates.join(" · ") : p.gates,
     sod: p.sod,
     required: p["required-fields"],
+    enforcement: p.enforcement,
   })),
 };
 

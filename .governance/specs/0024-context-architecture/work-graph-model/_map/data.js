@@ -518,6 +518,8 @@ window.MODEL = {
         gates: "approve-objective · activate-intent · release-rollout · accept-verdict",
         sod: "completo — requester ≠ approver ≠ owner-attester · target-definer ≠ actual-attester",
         required: "envelope L8 inteiro · outcome com attester independente · aggregation declarada",
+        enforcement:
+          "F11 (opção C): mutação ruler-authority SEM par = BLOQUEADA (soft-mandatory; break-glass logado + revisão retroativa é a saída); demais dangerous = detecção (dangerous-unreviewed)",
       },
       {
         id: "compact",
@@ -529,6 +531,8 @@ window.MODEL = {
         sod: "independência de negócio no gate; autocertificação técnica DECLARADA como gap + mitigação (revisão cruzada / trusted-source externo)",
         required:
           "outcome ainda exige attester (pode ser a FONTE de dados, não uma pessoa) · aggregation declarada",
+        enforcement:
+          "F11: tudo detecção (dangerous-unreviewed) + revisão retroativa em CADÊNCIA (não trava)",
       },
       {
         id: "solo",
@@ -537,6 +541,7 @@ window.MODEL = {
         gates: "nenhum — self-log append-only substitui (break-glass permanente, logado)",
         sod: "dispensado EXPLICITAMENTE com trade-off logado; dashboard marca self-attested",
         required: "registro append-only (o grafo continua contando a história)",
+        enforcement: "F11: detecção/self-log — não se bloqueia o solo",
       },
     ],
   },

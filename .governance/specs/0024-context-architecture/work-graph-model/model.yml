@@ -64,7 +64,7 @@ contract:
 deliberation:
   is: "q/r/d (question → research → decision) — ANEXÁVEL a qualquer nó, não uma camada"
   attaches-to: [intent, execution-unit, repo-work, contract]
-  enforcement: "OPCIONAL por decisão da owner (coração do framework, sem obrigatoriedade). Mutação PERIGOSA (target-change · rollup-change · compatibility-window · verdict-override · break-glass) dispara ALERTA: ou anexa q/r/d, ou registra justificativa append-only de por que não usou (auditável). Decisão do gate G11/P10 (2026-07-01)"
+  enforcement: "OPCIONAL por decisão da owner (coração do framework, sem obrigatoriedade). Mutação DANGEROUS (ver envelope.mutation-types.dangerous) dispara ALERTA: ou anexa q/r/d, ou registra justificativa append-only de por que não usou (auditável) — gate G11/P10. CAMADA F11 (decisão owner 2026-07-01, opção C): no perfil FULL, o subconjunto ruler-authority é SOFT-MANDATORY — exige um PAR (four-eyes) OU break-glass logado + revisão retroativa obrigatória; NÃO exige q/r/d (pede uma segunda pessoa, não um processo). compact = detecção + revisão retroativa em cadência · solo = detecção/self-log"
 
 intake:
   is: "funil PRÉ-intent (register → triagem → gate) — fora das 3 camadas"
@@ -152,6 +152,8 @@ envelope:
         aggregation-change,
         business-link-change,
       ]
+    ruler-authority: # F11 (decisão owner 2026-07-01, opção C) — subconjunto de dangerous que muda a RÉGUA/AUTORIDADE; no perfil full é SOFT-MANDATORY
+      [metric-definition-change, aggregation-change, profile-change, verdict-override, break-glass]
     unknown-mutation: "fail-closed (F3): mutação sem tipo do catálogo, ou cujo DIFF não bate com o tipo declarado (ex.: mudar a fórmula da métrica rotulada de actual-publish), é REJEITADA — não existe 'normal por default'"
 trust:
   boundary: "entidade de 1ª classe (matcher/agente/backend/API são fronteiras)"
@@ -514,7 +516,7 @@ business-tier:
       - "outcome que depende de contrato CITA a contract-revision; revision fora da compatibility-window → dashboard marca blocked/stale (G10 — a lei dependencia-verificavel mecanizada p/ o rollup)"
       - "coerência intent × outcome (F2): outcome de unit sob uma intent só soma no primary-target DELA; somar noutro target exige decision explícita registrada — senão INVALID"
       - "target FROZEN/closed não recebe actual novo (F9) — outcome com window fora do período do target vai p/ o target continuador (continues-from) ou fica unassigned VISÍVEL"
-      - "mutação dangerous com justificativa mas SEM q/r/d anexado → o nó/número afetado carrega a marca dangerous-unreviewed no dashboard até reviewer/decision fechar (F11 — detecção; bloquear no perfil full = decisão em aberto, ver research F11)"
+      - "mutação dangerous com justificativa mas SEM q/r/d anexado → o nó/número afetado carrega a marca dangerous-unreviewed no dashboard até reviewer/decision fechar (F11 — detecção; no perfil FULL o subconjunto ruler-authority é soft-mandatory: ver deliberation.enforcement)"
     standalone: "G14 — trabalho sem objective TAMBÉM emite outcome: ou contributes-to um target (quando fizer sentido) ou cai no bucket OPERACIONAL do dashboard (custo/risco) — visível, fora do rollup de objectives; nada some"
   outcome-schema: # F1+F8 (bloco D) — o outcome deixa de ser prosa: campos TIPADOS + refs resolvíveis + resolver fail-closed
     fields:
@@ -598,18 +600,21 @@ governance-profiles:
       gates: [approve-objective, activate-intent, release-rollout, accept-verdict]
       sod: "completo — requester ≠ approver ≠ owner-attester · target-definer ≠ actual-attester"
       required-fields: "envelope L8 inteiro · outcome com attester independente · aggregation declarada"
+      enforcement: "F11 (opção C): mutação ruler-authority SEM par = BLOQUEADA (soft-mandatory; break-glass logado + revisão retroativa é a saída); demais dangerous = detecção (dangerous-unreviewed)"
     compact:
       for: "time pequeno (o trio da simulação; o small-team deriva daqui por role-collapse)"
       nodes: "business-objective (1-2 níveis) + intent + execution-unit (colapsa no trivial) + repo-work + outcome"
       gates: "activate-intent + accept-verdict; os demais colapsam no MESMO humano, com colapso LOGADO"
       sod: "independência de negócio no gate; autocertificação técnica DECLARADA como gap + mitigação (revisão cruzada / trusted-source externo)"
       required-fields: "outcome ainda exige attester (pode ser a FONTE de dados, não uma pessoa) · aggregation declarada"
+      enforcement: "F11: tudo detecção (dangerous-unreviewed) + revisão retroativa em CADÊNCIA (não trava)"
     solo:
       for: "dev solo"
       nodes: "repo-work + outcome self-attested; intent/objective opcionais (colapsam)"
       gates: "nenhum — self-log append-only substitui (break-glass permanente, logado)"
       sod: "dispensado EXPLICITAMENTE com trade-off logado; dashboard marca self-attested"
       required-fields: "registro append-only (o grafo continua contando a história)"
+      enforcement: "F11: detecção/self-log — não se bloqueia o solo"
 
 # ═════════════════════ VALIDAÇÃO DE FLUXO (P10 · rodada Codex big-company → solo) ═════════════════════
 # Gaps RECONCILIADOS contra este arquivo (repo vence): aceito · parcial (o modelo já cobre parte — a
@@ -739,8 +744,8 @@ flow-validation:
 # ═════════════════════ REVISÃO ADVERSARIAL (P11 · rodada Codex técnica/arquitetural, pós-P10) ═════════════════════
 # Findings RECONCILIADOS contra este arquivo (repo vence). NADA aplicado — aguarda priorização/gate da owner.
 adversarial-review:
-  status: in-progress
-  gate: "owner 2026-07-01 — TODOS os blocos autorizados: D (F1+F8) · E (F3+F5) · F (F2+F9) · G (F4+F6+F10+F11-marca) APLICADOS; H parcial (F12 — --check fora do validate por decisão). ABERTOS: F11-bloqueio-no-full (aguarda decisão pós-research) · F13 (aguarda Q-collapse/Q-discover-level)"
+  status: applied # 13/13 com resolution (F13 = adiamento deliberado)
+  gate: "owner 2026-07-01 — TODOS os blocos autorizados e APLICADOS: D (F1+F8) · E (F3+F5) · F (F2+F9) · G (F4+F6+F10) · H parcial (F12 — --check fora do validate por decisão) · F11 DECIDIDO (opção C do research: soft-mandatory p/ ruler-authority no full) · F13 adiado (espera Q-collapse/Q-discover-level)"
   provocation: P11
   source: "codex (revisão adversarial do modelo v2, HEAD 9a60e288) + reconciliação claude 2026-07-01"
   verdict-codex: "coerente como arquitetura conceitual; NÃO pronto ponta-a-ponta na barra do red-team ('mecanismo pega' = resolver + fail-closed + evidência independente). Maior fragilidade: o dashboard ainda pode virar 'verdade por texto bem-formado' — falta o resolver independente que prova que número, fonte, revisão e autoridade são válidos"
@@ -810,7 +815,7 @@ adversarial-review:
       severity: P1
       reconciliation: "aceito com NUANCE — marcar dangerous-unreviewed no dashboard/linter é COMPATÍVEL com a decisão do G11 (auditabilidade); BLOQUEAR sem reviewer no perfil full AMPLIA a decisão → gate da owner"
       suggestion: "dashboard/linter marcam dangerous-unreviewed; opcional (decisão owner): no perfil full, bloquear sem reviewer/decision"
-      resolution: "PARCIAL (bloco G) — marca dangerous-unreviewed aplicada em rollup-mechanics; BLOQUEAR no perfil full = decisão da owner em aberto (ver research/2026-07-01-benchmark-f11-dangerous-mutation-enforcement.md)"
+      resolution: "APLICADO (bloco G + decisão owner 2026-07-01, opção C do research/2026-07-01-benchmark-f11-dangerous-mutation-enforcement.md) — marca dangerous-unreviewed + SOFT-MANDATORY p/ o subconjunto ruler-authority no perfil full (par OU break-glass logado + revisão retroativa); compact = detecção + cadência; solo = self-log"
     - id: F12
       about: "loop do mapa garante sync só do SUBCONJUNTO projetado, e o --check não roda no validate/CI"
       severity: P1
@@ -822,6 +827,7 @@ adversarial-review:
       severity: P2
       reconciliation: "aceito — já registradas como open-questions; a mecanização adicional deveria esperar essas regras mínimas"
       suggestion: "fechar regra mínima de collapse + discovery-unit antes de mecanizar mais"
+      resolution: "ADIADO deliberadamente — espera Q-collapse/Q-discover-level fecharem (open-questions); nenhuma mecanização nova nessas duas jornadas até lá"
 
 # ═════════════════════ PROVOCAÇÕES ═════════════════════
 open-questions:
