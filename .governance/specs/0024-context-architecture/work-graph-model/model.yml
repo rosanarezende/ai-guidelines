@@ -400,7 +400,7 @@ business-tier:
     intent: "1ª unidade governada de trabalho (já existe; entra nas 3 camadas)."
     metric-definition: "definição ESTÁVEL da métrica: unidade · source · aggregation · owner."
     target: "binding métrica + nó + período + valor esperado. ≠ metric-definition. actual = DERIVADO dos outcomes."
-    outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit (usa envelope L8). Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número) · contract-revision (quando o resultado depende de um contrato — G10). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard."
+    outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit (usa envelope L8). Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número) · contract-revision (quando o resultado depende de um contrato — G10). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard. Schema tipado + resolver: ver outcome-schema (F1)."
     allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority com unidade · período · owner OBRIGATÓRIOS (G12); vira nó quando ganha lifecycle/owner/consumo PRÓPRIOS (o critério é a scaling-law)."
   edges:
     - { id: cascades-to, from: business-objective, to: business-objective }
@@ -451,6 +451,24 @@ business-tier:
       - "outcome sem attested-by OU com revision stale/incompatível → número marcado unverified/stale no dashboard (falha VISÍVEL, não silenciosa — lei dependencia-verificavel)"
       - "outcome que depende de contrato CITA a contract-revision; revision fora da compatibility-window → dashboard marca blocked/stale (G10 — a lei dependencia-verificavel mecanizada p/ o rollup)"
     standalone: "G14 — trabalho sem objective TAMBÉM emite outcome: ou contributes-to um target (quando fizer sentido) ou cai no bucket OPERACIONAL do dashboard (custo/risco) — visível, fora do rollup de objectives; nada some"
+  outcome-schema: # F1+F8 (bloco D) — o outcome deixa de ser prosa: campos TIPADOS + refs resolvíveis + resolver fail-closed
+    fields:
+      source: "GlobalRef RESOLVÍVEL da fonte (ex.: metric-source:acme-analytics/conversion@rev) — não string livre"
+      window: "período de medição (start · end), fechado e imutável"
+      metric-definition: "GlobalRef da metric-definition usada (a unidade do value DEVE bater com ela)"
+      value: "número + unidade"
+      aggregation: "regra declarada (sum · avg · last · custom com owner)"
+      attested-by: "AUTHORITY resolvível (pessoa OU trust-boundary com owner) — ver measurement-roles"
+      revision: "revisão dos DADOS que sustentam o número (dataset/query@rev)"
+      contract-revisions: "F8: DERIVADAS do grafo — toda repo-work da unit com coordinates-with → contract entra na lista; NÃO é autodeclarada (omissão não passa despercebida)"
+    resolver:
+      is: "verificação OBRIGATÓRIA em actual-publish E na leitura do dashboard — a peça que PROVA que número, fonte, revisão e autoridade são válidos (barra do red-team)"
+      checks:
+        - "toda ref RESOLVE (source · metric-definition · attested-by · revision · contract-revisions) — ref quebrada = INVALID"
+        - "attested-by é authority AUTORIZADA p/ a metric-definition e ≠ target-definer — senão marcado self-attested"
+        - "revision dentro de ttl/janela — senão STALE"
+        - "contract-revisions COBREM as derivadas do grafo e estão na compatibility-window — senão BLOCKED/STALE"
+      fail-mode: "fail-CLOSED p/ SOMAR (invalid/stale/blocked/self-attested-sem-colapso-logado não entram no actual) · fail-VISIBLE p/ EXIBIR (tudo aparece no dashboard, com a marca)"
   input-vs-output:
     input: "business-objective → thesis → opportunity-area → intent"
     output: "outcome → target.actual → dashboard do objective (sobe SÓ por contributes-to, com agregação declarada)"
@@ -661,6 +679,7 @@ adversarial-review:
       severity: P0
       reconciliation: "aceito — follow-up direto da barra do red-team; o físico JÁ tem GlobalRef (family:namespace/id#anchor@revision + tombstone) p/ ancorar as refs"
       suggestion: "schema do outcome com refs RESOLVÍVEIS (GlobalRef) · attested-by como authority · resolver obrigatório que marca invalid/stale"
+      resolution: "APLICADO (bloco D) — business-tier.outcome-schema (fields tipados + resolver com 4 checks + fail-mode: fail-closed p/ somar, fail-visible p/ exibir)"
     - id: F2
       about: "rollup primário da INTENT conflado com contributes-to do OUTCOME (outcome pode somar num target que não é o da intent)"
       severity: P0
@@ -696,6 +715,7 @@ adversarial-review:
       severity: P1
       reconciliation: "aceito — mecanização boa: as revisões requeridas são DERIVÁVEIS da ancestralidade (repo-work coordinates-with contract)"
       suggestion: "resolver deriva required-contract-revisions do grafo; se o outcome omitir, fail-closed/stale"
+      resolution: "APLICADO (bloco D) — outcome-schema.fields.contract-revisions derivadas do grafo + check do resolver (cobertura + compatibility-window)"
     - id: F9
       about: "virada de ciclo pode misturar target antigo e novo (actual em dois dashboards)"
       severity: P1
