@@ -36,6 +36,12 @@ for (const x of o.teams) {
 for (const x of o.repos) {
   N(x.id, "repo", x.id, x);
   E(x.owner, x.id, "owns");
+  for (const m of x.modules || []) {
+    const mid = `${x.id}#${m.id}`;
+    N(mid, "module", m.id, { ...m, repo: x.id });
+    E(x.id, mid, "has-module");
+    E(m.owner, mid, "owns");
+  }
 }
 for (const x of o.contracts) {
   N(x.id, "contract", `${x.id}@${x.revision}`, x);
@@ -62,6 +68,7 @@ for (const it of o.intents) {
     N(wid, "work", w.id, { ...w, intent: it.id });
     E(it.id, wid, "piece");
     E(wid, w.repo, "in-repo");
+    if (w.module) E(wid, `${w.repo}#${w.module}`, "in-module");
     for (const d of w["blocked-by"] || []) E(wid, `${it.id}::${d}`, "blocked-by");
     for (const d of w["delivery-after"] || []) E(wid, `${it.id}::${d}`, "delivery-after");
   }

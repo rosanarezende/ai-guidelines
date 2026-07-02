@@ -212,7 +212,9 @@ function Intents({ sel, go }) {
         (w) =>
           html`<div className="row" key=${w.id}>
             <b>${w.id}</b> <span className="pill">${w.purpose}</span>
-            <span className="pill">${w.repo}</span> ${depState(w)}
+            <span className="pill">${w.repo}</span>
+            ${w.module ? html`<span className="pill">módulo: ${w.module}</span>` : null}
+            ${depState(w)}
             ${String(w.review || "").startsWith("externo")
               ? html`<span className="st ext">review ${w.review}</span>`
               : null}<br />

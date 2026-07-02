@@ -29,6 +29,12 @@ works:
     desc: "UI do CTA atrás da flag — constrói em paralelo com mock; a integração espera o endpoint"
     delivery-after: [api-elegibilidade]
     review: interno
+  - id: contas-legadas
+    repo: acme-core-api
+    module: mod-accounts
+    purpose: sustain
+    desc: "expõe leitura de contas legadas p/ a elegibilidade — MONOLITO: o dono é o do MÓDULO"
+    review: "externo: time-identity"
   - id: baseline-eventos
     repo: acme-analytics
     purpose: operate

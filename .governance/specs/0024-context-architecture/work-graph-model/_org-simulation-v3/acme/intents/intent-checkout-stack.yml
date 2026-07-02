@@ -32,6 +32,13 @@ works:
     purpose: sustain
     desc: "adapta os endpoints ao stack novo"
     review: interno
+  - id: estrangula-pedidos
+    repo: acme-core-api
+    module: mod-orders
+    purpose: sustain
+    desc: "estrangula o fluxo de pedidos do MONOLITO (strangler) — módulo do próprio time"
+    blocked-by: [spike-carrinho]
+    review: interno
   - id: revisao-contrato
     repo: acme-web-host
     purpose: sustain

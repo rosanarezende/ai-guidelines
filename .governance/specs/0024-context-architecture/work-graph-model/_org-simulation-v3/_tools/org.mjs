@@ -58,9 +58,17 @@ export function validateOrg(o) {
         err("refs", a.id, `cascades-from "${parent}" não existe em objectives`);
   for (const t of o.teams)
     if (!ids.area.has(t.area)) err("refs", t.id, `area "${t.area}" não existe`);
-  for (const r of o.repos)
+  for (const r of o.repos) {
     if (!ids.team.has(r.owner) && !ids.area.has(r.owner))
       err("refs", r.id, `owner "${r.owner}" não é time nem área`);
+    const modIds = new Set();
+    for (const m of r.modules || []) {
+      if (modIds.has(m.id)) err("refs", `${r.id}#${m.id}`, "id de módulo duplicado no repo");
+      modIds.add(m.id);
+      if (!ids.team.has(m.owner) && !ids.area.has(m.owner))
+        err("refs", `${r.id}#${m.id}`, `owner do módulo "${m.owner}" não é time nem área`);
+    }
+  }
   for (const c of o.contracts) {
     if (!ids.repo.has(c["owner-repo"]))
       err("refs", c.id, `owner-repo "${c["owner-repo"]}" não existe`);
@@ -161,10 +169,27 @@ export function validateOrg(o) {
       }
       const ownerRepo = repoById[w.repo];
       if (ownerRepo) {
-        const expected = ownerRepo.owner === it.team ? "interno" : `externo: ${ownerRepo.owner}`;
+        // monolito: dono é o do nó MAIS ESPECÍFICO — módulo se declarado, senão o repo (custodião)
+        let owner = ownerRepo.owner;
+        if (w.module) {
+          const mod = (ownerRepo.modules || []).find((m) => m.id === w.module);
+          if (!mod) err("refs", wid, `módulo "${w.module}" não existe em ${w.repo}`);
+          else owner = mod.owner;
+        } else if ((ownerRepo.modules || []).length) {
+          warn(
+            "monolith-module",
+            wid,
+            `${w.repo} tem donos por MÓDULO — declare o módulo da peça (senão o review cai no custodião)`
+          );
+        }
+        const expected = owner === it.team ? "interno" : `externo: ${owner}`;
         const declared = String(w.review || "");
         if (expected.startsWith("externo") && !declared.startsWith("externo"))
-          err("review-derivation", wid, `review deveria ser "${expected}" (repo de outro dono)`);
+          err(
+            "review-derivation",
+            wid,
+            `review deveria ser "${expected}" (dono do ${w.module ? "módulo" : "repo"})`
+          );
         if (expected === "interno" && declared.startsWith("externo"))
           warn("review-derivation", wid, "review externo declarado onde o derivado é interno");
       }

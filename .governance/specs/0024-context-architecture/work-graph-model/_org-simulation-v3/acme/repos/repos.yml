@@ -23,3 +23,12 @@ repos:
       caps: [componentes, tokens],
       note: compartilhado,
     }
+  - id: acme-core-api
+    owner: area-platform # CUSTODIÃO do repo: build, CI e o que não é de módulo nenhum
+    caps: [api-legada, integracoes]
+    note: "MONOLITO legado — grande demais p/ um time só: donos por MÓDULO (padrão CODEOWNERS)"
+    modules:
+      - { id: mod-billing, owner: time-billing, caps: [cobranca-legada, notas-fiscais] }
+      - { id: mod-orders, owner: time-checkout, caps: [pedidos-legados, estoque] }
+      - { id: mod-accounts, owner: time-identity, caps: [contas, permissoes-legadas] }
+      - { id: mod-reports, owner: time-data, caps: [relatorios-legados] }
