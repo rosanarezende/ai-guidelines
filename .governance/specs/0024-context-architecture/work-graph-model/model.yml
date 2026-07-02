@@ -413,18 +413,18 @@ business-tier:
     business-objective: "compromisso de negócio, RECURSIVO (cascades-to si mesmo). Campos: level · period · owner · parent · status. Ex. level: company-strategy | area-driver | team-priority. É o que dá a flexibilidade anual (ver annual-flexibility)."
     thesis: "hipótese CAUSAL de negócio (por que ações X devem mover a métrica Z). NÃO é objetivo — nó separado."
     opportunity-area: "espaço de ataque/opção (era 'thematic'). OPCIONAL."
-    intent: "1ª unidade governada de trabalho (já existe; entra nas 3 camadas)."
+    intent: "1ª unidade governada de trabalho (já existe; entra nas 3 camadas). Ganha primary-target (F2): o target primário herdado do authorizes — o rollup da intent é por ELE, e os outcomes das units sob ela devem ser compatíveis."
     metric-definition: "definição ESTÁVEL da métrica: unidade · source · aggregation · owner."
-    target: "binding métrica + nó + período + valor esperado. ≠ metric-definition. actual = DERIVADO dos outcomes."
+    target: "binding métrica + nó + período + valor esperado. ≠ metric-definition. actual = DERIVADO dos outcomes. Período IMUTÁVEL (F9): no fechamento do ciclo o target é FROZEN (closed) — actuals novos não entram; continuidade via continues-from (vale p/ target, não só objective)."
     outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit (usa envelope L8). Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número) · contract-revision (quando o resultado depende de um contrato — G10). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard. Schema tipado + resolver: ver outcome-schema (F1)."
     allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority com unidade · período · owner OBRIGATÓRIOS (G12); vira nó quando ganha lifecycle/owner/consumo PRÓPRIOS (o critério é a scaling-law)."
   edges:
     - { id: cascades-to, from: business-objective, to: business-objective }
     - {
         id: continues-from,
-        from: business-objective,
-        to: business-objective,
-        note: "novo ciclo (G8)",
+        from: [business-objective, target],
+        to: [business-objective, target],
+        note: "novo ciclo (G8; tipo-a-tipo — objective→objective · target→target, F9)",
       }
     - { id: split-from, from: business-objective, to: business-objective, note: "1 vira N (G8)" }
     - { id: merged-into, from: business-objective, to: business-objective, note: "N viram 1 (G8)" }
@@ -466,6 +466,8 @@ business-tier:
       - "aligns-with NUNCA soma — o dashboard ignora (contexto narrativo)"
       - "outcome sem attested-by OU com revision stale/incompatível → número marcado unverified/stale no dashboard (falha VISÍVEL, não silenciosa — lei dependencia-verificavel)"
       - "outcome que depende de contrato CITA a contract-revision; revision fora da compatibility-window → dashboard marca blocked/stale (G10 — a lei dependencia-verificavel mecanizada p/ o rollup)"
+      - "coerência intent × outcome (F2): outcome de unit sob uma intent só soma no primary-target DELA; somar noutro target exige decision explícita registrada — senão INVALID"
+      - "target FROZEN/closed não recebe actual novo (F9) — outcome com window fora do período do target vai p/ o target continuador (continues-from) ou fica unassigned VISÍVEL"
     standalone: "G14 — trabalho sem objective TAMBÉM emite outcome: ou contributes-to um target (quando fizer sentido) ou cai no bucket OPERACIONAL do dashboard (custo/risco) — visível, fora do rollup de objectives; nada some"
   outcome-schema: # F1+F8 (bloco D) — o outcome deixa de ser prosa: campos TIPADOS + refs resolvíveis + resolver fail-closed
     fields:
@@ -707,6 +709,7 @@ adversarial-review:
       severity: P0
       reconciliation: "aceito — FATO: a aresta contributes-to é outcome → target, mas o rollup-rule fala 'por outcome/intent'; a intent não tem campo primary-target"
       suggestion: "separar intent.primary-target (vem do authorizes) do contributes-to do outcome; outcome só soma se compatível com o primary-target OU com decision explícita"
+      resolution: "APLICADO (bloco F) — intent.primary-target (herdado do authorizes) + lint de coerência intent × outcome em rollup-mechanics"
     - id: F3
       about: "mutation-types burlável: dangerous é string e faltam tipos (profile-change · metric-definition-change · business-link-change · aggregation-change · break-glass como tipo real)"
       severity: P0
@@ -745,6 +748,7 @@ adversarial-review:
       severity: P1
       reconciliation: "PARCIAL — states.business-tier JÁ cobre target (fechamento existe); o que falta é CONTINUIDADE (continues-from/supersedes p/ target) + freeze do target ao fechar o ciclo"
       suggestion: "target com período imutável + freeze no fechamento do ciclo + arestas de continuidade também p/ target"
+      resolution: "APLICADO (bloco F) — nodes.target: período imutável + freeze no fechamento; continues-from vale tipo-a-tipo p/ target; lint de window fora do período em rollup-mechanics"
     - id: F10
       about: "simulação de papéis não cobre as fases business (define-objective/define-target/authorize-intake sem accountable por escala)"
       severity: P1
