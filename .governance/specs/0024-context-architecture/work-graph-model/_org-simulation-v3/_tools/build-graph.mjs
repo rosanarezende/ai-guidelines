@@ -25,6 +25,10 @@ for (const x of o.areas) {
   N(x.id, "area", x.title, x);
   E(x["cascades-from"], x.id, "cascades-to");
 }
+for (const x of o.theses || []) {
+  N(x.id, "thesis", x.says, x);
+  E(x.frames, x.id, "framed-by");
+}
 for (const x of o.teams) {
   N(x.id, "team", x.id, x);
   E(x.area, x.id, "has-team");
@@ -50,6 +54,7 @@ for (const it of o.intents) {
   E(it["authorized-by"], it.id, "authorizes");
   E(it.team, it.id, "runs");
   if (it["primary-target"]) E(it.id, it["primary-target"], "primary-target");
+  if (it.thesis) E(it.thesis, it.id, "informs");
   for (const c of it["contracts-changed"] || []) E(it.id, c, "changes");
   for (const c of it["contracts-consumed"] || []) E(it.id, c, "consumes");
   for (const w of it.works || []) {

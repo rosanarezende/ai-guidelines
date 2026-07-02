@@ -858,6 +858,7 @@ approach-proposal:
     applicability: "só intent PLANEJADA que pretende mudança governada; bug, reativo, descoberta avulsa e operação não têm o campo — a camada colapsa (não existe 'não se aplica' em dropdown)"
     drift: "unidades divergindo da abordagem declarada → alerta approach-drift (não bloqueia; substitui o strategy-drift)"
     naming-note: "nomes decididos pela owner: approach · graduation · direct (bet, commit-direct e deliver-direct REJEITADOS — conotação de jogo/git)"
+  culture-note: "GROWTH COMO CULTURA (owner, 2026-07-02): validate-first é abordagem de QUALQUER time — não propriedade de uma área. Áreas de growth podem ter times dedicados, mas a cultura incentiva todos a experimentar: um time de plataforma pode carregar target de receita e rodar experimento (ex.: checkout-1click na sim v3, time-checkout → obj-revenue). O dashboard MEDE a cultura: % de intents validate-first por área (derivado do grafo, não declarado)"
   signals:
     is: "SINAIS concretos do trabalho descrito ligam os mecanismos — SEM conceito intermediário. A 'natureza' foi REMOVIDA (decisão owner 2026-07-02: dois vocabulários p/ a mesma coisa = fricção; os sinais bastam). O portfólio agrega POR SINAL (quanto do trabalho toca contrato × meta operacional × caminho curto); divergência entre o sugerido na autoria e o observado nas peças = alerta signal-drift"
     list:

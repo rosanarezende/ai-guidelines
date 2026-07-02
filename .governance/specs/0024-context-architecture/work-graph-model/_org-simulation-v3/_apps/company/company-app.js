@@ -91,6 +91,30 @@ function StakeholdersDash() {
   </div>`;
 }
 
+function CultureCard() {
+  const areas = nodesBy("area");
+  const teams = nodesBy("team");
+  const rows = areas.map((a) => {
+    const teamIds = new Set(teams.filter((t) => t.data.area === a.id).map((t) => t.id));
+    const its = intents.filter((i) => teamIds.has(i.data.team));
+    const vf = its.filter((i) => i.data.approach === "validate-first").length;
+    return { area: a.label, total: its.length, vf };
+  });
+  return html`<div className="card">
+    <h2>growth como cultura — experimentação por área (derivado do grafo)</h2>
+    ${rows.map(
+      (r) =>
+        html`<div className="kv" key=${r.area}>
+          <b>${r.area}:</b> ${r.vf} de ${r.total} intents são validate-first
+        </div>`
+    )}
+    <div className="kv muted">
+      a abordagem é de QUALQUER time — growth pode ter times dedicados, mas a cultura incentiva
+      todos a experimentar (ex.: o 1-clique do time-checkout mira o objetivo de receita)
+    </div>
+  </div>`;
+}
+
 function ProfileCard({ pkey }) {
   const p = (G.profiles && G.profiles.profiles && G.profiles.profiles[pkey]) || {};
   return html`<div className="card">
@@ -143,6 +167,7 @@ function App() {
       )}
     </div>
     <${ProfileCard} pkey=${p} />
+    <${CultureCard} />
     <${ExecutionDash} />
     <${StakeholdersDash} />
   </div>`;

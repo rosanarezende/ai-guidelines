@@ -41,8 +41,26 @@ targets:
     node: time-sre
     metric: p99-latency
     period: 2027-H1
-    expected: "p99 abaixo de N ms · -30% de incidentes"
+    expected: "p99 abaixo de N ms"
     definer: head-platform
     attester: acme-obs-stack
     contributes-to: obj-efficiency
+    status: active
+  - id: tgt-sre-incidents
+    node: time-sre
+    metric: incident-count
+    period: 2027-H1
+    expected: "-30% de incidentes"
+    definer: head-platform
+    attester: acme-obs-stack
+    contributes-to: obj-efficiency
+    status: active
+  - id: tgt-checkout-conv # growth como CULTURA: meta de RECEITA num time de PLATAFORMA
+    node: time-checkout
+    metric: conversion-rate
+    period: 2027-H1
+    expected: "+V% de conversão no checkout (1 clique)"
+    definer: pm-growth
+    attester: acme-analytics
+    contributes-to: obj-revenue
     status: active

@@ -4,6 +4,7 @@ title: "CTA contextual de upgrade no billing"
 team: time-billing
 authorized-by: obj-revenue
 primary-target: tgt-billing-conv
+thesis: tese-cross-sell
 approach: validate-first
 hypothesis: "um CTA contextual no billing aumenta a conversão de cross-sell em X%"
 decision-rule: "roda 4 semanas OU 50k exposições; ganha se conversão ↑ X% sem churn ↑"

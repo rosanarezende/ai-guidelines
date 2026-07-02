@@ -4,6 +4,7 @@ title: "migrar o checkout para o stack novo"
 team: time-checkout
 authorized-by: obj-efficiency
 primary-target: tgt-checkout-stack
+thesis: tese-eficiencia
 approach: direct
 signal: touches-contract
 contracts-changed: [acme-user-context] # v3 → v4 com quebra — abre a janela

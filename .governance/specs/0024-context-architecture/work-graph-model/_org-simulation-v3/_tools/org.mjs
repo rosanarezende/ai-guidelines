@@ -15,6 +15,7 @@ export function loadOrg() {
     objectives: load("business/objectives.yml").objectives,
     areas: load("business/areas.yml").areas,
     teams: load("business/teams.yml").teams,
+    theses: load("business/theses.yml").theses,
     metrics: load("business/metrics.yml").metrics,
     targets: load("business/targets.yml").targets,
     repos: load("repos/repos.yml").repos,
@@ -44,6 +45,7 @@ export function validateOrg(o) {
     metric: new Set(o.metrics.map((x) => x.id)),
     target: new Set(o.targets.map((x) => x.id)),
     contract: new Set(o.contracts.map((x) => x.id)),
+    thesis: new Set((o.theses || []).map((x) => x.id)),
   };
   const repoById = Object.fromEntries(o.repos.map((r) => [r.id, r]));
   const targetById = Object.fromEntries(o.targets.map((t) => [t.id, t]));
@@ -65,6 +67,11 @@ export function validateOrg(o) {
       if (!ids.repo.has(cons)) err("refs", c.id, `consumer "${cons}" não existe`);
   }
 
+  // R1b — teses (P9): a hipótese causal enquadra um objetivo que existe
+  for (const th of o.theses || [])
+    if (!ids.obj.has(th.frames))
+      err("refs", th.id, `frames "${th.frames}" não existe em objectives`);
+
   // R2 — targets: refs + SoD da medição (definer ≠ attester) + attester coerente com a fonte da métrica
   for (const t of o.targets) {
     if (!ids.team.has(t.node) && !ids.obj.has(t.node))
@@ -82,6 +89,12 @@ export function validateOrg(o) {
     if (m && t.attester && t.attester !== m.source)
       warn("attester-source", t.id, `attester "${t.attester}" ≠ source da métrica ("${m.source}")`);
   }
+
+  // R2b — métrica órfã (achado da owner no grafo): metric sem nenhum target é decorativa
+  const usedMetrics = new Set(o.targets.map((t) => t.metric));
+  for (const m of o.metrics)
+    if (!usedMetrics.has(m.id))
+      warn("metric-orphan", m.id, "métrica sem nenhum target — flutua no grafo (decorativa)");
 
   // R3 — intents: refs · abordagem · regra de ouro · sinal × contrato · primary-target coerente
   for (const it of o.intents) {
@@ -101,6 +114,18 @@ export function validateOrg(o) {
         it.id,
         `o primary-target contribui p/ "${pt["contributes-to"]}", mas a intent é autorizada por "${it["authorized-by"]}" (F2 da P11)`
       );
+    if (it.thesis) {
+      if (!ids.thesis.has(it.thesis)) err("refs", it.id, `thesis "${it.thesis}" não existe`);
+      else {
+        const th = (o.theses || []).find((x) => x.id === it.thesis);
+        if (th && th.frames !== it["authorized-by"])
+          warn(
+            "thesis-coherence",
+            it.id,
+            `a tese "${it.thesis}" enquadra "${th.frames}", mas a intent é autorizada por "${it["authorized-by"]}"`
+          );
+      }
+    }
     if (!APPROACHES.includes(it.approach))
       err("approach", it.id, `approach "${it.approach}" inválida (validate-first · direct)`);
     if (it.approach === "validate-first" && (!it.hypothesis || !it["decision-rule"]))

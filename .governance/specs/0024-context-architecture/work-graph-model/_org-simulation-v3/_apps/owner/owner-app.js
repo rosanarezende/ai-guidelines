@@ -6,6 +6,7 @@ const G = window.GRAPH;
 
 const TYPE_COLOR = {
   objective: "#ba7517",
+  thesis: "#e0aa3e",
   area: "#e09f3e",
   team: "#8a8477",
   repo: "#378add",
@@ -18,6 +19,7 @@ const TYPE_COLOR = {
 };
 const TYPE_SHAPE = {
   objective: "round-rectangle",
+  thesis: "pentagon",
   area: "round-rectangle",
   team: "round-rectangle",
   repo: "barrel",

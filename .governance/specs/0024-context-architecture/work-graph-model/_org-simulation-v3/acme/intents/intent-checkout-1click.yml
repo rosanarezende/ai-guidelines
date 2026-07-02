@@ -1,0 +1,45 @@
+# intent-checkout-1click — GROWTH COMO CULTURA: um time de PLATAFORMA experimentando (validate-first)
+# rumo ao objetivo de RECEITA. A abordagem é de qualquer time — não propriedade de uma área.
+id: intent-checkout-1click
+title: "checkout em 1 clique para clientes recorrentes"
+team: time-checkout
+authorized-by: obj-revenue
+primary-target: tgt-checkout-conv
+thesis: tese-cross-sell
+approach: validate-first
+hypothesis: "reduzir o checkout a 1 clique p/ recorrentes aumenta a conversão em V%"
+decision-rule: "roda 3 semanas OU 30k exposições; ganha se conversão ↑ V% sem aumento de estorno"
+signal: none
+contracts-consumed: [acme-events-schema]
+works:
+  - id: flag-1click
+    repo: acme-checkout
+    purpose: create
+    desc: "fluxo de 1 clique atrás da flag (só recorrentes)"
+    review: interno
+  - id: api-token-pagamento
+    repo: acme-checkout-api
+    purpose: create
+    desc: "token de pagamento salvo p/ recorrentes"
+    review: interno
+  - id: baseline-1click
+    repo: acme-analytics
+    purpose: operate
+    desc: "eventos + baseline do funil (consome o schema existente, sem revisão)"
+    review: "externo: time-data"
+next:
+  - {
+      when: "veredito: ganhou",
+      then: "graduation — 1 clique vira padrão p/ recorrentes",
+      gate: accept-verdict,
+    }
+  - {
+      when: "veredito: perdeu",
+      then: "cleanup — remove a flag e o token opt-in",
+      gate: accept-verdict,
+    }
+  - {
+      when: "veredito: inconclusivo",
+      then: "refina a hipótese (segmento menor) OU vira descoberta",
+      gate: accept-verdict,
+    }
