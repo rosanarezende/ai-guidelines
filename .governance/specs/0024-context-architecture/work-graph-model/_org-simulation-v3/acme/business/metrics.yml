@@ -2,9 +2,17 @@
 metrics:
   - { id: conversion-rate, unit: "%", source: acme-analytics, aggregation: avg, owner: time-data }
   - { id: activation-rate, unit: "%", source: acme-analytics, aggregation: avg, owner: time-data }
+  - { id: churn-rate, unit: "%/mês", source: acme-analytics, aggregation: avg, owner: time-data }
   - {
       id: cost-to-serve,
       unit: "R$/pedido",
+      source: acme-data-pipeline,
+      aggregation: avg,
+      owner: time-data,
+    }
+  - {
+      id: ticket-cost,
+      unit: "R$/ticket",
       source: acme-data-pipeline,
       aggregation: avg,
       owner: time-data,
@@ -16,4 +24,11 @@ metrics:
       source: acme-obs-stack,
       aggregation: sum,
       owner: time-sre,
+    }
+  - {
+      id: consent-coverage,
+      unit: "% de dados com base legal",
+      source: acme-data-pipeline,
+      aggregation: avg,
+      owner: time-data,
     }

@@ -477,7 +477,12 @@ business-tier:
     outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit (usa envelope L8). Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número) · contract-revision (quando o resultado depende de um contrato — G10). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard. Schema tipado + resolver: ver outcome-schema (F1)."
     allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority com unidade · período · owner OBRIGATÓRIOS (G12); vira nó quando ganha lifecycle/owner/consumo PRÓPRIOS (o critério é a scaling-law)."
   edges:
-    - { id: cascades-to, from: business-objective, to: business-objective }
+    - {
+        id: cascades-to,
+        from: business-objective,
+        to: business-objective,
+        note: "N:N — um nível de baixo pode servir a MAIS de um objetivo de cima (o mundo real é grafo, não árvore; constatado no dogfood da sim v3: áreas com 2 objetivos)",
+      }
     - {
         id: continues-from,
         from: [business-objective, target],

@@ -1,0 +1,40 @@
+# intent-consent-center — obj-trust; SEGUNDA intent mexendo no MESMO contrato do checkout
+# (acme-user-context) — tensão de coordenação REAL: duas mudanças, uma janela, um owner.
+id: intent-consent-center
+title: "central de consentimento e base legal por dado"
+team: time-identity
+authorized-by: obj-trust
+primary-target: tgt-identity-consent
+thesis: tese-privacidade
+approach: direct
+signal: touches-contract
+contracts-changed: [acme-user-context] # o contexto de usuário ganha os campos de consentimento
+works:
+  - id: central-consentimento
+    repo: acme-identity
+    purpose: create
+    desc: "central de consentimento (ver/dar/revogar) + registro de base legal"
+    review: interno
+  - id: contexto-consentimento
+    repo: acme-web-host
+    purpose: sustain
+    desc: "acme-user-context ganha campos de consentimento — COORDENAR com a onda do checkout (mesmo contrato, mesma janela)"
+    blocked-by: [central-consentimento]
+    review: "externo: area-platform"
+  - id: propagar-base-legal
+    repo: acme-data-pipeline
+    purpose: sustain
+    desc: "warehouse propaga a base legal por dado (consent-coverage nasce daqui)"
+    delivery-after: [central-consentimento]
+    review: "externo: time-data"
+next:
+  - {
+      when: "central no ar",
+      then: "campos entram no contrato — revisão COORDENADA com a v4 do checkout",
+      gate: release-rollout,
+    }
+  - { when: "cobertura de base legal em 100%", then: "outcome sobe no placar de confiança" }
+  - {
+      when: "conflito de janela com o checkout",
+      then: "decision explícita: uma revisão v4 única OU janelas encadeadas",
+    }

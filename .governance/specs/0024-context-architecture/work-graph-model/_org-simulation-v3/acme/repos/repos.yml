@@ -1,5 +1,5 @@
-# repos.yml — o terreno: 10 repos, dono (time ou área) e as CAPABILITIES declaradas no manifesto.
-# As capabilities alimentam o matcher (advisory): ele sugere o repo de cada peça; o humano confirma.
+# repos.yml — o terreno: 12 repos. DONO é sempre UM (invariante de accountability — quem responde);
+# "vários times mexem no mesmo repo" aparece nas PEÇAS das intents (com review externo derivado).
 repos:
   - { id: acme-mfe-billing, owner: time-billing, caps: [billing-ui, planos, upgrade] }
   - { id: acme-api-billing, owner: time-billing, caps: [cobrança, elegibilidade, assinaturas] }
@@ -9,6 +9,8 @@ repos:
   - { id: acme-analytics, owner: time-data, caps: [eventos, métricas, experimentos-fonte] }
   - { id: acme-data-pipeline, owner: time-data, caps: [etl, warehouse] }
   - { id: acme-obs-stack, owner: time-sre, caps: [alertas, slo, tracing, atesta-outcomes] }
+  - { id: acme-identity, owner: time-identity, caps: [auth, login, consentimento, privacidade] }
+  - { id: acme-help-center, owner: time-support, caps: [ajuda, tickets, chatbot, self-service] }
   - {
       id: acme-web-host,
       owner: area-platform,

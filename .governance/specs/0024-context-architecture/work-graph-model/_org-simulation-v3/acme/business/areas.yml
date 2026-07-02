@@ -1,12 +1,18 @@
-# areas.yml — business-objective nível area: cada área traduz um objetivo da empresa num DRIVER seu
+# areas.yml — business-objective nível area. cascades-from é N:N (uma área pode servir
+# MAIS de um objetivo da empresa — o mundo real não é árvore, é grafo).
 areas:
   - id: area-growth
     title: "área de growth"
-    cascades-from: obj-revenue
-    driver: "cross-sell entre os produtos"
+    cascades-from: [obj-revenue, obj-retention]
+    driver: "cross-sell entre os produtos + ativação que retém"
     owner: head-growth
   - id: area-platform
     title: "área de plataforma"
-    cascades-from: obj-efficiency
-    driver: "eficiência e confiabilidade da plataforma"
+    cascades-from: [obj-efficiency, obj-trust]
+    driver: "eficiência, confiabilidade e privacidade da plataforma"
     owner: head-platform
+  - id: area-cx
+    title: "área de experiência do cliente"
+    cascades-from: [obj-retention, obj-efficiency]
+    driver: "suporte que retém + autoatendimento que barateia"
+    owner: head-cx

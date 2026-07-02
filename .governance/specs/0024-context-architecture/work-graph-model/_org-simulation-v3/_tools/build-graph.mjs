@@ -23,7 +23,7 @@ const E = (source, target, type) =>
 for (const x of o.objectives) N(x.id, "objective", x.title, x);
 for (const x of o.areas) {
   N(x.id, "area", x.title, x);
-  E(x["cascades-from"], x.id, "cascades-to");
+  for (const parent of [].concat(x["cascades-from"] || [])) E(parent, x.id, "cascades-to");
 }
 for (const x of o.theses || []) {
   N(x.id, "thesis", x.says, x);

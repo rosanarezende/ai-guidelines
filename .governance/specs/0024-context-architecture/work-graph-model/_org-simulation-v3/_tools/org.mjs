@@ -53,8 +53,9 @@ export function validateOrg(o) {
 
   // R1 — toda referência RESOLVE (a lei da dependência verificável, na prática)
   for (const a of o.areas)
-    if (!ids.obj.has(a["cascades-from"]))
-      err("refs", a.id, `cascades-from "${a["cascades-from"]}" não existe em objectives`);
+    for (const parent of [].concat(a["cascades-from"] || []))
+      if (!ids.obj.has(parent))
+        err("refs", a.id, `cascades-from "${parent}" não existe em objectives`);
   for (const t of o.teams)
     if (!ids.area.has(t.area)) err("refs", t.id, `area "${t.area}" não existe`);
   for (const r of o.repos)

@@ -1,7 +1,9 @@
-# teams.yml — os 5 times; a prioridade de cada um vira TARGET em targets.yml (binding com métrica)
+# teams.yml — 7 times em 3 áreas; a prioridade de cada um vira TARGET em targets.yml.
 teams:
   - { id: time-billing, area: area-growth, lead: lead-billing }
   - { id: time-onboarding, area: area-growth, lead: lead-onboarding }
   - { id: time-checkout, area: area-platform, lead: lead-checkout }
   - { id: time-data, area: area-platform, lead: lead-data }
   - { id: time-sre, area: area-platform, lead: lead-sre }
+  - { id: time-identity, area: area-platform, lead: lead-identity }
+  - { id: time-support, area: area-cx, lead: lead-support }

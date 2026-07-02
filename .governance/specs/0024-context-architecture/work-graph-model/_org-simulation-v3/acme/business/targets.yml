@@ -64,3 +64,39 @@ targets:
     attester: acme-analytics
     contributes-to: obj-revenue
     status: active
+  - id: tgt-onboarding-churn # área de growth servindo obj-retention (área N:N)
+    node: time-onboarding
+    metric: churn-rate
+    period: 2027-H1
+    expected: "-P p.p. de churn nos ativados na 1ª semana"
+    definer: pm-growth
+    attester: acme-analytics
+    contributes-to: obj-retention
+    status: active
+  - id: tgt-support-churn
+    node: time-support
+    metric: churn-rate
+    period: 2027-H1
+    expected: "-Q p.p. de churn entre quem abre ticket"
+    definer: head-cx
+    attester: acme-analytics
+    contributes-to: obj-retention
+    status: active
+  - id: tgt-support-cost # área de CX servindo obj-efficiency (área N:N)
+    node: time-support
+    metric: ticket-cost
+    period: 2027-H2
+    expected: "-R% no custo por ticket via autoatendimento"
+    definer: head-cx
+    attester: acme-data-pipeline
+    contributes-to: obj-efficiency
+    status: active
+  - id: tgt-identity-consent
+    node: time-identity
+    metric: consent-coverage
+    period: 2027-H1
+    expected: "100% dos dados com base legal registrada"
+    definer: head-platform
+    attester: acme-data-pipeline
+    contributes-to: obj-trust
+    status: active
