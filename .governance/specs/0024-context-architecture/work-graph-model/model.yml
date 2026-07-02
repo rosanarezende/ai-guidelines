@@ -356,6 +356,7 @@ simulation:
   finding:
     id: F-governance-scaling
     says: "o fluxo e a Lei da Independência (X/O1) assumem TIME COMPLETO. Precisam ESCALAR PARA BAIXO por role-collapse — espelho do execution-unit-collapse (cerimônia proporcional ao tamanho da org E do trabalho). full-team: SoD holds. trio: independência TÉCNICA fica com gaps de autocertificação (mitigar com revisão cruzada / trusted-source externo). solo: SoD impossível → self-governed + trade-off logado (break-glass). Conecta as leis fallback/break-glass + independência."
+    mechanized-by: "governance-profiles (G6 · bloco C)"
 
 # ═════════════════════ BUSINESS TIER (P9 · consolidado c/ Codex) — nós de negócio ACIMA da intent ═════════════════════
 # Core PEQUENO + RECURSIVO (não a árvore fixa strategy/driver/priority). Input (planejamento) + output (dashboards). Anonimizado.
@@ -427,6 +428,31 @@ scaling-law:
   applies-to: [business-tier, execution-unit, "roles/SoD"]
   generalizes: "F-governance-scaling + execution-unit-collapse — um princípio só p/ camadas de trabalho + tier de negócio + papéis"
   new-sod: "quem DEFINE o target não deve ser o único a ATESTAR o actual (fonte/analytics independente)"
+  executed-by: governance-profiles # G6 (bloco C)
+
+# ═════════════════════ PERFIS DE GOVERNANÇA (G6+G13 · bloco C) — a scaling-law EXECUTÁVEL ═════════════════════
+governance-profiles:
+  is: "perfis operacionais mínimos por forma de org (G6): cada perfil diz que NÓS existem, que GATES colapsam e que CAMPOS são obrigatórios — colapso LIMPO, não princípio abstrato"
+  law: "a org declara UM perfil + desvios EXPLÍCITOS; mudar de perfil = mutação com envelope L8. Perfis derivam por role-collapse parametrizado (G13) — o compact cobre o small-team (PM+TL+eng) sem um 4º arquétipo fixo"
+  profiles:
+    full:
+      for: "org com papéis separados (a full-team da simulação)"
+      nodes: "business-tier completo + 3 camadas + contract + intake + outcome"
+      gates: [approve-objective, activate-intent, release-rollout, accept-verdict]
+      sod: "completo — requester ≠ approver ≠ owner-attester · target-definer ≠ actual-attester"
+      required-fields: "envelope L8 inteiro · outcome com attester independente · aggregation declarada"
+    compact:
+      for: "time pequeno (o trio da simulação; o small-team deriva daqui por role-collapse)"
+      nodes: "business-objective (1-2 níveis) + intent + execution-unit (colapsa no trivial) + repo-work + outcome"
+      gates: "activate-intent + accept-verdict; os demais colapsam no MESMO humano, com colapso LOGADO"
+      sod: "independência de negócio no gate; autocertificação técnica DECLARADA como gap + mitigação (revisão cruzada / trusted-source externo)"
+      required-fields: "outcome ainda exige attester (pode ser a FONTE de dados, não uma pessoa) · aggregation declarada"
+    solo:
+      for: "dev solo"
+      nodes: "repo-work + outcome self-attested; intent/objective opcionais (colapsam)"
+      gates: "nenhum — self-log append-only substitui (break-glass permanente, logado)"
+      sod: "dispensado EXPLICITAMENTE com trade-off logado; dashboard marca self-attested"
+      required-fields: "registro append-only (o grafo continua contando a história)"
 
 # ═════════════════════ VALIDAÇÃO DE FLUXO (P10 · rodada Codex big-company → solo) ═════════════════════
 # Gaps RECONCILIADOS contra este arquivo (repo vence): aceito · parcial (o modelo já cobre parte — a
@@ -487,6 +513,7 @@ flow-validation:
       scale: [mid, trio, solo]
       reconciliation: "aceito — governance-profile é a materialização EXECUTÁVEL da scaling-law (conecta F-governance-scaling + degenerate-mode do solo)"
       suggestion: "governance-profile (full · compact · solo): nós mínimos, gates colapsados e campos obrigatórios por perfil"
+      resolution: "APLICADO (bloco C) — seção governance-profiles (full · compact · solo): nodes/gates/sod/required-fields por perfil + lei do desvio explícito"
     - id: G7
       about: "gate único não cobre decisões por tier"
       where: "objective approval · activation · rollout · verdict"
@@ -537,6 +564,7 @@ flow-validation:
       scale: [mid]
       reconciliation: "aceito — a sim tem full-team/trio/solo; nota: 'role-collapse parametrizado' CONVERGE com a scaling-law aplicada a papéis — o perfil mid talvez DERIVE do G6 (governance-profile) em vez de ser um 4º arquétipo fixo"
       suggestion: "arquétipo small-team (PM + TL + Eng) OU role-collapse parametrizado via governance-profile"
+      resolution: "APLICADO (bloco C) — via role-collapse parametrizado: o perfil compact cobre o small-team (sem 4º arquétipo fixo)"
     - id: G14
       about: "trabalho standalone some do dashboard"
       where: "bug · dep-bump · incident · trabalho solo"
