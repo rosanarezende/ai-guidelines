@@ -1,0 +1,10 @@
+# org.yml — a empresa simulada + a DECLARAÇÃO de perfil de governança (F5 da P11: nunca autoatribuição livre)
+company: acme
+profile-declaration:
+  scope: "acme (a org inteira)"
+  profile: full
+  eligibility: "papéis separados existem: sponsor · PM/liderança por área · eng por time · dados · SRE"
+  approved-by: sponsor-acme # fora do escopo operacional (SoD aplicado ao próprio perfil)
+  ttl: 2027-06-30
+  review-at: 2027-01-15
+  badge: "perfil full — SoD completo; mutações ruler-authority são soft-mandatory (par OU break-glass logado)"

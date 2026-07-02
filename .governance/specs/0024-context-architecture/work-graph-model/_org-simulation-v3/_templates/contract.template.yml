@@ -1,0 +1,7 @@
+# TEMPLATE contract — nasce quando um repo publica interface que outros consomem.
+# Toda revisão passa pelo review do owner; revisão com QUEBRA abre a janela (que mora AQUI).
+id: <contrato-slug>
+revision: v1
+owner-repo: <repo que publica>
+consumers: [<repos que consomem>]
+compatibility-window: null # "vN + vN+1 até <data>" quando uma quebra abrir a janela

@@ -1,0 +1,58 @@
+# intent-checkout-stack — abordagem direct + sinal touches-contract (muda contrato COM quebra)
+id: intent-checkout-stack
+title: "migrar o checkout para o stack novo"
+team: time-checkout
+authorized-by: obj-efficiency
+primary-target: tgt-checkout-stack
+approach: direct
+signal: touches-contract
+contracts-changed: [acme-user-context] # v3 → v4 com quebra — abre a janela
+works:
+  - id: spike-carrinho
+    repo: acme-checkout
+    purpose: discover
+    desc: "EXPLORATION — como migrar o estado do carrinho sem downtime? fate informa a onda 1"
+    timebox: 5d
+    review: interno
+  - id: componentes-ds
+    repo: acme-design-system
+    purpose: create
+    desc: "componentes do checkout no stack novo (consome acme-design-tokens sem revisão)"
+    review: "externo: area-platform"
+  - id: porta-fluxo
+    repo: acme-checkout
+    purpose: sustain
+    desc: "porta o fluxo principal (de → para) usando os componentes novos"
+    blocked-by: [spike-carrinho]
+    delivery-after: [componentes-ds]
+    review: interno
+  - id: adapta-api
+    repo: acme-checkout-api
+    purpose: sustain
+    desc: "adapta os endpoints ao stack novo"
+    review: interno
+  - id: revisao-contrato
+    repo: acme-web-host
+    purpose: sustain
+    desc: "acme-user-context v3 → v4 COM QUEBRA — abre a janela; mutação compat-window-change (dangerous → alerta q/r/d)"
+    review: "externo: area-platform"
+  - id: monitor-canary
+    repo: acme-obs-stack
+    purpose: operate
+    desc: "monitor do canary (guardrails do corte)"
+    delivery-after: [porta-fluxo, adapta-api]
+    review: "externo: time-sre"
+next:
+  - {
+      when: "onda 1 concluída",
+      then: "janela ABERTA: v3 e v4 convivem; consumidores migram no seu ritmo",
+    }
+  - {
+      when: "consumidores migrados",
+      then: "corte gradual — canary com plano de reversão",
+      gate: release-rollout,
+    }
+  - {
+      when: "corte completo",
+      then: "fecha a janela, desliga o legado; outcome sobe no placar do custo de servir",
+    }

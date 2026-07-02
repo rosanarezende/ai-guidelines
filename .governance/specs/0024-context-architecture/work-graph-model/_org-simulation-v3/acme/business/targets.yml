@@ -1,0 +1,48 @@
+# targets.yml — target = binding métrica × nó × período × valor. actual é DERIVADO (só de outcome válido).
+# SoD da medição: definer ≠ attester (o attester é a FONTE independente, ver measurement-roles no model.yml).
+targets:
+  - id: tgt-billing-conv
+    node: time-billing
+    metric: conversion-rate
+    period: 2027-H1
+    expected: "+X% de conversão de cross-sell"
+    definer: pm-growth
+    attester: acme-analytics
+    contributes-to: obj-revenue
+    status: active
+  - id: tgt-onboarding-act
+    node: time-onboarding
+    metric: activation-rate
+    period: 2027-H1
+    expected: "+Y% de ativação"
+    definer: pm-growth
+    attester: acme-analytics
+    contributes-to: obj-revenue
+    status: active
+  - id: tgt-checkout-stack
+    node: time-checkout
+    metric: cost-to-serve
+    period: 2027-H2
+    expected: "checkout no stack novo até o fim do H2 (-W% de custo)"
+    definer: head-platform
+    attester: acme-data-pipeline
+    contributes-to: obj-efficiency
+    status: active
+  - id: tgt-data-cost
+    node: time-data
+    metric: cost-to-serve
+    period: 2027-H1
+    expected: "-Z% no custo da infra de dados"
+    definer: head-platform
+    attester: acme-data-pipeline
+    contributes-to: obj-efficiency
+    status: active
+  - id: tgt-sre-p99
+    node: time-sre
+    metric: p99-latency
+    period: 2027-H1
+    expected: "p99 abaixo de N ms · -30% de incidentes"
+    definer: head-platform
+    attester: acme-obs-stack
+    contributes-to: obj-efficiency
+    status: active

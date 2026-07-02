@@ -1,0 +1,14 @@
+# TEMPLATE outcome — o resultado GOVERNADO (schema da P11). Único insumo do target.actual.
+# O resolver é FAIL-CLOSED p/ somar: ref quebrada = INVALID · revision velha = STALE ·
+# attester = definer → self-attested · contract-revisions incompletas = BLOCKED. Tudo VISÍVEL.
+id: out-<slug>
+emitted-by: "<intent ou execution-unit no veredito/fecho — standalone também emite>"
+source: "<fonte resolvível — ex.: acme-analytics/conversion@rev>"
+window: { start: "<data>", end: "<data>" } # fechado, imutável
+metric: "<id em metrics.yml>" # a unidade do value DEVE bater
+value: "<número + unidade>"
+aggregation: "<sum · avg · p99 · last>"
+attested-by: "<authority — diferente de quem definiu o target>"
+revision: "<dados/query@rev que sustentam o número>"
+contract-revisions: [] # DERIVADAS do grafo (peças × coordinates-with) — não autodeclaradas
+contributes-to: "<target>" # UM rollup primário; sem aggregation declarada não entra

@@ -1,0 +1,23 @@
+# repos.yml — o terreno: 10 repos, dono (time ou área) e as CAPABILITIES declaradas no manifesto.
+# As capabilities alimentam o matcher (advisory): ele sugere o repo de cada peça; o humano confirma.
+repos:
+  - { id: acme-mfe-billing, owner: time-billing, caps: [billing-ui, planos, upgrade] }
+  - { id: acme-api-billing, owner: time-billing, caps: [cobrança, elegibilidade, assinaturas] }
+  - { id: acme-mfe-onboarding, owner: time-onboarding, caps: [onboarding, ativação, tours] }
+  - { id: acme-checkout, owner: time-checkout, caps: [checkout-ui, carrinho, cupom, frete] }
+  - { id: acme-checkout-api, owner: time-checkout, caps: [pedidos, pagamento, frete-api] }
+  - { id: acme-analytics, owner: time-data, caps: [eventos, métricas, experimentos-fonte] }
+  - { id: acme-data-pipeline, owner: time-data, caps: [etl, warehouse] }
+  - { id: acme-obs-stack, owner: time-sre, caps: [alertas, slo, tracing, atesta-outcomes] }
+  - {
+      id: acme-web-host,
+      owner: area-platform,
+      caps: [shell-mfes, contexto-de-usuario, roteamento],
+      note: compartilhado,
+    }
+  - {
+      id: acme-design-system,
+      owner: area-platform,
+      caps: [componentes, tokens],
+      note: compartilhado,
+    }

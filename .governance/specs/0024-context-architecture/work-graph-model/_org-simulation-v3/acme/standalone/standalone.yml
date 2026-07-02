@@ -1,0 +1,26 @@
+# standalone.yml — os caminhos SEM intent (reativo/avulso): as camadas colapsam; nada some do placar.
+standalone:
+  - id: bug-frete
+    kind: fix # preset: sustain + corrective + user-visible
+    repo: acme-checkout
+    origin: "suporte reporta: cupom duplo zera o frete"
+    routed-by: "matcher (caps: cupom · frete) — humano confirmou (followed)"
+    review: interno
+    placar: operational-bucket
+  - id: incidente-checkout
+    kind: incident-response # reativo — nasce de ALERTA com telemetria verificável, nunca de abordagem
+    repo: acme-checkout-api
+    origin: "alerta do acme-obs-stack às 22:14 — checkout fora do ar (sev alta)"
+    severity: alta
+    mttr: 43min
+    postmortem: blameless
+    follow-ups:
+      - "fix (peça sustain no acme-checkout-api)"
+      - "proposta de hardening → intake (com authorized-by ou standalone)"
+    placar: "operational-bucket + MTTR"
+  - id: dep-bump-host
+    kind: dep-bump # preset: sustain + adaptive + internal
+    repo: acme-web-host
+    origin: "rotina: lib X 3.x → 4.x"
+    review: "externo: area-platform"
+    placar: operational-bucket

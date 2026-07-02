@@ -1,0 +1,36 @@
+# intent-p99-hardening — abordagem direct + sinal operational-target (colapsa: sem unit, peças direto)
+id: intent-p99-hardening
+title: "derrubar o p99 da plataforma (timeouts, retries, cache)"
+team: time-sre
+authorized-by: obj-efficiency
+primary-target: tgt-sre-p99
+approach: direct
+signal: operational-target
+works:
+  - id: guardrails-p99
+    repo: acme-obs-stack
+    purpose: operate
+    desc: "guardrails de p99 + alertas — MEDIR ANTES de mexer (baseline); a fonte que ATESTA os outcomes"
+    review: interno
+  - id: timeouts-api
+    repo: acme-checkout-api
+    purpose: sustain
+    desc: "timeouts + retries (preventivo) — codifica em paralelo; NÃO LIGA antes do baseline"
+    delivery-after: [guardrails-p99]
+    review: "externo: time-checkout"
+  - id: cache-contexto
+    repo: acme-web-host
+    purpose: sustain
+    desc: "cache do contexto de usuário (sem mudar o contrato — só a implementação)"
+    delivery-after: [guardrails-p99]
+    review: "externo: area-platform"
+next:
+  - {
+      when: "peças concluídas",
+      then: "outcomes sobem no placar OPERACIONAL — attester independente (obs-stack)",
+    }
+  - { when: "p99 cedeu", then: "guardrails viram monitoramento permanente; a intent fecha" }
+  - {
+      when: "p99 NÃO cedeu",
+      then: "escala: vira descoberta (investigar causa) OU experimento de performance (validate-first)",
+    }

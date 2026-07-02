@@ -1,0 +1,4 @@
+# outcomes.yml — os resultados GOVERNADOS (schema da P11: source · window · metric · value ·
+# aggregation · attested-by · revision · contract-revisions). VAZIO por enquanto: os primeiros
+# outcomes publicam na F6, quando o resolver completo validar (fail-closed p/ somar).
+outcomes: []

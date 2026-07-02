@@ -1,0 +1,11 @@
+# TEMPLATE target — binding métrica × nó × período × valor. actual é DERIVADO (nunca à mão).
+# SoD da medição: definer ≠ attester (attester = fonte independente).
+id: tgt-<slug>
+node: <time ou objective que carrega a meta>
+metric: <id em metrics.yml> # a definição estável mora lá
+period: <2027-H1>
+expected: "<o valor esperado, ex.: +X%>"
+definer: <quem define>
+attester: <a fonte que atesta — ≠ definer>
+contributes-to: <objective do rollup PRIMÁRIO — um só; secundários são aligns-with>
+status: active # proposed | active | closed (FROZEN — não recebe actual novo) | superseded | dropped

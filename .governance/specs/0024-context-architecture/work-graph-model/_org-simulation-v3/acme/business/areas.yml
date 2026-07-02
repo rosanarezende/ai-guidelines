@@ -1,0 +1,12 @@
+# areas.yml — business-objective nível area: cada área traduz um objetivo da empresa num DRIVER seu
+areas:
+  - id: area-growth
+    title: "área de growth"
+    cascades-from: obj-revenue
+    driver: "cross-sell entre os produtos"
+    owner: head-growth
+  - id: area-platform
+    title: "área de plataforma"
+    cascades-from: obj-efficiency
+    driver: "eficiência e confiabilidade da plataforma"
+    owner: head-platform

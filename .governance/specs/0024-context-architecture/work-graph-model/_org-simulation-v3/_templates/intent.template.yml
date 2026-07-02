@@ -1,0 +1,25 @@
+# TEMPLATE intent — a ÚNICA escolha estrutural do humano é a ABORDAGEM (P12).
+# Autoria assistida: descreva a pretensão; a IA sugere o preenchimento (nunca decide; no máximo alerta).
+id: intent-<slug>
+title: "<o que queremos alcançar>"
+team: <time dono>
+authorized-by: <objective ativo> # OU standalone: true — declarado, nunca inferido
+primary-target: <target herdado do authorizes — o rollup é por ELE>
+approach: validate-first # validate-first ("validar antes") | direct ("entregar direto")
+# REGRA DE OURO: validate-first SÓ se o compromisso permanente depende da evidência.
+# Se validate-first, os dois campos abaixo são OBRIGATÓRIOS (lint):
+# hypothesis: "<o que acreditamos e quanto>"
+# decision-rule: "<quando paramos e como decidimos>"
+signal: none # none | touches-contract (MUDA contrato/porta de→para) | operational-target (meta SLO/custo)
+# contracts-changed: [<contrato>]   # obriga signal: touches-contract; quebra abre a janela
+# contracts-consumed: [<contrato>]  # consumir sem revisão NÃO é sinal
+works:
+  - id: <peca-slug>
+    repo: <repo>
+    purpose: create # create | sustain | discover (timebox+fate) | operate
+    desc: "<o que a peça faz>"
+    # blocked-by: [<peça>]       # NÃO COMEÇA antes (falta decisão/insumo)
+    # delivery-after: [<peça>]   # paraleliza; a ENTREGA espera
+    review: interno # interno | "externo: <dono>" — DERIVADO: repo de outro time OU mudança de contrato
+next:
+  - { when: "<marco/veredito>", then: "<o que deriva>", gate: "<decision-point, se houver>" }
