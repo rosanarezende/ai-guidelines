@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-onboarding-checklist::flag-checklist
+intent: intent-onboarding-checklist
+work: flag-checklist
+repo: acme-mfe-onboarding
+purpose: create
+desc: checklist guiado atrás da flag (coorte da 1ª semana)
+review: interno
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/intents/intent-onboarding-checklist.yml
+  breakdownHash: f15ba6a81fc6
+code:
+  touchpoints:
+    - src/index.mjs

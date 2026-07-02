@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-cta-upgrade::baseline-eventos
+intent: intent-cta-upgrade
+work: baseline-eventos
+repo: acme-analytics
+purpose: operate
+desc: instrumenta com o schema EXISTENTE (consome sem revisão); pronto ANTES de ligar a flag
+review: "externo: time-data"
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/intents/intent-cta-upgrade.yml
+  breakdownHash: 5c870e399a68
+code:
+  touchpoints:
+    - src/index.mjs

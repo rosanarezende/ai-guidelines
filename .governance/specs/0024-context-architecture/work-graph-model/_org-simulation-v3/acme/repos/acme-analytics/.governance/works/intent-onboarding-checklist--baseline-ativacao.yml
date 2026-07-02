@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-onboarding-checklist::baseline-ativacao
+intent: intent-onboarding-checklist
+work: baseline-ativacao
+repo: acme-analytics
+purpose: operate
+desc: coortes de ativação × churn (consome o schema existente); pronto antes da flag
+review: "externo: time-data"
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/intents/intent-onboarding-checklist.yml
+  breakdownHash: 9c770512563e
+code:
+  touchpoints:
+    - src/index.mjs

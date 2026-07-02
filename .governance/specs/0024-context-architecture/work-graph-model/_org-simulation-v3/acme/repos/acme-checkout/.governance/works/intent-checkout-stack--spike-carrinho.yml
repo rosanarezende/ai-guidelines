@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-checkout-stack::spike-carrinho
+intent: intent-checkout-stack
+work: spike-carrinho
+repo: acme-checkout
+purpose: discover
+desc: EXPLORATION — como migrar o estado do carrinho sem downtime? fate informa a onda 1
+review: interno
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/intents/intent-checkout-stack.yml
+  breakdownHash: 5f48ae2a00da
+code:
+  touchpoints:
+    - src/index.mjs

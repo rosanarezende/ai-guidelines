@@ -10,6 +10,7 @@ import prettier from "prettier";
 import { parse } from "yaml";
 import { deriveIntent, loadOrg, validateOrg } from "./org.mjs";
 import { loadPublishedContexts, validateRepoContexts } from "./repo-contexts.mjs";
+import { loadPublishedRepoWorks, validateRepoWorks } from "./repo-works.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const APPS = path.join(here, "..", "_apps");
@@ -17,12 +18,19 @@ const MODEL = path.join(here, "..", "..", "model.yml");
 
 const o = loadOrg();
 const repoContextIssues = await validateRepoContexts(o);
-const issues = [...validateOrg(o), ...repoContextIssues];
+const repoWorkIssues = validateRepoWorks(o);
+const issues = [...validateOrg(o), ...repoContextIssues, ...repoWorkIssues];
 const repoContexts = loadPublishedContexts();
+const repoWorks = loadPublishedRepoWorks();
 
 const nodes = [];
 const edges = [];
-const N = (id, type, label, data = {}) => nodes.push({ id, type, label, data });
+const nodeIds = new Set();
+const N = (id, type, label, data = {}) => {
+  if (nodeIds.has(id)) return;
+  nodeIds.add(id);
+  nodes.push({ id, type, label, data });
+};
 const E = (source, target, type) =>
   edges.push({ id: `${type}:${source}->${target}`, source, target, type });
 
@@ -64,6 +72,18 @@ for (const x of repoContexts) {
   const cid = `${x.repo}::context`;
   N(cid, "repo-context", `${x.repo} context`, x);
   E(x.repo, cid, "publishes-context");
+}
+for (const x of repoWorks) {
+  const wid = `${x.id}::repo-ack`;
+  N(wid, "repo-work-ack", `${x.repo}/${x.work}`, x);
+  E(x.repo, wid, "publishes-work");
+  E(wid, `${x.intent}::${x.work}`, "acknowledges-work");
+  for (const touchpoint of x.code?.touchpoints || []) {
+    const tid = `${x.repo}::${touchpoint}`;
+    N(tid, "code-touchpoint", touchpoint, { repo: x.repo, path: touchpoint });
+    E(wid, tid, "evidenced-by");
+    E(x.repo, tid, "contains-code");
+  }
 }
 for (const x of o.contracts) {
   N(x.id, "contract", `${x.id}@${x.revision}`, x);

@@ -4,6 +4,7 @@
 import { loadOrg, validateOrg } from "./org.mjs";
 import { checkAppSecurity } from "./check-app-security.mjs";
 import { validateRepoContexts } from "./repo-contexts.mjs";
+import { validateRepoWorks } from "./repo-works.mjs";
 
 const base = loadOrg();
 const clone = () => structuredClone(base);
@@ -458,10 +459,29 @@ const CASES = [
       return o;
     },
   },
+  {
+    id: "RW·1 peça central mudou mas ack repo-local ficou stale",
+    expect: "repo-work-stale",
+    mutate: () => {
+      const o = clone();
+      work(o, "intent-cta-upgrade", "ui-cta").desc =
+        "UI do CTA atrás da flag — agora também mostra comparação de planos";
+      return o;
+    },
+  },
+  {
+    id: "RW·2 peça movida para outro repo sem ack do novo dono",
+    expect: "repo-work-stale",
+    mutate: () => {
+      const o = clone();
+      work(o, "intent-help-selfservice", "chatbot-deflexao").repo = "acme-analytics";
+      return o;
+    },
+  },
 ];
 
 async function validateAll(o) {
-  return [...validateOrg(o), ...(await validateRepoContexts(o))];
+  return [...validateOrg(o), ...(await validateRepoContexts(o)), ...validateRepoWorks(o)];
 }
 
 export async function run(cases) {

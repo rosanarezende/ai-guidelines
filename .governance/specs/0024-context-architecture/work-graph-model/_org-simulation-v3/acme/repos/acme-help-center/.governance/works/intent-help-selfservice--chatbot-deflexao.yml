@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-help-selfservice::chatbot-deflexao
+intent: intent-help-selfservice
+work: chatbot-deflexao
+repo: acme-help-center
+purpose: create
+desc: chatbot de deflexão (responde antes de abrir ticket)
+review: interno
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/intents/intent-help-selfservice.yml
+  breakdownHash: aaf0a8c5a8a1
+code:
+  touchpoints:
+    - src/index.mjs

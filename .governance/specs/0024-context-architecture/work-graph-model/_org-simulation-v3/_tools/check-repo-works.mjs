@@ -1,14 +1,8 @@
-// validate.mjs — CLI dos lints da org (exit 1 se houver ERRO). Uso: node _tools/validate.mjs
-import { loadOrg, validateOrg } from "./org.mjs";
-import { validateRepoContexts } from "./repo-contexts.mjs";
+// check-repo-works.mjs — falha se o breakdown central e os acks repo-local divergirem.
+import { loadOrg } from "./org.mjs";
 import { validateRepoWorks } from "./repo-works.mjs";
 
-const org = loadOrg();
-const issues = [
-  ...validateOrg(org),
-  ...(await validateRepoContexts(org)),
-  ...validateRepoWorks(org),
-];
+const issues = validateRepoWorks(loadOrg());
 const errors = issues.filter((i) => i.level === "error");
 const warns = issues.filter((i) => i.level === "warn");
 
@@ -17,7 +11,7 @@ for (const i of issues)
 
 console.log(
   issues.length === 0
-    ? "✓ org válida — nenhum issue"
+    ? "✓ repo-works validos — breakdown central reconhecido pelos repos"
     : `— ${errors.length} erro(s) · ${warns.length} aviso(s)`
 );
 process.exit(errors.length > 0 ? 1 : 0);

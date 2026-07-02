@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-checkout-1click::api-token-pagamento
+intent: intent-checkout-1click
+work: api-token-pagamento
+repo: acme-checkout-api
+purpose: create
+desc: token de pagamento salvo p/ recorrentes
+review: interno
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/intents/intent-checkout-1click.yml
+  breakdownHash: 5cbe64ba7be7
+code:
+  touchpoints:
+    - src/index.mjs

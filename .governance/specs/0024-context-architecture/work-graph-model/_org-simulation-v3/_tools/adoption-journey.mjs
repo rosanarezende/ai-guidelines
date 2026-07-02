@@ -25,22 +25,27 @@ const steps = [
     args: ["_tools/check-repo-contexts.mjs"],
   },
   {
-    name: "4. pacotes AI-assisted de capability estao frescos",
+    name: "4. peças repo-local reconhecem o breakdown central",
+    command: "node",
+    args: ["_tools/check-repo-works.mjs"],
+  },
+  {
+    name: "5. pacotes AI-assisted de capability estao frescos",
     command: "node",
     args: ["_tools/prepare-capability-review.mjs", "--check"],
   },
   {
-    name: "5. validador da org passa",
+    name: "6. validador da org passa",
     command: "node",
     args: ["_tools/validate.mjs"],
   },
   {
-    name: "6. red-team corpus continua fechado",
+    name: "7. red-team corpus continua fechado",
     command: "node",
     args: ["_tools/test-adversarial.mjs"],
   },
   {
-    name: "7. host agrega grafo publicado",
+    name: "8. host agrega grafo publicado",
     command: "node",
     args: ["_tools/build-graph.mjs"],
   },

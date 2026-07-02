@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-checkout-stack::componentes-ds
+intent: intent-checkout-stack
+work: componentes-ds
+repo: acme-design-system
+purpose: create
+desc: componentes do checkout no stack novo (consome acme-design-tokens sem revisão)
+review: "externo: area-platform"
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/intents/intent-checkout-stack.yml
+  breakdownHash: 987a9b0c2de6
+code:
+  touchpoints:
+    - src/index.mjs

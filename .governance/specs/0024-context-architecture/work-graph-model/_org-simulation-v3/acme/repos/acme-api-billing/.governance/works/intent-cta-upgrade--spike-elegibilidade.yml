@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-cta-upgrade::spike-elegibilidade
+intent: intent-cta-upgrade
+work: spike-elegibilidade
+repo: acme-api-billing
+purpose: discover
+desc: EXPLORATION — dá p/ reusar o motor de elegibilidade que já existe? pergunta falsificável + fate
+review: interno
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/intents/intent-cta-upgrade.yml
+  breakdownHash: 6ca57a180976
+code:
+  touchpoints:
+    - src/index.mjs
