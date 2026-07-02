@@ -279,6 +279,10 @@ function App() {
       <span><b>contrato</b> — nó de coordenação/versionamento (janela de compat mora nele)</span>
       <span><b>q/r/d</b> — anexável a qualquer nó (alerta em mutação perigosa)</span>
       <span><b>intake</b> — funil pré-intent (authorized-by ou standalone)</span>
+      <span
+        ><b>autoria assistida</b> — humano descreve, IA sugere os campos (nunca decide; no máximo
+        alerta)</span
+      >
       <span><b>decision-points</b> — ${MODEL.decisionPoints} (colapsáveis por perfil)</span>
     </div>
     <p className="src">

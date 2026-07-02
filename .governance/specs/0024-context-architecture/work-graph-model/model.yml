@@ -20,7 +20,7 @@ layers:
     is: "o objetivo de negócio durável (uma por objetivo); NÃO delibera — tem gate de ativação"
     owns: [enquadramento, objetivo, target-outcome, decision-gate]
     strategy: [experiment-led, direct-delivery, migration-led, reliability-led]
-    strategy-note: "candidato a DERIVADO das execution-units contidas (open)"
+    strategy-note: "RESOLVIDO (Q-strategy, owner 2026-07-01): DECLARADA pelo humano no gate de ativação — a estratégia é a APOSTA de quem ativa (existe antes das units e molda breakdown/gates). A derivada vira CONFERÊNCIA: observed-strategy das units divergindo da declarada → alerta strategy-drift no dashboard (não bloqueia; é conversa). Autoria com IA: ver assisted-authoring"
     breaks-into: [execution-unit, repo-work] # repo-work direto quando trivial (intent pode até ser nula em trabalho reativo)
 
   execution-unit:
@@ -70,6 +70,15 @@ intake:
   is: "funil PRÉ-intent (register → triagem → gate) — fora das 3 camadas"
   members: [proposal, register]
   business-link: "G2 (bloco B): todo register/proposal DECLARA authorized-by (um business-objective ativo) OU standalone — vínculo declarado, nunca inferido. No gate: com authorized-by, valida-se objective ativo + target + allocation; standalone entra como custo/risco operacional (ver G14), não some do dashboard"
+
+assisted-authoring:
+  is: "parceria humano+IA na CRIAÇÃO/edição de nós governados (decisão owner 2026-07-01, nascida na Q-strategy): o humano descreve a pretensão — texto livre e/ou documentos anexados (ex.: docs de modelagem) — e a IA SUGERE o preenchimento dos campos (strategy · título · vínculos · esboço de breakdown); o humano itera e edita o que quiser"
+  laws:
+    - "OPCIONAL sempre — o caminho 100% manual existe em todo nó; a assistência nunca é pré-requisito"
+    - "SUGESTIVO sempre — a IA não preenche em silêncio nem decide; sugere e o humano aceita/edita (reusa o princípio 'advisory, não decide' do matcher)"
+    - "no MÁXIMO alerta — quando a proposta do humano se encaixa TOTALMENTE noutro espectro (ex.: strategy declarada direct-delivery mas a descrição é um experimento), a IA alerta; não corrige nem bloqueia"
+  applies-to: "criação de intent (caso primário) e, pelo mesmo princípio, qualquer nó governado (proposal · register · objective)"
+  connects: "matcher advisory (triagem) · strategy-drift (a conferência derivada em execução) · L9 (IA não fecha gate)"
 
 # ═════════════════════ DIMENSÕES (ortogonais; cortam repo-work/execution-unit) ═════════════════════
 dimensions:
@@ -872,7 +881,8 @@ open-questions:
   - {
       id: Q-strategy,
       about: "intent.strategy é guardado ou DERIVADO das execution-units?",
-      status: open,
+      status: resolved,
+      by: "owner 2026-07-01: DECLARADA pelo humano (dono da aposta), com autoria ASSISTIDA opcional (assisted-authoring — IA sugere, humano edita; 100% manual sempre possível) + conferência DERIVADA (observed-strategy → alerta strategy-drift). IA sempre sugestiva; no máximo alerta quando a proposta se encaixa noutro espectro",
     }
   - {
       id: Q-collapse,
