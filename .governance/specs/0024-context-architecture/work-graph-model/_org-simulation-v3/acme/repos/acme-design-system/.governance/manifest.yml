@@ -1,0 +1,20 @@
+repo: acme-design-system
+role: platform-library
+owner: area-platform
+domain: design-platform
+provides:
+  - { name: acme-design-tokens, kind: design-contract, status: active }
+  - { name: billing-components, kind: ui-components, status: active }
+  - { name: checkout-components, kind: ui-components, status: active }
+  - { name: onboarding-components, kind: ui-components, status: active }
+  - { name: consent-components, kind: ui-components, status: active }
+consumes: []
+capabilities:
+  - text: "Design tokens and shared UI components for product microfrontends."
+    tags: [componentes, tokens]
+  - text: "Plan cards, checkout summaries, consent banners and onboarding steps."
+    tags: [billing-ui, checkout-ui, consentimento, onboarding]
+architecture:
+  stack: [node, javascript, html]
+  patterns: [component-library, design-tokens]
+  boundaries: [ui-only, no-product-state]

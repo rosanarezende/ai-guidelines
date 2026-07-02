@@ -1,0 +1,19 @@
+repo: acme-data-pipeline
+role: data-pipeline
+owner: time-data
+domain: warehouse-and-rollup
+provides:
+  - { name: warehouse-metrics, kind: metric-source, status: active }
+  - { name: target-actuals, kind: outcome-attestation, status: active }
+consumes:
+  - { contract: acme-analytics/acme-events-schema, why: materialize-daily-metrics }
+  - { contract: acme-analytics/experiment-event-source, why: read-event-sink }
+capabilities:
+  - text: "ETL and warehouse materialization for target actuals."
+    tags: [etl, warehouse]
+  - text: "Cost-to-serve, ticket-cost and consent coverage snapshots."
+    tags: [metricas, outcomes, custo]
+architecture:
+  stack: [node, javascript]
+  patterns: [etl, derived-read-model]
+  boundaries: [attestation-source, warehouse]

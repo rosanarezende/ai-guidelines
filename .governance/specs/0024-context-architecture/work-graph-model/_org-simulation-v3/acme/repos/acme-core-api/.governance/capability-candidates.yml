@@ -1,0 +1,22 @@
+repo: acme-core-api
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-core-api"
+  dependencies: []
+  exports:
+    - addPermission
+    - buildRevenueReport
+    - canAccess
+    - createInvoice
+    - createLegacyOrder
+    - exportCsv
+    - getAccount
+    - getLegacyOrder
+    - legacyPlanForAccount
+    - listInvoices
+    - monolithModules
+    - reserveInventory
+  sourceHash: c3804c97ad17

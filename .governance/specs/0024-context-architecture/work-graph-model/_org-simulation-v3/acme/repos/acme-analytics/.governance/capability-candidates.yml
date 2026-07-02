@@ -1,0 +1,15 @@
+repo: acme-analytics
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-analytics"
+  dependencies: []
+  exports:
+    - conversionEvent
+    - eventSchema
+    - experimentExposure
+    - inMemoryEventSink
+    - track
+  sourceHash: d24ebece413a

@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "39680e192ec8",
+  contentHash: "7e9ff8a062c4",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -581,6 +581,885 @@ window.GRAPH = {
         owner: "time-data",
         caps: ["relatorios-legados"],
         repo: "acme-core-api",
+      },
+    },
+    {
+      id: "acme-analytics::context",
+      type: "repo-context",
+      label: "acme-analytics context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-analytics",
+        owner: "time-data",
+        role: "event-platform",
+        domain: "measurement",
+        modules: [],
+        provides: [
+          {
+            name: "acme-events-schema",
+            kind: "event-schema",
+            status: "active",
+          },
+          {
+            name: "experiment-event-source",
+            kind: "event-sink",
+            status: "active",
+          },
+          {
+            name: "conversion-metrics-source",
+            kind: "metric-source",
+            status: "active",
+          },
+        ],
+        consumes: [],
+        capabilities: [
+          {
+            text: "Event schema, event collection and experiment exposure tracking.",
+            tags: ["eventos", "experimentos-fonte"],
+          },
+          {
+            text: "Conversion and activation measurement inputs for business outcomes.",
+            tags: ["metricas", "conversao", "ativacao"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript"],
+          patterns: ["event-schema", "in-memory-event-sink"],
+          boundaries: ["metric-source", "schema-owner"],
+        },
+        package: {
+          name: "@acme-sim/acme-analytics",
+          dependencies: [],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: [
+            "conversionEvent",
+            "eventSchema",
+            "experimentExposure",
+            "inMemoryEventSink",
+            "track",
+          ],
+          sourceHash: "d24ebece413a",
+        },
+        contentHash: "a4f3ff8ec2d5",
+      },
+    },
+    {
+      id: "acme-api-billing::context",
+      type: "repo-context",
+      label: "acme-api-billing context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-api-billing",
+        owner: "time-billing",
+        role: "backend-service",
+        domain: "billing",
+        modules: [],
+        provides: [
+          {
+            name: "billing-subscription-api",
+            kind: "api",
+            status: "active",
+          },
+          {
+            name: "billing-eligibility-api",
+            kind: "api",
+            status: "proposed",
+          },
+        ],
+        consumes: [
+          {
+            contract: "acme-core-api/legacy-billing-api",
+            why: "current-subscription-and-invoices",
+          },
+        ],
+        capabilities: [
+          {
+            text: "Billing plans, subscriptions and upgrade quotes.",
+            tags: ["cobranca", "planos", "assinaturas"],
+          },
+          {
+            text: "Eligibility API for contextual cross-sell experiments.",
+            tags: ["elegibilidade", "upgrade"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript"],
+          patterns: ["backend-api", "legacy-adapter"],
+          boundaries: ["billing-domain"],
+        },
+        package: {
+          name: "@acme-sim/acme-api-billing",
+          dependencies: ["@acme-sim/acme-core-api"],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["currentSubscription", "listPlans", "quoteUpgrade", "upgradeSubscription"],
+          sourceHash: "0d757c8a8f51",
+        },
+        contentHash: "872ca7251a10",
+      },
+    },
+    {
+      id: "acme-checkout::context",
+      type: "repo-context",
+      label: "acme-checkout context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-checkout",
+        owner: "time-checkout",
+        role: "microfrontend",
+        domain: "checkout",
+        modules: [],
+        provides: [
+          {
+            name: "checkout-ui",
+            kind: "ui-surface",
+            status: "active",
+          },
+        ],
+        consumes: [
+          {
+            contract: "acme-design-system/acme-design-tokens",
+            why: "visual-contract",
+          },
+          {
+            contract: "acme-design-system/checkout-components",
+            why: "checkout-summary",
+          },
+          {
+            contract: "acme-web-host/acme-user-context",
+            why: "recurring-customer-context",
+          },
+          {
+            contract: "acme-checkout-api/checkout-order-api",
+            why: "submit-checkout",
+          },
+          {
+            contract: "acme-checkout-api/freight-api",
+            why: "freight-preview",
+          },
+          {
+            contract: "acme-checkout-api/coupon-api",
+            why: "coupon-validation",
+          },
+          {
+            contract: "acme-analytics/acme-events-schema",
+            why: "funnel-measurement",
+          },
+        ],
+        capabilities: [
+          {
+            text: "Checkout UI, cart flow, coupon handling and freight preview.",
+            tags: ["checkout-ui", "carrinho", "cupom", "frete"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript", "html"],
+          patterns: ["microfrontend", "checkout-flow", "progressive-rollout"],
+          boundaries: ["checkout-ui"],
+        },
+        package: {
+          name: "@acme-sim/acme-checkout",
+          dependencies: [
+            "@acme-sim/acme-analytics",
+            "@acme-sim/acme-checkout-api",
+            "@acme-sim/acme-design-system",
+            "@acme-sim/acme-web-host",
+          ],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["renderCheckout", "submitCheckout"],
+          sourceHash: "bd9092274529",
+        },
+        contentHash: "15fce85abf5e",
+      },
+    },
+    {
+      id: "acme-checkout-api::context",
+      type: "repo-context",
+      label: "acme-checkout-api context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-checkout-api",
+        owner: "time-checkout",
+        role: "backend-service",
+        domain: "checkout",
+        modules: [],
+        provides: [
+          {
+            name: "checkout-order-api",
+            kind: "api",
+            status: "active",
+          },
+          {
+            name: "freight-api",
+            kind: "api",
+            status: "active",
+          },
+          {
+            name: "coupon-api",
+            kind: "api",
+            status: "active",
+          },
+        ],
+        consumes: [
+          {
+            contract: "acme-core-api/legacy-orders-api",
+            why: "create-order-and-reserve-inventory",
+          },
+          {
+            contract: "acme-core-api/legacy-accounts-api",
+            why: "account-status",
+          },
+          {
+            contract: "acme-analytics/acme-events-schema",
+            why: "checkout-api-events",
+          },
+        ],
+        capabilities: [
+          {
+            text: "Checkout order API, payment token seam and freight calculation.",
+            tags: ["pedidos", "pagamento", "frete-api"],
+          },
+          {
+            text: "Coupon calculation and pricing guardrails.",
+            tags: ["cupom", "frete"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript"],
+          patterns: ["backend-api", "legacy-adapter"],
+          boundaries: ["checkout-domain"],
+        },
+        package: {
+          name: "@acme-sim/acme-checkout-api",
+          dependencies: ["@acme-sim/acme-core-api"],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["applyCoupon", "calculateFreight", "createCheckoutOrder"],
+          sourceHash: "77fd476a6d38",
+        },
+        contentHash: "7123dbe17220",
+      },
+    },
+    {
+      id: "acme-core-api::context",
+      type: "repo-context",
+      label: "acme-core-api context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-core-api",
+        owner: "area-platform",
+        role: "legacy-monolith",
+        domain: "legacy-core",
+        modules: [
+          {
+            id: "mod-billing",
+            owner: "time-billing",
+            capabilities: [
+              {
+                text: "Legacy billing and invoices.",
+                tags: ["cobranca-legada", "notas-fiscais"],
+              },
+            ],
+          },
+          {
+            id: "mod-orders",
+            owner: "time-checkout",
+            capabilities: [
+              {
+                text: "Legacy orders and inventory reservations.",
+                tags: ["pedidos-legados", "estoque"],
+              },
+            ],
+          },
+          {
+            id: "mod-accounts",
+            owner: "time-identity",
+            capabilities: [
+              {
+                text: "Legacy accounts and permissions.",
+                tags: ["contas", "permissoes-legadas"],
+              },
+            ],
+          },
+          {
+            id: "mod-reports",
+            owner: "time-data",
+            capabilities: [
+              {
+                text: "Legacy reports and CSV exports.",
+                tags: ["relatorios-legados"],
+              },
+            ],
+          },
+        ],
+        provides: [
+          {
+            name: "legacy-billing-api",
+            kind: "api",
+            status: "active",
+            owner: "time-billing",
+          },
+          {
+            name: "legacy-orders-api",
+            kind: "api",
+            status: "active",
+            owner: "time-checkout",
+          },
+          {
+            name: "legacy-accounts-api",
+            kind: "api",
+            status: "active",
+            owner: "time-identity",
+          },
+          {
+            name: "legacy-reports-api",
+            kind: "api",
+            status: "active",
+            owner: "time-data",
+          },
+        ],
+        consumes: [],
+        capabilities: [
+          {
+            text: "Legacy API seams used by migration waves and strangler work.",
+            tags: ["api-legada", "integracoes"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript"],
+          patterns: ["modular-monolith", "strangler-seam"],
+          boundaries: ["module-owner-overrides", "platform-custodian"],
+        },
+        package: {
+          name: "@acme-sim/acme-core-api",
+          dependencies: [],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: [
+            "addPermission",
+            "buildRevenueReport",
+            "canAccess",
+            "createInvoice",
+            "createLegacyOrder",
+            "exportCsv",
+            "getAccount",
+            "getLegacyOrder",
+            "legacyPlanForAccount",
+            "listInvoices",
+            "monolithModules",
+            "reserveInventory",
+          ],
+          sourceHash: "c3804c97ad17",
+        },
+        contentHash: "94535e6569b5",
+      },
+    },
+    {
+      id: "acme-data-pipeline::context",
+      type: "repo-context",
+      label: "acme-data-pipeline context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-data-pipeline",
+        owner: "time-data",
+        role: "data-pipeline",
+        domain: "warehouse-and-rollup",
+        modules: [],
+        provides: [
+          {
+            name: "warehouse-metrics",
+            kind: "metric-source",
+            status: "active",
+          },
+          {
+            name: "target-actuals",
+            kind: "outcome-attestation",
+            status: "active",
+          },
+        ],
+        consumes: [
+          {
+            contract: "acme-analytics/acme-events-schema",
+            why: "materialize-daily-metrics",
+          },
+          {
+            contract: "acme-analytics/experiment-event-source",
+            why: "read-event-sink",
+          },
+        ],
+        capabilities: [
+          {
+            text: "ETL and warehouse materialization for target actuals.",
+            tags: ["etl", "warehouse"],
+          },
+          {
+            text: "Cost-to-serve, ticket-cost and consent coverage snapshots.",
+            tags: ["metricas", "outcomes", "custo"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript"],
+          patterns: ["etl", "derived-read-model"],
+          boundaries: ["attestation-source", "warehouse"],
+        },
+        package: {
+          name: "@acme-sim/acme-data-pipeline",
+          dependencies: ["@acme-sim/acme-analytics"],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["materializeDailyMetrics", "targetActualSnapshot"],
+          sourceHash: "2f540098d1be",
+        },
+        contentHash: "ebb7734db1c8",
+      },
+    },
+    {
+      id: "acme-design-system::context",
+      type: "repo-context",
+      label: "acme-design-system context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-design-system",
+        owner: "area-platform",
+        role: "platform-library",
+        domain: "design-platform",
+        modules: [],
+        provides: [
+          {
+            name: "acme-design-tokens",
+            kind: "design-contract",
+            status: "active",
+          },
+          {
+            name: "billing-components",
+            kind: "ui-components",
+            status: "active",
+          },
+          {
+            name: "checkout-components",
+            kind: "ui-components",
+            status: "active",
+          },
+          {
+            name: "onboarding-components",
+            kind: "ui-components",
+            status: "active",
+          },
+          {
+            name: "consent-components",
+            kind: "ui-components",
+            status: "active",
+          },
+        ],
+        consumes: [],
+        capabilities: [
+          {
+            text: "Design tokens and shared UI components for product microfrontends.",
+            tags: ["componentes", "tokens"],
+          },
+          {
+            text: "Plan cards, checkout summaries, consent banners and onboarding steps.",
+            tags: ["billing-ui", "checkout-ui", "consentimento", "onboarding"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript", "html"],
+          patterns: ["component-library", "design-tokens"],
+          boundaries: ["ui-only", "no-product-state"],
+        },
+        package: {
+          name: "@acme-sim/acme-design-system",
+          dependencies: [],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: [
+            "Button",
+            "CheckoutSummary",
+            "ConsentBanner",
+            "OnboardingStep",
+            "PlanCard",
+            "renderDesignSystemCatalog",
+            "tokens",
+          ],
+          sourceHash: "3b9d3ed058b5",
+        },
+        contentHash: "6e7215cc880a",
+      },
+    },
+    {
+      id: "acme-help-center::context",
+      type: "repo-context",
+      label: "acme-help-center context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-help-center",
+        owner: "time-support",
+        role: "support-application",
+        domain: "customer-support",
+        modules: [],
+        provides: [
+          {
+            name: "help-center-ui",
+            kind: "ui-surface",
+            status: "active",
+          },
+          {
+            name: "ticket-api",
+            kind: "api",
+            status: "active",
+          },
+          {
+            name: "chatbot-api",
+            kind: "api",
+            status: "active",
+          },
+        ],
+        consumes: [
+          {
+            contract: "acme-web-host/acme-user-context",
+            why: "account-bound-support",
+          },
+          {
+            contract: "acme-analytics/acme-events-schema",
+            why: "deflection-measurement",
+          },
+        ],
+        capabilities: [
+          {
+            text: "Help articles, ticket creation and chatbot self-service.",
+            tags: ["ajuda", "tickets", "chatbot", "self-service"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript"],
+          patterns: ["support-portal", "self-service"],
+          boundaries: ["support-domain"],
+        },
+        package: {
+          name: "@acme-sim/acme-help-center",
+          dependencies: ["@acme-sim/acme-web-host"],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["chatbotReply", "openTicket", "searchArticles"],
+          sourceHash: "f99909c02b13",
+        },
+        contentHash: "f4210337bacf",
+      },
+    },
+    {
+      id: "acme-identity::context",
+      type: "repo-context",
+      label: "acme-identity context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-identity",
+        owner: "time-identity",
+        role: "backend-service",
+        domain: "identity-and-consent",
+        modules: [],
+        provides: [
+          {
+            name: "identity-session-api",
+            kind: "api",
+            status: "active",
+          },
+          {
+            name: "consent-api",
+            kind: "api",
+            status: "active",
+          },
+        ],
+        consumes: [],
+        capabilities: [
+          {
+            text: "Authentication, sessions and user/account context.",
+            tags: ["auth", "login"],
+          },
+          {
+            text: "Consent preferences and privacy controls.",
+            tags: ["consentimento", "privacidade"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript"],
+          patterns: ["service-module", "in-memory-fixture"],
+          boundaries: ["identity-source", "consent-source"],
+        },
+        package: {
+          name: "@acme-sim/acme-identity",
+          dependencies: [],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["getSession", "getUserContext", "requireScope", "updateConsent"],
+          sourceHash: "b161a1646dad",
+        },
+        contentHash: "e2b889b137be",
+      },
+    },
+    {
+      id: "acme-mfe-billing::context",
+      type: "repo-context",
+      label: "acme-mfe-billing context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-mfe-billing",
+        owner: "time-billing",
+        role: "microfrontend",
+        domain: "billing-growth",
+        modules: [],
+        provides: [
+          {
+            name: "billing-upgrade-ui",
+            kind: "ui-surface",
+            status: "active",
+          },
+        ],
+        consumes: [
+          {
+            contract: "acme-design-system/acme-design-tokens",
+            why: "visual-contract",
+          },
+          {
+            contract: "acme-design-system/billing-components",
+            why: "plan-card",
+          },
+          {
+            contract: "acme-web-host/acme-user-context",
+            why: "account-context",
+          },
+          {
+            contract: "acme-api-billing/billing-subscription-api",
+            why: "plans-and-quotes",
+          },
+          {
+            contract: "acme-api-billing/billing-eligibility-api",
+            why: "contextual-eligibility",
+          },
+          {
+            contract: "acme-analytics/acme-events-schema",
+            why: "experiment-measurement",
+          },
+        ],
+        capabilities: [
+          {
+            text: "Billing upgrade UI, plan cards and contextual CTA experiments.",
+            tags: ["billing-ui", "planos", "upgrade"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript", "html"],
+          patterns: ["microfrontend", "feature-flag", "experiment-ui"],
+          boundaries: ["billing-ui"],
+        },
+        package: {
+          name: "@acme-sim/acme-mfe-billing",
+          dependencies: [
+            "@acme-sim/acme-analytics",
+            "@acme-sim/acme-api-billing",
+            "@acme-sim/acme-design-system",
+            "@acme-sim/acme-web-host",
+          ],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["previewUpgrade", "renderBillingUpgrade"],
+          sourceHash: "43e4bcc3be17",
+        },
+        contentHash: "38cfba32f640",
+      },
+    },
+    {
+      id: "acme-mfe-onboarding::context",
+      type: "repo-context",
+      label: "acme-mfe-onboarding context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-mfe-onboarding",
+        owner: "time-onboarding",
+        role: "microfrontend",
+        domain: "onboarding",
+        modules: [],
+        provides: [
+          {
+            name: "onboarding-checklist-ui",
+            kind: "ui-surface",
+            status: "active",
+          },
+        ],
+        consumes: [
+          {
+            contract: "acme-design-system/acme-design-tokens",
+            why: "visual-contract",
+          },
+          {
+            contract: "acme-design-system/onboarding-components",
+            why: "onboarding-step",
+          },
+          {
+            contract: "acme-identity/consent-api",
+            why: "analytics-consent",
+          },
+          {
+            contract: "acme-web-host/acme-user-context",
+            why: "account-context",
+          },
+          {
+            contract: "acme-analytics/acme-events-schema",
+            why: "activation-measurement",
+          },
+        ],
+        capabilities: [
+          {
+            text: "Onboarding checklist, activation tour and consent-aware first-week flows.",
+            tags: ["onboarding", "ativacao", "tours"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript", "html"],
+          patterns: ["microfrontend", "activation-checklist", "experiment-ui"],
+          boundaries: ["onboarding-ui"],
+        },
+        package: {
+          name: "@acme-sim/acme-mfe-onboarding",
+          dependencies: [
+            "@acme-sim/acme-analytics",
+            "@acme-sim/acme-design-system",
+            "@acme-sim/acme-identity",
+          ],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["completeOnboardingStep", "renderOnboardingTour"],
+          sourceHash: "dc7e442aeb05",
+        },
+        contentHash: "8c5deda8131b",
+      },
+    },
+    {
+      id: "acme-obs-stack::context",
+      type: "repo-context",
+      label: "acme-obs-stack context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-obs-stack",
+        owner: "time-sre",
+        role: "observability-platform",
+        domain: "reliability",
+        modules: [],
+        provides: [
+          {
+            name: "slo-snapshots",
+            kind: "metric-source",
+            status: "active",
+          },
+          {
+            name: "incident-alerts",
+            kind: "telemetry-source",
+            status: "active",
+          },
+        ],
+        consumes: [],
+        capabilities: [
+          {
+            text: "Alerts, SLOs, tracing and p99 snapshots.",
+            tags: ["alertas", "slo", "tracing"],
+          },
+          {
+            text: "Operational outcome attestation for latency and incident-count metrics.",
+            tags: ["atesta-outcomes", "observabilidade"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript"],
+          patterns: ["telemetry-source", "slo-snapshot"],
+          boundaries: ["incident-source", "operational-attester"],
+        },
+        package: {
+          name: "@acme-sim/acme-obs-stack",
+          dependencies: [],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: ["incidentAlert", "p99Latency", "recordTrace", "sloSnapshot"],
+          sourceHash: "06ed6090ba30",
+        },
+        contentHash: "ef01ac401036",
+      },
+    },
+    {
+      id: "acme-web-host::context",
+      type: "repo-context",
+      label: "acme-web-host context",
+      data: {
+        schema: "acme.repo-context/v1",
+        repo: "acme-web-host",
+        owner: "area-platform",
+        role: "platform-shell",
+        domain: "web-platform",
+        modules: [],
+        provides: [
+          {
+            name: "acme-user-context",
+            kind: "shared-contract",
+            status: "active",
+          },
+          {
+            name: "shell-mfes",
+            kind: "runtime-contract",
+            status: "active",
+          },
+        ],
+        consumes: [
+          {
+            contract: "acme-identity/identity-session-api",
+            why: "resolve-user-session",
+          },
+          {
+            contract: "acme-identity/consent-api",
+            why: "publish-consent-fields",
+          },
+        ],
+        capabilities: [
+          {
+            text: "Microfrontend shell, routing and user-context publication.",
+            tags: ["shell-mfes", "contexto-de-usuario", "roteamento"],
+          },
+          {
+            text: "Shared browser host for billing, checkout, onboarding and support surfaces.",
+            tags: ["microfrontend-host", "user-context"],
+          },
+        ],
+        architecture: {
+          stack: ["node", "javascript", "html"],
+          patterns: ["microfrontend-shell", "contract-publisher"],
+          boundaries: ["shared-user-context", "route-resolution"],
+        },
+        package: {
+          name: "@acme-sim/acme-web-host",
+          dependencies: ["@acme-sim/acme-identity"],
+        },
+        code: {
+          entrypoint: "src/index.mjs",
+          exports: [
+            "mountMicroFrontend",
+            "publishUserContextContract",
+            "resolveUserContext",
+            "routeFor",
+          ],
+          sourceHash: "d940f8912958",
+        },
+        contentHash: "0917694bbc86",
       },
     },
     {
@@ -2214,6 +3093,84 @@ window.GRAPH = {
       source: "time-data",
       target: "acme-core-api#mod-reports",
       type: "owns",
+    },
+    {
+      id: "publishes-context:acme-analytics->acme-analytics::context",
+      source: "acme-analytics",
+      target: "acme-analytics::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-api-billing->acme-api-billing::context",
+      source: "acme-api-billing",
+      target: "acme-api-billing::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-checkout->acme-checkout::context",
+      source: "acme-checkout",
+      target: "acme-checkout::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-checkout-api->acme-checkout-api::context",
+      source: "acme-checkout-api",
+      target: "acme-checkout-api::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-core-api->acme-core-api::context",
+      source: "acme-core-api",
+      target: "acme-core-api::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-data-pipeline->acme-data-pipeline::context",
+      source: "acme-data-pipeline",
+      target: "acme-data-pipeline::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-design-system->acme-design-system::context",
+      source: "acme-design-system",
+      target: "acme-design-system::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-help-center->acme-help-center::context",
+      source: "acme-help-center",
+      target: "acme-help-center::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-identity->acme-identity::context",
+      source: "acme-identity",
+      target: "acme-identity::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-mfe-billing->acme-mfe-billing::context",
+      source: "acme-mfe-billing",
+      target: "acme-mfe-billing::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-mfe-onboarding->acme-mfe-onboarding::context",
+      source: "acme-mfe-onboarding",
+      target: "acme-mfe-onboarding::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-obs-stack->acme-obs-stack::context",
+      source: "acme-obs-stack",
+      target: "acme-obs-stack::context",
+      type: "publishes-context",
+    },
+    {
+      id: "publishes-context:acme-web-host->acme-web-host::context",
+      source: "acme-web-host",
+      target: "acme-web-host::context",
+      type: "publishes-context",
     },
     {
       id: "publishes:acme-web-host->acme-user-context",

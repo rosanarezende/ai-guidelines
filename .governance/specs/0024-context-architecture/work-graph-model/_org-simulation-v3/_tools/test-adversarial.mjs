@@ -3,6 +3,7 @@
 // Uso: node _tools/test-adversarial.mjs
 import { loadOrg, validateOrg } from "./org.mjs";
 import { checkAppSecurity } from "./check-app-security.mjs";
+import { validateRepoContexts } from "./repo-contexts.mjs";
 
 const base = loadOrg();
 const clone = () => structuredClone(base);
@@ -429,12 +430,44 @@ const CASES = [
       return o;
     },
   },
+  // ── substrato repo-first: repos.yml nao pode divergir dos manifestos/contextos publicados ──
+  {
+    id: "R·1 cap central sem tag publicada pelo repo falha",
+    expect: "repo-context-caps",
+    mutate: () => {
+      const o = clone();
+      o.repos.find((r) => r.id === "acme-checkout").caps.push("cap-fantasma");
+      return o;
+    },
+  },
+  {
+    id: "R·2 contrato central com owner-repo que nao publica o contrato falha",
+    expect: "repo-context-contract",
+    mutate: () => {
+      const o = clone();
+      o.contracts.find((c) => c.id === "acme-user-context")["owner-repo"] = "acme-checkout";
+      return o;
+    },
+  },
+  {
+    id: "R·3 consumer central que nao consome no manifesto falha",
+    expect: "repo-context-contract",
+    mutate: () => {
+      const o = clone();
+      o.contracts.find((c) => c.id === "acme-design-tokens").consumers.push("acme-help-center");
+      return o;
+    },
+  },
 ];
 
-export function run(cases) {
+async function validateAll(o) {
+  return [...validateOrg(o), ...(await validateRepoContexts(o))];
+}
+
+export async function run(cases) {
   let fails = 0;
   for (const c of cases) {
-    const issues = validateOrg(c.mutate());
+    const issues = await validateAll(c.mutate());
     const errs = issues.filter((i) => i.level === "error");
     if (c.expect === null) {
       const ok = errs.length === 0;
@@ -454,7 +487,7 @@ export function run(cases) {
   return fails;
 }
 
-const fails = run(CASES);
+const fails = await run(CASES);
 const securityIssues = checkAppSecurity();
 for (const i of securityIssues) console.log(`✗ [${i.rule}] ${i.file} — ${i.msg}`);
 if (securityIssues.length === 0) console.log("✓ N·app-security — vendors locais + hashes + CSP ok");

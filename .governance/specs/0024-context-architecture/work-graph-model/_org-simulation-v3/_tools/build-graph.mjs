@@ -6,15 +6,19 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import prettier from "prettier";
 import { parse } from "yaml";
 import { deriveIntent, loadOrg, validateOrg } from "./org.mjs";
+import { loadPublishedContexts, validateRepoContexts } from "./repo-contexts.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const APPS = path.join(here, "..", "_apps");
 const MODEL = path.join(here, "..", "..", "model.yml");
 
 const o = loadOrg();
-const issues = validateOrg(o);
+const repoContextIssues = await validateRepoContexts(o);
+const issues = [...validateOrg(o), ...repoContextIssues];
+const repoContexts = loadPublishedContexts();
 
 const nodes = [];
 const edges = [];
@@ -55,6 +59,11 @@ for (const x of o.repos) {
     E(x.id, mid, "has-module");
     E(m.owner, mid, "owns");
   }
+}
+for (const x of repoContexts) {
+  const cid = `${x.repo}::context`;
+  N(cid, "repo-context", `${x.repo} context`, x);
+  E(x.repo, cid, "publishes-context");
 }
 for (const x of o.contracts) {
   N(x.id, "contract", `${x.id}@${x.revision}`, x);
@@ -126,12 +135,16 @@ const GRAPH = {
 };
 
 mkdirSync(APPS, { recursive: true });
-writeFileSync(
-  path.join(APPS, "graph.js"),
+const graphSource =
   "// graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.\n" +
-    "window.GRAPH = " +
-    JSON.stringify(GRAPH, null, 2) +
-    ";\n"
+  "window.GRAPH = " +
+  JSON.stringify(GRAPH, null, 2) +
+  ";\n";
+const graphPath = path.join(APPS, "graph.js");
+const prettierOptions = (await prettier.resolveConfig(graphPath)) || {};
+writeFileSync(
+  graphPath,
+  await prettier.format(graphSource, { ...prettierOptions, parser: "babel" })
 );
 console.log(
   `✓ graph.js gerado — ${nodes.length} nós · ${edges.length} arestas · ${issues.length} issue(s) do validador`

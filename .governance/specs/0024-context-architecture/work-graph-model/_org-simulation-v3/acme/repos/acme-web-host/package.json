@@ -1,0 +1,11 @@
+{
+  "name": "@acme-sim/acme-web-host",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node ../../../_tools/check-code-fixtures.mjs"
+  },
+  "dependencies": {
+    "@acme-sim/acme-identity": "workspace:*"
+  }
+}

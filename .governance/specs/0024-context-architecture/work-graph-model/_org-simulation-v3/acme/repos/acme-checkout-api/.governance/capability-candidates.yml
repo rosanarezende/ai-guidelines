@@ -1,0 +1,14 @@
+repo: acme-checkout-api
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-checkout-api"
+  dependencies:
+    - "@acme-sim/acme-core-api"
+  exports:
+    - applyCoupon
+    - calculateFreight
+    - createCheckoutOrder
+  sourceHash: 77fd476a6d38

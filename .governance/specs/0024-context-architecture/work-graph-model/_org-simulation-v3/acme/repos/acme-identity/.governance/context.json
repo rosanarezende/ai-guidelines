@@ -1,0 +1,46 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-identity",
+  "owner": "time-identity",
+  "role": "backend-service",
+  "domain": "identity-and-consent",
+  "modules": [],
+  "provides": [
+    {
+      "name": "identity-session-api",
+      "kind": "api",
+      "status": "active"
+    },
+    {
+      "name": "consent-api",
+      "kind": "api",
+      "status": "active"
+    }
+  ],
+  "consumes": [],
+  "capabilities": [
+    {
+      "text": "Authentication, sessions and user/account context.",
+      "tags": ["auth", "login"]
+    },
+    {
+      "text": "Consent preferences and privacy controls.",
+      "tags": ["consentimento", "privacidade"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript"],
+    "patterns": ["service-module", "in-memory-fixture"],
+    "boundaries": ["identity-source", "consent-source"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-identity",
+    "dependencies": []
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": ["getSession", "getUserContext", "requireScope", "updateConsent"],
+    "sourceHash": "b161a1646dad"
+  },
+  "contentHash": "e2b889b137be"
+}

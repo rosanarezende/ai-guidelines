@@ -1,0 +1,17 @@
+repo: acme-identity
+role: backend-service
+owner: time-identity
+domain: identity-and-consent
+provides:
+  - { name: identity-session-api, kind: api, status: active }
+  - { name: consent-api, kind: api, status: active }
+consumes: []
+capabilities:
+  - text: "Authentication, sessions and user/account context."
+    tags: [auth, login]
+  - text: "Consent preferences and privacy controls."
+    tags: [consentimento, privacidade]
+architecture:
+  stack: [node, javascript]
+  patterns: [service-module, in-memory-fixture]
+  boundaries: [identity-source, consent-source]

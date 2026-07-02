@@ -1,0 +1,21 @@
+repo: acme-checkout
+role: microfrontend
+owner: time-checkout
+domain: checkout
+provides:
+  - { name: checkout-ui, kind: ui-surface, status: active }
+consumes:
+  - { contract: acme-design-system/acme-design-tokens, why: visual-contract }
+  - { contract: acme-design-system/checkout-components, why: checkout-summary }
+  - { contract: acme-web-host/acme-user-context, why: recurring-customer-context }
+  - { contract: acme-checkout-api/checkout-order-api, why: submit-checkout }
+  - { contract: acme-checkout-api/freight-api, why: freight-preview }
+  - { contract: acme-checkout-api/coupon-api, why: coupon-validation }
+  - { contract: acme-analytics/acme-events-schema, why: funnel-measurement }
+capabilities:
+  - text: "Checkout UI, cart flow, coupon handling and freight preview."
+    tags: [checkout-ui, carrinho, cupom, frete]
+architecture:
+  stack: [node, javascript, html]
+  patterns: [microfrontend, checkout-flow, progressive-rollout]
+  boundaries: [checkout-ui]

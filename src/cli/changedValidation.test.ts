@@ -30,6 +30,21 @@ describe("changedValidation", () => {
     expect(steps.find((step) => step.command.includes("npx"))?.args).toContain("--write");
   });
 
+  it("divide Prettier em lotes quando o diff tem muitos arquivos", () => {
+    const many = Array.from(
+      { length: 180 },
+      (_, i) =>
+        `.governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v3/acme/repos/acme-${String(i).padStart(3, "0")}/.governance/context.json`
+    );
+    const steps = planChangedValidation(many);
+    const prettierSteps = steps.filter((step) => step.command === "npx");
+
+    expect(prettierSteps.length).toBeGreaterThan(1);
+    expect(
+      prettierSteps.every((step) => step.args.slice(0, 3).join(" ") === "prettier --check --")
+    ).toBe(true);
+  });
+
   it("aciona build quando o diff toca TypeScript em src", () => {
     expect(labels(["src/cli/foo.ts"])).toContain("Compilar TypeScript");
   });

@@ -1,0 +1,15 @@
+repo: acme-api-billing
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-api-billing"
+  dependencies:
+    - "@acme-sim/acme-core-api"
+  exports:
+    - currentSubscription
+    - listPlans
+    - quoteUpgrade
+    - upgradeSubscription
+  sourceHash: 0d757c8a8f51

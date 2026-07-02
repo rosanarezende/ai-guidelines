@@ -1,0 +1,16 @@
+repo: acme-mfe-billing
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-mfe-billing"
+  dependencies:
+    - "@acme-sim/acme-analytics"
+    - "@acme-sim/acme-api-billing"
+    - "@acme-sim/acme-design-system"
+    - "@acme-sim/acme-web-host"
+  exports:
+    - previewUpgrade
+    - renderBillingUpgrade
+  sourceHash: 43e4bcc3be17

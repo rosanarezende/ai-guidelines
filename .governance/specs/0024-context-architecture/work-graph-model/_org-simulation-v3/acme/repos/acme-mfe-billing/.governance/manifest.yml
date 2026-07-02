@@ -1,0 +1,20 @@
+repo: acme-mfe-billing
+role: microfrontend
+owner: time-billing
+domain: billing-growth
+provides:
+  - { name: billing-upgrade-ui, kind: ui-surface, status: active }
+consumes:
+  - { contract: acme-design-system/acme-design-tokens, why: visual-contract }
+  - { contract: acme-design-system/billing-components, why: plan-card }
+  - { contract: acme-web-host/acme-user-context, why: account-context }
+  - { contract: acme-api-billing/billing-subscription-api, why: plans-and-quotes }
+  - { contract: acme-api-billing/billing-eligibility-api, why: contextual-eligibility }
+  - { contract: acme-analytics/acme-events-schema, why: experiment-measurement }
+capabilities:
+  - text: "Billing upgrade UI, plan cards and contextual CTA experiments."
+    tags: [billing-ui, planos, upgrade]
+architecture:
+  stack: [node, javascript, html]
+  patterns: [microfrontend, feature-flag, experiment-ui]
+  boundaries: [billing-ui]

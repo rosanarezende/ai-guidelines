@@ -1,0 +1,18 @@
+repo: acme-api-billing
+role: backend-service
+owner: time-billing
+domain: billing
+provides:
+  - { name: billing-subscription-api, kind: api, status: active }
+  - { name: billing-eligibility-api, kind: api, status: proposed }
+consumes:
+  - { contract: acme-core-api/legacy-billing-api, why: current-subscription-and-invoices }
+capabilities:
+  - text: "Billing plans, subscriptions and upgrade quotes."
+    tags: [cobranca, planos, assinaturas]
+  - text: "Eligibility API for contextual cross-sell experiments."
+    tags: [elegibilidade, upgrade]
+architecture:
+  stack: [node, javascript]
+  patterns: [backend-api, legacy-adapter]
+  boundaries: [billing-domain]

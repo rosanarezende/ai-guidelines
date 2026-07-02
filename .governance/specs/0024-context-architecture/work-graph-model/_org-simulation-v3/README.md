@@ -21,6 +21,13 @@
 ```bash
 cd _org-simulation-v3
 node _tools/validate.mjs        # lints da org (exit 1 se houver ERRO)
+node _tools/adopt-existing-repos.mjs # cria sidecars minimos para repos existentes (idempotente)
+node _tools/adopt-existing-repos.mjs --check # confere se todo repo tem scaffold minimo
+node _tools/prepare-capability-review.mjs --write # gera pacotes p/ AI-assisted capability extraction
+node _tools/prepare-capability-review.mjs --check # confere freshness dos pacotes de revisao
+node _tools/publish-contexts.mjs # publica acme/repos/*/.governance/context.json a partir dos manifestos + codigo
+node _tools/check-repo-contexts.mjs # falha se repos.yml, manifestos e context.json divergirem
+node _tools/adoption-journey.mjs # dogfood completo da adoção repo-existente → host agregado
 node _tools/build-graph.mjs     # regenera _apps/graph.js (grafo + issues embutidos)
 node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada DEVE ser pega
 # abrir _apps/owner/index.html e _apps/company/index.html no navegador
@@ -33,9 +40,20 @@ node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada D
 3. `node _tools/build-graph.mjs` → os apps refletem.
 4. O que a sim provar que está errado NO MODELO vira provocação no `model.yml`.
 
+## Loop de adoção de uma empresa existente
+
+1. A empresa aponta a ferramenta para repos que já têm código.
+2. `node _tools/adopt-existing-repos.mjs` cria o sidecar mínimo `.governance/` sem sobrescrever manifestos existentes.
+3. `node _tools/prepare-capability-review.mjs --write` monta o pacote revisável para IA/humano.
+4. A IA sugere patch; o humano dono do repo revisa e edita `.governance/manifest.yml`.
+5. `node _tools/publish-contexts.mjs` publica `context.json` por repo.
+6. `node _tools/check-repo-contexts.mjs` prova que `repos.yml`, manifestos e contexts não divergiram.
+7. `node _tools/adoption-journey.mjs` executa o dogfood completo.
+
 ## Decisões de desenho (v1)
 
-- **File-first, um YAML por conceito** (`objectives.yml`, `teams.yml`…) — a divisão por entidade/pasta vem quando plugar os adapters da lib (padrão da v2).
+- **File-first, um YAML por conceito** (`objectives.yml`, `teams.yml`…) + **repos com sidecar proprio** (`acme/repos/<repo>/.governance/manifest.yml` → `context.json`). O `repos.yml` central e inventario; a publicacao por repo impede que ele vire a unica fonte de verdade.
+- **Adoção por empresa existente:** `_tools/adopt-existing-repos.mjs` faz scaffold minimo e gera `capability-candidates.yml` como rascunho revisavel. `_tools/prepare-capability-review.mjs` monta um pacote de revisão por repo com evidência estática para IA/humano. A extração por IA fica como canal assistivo (template em `_templates/capability-extraction-prompt.md`), nunca como mutação silenciosa do manifesto.
 - **Apps sem build** (React UMD + htm + Cytoscape UMD vendorizados em `_apps/vendor/`) — iteração sem toolchain e sem CDN em runtime; `node _tools/check-app-security.mjs` confere hashes + CSP.
 - **`graph.js` gerado** (window.GRAPH) em vez de fetch — `file://` não deixa fetch; mesmo truque do `data.js`.
 - O validador implementa **um subconjunto honesto** das regras da P10/P11/P12 (está listado nele); o resolver completo do outcome entra quando os primeiros outcomes forem publicados (F6).

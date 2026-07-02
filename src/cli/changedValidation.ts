@@ -24,6 +24,7 @@ export interface ChangedValidationDeps {
 }
 
 const FORMAT_EXTENSIONS = new Set([".ts", ".mjs", ".js", ".cjs", ".md", ".json", ".yml", ".yaml"]);
+const PRETTIER_ARG_BUDGET = 6000;
 
 function binary(name: "npm" | "npx"): string {
   return name;
@@ -82,6 +83,41 @@ function formatCandidates(paths: readonly string[]): string[] {
   return paths.filter((path) => FORMAT_EXTENSIONS.has(extension(path)));
 }
 
+function approxCommandLength(command: string, args: readonly string[]): number {
+  return [command, ...args].reduce((sum, arg) => sum + windowsShellArg(arg).length + 1, 0);
+}
+
+function planPrettierSteps(
+  formattable: readonly string[],
+  options: ChangedValidationOptions
+): ChangedValidationStep[] {
+  if (formattable.length === 0) return [];
+  const baseArgs = ["prettier", options.fix ? "--write" : "--check", "--"];
+  const chunks: string[][] = [];
+  let current: string[] = [];
+
+  for (const file of formattable) {
+    const candidate = [...current, file];
+    const length = approxCommandLength(binary("npx"), [...baseArgs, ...candidate]);
+    if (current.length > 0 && length > PRETTIER_ARG_BUDGET) {
+      chunks.push(current);
+      current = [file];
+    } else {
+      current = candidate;
+    }
+  }
+  if (current.length > 0) chunks.push(current);
+
+  const label = options.fix
+    ? "Formatar arquivos alterados"
+    : "Checar formatação dos arquivos alterados";
+  return chunks.map((chunk, index) => ({
+    label: chunks.length === 1 ? label : `${label} (${index + 1}/${chunks.length})`,
+    command: binary("npx"),
+    args: [...baseArgs, ...chunk],
+  }));
+}
+
 function windowsShellArg(arg: string): string {
   if (/^[A-Za-z0-9_./:=@%{}$+,\-]+$/.test(arg)) return arg;
   return `"${arg.replace(/"/g, '\\"')}"`;
@@ -114,15 +150,7 @@ export function planChangedValidation(
   ];
 
   const formattable = formatCandidates(paths);
-  if (formattable.length > 0) {
-    steps.push({
-      label: options.fix
-        ? "Formatar arquivos alterados"
-        : "Checar formatação dos arquivos alterados",
-      command: binary("npx"),
-      args: ["prettier", options.fix ? "--write" : "--check", "--", ...formattable],
-    });
-  }
+  steps.push(...planPrettierSteps(formattable, options));
 
   if (
     hasAny(paths, (p) => p.startsWith("src/") && p.endsWith(".ts")) ||

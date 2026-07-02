@@ -1,0 +1,56 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-help-center",
+  "owner": "time-support",
+  "role": "support-application",
+  "domain": "customer-support",
+  "modules": [],
+  "provides": [
+    {
+      "name": "help-center-ui",
+      "kind": "ui-surface",
+      "status": "active"
+    },
+    {
+      "name": "ticket-api",
+      "kind": "api",
+      "status": "active"
+    },
+    {
+      "name": "chatbot-api",
+      "kind": "api",
+      "status": "active"
+    }
+  ],
+  "consumes": [
+    {
+      "contract": "acme-web-host/acme-user-context",
+      "why": "account-bound-support"
+    },
+    {
+      "contract": "acme-analytics/acme-events-schema",
+      "why": "deflection-measurement"
+    }
+  ],
+  "capabilities": [
+    {
+      "text": "Help articles, ticket creation and chatbot self-service.",
+      "tags": ["ajuda", "tickets", "chatbot", "self-service"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript"],
+    "patterns": ["support-portal", "self-service"],
+    "boundaries": ["support-domain"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-help-center",
+    "dependencies": ["@acme-sim/acme-web-host"]
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": ["chatbotReply", "openTicket", "searchArticles"],
+    "sourceHash": "f99909c02b13"
+  },
+  "contentHash": "f4210337bacf"
+}

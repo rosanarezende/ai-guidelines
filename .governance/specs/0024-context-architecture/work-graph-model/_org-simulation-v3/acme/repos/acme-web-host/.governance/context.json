@@ -1,0 +1,60 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-web-host",
+  "owner": "area-platform",
+  "role": "platform-shell",
+  "domain": "web-platform",
+  "modules": [],
+  "provides": [
+    {
+      "name": "acme-user-context",
+      "kind": "shared-contract",
+      "status": "active"
+    },
+    {
+      "name": "shell-mfes",
+      "kind": "runtime-contract",
+      "status": "active"
+    }
+  ],
+  "consumes": [
+    {
+      "contract": "acme-identity/identity-session-api",
+      "why": "resolve-user-session"
+    },
+    {
+      "contract": "acme-identity/consent-api",
+      "why": "publish-consent-fields"
+    }
+  ],
+  "capabilities": [
+    {
+      "text": "Microfrontend shell, routing and user-context publication.",
+      "tags": ["shell-mfes", "contexto-de-usuario", "roteamento"]
+    },
+    {
+      "text": "Shared browser host for billing, checkout, onboarding and support surfaces.",
+      "tags": ["microfrontend-host", "user-context"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript", "html"],
+    "patterns": ["microfrontend-shell", "contract-publisher"],
+    "boundaries": ["shared-user-context", "route-resolution"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-web-host",
+    "dependencies": ["@acme-sim/acme-identity"]
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": [
+      "mountMicroFrontend",
+      "publishUserContextContract",
+      "resolveUserContext",
+      "routeFor"
+    ],
+    "sourceHash": "d940f8912958"
+  },
+  "contentHash": "0917694bbc86"
+}
