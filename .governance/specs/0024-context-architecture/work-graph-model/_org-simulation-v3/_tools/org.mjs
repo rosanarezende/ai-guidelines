@@ -64,8 +64,13 @@ const SCHEMAS = {
       "contributes-to",
       "status",
     ],
-    optional: [],
+    optional: ["attestation-collapse"],
     enums: { status: LIFECYCLE },
+  },
+  "attestation-collapse": {
+    required: ["reason", "approved-by", "review-at", "visibility"],
+    optional: [],
+    enums: { visibility: ["dashboard-badge"] },
   },
   repo: { required: ["id", "owner", "caps"], optional: ["note", "modules"] },
   module: { required: ["id", "owner", "caps"], optional: [] },
@@ -170,7 +175,16 @@ function checkAllSchemas(o, issues) {
   for (const x of o.teams) checkSchema("team", x, x.id, issues);
   for (const x of o.theses || []) checkSchema("thesis", x, x.id, issues);
   for (const x of o.metrics) checkSchema("metric", x, x.id, issues);
-  for (const x of o.targets) checkSchema("target", x, x.id, issues);
+  for (const x of o.targets) {
+    checkSchema("target", x, x.id, issues);
+    if (x["attestation-collapse"])
+      checkSchema(
+        "attestation-collapse",
+        x["attestation-collapse"],
+        `${x.id}::attestation-collapse`,
+        issues
+      );
+  }
   for (const x of o.repos) {
     checkSchema("repo", x, x.id, issues);
     for (const m of x.modules || []) checkSchema("module", m, `${x.id}#${m.id}`, issues);
@@ -253,7 +267,15 @@ export function validateOrg(o) {
   for (const x of o.areas) resolveAuth(x.owner, x.id, "owner");
   for (const x of o.theses || []) resolveAuth(x.owner, x.id, "owner");
   for (const x of o.teams) resolveAuth(x.lead, x.id, "lead");
-  for (const t of o.targets) resolveAuth(t.definer, t.id, "definer");
+  for (const t of o.targets) {
+    resolveAuth(t.definer, t.id, "definer");
+    if (t["attestation-collapse"])
+      resolveAuth(
+        t["attestation-collapse"]["approved-by"],
+        t.id,
+        "attestation-collapse.approved-by"
+      );
+  }
   // o approver do PERFIL deve estar FORA do escopo operacional (sponsor) — F5/K
   const pd = o.org["profile-declaration"] || {};
   if (pd["approved-by"]) {
@@ -292,12 +314,35 @@ export function validateOrg(o) {
     if (m && t.attester && t.attester !== m.source)
       warn("attester-source", t.id, `attester "${t.attester}" ≠ source da métrica ("${m.source}")`);
     const attRepo = repoById[t.attester];
-    if (attRepo && attRepo.owner === t.node)
+    const selfAttested = attRepo && attRepo.owner === t.node;
+    const collapse = t["attestation-collapse"];
+    if (selfAttested && !collapse)
+      err(
+        "self-attested-target",
+        t.id,
+        `a fonte que atesta (${t.attester}) é do PRÓPRIO time medido (${t.node}) — dispensa exige attestation-collapse LOGADO`
+      );
+    if (selfAttested && collapse)
       warn(
         "self-attested-target",
         t.id,
-        `a fonte que atesta (${t.attester}) é do PRÓPRIO time medido (${t.node}) — independência colapsada de fato (F9); dispensa exige colapso LOGADO`
+        `independência colapsada de fato (${t.attester} é do próprio ${t.node}) — ACEITA com colapso logado por ${collapse["approved-by"]}; dashboard deve marcar ${collapse.visibility}`
       );
+    if (!selfAttested && collapse)
+      err(
+        "attestation-collapse",
+        t.id,
+        "attestation-collapse declarado, mas a fonte que atesta não colapsa com o time medido"
+      );
+    if (collapse) {
+      const approver = authById[collapse["approved-by"]];
+      if (approver && approver.kind !== "sponsor")
+        err(
+          "attestation-collapse",
+          t.id,
+          `attestation-collapse aprovado por "${collapse["approved-by"]}" (${approver.kind}); colapso de independência em perfil full exige sponsor`
+        );
+    }
   }
 
   // métrica órfã
@@ -490,11 +535,24 @@ function resolveOutcomes(o, ix, { err, warn }) {
       // independência REAL do attester (cadeia de ownership) — no perfil full, self-attested NÃO soma
       const attRepo = ix.repoById[out["attested-by"]];
       const attOwner = attRepo ? attRepo.owner : null;
-      if (out["attested-by"] === t.definer || (attOwner && attOwner === t.node))
+      const collapse = t["attestation-collapse"];
+      if (out["attested-by"] === t.definer)
         err(
           "self-attested",
           out.id,
-          `attester "${out["attested-by"]}"${attOwner ? ` (owner: ${attOwner})` : ""} colapsa com quem define/é medido — self-attested NÃO soma no perfil full`
+          `attester "${out["attested-by"]}" também define o target — self-attested NÃO soma no perfil full`
+        );
+      if (attOwner && attOwner === t.node && !collapse)
+        err(
+          "self-attested",
+          out.id,
+          `attester "${out["attested-by"]}" (owner: ${attOwner}) colapsa com o time medido — self-attested sem attestation-collapse NÃO soma no perfil full`
+        );
+      if (attOwner && attOwner === t.node && collapse)
+        warn(
+          "self-attested",
+          out.id,
+          `attester "${out["attested-by"]}" (owner: ${attOwner}) colapsa com o time medido — outcome entra apenas como self-attested VISÍVEL (${collapse.visibility})`
         );
     }
 

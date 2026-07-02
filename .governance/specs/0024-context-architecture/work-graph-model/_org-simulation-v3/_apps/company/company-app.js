@@ -37,6 +37,24 @@ function intentInfo(it) {
   return { ws, hard, par, free, ext, gate, changed };
 }
 
+function attestationStatus(t) {
+  const att = node(t.data.attester);
+  const collapse = t.data["attestation-collapse"];
+  if (att && att.type === "repo" && att.data.owner === t.data.node) {
+    return collapse
+      ? html`<span>
+          independência:
+          <span className="st waiting">colapsada · logada</span>
+          aprovado por ${collapse["approved-by"]} · ${collapse.visibility}
+        </span>`
+      : html`<span>
+          independência:
+          <span className="st blocked">colapsada · sem log</span>
+        </span>`;
+  }
+  return html`<span>independência: sem colapso detectado pelo resolver</span>`;
+}
+
 function Crumb({ label, onClick }) {
   return html`<span className="crumb" onClick=${onClick}>← ${label}</span>`;
 }
@@ -132,10 +150,14 @@ function Objetivos({ sel, go }) {
           html`<div className="row" key=${t.id}>
             <b>${t.data.node}</b>: ${t.label} <span className="pill">${t.data.metric}</span><br />
             <span className="muted">
-              define: ${t.data.definer} · atesta: ${t.data.attester} · independência: NÃO verificada
-              (resolver pendente — bloco J da F5) ·
+              define: ${t.data.definer} · atesta: ${t.data.attester} · ${attestationStatus(t)} ·
               <b> actual: aguardando</b> — melhor vazio que mentira
             </span>
+            ${t.data["attestation-collapse"]
+              ? html`<div className="muted">
+                  colapso logado: ${t.data["attestation-collapse"].reason}
+                </div>`
+              : null}
           </div>`
       )}
     </div>

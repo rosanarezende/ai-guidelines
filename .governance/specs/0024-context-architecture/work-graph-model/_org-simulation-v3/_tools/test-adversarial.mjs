@@ -23,6 +23,21 @@ const validOutcome = (over = {}) => ({
   envelope: { actor: "ana-dev", authority: "pm-growth", "idempotency-key": "out-teste-1" },
   ...over,
 });
+const validCollapsedOutcome = (over = {}) => ({
+  id: "out-self-attested-logado",
+  "emitted-by": "dep-bump-host",
+  source: "acme-data-pipeline/cost@rev77",
+  window: { start: "2027-01-01", end: "2027-03-31" },
+  metric: "cost-to-serve",
+  value: "-1 R$/pedido",
+  aggregation: "avg",
+  "attested-by": "acme-data-pipeline",
+  revision: "warehouse@rev77",
+  "contract-revisions": [],
+  "contributes-to": "tgt-data-cost",
+  envelope: { actor: "ana-dev", authority: "head-platform", "idempotency-key": "out-self-1" },
+  ...over,
+});
 
 const CASES = [
   { id: "baseline sem erros (warns são permitidos)", expect: null, mutate: () => clone() },
@@ -137,6 +152,15 @@ const CASES = [
     mutate: () => {
       const o = clone();
       o.outcomes.push(validOutcome());
+      return o;
+    },
+  },
+  {
+    id: "J·0b outcome self-attested COM colapso logado passa (warning visível)",
+    expect: null,
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(validCollapsedOutcome());
       return o;
     },
   },
@@ -281,6 +305,25 @@ const CASES = [
     mutate: () => {
       const o = clone();
       o.teams[0].lead = "lead-fantasma";
+      return o;
+    },
+  },
+  {
+    id: "K·7 target self-attested SEM colapso logado falha",
+    expect: "self-attested-target",
+    mutate: () => {
+      const o = clone();
+      delete o.targets.find((t) => t.id === "tgt-data-cost")["attestation-collapse"];
+      return o;
+    },
+  },
+  {
+    id: "K·8 colapso de target aprovado por role interna falha",
+    expect: "attestation-collapse",
+    mutate: () => {
+      const o = clone();
+      o.targets.find((t) => t.id === "tgt-sre-p99")["attestation-collapse"]["approved-by"] =
+        "head-platform";
       return o;
     },
   },

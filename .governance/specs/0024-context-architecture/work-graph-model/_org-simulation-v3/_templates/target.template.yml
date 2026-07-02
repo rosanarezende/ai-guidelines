@@ -1,5 +1,6 @@
 # TEMPLATE target — binding métrica × nó × período × valor. actual é DERIVADO (nunca à mão).
-# SoD da medição: definer ≠ attester (attester = fonte independente).
+# SoD da medição: definer ≠ attester. Se a fonte que atesta pertence ao próprio
+# time medido, registre attestation-collapse; sem esse log o validador falha.
 id: tgt-<slug>
 node: <time ou objective que carrega a meta>
 metric: <id em metrics.yml> # a definição estável mora lá
@@ -9,3 +10,9 @@ definer: <quem define>
 attester: <a fonte que atesta — ≠ definer>
 contributes-to: <objective do rollup PRIMÁRIO — um só; secundários são aligns-with>
 status: active # proposed | active | closed (FROZEN — não recebe actual novo) | superseded | dropped
+# opcional, só quando a independência colapsa de fato e isso é uma decisão explícita
+# attestation-collapse:
+#   reason: "<por que a fonte independente seria artificial/antieconômica>"
+#   approved-by: sponsor-acme
+#   review-at: 2027-01-15
+#   visibility: dashboard-badge

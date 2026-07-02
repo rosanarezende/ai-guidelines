@@ -61,6 +61,9 @@ for (const x of o.targets) {
   E(x.id, x.metric, "uses-metric");
   E(x.id, x["contributes-to"], "contributes-to");
   E(x.definer, x.id, "defines");
+  if (x.attester) E(x.id, x.attester, "attested-by");
+  if (x["attestation-collapse"])
+    E(x["attestation-collapse"]["approved-by"], x.id, "approves-collapse");
 }
 for (const it of o.intents) {
   N(it.id, "intent", it.title, it);

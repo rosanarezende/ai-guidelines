@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "cb5c2c08d56e",
+  contentHash: "ca068b43790e",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -768,6 +768,13 @@ window.GRAPH = {
         attester: "acme-data-pipeline",
         "contributes-to": "obj-efficiency",
         status: "active",
+        "attestation-collapse": {
+          reason:
+            "time-data mede a propria fonte operacional (acme-data-pipeline); trocar a fonte seria artificial nesta sim",
+          "approved-by": "sponsor-acme",
+          "review-at": "2027-01-15",
+          visibility: "dashboard-badge",
+        },
       },
     },
     {
@@ -784,6 +791,13 @@ window.GRAPH = {
         attester: "acme-obs-stack",
         "contributes-to": "obj-efficiency",
         status: "active",
+        "attestation-collapse": {
+          reason:
+            "time-sre atesta SLO pela propria stack de observabilidade; independencia externa seria antieconomica nesta sim",
+          "approved-by": "sponsor-acme",
+          "review-at": "2027-01-15",
+          visibility: "dashboard-badge",
+        },
       },
     },
     {
@@ -800,6 +814,13 @@ window.GRAPH = {
         attester: "acme-obs-stack",
         "contributes-to": "obj-efficiency",
         status: "active",
+        "attestation-collapse": {
+          reason:
+            "time-sre atesta incidentes pela propria stack de observabilidade; colapso e intencional e visivel",
+          "approved-by": "sponsor-acme",
+          "review-at": "2027-01-15",
+          visibility: "dashboard-badge",
+        },
       },
     },
     {
@@ -2136,6 +2157,12 @@ window.GRAPH = {
       type: "defines",
     },
     {
+      id: "attested-by:tgt-billing-conv->acme-analytics",
+      source: "tgt-billing-conv",
+      target: "acme-analytics",
+      type: "attested-by",
+    },
+    {
       id: "has-target:time-onboarding->tgt-onboarding-act",
       source: "time-onboarding",
       target: "tgt-onboarding-act",
@@ -2158,6 +2185,12 @@ window.GRAPH = {
       source: "pm-growth",
       target: "tgt-onboarding-act",
       type: "defines",
+    },
+    {
+      id: "attested-by:tgt-onboarding-act->acme-analytics",
+      source: "tgt-onboarding-act",
+      target: "acme-analytics",
+      type: "attested-by",
     },
     {
       id: "has-target:time-checkout->tgt-checkout-stack",
@@ -2184,6 +2217,12 @@ window.GRAPH = {
       type: "defines",
     },
     {
+      id: "attested-by:tgt-checkout-stack->acme-data-pipeline",
+      source: "tgt-checkout-stack",
+      target: "acme-data-pipeline",
+      type: "attested-by",
+    },
+    {
       id: "has-target:time-data->tgt-data-cost",
       source: "time-data",
       target: "tgt-data-cost",
@@ -2206,6 +2245,18 @@ window.GRAPH = {
       source: "head-platform",
       target: "tgt-data-cost",
       type: "defines",
+    },
+    {
+      id: "attested-by:tgt-data-cost->acme-data-pipeline",
+      source: "tgt-data-cost",
+      target: "acme-data-pipeline",
+      type: "attested-by",
+    },
+    {
+      id: "approves-collapse:sponsor-acme->tgt-data-cost",
+      source: "sponsor-acme",
+      target: "tgt-data-cost",
+      type: "approves-collapse",
     },
     {
       id: "has-target:time-sre->tgt-sre-p99",
@@ -2232,6 +2283,18 @@ window.GRAPH = {
       type: "defines",
     },
     {
+      id: "attested-by:tgt-sre-p99->acme-obs-stack",
+      source: "tgt-sre-p99",
+      target: "acme-obs-stack",
+      type: "attested-by",
+    },
+    {
+      id: "approves-collapse:sponsor-acme->tgt-sre-p99",
+      source: "sponsor-acme",
+      target: "tgt-sre-p99",
+      type: "approves-collapse",
+    },
+    {
       id: "has-target:time-sre->tgt-sre-incidents",
       source: "time-sre",
       target: "tgt-sre-incidents",
@@ -2254,6 +2317,18 @@ window.GRAPH = {
       source: "head-platform",
       target: "tgt-sre-incidents",
       type: "defines",
+    },
+    {
+      id: "attested-by:tgt-sre-incidents->acme-obs-stack",
+      source: "tgt-sre-incidents",
+      target: "acme-obs-stack",
+      type: "attested-by",
+    },
+    {
+      id: "approves-collapse:sponsor-acme->tgt-sre-incidents",
+      source: "sponsor-acme",
+      target: "tgt-sre-incidents",
+      type: "approves-collapse",
     },
     {
       id: "has-target:time-checkout->tgt-checkout-conv",
@@ -2280,6 +2355,12 @@ window.GRAPH = {
       type: "defines",
     },
     {
+      id: "attested-by:tgt-checkout-conv->acme-analytics",
+      source: "tgt-checkout-conv",
+      target: "acme-analytics",
+      type: "attested-by",
+    },
+    {
       id: "has-target:time-onboarding->tgt-onboarding-churn",
       source: "time-onboarding",
       target: "tgt-onboarding-churn",
@@ -2302,6 +2383,12 @@ window.GRAPH = {
       source: "pm-growth",
       target: "tgt-onboarding-churn",
       type: "defines",
+    },
+    {
+      id: "attested-by:tgt-onboarding-churn->acme-analytics",
+      source: "tgt-onboarding-churn",
+      target: "acme-analytics",
+      type: "attested-by",
     },
     {
       id: "has-target:time-support->tgt-support-churn",
@@ -2328,6 +2415,12 @@ window.GRAPH = {
       type: "defines",
     },
     {
+      id: "attested-by:tgt-support-churn->acme-analytics",
+      source: "tgt-support-churn",
+      target: "acme-analytics",
+      type: "attested-by",
+    },
+    {
       id: "has-target:time-support->tgt-support-cost",
       source: "time-support",
       target: "tgt-support-cost",
@@ -2352,6 +2445,12 @@ window.GRAPH = {
       type: "defines",
     },
     {
+      id: "attested-by:tgt-support-cost->acme-data-pipeline",
+      source: "tgt-support-cost",
+      target: "acme-data-pipeline",
+      type: "attested-by",
+    },
+    {
       id: "has-target:time-identity->tgt-identity-consent",
       source: "time-identity",
       target: "tgt-identity-consent",
@@ -2374,6 +2473,12 @@ window.GRAPH = {
       source: "head-platform",
       target: "tgt-identity-consent",
       type: "defines",
+    },
+    {
+      id: "attested-by:tgt-identity-consent->acme-data-pipeline",
+      source: "tgt-identity-consent",
+      target: "acme-data-pipeline",
+      type: "attested-by",
     },
     {
       id: "authorizes:obj-revenue->intent-checkout-1click",
@@ -2993,19 +3098,19 @@ window.GRAPH = {
       level: "warn",
       rule: "self-attested-target",
       node: "tgt-data-cost",
-      msg: "a fonte que atesta (acme-data-pipeline) é do PRÓPRIO time medido (time-data) — independência colapsada de fato (F9); dispensa exige colapso LOGADO",
+      msg: "independência colapsada de fato (acme-data-pipeline é do próprio time-data) — ACEITA com colapso logado por sponsor-acme; dashboard deve marcar dashboard-badge",
     },
     {
       level: "warn",
       rule: "self-attested-target",
       node: "tgt-sre-p99",
-      msg: "a fonte que atesta (acme-obs-stack) é do PRÓPRIO time medido (time-sre) — independência colapsada de fato (F9); dispensa exige colapso LOGADO",
+      msg: "independência colapsada de fato (acme-obs-stack é do próprio time-sre) — ACEITA com colapso logado por sponsor-acme; dashboard deve marcar dashboard-badge",
     },
     {
       level: "warn",
       rule: "self-attested-target",
       node: "tgt-sre-incidents",
-      msg: "a fonte que atesta (acme-obs-stack) é do PRÓPRIO time medido (time-sre) — independência colapsada de fato (F9); dispensa exige colapso LOGADO",
+      msg: "independência colapsada de fato (acme-obs-stack é do próprio time-sre) — ACEITA com colapso logado por sponsor-acme; dashboard deve marcar dashboard-badge",
     },
   ],
   profiles: {

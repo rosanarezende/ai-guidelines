@@ -37,6 +37,11 @@ targets:
     attester: acme-data-pipeline
     contributes-to: obj-efficiency
     status: active
+    attestation-collapse:
+      reason: "time-data mede a propria fonte operacional (acme-data-pipeline); trocar a fonte seria artificial nesta sim"
+      approved-by: sponsor-acme
+      review-at: 2027-01-15
+      visibility: dashboard-badge
   - id: tgt-sre-p99
     node: time-sre
     metric: p99-latency
@@ -46,6 +51,11 @@ targets:
     attester: acme-obs-stack
     contributes-to: obj-efficiency
     status: active
+    attestation-collapse:
+      reason: "time-sre atesta SLO pela propria stack de observabilidade; independencia externa seria antieconomica nesta sim"
+      approved-by: sponsor-acme
+      review-at: 2027-01-15
+      visibility: dashboard-badge
   - id: tgt-sre-incidents
     node: time-sre
     metric: incident-count
@@ -55,6 +65,11 @@ targets:
     attester: acme-obs-stack
     contributes-to: obj-efficiency
     status: active
+    attestation-collapse:
+      reason: "time-sre atesta incidentes pela propria stack de observabilidade; colapso e intencional e visivel"
+      approved-by: sponsor-acme
+      review-at: 2027-01-15
+      visibility: dashboard-badge
   - id: tgt-checkout-conv # growth como CULTURA: meta de RECEITA num time de PLATAFORMA
     node: time-checkout
     metric: conversion-rate
