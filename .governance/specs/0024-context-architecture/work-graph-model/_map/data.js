@@ -568,36 +568,37 @@ window.MODEL = {
         "deliver-direct aguardando ok da owner (alternativas: direct · direct-delivery); approach e graduation já aprovados",
     },
     nature: {
-      is: "o que o trabalho faz com o que existe — DERIVADA, nunca aposta: na autoria a IA SUGERE da descrição (assisted-authoring); em execução vem das peças como RETRATO (principal + observadas, com revision do resolver); divergência = alerta nature-drift. O redesign misto prova que valor único mente",
-      values: {
-        create: {
-          label: "criar novo",
-          says: "capacidade que não existia",
-          impacts: [
-            "sem cerimônia extra — o caminho mais curto do modelo",
-            "peças típicas: create (+ operate p/ instrumentação, se mede algo)",
-            "release gradual opcional → release-rollout",
-          ],
+      is: "ETIQUETA derivada — NÃO é um passo do fluxo nem uma escolha. Os MECANISMOS não são ligados pela etiqueta: são ligados por SINAIS concretos do trabalho descrito (abaixo). A etiqueta só RESUME esses sinais p/ o portfólio (quanto do trabalho é novo × substituição × robustez) e p/ a conferência (nature-drift: o retrato observado das peças divergiu do sugerido na autoria)",
+      "open-with-owner":
+        "a owner ainda não vê motivo p/ o conceito existir — decisão em aberto: manter como etiqueta de portfólio OU REMOVER o conceito e ficar só com os sinais (os mecanismos não mudam em nada nas duas opções)",
+      signals: [
+        {
+          id: "touches-contract",
+          signal: "as peças portam algo de → para, OU tocam contrato de que outros dependem",
+          wakes:
+            "janela de compatibilidade (mora no CONTRATO) + consumidores avisados + dashboard de onda (blocked/stale se incompatível)",
+          "form-if-multi-repo": "migration-wave",
+          tag: "replace",
+          "tag-label": "substituir",
         },
-        replace: {
-          label: "substituir (a antiga 'migração')",
-          says: "troca algo de que outros dependem",
-          impacts: [
-            "contratos tocados entram em jogo: janela de compatibilidade (que mora no CONTRATO) + consumidores avisados",
-            "peças típicas: sustain (portar de → para) + create (partes novas) + operate (rollout/monitor)",
-            "dashboard: progresso da onda; blocked/stale se contrato incompatível",
-          ],
+        {
+          id: "operational-target",
+          signal: "a meta é SLO / risco / custo operacional (não métrica de produto)",
+          wakes: "o placar vira OPERACIONAL + guardrails; peças sustain (preventivo) e operate",
+          "form-if-multi-repo": "quase nunca vira unit — colapsa em peças",
+          tag: "harden",
+          "tag-label": "endurecer",
         },
-        harden: {
-          label: "endurecer (a antiga 'confiabilidade')",
-          says: "melhora robustez/custo/operação do que existe",
-          impacts: [
-            "o alvo no placar tende a ser SLO/risco/custo operacional (bucket operacional quando avulso)",
-            "peças típicas: sustain (preventivo) + operate (guardrails, alertas)",
-            "quase sempre COLAPSA — raramente precisa de unit coordenada",
-          ],
+        {
+          id: "none",
+          signal: "nenhum dos sinais acima",
+          wakes:
+            "caminho CURTO — nenhuma cerimônia extra; release gradual opcional (release-rollout)",
+          "form-if-multi-repo": "delivery-slice",
+          tag: "create",
+          "tag-label": "criar novo",
         },
-      },
+      ],
     },
     derivation: [
       {
