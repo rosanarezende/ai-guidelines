@@ -119,6 +119,65 @@
         margin-left: 6px;
         color: var(--ink2);
       }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 10px;
+      }
+      .card.click {
+        cursor: pointer;
+      }
+      .card.click:hover {
+        border-color: var(--accent);
+      }
+      .big {
+        font-size: 24px;
+        font-weight: 600;
+        margin-right: 6px;
+      }
+      .crumb {
+        font-size: 12px;
+        color: var(--accent);
+        cursor: pointer;
+        margin-bottom: 8px;
+        display: inline-block;
+      }
+      .row {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 10px;
+        margin: 6px 0;
+        font-size: 13px;
+        background: var(--card);
+      }
+      .row.click {
+        cursor: pointer;
+      }
+      .row.click:hover {
+        border-color: var(--accent);
+      }
+      .st {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        margin-left: 6px;
+      }
+      .st.blocked {
+        background: #fcebeb;
+        color: #a32d2d;
+      }
+      .st.waiting {
+        background: #faeeda;
+        color: #854f0b;
+      }
+      .st.free {
+        background: #e1f5ee;
+        color: #0f6e56;
+      }
+      .st.ext {
+        background: #eeedfe;
+        color: #3c3489;
+      }
     </style>
   </head>
   <body>
