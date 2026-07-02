@@ -32,7 +32,7 @@
 - **Bloco K — authority & envelope (P0) · ✅ APLICADO:** registry de authorities/trust-boundaries (pessoas · times · fontes com owner resolvível) + envelope L8 mínimo nas mutações perigosas (contract-revision · actual-publish · profile-change · verdict · break-glass). **Decisão posterior aplicada:** os 3 targets self-attested de plataforma/observabilidade ficam na sim com `attestation-collapse` logado, aprovado por sponsor e visível no dashboard; sem esse log, o validador falha.
 - **Bloco L — coordenação (P1) · ✅ APLICADO:** fila de revisão por contrato (`revision-proposals`: breaking? · consumers · owner-approval · decision) — a contenção `checkout-stack × consent-center × acme-user-context` vira caso resolvível — + deps cross-intent resolvíveis com ciclo no grafo inteiro.
 - **Bloco M — derivação & fluxo (P1) · ✅ APLICADO:** observed-form/approach-drift/signal-drift/collapse lint calculado (warning, não campo editável) + follow-ups→standalone/proposal resolvíveis (aresta raises) + stub do matcher (score · unknown · evidence · followed/overrode).
-- **Bloco N — infra (P1):** vendor/SRI p/ os apps (+ CSP) · separação load→normalize→resolve→lint no tooling.
+- **Bloco N — infra (P1) · ✅ APLICADO:** vendor local p/ os apps + manifest de hash + CSP bloqueando rede; `test-adversarial` roda `check-app-security` para impedir regressão para CDN em runtime.
 
 ## Arquitetura (propostas do Codex, aceitas em princípio)
 
