@@ -289,7 +289,8 @@ code {
 }
 .org-company .hd,
 .org-company .sub,
-.org-company .note {
+.org-company .note,
+.org-company .gaplist li {
   color: #633806;
 }
 @media (prefers-color-scheme: dark) {
@@ -299,7 +300,35 @@ code {
   }
   .org-company .hd,
   .org-company .sub,
-  .org-company .note {
+  .org-company .note,
+  .org-company .gaplist li {
     color: #fae3bd;
   }
+}
+
+.chain-a {
+  border-left: 4px solid #1d9e75;
+}
+.chain-b {
+  border-left: 4px solid #378add;
+}
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.dot-a {
+  background: #1d9e75;
+}
+.dot-b {
+  background: #378add;
+}
+.clickable {
+  cursor: pointer;
+}
+.sel-node {
+  outline: 2px solid #ba7517;
+  outline-offset: 2px;
 }

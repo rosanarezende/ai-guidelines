@@ -284,11 +284,8 @@ function App() {
         alerta)</span
       >
       <span><b>decision-points</b> — ${MODEL.decisionPoints} (colapsáveis por perfil)</span>
-      <span
-        ><a href="flow-explorer.html"
-          >explorador do fluxo — abordagem × natureza (proposta P12) →</a
-        ></span
-      >
+      <span><a href="flow-explorer.html">jornada da org-exemplo (proposta P12) →</a></span>
+      <span><a href="flow-generic.html">explorador genérico — abordagem × sinais →</a></span>
     </div>
     <p className="src">
       <code>data.js</code> é GERADO de <code>../model.yml</code> por <code>generate.mjs</code>.

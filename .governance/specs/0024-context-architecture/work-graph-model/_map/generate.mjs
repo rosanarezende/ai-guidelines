@@ -142,6 +142,8 @@ const flowExplorer = ap
       provocation: ap.provocation,
       approach: ap.approach,
       signals: ap.signals,
+      reviewRule: ap["review-rule"],
+      depsRule: ap["deps-rule"],
       exampleOrg: ap["example-org"],
       derivation: ap.derivation,
       consequences: ap.consequences,
