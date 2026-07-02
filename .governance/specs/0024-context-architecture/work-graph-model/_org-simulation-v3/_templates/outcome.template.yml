@@ -12,3 +12,7 @@ attested-by: "<authority — diferente de quem definiu o target>"
 revision: "<dados/query@rev que sustentam o número>"
 contract-revisions: [] # DERIVADAS do grafo (peças × coordinates-with) — não autodeclaradas
 contributes-to: "<target>" # UM rollup primário; sem aggregation declarada não entra
+envelope: # L8 mínimo — publicar actual é mutação PERIGOSA (actual-publish)
+  actor: "<quem publica>"
+  authority: "<em nome de qual autoridade resolvível>"
+  idempotency-key: "<chave única desta publicação>"

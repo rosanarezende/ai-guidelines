@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "5b73796c7bac",
+  contentHash: "b5bf1b281f37",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -2736,7 +2736,26 @@ window.GRAPH = {
       type: "in-repo",
     },
   ],
-  issues: [],
+  issues: [
+    {
+      level: "warn",
+      rule: "self-attested-target",
+      node: "tgt-data-cost",
+      msg: "a fonte que atesta (acme-data-pipeline) é do PRÓPRIO time medido (time-data) — independência colapsada de fato (F9); dispensa exige colapso LOGADO",
+    },
+    {
+      level: "warn",
+      rule: "self-attested-target",
+      node: "tgt-sre-p99",
+      msg: "a fonte que atesta (acme-obs-stack) é do PRÓPRIO time medido (time-sre) — independência colapsada de fato (F9); dispensa exige colapso LOGADO",
+    },
+    {
+      level: "warn",
+      rule: "self-attested-target",
+      node: "tgt-sre-incidents",
+      msg: "a fonte que atesta (acme-obs-stack) é do PRÓPRIO time medido (time-sre) — independência colapsada de fato (F9); dispensa exige colapso LOGADO",
+    },
+  ],
   profiles: {
     is: "perfis operacionais mínimos por forma de org (G6): cada perfil diz que NÓS existem, que GATES colapsam e que CAMPOS são obrigatórios — colapso LIMPO, não princípio abstrato",
     law: "a org declara UM perfil + desvios EXPLÍCITOS; mudar de perfil = mutação profile-change (dangerous). Perfis derivam por role-collapse parametrizado (G13) — o compact cobre o small-team (PM+TL+eng) sem um 4º arquétipo fixo",

@@ -1,0 +1,148 @@
+// test-adversarial.mjs — fixtures ADVERSARIAIS (barra do red-team): cada quebra plantada DEVE
+// ser pega pelo validador; exit 1 se alguma passar. As 6 quebras da revisão F5 moram aqui p/ sempre.
+// Uso: node _tools/test-adversarial.mjs
+import { loadOrg, validateOrg } from "./org.mjs";
+
+const base = loadOrg();
+const clone = () => structuredClone(base);
+const intent = (o, id) => o.intents.find((i) => i.id === id);
+const work = (o, iid, wid) => intent(o, iid).works.find((w) => w.id === wid);
+
+const CASES = [
+  { id: "baseline sem erros (warns são permitidos)", expect: null, mutate: () => clone() },
+  {
+    id: "F5·1 typo em chave (delivery-aftr) — schema fechado",
+    expect: "schema-unknown-key",
+    mutate: () => {
+      const o = clone();
+      const w = work(o, "intent-cta-upgrade", "ui-cta");
+      w["delivery-aftr"] = w["delivery-after"];
+      delete w["delivery-after"];
+      return o;
+    },
+  },
+  {
+    id: "campo obrigatório ausente (intent sem title)",
+    expect: "schema-required",
+    mutate: () => {
+      const o = clone();
+      delete o.intents[0].title;
+      return o;
+    },
+  },
+  {
+    id: "F5·2 review externo FALSO (externo: qualquer-coisa) — autoridade exata",
+    expect: "review-derivation",
+    mutate: () => {
+      const o = clone();
+      work(o, "intent-cta-upgrade", "baseline-eventos").review = "externo: qualquer-coisa";
+      return o;
+    },
+  },
+  {
+    id: "F5·3 kind inventado no standalone — enum fechado",
+    expect: "schema-enum",
+    mutate: () => {
+      const o = clone();
+      o.standalone[0].kind = "made-up-kind";
+      return o;
+    },
+  },
+  {
+    id: "F5·4 outcome incompleto (sem revision) — schema",
+    expect: "schema-required",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push({
+        id: "out-quebrado",
+        "emitted-by": "intent-cta-upgrade",
+        source: "acme-analytics/conversion@rev1",
+        window: { start: "2027-01-01", end: "2027-03-31" },
+        metric: "conversion-rate",
+        value: "+2 %",
+        aggregation: "avg",
+        "attested-by": "acme-analytics",
+        "contract-revisions": [],
+        "contributes-to": "tgt-billing-conv",
+        envelope: { actor: "alguém", authority: "pm-growth", "idempotency-key": "k1" },
+      });
+      return o;
+    },
+  },
+  {
+    id: "regra de ouro (validate-first sem hipótese)",
+    expect: "golden-rule",
+    mutate: () => {
+      const o = clone();
+      delete intent(o, "intent-cta-upgrade").hypothesis;
+      return o;
+    },
+  },
+  {
+    id: "sinal × contrato (muda contrato com signal none)",
+    expect: "signal-contract",
+    mutate: () => {
+      const o = clone();
+      intent(o, "intent-cta-upgrade")["contracts-changed"] = ["acme-user-context"];
+      return o;
+    },
+  },
+  {
+    id: "ciclo de dependências entre peças",
+    expect: "deps-cycle",
+    mutate: () => {
+      const o = clone();
+      work(o, "intent-checkout-stack", "porta-fluxo")["blocked-by"] = ["monitor-canary"];
+      return o;
+    },
+  },
+  {
+    id: "meta no objetivo errado (primary-target-coherence)",
+    expect: "primary-target-coherence",
+    mutate: () => {
+      const o = clone();
+      intent(o, "intent-cta-upgrade")["primary-target"] = "tgt-sre-p99";
+      return o;
+    },
+  },
+  {
+    id: "módulo inexistente no monolito",
+    expect: "refs",
+    mutate: () => {
+      const o = clone();
+      work(o, "intent-cta-upgrade", "contas-legadas").module = "mod-nao-existe";
+      return o;
+    },
+  },
+];
+
+export function run(cases) {
+  let fails = 0;
+  for (const c of cases) {
+    const issues = validateOrg(c.mutate());
+    const errs = issues.filter((i) => i.level === "error");
+    if (c.expect === null) {
+      const ok = errs.length === 0;
+      console.log(`${ok ? "✓" : "✗"} ${c.id} — ${errs.length} erro(s)`);
+      if (!ok) {
+        fails++;
+        errs.slice(0, 6).forEach((e) => console.log("    ", e.rule, "·", e.node, "—", e.msg));
+      }
+    } else {
+      const ok = errs.some((i) => i.rule === c.expect);
+      console.log(
+        `${ok ? "✓" : "✗"} ${c.id} → "${c.expect}"${ok ? " pego" : " — PASSOU SEM PEGAR!"}`
+      );
+      if (!ok) fails++;
+    }
+  }
+  return fails;
+}
+
+const fails = run(CASES);
+console.log(
+  fails === 0
+    ? `✓ ${CASES.length} fixtures — todas as quebras pegas`
+    : `✗ ${fails} fixture(s) falharam`
+);
+process.exit(fails ? 1 : 0);
