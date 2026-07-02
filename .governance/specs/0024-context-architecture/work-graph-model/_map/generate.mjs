@@ -135,6 +135,21 @@ const decisionPoints = Object.keys(m["decision-points"]).join(" · ");
 
 const MODEL = { layers, examples, sim, finding, graph, scalingLaw, profiles, decisionPoints };
 
+// ── cobertura (F12) — o gerador DECLARA o que projeta e imprime o que omite a cada run.
+// "em sinc" no --check vale só p/ o SUBCONJUNTO projetado; mudança em seção omitida não altera o _map.
+const PROJECTED_KEYS = new Set([
+  "meta", // não-visual
+  "layers",
+  "examples",
+  "simulation",
+  "business-tier", // só o .example é projetado
+  "scaling-law",
+  "governance-profiles",
+  "decision-points", // só os nomes
+]);
+const omitted = Object.keys(m).filter((k) => !PROJECTED_KEYS.has(k));
+console.log(`ℹ coverage — NÃO projetadas no mapa: ${omitted.join(", ")}`);
+
 // ── emissão / verificação ────────────────────────────────────────────────────
 const banner =
   "// data.js — GERADO por generate.mjs a partir de ../model.yml — NÃO editar à mão.\n" +

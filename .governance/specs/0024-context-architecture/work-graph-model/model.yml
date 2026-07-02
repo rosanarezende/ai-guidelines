@@ -12,7 +12,7 @@ meta:
   version: 2
   status: iterating # 3 camadas + business-tier + scaling-law APLICADOS (gate owner 2026-07-01); P10 em curso
   grounded-by: tracker.md
-  artifact: _map/model-map.html # navegável; data.js é GERADO por _map/generate.mjs (node generate.mjs · --check verifica o sync)
+  artifact: _map/model-map.html # navegável; data.js é GERADO por _map/generate.mjs (node generate.mjs · --check verifica o sync do SUBCONJUNTO projetado — coverage impressa a cada run; --check FORA do validate por decisão da owner 2026-07-01)
 
 # ═════════════════════ AS 3 CAMADAS ═════════════════════
 layers:
@@ -739,7 +739,8 @@ flow-validation:
 # ═════════════════════ REVISÃO ADVERSARIAL (P11 · rodada Codex técnica/arquitetural, pós-P10) ═════════════════════
 # Findings RECONCILIADOS contra este arquivo (repo vence). NADA aplicado — aguarda priorização/gate da owner.
 adversarial-review:
-  status: open
+  status: in-progress
+  gate: "owner 2026-07-01 — TODOS os blocos autorizados: D (F1+F8) · E (F3+F5) · F (F2+F9) · G (F4+F6+F10+F11-marca) APLICADOS; H parcial (F12 — --check fora do validate por decisão). ABERTOS: F11-bloqueio-no-full (aguarda decisão pós-research) · F13 (aguarda Q-collapse/Q-discover-level)"
   provocation: P11
   source: "codex (revisão adversarial do modelo v2, HEAD 9a60e288) + reconciliação claude 2026-07-01"
   verdict-codex: "coerente como arquitetura conceitual; NÃO pronto ponta-a-ponta na barra do red-team ('mecanismo pega' = resolver + fail-closed + evidência independente). Maior fragilidade: o dashboard ainda pode virar 'verdade por texto bem-formado' — falta o resolver independente que prova que número, fonte, revisão e autoridade são válidos"
@@ -815,6 +816,7 @@ adversarial-review:
       severity: P1
       reconciliation: "aceito — FATO conferido: o validate do package.json não chama generate.mjs --check; o gerador não projeta mutation-types/rollup-mechanics/envelope/trust. Mexer no contrato de scripts = gate da owner"
       suggestion: "adicionar o --check ao contrato de validação + coverage manifest (o gerador declara o que projeta e o que omite; seção crítica mudou sem projeção → falha)"
+      resolution: "PARCIAL (bloco H) — coverage manifest no gerador (omissões impressas a cada run); --check FORA do validate/CI por DECISÃO da owner (2026-07-01) — reavaliar quando o modelo estabilizar"
     - id: F13
       about: "Q-collapse e Q-discover-level abertas deixam 2 jornadas ambíguas (feature trivial · discovery cross-repo)"
       severity: P2
