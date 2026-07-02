@@ -37,6 +37,7 @@ const PURPOSES = ["create", "sustain", "discover", "operate"];
 const LIFECYCLE = ["proposed", "active", "closed", "superseded", "dropped"];
 const STANDALONE_KINDS = ["fix", "dep-bump", "incident-response"];
 const AGGREGATIONS = ["sum", "avg", "p99", "last"];
+const CONTRACT_DECISIONS = ["single-revision", "sequenced-windows", "split", "rejected", "pending"];
 
 const SCHEMAS = {
   objective: {
@@ -76,7 +77,12 @@ const SCHEMAS = {
   module: { required: ["id", "owner", "caps"], optional: [] },
   contract: {
     required: ["id", "revision", "owner-repo", "consumers"],
+    optional: ["compatibility-window", "revision-proposals"],
+  },
+  "contract-revision-proposal": {
+    required: ["id", "revision", "breaking", "intents", "consumers", "owner-approval", "decision"],
     optional: ["compatibility-window"],
+    enums: { decision: CONTRACT_DECISIONS },
   },
   intent: {
     required: [
@@ -90,7 +96,14 @@ const SCHEMAS = {
       "works",
       "next",
     ],
-    optional: ["thesis", "hypothesis", "decision-rule", "contracts-changed", "contracts-consumed"],
+    optional: [
+      "thesis",
+      "hypothesis",
+      "decision-rule",
+      "contracts-changed",
+      "contracts-consumed",
+      "depends-on",
+    ],
     enums: { approach: APPROACHES, signal: SIGNALS },
   },
   work: {
@@ -189,7 +202,11 @@ function checkAllSchemas(o, issues) {
     checkSchema("repo", x, x.id, issues);
     for (const m of x.modules || []) checkSchema("module", m, `${x.id}#${m.id}`, issues);
   }
-  for (const x of o.contracts) checkSchema("contract", x, x.id, issues);
+  for (const x of o.contracts) {
+    checkSchema("contract", x, x.id, issues);
+    for (const p of x["revision-proposals"] || [])
+      checkSchema("contract-revision-proposal", p, `${x.id}::${p.id}`, issues);
+  }
   for (const it of o.intents) {
     checkSchema("intent", it, it.id, issues);
     for (const w of it.works || []) checkSchema("work", w, `${it.id}::${w.id}`, issues);
@@ -228,6 +245,7 @@ export function validateOrg(o) {
   const targetById = Object.fromEntries(o.targets.map((t) => [t.id, t]));
   const metricById = Object.fromEntries(o.metrics.map((m) => [m.id, m]));
   const intentById = Object.fromEntries(o.intents.map((i) => [i.id, i]));
+  const authById = Object.fromEntries((o.authorities || []).map((a) => [a.id, a]));
 
   // refs básicas
   for (const a of o.areas)
@@ -252,13 +270,55 @@ export function validateOrg(o) {
       err("refs", c.id, `owner-repo "${c["owner-repo"]}" não existe`);
     for (const cons of c.consumers || [])
       if (!ids.repo.has(cons)) err("refs", c.id, `consumer "${cons}" não existe`);
+    const proposalIds = new Set();
+    const ownerRepo = repoById[c["owner-repo"]];
+    for (const p of c["revision-proposals"] || []) {
+      if (proposalIds.has(p.id))
+        err("contract-proposal", `${c.id}::${p.id}`, "revision-proposal duplicada no contrato");
+      proposalIds.add(p.id);
+      if (!Array.isArray(p.intents) || p.intents.length === 0)
+        err("contract-proposal", `${c.id}::${p.id}`, "revision-proposal sem intents afetadas");
+      for (const iid of p.intents || []) {
+        const it = intentById[iid];
+        if (!it) err("refs", `${c.id}::${p.id}`, `intent "${iid}" não existe`);
+        else if (!(it["contracts-changed"] || []).includes(c.id))
+          err(
+            "contract-proposal",
+            `${c.id}::${p.id}`,
+            `intent "${iid}" está na proposal mas não muda o contrato "${c.id}"`
+          );
+      }
+      for (const cons of p.consumers || [])
+        if (!ids.repo.has(cons)) err("refs", `${c.id}::${p.id}`, `consumer "${cons}" não existe`);
+      if (p.breaking === true) {
+        const missing = (c.consumers || []).filter((cons) => !(p.consumers || []).includes(cons));
+        if (missing.length)
+          err(
+            "contract-proposal-consumers",
+            `${c.id}::${p.id}`,
+            `proposal breaking não cobre consumer(s) atuais: ${missing.join(", ")}`
+          );
+      }
+      const approver = authById[p["owner-approval"]];
+      if (!approver)
+        err(
+          "refs-authority",
+          `${c.id}::${p.id}`,
+          `owner-approval "${p["owner-approval"]}" não resolve no registry`
+        );
+      else if (ownerRepo && approver.of !== ownerRepo.owner)
+        err(
+          "contract-owner-approval",
+          `${c.id}::${p.id}`,
+          `owner-approval "${p["owner-approval"]}" pertence a "${approver.of}", mas o owner do contrato é "${ownerRepo.owner}"`
+        );
+    }
   }
   for (const th of o.theses || [])
     if (!ids.obj.has(th.frames))
       err("refs", th.id, `frames "${th.frames}" não existe em objectives`);
 
   // bloco K — AUTORIDADES resolvem no registry: owner/lead/definer/approver não são texto
-  const authById = Object.fromEntries((o.authorities || []).map((a) => [a.id, a]));
   const resolveAuth = (id, node, field) => {
     if (id && !authById[id])
       err("refs-authority", node, `${field} "${id}" não resolve no registry de autoridades`);
@@ -391,6 +451,11 @@ export function validateOrg(o) {
     const consumed = it["contracts-consumed"] || [];
     for (const c of [...changed, ...consumed])
       if (!ids.contract.has(c)) err("refs", it.id, `contrato "${c}" não existe`);
+    for (const dep of it["depends-on"] || []) {
+      if (dep === it.id) err("deps-cross-intent", it.id, "intent depende de si mesma");
+      else if (!ids.intent.has(dep))
+        err("deps-cross-intent", it.id, `intent dependency "${dep}" não existe`);
+    }
     if (changed.length > 0 && it.signal !== "touches-contract")
       err("signal-contract", it.id, "muda contrato mas o sinal não é touches-contract");
     if (it.signal === "touches-contract" && changed.length === 0)
@@ -460,6 +525,51 @@ export function validateOrg(o) {
         break;
       }
   }
+
+  // bloco L — coordenação: contrato com múltiplas intents precisa decision explícita, e
+  // dependências cross-intent formam um grafo acíclico.
+  const changedByContract = new Map();
+  for (const it of o.intents) {
+    for (const cid of it["contracts-changed"] || []) {
+      const arr = changedByContract.get(cid) || [];
+      arr.push(it.id);
+      changedByContract.set(cid, arr);
+    }
+  }
+  for (const [cid, changingIntents] of changedByContract.entries()) {
+    if (changingIntents.length <= 1) continue;
+    const c = o.contracts.find((x) => x.id === cid);
+    const proposals = (c?.["revision-proposals"] || []).filter((p) =>
+      changingIntents.every((iid) => (p.intents || []).includes(iid))
+    );
+    if (proposals.length === 0)
+      err(
+        "contract-contention",
+        cid,
+        `múltiplas intents mudam o contrato (${changingIntents.join(", ")}) sem revision-proposal cobrindo todas`
+      );
+    else if (proposals.every((p) => p.decision === "pending"))
+      err(
+        "contract-contention",
+        cid,
+        `múltiplas intents mudam o contrato (${changingIntents.join(", ")}) mas a decision da revision-proposal ainda é pending`
+      );
+  }
+  const intentDeps = Object.fromEntries(o.intents.map((it) => [it.id, it["depends-on"] || []]));
+  const intentState = {};
+  const visitIntent = (id) => {
+    if (intentState[id] === 1) return true;
+    if (intentState[id] === 2) return false;
+    intentState[id] = 1;
+    for (const dep of intentDeps[id] || []) if (intentById[dep] && visitIntent(dep)) return true;
+    intentState[id] = 2;
+    return false;
+  };
+  for (const it of o.intents)
+    if (visitIntent(it.id)) {
+      err("deps-cycle", it.id, "ciclo de dependências entre intents");
+      break;
+    }
 
   // standalone
   for (const s of o.standalone) {

@@ -9,6 +9,7 @@ thesis: tese-privacidade
 approach: direct
 signal: touches-contract
 contracts-changed: [acme-user-context] # o contexto de usuário ganha os campos de consentimento
+depends-on: [intent-checkout-stack] # compartilha a revision-proposal v4 do acme-user-context
 works:
   - id: central-consentimento
     repo: acme-identity

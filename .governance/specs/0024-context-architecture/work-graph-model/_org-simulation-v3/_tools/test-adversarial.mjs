@@ -327,6 +327,55 @@ const CASES = [
       return o;
     },
   },
+  // ── bloco L: coordenação de contrato + dependências cross-intent ──
+  {
+    id: "L·1 duas intents mudam contrato SEM revision-proposal falha",
+    expect: "contract-contention",
+    mutate: () => {
+      const o = clone();
+      delete o.contracts.find((c) => c.id === "acme-user-context")["revision-proposals"];
+      return o;
+    },
+  },
+  {
+    id: "L·2 decision pendente na contention falha",
+    expect: "contract-contention",
+    mutate: () => {
+      const o = clone();
+      o.contracts.find((c) => c.id === "acme-user-context")["revision-proposals"][0].decision =
+        "pending";
+      return o;
+    },
+  },
+  {
+    id: "L·3 approval fora do owner do contrato falha",
+    expect: "contract-owner-approval",
+    mutate: () => {
+      const o = clone();
+      o.contracts.find((c) => c.id === "acme-user-context")["revision-proposals"][0][
+        "owner-approval"
+      ] = "lead-checkout";
+      return o;
+    },
+  },
+  {
+    id: "L·4 dependency cross-intent fantasma falha",
+    expect: "deps-cross-intent",
+    mutate: () => {
+      const o = clone();
+      intent(o, "intent-consent-center")["depends-on"] = ["intent-fantasma"];
+      return o;
+    },
+  },
+  {
+    id: "L·5 ciclo cross-intent falha",
+    expect: "deps-cycle",
+    mutate: () => {
+      const o = clone();
+      intent(o, "intent-checkout-stack")["depends-on"] = ["intent-consent-center"];
+      return o;
+    },
+  },
 ];
 
 export function run(cases) {

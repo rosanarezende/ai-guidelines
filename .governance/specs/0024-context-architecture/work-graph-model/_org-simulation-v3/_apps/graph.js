@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "ca068b43790e",
+  contentHash: "7ce3ab9dd6b8",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -579,6 +579,36 @@ window.GRAPH = {
         "owner-repo": "acme-web-host",
         consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
         "compatibility-window": null,
+        "revision-proposals": [
+          {
+            id: "acme-user-context-v4-coordenada",
+            revision: "v4",
+            breaking: true,
+            intents: ["intent-checkout-stack", "intent-consent-center"],
+            consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
+            "owner-approval": "head-platform",
+            decision: "single-revision",
+            "compatibility-window":
+              "v3+v4 até consumidores migrarem; janela revisada no release-rollout",
+          },
+        ],
+      },
+    },
+    {
+      id: "acme-user-context::acme-user-context-v4-coordenada",
+      type: "contract-revision-proposal",
+      label: "acme-user-context@v4",
+      data: {
+        id: "acme-user-context-v4-coordenada",
+        revision: "v4",
+        breaking: true,
+        intents: ["intent-checkout-stack", "intent-consent-center"],
+        consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
+        "owner-approval": "head-platform",
+        decision: "single-revision",
+        "compatibility-window":
+          "v3+v4 até consumidores migrarem; janela revisada no release-rollout",
+        contract: "acme-user-context",
       },
     },
     {
@@ -1200,6 +1230,7 @@ window.GRAPH = {
         approach: "direct",
         signal: "touches-contract",
         "contracts-changed": ["acme-user-context"],
+        "depends-on": ["intent-checkout-stack"],
         works: [
           {
             id: "central-consentimento",
@@ -2079,6 +2110,48 @@ window.GRAPH = {
       type: "consumed-by",
     },
     {
+      id: "has-revision-proposal:acme-user-context->acme-user-context::acme-user-context-v4-coordenada",
+      source: "acme-user-context",
+      target: "acme-user-context::acme-user-context-v4-coordenada",
+      type: "has-revision-proposal",
+    },
+    {
+      id: "approves:head-platform->acme-user-context::acme-user-context-v4-coordenada",
+      source: "head-platform",
+      target: "acme-user-context::acme-user-context-v4-coordenada",
+      type: "approves",
+    },
+    {
+      id: "coordinates:intent-checkout-stack->acme-user-context::acme-user-context-v4-coordenada",
+      source: "intent-checkout-stack",
+      target: "acme-user-context::acme-user-context-v4-coordenada",
+      type: "coordinates",
+    },
+    {
+      id: "coordinates:intent-consent-center->acme-user-context::acme-user-context-v4-coordenada",
+      source: "intent-consent-center",
+      target: "acme-user-context::acme-user-context-v4-coordenada",
+      type: "coordinates",
+    },
+    {
+      id: "affects-consumer:acme-user-context::acme-user-context-v4-coordenada->acme-mfe-billing",
+      source: "acme-user-context::acme-user-context-v4-coordenada",
+      target: "acme-mfe-billing",
+      type: "affects-consumer",
+    },
+    {
+      id: "affects-consumer:acme-user-context::acme-user-context-v4-coordenada->acme-mfe-onboarding",
+      source: "acme-user-context::acme-user-context-v4-coordenada",
+      target: "acme-mfe-onboarding",
+      type: "affects-consumer",
+    },
+    {
+      id: "affects-consumer:acme-user-context::acme-user-context-v4-coordenada->acme-checkout",
+      source: "acme-user-context::acme-user-context-v4-coordenada",
+      target: "acme-checkout",
+      type: "affects-consumer",
+    },
+    {
       id: "publishes:acme-design-system->acme-design-tokens",
       source: "acme-design-system",
       target: "acme-design-tokens",
@@ -2725,6 +2798,12 @@ window.GRAPH = {
       source: "intent-consent-center",
       target: "acme-user-context",
       type: "changes",
+    },
+    {
+      id: "depends-on:intent-consent-center->intent-checkout-stack",
+      source: "intent-consent-center",
+      target: "intent-checkout-stack",
+      type: "depends-on",
     },
     {
       id: "piece:intent-consent-center->intent-consent-center::central-consentimento",

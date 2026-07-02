@@ -6,6 +6,15 @@ contracts:
     owner-repo: acme-web-host
     consumers: [acme-mfe-billing, acme-mfe-onboarding, acme-checkout]
     compatibility-window: null # abre quando a v4 (com quebra) publicar — ver intent-checkout-stack
+    revision-proposals:
+      - id: acme-user-context-v4-coordenada
+        revision: v4
+        breaking: true
+        intents: [intent-checkout-stack, intent-consent-center]
+        consumers: [acme-mfe-billing, acme-mfe-onboarding, acme-checkout]
+        owner-approval: head-platform
+        decision: single-revision
+        compatibility-window: "v3+v4 até consumidores migrarem; janela revisada no release-rollout"
   - id: acme-design-tokens
     revision: v2
     owner-repo: acme-design-system

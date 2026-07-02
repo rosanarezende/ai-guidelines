@@ -53,6 +53,14 @@ for (const x of o.contracts) {
   N(x.id, "contract", `${x.id}@${x.revision}`, x);
   E(x["owner-repo"], x.id, "publishes");
   for (const c of x.consumers || []) E(x.id, c, "consumed-by");
+  for (const p of x["revision-proposals"] || []) {
+    const pid = `${x.id}::${p.id}`;
+    N(pid, "contract-revision-proposal", `${x.id}@${p.revision}`, { ...p, contract: x.id });
+    E(x.id, pid, "has-revision-proposal");
+    E(p["owner-approval"], pid, "approves");
+    for (const iid of p.intents || []) E(iid, pid, "coordinates");
+    for (const c of p.consumers || []) E(pid, c, "affects-consumer");
+  }
 }
 for (const x of o.metrics) N(x.id, "metric", x.id, x);
 for (const x of o.targets) {
@@ -73,6 +81,7 @@ for (const it of o.intents) {
   if (it.thesis) E(it.thesis, it.id, "informs");
   for (const c of it["contracts-changed"] || []) E(it.id, c, "changes");
   for (const c of it["contracts-consumed"] || []) E(it.id, c, "consumes");
+  for (const dep of it["depends-on"] || []) E(it.id, dep, "depends-on");
   for (const w of it.works || []) {
     const wid = `${it.id}::${w.id}`;
     N(wid, "work", w.id, { ...w, intent: it.id });

@@ -13,6 +13,7 @@ approach: validate-first # validate-first ("validar antes") | direct ("entregar 
 signal: none # none | touches-contract (MUDA contrato/porta de→para) | operational-target (meta SLO/custo)
 # contracts-changed: [<contrato>]   # obriga signal: touches-contract; quebra abre a janela
 # contracts-consumed: [<contrato>]  # consumir sem revisão NÃO é sinal
+# depends-on: [<intent-id>]         # dependência cross-intent; ref resolve e ciclo global falha
 works:
   - id: <peca-slug>
     repo: <repo>
