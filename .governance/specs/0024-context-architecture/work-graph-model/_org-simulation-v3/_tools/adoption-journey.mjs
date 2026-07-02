@@ -20,6 +20,11 @@ const steps = [
     args: ["_tools/check-code-fixtures.mjs"],
   },
   {
+    name: "2b. repos criticos provam comportamento local",
+    command: "node",
+    args: ["_tools/check-local-repo-tests.mjs"],
+  },
+  {
     name: "3. contextos publicados estao frescos",
     command: "node",
     args: ["_tools/check-repo-contexts.mjs"],

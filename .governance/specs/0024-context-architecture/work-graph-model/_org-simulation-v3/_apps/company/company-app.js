@@ -11,6 +11,7 @@ const theses = nodesBy("thesis");
 const areas = nodesBy("area");
 const teams = nodesBy("team");
 const targets = nodesBy("target");
+const outcomes = nodesBy("outcome");
 const intents = nodesBy("intent");
 const standalone = nodesBy("standalone");
 const contracts = nodesBy("contract");
@@ -36,6 +37,20 @@ function intentInfo(it) {
         ? "release-rollout"
         : "—";
   return { ws, hard, par, free, ext, gate, changed };
+}
+
+function outcomesForTarget(targetId) {
+  return outcomes.filter((outcome) => outcome.data["contributes-to"] === targetId);
+}
+
+function outcomesForIntent(intentId) {
+  return outcomes.filter((outcome) => outcome.data["emitted-by"] === intentId);
+}
+
+function actualSummary(targetId) {
+  const actuals = outcomesForTarget(targetId);
+  if (actuals.length === 0) return "aguardando outcome válido";
+  return actuals.map((outcome) => outcome.data.value).join(" · ");
 }
 
 function attestationStatus(t) {
@@ -71,6 +86,7 @@ function Home({ go }) {
       ${objectives.map((o) => {
         const tgts = targets.filter((t) => t.data["contributes-to"] === o.id);
         const its = intents.filter((i) => i.data["authorized-by"] === o.id);
+        const withActual = tgts.filter((t) => outcomesForTarget(t.id).length > 0).length;
         return html`<div
           className="card orange click"
           key=${o.id}
@@ -78,7 +94,7 @@ function Home({ go }) {
         >
           <h2>${o.label}</h2>
           <div className="kv">${o.data.period} · ${tgts.length} metas · ${its.length} intents</div>
-          <div className="kv"><b>actual:</b> aguardando outcomes válidos</div>
+          <div className="kv"><b>actual:</b> ${withActual}/${tgts.length} meta(s) com outcome</div>
         </div>`;
       })}
       <div className="card click" onClick=${() => go("intents", null)}>
@@ -154,8 +170,15 @@ function Objetivos({ sel, go }) {
             <b>${t.data.node}</b>: ${t.label} <span className="pill">${t.data.metric}</span><br />
             <span className="muted">
               define: ${t.data.definer} · atesta: ${t.data.attester} · ${attestationStatus(t)} ·
-              <b> actual: aguardando</b> — melhor vazio que mentira
+              <b> actual: ${actualSummary(t.id)}</b>
             </span>
+            ${outcomesForTarget(t.id).map(
+              (outcome) =>
+                html`<div className="muted" key=${outcome.id}>
+                  outcome ${outcome.id}: ${outcome.data.window.start}→${outcome.data.window.end} ·
+                  revision ${outcome.data.revision}
+                </div>`
+            )}
             ${t.data["attestation-collapse"]
               ? html`<div className="muted">
                   colapso logado: ${t.data["attestation-collapse"].reason}
@@ -208,6 +231,7 @@ function Intents({ sel, go }) {
   const obj = node(it.data["authorized-by"]);
   const tgt = node(it.data["primary-target"]);
   const th = it.data.thesis ? node(it.data.thesis) : null;
+  const intentOutcomes = outcomesForIntent(it.id);
   return html`<div>
     <${Crumb} label="todas as intents" onClick=${() => go("intents", null)} />
     <div className="card">
@@ -238,6 +262,12 @@ function Intents({ sel, go }) {
           </div>`
         : null}
       <div className="kv"><b>gate à frente:</b> ${inf.gate}</div>
+      <div className="kv">
+        <b>outcomes emitidos:</b>
+        ${intentOutcomes.length
+          ? intentOutcomes.map((outcome) => `${outcome.id} (${outcome.data.value})`).join(" · ")
+          : "nenhum"}
+      </div>
     </div>
     <div className="card">
       <h2>peças (${inf.ws.length})</h2>

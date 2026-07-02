@@ -11,6 +11,19 @@ const REPOS_DIR = path.join(ACME, "repos");
 const GOVERNANCE_DIR = ".governance";
 const WORK_SCHEMA = "acme.repo-work/v1";
 const WORK_STATUSES = ["acknowledged", "active", "blocked", "done", "dropped"];
+const LIFECYCLE_KEYS = [
+  "owner",
+  "started-at",
+  "base-revision",
+  "completed-at",
+  "source-commit",
+  "evidence",
+  "verification",
+  "blocked-by",
+  "reason",
+  "decision",
+  "fate",
+];
 
 const readYaml = (file) => parse(readFileSync(file, "utf8"));
 
@@ -118,7 +131,13 @@ export function loadPublishedRepoWorks() {
 
 export function publishRepoWorks(o) {
   const claims = deriveExpectedRepoWorks(o);
+  const existingById = new Map(loadPublishedRepoWorks().map((claim) => [claim.id, claim]));
   for (const claim of claims) {
+    const existing = existingById.get(claim.id) || {};
+    for (const key of LIFECYCLE_KEYS) {
+      if (existing[key] !== undefined) claim[key] = existing[key];
+    }
+    if (existing.status && existing.status !== "acknowledged") claim.status = existing.status;
     const out = claimFile(claim.repo, claim.intent, claim.work);
     mkdirSync(path.dirname(out), { recursive: true });
     writeFileSync(out, stringify(claim, { lineWidth: 100 }));
@@ -139,6 +158,17 @@ function checkClosedSchema(claim, node, issues) {
     "desc",
     "review",
     "status",
+    "owner",
+    "started-at",
+    "base-revision",
+    "completed-at",
+    "source-commit",
+    "evidence",
+    "verification",
+    "blocked-by",
+    "reason",
+    "decision",
+    "fate",
     "source",
     "code",
     "_file",
@@ -146,6 +176,8 @@ function checkClosedSchema(claim, node, issues) {
   ]);
   const sourceKeys = new Set(["kind", "file", "breakdownHash"]);
   const codeKeys = new Set(["touchpoints"]);
+  const evidenceKeys = new Set(["kind", "command", "result", "files"]);
+  const verificationKeys = new Set(["checked-by", "result"]);
   for (const key of Object.keys(claim || {}))
     if (!topKeys.has(key)) err("repo-work-schema", `chave desconhecida "${key}"`);
   for (const key of ["schema", "id", "intent", "work", "repo", "purpose", "review", "status"])
@@ -159,6 +191,11 @@ function checkClosedSchema(claim, node, issues) {
     if (!codeKeys.has(key)) err("repo-work-schema", `code.${key} é chave desconhecida`);
   if (!Array.isArray(claim?.code?.touchpoints) || claim.code.touchpoints.length === 0)
     err("repo-work-evidence", "code.touchpoints precisa apontar para pelo menos um arquivo local");
+  for (const key of Object.keys(claim?.evidence || {}))
+    if (!evidenceKeys.has(key)) err("repo-work-schema", `evidence.${key} é chave desconhecida`);
+  for (const key of Object.keys(claim?.verification || {}))
+    if (!verificationKeys.has(key))
+      err("repo-work-schema", `verification.${key} é chave desconhecida`);
   if (claim?.status && !WORK_STATUSES.includes(claim.status))
     err(
       "repo-work-schema",
@@ -166,16 +203,62 @@ function checkClosedSchema(claim, node, issues) {
     );
 }
 
-export function validateRepoWorks(o) {
+function hasText(value) {
+  return value !== undefined && value !== null && String(value).trim() !== "";
+}
+
+function requireFields(claim, fields, node, issues, status) {
+  const err = (rule, msg) => issues.push({ level: "error", rule, node, msg });
+  for (const field of fields) {
+    if (!hasText(claim[field])) err("repo-work-lifecycle", `status ${status} exige "${field}"`);
+  }
+}
+
+function checkLifecycle(claim, node, issues) {
+  const err = (rule, msg) => issues.push({ level: "error", rule, node, msg });
+  if (claim.status === "active")
+    requireFields(claim, ["owner", "started-at", "base-revision"], node, issues, "active");
+  if (claim.status === "done") {
+    requireFields(
+      claim,
+      ["owner", "started-at", "base-revision", "completed-at", "source-commit"],
+      node,
+      issues,
+      "done"
+    );
+    if (!claim.evidence) err("repo-work-lifecycle", "status done exige evidence");
+    if (!claim.verification) err("repo-work-lifecycle", "status done exige verification");
+    for (const field of ["kind", "command", "result"]) {
+      if (!hasText(claim.evidence?.[field]))
+        err("repo-work-lifecycle", `status done exige evidence.${field}`);
+    }
+    if (!Array.isArray(claim.evidence?.files) || claim.evidence.files.length === 0)
+      err("repo-work-lifecycle", "status done exige evidence.files com pelo menos um arquivo");
+    for (const field of ["checked-by", "result"]) {
+      if (!hasText(claim.verification?.[field]))
+        err("repo-work-lifecycle", `status done exige verification.${field}`);
+    }
+  }
+  if (claim.status === "blocked") {
+    requireFields(claim, ["owner"], node, issues, "blocked");
+    if (!hasText(claim["blocked-by"]) && !hasText(claim.reason))
+      err("repo-work-lifecycle", "status blocked exige blocked-by ou reason rastreável");
+  }
+  if (claim.status === "dropped")
+    requireFields(claim, ["decision", "fate"], node, issues, "dropped");
+}
+
+export function validateRepoWorks(o, options = {}) {
   const issues = [];
   const err = (rule, node, msg) => issues.push({ level: "error", rule, node, msg });
   const expected = deriveExpectedRepoWorks(o);
   const expectedById = new Map(expected.map((claim) => [claim.id, claim]));
   const publishedById = new Map();
+  const authorities = new Set((o.authorities || []).map((a) => a.id));
 
   let published = [];
   try {
-    published = loadPublishedRepoWorks();
+    published = options.publishedClaims || loadPublishedRepoWorks();
   } catch (e) {
     err("repo-work-parse", "repo-works", e.message);
     return issues;
@@ -186,6 +269,15 @@ export function validateRepoWorks(o) {
     if (publishedById.has(claim.id)) err("repo-work-duplicate", node, "id duplicado");
     publishedById.set(claim.id, claim);
     checkClosedSchema(claim, node, issues);
+    checkLifecycle(claim, node, issues);
+    if (claim.owner && !authorities.has(claim.owner))
+      err("repo-work-authority", node, `owner "${claim.owner}" não resolve em authorities.yml`);
+    if (claim.verification?.["checked-by"] && !authorities.has(claim.verification["checked-by"]))
+      err(
+        "repo-work-authority",
+        node,
+        `verification.checked-by "${claim.verification["checked-by"]}" não resolve em authorities.yml`
+      );
 
     const expectedClaim = expectedById.get(claim.id);
     if (!expectedClaim) {
@@ -217,6 +309,11 @@ export function validateRepoWorks(o) {
       if (!existsSync(full))
         err("repo-work-evidence", node, `touchpoint "${touchpoint}" não existe em ${claim.repo}`);
     }
+    for (const file of claim.evidence?.files || []) {
+      const full = path.join(REPOS_DIR, claim.repo || "", file);
+      if (!existsSync(full))
+        err("repo-work-evidence", node, `evidence.files "${file}" não existe em ${claim.repo}`);
+    }
   }
 
   for (const claim of expected) {
@@ -226,6 +323,28 @@ export function validateRepoWorks(o) {
         claim.id,
         `repo "${claim.repo}" não publicou ack local para ${claim.intent}::${claim.work}`
       );
+  }
+
+  for (const outcome of o.outcomes || []) {
+    const intentId = outcome["emitted-by"];
+    const intentClaims = expected.filter((claim) => claim.intent === intentId);
+    if (intentClaims.length === 0) continue;
+    for (const expectedClaim of intentClaims) {
+      const published = publishedById.get(expectedClaim.id);
+      if (!published) continue;
+      if (published.status === "dropped")
+        err(
+          "outcome-work-dropped",
+          outcome.id,
+          `outcome de "${intentId}" tenta somar, mas ${expectedClaim.work} foi dropped`
+        );
+      else if (published.status !== "done")
+        err(
+          "outcome-work-open",
+          outcome.id,
+          `outcome de "${intentId}" exige ${expectedClaim.work} done; status atual é "${published.status}"`
+        );
+    }
   }
 
   return issues;

@@ -16,8 +16,10 @@ const TYPE_COLOR = {
   work: "#5dcaa5",
   target: "#7f77dd",
   metric: "#afa9ec",
+  outcome: "#4dba73",
   standalone: "#d85a30",
   authority: "#d3d1c7",
+  "access-request": "#b97bd8",
 };
 const TYPE_SHAPE = {
   objective: "round-rectangle",
@@ -31,8 +33,10 @@ const TYPE_SHAPE = {
   work: "ellipse",
   target: "round-tag",
   metric: "tag",
+  outcome: "vee",
   standalone: "octagon",
   authority: "tag",
+  "access-request": "round-diamond",
 };
 const EDGE_DASH = { "delivery-after": [6, 3], "consumed-by": [2, 3], consumes: [2, 3] };
 const ALL_TYPES = Object.keys(TYPE_COLOR);

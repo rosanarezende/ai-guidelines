@@ -124,6 +124,19 @@ for (const x of o.targets) {
   if (x["attestation-collapse"])
     E(x["attestation-collapse"]["approved-by"], x.id, "approves-collapse");
 }
+for (const x of o.outcomes) {
+  N(x.id, "outcome", `${x.metric}: ${x.value}`, x);
+  E(x["emitted-by"], x.id, "emits");
+  E(x.id, x["contributes-to"], "contributes-to");
+  E(x.id, x.metric, "measures");
+  E(x.id, x["attested-by"], "attested-by");
+  if (x.envelope?.authority) E(x.envelope.authority, x.id, "authorizes-mutation");
+}
+for (const x of o.policy?.["access-requests"] || []) {
+  N(x.id, "access-request", `${x.action}: ${x.repo}`, x);
+  E(x.actor, x.id, "requests");
+  E(x.id, x.repo, x.decision === "allow" ? "allowed-read" : "denied-read");
+}
 for (const it of o.intents) {
   N(it.id, "intent", it.title, { ...it, derived: deriveIntent(it, o) });
   E(it["authorized-by"], it.id, "authorizes");

@@ -6,7 +6,20 @@ repo: acme-core-api
 purpose: sustain
 desc: "expõe leitura de contas legadas p/ a elegibilidade — MONOLITO: o dono é o do MÓDULO"
 review: "externo: time-identity"
-status: acknowledged
+status: done
+owner: lead-identity
+started-at: 2027-01-05
+base-revision: acme-core-api@ctx-v1
+completed-at: 2027-01-11
+source-commit: git:core-api-accounts-seam-001
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs
+  result: passed
+  files: [src/modules/accounts.mjs]
+verification:
+  checked-by: lead-identity
+  result: seam de contas legado exposto sem mover ownership do modulo
 source:
   kind: central-breakdown
   file: acme/intents/intent-cta-upgrade.yml

@@ -3,9 +3,9 @@
 // Uso: node _tools/test-adversarial.mjs
 import { loadOrg, validateOrg } from "./org.mjs";
 import { checkAppSecurity } from "./check-app-security.mjs";
-import { validateRepoContracts } from "./repo-contracts.mjs";
-import { validateRepoContexts } from "./repo-contexts.mjs";
-import { validateRepoWorks } from "./repo-works.mjs";
+import { loadPublishedRepoContracts, validateRepoContracts } from "./repo-contracts.mjs";
+import { loadPublishedContexts, validateRepoContexts } from "./repo-contexts.mjs";
+import { loadPublishedRepoWorks, validateRepoWorks } from "./repo-works.mjs";
 
 const base = loadOrg();
 const clone = () => structuredClone(base);
@@ -24,7 +24,13 @@ const validOutcome = (over = {}) => ({
   revision: "warehouse@rev42",
   "contract-revisions": [],
   "contributes-to": "tgt-billing-conv",
-  envelope: { actor: "ana-dev", authority: "pm-growth", "idempotency-key": "out-teste-1" },
+  envelope: {
+    actor: "ana-dev",
+    authority: "pm-growth",
+    "issued-at": "2027-04-02",
+    "idempotency-key": "out-teste-1",
+    nonce: "nonce-out-teste-1",
+  },
   ...over,
 });
 const validCollapsedOutcome = (over = {}) => ({
@@ -39,7 +45,13 @@ const validCollapsedOutcome = (over = {}) => ({
   revision: "warehouse@rev77",
   "contract-revisions": [],
   "contributes-to": "tgt-data-cost",
-  envelope: { actor: "ana-dev", authority: "head-platform", "idempotency-key": "out-self-1" },
+  envelope: {
+    actor: "ana-dev",
+    authority: "head-platform",
+    "issued-at": "2027-04-02",
+    "idempotency-key": "out-self-1",
+    nonce: "nonce-out-self-1",
+  },
   ...over,
 });
 
@@ -99,7 +111,13 @@ const CASES = [
         "attested-by": "acme-analytics",
         "contract-revisions": [],
         "contributes-to": "tgt-billing-conv",
-        envelope: { actor: "alguém", authority: "pm-growth", "idempotency-key": "k1" },
+        envelope: {
+          actor: "alguém",
+          authority: "pm-growth",
+          "issued-at": "2027-04-02",
+          "idempotency-key": "k1",
+          nonce: "nonce-k1",
+        },
       });
       return o;
     },
@@ -239,7 +257,14 @@ const CASES = [
     mutate: () => {
       const o = clone();
       o.outcomes.push(
-        validOutcome({ envelope: { authority: "pm-growth", "idempotency-key": "k9" } })
+        validOutcome({
+          envelope: {
+            authority: "pm-growth",
+            "issued-at": "2027-04-02",
+            "idempotency-key": "k9",
+            nonce: "nonce-k9",
+          },
+        })
       );
       return o;
     },
@@ -279,7 +304,13 @@ const CASES = [
       const o = clone();
       o.outcomes.push(
         validOutcome({
-          envelope: { actor: "ana-dev", authority: "autoridade-fantasma", "idempotency-key": "k4" },
+          envelope: {
+            actor: "ana-dev",
+            authority: "autoridade-fantasma",
+            "issued-at": "2027-04-02",
+            "idempotency-key": "k4",
+            nonce: "nonce-k4",
+          },
         })
       );
       return o;
@@ -295,7 +326,9 @@ const CASES = [
           envelope: {
             actor: "ana-dev",
             authority: "pm-growth",
+            "issued-at": "2027-04-02",
             "idempotency-key": "k5",
+            nonce: "nonce-k5",
             "campo-esquisito": true,
           },
         })
@@ -480,6 +513,68 @@ const CASES = [
     },
   },
   {
+    id: "RW·3 outcome antes de todas as peças estarem done falha",
+    expect: "outcome-work-open",
+    validate: async () => {
+      const claims = loadPublishedRepoWorks().map((claim) =>
+        claim.id === "intent-cta-upgrade::ui-cta" ? { ...claim, status: "active" } : claim
+      );
+      return validateRepoWorks(base, { publishedClaims: claims });
+    },
+  },
+  {
+    id: "RW·4 repo-work done sem evidence falha",
+    expect: "repo-work-lifecycle",
+    validate: async () => {
+      const claims = loadPublishedRepoWorks().map((claim) => {
+        if (claim.id !== "intent-cta-upgrade::ui-cta") return claim;
+        const copy = structuredClone(claim);
+        delete copy.evidence;
+        return copy;
+      });
+      return validateRepoWorks(base, { publishedClaims: claims });
+    },
+  },
+  {
+    id: "RW·5 repo-work blocked sem motivo rastreável falha",
+    expect: "repo-work-lifecycle",
+    validate: async () => {
+      const claims = loadPublishedRepoWorks().map((claim) => {
+        if (claim.id !== "intent-cta-upgrade::api-elegibilidade") return claim;
+        const copy = structuredClone(claim);
+        copy.status = "blocked";
+        delete copy["blocked-by"];
+        delete copy.reason;
+        return copy;
+      });
+      return validateRepoWorks(base, { publishedClaims: claims });
+    },
+  },
+  {
+    id: "RW·6 repo-work dropped ainda alimentando outcome falha",
+    expect: "outcome-work-dropped",
+    validate: async () => {
+      const claims = loadPublishedRepoWorks().map((claim) =>
+        claim.id === "intent-cta-upgrade::api-elegibilidade"
+          ? { ...claim, status: "dropped", decision: "accept-verdict", fate: "throwaway" }
+          : claim
+      );
+      return validateRepoWorks(base, { publishedClaims: claims });
+    },
+  },
+  {
+    id: "R·4 código mudou mas context.json publicado ficou stale",
+    expect: "repo-context-stale",
+    validate: async () => {
+      const expected = loadPublishedContexts().map((ctx) =>
+        ctx.repo === "acme-checkout"
+          ? { ...ctx, code: { ...ctx.code, sourceHash: "source-mutado" }, contentHash: "mutado" }
+          : ctx
+      );
+      return validateRepoContexts(base, { expectedContexts: expected });
+    },
+  },
+  {
     id: "RC·1 contrato central muda revision sem registry local fresco",
     expect: "repo-contract-stale",
     mutate: () => {
@@ -497,6 +592,99 @@ const CASES = [
       return o;
     },
   },
+  {
+    id: "RC·3 contrato local muda sem registry central acompanhar",
+    expect: "repo-contract-stale",
+    validate: async () => {
+      const published = loadPublishedRepoContracts().map((contract) =>
+        contract.id === "acme-user-context" ? { ...contract, revision: "v999" } : contract
+      );
+      return validateRepoContracts(base, { publishedContracts: published });
+    },
+  },
+  {
+    id: "D·1 confused deputy local tenta ler repo restricted de outro owner",
+    expect: "query-acl",
+    mutate: () => {
+      const o = clone();
+      o.policy["access-requests"].push({
+        id: "req-billing-read-identity-context",
+        actor: "lead-billing",
+        action: "read-context",
+        repo: "acme-identity",
+        decision: "allow",
+        via: "host-local-query",
+        reason: "debug lateral de consentimento",
+      });
+      return o;
+    },
+  },
+  {
+    id: "D·2 matcher externo bloqueado sem fallback rastreável falha",
+    expect: "matcher-fallback",
+    mutate: () => {
+      const o = clone();
+      const routing = o.standalone.find((s) => s.id === "bug-frete").routing;
+      routing.matcher = "external-llm-matcher";
+      routing.egress = { classification: "restricted", allowed: false, provider: "api-externa" };
+      delete routing.fallback;
+      return o;
+    },
+  },
+  {
+    id: "D·3 segredo colado em YAML sem quarantine falha",
+    expect: "secret-quarantine",
+    mutate: () => {
+      const o = clone();
+      intent(o, "intent-cta-upgrade").hypothesis =
+        "um CTA contextual aumenta conversão; token temporário sk-acmeLeak12345";
+      return o;
+    },
+  },
+  {
+    id: "D·4 oráculo sem independência falha",
+    expect: "oracle-independence",
+    mutate: () => {
+      const o = clone();
+      o.policy["oracle-independence"]["expected-by"] = "codex";
+      return o;
+    },
+  },
+  {
+    id: "D·5 authority revogada usada por envelope falha",
+    expect: "authority-revoked",
+    mutate: () => {
+      const o = clone();
+      o.outcomes.push(
+        validOutcome({
+          id: "out-revogado",
+          envelope: {
+            actor: "ana-dev",
+            authority: "lead-support",
+            "issued-at": "2027-02-02",
+            "idempotency-key": "out-revogado",
+            nonce: "nonce-out-revogado",
+          },
+        })
+      );
+      return o;
+    },
+  },
+  {
+    id: "D·6 replay de idempotency/nonce falha",
+    expect: "envelope-replay",
+    mutate: () => {
+      const o = clone();
+      const first = validOutcome({ id: "out-replay-1" });
+      const second = validOutcome({ id: "out-replay-2" });
+      first.envelope["idempotency-key"] = "replay-key";
+      first.envelope.nonce = "replay-nonce";
+      second.envelope["idempotency-key"] = "replay-key";
+      second.envelope.nonce = "replay-nonce";
+      o.outcomes.push(first, second);
+      return o;
+    },
+  },
 ];
 
 async function validateAll(o) {
@@ -511,7 +699,7 @@ async function validateAll(o) {
 export async function run(cases) {
   let fails = 0;
   for (const c of cases) {
-    const issues = await validateAll(c.mutate());
+    const issues = c.validate ? await c.validate() : await validateAll(c.mutate());
     const errs = issues.filter((i) => i.level === "error");
     if (c.expect === null) {
       const ok = errs.length === 0;

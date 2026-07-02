@@ -6,7 +6,20 @@ repo: acme-analytics
 purpose: operate
 desc: instrumenta com o schema EXISTENTE (consome sem revisão); pronto ANTES de ligar a flag
 review: "externo: time-data"
-status: acknowledged
+status: done
+owner: lead-data
+started-at: 2027-01-03
+base-revision: acme-analytics@ctx-v1
+completed-at: 2027-01-10
+source-commit: git:analytics-baseline-cta-001
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs
+  result: passed
+  files: [src/index.mjs]
+verification:
+  checked-by: lead-data
+  result: baseline e eventos de exposicao/conversao prontos antes da flag
 source:
   kind: central-breakdown
   file: acme/intents/intent-cta-upgrade.yml

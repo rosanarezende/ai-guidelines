@@ -15,4 +15,6 @@ contributes-to: "<target>" # UM rollup primário; sem aggregation declarada não
 envelope: # L8 mínimo — publicar actual é mutação PERIGOSA (actual-publish)
   actor: "<quem publica>"
   authority: "<em nome de qual autoridade resolvível>"
+  issued-at: "<data da mutação>"
   idempotency-key: "<chave única desta publicação>"
+  nonce: "<nonce único anti-replay>"

@@ -960,12 +960,12 @@ window.MODEL = {
       ],
       dashboards: {
         execution: [
-          "intent-cta-upgrade: 1 bloqueada (api espera o fate do spike) · 1 em paralelo aguardando entrega (ui integra depois do endpoint) · review externo pendente: time-data (baseline) · gate à frente: accept-verdict",
+          "intent-cta-upgrade: peças repo-local concluídas com evidência · outcome out-cta-upgrade-2027q1 publicado · resolver fecha fonte/revisão/janela/attester/envelope antes do dashboard somar",
           "intent-checkout-stack: caminho crítico = componentes-ds (review externo area-platform) → porta-fluxo → monitor-canary · janela v3+v4 ABERTA (2 consumidores pendentes) · alerta q/r/d ativo na revisao-contrato (compat-window-change)",
           "intent-p99-hardening: baseline PRIMEIRO (guardrails); 2 peças codificando em paralelo (não ligam antes do baseline); 2 reviews externos no caminho",
         ],
         stakeholders: [
-          "crescer receita via cross-sell: target +X% de conversão — actual AGUARDANDO (experimento no ar, veredito pendente; nada soma antes de outcome validado — melhor vazio que mentira)",
+          "crescer receita via cross-sell: target +X% de conversão — actual +2.4% DERIVADO de outcome validado (fonte acme-analytics@warehouse-rev42; nada entra sem resolver)",
           "reduzir o custo de servir: migração onda 1 em curso (janela aberta; progresso por consumidor) · p99 com baseline estabelecido — actuals DERIVADOS, attester independente (acme-obs-stack)",
           "bucket operacional: 1 bug (frete) · 1 incidente (MTTR 43min; postmortem gerou 2 follow-ups) · 1 dep-bump — custo visível, fora do rollup dos objetivos",
           "higiene: 0 dangerous-unreviewed em aberto · perfil full declarado (badge) · 0 números self-attested",

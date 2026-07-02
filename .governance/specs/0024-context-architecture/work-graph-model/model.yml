@@ -10,7 +10,7 @@
 
 meta:
   version: 2
-  status: applied-in-sim-v3 # 3 camadas + business-tier + approach/signal + repo-first substrate aplicados; próximos passos em _org-simulation-v3/NEXT-STEPS.md
+  status: applied-in-sim-v3 # 3 camadas + business-tier + approach/signal + repo-first substrate + outcome/lifecycle/trust-policy aplicados; próximos passos em _org-simulation-v3/NEXT-STEPS.md
   grounded-by: tracker.md
   artifact: _map/model-map.html # navegável; data.js é GERADO por _map/generate.mjs (node generate.mjs · --check verifica o sync do SUBCONJUNTO projetado — coverage impressa a cada run; --check FORA do validate por decisão da owner 2026-07-01)
 
@@ -124,7 +124,7 @@ edges:
   - { id: raises, from: node, to: proposal, category: proveniência }
   - { id: answers, from: "repo-work(discover)", to: "question", category: investigação }
   - { id: supported-by, from: decision, to: "research|discover", category: investigação }
-  - { id: emits, from: [execution-unit, repo-work], to: outcome, category: fecho }
+  - { id: emits, from: [intent, execution-unit, repo-work], to: outcome, category: fecho }
   - { id: closed-by, from: node, to: "answer|outcome|postmortem", category: fecho }
   - { id: supersedes, from: decision, to: decision, category: histórico }
   - { id: occurred-during, from: incident-response, to: node, category: resposta }
@@ -141,13 +141,14 @@ edges:
 
 states:
   own: [draft, active, done] # active EXIGE assignee + início
+  repo-work-ack: [acknowledged, active, blocked, done, dropped] # v3: repo reconhece a peça e publica progresso local; outcome de intent só soma quando as peças necessárias estão done
   derived: [blocked, paused]
   business-tier: [proposed, active, closed, superseded, dropped] # G8 — lifecycle de objective/target sai da prosa e entra no catálogo
 
 # ═════════════════════ ENVELOPE (L8) + CONFIANÇA (L9) — inalterados do tracker ═════════════════════
 envelope:
   quem: [actor, authority]
-  base: [base-revision, idempotency-key, revision]
+  base: [base-revision, idempotency-key, nonce, issued-at, revision]
   origem: [schema-version, source-commit, producer, ttl]
   seguranca: [classification, visibility, access]
   invalidacao: [invalidates]
@@ -185,7 +186,14 @@ envelope:
 trust:
   boundary: "entidade de 1ª classe (matcher/agente/backend/API são fronteiras)"
   policy-artifacts:
-    [threat-model, egress-policy, agent-delegation-policy, policy-catalog, red-team-corpus]
+    [
+      threat-model,
+      egress-policy,
+      agent-delegation-policy,
+      policy-catalog,
+      trust-policy,
+      red-team-corpus,
+    ]
   laws:
     - {
         id: fallback-break-glass,
@@ -262,8 +270,9 @@ physical:
   por-repo: ".governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml,backend.yml}"
   publications:
     context-json: "repo publica capabilities/contratos/consumos derivados do manifest + package + código; host falha se divergir do inventário central"
-    repo-work-ack: "repo publica .governance/works/<intent>--<work>.yml com hash do breakdown central + touchpoint de código; host falha em repo-work-stale/missing"
-    repo-contract: "owner repo publica .governance/registry/contracts/<contract>.yml com hash de contracts.yml + touchpoint de código; host falha em repo-contract-stale/missing"
+    repo-work-ack: "repo publica .governance/works/<intent>--<work>.yml com hash do breakdown central + touchpoint de código + lifecycle (acknowledged/active/blocked/done/dropped); host falha em repo-work-stale/missing e outcome-work-open/dropped"
+    repo-contract: "owner repo publica .governance/registry/contracts/<contract>.yml com hash de contracts.yml + interface versionada + touchpoint de código; host falha em repo-contract-stale/missing"
+    trust-policy: "host valida access-requests, authority-revocations, secret-quarantine e oracle-independence; política sem resolver é rejeitada como cerimônia"
   host: "acme-governance agrega projeções PUBLICADAS (context.json, repo-work-acks, repo-contracts), não abre banco nem confia só no YAML central"
   identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
   backend: [file, sqlite, neo4j, mongo]
@@ -497,7 +506,7 @@ business-tier:
     intent: "1ª unidade governada de trabalho (já existe; entra nas 3 camadas). Ganha primary-target (F2): o target primário herdado do authorizes — o rollup da intent é por ELE, e os outcomes das units sob ela devem ser compatíveis."
     metric-definition: "definição ESTÁVEL da métrica: unidade · source · aggregation · owner."
     target: "binding métrica + nó + período + valor esperado. ≠ metric-definition. actual = DERIVADO dos outcomes. Período IMUTÁVEL (F9): no fechamento do ciclo o target é FROZEN (closed) — actuals novos não entram; continuidade via continues-from (vale p/ target, não só objective)."
-    outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit (usa envelope L8). Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número) · contract-revision (quando o resultado depende de um contrato — G10). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard. Schema tipado + resolver: ver outcome-schema (F1)."
+    outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit; quando a unit ainda não é materializada fisicamente, a intent agregadora emite; repo-work standalone também emite. Usa envelope L8. Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número) · contract-revision (quando o resultado depende de um contrato — G10). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard. Schema tipado + resolver: ver outcome-schema (F1)."
     allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority com unidade · período · owner OBRIGATÓRIOS (G12); vira nó quando ganha lifecycle/owner/consumo PRÓPRIOS (o critério é a scaling-law)."
   edges:
     - {
@@ -521,9 +530,9 @@ business-tier:
     - { id: uses, from: target, to: metric-definition }
     - {
         id: emits,
-        from: execution-unit,
+        from: [intent, execution-unit, repo-work],
         to: outcome,
-        note: "no veredito/fecho da unit; repo-work STANDALONE também emite (G14)",
+        note: "no veredito/fecho da unit; intent emite quando a unit física está colapsada/não materializada; repo-work STANDALONE também emite (G14)",
       }
     - {
         id: contributes-to,
@@ -562,10 +571,12 @@ business-tier:
       window: "período de medição (start · end), fechado e imutável"
       metric-definition: "GlobalRef da metric-definition usada (a unidade do value DEVE bater com ela)"
       value: "número + unidade"
+      emitted-by: "intent|execution-unit|repo-work resolvível; intent é aceito quando a unit física ainda não foi materializada na sim/file layout"
       aggregation: "regra declarada (sum · avg · last · custom com owner)"
       attested-by: "AUTHORITY resolvível (pessoa OU trust-boundary com owner) — ver measurement-roles"
       revision: "revisão dos DADOS que sustentam o número (dataset/query@rev)"
       contract-revisions: "F8: DERIVADAS do grafo — toda repo-work da unit com coordinates-with → contract entra na lista; NÃO é autodeclarada (omissão não passa despercebida)"
+      envelope: "actor · authority · issued-at · idempotency-key · nonce; replay/authority revogada falha fechado"
     resolver:
       is: "verificação OBRIGATÓRIA em actual-publish E na leitura do dashboard — a peça que PROVA que número, fonte, revisão e autoridade são válidos (barra do red-team)"
       checks:
@@ -573,6 +584,8 @@ business-tier:
         - "attested-by é authority AUTORIZADA p/ a metric-definition e ≠ target-definer — senão marcado self-attested"
         - "revision dentro de ttl/janela — senão STALE"
         - "contract-revisions COBREM as derivadas do grafo e estão na compatibility-window — senão BLOCKED/STALE"
+        - "repo-work-acks necessários da intent emissora estão done; active/blocked/acknowledged/dropped bloqueiam o rollup"
+        - "idempotency-key/nonce únicos e authority não revogada no issued-at"
       fail-mode: "fail-CLOSED p/ SOMAR (invalid/stale/blocked/self-attested-sem-colapso-logado não entram no actual) · fail-VISIBLE p/ EXIBIR (tudo aparece no dashboard, com a marca)"
   input-vs-output:
     input: "business-objective → thesis → opportunity-area → intent"
@@ -1222,11 +1235,11 @@ approach-model:
         placar: "bucket operacional (custo de manutenção visível)"
     dashboards: # o fim da cadeia — DERIVADOS do grafo (ninguém preenche à mão)
       execution: # acompanhamento dos times (peças · bloqueios · reviews · gates · alertas)
-        - "intent-cta-upgrade: 1 bloqueada (api espera o fate do spike) · 1 em paralelo aguardando entrega (ui integra depois do endpoint) · review externo pendente: time-data (baseline) · gate à frente: accept-verdict"
+        - "intent-cta-upgrade: peças repo-local concluídas com evidência · outcome out-cta-upgrade-2027q1 publicado · resolver fecha fonte/revisão/janela/attester/envelope antes do dashboard somar"
         - "intent-checkout-stack: caminho crítico = componentes-ds (review externo area-platform) → porta-fluxo → monitor-canary · janela v3+v4 ABERTA (2 consumidores pendentes) · alerta q/r/d ativo na revisao-contrato (compat-window-change)"
         - "intent-p99-hardening: baseline PRIMEIRO (guardrails); 2 peças codificando em paralelo (não ligam antes do baseline); 2 reviews externos no caminho"
       stakeholders: # visão de negócio, por objetivo — só outcome VÁLIDO soma (resolver fail-closed)
-        - "crescer receita via cross-sell: target +X% de conversão — actual AGUARDANDO (experimento no ar, veredito pendente; nada soma antes de outcome validado — melhor vazio que mentira)"
+        - "crescer receita via cross-sell: target +X% de conversão — actual +2.4% DERIVADO de outcome validado (fonte acme-analytics@warehouse-rev42; nada entra sem resolver)"
         - "reduzir o custo de servir: migração onda 1 em curso (janela aberta; progresso por consumidor) · p99 com baseline estabelecido — actuals DERIVADOS, attester independente (acme-obs-stack)"
         - "bucket operacional: 1 bug (frete) · 1 incidente (MTTR 43min; postmortem gerou 2 follow-ups) · 1 dep-bump — custo visível, fora do rollup dos objetivos"
         - "higiene: 0 dangerous-unreviewed em aberto · perfil full declarado (badge) · 0 números self-attested"
@@ -1299,7 +1312,13 @@ decisions:
       id: P13,
       about: "adoção por empresa existente e fidelidade repo-first",
       status: applied,
-      by: "org-simulation-v3: repos com código MVP + sidecars .governance + context.json + repo-work acknowledgements + repo-contract registry; host valida stale/missing com red-team fixtures R/RW/RC",
+      by: "org-simulation-v3: repos com código MVP + sidecars .governance + context.json + repo-work lifecycle + repo-contract registry com interface; host valida stale/missing/open/dropped com red-team fixtures R/RW/RC",
+    }
+  - {
+      id: P14,
+      about: "primeiro outcome real + controles físicos de confiança",
+      status: applied,
+      by: "org-simulation-v3: intent-cta-upgrade publica outcome governado; repo-work done exige evidência; trust-policy valida ACL local, fallback matcher/egress, revogação, nonce/idempotência, secret quarantine e independência do oráculo",
     }
 
 open-questions: []

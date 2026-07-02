@@ -1,0 +1,24 @@
+# trust-policy.yml — política mínima da sim v3.
+# Barra: todo item aqui precisa ser resolvido por _tools/validate.mjs; campo sem executor é cerimônia.
+
+access-requests:
+  - id: req-billing-read-own-context
+    actor: lead-billing
+    action: read-context
+    repo: acme-mfe-billing
+    decision: allow
+    via: host-local-query
+    reason: "lead do time dono consulta o contexto publicado do próprio repo"
+
+authority-revocations:
+  - authority: lead-support
+    revoked-at: 2027-02-01
+    reason: "rotação simulada de papel; envelopes posteriores não podem reutilizar esta autoridade"
+
+secret-quarantine: []
+
+oracle-independence:
+  corpus: _tools/test-adversarial.mjs
+  attack-by: codex
+  expected-by: claude
+  approved-by: owner

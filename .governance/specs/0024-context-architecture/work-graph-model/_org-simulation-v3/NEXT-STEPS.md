@@ -1,115 +1,82 @@
-# Próximos passos — dogfood repo-first robusto
+# Próximos passos — sim v3 após o dogfood repo-first robusto
 
 > Autoridade: `../model.yml` é o SSOT do modelo. Este arquivo é roteiro operacional da sim v3.
 > Regra: toda fase precisa de mecanismo verificável, fixture adversarial e projeção no grafo/dashboard.
 
 ## Estado atual
 
-A v3 já prova a estrutura repo-first mínima:
+A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem seus repos:
 
 - repos acme têm código MVP importável;
+- repos críticos (`acme-core-api`, `acme-checkout`, `acme-analytics`) têm testes locais sem dependência externa;
 - cada repo tem `.governance/manifest.yml`, `context.json`, `works/*.yml` e, quando owner, `registry/contracts/*.yml`;
-- o host valida `repo-context-*`, `repo-work-*` e `repo-contract-*`;
-- `node _tools/adoption-journey.mjs` exercita código, contextos, work acknowledgements, contratos, red-team e grafo.
+- o host valida `repo-context-*`, `repo-work-*` e `repo-contract-*` por resolver fail-closed;
+- `intent-cta-upgrade` publica um outcome real em `acme/outcomes/outcomes.yml`, com source/revision/window/attester/envelope e rollup derivado;
+- peças repo-local têm lifecycle (`acknowledged|active|blocked|done|dropped`) e outcome não soma antes de `done`;
+- `acme/trust-policy.yml` materializa controles de ACL local, revogação, fallback de matcher, secret quarantine e independência do oráculo;
+- `node _tools/adoption-journey.mjs` exercita código, contextos, work acknowledgements, contratos, red-team, testes locais e grafo.
 
-O que ainda falta para parecer uma adoção real: outcome publicado, lifecycle das peças, testes locais por repo e drift código↔governança mais profundo.
+## Fases A–E fechadas nesta leva
 
-## Fase A — primeiro outcome real
+### Fase A — primeiro outcome real
 
-**Escolha inicial:** `intent-cta-upgrade`, por ser validate-first, cross-repo e com attester independente (`acme-analytics`).
+Fechado em `intent-cta-upgrade`:
 
-Entregas:
+- outcome válido em `acme/outcomes/outcomes.yml`;
+- source, revision, window, metric, aggregation, attested-by, contract-revisions e envelope resolvidos;
+- grafo/dashboard projetam outcome → target → objective;
+- fixtures adversariais bloqueiam outcome sem revisão, agregação incompatível, target errado, contrato omitido e self-attestation sem colapso.
 
-- adicionar outcome válido em `acme/outcomes/outcomes.yml`;
-- provar que ele soma apenas no `primary-target` da intent;
-- citar `source`, `revision`, `window`, `metric`, `attested-by`, `contract-revisions` e `envelope`;
-- atualizar o app/graph apenas por geração, sem preencher dashboard à mão.
+### Fase B — lifecycle repo-local das peças
 
-Falsificações obrigatórias:
+Fechado nos acks `.governance/works/intent-cta-upgrade--*.yml`:
 
-- outcome sem `revision` falha;
-- outcome com `aggregation` diferente da metric-definition falha;
-- outcome somando em target diferente sem decision falha;
-- outcome de intent que muda contrato sem citar revisão falha;
-- outcome self-attested sem colapso logado falha.
+- `done` exige owner, datas, base revision, source commit, evidência e verificação;
+- `blocked` exige causa rastreável;
+- `dropped` exige decisão/fate e não pode alimentar outcome de valor;
+- outcome emitido por uma intent falha se alguma peça necessária ainda não está `done`.
 
-Critério de aceite:
+### Fase C — aprofundar repos críticos
 
-- `node _tools/adoption-journey.mjs` passa;
-- red-team inclui pelo menos um caso positivo real e um caso inválido derivado do novo outcome;
-- grafo mostra outcome → target → objective.
+Fechado com testes locais e drift falsificável:
 
-## Fase B — lifecycle repo-local das peças
+- `acme-core-api`: monolito modular com teste de módulos e API legada;
+- `acme-checkout`: fluxo usuário + tracking;
+- `acme-analytics`: schema de eventos + eventos de exposição/conversão;
+- fixtures cobrem código que muda sem republicar `context.json` e contrato local que muda sem atualizar o registry central.
 
-Problema atual: o repo reconhece a peça, mas não declara progresso real.
+### Fase D — policy e confiança remanescentes
 
-Modelo operacional:
-
-- `status: acknowledged | active | blocked | done | dropped`;
-- `active` exige `owner`, `started-at` e `base-revision`;
-- `done` exige `completed-at`, `evidence`, `source-commit` e `verification`;
-- `blocked` exige `blocked-by` ou `reason` rastreável;
-- `dropped` exige decisão/fate e não pode alimentar outcome de valor.
-
-Falsificações obrigatórias:
-
-- outcome antes de work necessário estar `done` falha;
-- `done` sem evidência de código/teste falha;
-- work com `source.breakdownHash` stale falha;
-- work `blocked` sem motivo rastreável falha;
-- `dropped` ainda somando outcome falha.
-
-Critério de aceite:
-
-- os repo-work acknowledgements deixam de ser apenas confirmação de existência;
-- dashboard separa trabalho reconhecido, ativo, bloqueado e concluído.
-
-## Fase C — aprofundar repos críticos
-
-Repos prioritários:
-
-- `acme-core-api`: monolito modular com owners por módulo e seams reais para strangler;
-- `acme-checkout`: fluxo usuário + flag + integração com checkout API;
-- `acme-analytics`: schema de eventos + baseline + attestation de outcome.
-
-Entregas:
-
-- testes locais por repo (`npm test` ou script equivalente) sem instalar dependência externa;
-- schema de eventos versionado no `acme-analytics`;
-- contrato de `acme-user-context` com payload mais concreto;
-- fixture que altera código sem republicar `context.json` e falha por stale;
-- fixture que altera contrato local sem atualizar `contracts.yml` e falha.
-
-Critério de aceite:
-
-- `check-code-fixtures` continua sendo integração global;
-- cada repo crítico também prova seu comportamento localmente;
-- capability extraction passa a ter evidência de testes/exportações, não só palavras do manifesto.
-
-## Fase D — policy e confiança remanescentes
-
-Ainda não mecanizado na v3 física:
+Fechado como primeira versão física de `trust-policy.yml`:
 
 - ACL por edge/query dentro do host;
-- revogação/nonce de authority;
-- fallback rastreável quando política bloqueia egress/matcher;
-- quarantine de segredo colado em YAML;
-- independência do oráculo (`policy-pack`, fixtures e expected-outcomes com autores distintos).
+- revogação/nonce/idempotência no envelope;
+- fallback rastreável quando política bloqueia matcher externo;
+- quarantine de segredo colado;
+- independência do oráculo do corpus.
 
-Critério de aceite:
+### Fase E — destino da v2
 
-- cada controle tem resolver fail-closed ou warning visível, nunca campo decorativo;
-- cada gap tem fixture adversarial que primeiro falha e depois passa.
+Fechado:
 
-## Fase E — destino da v2
+- `_org-simulation-v2` fica arquivada como histórico operacional e referência de aprendizados únicos;
+- `_org-simulation-v3` é a única frente ativa de dogfood físico.
 
-Decisão pendente:
+## Próximo ciclo
 
-- arquivar `_org-simulation-v2` como histórico;
-- migrar apenas aprendizados ainda únicos;
-- ou manter temporariamente como comparação, com aviso explícito de que v3 é a frente ativa.
+1. **Revisão adversarial pós-F7:** pedir ao Claude Code/Fable 5 para revisar o diff desde `a970415b`, sem implementar, usando [`CLAUDE-CODE-FABLE-5-HANDOFF.md`](CLAUDE-CODE-FABLE-5-HANDOFF.md).
+2. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → actual`.
+3. **Segunda intent com outcome:** escolher uma intent que toque contrato ou objetivo operacional para provar que o mecanismo não está especial-cased no `intent-cta-upgrade`.
+4. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
+5. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
 
-Critério de aceite:
+## Comandos de aceite
 
-- não existem duas simulações ativas com modelos concorrentes;
-- README/tracker apontam uma única frente operacional.
+```bash
+cd _org-simulation-v3
+node _tools/validate.mjs
+node _tools/test-adversarial.mjs
+node _tools/check-local-repo-tests.mjs
+node _tools/adoption-journey.mjs
+node _tools/build-graph.mjs
+```

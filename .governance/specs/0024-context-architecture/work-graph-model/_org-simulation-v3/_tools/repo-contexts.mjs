@@ -171,17 +171,21 @@ export async function publishRepoContexts() {
   return contexts;
 }
 
-export async function validateRepoContexts(o) {
+export async function validateRepoContexts(o, options = {}) {
   const issues = [];
   const err = (rule, node, msg) => issues.push({ level: "error", rule, node, msg });
   const warn = (rule, node, msg) => issues.push({ level: "warn", rule, node, msg });
   const centralRepos = new Map((o.repos || []).map((repo) => [repo.id, repo]));
-  const expected = await deriveAllRepoContexts().catch((e) => {
-    err("repo-context", "repos", e.message);
-    return [];
-  });
+  const expected =
+    options.expectedContexts ||
+    (await deriveAllRepoContexts().catch((e) => {
+      err("repo-context", "repos", e.message);
+      return [];
+    }));
   const expectedByRepo = new Map(expected.map((ctx) => [ctx.repo, ctx]));
-  const publishedByRepo = new Map(loadPublishedContexts().map((ctx) => [ctx.repo, ctx]));
+  const publishedByRepo = new Map(
+    (options.publishedContexts || loadPublishedContexts()).map((ctx) => [ctx.repo, ctx])
+  );
 
   for (const repo of o.repos || []) {
     const ctx = expectedByRepo.get(repo.id);

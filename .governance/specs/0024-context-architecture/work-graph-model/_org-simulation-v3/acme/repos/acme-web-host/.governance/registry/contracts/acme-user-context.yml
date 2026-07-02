@@ -7,6 +7,22 @@ consumers:
   - acme-mfe-onboarding
   - acme-checkout
 compatibilityWindow: null
+interface:
+  kind: object
+  version: v3
+  fields:
+    - name: sessionId
+      type: string
+      required: true
+    - name: accountId
+      type: string
+      required: true
+    - name: userContextVersion
+      type: string
+      required: true
+    - name: entitlements
+      type: string[]
+      required: true
 revisionProposals:
   - id: acme-user-context-v4-coordenada
     revision: v4
@@ -24,7 +40,7 @@ revisionProposals:
 source:
   kind: central-contract
   file: acme/contracts/contracts.yml
-  contractHash: d82053b9718b
+  contractHash: 0f17dc00de60
 code:
   touchpoints:
     - src/index.mjs

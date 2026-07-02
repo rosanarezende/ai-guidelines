@@ -6,6 +6,14 @@ contracts:
     owner-repo: acme-web-host
     consumers: [acme-mfe-billing, acme-mfe-onboarding, acme-checkout]
     compatibility-window: null # abre quando a v4 (com quebra) publicar — ver intent-checkout-stack
+    interface:
+      kind: object
+      version: v3
+      fields:
+        - { name: sessionId, type: string, required: true }
+        - { name: accountId, type: string, required: true }
+        - { name: userContextVersion, type: string, required: true }
+        - { name: entitlements, type: "string[]", required: true }
     revision-proposals:
       - id: acme-user-context-v4-coordenada
         revision: v4
@@ -25,3 +33,17 @@ contracts:
     owner-repo: acme-analytics
     consumers: [acme-mfe-billing, acme-mfe-onboarding, acme-checkout, acme-checkout-api]
     compatibility-window: null
+    interface:
+      kind: event-schema
+      version: v1
+      fields:
+        - { name: name, type: string, required: true }
+        - { name: accountId, type: string, required: true }
+        - { name: occurredAt, type: iso-date-time, required: true }
+        - { name: properties, type: object, required: false }
+      events:
+        - billing_upgrade_viewed
+        - checkout_started
+        - checkout_completed
+        - onboarding_step_seen
+        - experiment_exposure

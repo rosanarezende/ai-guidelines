@@ -50,6 +50,7 @@ function contractPayload(contract) {
     ownerRepo: contract["owner-repo"],
     consumers: contract.consumers || [],
     compatibilityWindow: contract["compatibility-window"] ?? null,
+    interface: contract.interface || null,
     revisionProposals: contract["revision-proposals"] || [],
   };
 }
@@ -62,6 +63,7 @@ function expectedContract(contract) {
     ownerRepo: contract["owner-repo"],
     consumers: contract.consumers || [],
     compatibilityWindow: contract["compatibility-window"] ?? null,
+    interface: contract.interface || null,
     revisionProposals: contract["revision-proposals"] || [],
     source: {
       kind: "central-contract",
@@ -117,6 +119,7 @@ function checkClosedSchema(contract, node, issues) {
     "ownerRepo",
     "consumers",
     "compatibilityWindow",
+    "interface",
     "revisionProposals",
     "source",
     "code",
@@ -142,7 +145,7 @@ function checkClosedSchema(contract, node, issues) {
     err("repo-contract-evidence", "code.touchpoints precisa apontar para código do owner repo");
 }
 
-export function validateRepoContracts(o) {
+export function validateRepoContracts(o, options = {}) {
   const issues = [];
   const err = (rule, node, msg) => issues.push({ level: "error", rule, node, msg });
   const expected = deriveExpectedRepoContracts(o);
@@ -151,7 +154,7 @@ export function validateRepoContracts(o) {
 
   let published = [];
   try {
-    published = loadPublishedRepoContracts();
+    published = options.publishedContracts || loadPublishedRepoContracts();
   } catch (e) {
     err("repo-contract-parse", "repo-contracts", e.message);
     return issues;
@@ -168,15 +171,11 @@ export function validateRepoContracts(o) {
       err("repo-contract-orphan", node, "contrato local não existe em contracts.yml");
       continue;
     }
-    for (const key of ["schema", "revision", "ownerRepo", "compatibilityWindow"]) {
+    for (const key of ["schema", "revision", "ownerRepo", "compatibilityWindow", "interface"]) {
       const actual = contract[key] ?? null;
       const expectedValue = expectedContract[key] ?? null;
-      if (actual !== expectedValue)
-        err(
-          "repo-contract-stale",
-          node,
-          `${key}="${actual}" diverge do contrato central "${expectedValue}"`
-        );
+      if (JSON.stringify(stable(actual)) !== JSON.stringify(stable(expectedValue)))
+        err("repo-contract-stale", node, `${key} diverge do contrato central`);
     }
     if (!sameList(contract.consumers, expectedContract.consumers))
       err("repo-contract-stale", node, "consumers divergem do contrato central");

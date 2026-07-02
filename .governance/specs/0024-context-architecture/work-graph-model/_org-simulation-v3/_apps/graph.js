@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "ee900c87462e",
+  contentHash: "ad94ce6a65cf",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -1908,7 +1908,22 @@ window.GRAPH = {
         purpose: "create",
         desc: "elegibilidade + endpoint (o fate do spike decide: reusar × construir)",
         review: "interno",
-        status: "acknowledged",
+        status: "done",
+        owner: "lead-billing",
+        "started-at": "2027-01-06",
+        "base-revision": "acme-api-billing@ctx-v1",
+        "completed-at": "2027-01-12",
+        "source-commit": "git:api-billing-eligibility-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-billing",
+          result: "endpoint de elegibilidade coberto pela fixture de billing",
+        },
         source: {
           kind: "central-breakdown",
           file: "acme/intents/intent-cta-upgrade.yml",
@@ -1944,7 +1959,22 @@ window.GRAPH = {
         purpose: "operate",
         desc: "instrumenta com o schema EXISTENTE (consome sem revisão); pronto ANTES de ligar a flag",
         review: "externo: time-data",
-        status: "acknowledged",
+        status: "done",
+        owner: "lead-data",
+        "started-at": "2027-01-03",
+        "base-revision": "acme-analytics@ctx-v1",
+        "completed-at": "2027-01-10",
+        "source-commit": "git:analytics-baseline-cta-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-data",
+          result: "baseline e eventos de exposicao/conversao prontos antes da flag",
+        },
         source: {
           kind: "central-breakdown",
           file: "acme/intents/intent-cta-upgrade.yml",
@@ -1971,7 +2001,22 @@ window.GRAPH = {
         purpose: "sustain",
         desc: "expõe leitura de contas legadas p/ a elegibilidade — MONOLITO: o dono é o do MÓDULO",
         review: "externo: time-identity",
-        status: "acknowledged",
+        status: "done",
+        owner: "lead-identity",
+        "started-at": "2027-01-05",
+        "base-revision": "acme-core-api@ctx-v1",
+        "completed-at": "2027-01-11",
+        "source-commit": "git:core-api-accounts-seam-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/modules/accounts.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-identity",
+          result: "seam de contas legado exposto sem mover ownership do modulo",
+        },
         source: {
           kind: "central-breakdown",
           file: "acme/intents/intent-cta-upgrade.yml",
@@ -2008,7 +2053,22 @@ window.GRAPH = {
         purpose: "discover",
         desc: "EXPLORATION — dá p/ reusar o motor de elegibilidade que já existe? pergunta falsificável + fate",
         review: "interno",
-        status: "acknowledged",
+        status: "done",
+        owner: "lead-billing",
+        "started-at": "2027-01-03",
+        "base-revision": "acme-api-billing@ctx-v1",
+        "completed-at": "2027-01-06",
+        "source-commit": "git:api-billing-spike-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-billing",
+          result: "elegibilidade existente reaproveitada para o endpoint",
+        },
         source: {
           kind: "central-breakdown",
           file: "acme/intents/intent-cta-upgrade.yml",
@@ -2035,7 +2095,22 @@ window.GRAPH = {
         purpose: "create",
         desc: "UI do CTA atrás da flag — constrói em paralelo com mock; a integração espera o endpoint",
         review: "interno",
-        status: "acknowledged",
+        status: "done",
+        owner: "lead-billing",
+        "started-at": "2027-01-08",
+        "base-revision": "acme-mfe-billing@ctx-v1",
+        "completed-at": "2027-01-18",
+        "source-commit": "git:mfe-billing-cta-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-billing",
+          result: "CTA renderiza atras de flag e integra com quote de billing",
+        },
         source: {
           kind: "central-breakdown",
           file: "acme/intents/intent-cta-upgrade.yml",
@@ -2303,11 +2378,12 @@ window.GRAPH = {
         ownerRepo: "acme-design-system",
         consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
         compatibilityWindow: null,
+        interface: null,
         revisionProposals: [],
         source: {
           kind: "central-contract",
           file: "acme/contracts/contracts.yml",
-          contractHash: "1f2dfd22c16e",
+          contractHash: "a99d3b5a3b91",
         },
         code: {
           touchpoints: ["src/index.mjs"],
@@ -2333,11 +2409,44 @@ window.GRAPH = {
           "acme-checkout-api",
         ],
         compatibilityWindow: null,
+        interface: {
+          kind: "event-schema",
+          version: "v1",
+          fields: [
+            {
+              name: "name",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "accountId",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "occurredAt",
+              type: "iso-date-time",
+              required: true,
+            },
+            {
+              name: "properties",
+              type: "object",
+              required: false,
+            },
+          ],
+          events: [
+            "billing_upgrade_viewed",
+            "checkout_started",
+            "checkout_completed",
+            "onboarding_step_seen",
+            "experiment_exposure",
+          ],
+        },
         revisionProposals: [],
         source: {
           kind: "central-contract",
           file: "acme/contracts/contracts.yml",
-          contractHash: "734a9cd0da7f",
+          contractHash: "708818ce198b",
         },
         code: {
           touchpoints: ["src/index.mjs"],
@@ -2358,6 +2467,32 @@ window.GRAPH = {
         ownerRepo: "acme-web-host",
         consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
         compatibilityWindow: null,
+        interface: {
+          kind: "object",
+          version: "v3",
+          fields: [
+            {
+              name: "sessionId",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "accountId",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "userContextVersion",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "entitlements",
+              type: "string[]",
+              required: true,
+            },
+          ],
+        },
         revisionProposals: [
           {
             id: "acme-user-context-v4-coordenada",
@@ -2374,7 +2509,7 @@ window.GRAPH = {
         source: {
           kind: "central-contract",
           file: "acme/contracts/contracts.yml",
-          contractHash: "d82053b9718b",
+          contractHash: "0f17dc00de60",
         },
         code: {
           touchpoints: ["src/index.mjs"],
@@ -2394,6 +2529,32 @@ window.GRAPH = {
         "owner-repo": "acme-web-host",
         consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
         "compatibility-window": null,
+        interface: {
+          kind: "object",
+          version: "v3",
+          fields: [
+            {
+              name: "sessionId",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "accountId",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "userContextVersion",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "entitlements",
+              type: "string[]",
+              required: true,
+            },
+          ],
+        },
         "revision-proposals": [
           {
             id: "acme-user-context-v4-coordenada",
@@ -2453,6 +2614,39 @@ window.GRAPH = {
           "acme-checkout-api",
         ],
         "compatibility-window": null,
+        interface: {
+          kind: "event-schema",
+          version: "v1",
+          fields: [
+            {
+              name: "name",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "accountId",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "occurredAt",
+              type: "iso-date-time",
+              required: true,
+            },
+            {
+              name: "properties",
+              type: "object",
+              required: false,
+            },
+          ],
+          events: [
+            "billing_upgrade_viewed",
+            "checkout_started",
+            "checkout_completed",
+            "onboarding_step_seen",
+            "experiment_exposure",
+          ],
+        },
       },
     },
     {
@@ -2746,6 +2940,48 @@ window.GRAPH = {
         attester: "acme-data-pipeline",
         "contributes-to": "obj-trust",
         status: "active",
+      },
+    },
+    {
+      id: "out-cta-upgrade-2027q1",
+      type: "outcome",
+      label: "conversion-rate: +2.4 %",
+      data: {
+        id: "out-cta-upgrade-2027q1",
+        "emitted-by": "intent-cta-upgrade",
+        source: "acme-analytics/conversion-rate@warehouse-rev42",
+        window: {
+          start: "2027-01-01",
+          end: "2027-03-31",
+        },
+        metric: "conversion-rate",
+        value: "+2.4 %",
+        aggregation: "avg",
+        "attested-by": "acme-analytics",
+        revision: "warehouse@rev42",
+        "contract-revisions": [],
+        "contributes-to": "tgt-billing-conv",
+        envelope: {
+          actor: "ana-dev",
+          authority: "pm-growth",
+          "issued-at": "2027-04-02",
+          "idempotency-key": "out-cta-upgrade-2027q1",
+          nonce: "nonce-out-cta-upgrade-2027q1",
+        },
+      },
+    },
+    {
+      id: "req-billing-read-own-context",
+      type: "access-request",
+      label: "read-context: acme-mfe-billing",
+      data: {
+        id: "req-billing-read-own-context",
+        actor: "lead-billing",
+        action: "read-context",
+        repo: "acme-mfe-billing",
+        decision: "allow",
+        via: "host-local-query",
+        reason: "lead do time dono consulta o contexto publicado do próprio repo",
       },
     },
     {
@@ -5257,6 +5493,48 @@ window.GRAPH = {
       source: "tgt-identity-consent",
       target: "acme-data-pipeline",
       type: "attested-by",
+    },
+    {
+      id: "emits:intent-cta-upgrade->out-cta-upgrade-2027q1",
+      source: "intent-cta-upgrade",
+      target: "out-cta-upgrade-2027q1",
+      type: "emits",
+    },
+    {
+      id: "contributes-to:out-cta-upgrade-2027q1->tgt-billing-conv",
+      source: "out-cta-upgrade-2027q1",
+      target: "tgt-billing-conv",
+      type: "contributes-to",
+    },
+    {
+      id: "measures:out-cta-upgrade-2027q1->conversion-rate",
+      source: "out-cta-upgrade-2027q1",
+      target: "conversion-rate",
+      type: "measures",
+    },
+    {
+      id: "attested-by:out-cta-upgrade-2027q1->acme-analytics",
+      source: "out-cta-upgrade-2027q1",
+      target: "acme-analytics",
+      type: "attested-by",
+    },
+    {
+      id: "authorizes-mutation:pm-growth->out-cta-upgrade-2027q1",
+      source: "pm-growth",
+      target: "out-cta-upgrade-2027q1",
+      type: "authorizes-mutation",
+    },
+    {
+      id: "requests:lead-billing->req-billing-read-own-context",
+      source: "lead-billing",
+      target: "req-billing-read-own-context",
+      type: "requests",
+    },
+    {
+      id: "allowed-read:req-billing-read-own-context->acme-mfe-billing",
+      source: "req-billing-read-own-context",
+      target: "acme-mfe-billing",
+      type: "allowed-read",
     },
     {
       id: "authorizes:obj-revenue->intent-checkout-1click",

@@ -8,11 +8,33 @@ consumers:
   - acme-checkout
   - acme-checkout-api
 compatibilityWindow: null
+interface:
+  kind: event-schema
+  version: v1
+  fields:
+    - name: name
+      type: string
+      required: true
+    - name: accountId
+      type: string
+      required: true
+    - name: occurredAt
+      type: iso-date-time
+      required: true
+    - name: properties
+      type: object
+      required: false
+  events:
+    - billing_upgrade_viewed
+    - checkout_started
+    - checkout_completed
+    - onboarding_step_seen
+    - experiment_exposure
 revisionProposals: []
 source:
   kind: central-contract
   file: acme/contracts/contracts.yml
-  contractHash: 734a9cd0da7f
+  contractHash: 708818ce198b
 code:
   touchpoints:
     - src/index.mjs

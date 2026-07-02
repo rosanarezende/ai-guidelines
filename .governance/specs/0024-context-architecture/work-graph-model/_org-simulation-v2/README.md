@@ -1,5 +1,9 @@
 # `_org-simulation-v2` — simulação do modelo de trabalho (grafo de governança)
 
+> **STATUS: HISTÓRICO / ARQUIVADO COMO FRENTE OPERACIONAL (2026-07-02).**
+> A frente ativa é [`../_org-simulation-v3/`](../_org-simulation-v3/README.md), que materializa o modelo v2 limpo em repos existentes com código MVP, projections publicadas, outcomes e validadores fail-closed.
+> Esta v2 permanece versionada para consulta de aprendizados ainda úteis, especialmente o matcher plugável e a app de autoria, mas não deve ser usada como prova operacional atual do modelo.
+
 > Laboratório **FILE-FIRST** que materializa, ponta a ponta, o modelo de trabalho da Spec 0024 (o "grafo de
 > governança") numa org fictícia e **anonimizada** (`acme-*`). **Não é o produto** — é onde o modelo é
 > construído, validado e visualizado, **uma peça por vez**, confirmando/ajustando os templates conforme a

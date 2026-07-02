@@ -7,11 +7,12 @@ consumers:
   - acme-mfe-onboarding
   - acme-checkout
 compatibilityWindow: null
+interface: null
 revisionProposals: []
 source:
   kind: central-contract
   file: acme/contracts/contracts.yml
-  contractHash: 1f2dfd22c16e
+  contractHash: a99d3b5a3b91
 code:
   touchpoints:
     - src/index.mjs

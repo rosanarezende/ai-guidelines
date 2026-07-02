@@ -2,7 +2,7 @@
 
 > **O que é:** a org-exemplo da P12 (acme — 2 objetivos · 2 áreas · 5 times · 13 repos · 3 contratos · 7 intents · 3 reativos) instanciada como **arquivos de verdade**, com **validador executável** (o começo do resolver da P11) e **apps dedicados** de visualização/iteração. Decidida pela owner em 2026-07-02: "quero começar a validar de ponta a ponta".
 >
-> **Autoridade:** o MODELO mora em [`../model.yml`](../model.yml) (SSOT v2 limpo aplicado). Esta sim **valida** o modelo — quando a sim contradiz o modelo, ou se corrige a sim, ou se abre provocação no modelo. Substitui a `_org-simulation-v2` como frente ativa (a v2 fica até decisão de arquivamento). Próximos passos operacionais: [`NEXT-STEPS.md`](NEXT-STEPS.md).
+> **Autoridade:** o MODELO mora em [`../model.yml`](../model.yml) (SSOT v2 limpo aplicado). Esta sim **valida** o modelo — quando a sim contradiz o modelo, ou se corrige a sim, ou se abre provocação no modelo. Substitui a `_org-simulation-v2` como frente ativa; a v2 ficou arquivada como histórico e fonte de aprendizados de matcher/app. Próximos passos operacionais: [`NEXT-STEPS.md`](NEXT-STEPS.md).
 
 ## O plano ponta-a-ponta (fases)
 
@@ -15,7 +15,8 @@
 | F4   | **app das empresas** — `_apps/company/` : a mesma org vista pelos **perfis de governança** (grande=full · média=compact · solo) + os 2 dashboards derivados (acompanhamento e stakeholders)                                                                                                                                                         | ✅     |
 | F5   | **rodada Codex** — FEITA: 16/16 findings aceitos; reconciliação em [`_reviews/2026-07-02-f5-adversarial-review.md`](_reviews/2026-07-02-f5-adversarial-review.md) (veredito: a sim ainda aceita texto bem-formado como evidência — blocos I–N aguardam gate)                                                                                        | ✅     |
 | F6   | aplicar os blocos da F5 NA ORDEM (**I/J/K/L/M/N aplicados**: schema fail-closed + resolver + authority/envelope + self-attested targets com colapso logado + fila de revisão de contrato/deps cross-intent + derivação/drift/follow-ups/matcher + vendor/CSP) + substrate repo-first (código MVP, contextos, repo-work ack, repo-contract registry) | ✅     |
-| F7   | outcomes reais + lifecycle repo-local + aprofundamento dos repos críticos (`NEXT-STEPS.md`)                                                                                                                                                                                                                                                         | ⬜     |
+| F7   | outcomes reais + lifecycle repo-local + aprofundamento dos repos críticos (`NEXT-STEPS.md`): primeiro outcome válido, peças `done` com evidência, testes locais, interfaces de contrato, trust-policy e fixtures adversariais novas                                                                                                                 | ✅     |
+| F8   | iteração assistida com Claude Code/Fable 5: revisão da sim robusta, walkthrough da owner e próxima fatia incremental                                                                                                                                                                                                                                | ⬜     |
 
 ## Como rodar
 
@@ -32,6 +33,7 @@ node _tools/publish-repo-works.mjs # publica acks repo-local p/ as peças do bre
 node _tools/check-repo-works.mjs # falha se intent.works e repo/.governance/works divergirem
 node _tools/publish-repo-contracts.mjs # publica registry/contracts nos owner repos
 node _tools/check-repo-contracts.mjs # falha se contracts.yml e registry local divergirem
+node _tools/check-local-repo-tests.mjs # roda os testes locais dos repos criticos
 node _tools/adoption-journey.mjs # dogfood completo da adoção repo-existente → host agregado
 node _tools/build-graph.mjs     # regenera _apps/graph.js (grafo + issues embutidos)
 node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada DEVE ser pega
@@ -57,18 +59,24 @@ node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada D
 8. `node _tools/check-repo-contexts.mjs` prova que `repos.yml`, manifestos e contexts não divergiram.
 9. `node _tools/check-repo-works.mjs` prova que o breakdown central e os repos não divergiram.
 10. `node _tools/check-repo-contracts.mjs` prova que `contracts.yml` e os owner repos não divergiram.
-11. `node _tools/adoption-journey.mjs` executa o dogfood completo.
+11. `node _tools/check-local-repo-tests.mjs` prova comportamento nos repos críticos sem depender só do manifesto.
+12. `node _tools/adoption-journey.mjs` executa o dogfood completo.
 
-## Decisões de desenho (v1)
+## Decisões de desenho
 
 - **File-first, um YAML por conceito** (`objectives.yml`, `teams.yml`…) + **repos com sidecar proprio** (`acme/repos/<repo>/.governance/manifest.yml` → `context.json`). O `repos.yml` central e inventario; a publicacao por repo impede que ele vire a unica fonte de verdade.
 - **Adoção por empresa existente:** `_tools/adopt-existing-repos.mjs` faz scaffold minimo e gera `capability-candidates.yml` como rascunho revisavel. `_tools/prepare-capability-review.mjs` monta um pacote de revisão por repo com evidência estática para IA/humano. A extração por IA fica como canal assistivo (template em `_templates/capability-extraction-prompt.md`), nunca como mutação silenciosa do manifesto.
 - **Breakdown reconhecido pelo repo:** `intent.works` continua sendo a quebra central, mas cada repo publica `.governance/works/<intent>--<work>.yml` com hash do breakdown e touchpoint de código. Se a peça muda e o repo não reconhece a nova versão, o host falha em `repo-work-stale`.
+- **Lifecycle repo-local:** o acknowledgement não é só presença. Peças podem estar `acknowledged`, `active`, `blocked`, `done` ou `dropped`; `done` exige evidência de código/teste e verificação, e outcome não entra no dashboard enquanto peça necessária estiver aberta ou descartada.
 - **Contratos reconhecidos pelo owner repo:** `contracts.yml` continua sendo a visão coordenada da org, mas cada owner repo publica `.governance/registry/contracts/<contract>.yml` com hash do contrato central e touchpoint de código. Se a revisão, consumers ou owner mudam sem publicação local, o host falha em `repo-contract-stale`.
+- **Interfaces de contrato são parte do contrato:** o registry local replica também a interface/payload versionado. A sim não trata contrato como label solto.
+- **Outcome real é evento governado:** `outcomes.yml` só alimenta target/dashboard quando o resolver fecha fonte, janela, métrica, agregação, revisão, contratos derivados, envelope, idempotência, nonce e independência de atestação.
+- **Trust-policy físico:** `acme/trust-policy.yml` materializa ACL local, fallback de matcher/egress, revogações, quarantine de segredo e independência do oráculo. O validador rejeita política declarativa sem referência resolvível.
 - **Apps sem build** (React UMD + htm + Cytoscape UMD vendorizados em `_apps/vendor/`) — iteração sem toolchain e sem CDN em runtime; `node _tools/check-app-security.mjs` confere hashes + CSP.
 - **`graph.js` gerado** (window.GRAPH) em vez de fetch — `file://` não deixa fetch; mesmo truque do `data.js`.
-- O validador implementa **um subconjunto honesto** das regras da P10/P11/P12 (está listado nele); o resolver completo do outcome entra quando os primeiros outcomes forem publicados (F6).
+- O validador implementa **um subconjunto honesto** das regras da P10/P11/P12/P13: schema fail-closed, resolver de outcome, repo-first substrate, lifecycle repo-work, contrato local, drift de contexto e controles físicos de confiança. O que não está mecanizado fica registrado como próxima fatia, não como campo cerimonial.
 - **Self-attested target não é maquiado:** se a fonte que atesta pertence ao próprio time medido, o target exige `attestation-collapse` aprovado por sponsor; o dashboard mantém o badge/warning em vez de fingir independência.
 - **Contenção de contrato não é nota solta:** se múltiplas intents mudam o mesmo contrato, o contrato precisa de `revision-proposals` com intents cobertas, consumers afetados, owner-approval resolvido e decision não-pendente; deps cross-intent resolvem e o grafo global não pode ciclar.
 - **Derivação não vira campo editável:** observed approach/signal/form/collapse são calculados; drift é warning. Follow-ups de incidente apontam para `standalone:<id>`/`proposal:<id>` e o matcher registra score/unknown/evidence/decisão.
 - **Supply chain local:** os apps de decisão não carregam `http(s)`; dependências vendorizadas têm hash versionado e CSP bloqueia conexão externa.
+- **Handoff para Claude Code/Fable 5:** [`CLAUDE-CODE-FABLE-5-HANDOFF.md`](CLAUDE-CODE-FABLE-5-HANDOFF.md) registra como usar o modelo novo como revisor/implementador de próxima fatia sem reabrir decisões já mecanizadas.

@@ -1,7 +1,8 @@
 // org.mjs — loader + validador da org file-first. Estrutura: SCHEMAS (fail-closed) →
 // load → checagem de schema → checagem semântica → resolver. Barra do red-team:
 // regra sem executor é cerimônia; texto bem-formado NÃO é evidência.
-import { readFileSync, readdirSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
@@ -9,6 +10,7 @@ import { parse } from "yaml";
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const ACME = path.join(here, "..", "acme");
 const load = (p) => parse(readFileSync(path.join(ACME, p), "utf8"));
+const loadOptional = (p, fallback) => (existsSync(path.join(ACME, p)) ? load(p) : fallback);
 
 export function loadOrg() {
   return {
@@ -23,6 +25,11 @@ export function loadOrg() {
     repos: load("repos/repos.yml").repos,
     contracts: load("contracts/contracts.yml").contracts,
     proposals: load("intake/proposals.yml").proposals,
+    policy: loadOptional("trust-policy.yml", {
+      "access-requests": [],
+      "authority-revocations": [],
+      "secret-quarantine": [],
+    }),
     intents: readdirSync(path.join(ACME, "intents"))
       .filter((f) => f.endsWith(".yml"))
       .map((f) => load("intents/" + f)),
@@ -42,6 +49,14 @@ const CONTRACT_DECISIONS = ["single-revision", "sequenced-windows", "split", "re
 const ROUTING_DECISIONS = ["followed", "overrode"];
 const FOLLOWUP_KINDS = ["fix", "proposal"];
 const OPERATIONAL_METRICS = ["p99-latency", "incident-count", "cost-to-serve"];
+const ACCESS_ACTIONS = ["read-context", "matcher-query"];
+const ACCESS_DECISIONS = ["allow", "deny"];
+const SECRET_PATTERNS = [
+  /\bsk-[A-Za-z0-9_-]{8,}\b/,
+  /\bghp_[A-Za-z0-9_]{8,}\b/,
+  /\bAKIA[0-9A-Z]{12,}\b/,
+  /\bCPF[:=]?\s*\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/i,
+];
 
 const SCHEMAS = {
   objective: {
@@ -86,7 +101,12 @@ const SCHEMAS = {
   module: { required: ["id", "owner", "caps"], optional: [] },
   contract: {
     required: ["id", "revision", "owner-repo", "consumers"],
-    optional: ["compatibility-window", "revision-proposals"],
+    optional: ["compatibility-window", "revision-proposals", "interface"],
+  },
+  "contract-interface": {
+    required: ["kind", "version"],
+    optional: ["fields", "events"],
+    enums: { kind: ["object", "event-schema"] },
   },
   "contract-revision-proposal": {
     required: ["id", "revision", "breaking", "intents", "consumers", "owner-approval", "decision"],
@@ -128,8 +148,18 @@ const SCHEMAS = {
   },
   routing: {
     required: ["matcher", "query", "selected-repo", "decision", "decided-by", "suggestions"],
-    optional: ["reason"],
+    optional: ["reason", "egress", "fallback"],
     enums: { decision: ROUTING_DECISIONS },
+  },
+  egress: {
+    required: ["classification", "allowed"],
+    optional: ["provider"],
+    enums: { classification: ["public", "internal", "restricted"], allowed: [true, false] },
+  },
+  "matcher-fallback": {
+    required: ["mode", "recorded-by", "reason"],
+    optional: [],
+    enums: { mode: ["local-index", "manual-triage", "break-glass"] },
   },
   "matcher-suggestion": {
     required: ["repo", "score", "unknown", "evidence"],
@@ -169,8 +199,25 @@ const SCHEMAS = {
     enums: { kind: ["sponsor", "role"] },
   },
   envelope: {
-    required: ["actor", "authority", "idempotency-key"],
+    required: ["actor", "authority", "idempotency-key", "issued-at", "nonce"],
     optional: ["base-revision", "source-commit"],
+  },
+  "access-request": {
+    required: ["id", "actor", "action", "repo", "decision", "reason"],
+    optional: ["via"],
+    enums: { action: ACCESS_ACTIONS, decision: ACCESS_DECISIONS },
+  },
+  "authority-revocation": {
+    required: ["authority", "revoked-at", "reason"],
+    optional: [],
+  },
+  "secret-quarantine": {
+    required: ["hash", "reason", "approved-by"],
+    optional: [],
+  },
+  "oracle-independence": {
+    required: ["attack-by", "expected-by", "approved-by"],
+    optional: ["corpus"],
   },
 };
 
@@ -228,6 +275,7 @@ function checkAllSchemas(o, issues) {
   }
   for (const x of o.contracts) {
     checkSchema("contract", x, x.id, issues);
+    if (x.interface) checkSchema("contract-interface", x.interface, `${x.id}::interface`, issues);
     for (const p of x["revision-proposals"] || [])
       checkSchema("contract-revision-proposal", p, `${x.id}::${p.id}`, issues);
   }
@@ -241,6 +289,10 @@ function checkAllSchemas(o, issues) {
     checkSchema("standalone", x, x.id, issues);
     if (x.routing) {
       checkSchema("routing", x.routing, `${x.id}::routing`, issues);
+      if (x.routing.egress)
+        checkSchema("egress", x.routing.egress, `${x.id}::routing.egress`, issues);
+      if (x.routing.fallback)
+        checkSchema("matcher-fallback", x.routing.fallback, `${x.id}::routing.fallback`, issues);
       for (const [k, s] of (x.routing.suggestions || []).entries())
         checkSchema("matcher-suggestion", s, `${x.id}::routing.suggestions[${k}]`, issues);
     }
@@ -252,6 +304,48 @@ function checkAllSchemas(o, issues) {
     checkSchema("outcome", x, x.id, issues);
     if (x.envelope) checkSchema("envelope", x.envelope, `${x.id}::envelope`, issues);
   }
+  for (const x of o.policy?.["access-requests"] || [])
+    checkSchema("access-request", x, x.id, issues);
+  for (const x of o.policy?.["authority-revocations"] || [])
+    checkSchema("authority-revocation", x, `${x.authority || "revocation"}::revocation`, issues);
+  for (const x of o.policy?.["secret-quarantine"] || [])
+    checkSchema("secret-quarantine", x, `${x.hash || "secret"}::quarantine`, issues);
+  if (o.policy?.["oracle-independence"])
+    checkSchema(
+      "oracle-independence",
+      o.policy["oracle-independence"],
+      "oracle-independence",
+      issues
+    );
+}
+
+function secretHash(value) {
+  return createHash("sha256").update(String(value)).digest("hex").slice(0, 12);
+}
+
+function collectSecretFindings(value, trail = [], findings = []) {
+  if (typeof value === "string") {
+    for (const pattern of SECRET_PATTERNS) {
+      if (pattern.test(value)) {
+        findings.push({ path: trail.join("."), value, hash: secretHash(value) });
+        break;
+      }
+    }
+    return findings;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) =>
+      collectSecretFindings(item, [...trail, String(index)], findings)
+    );
+    return findings;
+  }
+  if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(value)) {
+      if (trail.includes("secret-quarantine")) continue;
+      collectSecretFindings(item, [...trail, key], findings);
+    }
+  }
+  return findings;
 }
 
 export function deriveIntent(it, o) {
@@ -323,6 +417,7 @@ export function validateOrg(o) {
     standalone: new Set(o.standalone.map((x) => x.id)),
   };
   const repoById = Object.fromEntries(o.repos.map((r) => [r.id, r]));
+  const teamById = Object.fromEntries(o.teams.map((t) => [t.id, t]));
   const targetById = Object.fromEntries(o.targets.map((t) => [t.id, t]));
   const metricById = Object.fromEntries(o.metrics.map((m) => [m.id, m]));
   const intentById = Object.fromEntries(o.intents.map((i) => [i.id, i]));
@@ -455,6 +550,62 @@ export function validateOrg(o) {
         "profile-approver",
         "org",
         `approved-by "${pd["approved-by"]}" (${approver.kind}${approver.of ? " de " + approver.of : ""}) está DENTRO do escopo — o perfil da org inteira exige sponsor`
+      );
+  }
+
+  // L9 proporcional — consultas internas também têm fronteira: não basta bloquear egress externo.
+  const roleCanAccessRepo = (authorityId, repoId) => {
+    const authority = authById[authorityId];
+    const repo = repoById[repoId];
+    if (!authority || !repo) return false;
+    if (authority.kind === "sponsor") return true;
+    if (authority.of === repo.owner) return true;
+    const ownerTeam = teamById[repo.owner];
+    if (ids.area.has(authority.of) && ownerTeam?.area === authority.of) return true;
+    return false;
+  };
+  for (const req of o.policy?.["access-requests"] || []) {
+    resolveAuth(req.actor, req.id, "actor");
+    if (!ids.repo.has(req.repo)) err("query-acl", req.id, `repo "${req.repo}" não existe`);
+    const allowed = roleCanAccessRepo(req.actor, req.repo);
+    if (req.decision === "allow" && !allowed)
+      err(
+        "query-acl",
+        req.id,
+        `actor "${req.actor}" não tem autoridade para ${req.action} em "${req.repo}" — host local não pode virar confused deputy`
+      );
+    if (req.decision === "deny" && allowed)
+      warn(
+        "query-acl",
+        req.id,
+        `actor "${req.actor}" teria acesso derivado a "${req.repo}", mas a request foi negada — verifique se é política temporária`
+      );
+  }
+
+  for (const rev of o.policy?.["authority-revocations"] || []) {
+    resolveAuth(rev.authority, `${rev.authority || "revocation"}::revocation`, "authority");
+  }
+
+  const oracle = o.policy?.["oracle-independence"];
+  if (oracle) {
+    const actors = [oracle["attack-by"], oracle["expected-by"], oracle["approved-by"]];
+    if (new Set(actors).size !== actors.length)
+      err(
+        "oracle-independence",
+        "oracle-independence",
+        "attack-by, expected-by e approved-by precisam ser autores distintos"
+      );
+  }
+
+  const quarantinedSecrets = new Set((o.policy?.["secret-quarantine"] || []).map((x) => x.hash));
+  for (const q of o.policy?.["secret-quarantine"] || [])
+    resolveAuth(q["approved-by"], q.hash, "approved-by");
+  for (const finding of collectSecretFindings(o, ["org"])) {
+    if (!quarantinedSecrets.has(finding.hash))
+      err(
+        "secret-quarantine",
+        finding.path || "org",
+        `possível segredo/identificador sensível detectado (hash ${finding.hash}) sem quarantine aprovada`
       );
   }
 
@@ -709,6 +860,20 @@ export function validateOrg(o) {
           s.id,
           `routing.decided-by "${s.routing["decided-by"]}" não resolve no registry`
         );
+      if (s.routing.egress?.allowed === false && String(s.routing.matcher).includes("external")) {
+        if (!s.routing.fallback)
+          err(
+            "matcher-fallback",
+            s.id,
+            "matcher externo bloqueado por egress exige fallback rastreável (local-index/manual-triage/break-glass)"
+          );
+        else if (!authById[s.routing.fallback["recorded-by"]])
+          err(
+            "refs-authority",
+            s.id,
+            `routing.fallback.recorded-by "${s.routing.fallback["recorded-by"]}" não resolve no registry`
+          );
+      }
       const suggestions = s.routing.suggestions || [];
       if (!Array.isArray(suggestions) || suggestions.length === 0)
         err("matcher-routing", s.id, "routing sem suggestions — matcher sem evidência");
@@ -768,6 +933,11 @@ export function validateOrg(o) {
 // ═════════ RESOLVER DE OUTCOMES (bloco J da F5) — FAIL-CLOSED p/ somar, VISÍVEL p/ exibir ═════════
 // O único insumo do target.actual é um outcome que passe AQUI. Texto bem-formado não é evidência.
 function resolveOutcomes(o, ix, { err, warn }) {
+  const seenIdempotency = new Map();
+  const seenNonce = new Map();
+  const revokedAtByAuthority = new Map(
+    (o.policy?.["authority-revocations"] || []).map((r) => [r.authority, r["revoked-at"]])
+  );
   for (const out of o.outcomes) {
     // refs resolvem
     if (!ix.ids.metric.has(out.metric)) err("refs", out.id, `metric "${out.metric}" não existe`);
@@ -870,7 +1040,7 @@ function resolveOutcomes(o, ix, { err, warn }) {
 
     // envelope L8 mínimo (conteúdo; a RESOLUÇÃO da authority entra no bloco K)
     const env = out.envelope || {};
-    for (const f of ["actor", "authority", "idempotency-key"])
+    for (const f of ["actor", "authority", "idempotency-key", "issued-at", "nonce"])
       if (!env[f])
         err("envelope", out.id, `envelope sem "${f}" — actual-publish é mutação PERIGOSA`);
     if (env.authority && !ix.authById[env.authority])
@@ -879,5 +1049,30 @@ function resolveOutcomes(o, ix, { err, warn }) {
         out.id,
         `envelope.authority "${env.authority}" não resolve no registry (bloco K)`
       );
+    if (env.authority && env["issued-at"] && revokedAtByAuthority.has(env.authority)) {
+      const revokedAt = revokedAtByAuthority.get(env.authority);
+      if (String(env["issued-at"]) >= String(revokedAt))
+        err(
+          "authority-revoked",
+          out.id,
+          `authority "${env.authority}" foi revogada em ${revokedAt}; envelope emitido em ${env["issued-at"]}`
+        );
+    }
+    if (env["idempotency-key"]) {
+      const previous = seenIdempotency.get(env["idempotency-key"]);
+      if (previous)
+        err(
+          "envelope-replay",
+          out.id,
+          `idempotency-key reutilizada por "${previous}" — replay/duplicata`
+        );
+      seenIdempotency.set(env["idempotency-key"], out.id);
+    }
+    if (env.nonce) {
+      const previous = seenNonce.get(env.nonce);
+      if (previous)
+        err("envelope-replay", out.id, `nonce reutilizado por "${previous}" — replay/duplicata`);
+      seenNonce.set(env.nonce, out.id);
+    }
   }
 }

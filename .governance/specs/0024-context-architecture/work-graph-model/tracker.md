@@ -2,7 +2,7 @@
 
 > **SSOT vivo desta frente.** Síntese **refinada** do que aprendemos na v1 ([`tracker-v1.md`](tracker-v1.md)) — sem o histórico de "era isso → virou isso". As 9 lentes vão do **mais amplo** (propósito) ao **mais genérico** (primitivos: dimensões · arestas · camadas físicas · o envelope transacional · as fronteiras de confiança).
 >
-> **▶ ESTADO ATUAL (2026-07-02):** o modelo vive em [`model.yml`](model.yml) (**SSOT v2 limpo aplicado**). O enum antigo `strategy` foi absorvido: `intent.approach = validate-first|direct` + `signal = none|touches-contract|operational-target`; `execution-unit` usa os nomes finais (`delivery-slice`, `graduation`, `release-rollout`, `discovery`). As antigas open questions Q-strategy/Q-collapse/Q-discover-level/Q-names estão fechadas no próprio SSOT. A org simulada v3 virou a frente ativa de dogfood físico: 13 repos acme com código MVP, sidecars `.governance`, `context.json`, repo-work acknowledgements e repo-contract registries; o host valida stale/missing por resolver fail-closed e fixtures adversariais. **Este tracker é EMBASAMENTO** (o porquê e as lentes), não autoridade. O `_map/` é GERADO do `model.yml` (`generate.mjs` · `--check` semântico · coverage manifest). Próxima fase: publicar outcomes reais e mecanizar lifecycle das peças repo-local para provar valor ponta a ponta.
+> **▶ ESTADO ATUAL (2026-07-02):** o modelo vive em [`model.yml`](model.yml) (**SSOT v2 limpo aplicado**). O enum antigo `strategy` foi absorvido: `intent.approach = validate-first|direct` + `signal = none|touches-contract|operational-target`; `execution-unit` usa os nomes finais (`delivery-slice`, `graduation`, `release-rollout`, `discovery`). As antigas open questions Q-strategy/Q-collapse/Q-discover-level/Q-names estão fechadas no próprio SSOT. A org simulada v3 é a frente ativa de dogfood físico: 13 repos acme com código MVP, sidecars `.governance`, `context.json`, repo-work lifecycle, repo-contract registries com interface, trust-policy, primeiro outcome real e fixtures adversariais; o host valida stale/missing/open/replay por resolver fail-closed. **Este tracker é EMBASAMENTO** (o porquê e as lentes), não autoridade. O `_map/` é GERADO do `model.yml` (`generate.mjs` · `--check` semântico · coverage manifest). Próxima fase: revisão/walkthrough pós-F7 e uso de Claude Code/Fable 5 para auditar a sim robusta antes da próxima fatia.
 > **Regras:** recência vence · conferir o já-decidido antes de desenhar · uma pergunta por vez · linguagem simples · docs externos **inspiram, não definem** (nem se versionam/citam) · **modelar todos os fluxos** (a implementação se faseia em [`features.md`](features.md), o modelo não).
 > Org fictícia ANONIMIZADA (`acme-*`). 🟢 = decidido · 🔶 = a estressar. Não-autoridade; em divergência vencem `state.yml`/gates/Git.
 
@@ -14,10 +14,10 @@
 
 1. ✅ **Fechar o desenho do modelo principal** — Q-strategy/Q-collapse/Q-discover-level/Q-names fechadas no `model.yml`: approach/signal aplicado, collapse-rule final, `discovery` adicionada, nomes finais aplicados.
 2. ✅ **Dogfood físico repo-first** — v3 materializa repos existentes com código MVP + sidecars; host agrega projeções publicadas e valida `context.json`, `repo-work` e `repo-contract`.
-3. 🚧 **Publicar outcomes reais** — escolher uma intent simples e fechar `outcomes.yml` até o dashboard: source/revision/window/attester/envelope/contract-revisions resolvidos.
-4. 🚧 **Lifecycle repo-local** — peças reconhecidas pelos repos precisam transicionar `acknowledged → active → done|blocked|dropped`; outcome não deve somar se a peça necessária não fechou.
-5. 🚧 **Aprofundar fidelidade dos repos** — 2–3 repos críticos com testes locais, schemas/eventos/contratos mais concretos, flags e drift código↔governança falsificável.
-6. ⬜ **Re-validação independente (Codex/owner)** — re-percorrer as jornadas big/mid/trio/solo/ciclo anual com o SSOT limpo e a v3 física.
+3. ✅ **Publicar outcomes reais** — `intent-cta-upgrade` fecha `outcomes.yml` até o dashboard: source/revision/window/attester/envelope/contract-revisions resolvidos.
+4. ✅ **Lifecycle repo-local** — peças reconhecidas pelos repos transicionam `acknowledged → active → done|blocked|dropped`; outcome não soma se a peça necessária não fechou.
+5. ✅ **Aprofundar fidelidade dos repos** — repos críticos têm testes locais, schemas/eventos/contratos concretos e drift código↔governança falsificável.
+6. ⬜ **Re-validação independente (Claude Code/Fable 5 + owner)** — re-percorrer as jornadas big/mid/trio/solo/ciclo anual com o SSOT limpo e a v3 física.
 7. ⬜ **Selo do PR #45** — reconciliar PR body/tasks/state da spec + Ready/Human Gate quando a owner decidir.
 
 ---
@@ -173,14 +173,15 @@ Conjunto fechado de arestas, cada uma com critério único (anota-se 1 lado; o r
 - **Fluxo & researches:** [`research/2026-06-30-initiative-to-works-flow.md`](research/2026-06-30-initiative-to-works-flow.md) + [`research/`](research/).
 - **Features a implementar (roadmap):** [`features.md`](features.md).
 - **Auditorias adversariais (evidência):** [`_audits/`](_audits/) — 4 rodadas (benchmark · taxonomia · ponta-a-ponta · fronteiras de confiança).
-- **Simulação & templates:** [`_org-simulation-v2/`](_org-simulation-v2/) · [`_templates/`](_templates/).
+- **Simulação ativa:** [`_org-simulation-v3/`](_org-simulation-v3/) — dogfood físico repo-first. A [`_org-simulation-v2/`](_org-simulation-v2/) ficou arquivada como histórico e fonte de aprendizados de matcher/app.
+- **Templates:** [`_templates/`](_templates/).
 
 ## 🔶 Abertos & próxima fase
 
-> _As **4 auditorias** ([`_audits/`](_audits/)): r1→`source`/incidente · r2→famílias · r3→**L8** · r4→**L9**. A **simulação ADVERSARIAL** (red-team doc-first · [deliberação](deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md)) rodou (**rounds 1+2**, Codex atacante) e **encerrou**: veredito = **sub-mecanizado, não over-engineered** → 3 leis novas + ~11 dentes P0. **Próxima fase = implementar os mecanismos P0.**_
+> _As **4 auditorias** ([`_audits/`](_audits/)): r1→`source`/incidente · r2→famílias · r3→**L8** · r4→**L9**. A **simulação ADVERSARIAL** (red-team doc-first · [deliberação](deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md)) rodou (**rounds 1+2**, Codex atacante) e **encerrou**: veredito = **sub-mecanizado, não over-engineered** → 3 leis novas + ~11 dentes P0. A v3 agora tem uma primeira leva física desses dentes: outcome real, lifecycle repo-local, drift, contrato local e trust-policy._
 
-1. **▶ Outcomes reais na v3:** publicar o primeiro outcome válido e um adversarial inválido para provar rollup fail-closed no dashboard, não só em fixture sintética.
-2. **▶ Lifecycle repo-local:** adicionar estado/evidência das peças nos arquivos `.governance/works`, com lint que bloqueia outcome antes de `done` quando a peça é pré-requisito.
-3. **▶ Fidelidade dos repos:** aprofundar `acme-core-api`, `acme-checkout` e `acme-analytics` com testes locais, schemas/eventos e drift detectável entre código e manifest/context.
-4. **Mecanismos P0 remanescentes:** dar dente aos gaps de L9 que ainda não estão na v3 física (ACL por edge local, revogação/nonce, fallback rastreável, quarantine de segredo, independência do oráculo).
-5. **Destino da v2:** decidir arquivamento, migração ou uso apenas histórico da `_org-simulation-v2` para evitar duas frentes ativas concorrentes.
+1. **▶ Revalidação pós-F7:** pedir revisão adversarial ao Claude Code/Fable 5 sobre o diff desde `a970415b`, sem implementar.
+2. **▶ Walkthrough da owner:** percorrer a cadeia `objective → target → intent → repo-work done → outcome → actual` nos apps.
+3. **▶ Segunda prova de generalização:** publicar outcome de uma intent com contrato ou target operacional para detectar especialização acidental no `intent-cta-upgrade`.
+4. **▶ Caminho standalone/reativo:** publicar outcome operacional sem intent para validar o bucket operacional e o colapso solo.
+5. **▶ Decisões append-only remanescentes:** converter warnings legítimos em decisões governadas quando a owner aceitar colapso/exceção.
