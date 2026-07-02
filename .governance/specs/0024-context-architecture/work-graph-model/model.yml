@@ -124,7 +124,7 @@ envelope:
   origem: [schema-version, source-commit, producer, ttl]
   seguranca: [classification, visibility, access]
   invalidacao: [invalidates]
-  mutation-types: # G9 — toda mutação DECLARA o tipo (catálogo por tier)
+  mutation-types: # G9 + F3 — toda mutação DECLARA o tipo; catálogo por tier, FECHADO (fail-closed)
     business-tier:
       [
         objective-create,
@@ -133,10 +133,26 @@ envelope:
         actual-publish,
         rollup-change,
         allocation-change,
+        metric-definition-change,
+        aggregation-change,
       ]
     work-tier: [intent-activate, unit-fork, verdict-set, verdict-override, work-state-change]
+    intake: [business-link-change]
     coordination: [contract-revision, compat-window-change]
-    dangerous: "target-change · rollup-change · compat-window-change · verdict-override · break-glass — disparam o ALERTA q/r/d (deliberation.enforcement)"
+    governance: [profile-change, break-glass] # F3 — agora são TIPOS reais (a law dos perfis já exigia)
+    dangerous: # F3 — lista ENUMERADA, não prosa; disparam o ALERTA q/r/d (deliberation.enforcement)
+      [
+        target-change,
+        rollup-change,
+        compat-window-change,
+        verdict-override,
+        break-glass,
+        profile-change,
+        metric-definition-change,
+        aggregation-change,
+        business-link-change,
+      ]
+    unknown-mutation: "fail-closed (F3): mutação sem tipo do catálogo, ou cujo DIFF não bate com o tipo declarado (ex.: mudar a fórmula da métrica rotulada de actual-publish), é REJEITADA — não existe 'normal por default'"
 trust:
   boundary: "entidade de 1ª classe (matcher/agente/backend/API são fronteiras)"
   policy-artifacts:
@@ -519,7 +535,13 @@ scaling-law:
 # ═════════════════════ PERFIS DE GOVERNANÇA (G6+G13 · bloco C) — a scaling-law EXECUTÁVEL ═════════════════════
 governance-profiles:
   is: "perfis operacionais mínimos por forma de org (G6): cada perfil diz que NÓS existem, que GATES colapsam e que CAMPOS são obrigatórios — colapso LIMPO, não princípio abstrato"
-  law: "a org declara UM perfil + desvios EXPLÍCITOS; mudar de perfil = mutação com envelope L8. Perfis derivam por role-collapse parametrizado (G13) — o compact cobre o small-team (PM+TL+eng) sem um 4º arquétipo fixo"
+  law: "a org declara UM perfil + desvios EXPLÍCITOS; mudar de perfil = mutação profile-change (dangerous). Perfis derivam por role-collapse parametrizado (G13) — o compact cobre o small-team (PM+TL+eng) sem um 4º arquétipo fixo"
+  declaration: # F5 (bloco E) — declarar perfil deixa de ser autoatribuição livre (perfil como bypass)
+    fields: [scope, profile, eligibility, approved-by, ttl, review-at]
+    eligibility: "compact/solo exigem elegibilidade DECLARÁVEL e verificável (nº de pessoas/papéis no escopo); org com papéis separados NÃO é elegível a solo — o dev solo REAL nunca é bloqueado"
+    approver: "declaração de compact/solo por um GRUPO exige approver FORA do escopo (SoD aplicado ao próprio perfil); solo individual = self, com badge"
+    ttl: "toda declaração tem ttl/review-at; vencida → dashboard marca profile-stale"
+    badge: "o perfil (e os desvios) aparece como BADGE nos dashboards/rollups do escopo — self-attested/collapsed é VISÍVEL, nunca implícito"
   profiles:
     full:
       for: "org com papéis separados (a full-team da simulação)"
@@ -690,6 +712,7 @@ adversarial-review:
       severity: P0
       reconciliation: "aceito — inconsistência interna CONFIRMADA: governance-profiles.law exige 'mudar de perfil = mutação L8' mas profile-change não existe no catálogo"
       suggestion: "dangerous como lista ENUMERADA · adicionar os tipos ausentes · fail-closed p/ mutação desconhecida ou incompatível com o diff"
+      resolution: "APLICADO (bloco E) — mutation-types: +metric-definition-change/aggregation-change/business-link-change + grupo governance (profile-change · break-glass); dangerous enumerado; unknown-mutation fail-closed"
     - id: F4
       about: "decision-points são nome + descrição, sem requisitos verificáveis por gate"
       severity: P1
@@ -700,6 +723,7 @@ adversarial-review:
       severity: P0
       reconciliation: "aceito — a law atual só pede 'declarar perfil + desvios'; sem escopo/elegibilidade/approver/TTL. Compatível com 'não se bloqueia o solo': a elegibilidade restringe org GRANDE, não o dev solo"
       suggestion: "profile-declaration com escopo · elegibilidade · approver externo · TTL/revisão periódica · badge visível nos dashboards"
+      resolution: "APLICADO (bloco E) — governance-profiles.declaration (scope/eligibility/approved-by/ttl/review-at + badge); profile-change virou mutação dangerous"
     - id: F6
       about: "attester como 'fonte de dados' (compact) pode ser autocertificação disfarçada (o time constrói a fonte, define o target e a usa como attester)"
       severity: P1
