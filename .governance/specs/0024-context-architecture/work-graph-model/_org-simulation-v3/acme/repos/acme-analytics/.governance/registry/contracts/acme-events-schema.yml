@@ -1,0 +1,18 @@
+schema: acme.repo-contract/v1
+id: acme-events-schema
+revision: v1
+ownerRepo: acme-analytics
+consumers:
+  - acme-mfe-billing
+  - acme-mfe-onboarding
+  - acme-checkout
+  - acme-checkout-api
+compatibilityWindow: null
+revisionProposals: []
+source:
+  kind: central-contract
+  file: acme/contracts/contracts.yml
+  contractHash: 734a9cd0da7f
+code:
+  touchpoints:
+    - src/index.mjs

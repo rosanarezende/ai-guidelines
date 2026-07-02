@@ -1,0 +1,30 @@
+schema: acme.repo-contract/v1
+id: acme-user-context
+revision: v3
+ownerRepo: acme-web-host
+consumers:
+  - acme-mfe-billing
+  - acme-mfe-onboarding
+  - acme-checkout
+compatibilityWindow: null
+revisionProposals:
+  - id: acme-user-context-v4-coordenada
+    revision: v4
+    breaking: true
+    intents:
+      - intent-checkout-stack
+      - intent-consent-center
+    consumers:
+      - acme-mfe-billing
+      - acme-mfe-onboarding
+      - acme-checkout
+    owner-approval: head-platform
+    decision: single-revision
+    compatibility-window: v3+v4 até consumidores migrarem; janela revisada no release-rollout
+source:
+  kind: central-contract
+  file: acme/contracts/contracts.yml
+  contractHash: d82053b9718b
+code:
+  touchpoints:
+    - src/index.mjs

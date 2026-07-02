@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import prettier from "prettier";
 import { parse } from "yaml";
 import { deriveIntent, loadOrg, validateOrg } from "./org.mjs";
+import { loadPublishedRepoContracts, validateRepoContracts } from "./repo-contracts.mjs";
 import { loadPublishedContexts, validateRepoContexts } from "./repo-contexts.mjs";
 import { loadPublishedRepoWorks, validateRepoWorks } from "./repo-works.mjs";
 
@@ -19,9 +20,11 @@ const MODEL = path.join(here, "..", "..", "model.yml");
 const o = loadOrg();
 const repoContextIssues = await validateRepoContexts(o);
 const repoWorkIssues = validateRepoWorks(o);
-const issues = [...validateOrg(o), ...repoContextIssues, ...repoWorkIssues];
+const repoContractIssues = validateRepoContracts(o);
+const issues = [...validateOrg(o), ...repoContextIssues, ...repoWorkIssues, ...repoContractIssues];
 const repoContexts = loadPublishedContexts();
 const repoWorks = loadPublishedRepoWorks();
+const repoContracts = loadPublishedRepoContracts();
 
 const nodes = [];
 const edges = [];
@@ -83,6 +86,18 @@ for (const x of repoWorks) {
     N(tid, "code-touchpoint", touchpoint, { repo: x.repo, path: touchpoint });
     E(wid, tid, "evidenced-by");
     E(x.repo, tid, "contains-code");
+  }
+}
+for (const x of repoContracts) {
+  const cid = `${x.ownerRepo}::contract::${x.id}`;
+  N(cid, "repo-contract", `${x.id}@${x.revision}`, x);
+  E(x.ownerRepo, cid, "publishes-contract-registry");
+  E(cid, x.id, "backs-contract");
+  for (const touchpoint of x.code?.touchpoints || []) {
+    const tid = `${x.ownerRepo}::${touchpoint}`;
+    N(tid, "code-touchpoint", touchpoint, { repo: x.ownerRepo, path: touchpoint });
+    E(cid, tid, "evidenced-by");
+    E(x.ownerRepo, tid, "contains-code");
   }
 }
 for (const x of o.contracts) {

@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "caf32fdba735",
+  contentHash: "ee900c87462e",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -2290,6 +2290,98 @@ window.GRAPH = {
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-checkout-api\\.governance\\works\\intent-p99-hardening--timeouts-api.yml",
         _repo: "acme-checkout-api",
+      },
+    },
+    {
+      id: "acme-design-system::contract::acme-design-tokens",
+      type: "repo-contract",
+      label: "acme-design-tokens@v2",
+      data: {
+        schema: "acme.repo-contract/v1",
+        id: "acme-design-tokens",
+        revision: "v2",
+        ownerRepo: "acme-design-system",
+        consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
+        compatibilityWindow: null,
+        revisionProposals: [],
+        source: {
+          kind: "central-contract",
+          file: "acme/contracts/contracts.yml",
+          contractHash: "1f2dfd22c16e",
+        },
+        code: {
+          touchpoints: ["src/index.mjs"],
+        },
+        _file:
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-design-system\\.governance\\registry\\contracts\\acme-design-tokens.yml",
+        _repo: "acme-design-system",
+      },
+    },
+    {
+      id: "acme-analytics::contract::acme-events-schema",
+      type: "repo-contract",
+      label: "acme-events-schema@v1",
+      data: {
+        schema: "acme.repo-contract/v1",
+        id: "acme-events-schema",
+        revision: "v1",
+        ownerRepo: "acme-analytics",
+        consumers: [
+          "acme-mfe-billing",
+          "acme-mfe-onboarding",
+          "acme-checkout",
+          "acme-checkout-api",
+        ],
+        compatibilityWindow: null,
+        revisionProposals: [],
+        source: {
+          kind: "central-contract",
+          file: "acme/contracts/contracts.yml",
+          contractHash: "734a9cd0da7f",
+        },
+        code: {
+          touchpoints: ["src/index.mjs"],
+        },
+        _file:
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-analytics\\.governance\\registry\\contracts\\acme-events-schema.yml",
+        _repo: "acme-analytics",
+      },
+    },
+    {
+      id: "acme-web-host::contract::acme-user-context",
+      type: "repo-contract",
+      label: "acme-user-context@v3",
+      data: {
+        schema: "acme.repo-contract/v1",
+        id: "acme-user-context",
+        revision: "v3",
+        ownerRepo: "acme-web-host",
+        consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
+        compatibilityWindow: null,
+        revisionProposals: [
+          {
+            id: "acme-user-context-v4-coordenada",
+            revision: "v4",
+            breaking: true,
+            intents: ["intent-checkout-stack", "intent-consent-center"],
+            consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
+            "owner-approval": "head-platform",
+            decision: "single-revision",
+            "compatibility-window":
+              "v3+v4 até consumidores migrarem; janela revisada no release-rollout",
+          },
+        ],
+        source: {
+          kind: "central-contract",
+          file: "acme/contracts/contracts.yml",
+          contractHash: "d82053b9718b",
+        },
+        code: {
+          touchpoints: ["src/index.mjs"],
+        },
+        _file:
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-web-host\\.governance\\registry\\contracts\\acme-user-context.yml",
+        _repo: "acme-web-host",
       },
     },
     {
@@ -4624,6 +4716,78 @@ window.GRAPH = {
       id: "contains-code:acme-checkout-api->acme-checkout-api::src/index.mjs",
       source: "acme-checkout-api",
       target: "acme-checkout-api::src/index.mjs",
+      type: "contains-code",
+    },
+    {
+      id: "publishes-contract-registry:acme-design-system->acme-design-system::contract::acme-design-tokens",
+      source: "acme-design-system",
+      target: "acme-design-system::contract::acme-design-tokens",
+      type: "publishes-contract-registry",
+    },
+    {
+      id: "backs-contract:acme-design-system::contract::acme-design-tokens->acme-design-tokens",
+      source: "acme-design-system::contract::acme-design-tokens",
+      target: "acme-design-tokens",
+      type: "backs-contract",
+    },
+    {
+      id: "evidenced-by:acme-design-system::contract::acme-design-tokens->acme-design-system::src/index.mjs",
+      source: "acme-design-system::contract::acme-design-tokens",
+      target: "acme-design-system::src/index.mjs",
+      type: "evidenced-by",
+    },
+    {
+      id: "contains-code:acme-design-system->acme-design-system::src/index.mjs",
+      source: "acme-design-system",
+      target: "acme-design-system::src/index.mjs",
+      type: "contains-code",
+    },
+    {
+      id: "publishes-contract-registry:acme-analytics->acme-analytics::contract::acme-events-schema",
+      source: "acme-analytics",
+      target: "acme-analytics::contract::acme-events-schema",
+      type: "publishes-contract-registry",
+    },
+    {
+      id: "backs-contract:acme-analytics::contract::acme-events-schema->acme-events-schema",
+      source: "acme-analytics::contract::acme-events-schema",
+      target: "acme-events-schema",
+      type: "backs-contract",
+    },
+    {
+      id: "evidenced-by:acme-analytics::contract::acme-events-schema->acme-analytics::src/index.mjs",
+      source: "acme-analytics::contract::acme-events-schema",
+      target: "acme-analytics::src/index.mjs",
+      type: "evidenced-by",
+    },
+    {
+      id: "contains-code:acme-analytics->acme-analytics::src/index.mjs",
+      source: "acme-analytics",
+      target: "acme-analytics::src/index.mjs",
+      type: "contains-code",
+    },
+    {
+      id: "publishes-contract-registry:acme-web-host->acme-web-host::contract::acme-user-context",
+      source: "acme-web-host",
+      target: "acme-web-host::contract::acme-user-context",
+      type: "publishes-contract-registry",
+    },
+    {
+      id: "backs-contract:acme-web-host::contract::acme-user-context->acme-user-context",
+      source: "acme-web-host::contract::acme-user-context",
+      target: "acme-user-context",
+      type: "backs-contract",
+    },
+    {
+      id: "evidenced-by:acme-web-host::contract::acme-user-context->acme-web-host::src/index.mjs",
+      source: "acme-web-host::contract::acme-user-context",
+      target: "acme-web-host::src/index.mjs",
+      type: "evidenced-by",
+    },
+    {
+      id: "contains-code:acme-web-host->acme-web-host::src/index.mjs",
+      source: "acme-web-host",
+      target: "acme-web-host::src/index.mjs",
       type: "contains-code",
     },
     {

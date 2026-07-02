@@ -3,6 +3,7 @@
 // Uso: node _tools/test-adversarial.mjs
 import { loadOrg, validateOrg } from "./org.mjs";
 import { checkAppSecurity } from "./check-app-security.mjs";
+import { validateRepoContracts } from "./repo-contracts.mjs";
 import { validateRepoContexts } from "./repo-contexts.mjs";
 import { validateRepoWorks } from "./repo-works.mjs";
 
@@ -478,10 +479,33 @@ const CASES = [
       return o;
     },
   },
+  {
+    id: "RC·1 contrato central muda revision sem registry local fresco",
+    expect: "repo-contract-stale",
+    mutate: () => {
+      const o = clone();
+      o.contracts.find((c) => c.id === "acme-design-tokens").revision = "v3";
+      return o;
+    },
+  },
+  {
+    id: "RC·2 owner-repo central muda sem contrato publicado no novo owner",
+    expect: "repo-contract-stale",
+    mutate: () => {
+      const o = clone();
+      o.contracts.find((c) => c.id === "acme-events-schema")["owner-repo"] = "acme-data-pipeline";
+      return o;
+    },
+  },
 ];
 
 async function validateAll(o) {
-  return [...validateOrg(o), ...(await validateRepoContexts(o)), ...validateRepoWorks(o)];
+  return [
+    ...validateOrg(o),
+    ...(await validateRepoContexts(o)),
+    ...validateRepoWorks(o),
+    ...validateRepoContracts(o),
+  ];
 }
 
 export async function run(cases) {

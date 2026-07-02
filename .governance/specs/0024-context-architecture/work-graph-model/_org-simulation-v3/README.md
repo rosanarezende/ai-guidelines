@@ -29,6 +29,8 @@ node _tools/publish-contexts.mjs # publica acme/repos/*/.governance/context.json
 node _tools/check-repo-contexts.mjs # falha se repos.yml, manifestos e context.json divergirem
 node _tools/publish-repo-works.mjs # publica acks repo-local p/ as peças do breakdown central
 node _tools/check-repo-works.mjs # falha se intent.works e repo/.governance/works divergirem
+node _tools/publish-repo-contracts.mjs # publica registry/contracts nos owner repos
+node _tools/check-repo-contracts.mjs # falha se contracts.yml e registry local divergirem
 node _tools/adoption-journey.mjs # dogfood completo da adoção repo-existente → host agregado
 node _tools/build-graph.mjs     # regenera _apps/graph.js (grafo + issues embutidos)
 node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada DEVE ser pega
@@ -50,15 +52,18 @@ node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada D
 4. A IA sugere patch; o humano dono do repo revisa e edita `.governance/manifest.yml`.
 5. `node _tools/publish-contexts.mjs` publica `context.json` por repo.
 6. `node _tools/publish-repo-works.mjs` publica o reconhecimento repo-local das peças já quebradas.
-7. `node _tools/check-repo-contexts.mjs` prova que `repos.yml`, manifestos e contexts não divergiram.
-8. `node _tools/check-repo-works.mjs` prova que o breakdown central e os repos não divergiram.
-9. `node _tools/adoption-journey.mjs` executa o dogfood completo.
+7. `node _tools/publish-repo-contracts.mjs` publica o contrato no registry do owner repo.
+8. `node _tools/check-repo-contexts.mjs` prova que `repos.yml`, manifestos e contexts não divergiram.
+9. `node _tools/check-repo-works.mjs` prova que o breakdown central e os repos não divergiram.
+10. `node _tools/check-repo-contracts.mjs` prova que `contracts.yml` e os owner repos não divergiram.
+11. `node _tools/adoption-journey.mjs` executa o dogfood completo.
 
 ## Decisões de desenho (v1)
 
 - **File-first, um YAML por conceito** (`objectives.yml`, `teams.yml`…) + **repos com sidecar proprio** (`acme/repos/<repo>/.governance/manifest.yml` → `context.json`). O `repos.yml` central e inventario; a publicacao por repo impede que ele vire a unica fonte de verdade.
 - **Adoção por empresa existente:** `_tools/adopt-existing-repos.mjs` faz scaffold minimo e gera `capability-candidates.yml` como rascunho revisavel. `_tools/prepare-capability-review.mjs` monta um pacote de revisão por repo com evidência estática para IA/humano. A extração por IA fica como canal assistivo (template em `_templates/capability-extraction-prompt.md`), nunca como mutação silenciosa do manifesto.
 - **Breakdown reconhecido pelo repo:** `intent.works` continua sendo a quebra central, mas cada repo publica `.governance/works/<intent>--<work>.yml` com hash do breakdown e touchpoint de código. Se a peça muda e o repo não reconhece a nova versão, o host falha em `repo-work-stale`.
+- **Contratos reconhecidos pelo owner repo:** `contracts.yml` continua sendo a visão coordenada da org, mas cada owner repo publica `.governance/registry/contracts/<contract>.yml` com hash do contrato central e touchpoint de código. Se a revisão, consumers ou owner mudam sem publicação local, o host falha em `repo-contract-stale`.
 - **Apps sem build** (React UMD + htm + Cytoscape UMD vendorizados em `_apps/vendor/`) — iteração sem toolchain e sem CDN em runtime; `node _tools/check-app-security.mjs` confere hashes + CSP.
 - **`graph.js` gerado** (window.GRAPH) em vez de fetch — `file://` não deixa fetch; mesmo truque do `data.js`.
 - O validador implementa **um subconjunto honesto** das regras da P10/P11/P12 (está listado nele); o resolver completo do outcome entra quando os primeiros outcomes forem publicados (F6).
