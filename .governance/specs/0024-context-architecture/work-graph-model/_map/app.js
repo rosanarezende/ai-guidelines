@@ -2,6 +2,12 @@
 const html = htm.bind(React.createElement);
 const { useState } = React;
 
+function intentTags(intent) {
+  if (!intent) return [];
+  if (intent.approach || intent.signal) return [intent.approach, intent.signal].filter(Boolean);
+  return [];
+}
+
 function Works({ works }) {
   return html`<div className="works">
     ${works.map(
@@ -80,7 +86,7 @@ function ExamplePanel({ ex }) {
   const head = ex.intent
     ? html`<div className="hd">
         <span className="lvl">intent</span> ${ex.intent.title}
-        <span className="tag">${ex.intent.strategy}</span>
+        ${intentTags(ex.intent).map((tag) => html`<span className="tag" key=${tag}>${tag}</span>`)}
       </div>`
     : html`<div className="hd">
         <span className="lvl">intent</span>
@@ -209,7 +215,7 @@ function GraphView() {
     <div className="intent">
       <div className="hd">
         <span className="lvl">intent</span> ${g.intent.title}
-        <span className="tag">${g.intent.strategy}</span>
+        ${intentTags(g.intent).map((tag) => html`<span className="tag" key=${tag}>${tag}</span>`)}
       </div>
     </div>
     ${down("breaks-into")}
@@ -266,9 +272,9 @@ function App() {
   return html`<div className="wrap">
     <h1>Modelo do trabalho — do negócio à peça</h1>
     <p className="lead">
-      business-objective (negócio, recursivo) → intent (estratégia) → execution-unit (tipo,
-      cross-repo) → repo-work (propósito, por repo) → outcome (resultado governado). Troque as
-      situações e as formas de org nas abas.
+      business-objective (negócio, recursivo) → intent (approach + signal) → execution-unit (forma
+      derivada, cross-repo) → repo-work (propósito, por repo) → outcome (resultado governado).
+      Troque as situações e as formas de org nas abas.
     </p>
     <${LayerLegend} />
     <${ExampleExplorer} />

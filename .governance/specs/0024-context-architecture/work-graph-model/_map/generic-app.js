@@ -1,5 +1,5 @@
 // generic-app.js — explorador GENÉRICO da proposta P12 (abordagem × sinais, sem a org-exemplo).
-// Dados GERADOS de ../model.yml § approach-proposal por generate.mjs — editar lá e regenerar.
+// Dados GERADOS de ../model.yml § approach-model por generate.mjs — editar lá e regenerar.
 // A jornada com a org-exemplo (acme) mora em flow-explorer.html.
 const html = htm.bind(React.createElement);
 const { useState } = React;
@@ -126,7 +126,7 @@ function App() {
     <p className="src">
       <a href="model-map.html">← mapa do modelo</a> ·
       <a href="flow-explorer.html"> jornada da org-exemplo</a> · <code>data.js</code> é GERADO de
-      <code> ../model.yml § approach-proposal</code> por <code>generate.mjs</code>.
+      <code> ../model.yml § approach-model</code> por <code>generate.mjs</code>.
     </p>
   </div>`;
 }

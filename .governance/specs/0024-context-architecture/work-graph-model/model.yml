@@ -1,16 +1,16 @@
-# model.yml — SSOT DA MODELAGEM (o grafo tipado do trabalho). v2 — 3 camadas + tier de negócio.
+# model.yml — SSOT DA MODELAGEM (o grafo tipado do trabalho). v2 — modelo limpo aplicado.
 #
 # FONTE DA VERDADE do modelo. O `tracker.md` é EMBASAMENTO (o porquê). O artefato navegável
 # (_map/model-map.html) reflete este arquivo. As provocações entram como mudanças aqui.
 #
-# Estrutura: intent (estratégia) → execution-unit (tipo, cross-repo) → repo-work (propósito, por repo)
+# Estrutura: intent (approach + signal) → execution-unit (forma derivada, cross-repo) → repo-work (propósito, por repo)
 #   + contract (coordenação/versionamento) + q/r/d (anexável a qualquer nó) + intake (funil pré-intent).
-# Perspectiva do Codex reconciliada (substitui a taxonomia "famílias" v0). Ainda ITERANDO (open-questions).
+# Perspectiva reconciliada: taxonomia antiga/famílias e enum strategy foram absorvidos.
 # Anonimizado (acme-*). Naming (P4): ids em EN, labels/descrição em PT.
 
 meta:
   version: 2
-  status: iterating # 3 camadas + business-tier + scaling-law APLICADOS (gate owner 2026-07-01); P10 em curso
+  status: applied-in-sim-v3 # 3 camadas + business-tier + approach/signal + repo-first substrate aplicados; próximos passos em _org-simulation-v3/NEXT-STEPS.md
   grounded-by: tracker.md
   artifact: _map/model-map.html # navegável; data.js é GERADO por _map/generate.mjs (node generate.mjs · --check verifica o sync do SUBCONJUNTO projetado — coverage impressa a cada run; --check FORA do validate por decisão da owner 2026-07-01)
 
@@ -19,32 +19,39 @@ layers:
   intent:
     is: "o objetivo de negócio durável (uma por objetivo); NÃO delibera — tem gate de ativação"
     owns: [enquadramento, objetivo, target-outcome, decision-gate]
-    strategy: [experiment-led, direct-delivery, migration-led, reliability-led]
-    strategy-note: "RESOLVIDO (Q-strategy, owner 2026-07-01): DECLARADA pelo humano no gate de ativação — a estratégia é a APOSTA de quem ativa (existe antes das units e molda breakdown/gates). A derivada vira CONFERÊNCIA: observed-strategy das units divergindo da declarada → alerta strategy-drift no dashboard (não bloqueia; é conversa). Autoria com IA: ver assisted-authoring"
+    approach: [validate-first, direct]
+    approach-note: "RESOLVIDO (P12, owner 2026-07-02): approach é a postura frente à incerteza de valor. validate-first = compromisso permanente depende da evidência; direct = mudança decidida. É declarado pelo humano no gate de ativação, com autoria assistida opcional; o observado vira approach-drift (alerta, não bloqueio)."
+    signal: [none, touches-contract, operational-target]
+    signal-note: "Sinais são derivados/confirmados pelo breakdown e acordam mecanismos: touches-contract → review do owner do contrato + janela se houver quebra; operational-target → placar operacional + guardrails; none → caminho curto. Sinal não é menu de usuário nem taxonomia paralela."
     breaks-into: [execution-unit, repo-work] # repo-work direto quando trivial (intent pode até ser nula em trabalho reativo)
 
   execution-unit:
     is: "unidade CROSS-REPO com lifecycle próprio + unidade semântica (a coisa é UMA)"
     optional: "COLAPSA no trivial (regra exata: collapse-rule) — aí intent liga direto no repo-work"
-    collapse-rule: "RESOLVIDO (Q-collapse, owner 2026-07-01) — a régua é a scaling-law: a unit EXISTE se pelo menos um vale: (1) mais de 1 repo envolvido · (2) o kind carrega lifecycle próprio (experiment-run/migration-wave/incident-response/rollout-slice NUNCA colapsam — veredito/janela/severidade/fases moram na unit) · (3) owner/cadência próprios ≠ intent. Senão COLAPSA. Colapso REVERSÍVEL: se o trabalho crescer (2º repo entra), cria-se a unit e as peças se reparentam — mutação normal com envelope, histórico preservado"
+    collapse-rule: "RESOLVIDO (Q-collapse, owner 2026-07-01; aplicado na v3) — a régua é a scaling-law: a unit EXISTE se pelo menos um vale: (1) mais de 1 repo envolvido · (2) o kind carrega lifecycle próprio (experiment-run/migration-wave/incident-response/release-rollout/discovery NUNCA colapsam — veredito/janela/severidade/fases/fate moram na unit) · (3) owner/cadência próprios ≠ intent. Senão COLAPSA. Colapso REVERSÍVEL: se o trabalho crescer, cria-se a unit e as peças se reparentam por mutação normal com envelope, histórico preservado."
     kinds:
       experiment-run:
         owns: [hypothesis, flag, exposure, metrics, guardrails, decision-rule, verdict]
         verdict: [pending, won, lost, inconclusive]
-        fork: "won → shape-up/feature-slice · lost → cleanup · inconclusive → novo experiment/exploration"
+        fork: "won → graduation/delivery-slice · lost → cleanup · inconclusive → novo experiment/discovery"
       migration-wave:
         owns: [from, to, compatibility-window]
-      feature-slice:
+      delivery-slice:
         owns: ["entrega coordenada cross-repo"]
       incident-response:
         owns: [severity, declare, mitigate, resolve, postmortem]
         source: reactive
-      shape-up:
+      graduation:
         owns: ["sistematização pós-veredito won (vira capacidade permanente)"]
       cleanup:
         owns: ["remoção pós-veredito lost / parcial"]
-      rollout-slice:
+      release-rollout:
         owns: ["fase de release/canary"]
+      discovery:
+        owns:
+          [
+            "pergunta falsificável compartilhada · timebox · fate agregado (throwaway/promoted/parked)",
+          ]
     breaks-into: [repo-work]
 
   repo-work:
@@ -73,13 +80,13 @@ intake:
   business-link: "G2 (bloco B): todo register/proposal DECLARA authorized-by (um business-objective ativo) OU standalone — vínculo declarado, nunca inferido. No gate: com authorized-by, valida-se objective ativo + target + allocation; standalone entra como custo/risco operacional (ver G14), não some do dashboard"
 
 assisted-authoring:
-  is: "parceria humano+IA na CRIAÇÃO/edição de nós governados (decisão owner 2026-07-01, nascida na Q-strategy): o humano descreve a pretensão — texto livre e/ou documentos anexados (ex.: docs de modelagem) — e a IA SUGERE o preenchimento dos campos (strategy · título · vínculos · esboço de breakdown); o humano itera e edita o que quiser"
+  is: "parceria humano+IA na CRIAÇÃO/edição de nós governados: o humano descreve a pretensão — texto livre e/ou documentos anexados (ex.: docs de modelagem) — e a IA SUGERE o preenchimento dos campos (approach · sinais prováveis · título · vínculos · esboço de breakdown); o humano itera e edita o que quiser"
   laws:
     - "OPCIONAL sempre — o caminho 100% manual existe em todo nó; a assistência nunca é pré-requisito"
     - "SUGESTIVO sempre — a IA não preenche em silêncio nem decide; sugere e o humano aceita/edita (reusa o princípio 'advisory, não decide' do matcher)"
-    - "no MÁXIMO alerta — quando a proposta do humano se encaixa TOTALMENTE noutro espectro (ex.: strategy declarada direct-delivery mas a descrição é um experimento), a IA alerta; não corrige nem bloqueia"
+    - "no MÁXIMO alerta — quando a proposta do humano se encaixa TOTALMENTE noutro espectro (ex.: approach declarada direct mas a descrição exige decisão por evidência), a IA alerta; não corrige nem bloqueia"
   applies-to: "criação de intent (caso primário) e, pelo mesmo princípio, qualquer nó governado (proposal · register · objective)"
-  connects: "matcher advisory (triagem) · strategy-drift (a conferência derivada em execução) · L9 (IA não fecha gate)"
+  connects: "matcher advisory (triagem) · approach-drift/signal-drift (conferências derivadas em execução) · L9 (IA não fecha gate)"
 
 # ═════════════════════ DIMENSÕES (ortogonais; cortam repo-work/execution-unit) ═════════════════════
 dimensions:
@@ -112,15 +119,25 @@ edges:
       to: execution-unit,
       inverse: derives-from,
       category: proveniência,
-      note: "won→shape-up · lost→cleanup",
+      note: "won→graduation/delivery-slice · lost→cleanup",
     }
   - { id: raises, from: node, to: proposal, category: proveniência }
   - { id: answers, from: "repo-work(discover)", to: "question", category: investigação }
   - { id: supported-by, from: decision, to: "research|discover", category: investigação }
+  - { id: emits, from: [execution-unit, repo-work], to: outcome, category: fecho }
   - { id: closed-by, from: node, to: "answer|outcome|postmortem", category: fecho }
   - { id: supersedes, from: decision, to: decision, category: histórico }
   - { id: occurred-during, from: incident-response, to: node, category: resposta }
   - { id: caused-by, from: incident-response, to: node, category: resposta }
+  - { id: publishes-context, from: repo, to: repo-context, category: projeção }
+  - { id: acknowledges-work, from: repo-work-ack, to: repo-work, category: reconhecimento }
+  - { id: backs-contract, from: repo-contract, to: contract, category: reconhecimento }
+  - {
+      id: evidenced-by,
+      from: "repo-context|repo-work-ack|repo-contract",
+      to: code-touchpoint,
+      category: evidência,
+    }
 
 states:
   own: [draft, active, done] # active EXIGE assignee + início
@@ -226,14 +243,14 @@ decision-points: # G7 + F4 — gates NOMEADOS com requisitos VERIFICÁVEIS; todo
     approver: "owner do objective autorizador (no solo: self, logado)"
     on-block: "candidata permanece no funil; fallback = rework ou descarte"
   release-rollout:
-    is: "autoriza exposição (rollout-slice/canary)"
-    subject: "execution-unit (rollout-slice)"
+    is: "autoriza exposição (release-rollout/canary)"
+    subject: "execution-unit (release-rollout)"
     prerequisites: "guardrails declarados + plano de reversão (lei fallback/break-glass)"
     evidence: "baseline das métricas de guardrail + flag/canary configurados"
     approver: "dono da unit + owner do domínio exposto"
     on-block: "sem exposição; change-class emergency passa por break-glass LOGADO"
   accept-verdict:
-    is: "aceita o veredito do experiment-run + o fork (won → shape-up · lost → cleanup)"
+    is: "aceita o veredito do experiment-run + o fork (won → graduation · lost → cleanup)"
     subject: "execution-unit (experiment-run)"
     prerequisites: "outcome VÁLIDO pelo resolver (não invalid/stale; self-attested só com colapso logado)"
     evidence: "outcome publicado + decision-rule aplicada"
@@ -242,8 +259,12 @@ decision-points: # G7 + F4 — gates NOMEADOS com requisitos VERIFICÁVEIS; todo
 physical:
   candidata: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml"
   ativada: "acme-governance/intents/<id>/intent.yml"
-  por-repo: ".governance/{manifest,registry,works,context.json,backend.yml}"
-  host: "acme-governance agrega os context.json publicados"
+  por-repo: ".governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml,backend.yml}"
+  publications:
+    context-json: "repo publica capabilities/contratos/consumos derivados do manifest + package + código; host falha se divergir do inventário central"
+    repo-work-ack: "repo publica .governance/works/<intent>--<work>.yml com hash do breakdown central + touchpoint de código; host falha em repo-work-stale/missing"
+    repo-contract: "owner repo publica .governance/registry/contracts/<contract>.yml com hash de contracts.yml + touchpoint de código; host falha em repo-contract-stale/missing"
+  host: "acme-governance agrega projeções PUBLICADAS (context.json, repo-work-acks, repo-contracts), não abre banco nem confia só no YAML central"
   identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
   backend: [file, sqlite, neo4j, mongo]
 
@@ -251,7 +272,7 @@ physical:
 examples:
   - id: experiment-cross-repo
     label: "experimento cross-repo (growth)"
-    intent: { title: "aumentar conversão trial → paid", strategy: experiment-led }
+    intent: { title: "aumentar conversão trial → paid", approach: validate-first, signal: none }
     execution-unit:
       {
         kind: experiment-run,
@@ -265,11 +286,11 @@ examples:
       - { repo: acme-web-host, purpose: sustain, desc: "adaptar contexto/contrato" }
       - { repo: acme-growth-ops, purpose: operate, desc: "monitoramento pós-release" }
     contract: "acme-user-context@v3"
-    note: "veredito na unit (não por repo); won→shape-up · lost→cleanup · inconclusive→novo"
+    note: "veredito na unit (não por repo); won→graduation · lost→cleanup · inconclusive→novo"
 
   - id: redesign-misto
     label: "redesign misto (migração)"
-    intent: { title: "redesign do checkout", strategy: migration-led }
+    intent: { title: "redesign do checkout", approach: direct, signal: touches-contract }
     execution-unit:
       {
         kind: migration-wave,
@@ -295,13 +316,15 @@ examples:
     migrations:
       - {
           intent: redesign-checkout,
-          strategy: migration-led,
-          does: "migration-led — adapta o contrato",
+          approach: direct,
+          signal: touches-contract,
+          does: "direct + touches-contract — adapta o contrato",
         }
       - {
           intent: growth-upgrade,
-          strategy: experiment-led,
-          does: "experiment-led — consome o contrato",
+          approach: validate-first,
+          signal: none,
+          does: "validate-first — consome o contrato sem revisão",
         }
     note: "coordenação entre iniciativas = via o contrato (derivada); a janela mora nele (não é derivável)"
 
@@ -350,7 +373,7 @@ examples:
 
   - id: experiment-lost
     label: "experimento que termina em lost"
-    intent: { title: "aumentar ativação via onboarding", strategy: experiment-led }
+    intent: { title: "aumentar ativação via onboarding", approach: validate-first, signal: none }
     execution-unit:
       {
         kind: experiment-run,
@@ -366,10 +389,10 @@ examples:
 
   - id: delivery-tradicional
     label: "delivery tradicional"
-    intent: { title: "exportar relatório em PDF", strategy: direct-delivery }
-    execution-unit: null # colapsa (1 repo); seria feature-slice se cross-repo
+    intent: { title: "exportar relatório em PDF", approach: direct, signal: none }
+    execution-unit: null # colapsa (1 repo); seria delivery-slice se cross-repo
     repo-works: [{ repo: acme-reports, purpose: create, desc: "botão + geração do PDF" }]
-    note: "feature comum = intent direct-delivery → repo-work create (execution-unit colapsa)"
+    note: "feature comum = intent direct → repo-work create (execution-unit colapsa)"
 
 # ═════════════════════ SIMULAÇÃO (fluxo ponta-a-ponta × forma de org) ═════════════════════
 simulation:
@@ -405,7 +428,7 @@ simulation:
         breakdown: "Tech Lead materializa execution-units + repo-works; Principal p/ contratos cross-repo"
         execucao: "devs Sr/Pl (create/sustain/discover); Jr (peças menores + pair)"
         coordenacao: "Principal / contract-owners; devs = consumers"
-        veredito: "PM + dados (experiment-run); Tech Lead conduz shape-up/cleanup"
+        veredito: "PM + dados (experiment-run); Tech Lead conduz graduation/cleanup"
       sod: "HOLDS — requester (PM/dev) ≠ approver (TL/Principal) ≠ owner-attester (dono do domínio)"
       gaps:
         - "quem é dono do `operate`/monitoramento (risco de SRE-gap — cai no Principal/dev por omissão)"
@@ -570,7 +593,7 @@ business-tier:
         }
     thesis: "ofertar o produto B à base do produto A, evidenciando o uso conjunto, move a conversão"
     opportunities: ["jornada de cross-sell unificada", "personalização da oferta"]
-    intent: { title: "testar CTA contextual de upgrade", strategy: experiment-led }
+    intent: { title: "testar CTA contextual de upgrade", approach: validate-first, signal: none }
     unit: { kind: experiment-run, title: "CTA contextual v1", verdict: won }
     works:
       - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atrás da flag" }
@@ -760,7 +783,7 @@ flow-validation:
 # Findings RECONCILIADOS contra este arquivo (repo vence). NADA aplicado — aguarda priorização/gate da owner.
 adversarial-review:
   status: applied # 13/13 com resolution (F13 = adiamento deliberado)
-  gate: "owner 2026-07-01 — TODOS os blocos autorizados e APLICADOS: D (F1+F8) · E (F3+F5) · F (F2+F9) · G (F4+F6+F10) · H parcial (F12 — --check fora do validate por decisão) · F11 DECIDIDO (opção C do research: soft-mandatory p/ ruler-authority no full) · F13 adiado (espera Q-collapse/Q-discover-level)"
+  gate: "owner 2026-07-01 — TODOS os blocos autorizados e APLICADOS: D (F1+F8) · E (F3+F5) · F (F2+F9) · G (F4+F6+F10) · H parcial (F12 — --check fora do validate por decisão) · F11 DECIDIDO (opção C do research: soft-mandatory p/ ruler-authority no full). F13 foi fechado depois pela P12 aplicada: collapse/discovery/names resolvidos no modelo limpo."
   provocation: P11
   source: "codex (revisão adversarial do modelo v2, HEAD 9a60e288) + reconciliação claude 2026-07-01"
   verdict-codex: "coerente como arquitetura conceitual; NÃO pronto ponta-a-ponta na barra do red-team ('mecanismo pega' = resolver + fail-closed + evidência independente). Maior fragilidade: o dashboard ainda pode virar 'verdade por texto bem-formado' — falta o resolver independente que prova que número, fonte, revisão e autoridade são válidos"
@@ -838,17 +861,16 @@ adversarial-review:
       suggestion: "adicionar o --check ao contrato de validação + coverage manifest (o gerador declara o que projeta e o que omite; seção crítica mudou sem projeção → falha)"
       resolution: "PARCIAL (bloco H) — coverage manifest no gerador (omissões impressas a cada run); --check FORA do validate/CI por DECISÃO da owner (2026-07-01) — reavaliar quando o modelo estabilizar"
     - id: F13
-      about: "Q-collapse e Q-discover-level abertas deixam 2 jornadas ambíguas (feature trivial · discovery cross-repo)"
+      about: "Q-collapse e Q-discover-level deixavam 2 jornadas ambíguas (feature trivial · discovery cross-repo)"
       severity: P2
-      reconciliation: "aceito — já registradas como open-questions; a mecanização adicional deveria esperar essas regras mínimas"
+      reconciliation: "aceito — eram open-questions na revisão; a mecanização adicional deveria esperar essas regras mínimas"
       suggestion: "fechar regra mínima de collapse + discovery-unit antes de mecanizar mais"
-      resolution: "ADIADO deliberadamente — espera Q-collapse/Q-discover-level fecharem (open-questions); nenhuma mecanização nova nessas duas jornadas até lá"
+      resolution: "FECHADO (P12 aplicada) — collapse-rule finalizada; discovery adicionada como execution-unit quando pergunta/fate é compartilhada; feature trivial colapsa em repo-work"
 
-# ═════════════════════ PROPOSTA EM VALIDAÇÃO (P12 · strategy → abordagem binária + SINAIS derivados) ═════════════════════
-# NADA aplicado nas layers ainda — a owner valida via _map/flow-explorer.html (gerado DESTA seção).
-# Quando aceita: substitui layers.intent.strategy (enum de 4) e aplica os renames.
-approach-proposal:
-  status: proposed
+# ═════════════════════ MODELO DE APPROACH (P12 aplicado · enum strategy removido) ═════════════════════
+# Este bloco alimenta flow-explorer/flow-generic e detalha a regra aplicada em layers.intent.
+approach-model:
+  status: applied
   provocation: P12
   source: "owner (fricção de adoção + 'por que migração/confiabilidade são apostas?') + claude (matriz 2 eixos) + codex (adotar-com-ajustes: regra de ouro · natureza como retrato · aplicabilidade)"
   replaces: "layers.intent.strategy (enum experiment-led/direct-delivery/migration-led/reliability-led)"
@@ -1210,8 +1232,8 @@ approach-proposal:
         - "higiene: 0 dangerous-unreviewed em aberto · perfil full declarado (badge) · 0 números self-attested"
   artifact: "_map/flow-explorer.html (a JORNADA da org-exemplo, navegável em 5 etapas) + _map/flow-generic.html (as regras genéricas abordagem × sinais) — ambos gerados desta seção por _map/generate.mjs"
 
-# ═════════════════════ PROVOCAÇÕES ═════════════════════
-open-questions:
+# ═════════════════════ DECISÕES FECHADAS E ABERTOS REAIS ═════════════════════
+decisions:
   - {
       id: P1,
       about: "família do experiment",
@@ -1228,7 +1250,7 @@ open-questions:
       id: P3,
       about: "delivery ~ experiment > maintenance",
       status: resolved,
-      by: "3-layer: delivery=create/direct-delivery; experiment=execution-unit; sustain à parte",
+      by: "3-layer: delivery=create/direct; experiment=execution-unit; sustain à parte",
     }
   - { id: P4, about: "nomes EN/PT", status: decided, by: "ids EN + labels PT" }
   - {
@@ -1249,12 +1271,11 @@ open-questions:
       status: resolved,
       by: "3-layer: migration-wave com peças mistas; contrato compartilhado coordena",
     }
-  # ainda abertas:
   - {
       id: Q-strategy,
       about: "intent.strategy é guardado ou DERIVADO das execution-units?",
       status: resolved,
-      by: "owner 2026-07-01: DECLARADA pelo humano (dono da aposta), com autoria ASSISTIDA opcional (assisted-authoring — IA sugere, humano edita; 100% manual sempre possível) + conferência DERIVADA (observed-strategy → alerta strategy-drift). IA sempre sugestiva; no máximo alerta quando a proposta se encaixa noutro espectro",
+      by: "P12 aplicado: strategy de 4 valores foi substituída por approach binário declarado (validate-first/direct) + signal derivado/confirmado; drift vira approach-drift/signal-drift",
     }
   - {
       id: Q-collapse,
@@ -1265,10 +1286,20 @@ open-questions:
   - {
       id: Q-discover-level,
       about: "exploration grande (cross-repo) = discover repo-work × discovery execution-unit?",
-      status: open,
+      status: resolved,
+      by: "discovery virou execution-unit quando a pergunta/fate é compartilhada cross-repo ou tem lifecycle/owner/cadência próprios; descoberta simples colapsa em repo-work purpose=discover",
     }
   - {
       id: Q-names,
       about: "nomes finais dos kinds/purposes (feature-slice? rollout-slice puxa peso?)",
-      status: open,
+      status: resolved,
+      by: "feature-slice→delivery-slice · shape-up→graduation · rollout-slice→release-rollout · discovery adicionado; ids EN, labels/descrições PT",
     }
+  - {
+      id: P13,
+      about: "adoção por empresa existente e fidelidade repo-first",
+      status: applied,
+      by: "org-simulation-v3: repos com código MVP + sidecars .governance + context.json + repo-work acknowledgements + repo-contract registry; host valida stale/missing com red-team fixtures R/RW/RC",
+    }
+
+open-questions: []

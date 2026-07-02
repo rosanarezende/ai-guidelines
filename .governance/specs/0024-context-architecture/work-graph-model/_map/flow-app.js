@@ -1,7 +1,7 @@
 // flow-app.js — jornada da org-exemplo (proposta P12), navegável em 5 etapas com NÓS CLICÁVEIS.
 // Clique num nó (objetivo, área, time, intent, repo, contrato) → painel de conexões com saltos.
 // Cores de cadeia: cada objetivo da empresa tem uma cor que acompanha área → time → intent.
-// Dados GERADOS de ../model.yml § approach-proposal por generate.mjs. Visão genérica: flow-generic.html.
+// Dados GERADOS de ../model.yml § approach-model por generate.mjs. Visão genérica: flow-generic.html.
 const html = htm.bind(React.createElement);
 const { useState } = React;
 const FX = window.MODEL.flowExplorer;
@@ -468,7 +468,7 @@ function App() {
     <p className="src">
       <a href="model-map.html">← mapa do modelo</a> ·
       <a href="flow-generic.html"> explorador genérico</a> · <code>data.js</code> é GERADO de
-      <code> ../model.yml § approach-proposal</code> por <code>generate.mjs</code>.
+      <code> ../model.yml § approach-model</code> por <code>generate.mjs</code>.
     </p>
   </div>`;
 }

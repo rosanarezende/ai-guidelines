@@ -20,7 +20,10 @@ const layers = [
   {
     id: "intent",
     ax: m.layers.intent.is,
-    vals: m.layers.intent.strategy.map((t) => ({ t })),
+    vals: [
+      ...m.layers.intent.approach.map((t) => ({ t, p: "approach" })),
+      ...m.layers.intent.signal.map((t) => ({ t, p: "signal" })),
+    ],
   },
   {
     id: "execution-unit",
@@ -46,7 +49,7 @@ const examples = (m.examples || []).map((ex) => {
         unit: { kind: "migrations", title: "as iniciativas que dependem dele" },
         works: (ex.migrations || []).map((g) => ({
           r: `intent · ${g.intent}`,
-          p: g.strategy,
+          p: [g.approach, g.signal].filter(Boolean).join(" + "),
           d: g.does,
         })),
         note: ex.note,
@@ -134,8 +137,8 @@ const profiles = {
 
 const decisionPoints = Object.keys(m["decision-points"]).join(" · ");
 
-// proposta P12 (approach × nature) → alimenta o flow-explorer.html
-const ap = m["approach-proposal"];
+// approach × signal aplicado → alimenta o flow-explorer.html
+const ap = m["approach-model"];
 const flowExplorer = ap
   ? {
       status: ap.status,
@@ -175,7 +178,7 @@ const PROJECTED_KEYS = new Set([
   "scaling-law",
   "governance-profiles",
   "decision-points", // só os nomes
-  "approach-proposal", // → flow-explorer.html
+  "approach-model", // → flow-explorer.html
 ]);
 const omitted = Object.keys(m).filter((k) => !PROJECTED_KEYS.has(k));
 console.log(`ℹ coverage — NÃO projetadas no mapa: ${omitted.join(", ")}`);

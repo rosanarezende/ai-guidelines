@@ -7,16 +7,24 @@ window.MODEL = {
       ax: "o objetivo de negócio durável (uma por objetivo); NÃO delibera — tem gate de ativação",
       vals: [
         {
-          t: "experiment-led",
+          t: "validate-first",
+          p: "approach",
         },
         {
-          t: "direct-delivery",
+          t: "direct",
+          p: "approach",
         },
         {
-          t: "migration-led",
+          t: "none",
+          p: "signal",
         },
         {
-          t: "reliability-led",
+          t: "touches-contract",
+          p: "signal",
+        },
+        {
+          t: "operational-target",
+          p: "signal",
         },
       ],
     },
@@ -31,19 +39,22 @@ window.MODEL = {
           t: "migration-wave",
         },
         {
-          t: "feature-slice",
+          t: "delivery-slice",
         },
         {
           t: "incident-response",
         },
         {
-          t: "shape-up",
+          t: "graduation",
         },
         {
           t: "cleanup",
         },
         {
-          t: "rollout-slice",
+          t: "release-rollout",
+        },
+        {
+          t: "discovery",
         },
       ],
     },
@@ -76,7 +87,8 @@ window.MODEL = {
       label: "experimento cross-repo (growth)",
       intent: {
         title: "aumentar conversão trial → paid",
-        strategy: "experiment-led",
+        approach: "validate-first",
+        signal: "none",
       },
       unit: {
         kind: "experiment-run",
@@ -110,7 +122,7 @@ window.MODEL = {
           d: "monitoramento pós-release",
         },
       ],
-      note: "veredito na unit (não por repo); won→shape-up · lost→cleanup · inconclusive→novo",
+      note: "veredito na unit (não por repo); won→graduation · lost→cleanup · inconclusive→novo",
       contract: "acme-user-context@v3",
     },
     {
@@ -118,7 +130,8 @@ window.MODEL = {
       label: "redesign misto (migração)",
       intent: {
         title: "redesign do checkout",
-        strategy: "migration-led",
+        approach: "direct",
+        signal: "touches-contract",
       },
       unit: {
         kind: "migration-wave",
@@ -168,13 +181,13 @@ window.MODEL = {
         works: [
           {
             r: "intent · redesign-checkout",
-            p: "migration-led",
-            d: "migration-led — adapta o contrato",
+            p: "direct + touches-contract",
+            d: "direct + touches-contract — adapta o contrato",
           },
           {
             r: "intent · growth-upgrade",
-            p: "experiment-led",
-            d: "experiment-led — consome o contrato",
+            p: "validate-first + none",
+            d: "validate-first — consome o contrato sem revisão",
           },
         ],
         note: "coordenação entre iniciativas = via o contrato (derivada); a janela mora nele (não é derivável)",
@@ -227,7 +240,8 @@ window.MODEL = {
       label: "experimento que termina em lost",
       intent: {
         title: "aumentar ativação via onboarding",
-        strategy: "experiment-led",
+        approach: "validate-first",
+        signal: "none",
       },
       unit: {
         kind: "experiment-run",
@@ -254,7 +268,8 @@ window.MODEL = {
       label: "delivery tradicional",
       intent: {
         title: "exportar relatório em PDF",
-        strategy: "direct-delivery",
+        approach: "direct",
+        signal: "none",
       },
       unit: null,
       works: [
@@ -264,7 +279,7 @@ window.MODEL = {
           d: "botão + geração do PDF",
         },
       ],
-      note: "feature comum = intent direct-delivery → repo-work create (execution-unit colapsa)",
+      note: "feature comum = intent direct → repo-work create (execution-unit colapsa)",
     },
   ],
   sim: [
@@ -318,7 +333,7 @@ window.MODEL = {
         },
         {
           phase: "veredito",
-          who: "PM + dados (experiment-run); Tech Lead conduz shape-up/cleanup",
+          who: "PM + dados (experiment-run); Tech Lead conduz graduation/cleanup",
         },
       ],
       gaps: [
@@ -463,7 +478,8 @@ window.MODEL = {
     opportunities: ["jornada de cross-sell unificada", "personalização da oferta"],
     intent: {
       title: "testar CTA contextual de upgrade",
-      strategy: "experiment-led",
+      approach: "validate-first",
+      signal: "none",
     },
     unit: {
       kind: "experiment-run",
@@ -547,7 +563,7 @@ window.MODEL = {
   },
   decisionPoints: "approve-objective · activate-intent · release-rollout · accept-verdict",
   flowExplorer: {
-    status: "proposed",
+    status: "applied",
     provocation: "P12",
     approach: {
       id: "approach",
