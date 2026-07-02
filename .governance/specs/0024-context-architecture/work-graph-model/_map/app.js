@@ -1,4 +1,4 @@
-// app.js — mapa navegável do modelo (React + htm, sem build). Dados em data.js (espelham ../model.yml).
+// app.js — mapa navegável do modelo (React + htm, sem build). Dados em data.js (GERADO de ../model.yml por generate.mjs).
 const html = htm.bind(React.createElement);
 const { useState } = React;
 
@@ -141,6 +141,38 @@ function SimExplorer() {
   </div>`;
 }
 
+function ProfilesView() {
+  const [i, setI] = useState(0);
+  const p = MODEL.profiles;
+  const it = p.items[i];
+  return html`<div>
+    <p className="cap">perfis de governança (a lei de escala executável)</p>
+    <${Tabs} items=${p.items.map((x) => x.id)} active=${i} onPick=${setI} />
+    <div className="intent">
+      <div className="hd"><span className="lvl">${it.id}</span> ${it.for}</div>
+      <div className="works">
+        <div className="w">
+          <span className="r">nós</span>
+          <div className="d">${it.nodes}</div>
+        </div>
+        <div className="w">
+          <span className="r">gates</span>
+          <div className="d">${it.gates}</div>
+        </div>
+        <div className="w">
+          <span className="r">SoD</span>
+          <div className="d">${it.sod}</div>
+        </div>
+        <div className="w">
+          <span className="r">obrigatório</span>
+          <div className="d">${it.required}</div>
+        </div>
+      </div>
+      <p className="note">${p.law}</p>
+    </div>
+  </div>`;
+}
+
 function ObjectiveChain({ objective }) {
   return html`<div className="intent">
     <div className="hd">
@@ -237,14 +269,16 @@ function App() {
     <${LayerLegend} />
     <${ExampleExplorer} />
     <${SimExplorer} />
+    <${ProfilesView} />
     <${GraphView} />
     <div className="foot">
       <span><b>contrato</b> — nó de coordenação/versionamento (janela de compat mora nele)</span>
-      <span><b>q/r/d</b> — anexável a qualquer nó</span>
-      <span><b>intake</b> — funil pré-intent</span>
+      <span><b>q/r/d</b> — anexável a qualquer nó (alerta em mutação perigosa)</span>
+      <span><b>intake</b> — funil pré-intent (authorized-by ou standalone)</span>
+      <span><b>decision-points</b> — ${MODEL.decisionPoints} (colapsáveis por perfil)</span>
     </div>
     <p className="src">
-      Gerado a partir de <code>data.js</code> (espelha <code>../model.yml</code>).
+      <code>data.js</code> é GERADO de <code>../model.yml</code> por <code>generate.mjs</code>.
     </p>
   </div>`;
 }

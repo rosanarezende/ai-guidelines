@@ -12,7 +12,7 @@ meta:
   version: 2
   status: iterating # 3 camadas + business-tier + scaling-law APLICADOS (gate owner 2026-07-01); P10 em curso
   grounded-by: tracker.md
-  artifact: _map/model-map.html # navegável; hoje mantido em sync à mão (gerador = próximo passo)
+  artifact: _map/model-map.html # navegável; data.js é GERADO por _map/generate.mjs (node generate.mjs · --check verifica o sync)
 
 # ═════════════════════ AS 3 CAMADAS ═════════════════════
 layers:
@@ -241,7 +241,16 @@ examples:
       consumers: "acme-mfe-billing, acme-mfe-support"
       compatibility-window: "v2, v3 até 2026-08-15"
     migrations:
-      ["intent redesign-checkout (migration-led)", "intent growth-upgrade (experiment-led)"]
+      - {
+          intent: redesign-checkout,
+          strategy: migration-led,
+          does: "migration-led — adapta o contrato",
+        }
+      - {
+          intent: growth-upgrade,
+          strategy: experiment-led,
+          does: "experiment-led — consome o contrato",
+        }
     note: "coordenação entre iniciativas = via o contrato (derivada); a janela mora nele (não é derivável)"
 
   # ── 5 situações novas (casos-limite que estressam o modelo) ──
@@ -449,6 +458,36 @@ business-tier:
   fork-resolvido: "core FIXO + níveis CONFIGURÁVEIS (nem 5 nós fixos, nem grafo plugável livre). Core = business-objective · thesis · opportunity-area · metric-definition/target · intent. Domínio configura business-objective.level. Tipo NOVO só com CONTRATO (owner · lifecycle · arestas · rollup · regra-de-colapso · impacto-no-dashboard)."
   two-hypotheses: "não conflar: thesis = hipótese de NEGÓCIO (estratégica) ≠ experiment-run.hypothesis = hipótese TÁTICA (da execution-unit). Níveis diferentes."
   connects: "features.md P2 (portfólio: RICE/ICE, roadmap, priorização)"
+  example: # instância ILUSTRATIVA do grafo completo (o _map desenha esta cadeia; data.js é gerado daqui)
+    objective:
+      - { level: company-strategy, title: "crescer receita via plataforma", period: "2027" }
+      - { level: area-driver, title: "cross-sell entre produtos", period: "2027-H1" }
+      - {
+          level: team-priority,
+          title: "P1 · +X% de conversão de cross-sell",
+          period: "2027-H1",
+          meta: "target: conversion-rate · budget: orçamento H1",
+        }
+    thesis: "ofertar o produto B à base do produto A, evidenciando o uso conjunto, move a conversão"
+    opportunities: ["jornada de cross-sell unificada", "personalização da oferta"]
+    intent: { title: "testar CTA contextual de upgrade", strategy: experiment-led }
+    unit: { kind: experiment-run, title: "CTA contextual v1", verdict: won }
+    works:
+      - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atrás da flag" }
+      - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline (mede a métrica)" }
+      - { repo: acme-web-host, purpose: sustain, desc: "adapta o contrato compartilhado" }
+    outcome:
+      title: "resultado do experimento (won)"
+      fields: "source: acme-analytics · janela: H1 · valor: +X% · attested-by: acme-data (≠ quem definiu o target) · revision: dados@rev"
+      note: "único insumo do target.actual — sem attester independente ou com revision stale, o dashboard marca unverified/stale (falha visível, não silenciosa)"
+    measurement:
+      metric: "conversion-rate · source: acme-analytics · owner: acme-data"
+      target: "H1: +X% · actual = DERIVADO dos outcomes (não à mão)"
+      roles: "papéis: target-definer · metric-owner · actual-attester · dashboard-consumer — quem define o target NÃO é o único a atestar o actual"
+    rollup:
+      contributes: "o outcome CONTRIBUI (mensurável) p/ a priority P1 → entra no dashboard (rollup primário)"
+      aligns: "e ALINHA (narrativo) com a company-strategy → contexto, NÃO soma no dashboard"
+      lint: "lint: exatamente 1 rollup primário por outcome/intent · aggregation obrigatória · aligns-with nunca soma"
 
 # ═════════════════════ LEI ÚNICA DE ESCALA (Codex — generaliza F-governance-scaling) ═════════════════════
 scaling-law:
