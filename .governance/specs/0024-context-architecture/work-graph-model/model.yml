@@ -115,6 +115,7 @@ edges:
 states:
   own: [draft, active, done] # active EXIGE assignee + início
   derived: [blocked, paused]
+  business-tier: [proposed, active, closed, superseded, dropped] # G8 — lifecycle de objective/target sai da prosa e entra no catálogo
 
 # ═════════════════════ ENVELOPE (L8) + CONFIANÇA (L9) — inalterados do tracker ═════════════════════
 envelope:
@@ -123,6 +124,19 @@ envelope:
   origem: [schema-version, source-commit, producer, ttl]
   seguranca: [classification, visibility, access]
   invalidacao: [invalidates]
+  mutation-types: # G9 — toda mutação DECLARA o tipo (catálogo por tier)
+    business-tier:
+      [
+        objective-create,
+        objective-close,
+        target-change,
+        actual-publish,
+        rollup-change,
+        allocation-change,
+      ]
+    work-tier: [intent-activate, unit-fork, verdict-set, verdict-override, work-state-change]
+    coordination: [contract-revision, compat-window-change]
+    dangerous: "target-change · rollup-change · compat-window-change · verdict-override · break-glass — disparam o ALERTA q/r/d (deliberation.enforcement)"
 trust:
   boundary: "entidade de 1ª classe (matcher/agente/backend/API são fronteiras)"
   policy-artifacts:
@@ -165,9 +179,14 @@ flow:
   - { phase: registro, role: negocio }
   - { phase: triagem, role: eng, does: [itens, matcher-advisory, valida-contratos] }
   - { phase: investigacao, does: ["discover roda; viabilidade testada"] }
-  - { phase: gate, role: humano, kind: append-only }
+  - { phase: gate, role: humano, kind: append-only, note: "= decision-points.activate-intent" }
   - { phase: ativacao, does: [consolida, "move p/ intents/"] }
   - { phase: breakdown, role: dono, emits: ["execution-units + repo-works (heterogêneo)"] }
+decision-points: # G7 — gates NOMEADOS por tier (o gate do fluxo era só o de ativação); todos append-only e colapsáveis por perfil
+  approve-objective: "aprova/encerra o business-objective do ciclo (owner do nível acima; no topo, o sponsor)"
+  activate-intent: "o gate que já existia no fluxo (promove candidata → intent)"
+  release-rollout: "autoriza exposição (rollout-slice/canary); change-class emergency passa por break-glass LOGADO"
+  accept-verdict: "aceita o veredito do experiment-run + o fork (won → shape-up · lost → cleanup); override = mutação perigosa (alerta q/r/d)"
 physical:
   candidata: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml"
   ativada: "acme-governance/intents/<id>/intent.yml"
@@ -376,6 +395,14 @@ business-tier:
     allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority; vira nó só se precisar."
   edges:
     - { id: cascades-to, from: business-objective, to: business-objective }
+    - {
+        id: continues-from,
+        from: business-objective,
+        to: business-objective,
+        note: "novo ciclo (G8)",
+      }
+    - { id: split-from, from: business-objective, to: business-objective, note: "1 vira N (G8)" }
+    - { id: merged-into, from: business-objective, to: business-objective, note: "N viram 1 (G8)" }
     - { id: framed-by, from: business-objective, to: thesis }
     - { id: explores, from: thesis, to: opportunity-area }
     - { id: authorizes, from: business-objective, to: intent }
@@ -416,7 +443,7 @@ business-tier:
   input-vs-output:
     input: "business-objective → thesis → opportunity-area → intent"
     output: "outcome → target.actual → dashboard do objective (sobe SÓ por contributes-to, com agregação declarada)"
-  annual-flexibility: "objetivos versionados POR CICLO: novo ciclo = novos business-objective (status closed/active · continues-from/supersedes/split/merge), NÃO mudança de schema. level/nomes = LABEL configurável. Usa o envelope L8 (append-only/supersedes) → mudança anual vira DADO, preserva histórico/comparação; não é migração ontológica."
+  annual-flexibility: "objetivos versionados POR CICLO: novo ciclo = novos business-objective (status closed/active · continues-from/supersedes/split/merge — desde o G8, no catálogo de states/edges), NÃO mudança de schema. level/nomes = LABEL configurável. Usa o envelope L8 (append-only/supersedes) → mudança anual vira DADO, preserva histórico/comparação; não é migração ontológica."
   fork-resolvido: "core FIXO + níveis CONFIGURÁVEIS (nem 5 nós fixos, nem grafo plugável livre). Core = business-objective · thesis · opportunity-area · metric-definition/target · intent. Domínio configura business-objective.level. Tipo NOVO só com CONTRATO (owner · lifecycle · arestas · rollup · regra-de-colapso · impacto-no-dashboard)."
   two-hypotheses: "não conflar: thesis = hipótese de NEGÓCIO (estratégica) ≠ experiment-run.hypothesis = hipótese TÁTICA (da execution-unit). Níveis diferentes."
   connects: "features.md P2 (portfólio: RICE/ICE, roadmap, priorização)"
@@ -521,6 +548,7 @@ flow-validation:
       scale: [big, mid]
       reconciliation: "aceito — FATO: o fluxo tem UM gate (pré-ativação); verdict/rollout/aprovação-de-objective não têm decision-point governado"
       suggestion: "decision-points separados (approve-objective · activate-intent · release/rollout · accept-verdict), todos colapsáveis"
+      resolution: "APLICADO (fila P1) — seção decision-points (4 gates nomeados, append-only, colapsáveis por perfil); o gate do fluxo = activate-intent"
     - id: G8
       about: "states genéricos demais p/ o business-tier"
       where: "objective anual · target · reopen/supersede"
@@ -528,6 +556,7 @@ flow-validation:
       scale: [big, mid]
       reconciliation: "parcial — o annual-flexibility JÁ nomeia closed/active + continues-from/supersedes/split/merge; o gap REAL é esse lifecycle viver só em prosa (fora do catálogo states e das edges)"
       suggestion: "lifecycle próprio de objective/target (proposed · active · closed · superseded · dropped) + as arestas continues-from/split-from/merged-into no catálogo"
+      resolution: "APLICADO (fila P1) — states.business-tier (5 estados) + arestas continues-from/split-from/merged-into no business-tier.edges"
     - id: G9
       about: "envelope L8 sem catálogo de mutações por tier"
       where: "toda mutação — em especial target/objective"
@@ -535,6 +564,7 @@ flow-validation:
       scale: [big, mid, trio]
       reconciliation: "aceito — FATO: o envelope define grupos de CAMPOS, não TIPOS de mutação"
       suggestion: "mutation types declarados: objective-create · target-change · actual-publish · rollup-change · allocation-change"
+      resolution: "APLICADO (fila P1) — envelope.mutation-types (business-tier · work-tier · coordination + a lista dangerous ligada ao alerta q/r/d)"
     - id: G10
       about: "contratos coordenam repo-work, mas não bloqueiam rollup"
       where: "coordenação → veredito"
