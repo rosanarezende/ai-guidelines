@@ -25,7 +25,8 @@ layers:
 
   execution-unit:
     is: "unidade CROSS-REPO com lifecycle próprio + unidade semântica (a coisa é UMA)"
-    optional: "COLAPSA no trivial (1 repo, sem lifecycle próprio) — aí intent liga direto no repo-work"
+    optional: "COLAPSA no trivial (regra exata: collapse-rule) — aí intent liga direto no repo-work"
+    collapse-rule: "RESOLVIDO (Q-collapse, owner 2026-07-01) — a régua é a scaling-law: a unit EXISTE se pelo menos um vale: (1) mais de 1 repo envolvido · (2) o kind carrega lifecycle próprio (experiment-run/migration-wave/incident-response/rollout-slice NUNCA colapsam — veredito/janela/severidade/fases moram na unit) · (3) owner/cadência próprios ≠ intent. Senão COLAPSA. Colapso REVERSÍVEL: se o trabalho crescer (2º repo entra), cria-se a unit e as peças se reparentam — mutação normal com envelope, histórico preservado"
     kinds:
       experiment-run:
         owns: [hypothesis, flag, exposure, metrics, guardrails, decision-rule, verdict]
@@ -887,7 +888,8 @@ open-questions:
   - {
       id: Q-collapse,
       about: "regra exata de quando a execution-unit colapsa (trivial)",
-      status: open,
+      status: resolved,
+      by: "owner 2026-07-01: a régua é a scaling-law — unit existe se >1 repo OU kind com lifecycle próprio (nunca colapsam) OU owner/cadência próprios; senão colapsa, REVERSÍVEL (reparent com envelope). Ver layers.execution-unit.collapse-rule",
     }
   - {
       id: Q-discover-level,

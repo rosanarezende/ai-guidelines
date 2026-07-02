@@ -22,7 +22,7 @@ window.MODEL = {
     },
     {
       id: "execution-unit",
-      ax: "unidade CROSS-REPO com lifecycle próprio + unidade semântica (a coisa é UMA) · COLAPSA no trivial (1 repo, sem lifecycle próprio) — aí intent liga direto no repo-work",
+      ax: "unidade CROSS-REPO com lifecycle próprio + unidade semântica (a coisa é UMA) · COLAPSA no trivial (regra exata: collapse-rule) — aí intent liga direto no repo-work",
       vals: [
         {
           t: "experiment-run",
