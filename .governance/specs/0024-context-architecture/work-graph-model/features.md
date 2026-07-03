@@ -32,10 +32,11 @@ físico, mas não apaga os aprendizados da v2.
 - backend file-first transacional mínimo: lock global por comando, escrita atômica, event-log
   append-only, marker de recovery para crash entre write e evento, replay por idempotency/nonce e
   fixtures de concorrência.
+- segundo outcome real em `intent-checkout-stack`, tocando contrato e citando
+  `acme-user-context@v4`, com todos os repo-work acks fechados por comando.
 
 🚧 Ainda falta para considerar o work-graph pronto ponta a ponta:
 
-- segundo outcome real para provar que o fluxo não está especial-cased em `intent-cta-upgrade`;
 - caminho operacional sem intent planejada;
 - matcher executável v3;
 - authoring completo no app Next/MUI;
@@ -128,15 +129,17 @@ Critérios:
 
 ### R4 · Segundo outcome real
 
-Status: ⬜ a fazer.
+Status: ✅ aplicado.
 
 Objetivo: provar que outcome/verdict/dashboard não estão hardcoded no `intent-cta-upgrade`.
 
-Preferência:
+Implementado:
 
-- uma intent que toque contrato; ou
-- uma intent operacional/reliability; ou
-- uma intent com profile compact/SoD parcial.
+- `intent-checkout-stack` teve suas 7 peças repo-local fechadas como `done` via `repo-work.ack`;
+- `out-checkout-stack-2027h2` foi publicado via `outcome.publish`;
+- o outcome cita `contract-revisions: [acme-user-context@v4]`, exercitando a dependência
+  verificável de contrato;
+- `check-runtime.mjs` agora falha se esse outcome ou a contract-revision sumirem.
 
 ### R5 · Operacional sem intent
 
@@ -241,10 +244,9 @@ Direção:
 
 ## Perguntas ainda abertas
 
-1. Qual segunda intent deve publicar outcome real para provar generalidade?
-2. Qual caso operacional sem intent deve ser o primeiro: incidente, dep-bump ou bug standalone?
-3. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
-4. Quando o app incubado deixa de ser sim e vira pacote do framework?
+1. Qual caso operacional sem intent deve ser o primeiro: incidente, dep-bump ou bug standalone?
+2. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
+3. Quando o app incubado deixa de ser sim e vira pacote do framework?
 
 ---
 

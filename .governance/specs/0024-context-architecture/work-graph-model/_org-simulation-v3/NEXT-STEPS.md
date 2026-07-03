@@ -13,6 +13,8 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - cada repo tem `.governance/manifest.yml`, `context.json`, `works/*.yml` e, quando owner, `registry/contracts/*.yml`;
 - o host valida `repo-context-*`, `repo-work-*` e `repo-contract-*` por resolver fail-closed;
 - `intent-cta-upgrade` publica um outcome real em `acme-governance/outcomes/outcomes.yml`, com source/revision/window/attester/envelope e rollup derivado;
+- `intent-checkout-stack` publica o segundo outcome real, com todas as peças repo-local `done` e
+  `contract-revisions: [acme-user-context@v4]`;
 - peças repo-local têm lifecycle (`acknowledged|active|blocked|done|dropped`) e outcome não soma antes de `done`;
 - `acme-governance/trust-policy.yml` materializa controles de ACL local, revogação, fallback de matcher, secret quarantine e independência do oráculo;
 - `_lib/` materializa a primeira runtime DDD v3: adapter file, domínio/validador, command dry-run e read-model de grafo;
@@ -77,13 +79,12 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **Segundo outcome real:** escolher uma intent que toque contrato ou objetivo operacional para provar que o mecanismo não está especial-cased no `intent-cta-upgrade`.
-2. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → verdict → actual`.
-3. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
-4. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
-5. **Portabilidade v2 → v3:** completar matcher executável e authoring completo, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
-6. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo.
-7. **Revisão adversarial pós-R3:** pedir ao Claude Code/Fable 5 para revisar a sim com foco em transação file-first + primeiro verdict real, sem implementar.
+1. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
+2. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → verdict/rollup → actual`.
+3. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
+4. **Portabilidade v2 → v3:** completar matcher executável e authoring completo, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
+5. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo.
+6. **Revisão adversarial pós-R4:** pedir ao Claude Code/Fable 5 para revisar a sim com foco em dois outcomes reais, contrato e transação file-first.
 
 ## Comandos de aceite
 

@@ -6,7 +6,7 @@ repo: acme-obs-stack
 purpose: operate
 desc: monitor do canary (guardrails do corte)
 review: "externo: time-sre"
-status: acknowledged
+status: done
 source:
   kind: central-breakdown
   file: acme-governance/intents/intent-checkout-stack.yml
@@ -14,3 +14,17 @@ source:
 code:
   touchpoints:
     - src/index.mjs
+owner: lead-sre
+started-at: 2027-09-01
+base-revision: acme-obs-stack@ef01ac401036
+completed-at: 2027-09-20
+source-commit: git:obs-stack-checkout-canary-001
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs
+  result: passed
+  files:
+    - src/index.mjs
+verification:
+  checked-by: lead-sre
+  result: guardrails de canary publicados para rollout do checkout stack

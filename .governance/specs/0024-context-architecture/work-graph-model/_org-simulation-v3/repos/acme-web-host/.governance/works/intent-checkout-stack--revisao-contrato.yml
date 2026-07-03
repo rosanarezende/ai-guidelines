@@ -7,7 +7,7 @@ purpose: sustain
 desc: acme-user-context v3 → v4 COM QUEBRA — abre a janela; mutação compat-window-change (dangerous
   → alerta q/r/d)
 review: "externo: area-platform"
-status: acknowledged
+status: done
 source:
   kind: central-breakdown
   file: acme-governance/intents/intent-checkout-stack.yml
@@ -15,3 +15,17 @@ source:
 code:
   touchpoints:
     - src/index.mjs
+owner: head-platform
+started-at: 2027-08-08
+base-revision: acme-web-host@0917694bbc86
+completed-at: 2027-09-15
+source-commit: git:web-host-user-context-v4-001
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs
+  result: passed
+  files:
+    - src/index.mjs
+verification:
+  checked-by: head-platform
+  result: acme-user-context v4 revisado com janela de compatibilidade coordenada

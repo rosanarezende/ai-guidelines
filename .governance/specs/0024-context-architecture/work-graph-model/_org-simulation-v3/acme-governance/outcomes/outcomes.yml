@@ -1,12 +1,12 @@
-# outcomes.yml — resultados GOVERNADOS. Só entram no rollup quando o resolver prova:
-# source · window · metric · aggregation · attester independente · revision · envelope · peças done.
 outcomes:
   - id: out-cta-upgrade-2027q1
     emitted-by: intent-cta-upgrade
     source: acme-analytics/conversion-rate@warehouse-rev42
-    window: { start: 2027-01-01, end: 2027-03-31 }
+    window:
+      start: 2027-01-01
+      end: 2027-03-31
     metric: conversion-rate
-    value: "+2.4 %"
+    value: +2.4 %
     aggregation: avg
     attested-by: acme-analytics
     revision: warehouse@rev42
@@ -18,3 +18,23 @@ outcomes:
       issued-at: 2027-04-02
       idempotency-key: out-cta-upgrade-2027q1
       nonce: nonce-out-cta-upgrade-2027q1
+  - id: out-checkout-stack-2027h2
+    emitted-by: intent-checkout-stack
+    source: acme-data-pipeline/cost-to-serve@warehouse-rev77
+    window:
+      start: 2027-07-01
+      end: 2027-12-31
+    metric: cost-to-serve
+    value: -11.8 R$/pedido
+    aggregation: avg
+    attested-by: acme-data-pipeline
+    revision: warehouse@rev77
+    contract-revisions:
+      - acme-user-context@v4
+    contributes-to: tgt-checkout-stack
+    envelope:
+      actor: tool:r4-second-outcome
+      authority: head-platform
+      issued-at: 2027-10-20
+      idempotency-key: out-checkout-stack-2027h2
+      nonce: nonce-out-checkout-stack-2027h2

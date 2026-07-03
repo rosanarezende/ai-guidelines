@@ -470,10 +470,9 @@ Antes de considerar o app robusto, a suíte deve provar que:
 
 ### Perguntas remanescentes
 
-1. Qual segunda intent deve publicar outcome real para provar generalidade?
-2. Qual caminho operacional sem intent vem primeiro: incidente, dep-bump ou bug standalone?
-3. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
-4. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
+1. Qual caminho operacional sem intent vem primeiro: incidente, dep-bump ou bug standalone?
+2. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
+3. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
 
 ## 15. Estado da decisão Opção A
 
@@ -501,5 +500,5 @@ de iniciar UI/API nova.
   atômica, marker de recovery e event-log append-only. `currentRevision()` inclui triages e
   sidecars repo-local publicados, para que repo-work/contract não virem mutações invisíveis ao
   stale-check. Ainda não há backend transacional SQLite/Neo4j/Mongo write-capable.
-- **Próxima decisão:** escolher o segundo outcome real e o primeiro fluxo operacional sem intent,
-  sem transformar banco/read-model em SSOT.
+- **Próxima decisão:** escolher o primeiro fluxo operacional sem intent, sem transformar
+  banco/read-model em SSOT.

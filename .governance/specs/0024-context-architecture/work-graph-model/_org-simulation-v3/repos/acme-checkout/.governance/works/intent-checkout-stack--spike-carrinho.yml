@@ -6,7 +6,7 @@ repo: acme-checkout
 purpose: discover
 desc: EXPLORATION — como migrar o estado do carrinho sem downtime? fate informa a onda 1
 review: interno
-status: acknowledged
+status: done
 source:
   kind: central-breakdown
   file: acme-governance/intents/intent-checkout-stack.yml
@@ -14,3 +14,17 @@ source:
 code:
   touchpoints:
     - src/index.mjs
+owner: lead-checkout
+started-at: 2027-08-01
+base-revision: acme-checkout@15fce85abf5e
+completed-at: 2027-08-05
+source-commit: git:checkout-stack-spike-001
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs
+  result: passed
+  files:
+    - src/index.mjs
+verification:
+  checked-by: lead-checkout
+  result: estratégia de migração do carrinho validada sem downtime

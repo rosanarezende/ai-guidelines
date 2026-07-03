@@ -6,7 +6,7 @@ repo: acme-checkout-api
 purpose: sustain
 desc: adapta os endpoints ao stack novo
 review: interno
-status: acknowledged
+status: done
 source:
   kind: central-breakdown
   file: acme-governance/intents/intent-checkout-stack.yml
@@ -14,3 +14,17 @@ source:
 code:
   touchpoints:
     - src/index.mjs
+owner: lead-checkout
+started-at: 2027-08-10
+base-revision: acme-checkout-api@7123dbe17220
+completed-at: 2027-09-04
+source-commit: git:checkout-api-stack-001
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs
+  result: passed
+  files:
+    - src/index.mjs
+verification:
+  checked-by: lead-checkout
+  result: endpoints de checkout adaptados para o novo stack

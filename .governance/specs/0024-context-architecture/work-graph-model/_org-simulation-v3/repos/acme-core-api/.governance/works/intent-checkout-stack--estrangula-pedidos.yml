@@ -6,7 +6,7 @@ repo: acme-core-api
 purpose: sustain
 desc: estrangula o fluxo de pedidos do MONOLITO (strangler) — módulo do próprio time
 review: interno
-status: acknowledged
+status: done
 source:
   kind: central-breakdown
   file: acme-governance/intents/intent-checkout-stack.yml
@@ -15,3 +15,17 @@ code:
   touchpoints:
     - src/modules/orders.mjs
 module: mod-orders
+owner: lead-checkout
+started-at: 2027-08-12
+base-revision: acme-core-api@94535e6569b5
+completed-at: 2027-09-12
+source-commit: git:core-api-orders-strangler-001
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs
+  result: passed
+  files:
+    - src/modules/orders.mjs
+verification:
+  checked-by: lead-checkout
+  result: módulo de pedidos estrangulado para o fluxo novo

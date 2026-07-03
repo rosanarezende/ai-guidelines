@@ -6,7 +6,7 @@ repo: acme-design-system
 purpose: create
 desc: componentes do checkout no stack novo (consome acme-design-tokens sem revisão)
 review: "externo: area-platform"
-status: acknowledged
+status: done
 source:
   kind: central-breakdown
   file: acme-governance/intents/intent-checkout-stack.yml
@@ -14,3 +14,17 @@ source:
 code:
   touchpoints:
     - src/index.mjs
+owner: head-platform
+started-at: 2027-08-03
+base-revision: acme-design-system@6e7215cc880a
+completed-at: 2027-08-18
+source-commit: git:design-system-checkout-components-001
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs
+  result: passed
+  files:
+    - src/index.mjs
+verification:
+  checked-by: head-platform
+  result: componentes do checkout publicados com tokens compatíveis

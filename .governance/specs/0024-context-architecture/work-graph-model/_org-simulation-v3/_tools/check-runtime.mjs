@@ -33,6 +33,23 @@ if ((org.intents || []).length < 1) fail("nenhuma intent carregada pelo adapter 
 if ((org.repos || []).length < 1) fail("nenhum repo carregado pelo adapter file");
 if (errors.length) fail(`domínio retornou ${errors.length} erro(s) no snapshot base`);
 
+const checkoutOutcome = (org.outcomes || []).find(
+  (outcome) => outcome.id === "out-checkout-stack-2027h2"
+);
+if (!checkoutOutcome) fail("segundo outcome real de intent-checkout-stack não existe");
+if (!(checkoutOutcome["contract-revisions"] || []).includes("acme-user-context@v4")) {
+  fail("out-checkout-stack-2027h2 não cita acme-user-context@v4");
+}
+for (const work of (org.intents || []).find((intent) => intent.id === "intent-checkout-stack")
+  ?.works || []) {
+  const claim = (org.repoWorkClaims || []).find(
+    (item) => item.intent === "intent-checkout-stack" && item.work === work.id
+  );
+  if (claim?.status !== "done") {
+    fail(`intent-checkout-stack::${work.id} não está done antes do outcome`);
+  }
+}
+
 const graph = buildGraphReadModel({
   org,
   issues,

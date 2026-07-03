@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme-governance/ + repos/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "b5380c0b1375",
+  contentHash: "596d35b91443",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -1583,7 +1583,7 @@ window.GRAPH = {
         purpose: "sustain",
         desc: "adapta os endpoints ao stack novo",
         review: "interno",
-        status: "acknowledged",
+        status: "done",
         source: {
           kind: "central-breakdown",
           file: "acme-governance/intents/intent-checkout-stack.yml",
@@ -1591,6 +1591,21 @@ window.GRAPH = {
         },
         code: {
           touchpoints: ["src/index.mjs"],
+        },
+        owner: "lead-checkout",
+        "started-at": "2027-08-10",
+        "base-revision": "acme-checkout-api@7123dbe17220",
+        "completed-at": "2027-09-04",
+        "source-commit": "git:checkout-api-stack-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-checkout",
+          result: "endpoints de checkout adaptados para o novo stack",
         },
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout-api\\.governance\\works\\intent-checkout-stack--adapta-api.yml",
@@ -1610,7 +1625,7 @@ window.GRAPH = {
         purpose: "create",
         desc: "componentes do checkout no stack novo (consome acme-design-tokens sem revisão)",
         review: "externo: area-platform",
-        status: "acknowledged",
+        status: "done",
         source: {
           kind: "central-breakdown",
           file: "acme-governance/intents/intent-checkout-stack.yml",
@@ -1618,6 +1633,21 @@ window.GRAPH = {
         },
         code: {
           touchpoints: ["src/index.mjs"],
+        },
+        owner: "head-platform",
+        "started-at": "2027-08-03",
+        "base-revision": "acme-design-system@6e7215cc880a",
+        "completed-at": "2027-08-18",
+        "source-commit": "git:design-system-checkout-components-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "head-platform",
+          result: "componentes do checkout publicados com tokens compatíveis",
         },
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-design-system\\.governance\\works\\intent-checkout-stack--componentes-ds.yml",
@@ -1646,7 +1676,7 @@ window.GRAPH = {
         purpose: "sustain",
         desc: "estrangula o fluxo de pedidos do MONOLITO (strangler) — módulo do próprio time",
         review: "interno",
-        status: "acknowledged",
+        status: "done",
         source: {
           kind: "central-breakdown",
           file: "acme-governance/intents/intent-checkout-stack.yml",
@@ -1656,6 +1686,21 @@ window.GRAPH = {
           touchpoints: ["src/modules/orders.mjs"],
         },
         module: "mod-orders",
+        owner: "lead-checkout",
+        "started-at": "2027-08-12",
+        "base-revision": "acme-core-api@94535e6569b5",
+        "completed-at": "2027-09-12",
+        "source-commit": "git:core-api-orders-strangler-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/modules/orders.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-checkout",
+          result: "módulo de pedidos estrangulado para o fluxo novo",
+        },
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-core-api\\.governance\\works\\intent-checkout-stack--estrangula-pedidos.yml",
         _repo: "acme-core-api",
@@ -1683,7 +1728,7 @@ window.GRAPH = {
         purpose: "operate",
         desc: "monitor do canary (guardrails do corte)",
         review: "externo: time-sre",
-        status: "acknowledged",
+        status: "done",
         source: {
           kind: "central-breakdown",
           file: "acme-governance/intents/intent-checkout-stack.yml",
@@ -1691,6 +1736,21 @@ window.GRAPH = {
         },
         code: {
           touchpoints: ["src/index.mjs"],
+        },
+        owner: "lead-sre",
+        "started-at": "2027-09-01",
+        "base-revision": "acme-obs-stack@ef01ac401036",
+        "completed-at": "2027-09-20",
+        "source-commit": "git:obs-stack-checkout-canary-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-sre",
+          result: "guardrails de canary publicados para rollout do checkout stack",
         },
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-obs-stack\\.governance\\works\\intent-checkout-stack--monitor-canary.yml",
@@ -1719,7 +1779,7 @@ window.GRAPH = {
         purpose: "sustain",
         desc: "porta o fluxo principal (de → para) usando os componentes novos",
         review: "interno",
-        status: "acknowledged",
+        status: "done",
         source: {
           kind: "central-breakdown",
           file: "acme-governance/intents/intent-checkout-stack.yml",
@@ -1727,6 +1787,21 @@ window.GRAPH = {
         },
         code: {
           touchpoints: ["src/index.mjs"],
+        },
+        owner: "lead-checkout",
+        "started-at": "2027-08-18",
+        "base-revision": "acme-checkout@15fce85abf5e",
+        "completed-at": "2027-09-08",
+        "source-commit": "git:checkout-stack-flow-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-checkout",
+          result: "fluxo principal portado e integrado ao novo stack",
         },
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout\\.governance\\works\\intent-checkout-stack--porta-fluxo.yml",
@@ -1746,7 +1821,7 @@ window.GRAPH = {
         purpose: "sustain",
         desc: "acme-user-context v3 → v4 COM QUEBRA — abre a janela; mutação compat-window-change (dangerous → alerta q/r/d)",
         review: "externo: area-platform",
-        status: "acknowledged",
+        status: "done",
         source: {
           kind: "central-breakdown",
           file: "acme-governance/intents/intent-checkout-stack.yml",
@@ -1754,6 +1829,21 @@ window.GRAPH = {
         },
         code: {
           touchpoints: ["src/index.mjs"],
+        },
+        owner: "head-platform",
+        "started-at": "2027-08-08",
+        "base-revision": "acme-web-host@0917694bbc86",
+        "completed-at": "2027-09-15",
+        "source-commit": "git:web-host-user-context-v4-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "head-platform",
+          result: "acme-user-context v4 revisado com janela de compatibilidade coordenada",
         },
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-web-host\\.governance\\works\\intent-checkout-stack--revisao-contrato.yml",
@@ -1782,7 +1872,7 @@ window.GRAPH = {
         purpose: "discover",
         desc: "EXPLORATION — como migrar o estado do carrinho sem downtime? fate informa a onda 1",
         review: "interno",
-        status: "acknowledged",
+        status: "done",
         source: {
           kind: "central-breakdown",
           file: "acme-governance/intents/intent-checkout-stack.yml",
@@ -1790,6 +1880,21 @@ window.GRAPH = {
         },
         code: {
           touchpoints: ["src/index.mjs"],
+        },
+        owner: "lead-checkout",
+        "started-at": "2027-08-01",
+        "base-revision": "acme-checkout@15fce85abf5e",
+        "completed-at": "2027-08-05",
+        "source-commit": "git:checkout-stack-spike-001",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs",
+          result: "passed",
+          files: ["src/index.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-checkout",
+          result: "estratégia de migração do carrinho validada sem downtime",
         },
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout\\.governance\\works\\intent-checkout-stack--spike-carrinho.yml",
@@ -2967,6 +3072,34 @@ window.GRAPH = {
           "issued-at": "2027-04-02",
           "idempotency-key": "out-cta-upgrade-2027q1",
           nonce: "nonce-out-cta-upgrade-2027q1",
+        },
+      },
+    },
+    {
+      id: "out-checkout-stack-2027h2",
+      type: "outcome",
+      label: "cost-to-serve: -11.8 R$/pedido",
+      data: {
+        id: "out-checkout-stack-2027h2",
+        "emitted-by": "intent-checkout-stack",
+        source: "acme-data-pipeline/cost-to-serve@warehouse-rev77",
+        window: {
+          start: "2027-07-01",
+          end: "2027-12-31",
+        },
+        metric: "cost-to-serve",
+        value: "-11.8 R$/pedido",
+        aggregation: "avg",
+        "attested-by": "acme-data-pipeline",
+        revision: "warehouse@rev77",
+        "contract-revisions": ["acme-user-context@v4"],
+        "contributes-to": "tgt-checkout-stack",
+        envelope: {
+          actor: "tool:r4-second-outcome",
+          authority: "head-platform",
+          "issued-at": "2027-10-20",
+          "idempotency-key": "out-checkout-stack-2027h2",
+          nonce: "nonce-out-checkout-stack-2027h2",
         },
       },
     },
@@ -5489,6 +5622,36 @@ window.GRAPH = {
       id: "authorizes-mutation:pm-growth->out-cta-upgrade-2027q1",
       source: "pm-growth",
       target: "out-cta-upgrade-2027q1",
+      type: "authorizes-mutation",
+    },
+    {
+      id: "emits:intent-checkout-stack->out-checkout-stack-2027h2",
+      source: "intent-checkout-stack",
+      target: "out-checkout-stack-2027h2",
+      type: "emits",
+    },
+    {
+      id: "contributes-to:out-checkout-stack-2027h2->tgt-checkout-stack",
+      source: "out-checkout-stack-2027h2",
+      target: "tgt-checkout-stack",
+      type: "contributes-to",
+    },
+    {
+      id: "measures:out-checkout-stack-2027h2->cost-to-serve",
+      source: "out-checkout-stack-2027h2",
+      target: "cost-to-serve",
+      type: "measures",
+    },
+    {
+      id: "attested-by:out-checkout-stack-2027h2->acme-data-pipeline",
+      source: "out-checkout-stack-2027h2",
+      target: "acme-data-pipeline",
+      type: "attested-by",
+    },
+    {
+      id: "authorizes-mutation:head-platform->out-checkout-stack-2027h2",
+      source: "head-platform",
+      target: "out-checkout-stack-2027h2",
       type: "authorizes-mutation",
     },
     {

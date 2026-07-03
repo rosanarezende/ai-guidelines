@@ -9,7 +9,7 @@ Exemplos derivados da runtime v3 para os quatro formatos estudados na v2.
 | sqlite  | read-model relacional local          | exemplo completo derivado |
 | mongo   | snapshot documental/event-like       | exemplo completo derivado |
 
-Snapshot: d4031295214d · 172 nós · 364 arestas · 3 issues.
+Snapshot: f2afb7f97d78 · 173 nós · 369 arestas · 3 issues.
 
 Regra: estes arquivos são projeções. Ação governada deve reler o YAML/event-log autoritativo.
 
