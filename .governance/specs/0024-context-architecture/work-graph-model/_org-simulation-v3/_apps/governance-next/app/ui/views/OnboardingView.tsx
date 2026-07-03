@@ -26,7 +26,8 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { GovernanceSnapshot } from "@/lib/types";
 import { Flex, ResponsiveGrid } from "../components";
@@ -45,20 +46,238 @@ import {
   roleWarnings,
   type AssistantChoice,
   type ProfileId,
+  type ProfileOption,
   type RoleAssignments,
   type RoleKey,
   type SourceKindId,
 } from "../adoption/model";
+import {
+  markOnboardingPartialIfNeeded,
+  writeOnboardingStatus,
+} from "../adoption/onboardingStorage";
 import AppShell from "../shell/AppShell";
 
 const STEP_LABELS = [
-  "Perfil da organização",
+  "Diagnóstico da organização",
   "Papéis e responsáveis",
   "Fontes de trabalho",
   "Assistente",
   "Integrações",
   "Revisão",
 ];
+
+type OrgSizeChoice = "one" | "small" | "medium" | "large";
+type ResponsibilityChoice = "collapsed" | "tracks" | "separated";
+type ConflictChoice = "record" | "warn" | "block";
+
+type DiagnosisAnswers = {
+  size?: OrgSizeChoice;
+  responsibility?: ResponsibilityChoice;
+  conflict?: ConflictChoice;
+};
+
+type DiagnosisChoice = {
+  id: string;
+  label: string;
+  description: string;
+};
+
+const SIZE_CHOICES: DiagnosisChoice[] = [
+  {
+    id: "one",
+    label: "Só eu",
+    description: "Uma pessoa decide, executa e confirma a maior parte do trabalho.",
+  },
+  {
+    id: "small",
+    label: "Até 5 pessoas",
+    description: "Time pequeno, com decisões próximas e papéis frequentemente acumulados.",
+  },
+  {
+    id: "medium",
+    label: "6 a 20 pessoas",
+    description: "Já existem responsáveis distintos, mas nem toda decisão tem par independente.",
+  },
+  {
+    id: "large",
+    label: "Mais de 20 pessoas",
+    description: "Há espaço para separar aprovação, execução, segurança, dados e sponsorship.",
+  },
+];
+
+const RESPONSIBILITY_CHOICES: DiagnosisChoice[] = [
+  {
+    id: "collapsed",
+    label: "Quase tudo fica nas mesmas pessoas",
+    description: "Quem decide também costuma executar, configurar e confirmar o resultado.",
+  },
+  {
+    id: "tracks",
+    label: "Há frentes de negócio, produto/design e engenharia",
+    description:
+      "As responsabilidades existem por frente, mesmo que uma pessoa acumule mais de uma.",
+  },
+  {
+    id: "separated",
+    label: "Papéis críticos costumam ser separados",
+    description: "Objetivo, aprovação, execução, segurança e atestação podem ter donos diferentes.",
+  },
+];
+
+const CONFLICT_CHOICES: DiagnosisChoice[] = [
+  {
+    id: "record",
+    label: "Registrar com transparência",
+    description: "Quando faltar separação de papéis, deixar claro no histórico e seguir.",
+  },
+  {
+    id: "warn",
+    label: "Avisar e revisar depois",
+    description: "Deixar o trabalho andar, mas abrir revisão para decisões sensíveis.",
+  },
+  {
+    id: "block",
+    label: "Bloquear até outra pessoa aprovar",
+    description: "Impedir decisões sensíveis quando a independência mínima não existir.",
+  },
+];
+
+const CONFLICT_POLICIES: Record<
+  ConflictChoice,
+  {
+    label: string;
+    summary: string;
+    effect: string;
+    review: string;
+    appWill: string[];
+    appWillNot: string[];
+    visibleRisks: string[];
+    ceremony: string[];
+    enforcement: ProfileOption["enforcement"];
+    severity: "info" | "warning" | "error";
+  }
+> = {
+  record: {
+    label: "Registrar com transparência",
+    summary:
+      "O perfil recomendado não muda, mas a configuração fica mais leve: acúmulo sensível não bloqueia e não abre revisão automática.",
+    effect:
+      "Cada acúmulo entra no histórico como auto-declarado. O dashboard mostra a limitação, e a responsabilidade fica explícita.",
+    review: "Sem revisão automática; a revisão futura é manual ou por auditoria.",
+    appWill: [
+      "registrar o acúmulo sensível como auto-declarado",
+      "mostrar no dashboard que a confirmação não é independente",
+      "deixar o trabalho seguir quando não houver par disponível",
+    ],
+    appWillNot: [
+      "abrir revisão automática para cada acúmulo",
+      "tratar auto-declaração como evidência forte",
+    ],
+    visibleRisks: [
+      "o risco fica documentado, mas pode ficar sem segunda leitura",
+      "auditoria futura vê a limitação; o app não corrige sozinho",
+    ],
+    ceremony: ["Auto-declarado visível", "Sem revisão automática", "Segue com registro"],
+    enforcement: {
+      verb: "Registra",
+      text: "acúmulos sensíveis passam como declaração explícita. O app não bloqueia e não agenda revisão sozinho; ele preserva a evidência de que faltou independência.",
+      severity: "info",
+    },
+    severity: "info",
+  },
+  warn: {
+    label: "Avisar e revisar depois",
+    summary:
+      "O perfil recomendado não muda, mas a configuração fica mais ativa: acúmulo sensível gera aviso e revisão em cadência.",
+    effect:
+      "O trabalho pode seguir, mas o app cria uma pendência de revisão para a dupla confirmar ou corrigir depois.",
+    review: "Revisão conjunta em cadência para decisões sensíveis.",
+    appWill: [
+      "registrar o acúmulo sensível e abrir pendência de revisão",
+      "permitir que o trabalho siga antes da segunda leitura",
+      "destacar revisões pendentes na Home e na auditoria",
+    ],
+    appWillNot: [
+      "bloquear por padrão quando faltar par",
+      "tratar a confirmação como evidência forte antes da revisão",
+    ],
+    visibleRisks: [
+      "decisões seguem com pendência aberta até a revisão",
+      "se a cadência de revisão não acontecer, o risco fica acumulado",
+    ],
+    ceremony: ["Aviso visível", "Revisão em cadência", "Segue com pendência"],
+    enforcement: {
+      verb: "Avisa",
+      text: "acúmulos sensíveis viram aviso e pendência de revisão. O trabalho pode seguir, mas a limitação continua visível até alguém revisar.",
+      severity: "warning",
+    },
+    severity: "warning",
+  },
+  block: {
+    label: "Bloquear até outra pessoa aprovar",
+    summary:
+      "Aqui a recomendação muda para responsabilidade separada, porque você pediu bloqueio quando faltar independência.",
+    effect:
+      "A mutação sensível só passa com outra autoridade resolvida ou com break-glass registrado e revisável.",
+    review: "Bloqueio forte, com exceção apenas por break-glass.",
+    appWill: [
+      "exigir outra autoridade para aprovar decisões sensíveis",
+      "bloquear autoaprovação quando a independência mínima faltar",
+      "permitir exceção apenas com break-glass registrado e revisável",
+    ],
+    appWillNot: [
+      "deixar mutação sensível passar como aviso simples",
+      "esconder bloqueio ou exceção do histórico",
+    ],
+    visibleRisks: [
+      "mais fricção operacional quando papéis ainda não estão configurados",
+      "pode exigir convite ou autoridade resolvida antes de seguir",
+    ],
+    ceremony: ["Bloqueio forte", "Par independente", "Break-glass revisável"],
+    enforcement: {
+      verb: "Bloqueia",
+      text: "mutações sensíveis não passam com a mesma pessoa nos dois papéis. Para seguir sem par, só com break-glass registrado e prazo de revisão.",
+      severity: "error",
+    },
+    severity: "error",
+  },
+};
+
+function recommendProfile(answers: DiagnosisAnswers): ProfileId {
+  if (answers.size === "one") return "solo";
+  if (answers.responsibility === "separated" || answers.conflict === "block") {
+    return "full";
+  }
+  if (answers.responsibility === "tracks") return "trio";
+  return "compact";
+}
+
+function recommendationIsReady(answers: DiagnosisAnswers): boolean {
+  if (answers.size === "one") return true;
+  if (!answers.size || !answers.responsibility) return false;
+  if (answers.responsibility === "separated") return true;
+  return Boolean(answers.conflict);
+}
+
+function effectiveRecommendation(
+  profile: ProfileOption,
+  conflictPolicy: (typeof CONFLICT_POLICIES)[ConflictChoice] | null,
+  appliesPolicy: boolean
+): ProfileOption {
+  if (!conflictPolicy || !appliesPolicy) return profile;
+  return {
+    ...profile,
+    description:
+      profile.id === "full"
+        ? "Você escolheu uma regra forte para acúmulos sensíveis. O app recomenda responsabilidades separadas: decisões sensíveis precisam de par independente ou break-glass rastreável."
+        : `Você está escolhendo ${profile.label.toLowerCase()} com uma regra específica para acúmulos sensíveis: ${conflictPolicy.label.toLowerCase()}.`,
+    appWill: conflictPolicy.appWill,
+    appWillNot: conflictPolicy.appWillNot,
+    visibleRisks: conflictPolicy.visibleRisks,
+    ceremony: conflictPolicy.ceremony,
+    enforcement: conflictPolicy.enforcement,
+  };
+}
 
 function WelcomeCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
@@ -73,6 +292,80 @@ function WelcomeCard({ icon, title, text }: { icon: ReactNode; title: string; te
         </Typography>
       </Box>
     </Paper>
+  );
+}
+
+function DiagnosisQuestion({
+  title,
+  helper,
+  value,
+  options,
+  onChange,
+}: {
+  title: string;
+  helper: string;
+  value?: string;
+  options: DiagnosisChoice[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Box sx={{ display: "grid", gap: 1.25 }}>
+      <Box>
+        <Typography variant="body2" sx={{ fontWeight: 800 }}>
+          {title}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          {helper}
+        </Typography>
+      </Box>
+      <ResponsiveGrid min={190} gap={1}>
+        {options.map((option) => {
+          const selected = option.id === value;
+          return (
+            <OptionCard key={option.id} selected={selected} onClick={() => onChange(option.id)}>
+              <Box sx={{ display: "grid", gap: 0.75 }}>
+                <Flex align="center" justify="space-between" gap={1}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {option.label}
+                  </Typography>
+                  {selected ? (
+                    <RadioButtonCheckedIcon color="primary" fontSize="small" />
+                  ) : (
+                    <RadioButtonUncheckedIcon fontSize="small" sx={{ color: "#c2c9c2" }} />
+                  )}
+                </Flex>
+                <Typography variant="caption" color="text.secondary">
+                  {option.description}
+                </Typography>
+              </Box>
+            </OptionCard>
+          );
+        })}
+      </ResponsiveGrid>
+    </Box>
+  );
+}
+
+function ProfileDetailList({ title, items }: { title: string; items: string[] }) {
+  return (
+    <Box sx={{ display: "grid", gap: 0.75 }}>
+      <Typography variant="caption" sx={{ fontWeight: 800, color: "text.secondary" }}>
+        {title}
+      </Typography>
+      <Box component="ul" sx={{ m: 0, pl: 2.25, display: "grid", gap: 0.65 }}>
+        {items.map((item) => (
+          <Typography
+            key={item}
+            component="li"
+            variant="body2"
+            color="text.secondary"
+            sx={{ pl: 0.25 }}
+          >
+            {item}
+          </Typography>
+        ))}
+      </Box>
+    </Box>
   );
 }
 
@@ -126,11 +419,15 @@ function OptionCard({
 }
 
 export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnapshot }) {
+  const router = useRouter();
   const adoption = useMemo(() => deriveAdoption(snapshot), [snapshot]);
   const [step, setStep] = useState(0);
   const [profile, setProfile] = useState<ProfileId>(
     snapshot.profileDeclaration.profile === "full" ? "full" : "compact"
   );
+  const [diagnosis, setDiagnosis] = useState<DiagnosisAnswers>({});
+  const [manualProfileOpen, setManualProfileOpen] = useState(false);
+  const [manualProfileSelected, setManualProfileSelected] = useState(false);
   const [assignments, setAssignments] = useState<RoleAssignments>(DEFAULT_ASSIGNMENTS);
   const [sourceKinds, setSourceKinds] = useState<Record<SourceKindId, boolean>>({
     git: true,
@@ -141,7 +438,25 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
   });
   const [assistant, setAssistant] = useState<AssistantChoice>("local");
 
+  const recommendedProfileId = recommendProfile(diagnosis);
+  const recommendedProfile = profileOption(recommendedProfileId);
   const selectedProfile = profileOption(profile);
+  const shouldAskResponsibility = Boolean(diagnosis.size && diagnosis.size !== "one");
+  const shouldAskConflict = Boolean(
+    shouldAskResponsibility && diagnosis.responsibility && diagnosis.responsibility !== "separated"
+  );
+  const hasRecommendation = recommendationIsReady(diagnosis);
+  const canContinueProfileStep = hasRecommendation || manualProfileSelected;
+  const conflictPolicy = diagnosis.conflict ? CONFLICT_POLICIES[diagnosis.conflict] : null;
+  const shouldShowConflictPolicy =
+    Boolean(conflictPolicy) && hasRecommendation && profile === recommendedProfileId;
+  const shouldShowManualOverrideNotice =
+    Boolean(conflictPolicy) && manualProfileSelected && profile !== recommendedProfileId;
+  const effectiveProfile = effectiveRecommendation(
+    selectedProfile,
+    conflictPolicy,
+    shouldShowConflictPolicy
+  );
   const authorityIds = useMemo(
     () => new Set(snapshot.authorities.map((authority) => authority.id)),
     [snapshot.authorities]
@@ -149,6 +464,30 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
   const warnings = roleWarnings(assignments, profile, authorityIds);
   const selectedSourceCount = Object.values(sourceKinds).filter(Boolean).length;
   const systems = assistantSystems(snapshot);
+
+  useEffect(() => {
+    if (step > 0) markOnboardingPartialIfNeeded();
+  }, [step]);
+
+  const updateDiagnosis = (patch: Partial<DiagnosisAnswers>) => {
+    let next: DiagnosisAnswers = { ...diagnosis, ...patch };
+    if (patch.size && patch.size !== diagnosis.size) {
+      next = { size: patch.size };
+    }
+    if (patch.responsibility && patch.responsibility !== diagnosis.responsibility) {
+      next = { ...next, conflict: undefined };
+    }
+    if (next.size === "one") {
+      next = { size: "one" };
+    }
+    if (next.responsibility === "separated") {
+      next = { ...next, conflict: undefined };
+    }
+    setDiagnosis(next);
+    if (!manualProfileSelected && recommendationIsReady(next)) {
+      setProfile(recommendProfile(next));
+    }
+  };
 
   const catalogHighlights = useMemo(() => {
     const weight = (priority: string) =>
@@ -159,7 +498,7 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
   }, [snapshot.integrationCatalog.integrations]);
 
   const works: string[] = [
-    `Perfil: ${selectedProfile.label} — cerimônia ajustada à sua realidade`,
+    `Perfil: ${effectiveProfile.label} — cerimônia ajustada à sua realidade`,
     profile === "solo"
       ? "Papéis: você em todos, registrado como self-governed"
       : "Papéis: contrato de responsabilidade declarado por autoridade resolvível",
@@ -171,6 +510,9 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
       `Evidência automática a partir de ${selectedSourceCount} tipo(s) de fonte de trabalho`
     );
   if (assistant === "local") works.push("Assistente local (Ollama) — sem saída de dados");
+  if (conflictPolicy) {
+    works.push(`Acúmulo de papéis sensíveis: ${conflictPolicy.label} — ${conflictPolicy.review}`);
+  }
 
   const pending: string[] = [];
   if (selectedSourceCount === 0)
@@ -193,6 +535,11 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
             "Todas as confirmações são auto-declaradas — visíveis para você e para qualquer auditoria futura.",
           ]
         : warnings.filter((warning) => !warning.startsWith("Separação"));
+
+  const finishOnboarding = () => {
+    writeOnboardingStatus("finished");
+    router.push("/");
+  };
 
   const stepper = (
     <Box
@@ -285,8 +632,8 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
             Vamos montar a governança do seu jeito
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Seis passos curtos. Só o perfil da organização é obrigatório — todo o resto dá para
-            fazer depois, em Configurações.
+            Seis passos curtos. Começamos com algumas perguntas para recomendar a cerimônia certa
+            para sua realidade — você revisa antes de continuar.
           </Typography>
           <Box sx={{ display: "grid", gap: 1.5, mt: 1 }}>
             <WelcomeCard
@@ -297,12 +644,12 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
             <WelcomeCard
               icon={<LockIcon />}
               title="Nada sai da sua máquina sem você aprovar"
-              text="Assistente e integrações são opcionais. O framework funciona completo sem nenhuma conexão externa."
+              text="Assistente e integrações são opcionais. O framework funciona sem serviços externos; para provar execução e resultados, conecte uma fonte de trabalho local ou versionada."
             />
             <WelcomeCard
               icon={<BalanceIcon />}
               title="Honesto com a sua realidade"
-              text="Time completo, trio ou solo: o app ajusta a cerimônia em vez de fingir independência que não existe."
+              text="Uma pessoa, time enxuto ou organização com responsabilidades separadas: o app ajusta a cerimônia em vez de fingir independência que não existe."
             />
           </Box>
           <Flex align="center" gap={2} sx={{ mt: 1 }}>
@@ -330,62 +677,256 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
               <>
                 <StepHeading
                   step={1}
-                  title="Como a sua organização funciona hoje?"
-                  lead="Isso define quanta cerimônia o app pede. Seja honesto — dá para mudar depois, e a mudança fica registrada."
+                  title="Como sua organização toma decisões hoje?"
+                  lead="Vamos ajustar a cerimônia ao tamanho e à separação real de responsabilidades. Você pode revisar a recomendação antes de continuar."
                 />
-                <ResponsiveGrid min={220} gap={1.75}>
-                  {PROFILE_OPTIONS.map((option) => {
-                    const selected = option.id === profile;
-                    return (
-                      <OptionCard
-                        key={option.id}
-                        selected={selected}
-                        onClick={() => setProfile(option.id)}
-                      >
-                        <Box sx={{ display: "grid", gap: 1, alignContent: "start" }}>
-                          <Flex justify="space-between" align="center" gap={1}>
-                            <Typography sx={{ fontWeight: 800 }}>{option.label}</Typography>
-                            {selected ? (
-                              <CheckCircleIcon color="primary" fontSize="small" />
-                            ) : (
-                              <RadioButtonUncheckedIcon
-                                fontSize="small"
-                                sx={{ color: "#c2c9c2" }}
-                              />
-                            )}
-                          </Flex>
-                          <Typography variant="caption" sx={{ color: "text.primary" }}>
-                            {option.bestWhen}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ borderTop: "1px solid", borderColor: "divider", pt: 1 }}
-                          >
-                            {option.tradeoff}
-                          </Typography>
-                        </Box>
-                      </OptionCard>
-                    );
-                  })}
-                </ResponsiveGrid>
-                <Flex wrap gap={0.75} align="center">
-                  <Typography variant="caption" color="text.secondary">
-                    O que isso muda:
-                  </Typography>
-                  {selectedProfile.ceremony.map((item) => (
-                    <Chip
-                      key={item}
-                      size="small"
-                      label={item}
-                      sx={{ bgcolor: "#eaf1ec", color: "#1a5632" }}
+                <Box sx={{ display: "grid", gap: 2.5 }}>
+                  <DiagnosisQuestion
+                    title="Quantas pessoas participam das decisões e da execução?"
+                    helper="Não precisa ser exato; queremos entender se há gente suficiente para separar papéis."
+                    value={diagnosis.size}
+                    options={SIZE_CHOICES}
+                    onChange={(value) => updateDiagnosis({ size: value as OrgSizeChoice })}
+                  />
+                  {shouldAskResponsibility ? (
+                    <DiagnosisQuestion
+                      title="Como as responsabilidades se dividem hoje?"
+                      helper="Pense em quem define objetivo, quem executa, quem aprova risco e quem confirma resultado."
+                      value={diagnosis.responsibility}
+                      options={RESPONSIBILITY_CHOICES}
+                      onChange={(value) =>
+                        updateDiagnosis({ responsibility: value as ResponsibilityChoice })
+                      }
                     />
-                  ))}
-                </Flex>
-                <Alert severity={selectedProfile.enforcement.severity}>
-                  <strong>{selectedProfile.enforcement.verb}:</strong>{" "}
-                  {selectedProfile.enforcement.text}
-                </Alert>
+                  ) : null}
+                  {shouldAskConflict ? (
+                    <DiagnosisQuestion
+                      title="Quando a mesma pessoa acumula papéis sensíveis, o app deve..."
+                      helper="Essa resposta define se a governança bloqueia, avisa ou registra com transparência."
+                      value={diagnosis.conflict}
+                      options={CONFLICT_CHOICES}
+                      onChange={(value) => updateDiagnosis({ conflict: value as ConflictChoice })}
+                    />
+                  ) : null}
+                </Box>
+
+                {hasRecommendation || manualProfileSelected ? (
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: 2.25,
+                      display: "grid",
+                      gap: 1.75,
+                      bgcolor: "#f8fbf8",
+                      borderColor: "#d9e8dd",
+                    }}
+                  >
+                    <Flex align="center" justify="space-between" gap={1.5} wrap>
+                      <Box>
+                        <Flex align="center" gap={1} wrap>
+                          <Chip
+                            size="small"
+                            color={
+                              manualProfileSelected && !hasRecommendation ? "default" : "success"
+                            }
+                            label={
+                              manualProfileSelected && !hasRecommendation
+                                ? "Escolha manual"
+                                : manualProfileSelected
+                                  ? "Escolha manual"
+                                  : "Recomendado"
+                            }
+                          />
+                          <Typography sx={{ fontSize: 18, fontWeight: 800 }}>
+                            {effectiveProfile.label}
+                          </Typography>
+                        </Flex>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                          {manualProfileSelected &&
+                          hasRecommendation &&
+                          profile !== recommendedProfileId
+                            ? `Recomendação pelas respostas: ${recommendedProfile.label}. Você pode manter sua escolha manual.`
+                            : manualProfileSelected && !hasRecommendation
+                              ? "Você escolheu manualmente. Responda às perguntas se quiser uma recomendação automática."
+                              : effectiveProfile.bestWhen}
+                        </Typography>
+                      </Box>
+                      <Flex gap={1} wrap>
+                        {manualProfileSelected &&
+                        hasRecommendation &&
+                        profile !== recommendedProfileId ? (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => {
+                              setProfile(recommendedProfileId);
+                              setManualProfileOpen(false);
+                              setManualProfileSelected(false);
+                            }}
+                          >
+                            Usar recomendação
+                          </Button>
+                        ) : null}
+                        <Button
+                          size="small"
+                          color="inherit"
+                          onClick={() => setManualProfileOpen((current) => !current)}
+                        >
+                          {manualProfileOpen ? "Ocultar opções" : "Ver outras opções"}
+                        </Button>
+                      </Flex>
+                    </Flex>
+
+                    <Typography variant="body2" color="text.secondary">
+                      {effectiveProfile.description}
+                    </Typography>
+
+                    {shouldShowConflictPolicy && conflictPolicy ? (
+                      <Paper
+                        variant="outlined"
+                        sx={{
+                          p: 1.75,
+                          display: "grid",
+                          gap: 1,
+                          bgcolor:
+                            conflictPolicy.severity === "error"
+                              ? "#fff5f5"
+                              : conflictPolicy.severity === "warning"
+                                ? "#fff9ed"
+                                : "#eef8ff",
+                          borderColor:
+                            conflictPolicy.severity === "error"
+                              ? "#f3c7c7"
+                              : conflictPolicy.severity === "warning"
+                                ? "#edd8a8"
+                                : "#cce7f8",
+                        }}
+                      >
+                        <Flex align="center" gap={1} wrap>
+                          <Chip
+                            size="small"
+                            color={conflictPolicy.severity}
+                            variant="outlined"
+                            label="Regra escolhida"
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                            {conflictPolicy.label}
+                          </Typography>
+                        </Flex>
+                        <Typography variant="body2" color="text.secondary">
+                          {conflictPolicy.summary}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {conflictPolicy.effect}
+                        </Typography>
+                      </Paper>
+                    ) : null}
+
+                    {shouldShowManualOverrideNotice && conflictPolicy ? (
+                      <Alert severity="warning">
+                        <strong>Você escolheu um perfil diferente da recomendação.</strong> Pela sua
+                        resposta sobre acúmulo sensível, a recomendação automática seria{" "}
+                        {recommendedProfile.label}. O perfil manual aplica a regra abaixo:{" "}
+                        {selectedProfile.enforcement.text}
+                      </Alert>
+                    ) : null}
+
+                    <ResponsiveGrid min={210} gap={1.5}>
+                      <ProfileDetailList title="O app vai" items={effectiveProfile.appWill} />
+                      <ProfileDetailList
+                        title="O app não vai"
+                        items={effectiveProfile.appWillNot}
+                      />
+                      <ProfileDetailList
+                        title="Riscos visíveis"
+                        items={effectiveProfile.visibleRisks}
+                      />
+                    </ResponsiveGrid>
+
+                    <Flex wrap gap={0.75} align="center">
+                      <Typography variant="caption" color="text.secondary">
+                        O que isso muda:
+                      </Typography>
+                      {effectiveProfile.ceremony.map((item) => (
+                        <Chip
+                          key={item}
+                          size="small"
+                          label={item}
+                          sx={{ bgcolor: "#eaf1ec", color: "#1a5632" }}
+                        />
+                      ))}
+                    </Flex>
+
+                    <Alert severity={effectiveProfile.enforcement.severity}>
+                      <strong>{effectiveProfile.enforcement.verb}:</strong>{" "}
+                      {effectiveProfile.enforcement.text}
+                    </Alert>
+                  </Paper>
+                ) : (
+                  <Alert
+                    severity="info"
+                    action={
+                      <Button
+                        size="small"
+                        color="inherit"
+                        onClick={() => setManualProfileOpen(true)}
+                      >
+                        Escolher manualmente
+                      </Button>
+                    }
+                  >
+                    Comece pelo tamanho da organização. Depois mostramos apenas as perguntas
+                    necessárias para chegar a uma recomendação explicada.
+                  </Alert>
+                )}
+
+                {manualProfileOpen ? (
+                  <Box sx={{ display: "grid", gap: 1.5 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                      Escolha manualmente se a recomendação não representar sua organização
+                    </Typography>
+                    <ResponsiveGrid min={220} gap={1.5}>
+                      {PROFILE_OPTIONS.map((option) => {
+                        const selected = option.id === profile;
+                        return (
+                          <OptionCard
+                            key={option.id}
+                            selected={selected}
+                            onClick={() => {
+                              setProfile(option.id);
+                              setManualProfileOpen(true);
+                              setManualProfileSelected(true);
+                            }}
+                          >
+                            <Box sx={{ display: "grid", gap: 1, alignContent: "start" }}>
+                              <Flex justify="space-between" align="center" gap={1}>
+                                <Typography sx={{ fontWeight: 800 }}>{option.label}</Typography>
+                                {selected ? (
+                                  <CheckCircleIcon color="primary" fontSize="small" />
+                                ) : (
+                                  <RadioButtonUncheckedIcon
+                                    fontSize="small"
+                                    sx={{ color: "#c2c9c2" }}
+                                  />
+                                )}
+                              </Flex>
+                              <Typography variant="caption" sx={{ color: "text.primary" }}>
+                                {option.bestWhen}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{ borderTop: "1px solid", borderColor: "divider", pt: 1 }}
+                              >
+                                {option.tradeoff}
+                              </Typography>
+                            </Box>
+                          </OptionCard>
+                        );
+                      })}
+                    </ResponsiveGrid>
+                  </Box>
+                ) : null}
               </>
             ) : null}
 
@@ -692,7 +1233,7 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
                   </Box>
                 </Paper>
                 <Flex align="center" gap={2}>
-                  <Button component={Link} href="/" variant="contained">
+                  <Button variant="contained" onClick={finishOnboarding}>
                     Concluir e abrir a Home
                   </Button>
                   <Button component={Link} href="/console" size="small" color="inherit">
@@ -719,6 +1260,7 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
                 <Button
                   variant="contained"
                   endIcon={<ArrowForwardIcon />}
+                  disabled={step === 1 && !canContinueProfileStep}
                   onClick={() => setStep(step + 1)}
                 >
                   Continuar

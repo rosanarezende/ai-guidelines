@@ -12,7 +12,8 @@ import LinkIcon from "@mui/icons-material/Link";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import type { GovernanceSnapshot } from "@/lib/types";
 import { Flex, ResponsiveGrid, SectionCard } from "../components";
 import {
@@ -24,6 +25,7 @@ import {
   TrustLegend,
 } from "../adoption/components";
 import { deriveAdoption, profileChipLabel, profileOption } from "../adoption/model";
+import { readOnboardingStatus, type OnboardingStatus } from "../adoption/onboardingStorage";
 import AppShell from "../shell/AppShell";
 
 const ROLE_NOTICES: Record<string, string | null> = {
@@ -35,13 +37,41 @@ const ROLE_NOTICES: Record<string, string | null> = {
 };
 
 export default function HomeView({ snapshot }: { snapshot: GovernanceSnapshot }) {
+  const router = useRouter();
   const adoption = useMemo(() => deriveAdoption(snapshot), [snapshot]);
   const [assistantDismissed, setAssistantDismissed] = useState(false);
+  const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus | "checking" | null>(
+    "checking"
+  );
 
   const profile = snapshot.profileDeclaration.profile;
   const roleNotice = ROLE_NOTICES[profile] ?? null;
   const cycle = adoption.periods[0] || "sem período";
   const pendingCount = adoption.attention.length;
+
+  useEffect(() => {
+    const status = readOnboardingStatus();
+    if (!status) {
+      setOnboardingStatus(null);
+      router.replace("/onboarding");
+      return;
+    }
+    setOnboardingStatus(status);
+  }, [router]);
+
+  if (onboardingStatus === "checking" || onboardingStatus === null) {
+    return (
+      <AppShell chip={profileChipLabel(profile)}>
+        <Paper variant="outlined" sx={{ p: 3, maxWidth: 560 }}>
+          <Typography variant="h2">Verificando configuração local</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Se este navegador ainda não concluiu o onboarding, você será levado para a configuração
+            inicial.
+          </Typography>
+        </Paper>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell chip={profileChipLabel(profile)}>
@@ -57,6 +87,35 @@ export default function HomeView({ snapshot }: { snapshot: GovernanceSnapshot })
         </Box>
 
         {roleNotice ? <Alert severity="info">{roleNotice}</Alert> : null}
+
+        {onboardingStatus === "partial" ? (
+          <Paper
+            variant="outlined"
+            sx={{ p: 2.25, display: "grid", gap: 1.25, borderColor: "#d9e8dd", bgcolor: "#f8fbf8" }}
+          >
+            <Flex justify="space-between" align="center" gap={2} wrap>
+              <Box>
+                <Chip size="small" color="warning" label="Onboarding em andamento" />
+                <Typography variant="h2" sx={{ mt: 1 }}>
+                  Termine a configuração inicial
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 720 }}>
+                  Você já começou neste navegador. Enquanto não concluir, a Home continua útil, mas
+                  perfil, papéis, fontes de trabalho e assistente ainda podem estar só parcialmente
+                  configurados.
+                </Typography>
+              </Box>
+              <Flex gap={1} wrap>
+                <Button component={Link} href="/onboarding" variant="contained">
+                  Continuar onboarding
+                </Button>
+                <Button component={Link} href="/configuracoes" variant="outlined">
+                  Abrir configurações
+                </Button>
+              </Flex>
+            </Flex>
+          </Paper>
+        ) : null}
 
         <ResponsiveGrid min={232} gap={1.75}>
           <ShortcutCard

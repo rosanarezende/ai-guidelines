@@ -36,9 +36,14 @@ export type ProfileId = "full" | "compact" | "trio" | "solo";
 export type ProfileOption = {
   id: ProfileId;
   label: string;
+  shortLabel: string;
   mapsTo: "full" | "compact" | "solo";
   bestWhen: string;
   tradeoff: string;
+  description: string;
+  appWill: string[];
+  appWillNot: string[];
+  visibleRisks: string[];
   ceremony: string[];
   enforcement: {
     verb: string;
@@ -50,10 +55,27 @@ export type ProfileOption = {
 export const PROFILE_OPTIONS: ProfileOption[] = [
   {
     id: "full",
-    label: "Perfil full",
+    label: "Responsabilidades separadas",
+    shortLabel: "Full",
     mapsTo: "full",
-    bestWhen: "PM, liderança técnica, dados, SRE e sponsor existem como papéis separados.",
+    bestWhen:
+      "Para organizações com lideranças, aprovação, segurança, dados e times técnicos em papéis separáveis.",
     tradeoff: "Mais integridade: aprovações separadas; conflitos de papel sensível bloqueiam.",
+    description:
+      "Use quando a organização consegue separar quem define objetivos, quem executa, quem aprova riscos e quem atesta resultados. O app aplica mais bloqueios para proteger decisões sensíveis e reduzir placar inflado por autoaprovação.",
+    appWill: [
+      "exigir par independente em mutações de régua, autoridade, segurança e contabilidade",
+      "mostrar filas separadas para aprovação, evidência, contrato e auditoria",
+      "bloquear conflitos de papel sensível até outra autoridade aprovar ou registrar break-glass",
+    ],
+    appWillNot: [
+      "deixar uma pessoa aprovar sozinha o próprio resultado como se fosse independente",
+      "esconder acúmulo de papel em dashboards executivos",
+    ],
+    visibleRisks: [
+      "mais fricção operacional",
+      "bloqueios quando papéis ou fontes de evidência ainda não estão configurados",
+    ],
     ceremony: ["SoD forte", "Aprovações separadas", "Conflitos bloqueiam"],
     enforcement: {
       verb: "Bloqueia",
@@ -63,10 +85,26 @@ export const PROFILE_OPTIONS: ProfileOption[] = [
   },
   {
     id: "compact",
-    label: "Compact",
+    label: "Time enxuto",
+    shortLabel: "Compact",
     mapsTo: "compact",
-    bestWhen: "Empresa média com poucos approvers e algum colapso de papel.",
+    bestWhen: "Para times pequenos ou médios em que algumas pessoas acumulam responsabilidades.",
     tradeoff: "Detecta risco e revisa em cadência; bloqueia menos que o full.",
+    description:
+      "Use quando existe mais de uma pessoa, mas ainda não há separação completa de responsabilidades. O app evita burocracia pesada, marca acúmulos de papel e cria revisão em cadência para o que não dá para separar hoje.",
+    appWill: [
+      "avisar quando a mesma pessoa acumula papéis sensíveis",
+      "registrar justificativa e revisão retroativa para decisões perigosas",
+      "deixar o fluxo andar quando bloquear criaria bypass informal",
+    ],
+    appWillNot: [
+      "chamar acúmulo de papel de independência",
+      "travar todo trabalho por falta de estrutura de empresa grande",
+    ],
+    visibleRisks: [
+      "algumas confirmações entram como auto-declaradas até revisão",
+      "evidências manuais ficam destacadas até existir fonte de trabalho conectada",
+    ],
     ceremony: ["Acúmulos detectados", "Revisão em cadência", "Avisa em vez de travar"],
     enforcement: {
       verb: "Avisa",
@@ -76,10 +114,27 @@ export const PROFILE_OPTIONS: ProfileOption[] = [
   },
   {
     id: "trio",
-    label: "Trio",
+    label: "Negócio + Produto/Design + Engenharia",
+    shortLabel: "Trio funcional",
     mapsTo: "compact",
-    bestWhen: "Negócio, produto/design e engenharia operam juntos, em três pessoas.",
+    bestWhen:
+      "Para organizações em que decisões se dividem por frentes de responsabilidade, não necessariamente por três pessoas.",
     tradeoff: "Independência de negócio existe; a técnica tende a colapsar — e isso fica visível.",
+    description:
+      "Use quando o trabalho passa por frentes como negócio, produto/design e engenharia, mas os papéis ainda podem acumular dentro de cada frente. É uma variação guiada do perfil enxuto: há mais contexto que no solo, mas menos independência que no full.",
+    appWill: [
+      "separar decisões de negócio, produto/design e engenharia quando houver autoridade para isso",
+      "marcar acúmulos técnicos como auto-declarados ou revisão conjunta",
+      "pedir segunda olhada quando uma frente define e confirma a própria meta",
+    ],
+    appWillNot: [
+      "assumir que existem exatamente três pessoas",
+      "fingir que revisão conjunta equivale a atestação independente",
+    ],
+    visibleRisks: [
+      "papéis acumulados por frente ficam visíveis",
+      "alguns outcomes podem exigir revisão conjunta antes de virar confiança forte",
+    ],
     ceremony: ["Acúmulos visíveis", "Auto-declarado + revisão conjunta", "Avisa em vez de travar"],
     enforcement: {
       verb: "Avisa",
@@ -89,10 +144,27 @@ export const PROFILE_OPTIONS: ProfileOption[] = [
   },
   {
     id: "solo",
-    label: "Solo",
+    label: "Solo ou micro-time",
+    shortLabel: "Solo",
     mapsTo: "solo",
-    bestWhen: "Uma pessoa ou micro-time, sem separação real de deveres.",
+    bestWhen:
+      "Para uma pessoa ou micro-time em que todos têm acesso amplo e a separação real de deveres não existe.",
     tradeoff: "Menos cerimônia: tudo é registrado como auto-declarado.",
+    description:
+      "Use quando uma pessoa, ou um grupo muito pequeno, decide, executa e confirma a maior parte do trabalho. O app reduz bloqueios, mas não finge independência: decisões próprias ficam marcadas como auto-declaradas e continuam auditáveis.",
+    appWill: [
+      "registrar decisões, evidências e exceções em arquivos seus",
+      "mostrar quando uma confirmação é auto-declarada",
+      "permitir avançar sem exigir outra pessoa que não existe",
+    ],
+    appWillNot: [
+      "bloquear toda ação por falta de segunda aprovação",
+      "mostrar autoaprovação como evidência independente",
+    ],
+    visibleRisks: [
+      "self-governed aparece no placar e na auditoria",
+      "sem fonte de trabalho, execução e resultado ficam como evidência manual/declarada",
+    ],
     ceremony: ["Self-governed", "Tudo registrado", "Não finge independência"],
     enforcement: {
       verb: "Registra",

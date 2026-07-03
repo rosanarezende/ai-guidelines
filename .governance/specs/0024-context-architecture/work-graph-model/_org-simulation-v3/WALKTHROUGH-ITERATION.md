@@ -20,15 +20,18 @@ necessario e avisos honestos quando ha colapso ou cerimonia.
 
 ## Observacoes da Owner
 
-| id  | tela          | observacao                                                                             | severidade | status            |
-| --- | ------------- | -------------------------------------------------------------------------------------- | ---------- | ----------------- |
-| W1  | boot          | warnings React/MUI e hydration mismatch ao abrir `npm run dev`                         | P0         | fechado no app v2 |
-| W2  | primeira tela | nao fica claro se a tela e stakeholder, lider, dev ou auditor                          | P0         | fechado no app v2 |
-| W3  | planejamento  | objetivos precisam ser navegaveis por ciclo/ano e mais proximos de dashboard executivo | P1         | fechado no app v2 |
-| W4  | arquitetura   | app deve ser TypeScript robusto; backend/runtime tambem sera migrado depois            | P0         | decidido          |
-| W5  | configuracoes | integracoes e assistente inicial precisam aparecer no onboarding sem fingir mecanismo  | P0         | fechado como UX   |
-| W6  | perfis        | admin, payer, sponsor, owner tecnico e actual-attester nao podem colapsar sem risco    | P0         | fechado como UX   |
-| W7  | primeira tela | a entrada deve ser Home de Adocao/Governanca orientada a tarefa humana, nao grafo      | P0         | decidido          |
+| id  | tela          | observacao                                                                              | severidade | status            |
+| --- | ------------- | --------------------------------------------------------------------------------------- | ---------- | ----------------- |
+| W1  | boot          | warnings React/MUI e hydration mismatch ao abrir `npm run dev`                          | P0         | fechado no app v2 |
+| W2  | primeira tela | nao fica claro se a tela e stakeholder, lider, dev ou auditor                           | P0         | fechado no app v2 |
+| W3  | planejamento  | objetivos precisam ser navegaveis por ciclo/ano e mais proximos de dashboard executivo  | P1         | fechado no app v2 |
+| W4  | arquitetura   | app deve ser TypeScript robusto; backend/runtime tambem sera migrado depois             | P0         | decidido          |
+| W5  | configuracoes | integracoes e assistente inicial precisam aparecer no onboarding sem fingir mecanismo   | P0         | fechado como UX   |
+| W6  | perfis        | admin, payer, sponsor, owner tecnico e actual-attester nao podem colapsar sem risco     | P0         | fechado como UX   |
+| W7  | primeira tela | a entrada deve ser Home de Adocao/Governanca orientada a tarefa humana, nao grafo       | P0         | decidido          |
+| W8  | onboarding    | perfil da organizacao nao deve ser menu tecnico; app deve diagnosticar e recomendar     | P0         | em iteracao       |
+| W9  | onboarding    | perguntas dependentes e recomendacao so aparecem quando fazem sentido pelo diagnostico  | P0         | fechado no app    |
+| W10 | home          | primeira visita sem onboarding concluido deve ir ao onboarding; parcial mostra retomada | P0         | fechado no app    |
 
 ## Bugs Tecnicos
 
@@ -61,9 +64,10 @@ necessario e avisos honestos quando ha colapso ou cerimonia.
 ## Proximas Fatias
 
 1. Validar a nova secao de experiencia de produto do `app-requirements.md` com Claude Design/Fable 5.
-2. Implementar a Home de Adocao/Governanca como primeira tela: configurar organizacao, conectar repos,
-   planejar ciclo, registrar iniciativa, acompanhar resultados, resolver pendencias e auditar decisoes.
-3. Navegacao por periodo/ciclo dentro dos dashboards de objetivos e resultados.
-4. Separacao de console tecnico/admin da experiencia de leitura da owner.
-5. Migracao futura da runtime `_lib` para TypeScript com portas explicitas.
-6. Persistencia futura das configuracoes via comando governado, nao por formulario direto.
+2. Validar o onboarding diagnostico no app real: perguntas, recomendacao, override manual e clareza
+   para usuario que nunca viu `full/compact/trio/solo`.
+3. Persistencia governada real das configuracoes de onboarding; hoje `partial/finished` e apenas
+   estado local do navegador para experiencia de adocao.
+4. Navegacao por periodo/ciclo dentro dos dashboards de objetivos e resultados.
+5. Separacao de console tecnico/admin da experiencia de leitura da owner.
+6. Migracao futura da runtime `_lib` para TypeScript com portas explicitas.
