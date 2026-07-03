@@ -16,6 +16,8 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - `intent-checkout-stack` publica o segundo outcome real, com todas as peças repo-local `done` e
   `contract-revisions: [acme-user-context@v4]`;
 - peças repo-local têm lifecycle (`acknowledged|active|blocked|done|dropped`) e outcome não soma antes de `done`;
+- standalone repo-local também tem lifecycle comprovado: `fix-checkout-timeout` foi fechado por
+  `standalone.complete` e publicou `out-fix-checkout-timeout-2027h1` sem intent planejada;
 - `acme-governance/trust-policy.yml` materializa controles de ACL local, revogação, fallback de matcher, secret quarantine e independência do oráculo;
 - `_lib/` materializa a primeira runtime DDD v3: adapter file, domínio/validador, command dry-run e read-model de grafo;
 - `_examples/backends/` materializa exemplos derivados nos 4 formatos estudados na v2: file e Neo4j completos/prioritários, SQLite e Mongo completos como read-models derivados;
@@ -23,7 +25,7 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - `load-neo4j-example.mjs --dry-run` monta o plano executável de carga Neo4j; `--apply` é fail-closed e exige `--source-hash` + credenciais HTTP explícitas;
 - `_apps/governance-next/` materializa a primeira superfície operacional em React/Next + Material UI, consumindo a runtime v3 por API routes e enviando comandos governados;
 - `integration-catalog.yml` registra adapters externos opcionais como evidence providers/importers/projections; ferramentas externas potencializam adoção, mas não substituem o SSOT file-first;
-- `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`, `repo-work.ack`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`, `incident.declare` e `policy.break-glass` já têm dry-run/execute com `base-revision`, idempotency, nonce, authority resolvida, lock global por comando, escrita atômica, marker de recovery e event-log append-only;
+- `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`, `repo-work.ack`, `standalone.complete`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`, `incident.declare` e `policy.break-glass` já têm dry-run/execute com `base-revision`, idempotency, nonce, authority resolvida, lock global por comando, escrita atômica, marker de recovery e event-log append-only;
 - `verdict.accept` do `intent-cta-upgrade` foi executado no estado canônico via runtime, criando `decisions/verdicts.yml` e `events/events.jsonl` sem edição manual;
 - `currentRevision()` inclui também triages, repo-work claims e repo-contract registries, então sidecar repo-local não é uma mutação invisível para stale-check;
 - standalone reativo/avulso executável mora no repo (`repos/<repo>/.governance/works/*.yml`); incidentes centrais moram em `acme-governance/incidents/incidents.yml` e geram follow-ups resolvíveis;
@@ -79,12 +81,11 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
-2. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → verdict/rollup → actual`.
-3. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
-4. **Portabilidade v2 → v3:** completar matcher executável e authoring completo, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
-5. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo.
-6. **Revisão adversarial pós-R4:** pedir ao Claude Code/Fable 5 para revisar a sim com foco em dois outcomes reais, contrato e transação file-first.
+1. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → verdict/rollup → actual` e o caminho `incident → standalone.complete → outcome operacional`.
+2. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
+3. **Portabilidade v2 → v3:** completar matcher executável e authoring completo, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
+4. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo.
+5. **Revisão adversarial pós-R5:** pedir ao Claude Code/Fable 5 para revisar a sim com foco em outcomes de intent, outcome standalone, contrato e transação file-first.
 
 ## Comandos de aceite
 

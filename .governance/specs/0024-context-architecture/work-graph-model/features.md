@@ -34,10 +34,12 @@ físico, mas não apaga os aprendizados da v2.
   fixtures de concorrência.
 - segundo outcome real em `intent-checkout-stack`, tocando contrato e citando
   `acme-user-context@v4`, com todos os repo-work acks fechados por comando.
+- primeiro outcome operacional sem intent: `fix-checkout-timeout` foi concluído via
+  `standalone.complete` e publicou `out-fix-checkout-timeout-2027h1` em `tgt-sre-incidents`, com
+  colapso de attestation visível.
 
 🚧 Ainda falta para considerar o work-graph pronto ponta a ponta:
 
-- caminho operacional sem intent planejada;
 - matcher executável v3;
 - authoring completo no app Next/MUI;
 - adapters externos como evidence providers;
@@ -143,16 +145,21 @@ Implementado:
 
 ### R5 · Operacional sem intent
 
-Status: ⬜ a fazer.
+Status: ✅ aplicado.
 
 Objetivo: provar que trabalho reativo/standalone entra no bucket operacional sem sumir do grafo.
 
-Critérios:
+Implementado:
 
-- standalone repo-local com evidence;
-- incidente com follow-up resolvível;
-- outcome operacional sem `primary-target` de objetivo;
-- dashboard mostra custo/risco fora do rollup de objectives.
+- `fix-checkout-timeout` é standalone repo-local, follow-up resolvível de
+  `incident:incidente-checkout`;
+- `standalone.complete` fecha o standalone como `done` com owner, datas, source-commit,
+  evidence e verification;
+- `outcome.publish` publica `out-fix-checkout-timeout-2027h1` contra `tgt-sre-incidents`, sem
+  intent emissora nem `primary-target` de intent;
+- o resolver falha fechado se um standalone não `done` tenta emitir outcome;
+- o colapso de independência do `acme-obs-stack` permanece visível como warning/badge, não vira
+  verdade silenciosa.
 
 ### R6 · Matcher executável v3
 
@@ -244,9 +251,9 @@ Direção:
 
 ## Perguntas ainda abertas
 
-1. Qual caso operacional sem intent deve ser o primeiro: incidente, dep-bump ou bug standalone?
-2. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
-3. Quando o app incubado deixa de ser sim e vira pacote do framework?
+1. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
+2. Quando o app incubado deixa de ser sim e vira pacote do framework?
+3. Qual é a próxima revisão adversarial necessária antes de declarar readiness desta frente?
 
 ---
 

@@ -505,6 +505,25 @@ export class FileGovernanceRepository {
     };
   }
 
+  writeStandaloneCompletion(standalone) {
+    const existing = this.loadRepoStandaloneWorks().find((item) => item.id === standalone.id);
+    if (!existing) throw new Error(`standalone "${standalone.id}" não existe`);
+    const file = path.isAbsolute(existing._file)
+      ? existing._file
+      : path.join(this.reposRoot, existing._file);
+    const doc = existsSync(file) ? parse(readFileSync(file, "utf8")) || {} : {};
+    const next = { ...doc };
+    for (const key of REPO_WORK_LIFECYCLE_KEYS) {
+      if (standalone[key] !== undefined) next[key] = standalone[key];
+    }
+    next.status = standalone.status || doc.status || "done";
+    writeYamlAtomic(file, next);
+    return {
+      path: path.relative(this.reposRoot, file).replaceAll("\\", "/"),
+      id: standalone.id,
+    };
+  }
+
   appendContractRevisionProposal(contractId, proposal) {
     const relativePath = "contracts/contracts.yml";
     const file = path.join(this.governanceRoot, relativePath);
@@ -564,6 +583,9 @@ export class FileGovernanceRepository {
     }
     if (command.type === "repo-work.ack") {
       return this.writeRepoWorkAck(command.payload.ack);
+    }
+    if (command.type === "standalone.complete") {
+      return this.writeStandaloneCompletion(command.payload.standalone);
     }
     if (command.type === "contract.propose-revision") {
       return this.appendContractRevisionProposal(

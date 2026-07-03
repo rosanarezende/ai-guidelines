@@ -359,6 +359,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - `POST /commands/intent.activate`
 - `POST /commands/breakdown.apply`
 - `POST /commands/repo-work.ack`
+- `POST /commands/standalone.complete`
 - `POST /commands/contract.propose-revision`
 - `POST /commands/outcome.publish`
 - `POST /commands/verdict.accept`
@@ -470,9 +471,9 @@ Antes de considerar o app robusto, a suíte deve provar que:
 
 ### Perguntas remanescentes
 
-1. Qual caminho operacional sem intent vem primeiro: incidente, dep-bump ou bug standalone?
-2. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
-3. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
+1. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
+2. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
+3. Qual primeira tela write-capable do app deve sair do modo demo para fluxo de trabalho real?
 
 ## 15. Estado da decisão Opção A
 
@@ -493,12 +494,15 @@ de iniciar UI/API nova.
 - **Estado complementar 3:** `_apps/governance-next/` implementa a primeira superfície React/Next +
   Material UI. O app lê snapshot derivado da runtime, expõe tabs ponta-a-ponta e chama API routes
   para `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`,
-  `repo-work.ack`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`,
-  `incident.declare` e `policy.break-glass` com dry-run/execute.
+  `repo-work.ack`, `standalone.complete`, `contract.propose-revision`, `outcome.publish`,
+  `verdict.accept`, `incident.declare` e `policy.break-glass` com dry-run/execute.
 - **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
   `base-revision`, authority resolvida, idempotency, nonce, lock global por comando, escrita YAML
   atômica, marker de recovery e event-log append-only. `currentRevision()` inclui triages e
   sidecars repo-local publicados, para que repo-work/contract não virem mutações invisíveis ao
   stale-check. Ainda não há backend transacional SQLite/Neo4j/Mongo write-capable.
-- **Próxima decisão:** escolher o primeiro fluxo operacional sem intent, sem transformar
-  banco/read-model em SSOT.
+- **Estado complementar 5:** `fix-checkout-timeout` fechou o primeiro caminho operacional sem
+  intent: `standalone.complete` grava evidence/verification no repo e `outcome.publish` soma em
+  `tgt-sre-incidents` com self-attestation visível.
+- **Próxima decisão:** escolher o primeiro adapter externo ou a primeira tela write-capable real,
+  sem transformar banco/read-model em SSOT.

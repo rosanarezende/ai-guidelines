@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme-governance/ + repos/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "596d35b91443",
+  contentHash: "a0300583ec51",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -3104,6 +3104,34 @@ window.GRAPH = {
       },
     },
     {
+      id: "out-fix-checkout-timeout-2027h1",
+      type: "outcome",
+      label: "incident-count: -1 incidentes/mês",
+      data: {
+        id: "out-fix-checkout-timeout-2027h1",
+        "emitted-by": "fix-checkout-timeout",
+        source: "acme-obs-stack/incident-count@obs-rev19",
+        window: {
+          start: "2027-04-01",
+          end: "2027-04-30",
+        },
+        metric: "incident-count",
+        value: "-1 incidentes/mês",
+        aggregation: "sum",
+        "attested-by": "acme-obs-stack",
+        revision: "obs@rev19",
+        "contract-revisions": [],
+        "contributes-to": "tgt-sre-incidents",
+        envelope: {
+          actor: "tool:r5-operational-outcome",
+          authority: "lead-sre",
+          "issued-at": "2027-04-10",
+          "idempotency-key": "out-fix-checkout-timeout-2027h1",
+          nonce: "nonce-out-fix-checkout-timeout-2027h1",
+        },
+      },
+    },
+    {
       id: "verdict-cta-upgrade-2027q1",
       type: "verdict",
       label: "won: intent-cta-upgrade",
@@ -4078,6 +4106,22 @@ window.GRAPH = {
           kind: "standalone",
           file: "repos/acme-checkout-api/.governance/works/fix-checkout-timeout.yml",
         },
+        owner: "lead-checkout",
+        "started-at": "2027-04-08",
+        "base-revision": "acme-checkout-api@7fd8f246b1ca",
+        "completed-at": "2027-04-09",
+        "source-commit": "acme-checkout-api@fix-timeout-rev3",
+        evidence: {
+          kind: "code-fixture",
+          command: "node _tools/check-code-fixtures.mjs --repo acme-checkout-api",
+          result: "passed",
+          files: ["src/routes/checkout.mjs", "src/lib/timeout-policy.mjs"],
+        },
+        verification: {
+          "checked-by": "lead-checkout",
+          result: "passed",
+        },
+        status: "done",
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout-api\\.governance\\works\\fix-checkout-timeout.yml",
         _repo: "acme-checkout-api",
@@ -5655,6 +5699,36 @@ window.GRAPH = {
       type: "authorizes-mutation",
     },
     {
+      id: "emits:fix-checkout-timeout->out-fix-checkout-timeout-2027h1",
+      source: "fix-checkout-timeout",
+      target: "out-fix-checkout-timeout-2027h1",
+      type: "emits",
+    },
+    {
+      id: "contributes-to:out-fix-checkout-timeout-2027h1->tgt-sre-incidents",
+      source: "out-fix-checkout-timeout-2027h1",
+      target: "tgt-sre-incidents",
+      type: "contributes-to",
+    },
+    {
+      id: "measures:out-fix-checkout-timeout-2027h1->incident-count",
+      source: "out-fix-checkout-timeout-2027h1",
+      target: "incident-count",
+      type: "measures",
+    },
+    {
+      id: "attested-by:out-fix-checkout-timeout-2027h1->acme-obs-stack",
+      source: "out-fix-checkout-timeout-2027h1",
+      target: "acme-obs-stack",
+      type: "attested-by",
+    },
+    {
+      id: "authorizes-mutation:lead-sre->out-fix-checkout-timeout-2027h1",
+      source: "lead-sre",
+      target: "out-fix-checkout-timeout-2027h1",
+      type: "authorizes-mutation",
+    },
+    {
       id: "has-verdict:intent-cta-upgrade->verdict-cta-upgrade-2027q1",
       source: "intent-cta-upgrade",
       target: "verdict-cta-upgrade-2027q1",
@@ -6345,6 +6419,12 @@ window.GRAPH = {
       rule: "self-attested-target",
       node: "tgt-sre-incidents",
       msg: "independência colapsada de fato (acme-obs-stack é do próprio time-sre) — ACEITA com colapso logado por sponsor-acme; dashboard deve marcar dashboard-badge",
+    },
+    {
+      level: "warn",
+      rule: "self-attested",
+      node: "out-fix-checkout-timeout-2027h1",
+      msg: 'attester "acme-obs-stack" (owner: time-sre) colapsa com o time medido — outcome entra apenas como self-attested VISÍVEL (dashboard-badge)',
     },
   ],
   profiles: {

@@ -1,6 +1,6 @@
 // Neo4j graph seed generated from the v3 runtime read-model.
-MERGE (m:ProjectionMetadata {contentHash: 'f2afb7f97d78'})
-SET m.schema = 'acme.backend-example/v1', m.nodeCount = 173, m.edgeCount = 369, m.issueCount = 3;
+MERGE (m:ProjectionMetadata {contentHash: 'c04076d80f7e'})
+SET m.schema = 'acme.backend-example/v1', m.nodeCount = 174, m.edgeCount = 374, m.issueCount = 4;
 
 MERGE (n:GovernanceNode:REPO {id: 'acme-analytics'})
 SET n.type = 'repo', n.label = 'acme-analytics', n.data = '{"id":"acme-analytics","owner":"time-data","caps":["eventos","métricas","experimentos-fonte"]}', n.dataHash = '4040c3f3a52c';
@@ -125,7 +125,7 @@ SET n.type = 'metric', n.label = 'cost-to-serve', n.data = '{"id":"cost-to-serve
 MERGE (n:GovernanceNode:STANDALONE {id: 'dep-bump-host'})
 SET n.type = 'standalone', n.label = 'dep-bump: dep-bump-host', n.data = '{"schema":"acme.standalone-work/v1","id":"dep-bump-host","kind":"dep-bump","repo":"acme-web-host","origin":"rotina: lib X 3.x → 4.x","review":"externo: area-platform","placar":"operational-bucket","source":{"kind":"standalone","file":"repos/acme-web-host/.governance/works/dep-bump-host.yml"},"_file":"C:\\\\Users\\\\Rosana\\\\dev\\\\ai-guidelines\\\\.governance\\\\specs\\\\0024-context-architecture\\\\work-graph-model\\\\_org-simulation-v3\\\\repos\\\\acme-web-host\\\\.governance\\\\works\\\\dep-bump-host.yml","_repo":"acme-web-host"}', n.dataHash = '6d5c8ca894e3';
 MERGE (n:GovernanceNode:STANDALONE {id: 'fix-checkout-timeout'})
-SET n.type = 'standalone', n.label = 'fix: fix-checkout-timeout', n.data = '{"schema":"acme.standalone-work/v1","id":"fix-checkout-timeout","kind":"fix","repo":"acme-checkout-api","origin":"follow-up de incident:incidente-checkout — reduzir timeout e fallback do checkout","review":"interno","placar":"operational-bucket","source":{"kind":"standalone","file":"repos/acme-checkout-api/.governance/works/fix-checkout-timeout.yml"},"_file":"C:\\\\Users\\\\Rosana\\\\dev\\\\ai-guidelines\\\\.governance\\\\specs\\\\0024-context-architecture\\\\work-graph-model\\\\_org-simulation-v3\\\\repos\\\\acme-checkout-api\\\\.governance\\\\works\\\\fix-checkout-timeout.yml","_repo":"acme-checkout-api"}', n.dataHash = 'bac87cc2a1a3';
+SET n.type = 'standalone', n.label = 'fix: fix-checkout-timeout', n.data = '{"schema":"acme.standalone-work/v1","id":"fix-checkout-timeout","kind":"fix","repo":"acme-checkout-api","origin":"follow-up de incident:incidente-checkout — reduzir timeout e fallback do checkout","review":"interno","placar":"operational-bucket","source":{"kind":"standalone","file":"repos/acme-checkout-api/.governance/works/fix-checkout-timeout.yml"},"owner":"lead-checkout","started-at":"2027-04-08","base-revision":"acme-checkout-api@7fd8f246b1ca","completed-at":"2027-04-09","source-commit":"acme-checkout-api@fix-timeout-rev3","evidence":{"kind":"code-fixture","command":"node _tools/check-code-fixtures.mjs --repo acme-checkout-api","result":"passed","files":["src/routes/checkout.mjs","src/lib/timeout-policy.mjs"]},"verification":{"checked-by":"lead-checkout","result":"passed"},"status":"done","_file":"C:\\\\Users\\\\Rosana\\\\dev\\\\ai-guidelines\\\\.governance\\\\specs\\\\0024-context-architecture\\\\work-graph-model\\\\_org-simulation-v3\\\\repos\\\\acme-checkout-api\\\\.governance\\\\works\\\\fix-checkout-timeout.yml","_repo":"acme-checkout-api"}', n.dataHash = '45360e19ccbf';
 MERGE (n:GovernanceNode:AUTHORITY {id: 'head-cx'})
 SET n.type = 'authority', n.label = 'head-cx', n.data = '{"id":"head-cx","kind":"role","of":"area-cx"}', n.dataHash = '2695496cd19a';
 MERGE (n:GovernanceNode:AUTHORITY {id: 'head-growth'})
@@ -284,6 +284,8 @@ MERGE (n:GovernanceNode:OUTCOME {id: 'out-checkout-stack-2027h2'})
 SET n.type = 'outcome', n.label = 'cost-to-serve: -11.8 R$/pedido', n.data = '{"id":"out-checkout-stack-2027h2","emitted-by":"intent-checkout-stack","source":"acme-data-pipeline/cost-to-serve@warehouse-rev77","window":{"start":"2027-07-01","end":"2027-12-31"},"metric":"cost-to-serve","value":"-11.8 R$/pedido","aggregation":"avg","attested-by":"acme-data-pipeline","revision":"warehouse@rev77","contract-revisions":["acme-user-context@v4"],"contributes-to":"tgt-checkout-stack","envelope":{"actor":"tool:r4-second-outcome","authority":"head-platform","issued-at":"2027-10-20","idempotency-key":"out-checkout-stack-2027h2","nonce":"nonce-out-checkout-stack-2027h2"}}', n.dataHash = '7b1b6d5c6b31';
 MERGE (n:GovernanceNode:OUTCOME {id: 'out-cta-upgrade-2027q1'})
 SET n.type = 'outcome', n.label = 'conversion-rate: +2.4 %', n.data = '{"id":"out-cta-upgrade-2027q1","emitted-by":"intent-cta-upgrade","source":"acme-analytics/conversion-rate@warehouse-rev42","window":{"start":"2027-01-01","end":"2027-03-31"},"metric":"conversion-rate","value":"+2.4 %","aggregation":"avg","attested-by":"acme-analytics","revision":"warehouse@rev42","contract-revisions":[],"contributes-to":"tgt-billing-conv","envelope":{"actor":"ana-dev","authority":"pm-growth","issued-at":"2027-04-02","idempotency-key":"out-cta-upgrade-2027q1","nonce":"nonce-out-cta-upgrade-2027q1"}}', n.dataHash = 'd9cf9a4c7a1a';
+MERGE (n:GovernanceNode:OUTCOME {id: 'out-fix-checkout-timeout-2027h1'})
+SET n.type = 'outcome', n.label = 'incident-count: -1 incidentes/mês', n.data = '{"id":"out-fix-checkout-timeout-2027h1","emitted-by":"fix-checkout-timeout","source":"acme-obs-stack/incident-count@obs-rev19","window":{"start":"2027-04-01","end":"2027-04-30"},"metric":"incident-count","value":"-1 incidentes/mês","aggregation":"sum","attested-by":"acme-obs-stack","revision":"obs@rev19","contract-revisions":[],"contributes-to":"tgt-sre-incidents","envelope":{"actor":"tool:r5-operational-outcome","authority":"lead-sre","issued-at":"2027-04-10","idempotency-key":"out-fix-checkout-timeout-2027h1","nonce":"nonce-out-fix-checkout-timeout-2027h1"}}', n.dataHash = '03017caed5d0';
 MERGE (n:GovernanceNode:METRIC {id: 'p99-latency'})
 SET n.type = 'metric', n.label = 'p99-latency', n.data = '{"id":"p99-latency","unit":"ms","source":"acme-obs-stack","aggregation":"p99","owner":"time-sre"}', n.dataHash = '99fe4529166b';
 MERGE (n:GovernanceNode:AUTHORITY {id: 'pm-growth'})
@@ -460,6 +462,9 @@ SET r.type = 'attested-by';
 MATCH (source:GovernanceNode {id: 'out-cta-upgrade-2027q1'}), (target:GovernanceNode {id: 'acme-analytics'})
 MERGE (source)-[r:ATTESTED_BY {id: 'attested-by:out-cta-upgrade-2027q1->acme-analytics'}]->(target)
 SET r.type = 'attested-by';
+MATCH (source:GovernanceNode {id: 'out-fix-checkout-timeout-2027h1'}), (target:GovernanceNode {id: 'acme-obs-stack'})
+MERGE (source)-[r:ATTESTED_BY {id: 'attested-by:out-fix-checkout-timeout-2027h1->acme-obs-stack'}]->(target)
+SET r.type = 'attested-by';
 MATCH (source:GovernanceNode {id: 'tgt-billing-conv'}), (target:GovernanceNode {id: 'acme-analytics'})
 MERGE (source)-[r:ATTESTED_BY {id: 'attested-by:tgt-billing-conv->acme-analytics'}]->(target)
 SET r.type = 'attested-by';
@@ -495,6 +500,9 @@ MERGE (source)-[r:ATTESTED_BY {id: 'attested-by:tgt-support-cost->acme-data-pipe
 SET r.type = 'attested-by';
 MATCH (source:GovernanceNode {id: 'head-platform'}), (target:GovernanceNode {id: 'out-checkout-stack-2027h2'})
 MERGE (source)-[r:AUTHORIZES_MUTATION {id: 'authorizes-mutation:head-platform->out-checkout-stack-2027h2'}]->(target)
+SET r.type = 'authorizes-mutation';
+MATCH (source:GovernanceNode {id: 'lead-sre'}), (target:GovernanceNode {id: 'out-fix-checkout-timeout-2027h1'})
+MERGE (source)-[r:AUTHORIZES_MUTATION {id: 'authorizes-mutation:lead-sre->out-fix-checkout-timeout-2027h1'}]->(target)
 SET r.type = 'authorizes-mutation';
 MATCH (source:GovernanceNode {id: 'pm-growth'}), (target:GovernanceNode {id: 'out-cta-upgrade-2027q1'})
 MERGE (source)-[r:AUTHORIZES_MUTATION {id: 'authorizes-mutation:pm-growth->out-cta-upgrade-2027q1'}]->(target)
@@ -691,6 +699,9 @@ SET r.type = 'contributes-to';
 MATCH (source:GovernanceNode {id: 'out-cta-upgrade-2027q1'}), (target:GovernanceNode {id: 'tgt-billing-conv'})
 MERGE (source)-[r:CONTRIBUTES_TO {id: 'contributes-to:out-cta-upgrade-2027q1->tgt-billing-conv'}]->(target)
 SET r.type = 'contributes-to';
+MATCH (source:GovernanceNode {id: 'out-fix-checkout-timeout-2027h1'}), (target:GovernanceNode {id: 'tgt-sre-incidents'})
+MERGE (source)-[r:CONTRIBUTES_TO {id: 'contributes-to:out-fix-checkout-timeout-2027h1->tgt-sre-incidents'}]->(target)
+SET r.type = 'contributes-to';
 MATCH (source:GovernanceNode {id: 'tgt-billing-conv'}), (target:GovernanceNode {id: 'obj-revenue'})
 MERGE (source)-[r:CONTRIBUTES_TO {id: 'contributes-to:tgt-billing-conv->obj-revenue'}]->(target)
 SET r.type = 'contributes-to';
@@ -790,6 +801,9 @@ SET r.type = 'delivery-after';
 MATCH (source:GovernanceNode {id: 'intent-consent-center'}), (target:GovernanceNode {id: 'intent-checkout-stack'})
 MERGE (source)-[r:DEPENDS_ON {id: 'depends-on:intent-consent-center->intent-checkout-stack'}]->(target)
 SET r.type = 'depends-on';
+MATCH (source:GovernanceNode {id: 'fix-checkout-timeout'}), (target:GovernanceNode {id: 'out-fix-checkout-timeout-2027h1'})
+MERGE (source)-[r:EMITS {id: 'emits:fix-checkout-timeout->out-fix-checkout-timeout-2027h1'}]->(target)
+SET r.type = 'emits';
 MATCH (source:GovernanceNode {id: 'intent-checkout-stack'}), (target:GovernanceNode {id: 'out-checkout-stack-2027h2'})
 MERGE (source)-[r:EMITS {id: 'emits:intent-checkout-stack->out-checkout-stack-2027h2'}]->(target)
 SET r.type = 'emits';
@@ -1095,6 +1109,9 @@ MERGE (source)-[r:MEASURES {id: 'measures:out-checkout-stack-2027h2->cost-to-ser
 SET r.type = 'measures';
 MATCH (source:GovernanceNode {id: 'out-cta-upgrade-2027q1'}), (target:GovernanceNode {id: 'conversion-rate'})
 MERGE (source)-[r:MEASURES {id: 'measures:out-cta-upgrade-2027q1->conversion-rate'}]->(target)
+SET r.type = 'measures';
+MATCH (source:GovernanceNode {id: 'out-fix-checkout-timeout-2027h1'}), (target:GovernanceNode {id: 'incident-count'})
+MERGE (source)-[r:MEASURES {id: 'measures:out-fix-checkout-timeout-2027h1->incident-count'}]->(target)
 SET r.type = 'measures';
 MATCH (source:GovernanceNode {id: 'area-platform'}), (target:GovernanceNode {id: 'acme-core-api'})
 MERGE (source)-[r:OWNS {id: 'owns:area-platform->acme-core-api'}]->(target)

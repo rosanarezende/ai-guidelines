@@ -7,6 +7,7 @@ const SIGNALS = ["none", "touches-contract", "operational-target"];
 const PURPOSES = ["create", "sustain", "discover", "operate"];
 const LIFECYCLE = ["proposed", "active", "closed", "superseded", "dropped"];
 const STANDALONE_KINDS = ["fix", "dep-bump"];
+const STANDALONE_STATUSES = ["acknowledged", "active", "blocked", "done", "dropped"];
 const INCIDENT_KINDS = ["incident-response"];
 const INCIDENT_STATUSES = ["declared", "mitigating", "resolved", "postmortem-complete"];
 const INCIDENT_SEVERITIES = ["baixa", "media", "alta", "critica"];
@@ -122,8 +123,26 @@ const SCHEMAS = {
   next: { required: ["when", "then"], optional: ["gate"] },
   standalone: {
     required: ["id", "kind", "repo", "origin", "source", "placar"],
-    optional: ["schema", "review", "routing", "_file", "_repo"],
-    enums: { kind: STANDALONE_KINDS },
+    optional: [
+      "schema",
+      "review",
+      "routing",
+      "_file",
+      "_repo",
+      "status",
+      "owner",
+      "started-at",
+      "base-revision",
+      "completed-at",
+      "source-commit",
+      "evidence",
+      "verification",
+      "blocked-by",
+      "reason",
+      "decision",
+      "fate",
+    ],
+    enums: { kind: STANDALONE_KINDS, status: STANDALONE_STATUSES },
   },
   incident: {
     required: ["id", "kind", "repo", "origin", "severity", "placar"],
@@ -1131,12 +1150,25 @@ function resolveOutcomes(o, ix, { err, warn }) {
     if (!ix.ids.metric.has(out.metric)) err("refs", out.id, `metric "${out.metric}" não existe`);
     if (!ix.ids.target.has(out["contributes-to"]))
       err("refs", out.id, `contributes-to "${out["contributes-to"]}" não existe`);
-    const emitter =
-      ix.intentById[out["emitted-by"]] ||
-      o.standalone.find((s) => s.id === out["emitted-by"]) ||
-      null;
+    const intentEmitter = ix.intentById[out["emitted-by"]] || null;
+    const standaloneEmitter = o.standalone.find((s) => s.id === out["emitted-by"]) || null;
+    const emitter = intentEmitter || standaloneEmitter;
     if (!emitter)
       err("refs", out.id, `emitted-by "${out["emitted-by"]}" não é intent nem standalone`);
+    if (standaloneEmitter) {
+      if (standaloneEmitter.status !== "done")
+        err(
+          "standalone-outcome",
+          out.id,
+          `standalone "${standaloneEmitter.id}" precisa estar done antes de emitir outcome`
+        );
+      if (!standaloneEmitter.evidence || !standaloneEmitter.verification)
+        err(
+          "standalone-outcome",
+          out.id,
+          `standalone "${standaloneEmitter.id}" precisa de evidence + verification antes de emitir outcome`
+        );
+    }
 
     // janela fechada e válida
     const w = out.window || {};

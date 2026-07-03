@@ -1,9 +1,26 @@
 schema: acme.standalone-work/v1
 id: fix-checkout-timeout
-kind: fix # follow-up resolvível do incident:incidente-checkout
+kind: fix
 repo: acme-checkout-api
-origin: "follow-up de incident:incidente-checkout — reduzir timeout e fallback do checkout"
+origin: follow-up de incident:incidente-checkout — reduzir timeout e fallback do checkout
 review: interno
 placar: operational-bucket
 source:
-  { kind: standalone, file: repos/acme-checkout-api/.governance/works/fix-checkout-timeout.yml }
+  kind: standalone
+  file: repos/acme-checkout-api/.governance/works/fix-checkout-timeout.yml
+owner: lead-checkout
+started-at: 2027-04-08
+base-revision: acme-checkout-api@7fd8f246b1ca
+completed-at: 2027-04-09
+source-commit: acme-checkout-api@fix-timeout-rev3
+evidence:
+  kind: code-fixture
+  command: node _tools/check-code-fixtures.mjs --repo acme-checkout-api
+  result: passed
+  files:
+    - src/routes/checkout.mjs
+    - src/lib/timeout-policy.mjs
+verification:
+  checked-by: lead-checkout
+  result: passed
+status: done

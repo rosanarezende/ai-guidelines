@@ -3,11 +3,11 @@
     "schema": "acme.backend-example/v1",
     "authority": "derived-read-model",
     "source": "acme-governance + repos/.governance + runtime v3",
-    "contentHash": "f2afb7f97d78",
+    "contentHash": "c04076d80f7e",
     "counts": {
-      "nodes": 173,
-      "edges": 369,
-      "issues": 3
+      "nodes": 174,
+      "edges": 374,
+      "issues": 4
     },
     "note": "Example backend exports are derived. YAML/event-log remains authoritative."
   },
@@ -1726,10 +1726,26 @@
           "kind": "standalone",
           "file": "repos/acme-checkout-api/.governance/works/fix-checkout-timeout.yml"
         },
+        "owner": "lead-checkout",
+        "started-at": "2027-04-08",
+        "base-revision": "acme-checkout-api@7fd8f246b1ca",
+        "completed-at": "2027-04-09",
+        "source-commit": "acme-checkout-api@fix-timeout-rev3",
+        "evidence": {
+          "kind": "code-fixture",
+          "command": "node _tools/check-code-fixtures.mjs --repo acme-checkout-api",
+          "result": "passed",
+          "files": ["src/routes/checkout.mjs", "src/lib/timeout-policy.mjs"]
+        },
+        "verification": {
+          "checked-by": "lead-checkout",
+          "result": "passed"
+        },
+        "status": "done",
         "_file": "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout-api\\.governance\\works\\fix-checkout-timeout.yml",
         "_repo": "acme-checkout-api"
       },
-      "dataHash": "bac87cc2a1a3"
+      "dataHash": "45360e19ccbf"
     },
     {
       "id": "head-cx",
@@ -3780,6 +3796,35 @@
       "dataHash": "d9cf9a4c7a1a"
     },
     {
+      "id": "out-fix-checkout-timeout-2027h1",
+      "type": "outcome",
+      "label": "incident-count: -1 incidentes/mês",
+      "data": {
+        "id": "out-fix-checkout-timeout-2027h1",
+        "emitted-by": "fix-checkout-timeout",
+        "source": "acme-obs-stack/incident-count@obs-rev19",
+        "window": {
+          "start": "2027-04-01",
+          "end": "2027-04-30"
+        },
+        "metric": "incident-count",
+        "value": "-1 incidentes/mês",
+        "aggregation": "sum",
+        "attested-by": "acme-obs-stack",
+        "revision": "obs@rev19",
+        "contract-revisions": [],
+        "contributes-to": "tgt-sre-incidents",
+        "envelope": {
+          "actor": "tool:r5-operational-outcome",
+          "authority": "lead-sre",
+          "issued-at": "2027-04-10",
+          "idempotency-key": "out-fix-checkout-timeout-2027h1",
+          "nonce": "nonce-out-fix-checkout-timeout-2027h1"
+        }
+      },
+      "dataHash": "03017caed5d0"
+    },
+    {
       "id": "p99-latency",
       "type": "metric",
       "label": "p99-latency",
@@ -4465,6 +4510,12 @@
       "type": "attested-by"
     },
     {
+      "id": "attested-by:out-fix-checkout-timeout-2027h1->acme-obs-stack",
+      "source": "out-fix-checkout-timeout-2027h1",
+      "target": "acme-obs-stack",
+      "type": "attested-by"
+    },
+    {
       "id": "attested-by:tgt-billing-conv->acme-analytics",
       "source": "tgt-billing-conv",
       "target": "acme-analytics",
@@ -4534,6 +4585,12 @@
       "id": "authorizes-mutation:head-platform->out-checkout-stack-2027h2",
       "source": "head-platform",
       "target": "out-checkout-stack-2027h2",
+      "type": "authorizes-mutation"
+    },
+    {
+      "id": "authorizes-mutation:lead-sre->out-fix-checkout-timeout-2027h1",
+      "source": "lead-sre",
+      "target": "out-fix-checkout-timeout-2027h1",
       "type": "authorizes-mutation"
     },
     {
@@ -4927,6 +4984,12 @@
       "type": "contributes-to"
     },
     {
+      "id": "contributes-to:out-fix-checkout-timeout-2027h1->tgt-sre-incidents",
+      "source": "out-fix-checkout-timeout-2027h1",
+      "target": "tgt-sre-incidents",
+      "type": "contributes-to"
+    },
+    {
       "id": "contributes-to:tgt-billing-conv->obj-revenue",
       "source": "tgt-billing-conv",
       "target": "obj-revenue",
@@ -5123,6 +5186,12 @@
       "source": "intent-consent-center",
       "target": "intent-checkout-stack",
       "type": "depends-on"
+    },
+    {
+      "id": "emits:fix-checkout-timeout->out-fix-checkout-timeout-2027h1",
+      "source": "fix-checkout-timeout",
+      "target": "out-fix-checkout-timeout-2027h1",
+      "type": "emits"
     },
     {
       "id": "emits:intent-checkout-stack->out-checkout-stack-2027h2",
@@ -5734,6 +5803,12 @@
       "id": "measures:out-cta-upgrade-2027q1->conversion-rate",
       "source": "out-cta-upgrade-2027q1",
       "target": "conversion-rate",
+      "type": "measures"
+    },
+    {
+      "id": "measures:out-fix-checkout-timeout-2027h1->incident-count",
+      "source": "out-fix-checkout-timeout-2027h1",
+      "target": "incident-count",
       "type": "measures"
     },
     {
@@ -6478,6 +6553,13 @@
       "rule": "self-attested-target",
       "node": "tgt-sre-incidents",
       "msg": "independência colapsada de fato (acme-obs-stack é do próprio time-sre) — ACEITA com colapso logado por sponsor-acme; dashboard deve marcar dashboard-badge"
+    },
+    {
+      "id": "warn:self-attested:out-fix-checkout-timeout-2027h1",
+      "level": "warn",
+      "rule": "self-attested",
+      "node": "out-fix-checkout-timeout-2027h1",
+      "msg": "attester \"acme-obs-stack\" (owner: time-sre) colapsa com o time medido — outcome entra apenas como self-attested VISÍVEL (dashboard-badge)"
     }
   ]
 }

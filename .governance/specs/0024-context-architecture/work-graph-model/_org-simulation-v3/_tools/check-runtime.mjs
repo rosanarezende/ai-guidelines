@@ -50,6 +50,21 @@ for (const work of (org.intents || []).find((intent) => intent.id === "intent-ch
   }
 }
 
+const operationalOutcome = (org.outcomes || []).find(
+  (outcome) => outcome.id === "out-fix-checkout-timeout-2027h1"
+);
+if (!operationalOutcome) fail("outcome operacional de standalone não existe");
+if (operationalOutcome["emitted-by"] !== "fix-checkout-timeout") {
+  fail("out-fix-checkout-timeout-2027h1 não é emitido pelo standalone fix-checkout-timeout");
+}
+if (operationalOutcome["contributes-to"] !== "tgt-sre-incidents") {
+  fail("out-fix-checkout-timeout-2027h1 não contribui para tgt-sre-incidents");
+}
+const standaloneFix = (org.standalone || []).find((item) => item.id === "fix-checkout-timeout");
+if (standaloneFix?.status !== "done" || !standaloneFix.evidence || !standaloneFix.verification) {
+  fail("fix-checkout-timeout precisa estar done com evidence+verification antes do outcome");
+}
+
 const graph = buildGraphReadModel({
   org,
   issues,
@@ -95,6 +110,47 @@ if (!accepted.ok)
 const unknown = runtime.dryRunGovernedCommand({ ...validCommand, type: "made-up.command" });
 if (unknown.ok || !unknown.issues.some((issue) => issue.rule === "command-type")) {
   fail("comando desconhecido não falhou fechado");
+}
+
+const standaloneWithoutEvidence = runtime.dryRunGovernedCommand({
+  id: "cmd-check-runtime-standalone-outcome-open",
+  type: "outcome.publish",
+  envelope: {
+    actor: "ana-dev",
+    authority: "lead-sre",
+    "base-revision": "check-runtime@local",
+    "idempotency-key": "cmd-check-runtime-standalone-outcome-open",
+    "issued-at": "2027-04-11",
+    nonce: "nonce-cmd-check-runtime-standalone-outcome-open",
+  },
+  payload: {
+    outcome: {
+      id: "out-check-runtime-standalone-open",
+      "emitted-by": "dep-bump-host",
+      source: "acme-obs-stack/incident-count@obs-rev19",
+      window: { start: "2027-04-01", end: "2027-04-30" },
+      metric: "incident-count",
+      value: "-1 incidentes/mês",
+      aggregation: "sum",
+      "attested-by": "acme-obs-stack",
+      revision: "obs@rev19",
+      "contract-revisions": [],
+      "contributes-to": "tgt-sre-incidents",
+      envelope: {
+        actor: "tool:check-runtime",
+        authority: "lead-sre",
+        "issued-at": "2027-04-11",
+        "idempotency-key": "out-check-runtime-standalone-open",
+        nonce: "nonce-out-check-runtime-standalone-open",
+      },
+    },
+  },
+});
+if (
+  standaloneWithoutEvidence.ok ||
+  !standaloneWithoutEvidence.issues.some((issue) => issue.rule === "standalone-outcome")
+) {
+  fail("outcome de standalone sem status done/evidence não falhou fechado");
 }
 
 const noEnvelope = runtime.dryRunGovernedCommand({

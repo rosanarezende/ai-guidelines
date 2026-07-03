@@ -12,6 +12,7 @@ export const COMMAND_TYPES = new Map([
   ["proposal.create", { mutates: true, payloadKey: "proposal" }],
   ["read-model.rebuild", { mutates: false }],
   ["repo-work.ack", { mutates: true, payloadKey: "ack" }],
+  ["standalone.complete", { mutates: true, payloadKey: "standalone" }],
   ["triage.save", { mutates: true, payloadKey: "triage" }],
   ["outcome.publish", { mutates: true, payloadKey: "outcome" }],
   ["verdict.accept", { mutates: true, payloadKey: "verdict" }],
@@ -68,6 +69,10 @@ function findIntentWork(org, intentId, workId) {
   const intent = (org.intents || []).find((item) => item.id === intentId);
   const work = (intent?.works || []).find((item) => item.id === workId);
   return { intent, work };
+}
+
+function findStandalone(org, standaloneId) {
+  return (org.standalone || []).find((item) => item.id === standaloneId) || null;
 }
 
 function hasText(value) {
@@ -326,6 +331,76 @@ export function validateGovernedCommand(command, org, options = {}) {
       for (const field of ["decision", "fate"])
         if (!hasText(ack[field]))
           issues.push(issue("repo-work-lifecycle", node, `status dropped exige "${field}"`));
+    }
+  }
+
+  if (command.type === "standalone.complete" && command.payload?.standalone) {
+    const standalone = command.payload.standalone;
+    const existing = findStandalone(org, standalone.id);
+    if (!standalone.id)
+      issues.push(issue("standalone-schema", node, "standalone.id é obrigatório"));
+    if (!existing)
+      issues.push(issue("standalone-ref", node, `standalone "${standalone.id}" não existe`));
+    if (standalone.status !== "done")
+      issues.push(issue("standalone-lifecycle", node, "standalone.complete exige status done"));
+    if (standalone.repo && existing && standalone.repo !== existing.repo)
+      issues.push(
+        issue(
+          "standalone-ref",
+          node,
+          `standalone.repo "${standalone.repo}" diverge do repo "${existing.repo}"`
+        )
+      );
+    if (standalone.owner && !authorities.has(standalone.owner))
+      issues.push(
+        issue("standalone-authority", node, `standalone.owner "${standalone.owner}" não resolve`)
+      );
+    if (standalone.owner !== envelope.authority) {
+      issues.push(
+        issue(
+          "standalone-authority",
+          node,
+          "standalone.owner precisa ser a authority do comando para status done"
+        )
+      );
+    }
+    for (const field of ["owner", "started-at", "base-revision", "completed-at", "source-commit"])
+      if (!hasText(standalone[field]))
+        issues.push(issue("standalone-lifecycle", node, `status done exige "${field}"`));
+    if (!standalone.evidence)
+      issues.push(issue("standalone-lifecycle", node, "status done exige evidence"));
+    if (!standalone.verification)
+      issues.push(issue("standalone-lifecycle", node, "status done exige verification"));
+    for (const field of ["kind", "command", "result"]) {
+      if (!hasText(standalone.evidence?.[field]))
+        issues.push(issue("standalone-lifecycle", node, `status done exige evidence.${field}`));
+    }
+    if (!Array.isArray(standalone.evidence?.files) || standalone.evidence.files.length === 0)
+      issues.push(
+        issue("standalone-lifecycle", node, "status done exige evidence.files não-vazio")
+      );
+    for (const field of ["checked-by", "result"]) {
+      if (!hasText(standalone.verification?.[field]))
+        issues.push(issue("standalone-lifecycle", node, `status done exige verification.${field}`));
+    }
+    if (
+      standalone.verification?.["checked-by"] &&
+      !authorities.has(standalone.verification["checked-by"])
+    )
+      issues.push(
+        issue(
+          "standalone-authority",
+          node,
+          `verification.checked-by "${standalone.verification["checked-by"]}" não resolve`
+        )
+      );
+
+    if (existing) {
+      const candidate = structuredClone(org);
+      candidate.standalone = (candidate.standalone || []).map((item) =>
+        item.id === standalone.id ? { ...item, ...standalone } : item
+      );
+      issues.push(...domainErrorsForNodes(candidate, [standalone.id]));
     }
   }
 

@@ -38,3 +38,22 @@ outcomes:
       issued-at: 2027-10-20
       idempotency-key: out-checkout-stack-2027h2
       nonce: nonce-out-checkout-stack-2027h2
+  - id: out-fix-checkout-timeout-2027h1
+    emitted-by: fix-checkout-timeout
+    source: acme-obs-stack/incident-count@obs-rev19
+    window:
+      start: 2027-04-01
+      end: 2027-04-30
+    metric: incident-count
+    value: -1 incidentes/mês
+    aggregation: sum
+    attested-by: acme-obs-stack
+    revision: obs@rev19
+    contract-revisions: []
+    contributes-to: tgt-sre-incidents
+    envelope:
+      actor: tool:r5-operational-outcome
+      authority: lead-sre
+      issued-at: 2027-04-10
+      idempotency-key: out-fix-checkout-timeout-2027h1
+      nonce: nonce-out-fix-checkout-timeout-2027h1
