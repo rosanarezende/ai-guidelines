@@ -83,3 +83,15 @@ Se uma integração não consegue responder isso, ela ainda é conveniente demai
 Assistentes entram pelo mesmo contrato: podem sugerir, resumir, procurar contexto ou propor patch,
 mas não viram fonte da verdade. O framework precisa conseguir rodar sem eles e precisa degradar para
 humano/local quando classificação ou egress bloquearem o provedor escolhido.
+
+## Projeção no app
+
+`_org-simulation-v3/_apps/governance-next/` projeta este catálogo na aba `Configuracoes`.
+Essa tela é intencionalmente fluida: mostra o que o framework já entrega sem integração, permite
+simular a escolha de perfil da organização e prioriza o assistente inicial local/cloud (Ollama como
+primeiro caminho local). O que ainda não tem mecanismo aparece como `em breve`, não como controle
+efetivo.
+
+Configuração real futura precisa virar comando governado: escolher perfil, payer, sponsor,
+authority, egress policy ou assistant runtime altera risco de governança e não pode ser apenas
+estado de UI.

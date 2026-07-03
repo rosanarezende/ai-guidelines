@@ -1,10 +1,13 @@
 import { buildGraphReadModel, openFileGovernanceRuntime } from "../../../_lib/index.mjs";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import {
   loadPublishedRepoContracts,
   validateRepoContracts,
 } from "../../../_tools/repo-contracts.mjs";
 import { loadPublishedContexts, validateRepoContexts } from "../../../_tools/repo-contexts.mjs";
 import { loadPublishedRepoWorks, validateRepoWorks } from "../../../_tools/repo-works.mjs";
+import { parse } from "yaml";
 import type {
   Authority,
   BreakGlass,
@@ -15,6 +18,7 @@ import type {
   GovernanceIssue,
   GovernanceSnapshot,
   GraphReadModel,
+  IntegrationCatalog,
   Incident,
   Intent,
   MetricDefinition,
@@ -31,6 +35,8 @@ import type {
   Triage,
   Verdict,
 } from "./types";
+
+const integrationCatalogFile = path.resolve(process.cwd(), "../../../integration-catalog.yml");
 
 type RawOrg = {
   org: {
@@ -172,6 +178,10 @@ function buildRepoStatus(
   }));
 }
 
+function loadIntegrationCatalog(): IntegrationCatalog {
+  return parse(readFileSync(integrationCatalogFile, "utf8")) as IntegrationCatalog;
+}
+
 export async function loadGovernanceSnapshot(): Promise<GovernanceSnapshot> {
   const runtime = openFileGovernanceRuntime();
   const org = asOrg(runtime.loadOrg());
@@ -224,6 +234,7 @@ export async function loadGovernanceSnapshot(): Promise<GovernanceSnapshot> {
     authorities: sortById(org.authorities || []),
     contracts: sortById(org.contracts || []),
     metrics: sortById(org.metrics || []),
+    integrationCatalog: loadIntegrationCatalog(),
     outcomes: sortById(org.outcomes || []).map((outcome) => ({
       ...outcome,
       valid: errorsForNode(issues, outcome.id).length === 0,

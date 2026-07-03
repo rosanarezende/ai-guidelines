@@ -493,10 +493,15 @@ de iniciar UI/API nova.
   `--apply` exige `--source-hash` + credenciais explícitas.
 - **Estado complementar 3:** `_apps/governance-next/` implementa a superfície operacional React/Next +
   Material UI v2 em TypeScript strict. O app lê snapshot derivado da runtime, separa navegação por
-  audiência (stakeholder, owner, tech lead, operação, auditoria, admin), expõe tabs ponta-a-ponta e
+  audiência (stakeholder, owner, tech lead, operação, admin de adoção, auditoria, admin), expõe tabs ponta-a-ponta e
   chama API routes para `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`,
   `repo-work.ack`, `standalone.complete`, `contract.propose-revision`, `outcome.publish`,
   `verdict.accept`, `incident.declare` e `policy.break-glass` com dry-run/execute.
+- **Estado complementar 3b:** a aba `Configuracoes` projeta o catálogo versionado de integrações e
+  prototipa o onboarding inicial de adoção: perfil da organização, separação admin/payer/sponsor,
+  assistente local/cloud (com Ollama como primeira opção local) e tags `em breve` para adapters sem
+  mecanismo. Ainda é UX/projeção: persistência futura precisa entrar como comando governado com
+  resolver de authority, billing role, egress/classification e policy revision.
 - **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
   `base-revision`, authority resolvida, idempotency, nonce, lock global por comando, escrita YAML
   atômica, marker de recovery e event-log append-only. `currentRevision()` inclui triages e

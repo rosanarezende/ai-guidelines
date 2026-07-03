@@ -23,6 +23,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
 import HubIcon from "@mui/icons-material/Hub";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
 import TroubleshootIcon from "@mui/icons-material/Troubleshoot";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactElement } from "react";
@@ -33,10 +34,11 @@ import CommandWorkspace from "./commands/CommandWorkspace";
 import AuditConsole from "./views/AuditConsole";
 import CompanyDashboard from "./views/CompanyDashboard";
 import ExecutionWorkspace from "./views/ExecutionWorkspace";
+import IntegrationSettings from "./views/IntegrationSettings";
 import OpsWorkspace from "./views/OpsWorkspace";
 import OwnerWorkspace from "./views/OwnerWorkspace";
 
-type ViewId = "company" | "owner" | "execution" | "ops" | "audit" | "commands";
+type ViewId = "company" | "owner" | "execution" | "ops" | "settings" | "audit" | "commands";
 
 const views: Array<{
   id: ViewId;
@@ -67,6 +69,12 @@ const views: Array<{
     label: "Operacao",
     audience: "SRE/operacao",
     icon: <TroubleshootIcon fontSize="small" />,
+  },
+  {
+    id: "settings",
+    label: "Configuracoes",
+    audience: "admin de adocao",
+    icon: <SettingsSuggestIcon fontSize="small" />,
   },
   {
     id: "audit",
@@ -236,6 +244,9 @@ export default function GovernanceApp({
             </Box>
             <Box sx={{ display: view === "ops" ? "block" : "none" }}>
               <OpsWorkspace snapshot={snapshot} />
+            </Box>
+            <Box sx={{ display: view === "settings" ? "block" : "none" }}>
+              <IntegrationSettings snapshot={snapshot} />
             </Box>
             <Box sx={{ display: view === "audit" ? "block" : "none" }}>
               <AuditConsole snapshot={snapshot} />

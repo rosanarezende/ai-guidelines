@@ -235,6 +235,37 @@ export type GraphReadModel = {
   edges: Array<{ id: string; source: string; target: string; type: string }>;
 };
 
+export type IntegrationAdapterKind = {
+  purpose: string;
+  "may-write-authoritative-state": boolean | string;
+};
+
+export type IntegrationItem = {
+  id: string;
+  category: string;
+  systems: string[];
+  "adapter-kind": string;
+  feeds: string[];
+  "framework-works-without-it": boolean;
+  "value-add": string;
+  authority: string;
+  priority: "P0" | "P1" | "P2" | "deferred" | string;
+};
+
+export type IntegrationCatalog = {
+  schema: string;
+  status: string;
+  authority: string;
+  principle: string;
+  "adapter-kinds": Record<string, IntegrationAdapterKind>;
+  "common-contract": {
+    "required-fields": string[];
+    "fail-closed-when": string[];
+    never: string[];
+  };
+  integrations: IntegrationItem[];
+};
+
 export type GovernanceSnapshot = {
   revision: string;
   company: string;
@@ -283,6 +314,7 @@ export type GovernanceSnapshot = {
   contracts: Contract[];
   metrics: MetricDefinition[];
   outcomes: OutcomeView[];
+  integrationCatalog: IntegrationCatalog;
 };
 
 export type CommandType =

@@ -7,11 +7,13 @@ import { buildGraphReadModel, openFileGovernanceRuntime } from "../_lib/index.mj
 import { loadPublishedRepoContracts, validateRepoContracts } from "./repo-contracts.mjs";
 import { loadPublishedContexts, validateRepoContexts } from "./repo-contexts.mjs";
 import { loadPublishedRepoWorks, validateRepoWorks } from "./repo-works.mjs";
+import { parse } from "yaml";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, "..");
 const appDir = path.join(root, "_apps", "governance-next");
 const repoRoot = path.resolve(root, "../../../../..");
+const integrationCatalogFile = path.join(root, "..", "integration-catalog.yml");
 
 function fail(message) {
   console.error(`✗ governance app — ${message}`);
@@ -66,11 +68,16 @@ const issues = [
 ];
 const graph = buildGraphReadModel({ org, issues, repoContexts, repoWorks, repoContracts });
 const revision = runtime.currentRevision();
+const integrationCatalog = parse(fs.readFileSync(integrationCatalogFile, "utf8"));
+const integrations = integrationCatalog?.integrations || [];
+const assistantRuntime = integrations.find((item) => item.id === "assistant-runtime-local-cloud");
 
 if (!revision) fail("snapshot sem revision");
 if (!graph?.nodes?.length) fail("snapshot sem grafo");
 if (!Array.isArray(org.objectives) || !org.objectives.length) fail("snapshot sem planning tier");
 if (!Array.isArray(org.targets) || !org.targets.length) fail("snapshot sem targets/dashboard");
+if (!assistantRuntime?.systems?.includes("ollama"))
+  fail("catalogo sem assistant runtime local Ollama");
 
 const nextBin = path.join(repoRoot, "node_modules", "next", "dist", "bin", "next");
 const result = spawnSync(process.execPath, [nextBin, "build", "--webpack"], {
@@ -81,5 +88,5 @@ const result = spawnSync(process.execPath, [nextBin, "build", "--webpack"], {
 if (result.status !== 0) fail("next build falhou");
 
 console.log(
-  `✓ governance app — TypeScript/MUI build + snapshot (${graph.nodes.length} nós · ${graph.edges.length} arestas · rev ${revision})`
+  `✓ governance app — TypeScript/MUI build + snapshot (${graph.nodes.length} nós · ${graph.edges.length} arestas · ${integrations.length} integrações · rev ${revision})`
 );
