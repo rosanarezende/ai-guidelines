@@ -1,9 +1,9 @@
 import { loadGovernanceSnapshot } from "@/lib/governance-server";
-import HomeView from "./ui/views/HomeView";
+import OnboardingView from "../ui/views/OnboardingView";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+export default async function OnboardingPage() {
   const snapshot = await loadGovernanceSnapshot();
-  return <HomeView snapshot={snapshot} />;
+  return <OnboardingView snapshot={snapshot} />;
 }

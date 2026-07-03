@@ -1,4 +1,5 @@
 import { Alert, Box, Card, CardContent, Chip, Divider, Paper, Typography } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import type { GovernanceIssue } from "@/lib/types";
@@ -11,6 +12,7 @@ export function Flex({
   justify = "flex-start",
   wrap = false,
   direction = "row",
+  sx,
 }: {
   children: ReactNode;
   gap?: number;
@@ -18,17 +20,21 @@ export function Flex({
   justify?: string;
   wrap?: boolean;
   direction?: "row" | "column";
+  sx?: SxProps<Theme>;
 }) {
   return (
     <Box
-      sx={{
-        display: "flex",
-        flexDirection: direction,
-        alignItems: align,
-        justifyContent: justify,
-        flexWrap: wrap ? "wrap" : "nowrap",
-        gap,
-      }}
+      sx={[
+        {
+          display: "flex",
+          flexDirection: direction,
+          alignItems: align,
+          justifyContent: justify,
+          flexWrap: wrap ? "wrap" : "nowrap",
+          gap,
+        },
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ]}
     >
       {children}
     </Box>

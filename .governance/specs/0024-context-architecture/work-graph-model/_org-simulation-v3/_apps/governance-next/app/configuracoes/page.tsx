@@ -1,9 +1,9 @@
 import { loadGovernanceSnapshot } from "@/lib/governance-server";
-import HomeView from "./ui/views/HomeView";
+import SettingsView from "../ui/views/SettingsView";
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+export default async function SettingsPage() {
   const snapshot = await loadGovernanceSnapshot();
-  return <HomeView snapshot={snapshot} />;
+  return <SettingsView snapshot={snapshot} />;
 }

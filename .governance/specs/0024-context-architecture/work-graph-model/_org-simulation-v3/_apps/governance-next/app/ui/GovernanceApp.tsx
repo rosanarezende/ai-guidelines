@@ -21,10 +21,11 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
+import HomeIcon from "@mui/icons-material/Home";
 import HubIcon from "@mui/icons-material/Hub";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import SettingsSuggestIcon from "@mui/icons-material/SettingsSuggest";
 import TroubleshootIcon from "@mui/icons-material/Troubleshoot";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactElement } from "react";
 import type { GovernanceSnapshot } from "@/lib/types";
@@ -34,11 +35,10 @@ import CommandWorkspace from "./commands/CommandWorkspace";
 import AuditConsole from "./views/AuditConsole";
 import CompanyDashboard from "./views/CompanyDashboard";
 import ExecutionWorkspace from "./views/ExecutionWorkspace";
-import IntegrationSettings from "./views/IntegrationSettings";
 import OpsWorkspace from "./views/OpsWorkspace";
 import OwnerWorkspace from "./views/OwnerWorkspace";
 
-type ViewId = "company" | "owner" | "execution" | "ops" | "settings" | "audit" | "commands";
+type ViewId = "company" | "owner" | "execution" | "ops" | "audit" | "commands";
 
 const views: Array<{
   id: ViewId;
@@ -69,12 +69,6 @@ const views: Array<{
     label: "Operacao",
     audience: "SRE/operacao",
     icon: <TroubleshootIcon fontSize="small" />,
-  },
-  {
-    id: "settings",
-    label: "Configuracoes",
-    audience: "admin de adocao",
-    icon: <SettingsSuggestIcon fontSize="small" />,
   },
   {
     id: "audit",
@@ -108,12 +102,16 @@ function AppSkeleton() {
 
 export default function GovernanceApp({
   initialSnapshot,
+  initialView,
 }: {
   initialSnapshot: GovernanceSnapshot;
+  initialView?: string;
 }) {
   const [mounted, setMounted] = useState(false);
   const [snapshot, setSnapshot] = useState(initialSnapshot);
-  const [view, setView] = useState<ViewId>("company");
+  const [view, setView] = useState<ViewId>(() =>
+    views.some((item) => item.id === initialView) ? (initialView as ViewId) : "company"
+  );
   const [period, setPeriod] = useState(() => firstPeriod(initialSnapshot));
   const [busy, setBusy] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -159,12 +157,25 @@ export default function GovernanceApp({
           <Toolbar sx={{ gap: 2, alignItems: "center" }}>
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Typography variant="h1" component="div">
-                acme governance
+                acme governance · console técnico
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                App operacional v2 · TypeScript strict · audiencia: {selected.audience}
+                Área avançada (grafo, comandos, resolver, event-log) · audiencia:{" "}
+                {selected.audience}
               </Typography>
             </Box>
+            <Button
+              component={Link}
+              href="/"
+              size="small"
+              color="inherit"
+              startIcon={<HomeIcon fontSize="small" />}
+            >
+              Home
+            </Button>
+            <Button component={Link} href="/configuracoes" size="small" color="inherit">
+              Configurações
+            </Button>
             <Tooltip title="Recarrega a projecao derivada do file-first">
               <span>
                 <Button
@@ -244,9 +255,6 @@ export default function GovernanceApp({
             </Box>
             <Box sx={{ display: view === "ops" ? "block" : "none" }}>
               <OpsWorkspace snapshot={snapshot} />
-            </Box>
-            <Box sx={{ display: view === "settings" ? "block" : "none" }}>
-              <IntegrationSettings snapshot={snapshot} />
             </Box>
             <Box sx={{ display: view === "audit" ? "block" : "none" }}>
               <AuditConsole snapshot={snapshot} />
