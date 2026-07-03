@@ -267,11 +267,15 @@ decision-points: # G7 + F4 — gates NOMEADOS com requisitos VERIFICÁVEIS; todo
 physical:
   host-root: "acme-governance/ # host central da org simulada; representa o repo de governança"
   repos-root: "repos/<repo>/ # repos de produto já existentes/adotados, cada um com seu sidecar"
-  candidata: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml"
+  intake-proposals: "acme-governance/intake/proposals.yml # proposal/register pré-intent; substitui o layout v2 registers/candidates na sim v3"
+  intake-triage: "acme-governance/intake/triage/<proposal-id>.yml # triagem por proposta/candidata antes do gate"
   ativada: "acme-governance/intents/<id>.yml"
-  verdict: "acme-governance/decisions/verdicts.yml # decision-point accept-verdict append-only"
+  decisions: "acme-governance/decisions/verdicts.yml # decision-point accept-verdict append-only; criado por comando quando houver verdict físico"
+  events: "acme-governance/events/events.jsonl # event-log append-only do runtime file-first; obrigatório quando a mutação passa por comando"
   incidente: "acme-governance/incidents/incidents.yml # instrumento reativo central; gera follow-ups"
-  por-repo: "repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml,backend.yml}"
+  por-repo: "repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml}"
+  por-repo-futuro: "repos/<repo>/.governance/backend.yml # modelado para adapters futuros; sem executor v3 e não aceito como evidência"
+  historico-v2: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml pertence ao fluxo v2; não criar estrutura paralela na v3"
   publications:
     context-json: "repo publica capabilities/contratos/consumos derivados do manifest + package + código; host falha se divergir do inventário central"
     repo-work-ack: "repo publica .governance/works/<intent>--<work>.yml com hash do breakdown central + touchpoint de código + lifecycle (acknowledged/active/blocked/done/dropped); host falha em repo-work-stale/missing e outcome-work-open/dropped"

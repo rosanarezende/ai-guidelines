@@ -464,9 +464,9 @@ Antes de considerar o app robusto, a suíte deve provar que:
 2. **Primeiro backend transacional:** provar primeiro `file + event-log/lock`. SQLite vem depois como adapter local, não como atalho para resolver consistência.
 3. **Neo4j:** read-model derivado por padrão. Pode consultar impacto/grafo/dashboard; comando governado relê YAML/event-log autoritativo antes de agir.
 4. **Authoring:** começa no app web React/Next + Material UI. CLI/TUI fica como suporte operacional e automação.
-5. **Perfil compact:** bloqueia hard mutações de confiança, segurança e contabilidade; o resto segue com warning append-only.
+5. **Perfil compact:** detecta mutações dangerous, registra justificativa append-only e exige revisão retroativa em cadência; hard-block só entra por decisão futura explícita.
 6. **Capability extraction:** é assistência de adoção/manutenção de manifesto. Análise estática profunda entra por adapter/plugin externo.
-7. **Integrações externas:** opcionais, versionadas em [`integration-catalog.yml`](integration-catalog.yml), sempre como evidência/importação/projeção. Não substituem SSOT file-first.
+7. **Integrações externas:** opcionais, versionadas em [`integration-catalog.yml`](integration-catalog.yml), sempre como evidência/importação/projeção. Não substituem SSOT file-first; assistentes locais/cloud e canais de coding agent são plugáveis, enquanto gateways agentivos amplos ficam adiados até delegação/sandbox/auditoria.
 
 ### Perguntas remanescentes
 

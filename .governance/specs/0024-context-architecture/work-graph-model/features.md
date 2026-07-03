@@ -67,8 +67,8 @@ físico, mas não apaga os aprendizados da v2.
    - Nenhuma tela edita YAML direto; toda escrita passa por comando/envelope/dry-run.
 
 5. **Perfil compact e dangerous mutations**
-   - Decisão: compact bloqueia hard mutações de confiança, segurança e contabilidade.
-   - O resto segue com warning append-only, visível em dashboard/auditoria.
+   - Decisão: compact detecta mutações dangerous, registra justificativa append-only e exige revisão retroativa em cadência.
+   - Não bloqueia por padrão; hard-block no compact só entra por decisão futura explícita, com lista curta e fallback/break-glass.
 
 6. **Capability extraction**
    - Decisão: fica dentro do framework como assistência de adoção/manutenção de manifestos.
@@ -194,10 +194,16 @@ Primeiras famílias candidatas:
 
 - API/contract schemas: OpenAPI, GraphQL, protobuf, AsyncAPI;
 - CI/test reports: GitHub Actions, GitLab CI, Jenkins, JUnit, coverage;
+- deploy/release evidence: Argo Rollouts, Argo CD, Flux, GitHub Deployments;
 - observability/metrics: OpenTelemetry, Prometheus, Grafana, Datadog;
+- FinOps/custo: cloud billing export, AWS Cost Explorer, Azure Cost Management, GCP Billing;
 - code quality/security: SonarQube, Semgrep, CodeQL, OSV, Dependency-Track;
 - repo ownership/catalog: CODEOWNERS, GitHub teams, Backstage;
-- backlog import: Jira, Linear, Azure DevOps.
+- backlog import: Jira, Linear, Azure DevOps;
+- assistant runtime: Ollama, LM Studio, LocalAI, vLLM e endpoints OpenAI-compatible;
+- knowledge assistant: Onyx/Open WebUI/AnythingLLM/Dify/Khoj como busca/contexto, não autoridade;
+- coding-agent channel: OpenCode, Claude Code, Codex CLI, Aider como canal optativo;
+- agent gateway: classe adiada/risk-gated; só depois de delegação formal, sandbox, secrets isolation e auditoria.
 
 ### R9 · SQLite/Neo4j/Mongo transacionais
 
@@ -225,7 +231,7 @@ Direção:
 | Read-models                              | 🚧 graph read-model v3 existe; snapshots multi-backend existem             | persistência operacional depois do file backend.                                     |
 | App de autoria                           | 🚧 app Next/MUI existe com comandos principais; autoria completa ainda não | R7.                                                                                  |
 | Scaffold de repo novo                    | 🚧 foco atual é adoção de repos existentes                                 | manter separado de create-new-repo.                                                  |
-| `backend.yml` por repo                   | ⬜ modelado no layout, sem executor                                        | não aceitar como evidência até existir adapter real.                                 |
+| `backend.yml` por repo                   | ⬜ modelado como futuro (`physical.por-repo-futuro`), sem executor         | não aceitar como evidência até existir adapter real.                                 |
 | Templates v2                             | 🧊 arquivados em `_archive/templates-v2`                                   | usar `_org-simulation-v3/_templates` como fonte ativa.                               |
 | q/r/d físico por work/repo               | ⬜ não migrado fisicamente                                                 | reintroduzir só quando houver comando/resolver, sem vazar histórico privado de repo. |
 | Visualização                             | ✅ owner/company static apps + app Next/MUI                                | static apps são projeções; Next/MUI é superfície operacional em incubação.           |
@@ -237,7 +243,7 @@ Direção:
 1. Qual é o primeiro escopo de lock do file backend transacional: por arquivo, por nó, por aggregate ou por comando?
 2. Qual segunda intent deve publicar outcome real para provar generalidade?
 3. Qual caso operacional sem intent deve ser o primeiro: incidente, dep-bump ou bug standalone?
-4. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade ou ownership?
+4. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
 5. Quando o app incubado deixa de ser sim e vira pacote do framework?
 
 ---

@@ -29,6 +29,18 @@ adapter-kinds:
   assistant-provider:
     purpose: "gera sugestoes assistivas com score, unknown, evidence e policy"
     may-write-authoritative-state: false
+  assistant-runtime:
+    purpose: "executa modelos locais/cloud por politica de egress para matcher, resumo e extraction assistiva"
+    may-write-authoritative-state: false
+  knowledge-assistant:
+    purpose: "indexa e busca conhecimento existente para anexos, contexto e sinais de stale-doc"
+    may-write-authoritative-state: false
+  coding-agent-channel:
+    purpose: "canal opcional para agentes/CLIs de codigo proporem patches ou revisoes"
+    may-write-authoritative-state: false
+  agent-gateway:
+    purpose: "gateway agentivo amplo; classe adiada/risk-gated por ampliar superficie de autoridade e egress"
+    may-write-authoritative-state: false
 
 common-contract:
   required-fields:
@@ -125,6 +137,16 @@ integrations:
     authority: "relatorio faltante/stale bloqueia evidence, nao edita work"
     priority: P0
 
+  - id: deploy-release-evidence
+    category: execution-evidence
+    systems: [argo-rollouts, argo-cd, flux, github-deployments, gitlab-environments, spinnaker]
+    adapter-kind: evidence-provider
+    feeds: [release-rollout, canary-state, rollback-evidence, deploy-revision, guardrail-status]
+    framework-works-without-it: true
+    value-add: "prova rollout, canary e rollback com revisao observada em vez de texto no gate"
+    authority: "deploy observado alimenta decision-point; release-rollout continua governado pelo framework"
+    priority: P1
+
   - id: code-quality
     category: quality-security
     systems: [sonarqube, sonarcloud, semgrep, eslint, biome]
@@ -164,6 +186,16 @@ integrations:
     value-add: "fecha outcome/actual com fonte e revisao verificaveis"
     authority: "valor so soma se metric-definition, janela, unidade, aggregation e attester resolverem"
     priority: P0
+
+  - id: finops-cost
+    category: metrics-outcomes
+    systems: [cloud-billing-export, aws-cost-explorer, azure-cost-management, gcp-billing, kubecost]
+    adapter-kind: metric-provider
+    feeds: [cost-to-serve, ticket-cost, budget-burn, allocation-actual, operational-target]
+    framework-works-without-it: true
+    value-add: "fecha metas de custo e budgets com fonte financeira observada, sem planilha autodeclarada"
+    authority: "custo observado so vira actual se metric-definition, janela, unidade e attester resolverem"
+    priority: P1
 
   - id: product-analytics
     category: metrics-outcomes
@@ -234,6 +266,48 @@ integrations:
     value-add: "aproveita docs existentes sem colar conteudo sensivel no YAML"
     authority: "documento externo e anexo/evidencia, nao decision append-only"
     priority: P2
+
+  - id: assistant-runtime-local-cloud
+    category: ai-assistance
+    systems:
+      [ollama, lm-studio, localai, llama-cpp-server, vllm, openai-compatible, anthropic-compatible]
+    adapter-kind: assistant-runtime
+    feeds: [matcher-suggestion, capability-extraction, summary-draft, triage-question-candidate]
+    framework-works-without-it: true
+    value-add: "permite que a organizacao escolha assistente local/cloud por politica de classificacao e egress"
+    authority: "gera sugestao com score/unknown/evidence/policy; humano confirma e resolver valida refs"
+    priority: P0
+
+  - id: knowledge-assistant
+    category: ai-assistance
+    systems: [onyx, open-webui, anythingllm, dify, khoj]
+    adapter-kind: knowledge-assistant
+    feeds:
+      [attachment-ref, context-candidate, stale-doc-warning, decision-support, classification-risk]
+    framework-works-without-it: true
+    value-add: "aproveita busca/RAG corporativo para contexto sem copiar conteudo sensivel para YAML"
+    authority: "resultado e candidato/anexo; nao define target, gate, verdict nem actual"
+    priority: P1
+
+  - id: coding-agent-channel
+    category: ai-assistance
+    systems: [opencode, claude-code, codex-cli, aider]
+    adapter-kind: coding-agent-channel
+    feeds: [patch-plan, implementation-suggestion, review-evidence, work-log]
+    framework-works-without-it: true
+    value-add: "acomoda times que preferem terminal/agent CLI sem tornar o agente autoridade do grafo"
+    authority: "patch/review entram como proposta ou evidencia; mutacao governada exige comando, authority e base-revision"
+    priority: P1
+
+  - id: agent-gateway-deferred
+    category: ai-assistance
+    systems: [openclaw]
+    adapter-kind: agent-gateway
+    feeds: [delegated-task-candidate, agent-activity-log]
+    framework-works-without-it: true
+    value-add: "registrar classe de risco sem habilitar cedo demais gateways agentivos amplos"
+    authority: "ADIADO: nao habilitar ate existir delegacao formal, sandbox, secrets isolation, TTL, max-mutations, human approval e auditoria"
+    priority: deferred
 
   - id: graph-export
     category: read-model
