@@ -14,6 +14,8 @@ const root = path.join(here, "..");
 const appDir = path.join(root, "_apps", "governance-next");
 const repoRoot = path.resolve(root, "../../../../..");
 const integrationCatalogFile = path.join(root, "..", "integration-catalog.yml");
+const appPackageFile = path.join(appDir, "package.json");
+const rootPackageFile = path.join(repoRoot, "package.json");
 
 function fail(message) {
   console.error(`✗ governance app — ${message}`);
@@ -37,7 +39,55 @@ function readRelativeFiles() {
   });
 }
 
+function packageName(specifier) {
+  if (
+    specifier.startsWith(".") ||
+    specifier.startsWith("/") ||
+    specifier.startsWith("node:") ||
+    specifier.startsWith("@/")
+  ) {
+    return null;
+  }
+  const parts = specifier.split("/");
+  if (specifier.startsWith("@")) return `${parts[0]}/${parts[1]}`;
+  return parts[0];
+}
+
+function importedPackages(files) {
+  const packages = new Set();
+  const importRegex =
+    /(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?["']([^"']+)["']|import\(["']([^"']+)["']\)/g;
+  for (const file of files.filter((item) => /\.(ts|tsx)$/.test(item))) {
+    const text = fs.readFileSync(file, "utf8");
+    for (const match of text.matchAll(importRegex)) {
+      const name = packageName(match[1] || match[2] || "");
+      if (name) packages.add(name);
+    }
+  }
+  return [...packages].sort();
+}
+
+function assertWorkspaceDependencyContract(files) {
+  const rootPackage = JSON.parse(fs.readFileSync(rootPackageFile, "utf8"));
+  const appPackage = JSON.parse(fs.readFileSync(appPackageFile, "utf8"));
+  const appWorkspacePath = path.relative(repoRoot, appDir).replaceAll("\\", "/");
+  if (!rootPackage.workspaces?.includes(appWorkspacePath)) {
+    fail(`governance-next nao esta declarado como npm workspace: ${appWorkspacePath}`);
+  }
+
+  const declared = new Set([
+    ...Object.keys(appPackage.dependencies || {}),
+    ...Object.keys(appPackage.devDependencies || {}),
+    ...Object.keys(appPackage.peerDependencies || {}),
+  ]);
+  const missing = importedPackages(files).filter((name) => !declared.has(name));
+  if (missing.length > 0) {
+    fail(`imports sem dependencia declarada no app package.json: ${missing.join(", ")}`);
+  }
+}
+
 const sourceFiles = readRelativeFiles();
+assertWorkspaceDependencyContract(sourceFiles);
 if (sourceFiles.some((file) => /\.(js|jsx|mjs)$/.test(file))) {
   fail("app v2 ainda contem arquivo JS/JSX/MJS");
 }

@@ -473,7 +473,9 @@ Antes de considerar o app robusto, a suíte deve provar que:
 
 1. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
 2. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
-3. Qual primeira tela write-capable do app deve sair do modo demo para fluxo de trabalho real?
+3. A arquitetura/frontend planejada neste documento está adequada para usuários humanos não técnicos,
+   ou a navegação atual ficou excessivamente orientada a agentes/auditores?
+4. Qual primeira tela write-capable do app deve sair do modo demo para fluxo de trabalho real?
 
 ## 15. Estado da decisão Opção A
 
@@ -492,7 +494,8 @@ de iniciar UI/API nova.
   Neo4j e contrato de ação; `load-neo4j-example.mjs --dry-run` prova o plano de carga sem rede e
   `--apply` exige `--source-hash` + credenciais explícitas.
 - **Estado complementar 3:** `_apps/governance-next/` implementa a superfície operacional React/Next +
-  Material UI v2 em TypeScript strict. O app lê snapshot derivado da runtime, separa navegação por
+  Material UI v2 em TypeScript strict, como npm workspace com dependências explícitas no package do app.
+  O app lê snapshot derivado da runtime, separa navegação por
   audiência (stakeholder, owner, tech lead, operação, admin de adoção, auditoria, admin), expõe tabs ponta-a-ponta e
   chama API routes para `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`,
   `repo-work.ack`, `standalone.complete`, `contract.propose-revision`, `outcome.publish`,
@@ -502,6 +505,10 @@ de iniciar UI/API nova.
   assistente local/cloud (com Ollama como primeira opção local) e tags `em breve` para adapters sem
   mecanismo. Ainda é UX/projeção: persistência futura precisa entrar como comando governado com
   resolver de authority, billing role, egress/classification e policy revision.
+- **Estado complementar 3c:** antes de ampliar authoring ou persistir configurações, a próxima fatia
+  deve revisar este próprio `app-requirements.md` contra o app real. A interface atual ainda serve
+  melhor a agentes/auditores do que a usuários humanos que estão adotando o framework; isso precisa
+  virar requisito de produto antes de virar mais código.
 - **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
   `base-revision`, authority resolvida, idempotency, nonce, lock global por comando, escrita YAML
   atômica, marker de recovery e event-log append-only. `currentRevision()` inclui triages e
