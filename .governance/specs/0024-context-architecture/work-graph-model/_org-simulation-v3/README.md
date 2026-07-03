@@ -35,6 +35,7 @@ node _tools/publish-repo-contracts.mjs # publica registry/contracts nos owner re
 node _tools/check-repo-contracts.mjs # falha se contracts.yml e registry local divergirem
 node _tools/check-local-repo-tests.mjs # roda os testes locais dos repos criticos
 node _tools/check-runtime.mjs # prova _lib runtime: file adapter + dominio + read-model + command dry-run
+node _tools/check-governance-app.mjs # prova app Next/MUI: snapshot runtime + next build
 node _tools/export-backend-examples.mjs # gera exemplos file/sqlite/neo4j/mongo a partir do read-model
 node _tools/export-backend-examples.mjs --check # confere freshness dos exemplos de banco
 node _tools/check-backend-examples.mjs # smoke operacional: file read-model + Neo4j Cypher + contrato de ação
@@ -42,7 +43,10 @@ node _tools/load-neo4j-example.mjs --dry-run # valida plano executável de carga
 node _tools/adoption-journey.mjs # dogfood completo da adoção repo-existente → host agregado
 node _tools/build-graph.mjs     # regenera _apps/graph.js (grafo + issues embutidos)
 node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada DEVE ser pega
-# abrir _apps/owner/index.html e _apps/company/index.html no navegador
+# apps estáticos: abrir _apps/owner/index.html e _apps/company/index.html no navegador
+# app operacional Next/MUI:
+npm --prefix _apps/governance-next run dev
+# abrir http://127.0.0.1:3024
 ```
 
 ## O loop de iteração (o ponto da v3)
@@ -72,7 +76,8 @@ node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada D
 ## Decisões de desenho
 
 - **File-first, com fronteira física explícita:** `acme-governance/` é o host central da org; `repos/` representa os repos já existentes da empresa; cada repo tem sidecar próprio (`repos/<repo>/.governance/manifest.yml` → `context.json`). O `repos.yml` central é inventário; a publicação por repo impede que ele vire a única fonte de verdade.
-- **Escopo honesto da v3:** esta sim agora porta a base `_lib` DDD (`domain`, `adapters/file`, command dry-run e read-model de grafo), exemplos verificáveis de backends derivados em `_examples/backends/` (`file`, `neo4j`, `sqlite`, `mongo`) e smoke operacional para `file + Neo4j`. Ainda não porta adapters transacionais sqlite/neo4j/mongo nem app de autoria da v2. A v3 prova dogfood repo-first, runtime file-first, projeções multi-backend, loader Neo4j dry-run e resolvers fail-closed; a portabilidade de backend transacional fica como próxima camada, registrada em `features.md`.
+- **Escopo honesto da v3:** esta sim agora porta a base `_lib` DDD (`domain`, `adapters/file`, command dry-run/execute mínimo e read-model de grafo), exemplos verificáveis de backends derivados em `_examples/backends/` (`file`, `neo4j`, `sqlite`, `mongo`) e smoke operacional para `file + Neo4j`. Ainda não porta adapters transacionais sqlite/neo4j/mongo write-capable nem a autoria completa da v2. A v3 prova dogfood repo-first, runtime file-first, app operacional Next/MUI, projeções multi-backend, loader Neo4j dry-run e resolvers fail-closed; a portabilidade de backend transacional fica como próxima camada, registrada em `features.md`.
+- **App operacional Next/MUI:** `_apps/governance-next/` é a primeira superfície de produto do app-requirements. Ele lê a runtime v3 server-side, mostra planning/intake/execução/contratos/outcomes/repos/operação e envia comandos governados para dry-run/execute. Nesta fatia, os comandos mutáveis mecanizados são `proposal.create` e `outcome.publish`; qualquer expansão de authoring precisa entrar como comando com resolver, não como edição direta de YAML pela UI.
 - **Read-model não age sozinho:** `_examples/backends/ACTION-CONTRACT.md` declara que toda ação governada relê YAML/event-log autoritativo e falha fechado se o hash/base-revision divergir. O loader Neo4j só aplica com `--apply --source-hash <hash>` e credenciais explícitas; por padrão roda em dry-run.
 - **Standalone é repo-local:** fixes/dep-bumps avulsos moram em `repos/<repo>/.governance/works/*.yml` com `schema: acme.standalone-work/v1`. O host só agrega. Incidente é instrumento central em `acme-governance/incidents/incidents.yml` e gera follow-ups para standalone/proposal.
 - **Adoção por empresa existente:** `_tools/adopt-existing-repos.mjs` faz scaffold minimo e gera `capability-candidates.yml` como rascunho revisavel. `_tools/prepare-capability-review.mjs` monta um pacote de revisão por repo com evidência estática para IA/humano. A extração por IA fica como canal assistivo (template em `_templates/capability-extraction-prompt.md`), nunca como mutação silenciosa do manifesto.

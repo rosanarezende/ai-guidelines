@@ -481,5 +481,13 @@ de iniciar UI/API nova.
 - **Estado complementar 2:** `check-backend-examples.mjs` valida hash, refs, event-log, cobertura
   Neo4j e contrato de ação; `load-neo4j-example.mjs --dry-run` prova o plano de carga sem rede e
   `--apply` exige `--source-hash` + credenciais explícitas.
-- **Próxima decisão:** implementar escrita real por comandos/event-log e escolher o primeiro backend
-  transacional (`file` com lock/event-log ou SQLite) sem transformar banco/read-model em SSOT.
+- **Estado complementar 3:** `_apps/governance-next/` implementa a primeira superfície React/Next +
+  Material UI. O app lê snapshot derivado da runtime, expõe tabs ponta-a-ponta e chama API routes
+  para `proposal.create` e `outcome.publish` com dry-run/execute.
+- **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
+  `base-revision`, authority resolvida, idempotency, nonce, escrita YAML autoritativa e event-log
+  append-only. Ainda não há authoring completo de triage/gate/intent/breakdown nem backend
+  transacional SQLite/Neo4j/Mongo.
+- **Próxima decisão:** escolher o primeiro backend transacional (`file` com lock/event-log ou
+  SQLite) e expandir o command pipeline para triage/gate/breakdown sem transformar
+  banco/read-model em SSOT.

@@ -79,6 +79,11 @@ const steps = [
     command: "node",
     args: ["_tools/load-neo4j-example.mjs", "--dry-run"],
   },
+  {
+    name: "13. app Next/MUI carrega runtime e builda",
+    command: "node",
+    args: ["_tools/check-governance-app.mjs"],
+  },
 ];
 
 for (const step of steps) {

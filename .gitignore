@@ -23,6 +23,9 @@ checks_ai_guidelines.txt
 # Build output do tsc (declarado em tsconfig.json `outDir`)
 dist/
 
+# Build output do Next.js usado nas simulações governadas
+.next/
+
 # Artefatos gerados para o simulador real do site (WebContainer)
 site/public/packages/
 site/public/real-cli-package.json

@@ -1,7 +1,8 @@
 // commands.mjs — pipeline fail-closed de comandos da runtime v3.
 import { validateOrg } from "./org-domain.mjs";
 
-const COMMAND_TYPES = new Map([
+export const COMMAND_TYPES = new Map([
+  ["proposal.create", { mutates: true, payloadKey: "proposal" }],
   ["read-model.rebuild", { mutates: false }],
   ["outcome.publish", { mutates: true, payloadKey: "outcome" }],
 ]);
@@ -19,7 +20,8 @@ function issue(rule, node, msg) {
   return { level: "error", rule, node, msg };
 }
 
-export function validateGovernedCommand(command, org, { history = [] } = {}) {
+export function validateGovernedCommand(command, org, options = {}) {
+  const { currentRevision, history = [] } = options;
   const issues = [];
   const node = command?.id || command?.type || "command";
   if (!command || typeof command !== "object") {
@@ -36,6 +38,15 @@ export function validateGovernedCommand(command, org, { history = [] } = {}) {
   const envelope = command.envelope || {};
   for (const field of requiredEnvelope) {
     if (!envelope[field]) issues.push(issue("command-envelope", node, `envelope sem "${field}"`));
+  }
+  if (currentRevision && envelope["base-revision"] !== currentRevision) {
+    issues.push(
+      issue(
+        "command-stale",
+        node,
+        `base-revision "${envelope["base-revision"]}" diverge da revisão atual "${currentRevision}"`
+      )
+    );
   }
 
   const authorities = new Map(
@@ -89,12 +100,34 @@ export function validateGovernedCommand(command, org, { history = [] } = {}) {
     issues.push(issue("command-payload", node, `payload sem "${spec.payloadKey}"`));
   }
 
+  if (command.type === "proposal.create" && command.payload?.proposal) {
+    if ((org.proposals || []).some((proposal) => proposal.id === command.payload.proposal.id)) {
+      issues.push(
+        issue("command-duplicate", node, `proposal "${command.payload.proposal.id}" já existe`)
+      );
+    } else {
+      const candidate = structuredClone(org);
+      candidate.proposals = [...(candidate.proposals || []), command.payload.proposal];
+      for (const domainIssue of validateOrg(candidate)) {
+        if (domainIssue.level === "error" && domainIssue.node === command.payload.proposal.id) {
+          issues.push(domainIssue);
+        }
+      }
+    }
+  }
+
   if (command.type === "outcome.publish" && command.payload?.outcome) {
-    const candidate = structuredClone(org);
-    candidate.outcomes = [...(candidate.outcomes || []), command.payload.outcome];
-    for (const domainIssue of validateOrg(candidate)) {
-      if (domainIssue.level === "error" && domainIssue.node === command.payload.outcome.id) {
-        issues.push(domainIssue);
+    if ((org.outcomes || []).some((outcome) => outcome.id === command.payload.outcome.id)) {
+      issues.push(
+        issue("command-duplicate", node, `outcome "${command.payload.outcome.id}" já existe`)
+      );
+    } else {
+      const candidate = structuredClone(org);
+      candidate.outcomes = [...(candidate.outcomes || []), command.payload.outcome];
+      for (const domainIssue of validateOrg(candidate)) {
+        if (domainIssue.level === "error" && domainIssue.node === command.payload.outcome.id) {
+          issues.push(domainIssue);
+        }
       }
     }
   }

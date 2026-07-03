@@ -1,6 +1,11 @@
 // check-runtime.mjs — prova que a runtime DDD v3 existe fora dos scripts de CLI.
 // Uso: node _tools/check-runtime.mjs
+import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { parse } from "yaml";
 import { buildGraphReadModel, openFileGovernanceRuntime } from "../_lib/index.mjs";
+import { GOVERNANCE_ROOT, REPOS_ROOT } from "../_lib/paths.mjs";
 import { loadPublishedRepoContracts } from "./repo-contracts.mjs";
 import { loadPublishedContexts } from "./repo-contexts.mjs";
 import { loadPublishedRepoWorks } from "./repo-works.mjs";
@@ -73,6 +78,71 @@ const noEnvelope = runtime.dryRunGovernedCommand({
 });
 if (noEnvelope.ok || !noEnvelope.issues.some((issue) => issue.rule === "command-envelope")) {
   fail("comando sem envelope não foi bloqueado");
+}
+
+const tmp = mkdtempSync(path.join(os.tmpdir(), "acme-runtime-"));
+try {
+  const governanceRoot = path.join(tmp, "acme-governance");
+  cpSync(GOVERNANCE_ROOT, governanceRoot, { recursive: true });
+  const writeRuntime = openFileGovernanceRuntime({ governanceRoot, reposRoot: REPOS_ROOT });
+  const revision = writeRuntime.currentRevision();
+  const proposalCommand = {
+    id: "cmd-check-runtime-proposal",
+    type: "proposal.create",
+    envelope: {
+      actor: "tool:check-runtime",
+      authority: "pm-growth",
+      "base-revision": revision,
+      "idempotency-key": "cmd-check-runtime-proposal",
+      "issued-at": "2027-04-04",
+      nonce: "nonce-cmd-check-runtime-proposal",
+    },
+    payload: {
+      proposal: {
+        id: "prop-check-runtime",
+        title: "proposal criada pelo check-runtime",
+        "raised-by": "incident:incidente-checkout",
+        "authorized-by": "obj-revenue",
+        target: "tgt-billing-conv",
+        status: "proposed",
+        note: "prova command execute em cópia temporária",
+      },
+    },
+  };
+  const executed = writeRuntime.executeGovernedCommand(proposalCommand);
+  if (!executed.ok)
+    fail(`comando executável rejeitado: ${executed.issues.map((i) => i.rule).join(", ")}`);
+  const proposals = parse(
+    readFileSync(path.join(governanceRoot, "intake", "proposals.yml"), "utf8")
+  ).proposals;
+  if (!proposals.some((proposal) => proposal.id === "prop-check-runtime")) {
+    fail("proposal.create não gravou proposals.yml na cópia temporária");
+  }
+  const eventLog = readFileSync(path.join(governanceRoot, "events", "events.jsonl"), "utf8");
+  if (!eventLog.includes("cmd-check-runtime-proposal")) {
+    fail("proposal.create não registrou event-log append-only");
+  }
+  const stale = writeRuntime.executeGovernedCommand({
+    ...proposalCommand,
+    id: "cmd-check-runtime-stale",
+    envelope: {
+      ...proposalCommand.envelope,
+      "idempotency-key": "cmd-check-runtime-stale",
+      nonce: "nonce-cmd-check-runtime-stale",
+      "base-revision": "stale-revision",
+    },
+    payload: {
+      proposal: {
+        ...proposalCommand.payload.proposal,
+        id: "prop-check-runtime-stale",
+      },
+    },
+  });
+  if (stale.ok || !stale.issues.some((issue) => issue.rule === "command-stale")) {
+    fail("execute não falhou fechado com base-revision stale");
+  }
+} finally {
+  rmSync(tmp, { recursive: true, force: true });
 }
 
 console.log(
