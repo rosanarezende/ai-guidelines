@@ -14,6 +14,8 @@ const GLOBAL_REF_KINDS = [
   "target",
   "team",
   "thesis",
+  "verdict",
+  "outcome",
 ];
 
 function findGlobalRef(value) {
@@ -145,10 +147,25 @@ export function buildGraphReadModel({
     E(x.id, x["attested-by"], "attested-by");
     if (x.envelope?.authority) E(x.envelope.authority, x.id, "authorizes-mutation");
   }
+  for (const x of org.verdicts || []) {
+    N(x.id, "verdict", `${x.verdict}: ${x.intent}`, x);
+    E(x.intent, x.id, "has-verdict");
+    E(x.outcome, x.id, "supports-verdict");
+    E(x["decided-by"], x.id, "accepts-verdict");
+    if (x["break-glass-ref"]) E(x["break-glass-ref"], x.id, "permits-override");
+    if (x.supersedes) E(x.id, x.supersedes, "supersedes");
+  }
   for (const x of org.policy?.["access-requests"] || []) {
     N(x.id, "access-request", `${x.action}: ${x.repo}`, x);
     E(x.actor, x.id, "requests");
     E(x.id, x.repo, x.decision === "allow" ? "allowed-read" : "denied-read");
+  }
+  for (const x of org.policy?.["break-glass"] || []) {
+    N(x.id, "break-glass", `${x.mutation}: ${x.subject}`, x);
+    E(x["requested-by"], x.id, "requests-break-glass");
+    E(x["approved-by"], x.id, "approves-break-glass");
+    const subject = findGlobalRef(x.subject);
+    if (subject) E(x.id, subject.id, "temporarily-permits");
   }
   for (const it of org.intents) {
     N(it.id, "intent", it.title, { ...it, derived: deriveIntent(it, org) });

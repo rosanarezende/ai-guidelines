@@ -484,12 +484,12 @@ de iniciar UI/API nova.
 - **Estado complementar 3:** `_apps/governance-next/` implementa a primeira superfície React/Next +
   Material UI. O app lê snapshot derivado da runtime, expõe tabs ponta-a-ponta e chama API routes
   para `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`,
-  `repo-work.ack`, `contract.propose-revision` e `outcome.publish` com dry-run/execute.
+  `repo-work.ack`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`,
+  `incident.declare` e `policy.break-glass` com dry-run/execute.
 - **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
   `base-revision`, authority resolvida, idempotency, nonce, escrita YAML autoritativa e event-log
   append-only. `currentRevision()` inclui triages e sidecars repo-local publicados, para que
-  repo-work/contract não virem mutações invisíveis ao stale-check. Ainda não há comandos de
-  verdict/incident/policy nem backend transacional SQLite/Neo4j/Mongo.
+  repo-work/contract não virem mutações invisíveis ao stale-check. Ainda não há backend
+  transacional SQLite/Neo4j/Mongo write-capable.
 - **Próxima decisão:** escolher o primeiro backend transacional (`file` com lock/event-log ou
-  SQLite) e expandir o command pipeline para verdict/incident/policy sem transformar banco/read-model
-  em SSOT.
+  SQLite) sem transformar banco/read-model em SSOT.

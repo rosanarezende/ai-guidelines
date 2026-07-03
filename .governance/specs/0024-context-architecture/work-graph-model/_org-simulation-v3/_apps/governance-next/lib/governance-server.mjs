@@ -66,6 +66,8 @@ function buildOperationalBucket(org) {
     standalone: sortById(org.standalone || []),
     proposals: sortById(org.proposals || []),
     triages: sortById(org.triages || []),
+    verdicts: sortById(org.verdicts || []),
+    breakGlass: sortById(org.policy?.["break-glass"] || []),
   };
 }
 
@@ -124,6 +126,8 @@ export async function loadGovernanceSnapshot() {
       outcomes: org.outcomes.length,
       incidents: (org.incidents || []).length,
       triages: (org.triages || []).length,
+      verdicts: (org.verdicts || []).length,
+      breakGlass: (org.policy?.["break-glass"] || []).length,
       graphNodes: graph.nodes.length,
       graphEdges: graph.edges.length,
       errors: errors.length,

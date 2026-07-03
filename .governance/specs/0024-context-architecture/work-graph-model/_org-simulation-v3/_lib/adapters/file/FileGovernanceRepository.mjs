@@ -168,8 +168,12 @@ export class FileGovernanceRepository {
         "access-requests": [],
         "authority-revocations": [],
         "secret-quarantine": [],
+        "break-glass": [],
       }),
       intents: this.loadIntents(),
+      verdicts: this.readOptionalGovernanceYaml("decisions/verdicts.yml", {
+        verdicts: [],
+      }).verdicts,
       standalone: this.loadRepoStandaloneWorks(),
       repoWorkClaims: this.loadRepoWorkClaims(),
       repoContracts: this.loadRepoContracts(),
@@ -198,6 +202,32 @@ export class FileGovernanceRepository {
   appendGovernanceList(relativePath, rootKey, item) {
     const file = path.join(this.governanceRoot, relativePath);
     const doc = parse(readFileSync(file, "utf8")) || {};
+    const items = Array.isArray(doc[rootKey]) ? doc[rootKey] : [];
+    if (items.some((existing) => existing.id === item.id)) {
+      throw new Error(`${rootKey} já contém id "${item.id}"`);
+    }
+    doc[rootKey] = [...items, item];
+    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+    return { path: relativePath, id: item.id };
+  }
+
+  appendOptionalGovernanceList(relativePath, rootKey, item) {
+    const file = path.join(this.governanceRoot, relativePath);
+    mkdirSync(path.dirname(file), { recursive: true });
+    const doc = existsSync(file) ? parse(readFileSync(file, "utf8")) || {} : {};
+    const items = Array.isArray(doc[rootKey]) ? doc[rootKey] : [];
+    if (items.some((existing) => existing.id === item.id)) {
+      throw new Error(`${rootKey} já contém id "${item.id}"`);
+    }
+    doc[rootKey] = [...items, item];
+    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+    return { path: relativePath, id: item.id };
+  }
+
+  appendPolicyList(rootKey, item) {
+    const relativePath = "trust-policy.yml";
+    const file = path.join(this.governanceRoot, relativePath);
+    const doc = existsSync(file) ? parse(readFileSync(file, "utf8")) || {} : {};
     const items = Array.isArray(doc[rootKey]) ? doc[rootKey] : [];
     if (items.some((existing) => existing.id === item.id)) {
       throw new Error(`${rootKey} já contém id "${item.id}"`);
@@ -315,6 +345,23 @@ export class FileGovernanceRepository {
   }
 
   applyCommand(command) {
+    if (command.type === "verdict.accept") {
+      return this.appendOptionalGovernanceList(
+        "decisions/verdicts.yml",
+        "verdicts",
+        command.payload.verdict
+      );
+    }
+    if (command.type === "incident.declare") {
+      return this.appendGovernanceList(
+        "incidents/incidents.yml",
+        "incidents",
+        command.payload.incident
+      );
+    }
+    if (command.type === "policy.break-glass") {
+      return this.appendPolicyList("break-glass", command.payload["break-glass"]);
+    }
     if (command.type === "triage.save") {
       return this.writeTriage(command.payload.triage);
     }

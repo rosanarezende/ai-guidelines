@@ -8,6 +8,10 @@ const PURPOSES = ["create", "sustain", "discover", "operate"];
 const LIFECYCLE = ["proposed", "active", "closed", "superseded", "dropped"];
 const STANDALONE_KINDS = ["fix", "dep-bump"];
 const INCIDENT_KINDS = ["incident-response"];
+const INCIDENT_STATUSES = ["declared", "mitigating", "resolved", "postmortem-complete"];
+const INCIDENT_SEVERITIES = ["baixa", "media", "alta", "critica"];
+const VERDICTS = ["won", "lost", "inconclusive"];
+const VERDICT_NEXT = ["graduation", "cleanup", "parked", "none"];
 const AGGREGATIONS = ["sum", "avg", "p99", "last"];
 const CONTRACT_DECISIONS = ["single-revision", "sequenced-windows", "split", "rejected", "pending"];
 const ROUTING_DECISIONS = ["followed", "overrode"];
@@ -15,6 +19,17 @@ const FOLLOWUP_KINDS = ["fix", "proposal"];
 const OPERATIONAL_METRICS = ["p99-latency", "incident-count", "cost-to-serve"];
 const ACCESS_ACTIONS = ["read-context", "matcher-query"];
 const ACCESS_DECISIONS = ["allow", "deny"];
+const BREAK_GLASS_MUTATIONS = [
+  "target-change",
+  "rollup-change",
+  "compat-window-change",
+  "verdict-override",
+  "break-glass",
+  "profile-change",
+  "metric-definition-change",
+  "aggregation-change",
+  "business-link-change",
+];
 const SECRET_PATTERNS = [
   /\bsk-[A-Za-z0-9_-]{8,}\b/,
   /\bghp_[A-Za-z0-9_]{8,}\b/,
@@ -111,9 +126,21 @@ const SCHEMAS = {
     enums: { kind: STANDALONE_KINDS },
   },
   incident: {
-    required: ["id", "kind", "repo", "origin", "severity", "mttr", "postmortem", "placar"],
-    optional: ["follow-ups"],
-    enums: { kind: INCIDENT_KINDS },
+    required: ["id", "kind", "repo", "origin", "severity", "placar"],
+    optional: [
+      "status",
+      "declared-by",
+      "detected-at",
+      "telemetry",
+      "mttr",
+      "postmortem",
+      "follow-ups",
+    ],
+    enums: { kind: INCIDENT_KINDS, status: INCIDENT_STATUSES, severity: INCIDENT_SEVERITIES },
+  },
+  "incident-telemetry": {
+    required: ["source", "event", "observed-at"],
+    optional: ["query", "snapshot"],
   },
   routing: {
     required: ["matcher", "query", "selected-repo", "decision", "decided-by", "suggestions"],
@@ -157,6 +184,21 @@ const SCHEMAS = {
     optional: [],
     enums: { aggregation: AGGREGATIONS },
   },
+  verdict: {
+    required: [
+      "id",
+      "intent",
+      "outcome",
+      "verdict",
+      "decided-by",
+      "decided-at",
+      "decision-rule",
+      "evidence",
+      "next",
+    ],
+    optional: ["override", "break-glass-ref", "supersedes", "reason"],
+    enums: { verdict: VERDICTS, next: VERDICT_NEXT },
+  },
   "profile-declaration": {
     required: ["scope", "profile", "eligibility", "approved-by", "ttl", "review-at"],
     optional: ["badge"],
@@ -183,6 +225,22 @@ const SCHEMAS = {
   "secret-quarantine": {
     required: ["hash", "reason", "approved-by"],
     optional: [],
+  },
+  "break-glass": {
+    required: [
+      "id",
+      "mutation",
+      "subject",
+      "reason",
+      "requested-by",
+      "approved-by",
+      "issued-at",
+      "expires-at",
+      "review-at",
+      "evidence",
+    ],
+    optional: [],
+    enums: { mutation: BREAK_GLASS_MUTATIONS },
   },
   "oracle-independence": {
     required: ["attack-by", "expected-by", "approved-by"],
@@ -268,9 +326,11 @@ function checkAllSchemas(o, issues) {
   }
   for (const x of o.incidents || []) {
     checkSchema("incident", x, x.id, issues);
+    if (x.telemetry) checkSchema("incident-telemetry", x.telemetry, `${x.id}::telemetry`, issues);
     for (const [k, f] of (x["follow-ups"] || []).entries())
       checkSchema("follow-up", f, `${x.id}::follow-ups[${k}]`, issues);
   }
+  for (const x of o.verdicts || []) checkSchema("verdict", x, x.id, issues);
   for (const x of o.authorities || []) checkSchema("authority", x, x.id, issues);
   for (const x of o.outcomes) {
     checkSchema("outcome", x, x.id, issues);
@@ -282,6 +342,8 @@ function checkAllSchemas(o, issues) {
     checkSchema("authority-revocation", x, `${x.authority || "revocation"}::revocation`, issues);
   for (const x of o.policy?.["secret-quarantine"] || [])
     checkSchema("secret-quarantine", x, `${x.hash || "secret"}::quarantine`, issues);
+  for (const x of o.policy?.["break-glass"] || [])
+    checkSchema("break-glass", x, x.id || "break-glass", issues);
   if (o.policy?.["oracle-independence"])
     checkSchema(
       "oracle-independence",
@@ -388,6 +450,8 @@ export function validateOrg(o) {
     intent: new Set(o.intents.map((x) => x.id)),
     standalone: new Set(o.standalone.map((x) => x.id)),
     incident: new Set((o.incidents || []).map((x) => x.id)),
+    outcome: new Set((o.outcomes || []).map((x) => x.id)),
+    verdict: new Set((o.verdicts || []).map((x) => x.id)),
   };
   const repoById = Object.fromEntries(o.repos.map((r) => [r.id, r]));
   const teamById = Object.fromEntries(o.teams.map((t) => [t.id, t]));
@@ -395,6 +459,7 @@ export function validateOrg(o) {
   const metricById = Object.fromEntries(o.metrics.map((m) => [m.id, m]));
   const intentById = Object.fromEntries(o.intents.map((i) => [i.id, i]));
   const proposalById = Object.fromEntries((o.proposals || []).map((p) => [p.id, p]));
+  const outcomeById = Object.fromEntries((o.outcomes || []).map((out) => [out.id, out]));
   const authById = Object.fromEntries((o.authorities || []).map((a) => [a.id, a]));
   const resolveGlobalRef = (ref, node, field) => {
     const [kind, id, ...rest] = String(ref || "").split(":");
@@ -409,6 +474,28 @@ export function validateOrg(o) {
       proposal: ids.proposal,
       intent: ids.intent,
       incident: ids.incident,
+    };
+    if (!registry[kind])
+      return err("refs", node, `${field} "${ref}" usa kind não suportado "${kind}"`);
+    if (!registry[kind].has(id)) return err("refs", node, `${field} "${ref}" não resolve`);
+  };
+  const resolvePolicySubjectRef = (ref, node, field) => {
+    const [kind, id, ...rest] = String(ref || "").split(":");
+    if (!kind || !id || rest.length)
+      return err("refs", node, `${field} "${ref}" deve usar GlobalRef simples kind:id`);
+    const registry = {
+      objective: ids.obj,
+      target: ids.target,
+      metric: ids.metric,
+      contract: ids.contract,
+      intent: ids.intent,
+      proposal: ids.proposal,
+      incident: ids.incident,
+      standalone: ids.standalone,
+      repo: ids.repo,
+      team: ids.team,
+      verdict: ids.verdict,
+      outcome: ids.outcome,
     };
     if (!registry[kind])
       return err("refs", node, `${field} "${ref}" usa kind não suportado "${kind}"`);
@@ -578,6 +665,33 @@ export function validateOrg(o) {
   const quarantinedSecrets = new Set((o.policy?.["secret-quarantine"] || []).map((x) => x.hash));
   for (const q of o.policy?.["secret-quarantine"] || [])
     resolveAuth(q["approved-by"], q.hash, "approved-by");
+  const breakGlassIds = new Set();
+  for (const bg of o.policy?.["break-glass"] || []) {
+    if (breakGlassIds.has(bg.id)) err("break-glass", bg.id, "break-glass id duplicado");
+    breakGlassIds.add(bg.id);
+    resolvePolicySubjectRef(bg.subject, bg.id, "subject");
+    resolveAuth(bg["requested-by"], bg.id, "requested-by");
+    resolveAuth(bg["approved-by"], bg.id, "approved-by");
+    if (bg["requested-by"] && bg["approved-by"] && bg["requested-by"] === bg["approved-by"])
+      err(
+        "break-glass-sod",
+        bg.id,
+        "requested-by e approved-by precisam ser autoridades distintas no perfil full"
+      );
+    const approver = authById[bg["approved-by"]];
+    if (approver && approver.kind !== "sponsor")
+      err(
+        "break-glass-authority",
+        bg.id,
+        `break-glass aprovado por "${bg["approved-by"]}" (${approver.kind}); perfil full exige sponsor`
+      );
+    if (bg["issued-at"] && bg["expires-at"] && String(bg["issued-at"]) >= String(bg["expires-at"]))
+      err("break-glass-window", bg.id, "expires-at precisa ser posterior a issued-at");
+    if (bg["issued-at"] && bg["review-at"] && String(bg["issued-at"]) > String(bg["review-at"]))
+      err("break-glass-window", bg.id, "review-at precisa ser em ou após issued-at");
+    if (!Array.isArray(bg.evidence) || bg.evidence.length === 0)
+      err("break-glass-evidence", bg.id, "break-glass exige evidence não-vazio");
+  }
   for (const finding of collectSecretFindings(o, ["org"])) {
     if (!quarantinedSecrets.has(finding.hash))
       err(
@@ -887,6 +1001,29 @@ export function validateOrg(o) {
   for (const incident of o.incidents || []) {
     if (!ids.repo.has(incident.repo))
       err("refs", incident.id, `repo "${incident.repo}" não existe`);
+    if (incident["declared-by"]) resolveAuth(incident["declared-by"], incident.id, "declared-by");
+    if (["declared", "mitigating"].includes(incident.status)) {
+      for (const field of ["declared-by", "detected-at", "telemetry"])
+        if (!incident[field])
+          err("incident-lifecycle", incident.id, `status ${incident.status} exige ${field}`);
+    }
+    if (incident.telemetry?.source && !ids.repo.has(incident.telemetry.source))
+      err(
+        "incident-telemetry",
+        incident.id,
+        `telemetry.source "${incident.telemetry.source}" não é repo publicado`
+      );
+    if (["resolved", "postmortem-complete"].includes(incident.status)) {
+      for (const field of ["mttr", "postmortem"])
+        if (!incident[field])
+          err("incident-lifecycle", incident.id, `status ${incident.status} exige ${field}`);
+    }
+    if (!incident.status && (!incident.mttr || !incident.postmortem))
+      err(
+        "incident-lifecycle",
+        incident.id,
+        "incidente sem status explícito precisa ter mttr + postmortem para representar legado resolvido"
+      );
     for (const f of incident["follow-ups"] || []) {
       resolveGlobalRef(f.ref, incident.id, "follow-up.ref");
       if (f.kind === "proposal" && !String(f.ref).startsWith("proposal:"))
@@ -912,8 +1049,73 @@ export function validateOrg(o) {
     { ids, targetById, metricById, intentById, repoById, authById },
     { err, warn }
   );
+  validateVerdicts(o, { ids, intentById, outcomeById, breakGlassIds, authById }, { issues, err });
 
   return issues;
+}
+
+function validateVerdicts(o, ix, { issues, err }) {
+  const verdictIds = new Set();
+  const latestByIntent = new Map();
+  for (const verdict of o.verdicts || []) {
+    if (verdictIds.has(verdict.id)) err("verdict", verdict.id, "verdict id duplicado");
+    verdictIds.add(verdict.id);
+    if (verdict.intent && !ix.ids.intent.has(verdict.intent))
+      err("refs", verdict.id, `intent "${verdict.intent}" não existe`);
+    if (verdict.outcome && !ix.ids.outcome.has(verdict.outcome))
+      err("refs", verdict.id, `outcome "${verdict.outcome}" não existe`);
+    const intent = ix.intentById[verdict.intent];
+    const outcome = ix.outcomeById[verdict.outcome];
+    if (intent && !(intent.next || []).some((next) => next.gate === "accept-verdict"))
+      err(
+        "verdict-gate",
+        verdict.id,
+        `intent "${intent.id}" não declara gate accept-verdict no próximo passo`
+      );
+    if (intent && outcome && outcome["emitted-by"] !== intent.id)
+      err(
+        "verdict-outcome",
+        verdict.id,
+        `outcome "${outcome.id}" emitted-by="${outcome["emitted-by"]}" não pertence à intent "${intent.id}"`
+      );
+    const outcomeErrors = issues.filter(
+      (issue) => issue.level === "error" && issue.node === verdict.outcome
+    );
+    if (outcome && outcomeErrors.length)
+      err(
+        "verdict-outcome",
+        verdict.id,
+        `outcome "${outcome.id}" tem erro(s) e não pode sustentar verdict`
+      );
+    if (verdict["decided-by"] && !ix.authById[verdict["decided-by"]])
+      err(
+        "refs-authority",
+        verdict.id,
+        `decided-by "${verdict["decided-by"]}" não resolve no registry`
+      );
+    if (!Array.isArray(verdict.evidence) || verdict.evidence.length === 0)
+      err("verdict-evidence", verdict.id, "verdict exige evidence não-vazio");
+    if (verdict.override === true) {
+      if (!verdict["break-glass-ref"])
+        err("verdict-override", verdict.id, "override exige break-glass-ref");
+      else if (!ix.breakGlassIds.has(verdict["break-glass-ref"]))
+        err(
+          "verdict-override",
+          verdict.id,
+          `break-glass-ref "${verdict["break-glass-ref"]}" não resolve`
+        );
+    }
+    if (verdict.supersedes && !verdictIds.has(verdict.supersedes))
+      err("verdict-supersedes", verdict.id, `supersedes "${verdict.supersedes}" não resolve`);
+    const previous = latestByIntent.get(verdict.intent);
+    if (previous && !verdict.supersedes)
+      err(
+        "verdict-duplicate",
+        verdict.id,
+        `intent "${verdict.intent}" já tem verdict "${previous}" — novo verdict precisa supersedes`
+      );
+    latestByIntent.set(verdict.intent, verdict.id);
+  }
 }
 
 // ═════════ RESOLVER DE OUTCOMES (bloco J da F5) — FAIL-CLOSED p/ somar, VISÍVEL p/ exibir ═════════

@@ -6,17 +6,35 @@ export const COMMAND_TYPES = new Map([
   ["breakdown.apply", { mutates: true, payloadKey: "breakdown" }],
   ["contract.propose-revision", { mutates: true, payloadKey: "proposal" }],
   ["gate.decide", { mutates: true, payloadKey: "gate" }],
+  ["incident.declare", { mutates: true, payloadKey: "incident" }],
   ["intent.activate", { mutates: true, payloadKey: "intent" }],
+  ["policy.break-glass", { mutates: true, payloadKey: "break-glass" }],
   ["proposal.create", { mutates: true, payloadKey: "proposal" }],
   ["read-model.rebuild", { mutates: false }],
   ["repo-work.ack", { mutates: true, payloadKey: "ack" }],
   ["triage.save", { mutates: true, payloadKey: "triage" }],
   ["outcome.publish", { mutates: true, payloadKey: "outcome" }],
+  ["verdict.accept", { mutates: true, payloadKey: "verdict" }],
 ]);
 
 const GATE_DECISIONS = ["activate", "discard"];
 const CONTRACT_DECISIONS = ["single-revision", "sequenced-windows", "split", "rejected", "pending"];
 const TRIAGE_DISPOSITIONS = ["explore", "answer-direct", "needs-info"];
+const INCIDENT_STATUSES = ["declared", "mitigating", "resolved", "postmortem-complete"];
+const INCIDENT_SEVERITIES = ["baixa", "media", "alta", "critica"];
+const VERDICTS = ["won", "lost", "inconclusive"];
+const VERDICT_NEXT = ["graduation", "cleanup", "parked", "none"];
+const BREAK_GLASS_MUTATIONS = [
+  "target-change",
+  "rollup-change",
+  "compat-window-change",
+  "verdict-override",
+  "break-glass",
+  "profile-change",
+  "metric-definition-change",
+  "aggregation-change",
+  "business-link-change",
+];
 
 const requiredEnvelope = [
   "actor",
@@ -54,6 +72,41 @@ function findIntentWork(org, intentId, workId) {
 
 function hasText(value) {
   return value !== undefined && value !== null && String(value).trim() !== "";
+}
+
+function authorityKind(authorities, id) {
+  return authorities.get(id)?.kind || null;
+}
+
+function resolveSubject(org, ref) {
+  const [kind, id, ...rest] = String(ref || "").split(":");
+  if (!kind || !id || rest.length) return false;
+  const registries = {
+    objective: org.objectives || [],
+    target: org.targets || [],
+    metric: org.metrics || [],
+    contract: org.contracts || [],
+    intent: org.intents || [],
+    proposal: org.proposals || [],
+    incident: org.incidents || [],
+    standalone: org.standalone || [],
+    repo: org.repos || [],
+    team: org.teams || [],
+    verdict: org.verdicts || [],
+    outcome: org.outcomes || [],
+  };
+  return (registries[kind] || []).some((item) => item.id === id);
+}
+
+function domainErrorsForNodes(candidate, nodes) {
+  const set = new Set(nodes.filter(Boolean));
+  return validateOrg(candidate).filter(
+    (domainIssue) =>
+      domainIssue.level === "error" &&
+      [...set].some(
+        (node) => domainIssue.node === node || String(domainIssue.node).startsWith(`${node}::`)
+      )
+  );
 }
 
 export function validateGovernedCommand(command, org, options = {}) {
@@ -342,6 +395,263 @@ export function validateGovernedCommand(command, org, options = {}) {
               String(domainIssue.node).startsWith(`${contractId}::${proposal.id}::`))
         )
       );
+    }
+  }
+
+  if (command.type === "incident.declare" && command.payload?.incident) {
+    const incident = command.payload.incident;
+    for (const field of [
+      "id",
+      "kind",
+      "repo",
+      "origin",
+      "severity",
+      "status",
+      "declared-by",
+      "detected-at",
+      "telemetry",
+      "placar",
+    ]) {
+      if (!hasText(incident[field]))
+        issues.push(issue("incident-schema", node, `incident.${field} é obrigatório`));
+    }
+    if (incident.kind !== "incident-response")
+      issues.push(issue("incident-schema", node, "incident.kind precisa ser incident-response"));
+    if (!INCIDENT_STATUSES.includes(incident.status))
+      issues.push(
+        issue(
+          "incident-schema",
+          node,
+          `incident.status "${incident.status}" inválido (aceitos: ${INCIDENT_STATUSES.join(" · ")})`
+        )
+      );
+    if (!INCIDENT_SEVERITIES.includes(incident.severity))
+      issues.push(
+        issue(
+          "incident-schema",
+          node,
+          `incident.severity "${incident.severity}" inválida (aceitas: ${INCIDENT_SEVERITIES.join(" · ")})`
+        )
+      );
+    if ((org.incidents || []).some((item) => item.id === incident.id))
+      issues.push(issue("command-duplicate", node, `incident "${incident.id}" já existe`));
+    if (incident.repo && !(org.repos || []).some((repo) => repo.id === incident.repo))
+      issues.push(issue("incident-ref", node, `incident.repo "${incident.repo}" não existe`));
+    if (incident["declared-by"] && !authorities.has(incident["declared-by"]))
+      issues.push(
+        issue("incident-authority", node, `declared-by "${incident["declared-by"]}" não resolve`)
+      );
+    if (incident["declared-by"] && incident["declared-by"] !== envelope.authority)
+      issues.push(
+        issue(
+          "incident-authority",
+          node,
+          `incident.declared-by precisa ser a authority do comando (${envelope.authority})`
+        )
+      );
+    for (const field of ["source", "event", "observed-at"]) {
+      if (!hasText(incident.telemetry?.[field]))
+        issues.push(issue("incident-telemetry", node, `incident.telemetry.${field} é obrigatório`));
+    }
+    if (
+      incident.telemetry?.source &&
+      !(org.repos || []).some((repo) => repo.id === incident.telemetry.source)
+    )
+      issues.push(
+        issue(
+          "incident-telemetry",
+          node,
+          `incident.telemetry.source "${incident.telemetry.source}" não é repo publicado`
+        )
+      );
+    if (!issues.some((item) => item.rule === "command-duplicate")) {
+      const candidate = structuredClone(org);
+      candidate.incidents = [...(candidate.incidents || []), incident];
+      issues.push(...domainErrorsForNodes(candidate, [incident.id]));
+    }
+  }
+
+  if (command.type === "policy.break-glass" && command.payload?.["break-glass"]) {
+    const breakGlass = command.payload["break-glass"];
+    for (const field of [
+      "id",
+      "mutation",
+      "subject",
+      "reason",
+      "requested-by",
+      "approved-by",
+      "issued-at",
+      "expires-at",
+      "review-at",
+      "evidence",
+    ]) {
+      if (!hasText(breakGlass[field]))
+        issues.push(issue("break-glass-schema", node, `break-glass.${field} é obrigatório`));
+    }
+    if (!BREAK_GLASS_MUTATIONS.includes(breakGlass.mutation))
+      issues.push(
+        issue(
+          "break-glass-schema",
+          node,
+          `break-glass.mutation "${breakGlass.mutation}" inválida (aceitas: ${BREAK_GLASS_MUTATIONS.join(" · ")})`
+        )
+      );
+    if ((org.policy?.["break-glass"] || []).some((item) => item.id === breakGlass.id))
+      issues.push(issue("command-duplicate", node, `break-glass "${breakGlass.id}" já existe`));
+    if (breakGlass.subject && !resolveSubject(org, breakGlass.subject))
+      issues.push(
+        issue(
+          "break-glass-subject",
+          node,
+          `break-glass.subject "${breakGlass.subject}" não resolve`
+        )
+      );
+    for (const field of ["requested-by", "approved-by"]) {
+      if (breakGlass[field] && !authorities.has(breakGlass[field]))
+        issues.push(
+          issue("break-glass-authority", node, `${field} "${breakGlass[field]}" não resolve`)
+        );
+    }
+    if (breakGlass["approved-by"] && breakGlass["approved-by"] !== envelope.authority)
+      issues.push(
+        issue(
+          "break-glass-authority",
+          node,
+          `break-glass.approved-by precisa ser a authority do comando (${envelope.authority})`
+        )
+      );
+    if (
+      breakGlass["requested-by"] &&
+      breakGlass["approved-by"] &&
+      breakGlass["requested-by"] === breakGlass["approved-by"]
+    )
+      issues.push(
+        issue("break-glass-sod", node, "requested-by e approved-by precisam ser distintos")
+      );
+    if (
+      breakGlass["approved-by"] &&
+      authorityKind(authorities, breakGlass["approved-by"]) !== "sponsor"
+    )
+      issues.push(issue("break-glass-authority", node, "perfil full exige sponsor em approved-by"));
+    if (breakGlass["issued-at"] >= breakGlass["expires-at"])
+      issues.push(
+        issue("break-glass-window", node, "expires-at precisa ser posterior a issued-at")
+      );
+    if (breakGlass["issued-at"] > breakGlass["review-at"])
+      issues.push(issue("break-glass-window", node, "review-at precisa ser em ou após issued-at"));
+    if (!Array.isArray(breakGlass.evidence) || breakGlass.evidence.length === 0)
+      issues.push(
+        issue("break-glass-evidence", node, "break-glass.evidence precisa ser não-vazio")
+      );
+    if (!issues.some((item) => item.rule === "command-duplicate")) {
+      const candidate = structuredClone(org);
+      candidate.policy = {
+        ...(candidate.policy || {}),
+        "break-glass": [...(candidate.policy?.["break-glass"] || []), breakGlass],
+      };
+      issues.push(...domainErrorsForNodes(candidate, [breakGlass.id]));
+    }
+  }
+
+  if (command.type === "verdict.accept" && command.payload?.verdict) {
+    const verdict = command.payload.verdict;
+    const intent = (org.intents || []).find((item) => item.id === verdict.intent);
+    const outcome = (org.outcomes || []).find((item) => item.id === verdict.outcome);
+    for (const field of [
+      "id",
+      "intent",
+      "outcome",
+      "verdict",
+      "decided-by",
+      "decided-at",
+      "decision-rule",
+      "evidence",
+      "next",
+    ]) {
+      if (!hasText(verdict[field]))
+        issues.push(issue("verdict-schema", node, `verdict.${field} é obrigatório`));
+    }
+    if (!VERDICTS.includes(verdict.verdict))
+      issues.push(
+        issue(
+          "verdict-schema",
+          node,
+          `verdict.verdict "${verdict.verdict}" inválido (aceitos: ${VERDICTS.join(" · ")})`
+        )
+      );
+    if (!VERDICT_NEXT.includes(verdict.next))
+      issues.push(
+        issue(
+          "verdict-schema",
+          node,
+          `verdict.next "${verdict.next}" inválido (aceitos: ${VERDICT_NEXT.join(" · ")})`
+        )
+      );
+    if ((org.verdicts || []).some((item) => item.id === verdict.id))
+      issues.push(issue("command-duplicate", node, `verdict "${verdict.id}" já existe`));
+    if (verdict.intent && !intent)
+      issues.push(issue("verdict-ref", node, `intent "${verdict.intent}" não existe`));
+    if (verdict.outcome && !outcome)
+      issues.push(issue("verdict-ref", node, `outcome "${verdict.outcome}" não existe`));
+    if (intent && !(intent.next || []).some((next) => next.gate === "accept-verdict"))
+      issues.push(
+        issue("verdict-gate", node, `intent "${intent.id}" não declara gate accept-verdict`)
+      );
+    if (intent && outcome && outcome["emitted-by"] !== intent.id)
+      issues.push(
+        issue(
+          "verdict-outcome",
+          node,
+          `outcome "${outcome.id}" não pertence à intent "${intent.id}"`
+        )
+      );
+    if (outcome) {
+      const outcomeErrors = validateOrg(org).filter(
+        (domainIssue) => domainIssue.level === "error" && domainIssue.node === outcome.id
+      );
+      if (outcomeErrors.length)
+        issues.push(
+          issue(
+            "verdict-outcome",
+            node,
+            `outcome "${outcome.id}" tem erro(s) e não pode sustentar verdict`
+          )
+        );
+    }
+    if (verdict["decided-by"] && !authorities.has(verdict["decided-by"]))
+      issues.push(
+        issue("verdict-authority", node, `decided-by "${verdict["decided-by"]}" não resolve`)
+      );
+    if (verdict["decided-by"] && verdict["decided-by"] !== envelope.authority)
+      issues.push(
+        issue(
+          "verdict-authority",
+          node,
+          `verdict.decided-by precisa ser a authority do comando (${envelope.authority})`
+        )
+      );
+    if (!Array.isArray(verdict.evidence) || verdict.evidence.length === 0)
+      issues.push(issue("verdict-evidence", node, "verdict.evidence precisa ser não-vazio"));
+    if (verdict.override === true) {
+      if (!verdict["break-glass-ref"])
+        issues.push(issue("verdict-override", node, "override exige break-glass-ref"));
+      else if (
+        !(org.policy?.["break-glass"] || []).some(
+          (breakGlass) => breakGlass.id === verdict["break-glass-ref"]
+        )
+      )
+        issues.push(
+          issue(
+            "verdict-override",
+            node,
+            `break-glass-ref "${verdict["break-glass-ref"]}" não resolve`
+          )
+        );
+    }
+    if (!issues.some((item) => item.rule === "command-duplicate")) {
+      const candidate = structuredClone(org);
+      candidate.verdicts = [...(candidate.verdicts || []), verdict];
+      issues.push(...domainErrorsForNodes(candidate, [verdict.id]));
     }
   }
 

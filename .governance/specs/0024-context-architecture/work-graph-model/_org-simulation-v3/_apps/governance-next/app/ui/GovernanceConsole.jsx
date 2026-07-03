@@ -471,7 +471,8 @@ function OperationsTab({ snapshot }) {
                 <Paper key={incident.id} variant="outlined" sx={{ p: 1.25 }}>
                   <Typography fontWeight={700}>{incident.id}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {incident.severity} · {incident.repo} · MTTR {incident.mttr}
+                    {incident.severity} · {incident.repo} · {incident.status || "resolved"} · MTTR{" "}
+                    {incident.mttr || "pendente"}
                   </Typography>
                 </Paper>
               ))}
@@ -494,6 +495,52 @@ function OperationsTab({ snapshot }) {
                   </Typography>
                 </Paper>
               ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card variant="outlined">
+          <CardContent>
+            <Typography variant="h2" gutterBottom>
+              Verdicts
+            </Typography>
+            <Stack spacing={1}>
+              {snapshot.operations.verdicts.length ? (
+                snapshot.operations.verdicts.map((verdict) => (
+                  <Paper key={verdict.id} variant="outlined" sx={{ p: 1.25 }}>
+                    <Typography fontWeight={700}>{verdict.id}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {verdict.verdict} · {verdict.intent} · next {verdict.next}
+                    </Typography>
+                  </Paper>
+                ))
+              ) : (
+                <Alert severity="info">Sem verdict aceito ainda.</Alert>
+              )}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Card variant="outlined">
+          <CardContent>
+            <Typography variant="h2" gutterBottom>
+              Break-glass
+            </Typography>
+            <Stack spacing={1}>
+              {snapshot.operations.breakGlass.length ? (
+                snapshot.operations.breakGlass.map((entry) => (
+                  <Paper key={entry.id} variant="outlined" sx={{ p: 1.25 }}>
+                    <Typography fontWeight={700}>{entry.id}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {entry.mutation} · {entry.subject} · review {entry["review-at"]}
+                    </Typography>
+                  </Paper>
+                ))
+              ) : (
+                <Alert severity="success">Nenhum break-glass aberto.</Alert>
+              )}
             </Stack>
           </CardContent>
         </Card>

@@ -495,6 +495,176 @@ try {
   if (!updatedIntent.works.some((work) => work.id === "work-check-runtime-analytics")) {
     fail("breakdown.apply não substituiu works da intent");
   }
+
+  const incidentMismatch = writeRuntime.executeGovernedCommand({
+    id: "cmd-check-runtime-incident-mismatch",
+    type: "incident.declare",
+    envelope: envelope("cmd-check-runtime-incident-mismatch", "2027-04-08", "pm-growth"),
+    payload: {
+      incident: {
+        id: "inc-check-runtime-mismatch",
+        kind: "incident-response",
+        repo: "acme-checkout-api",
+        origin: "alerta do acme-obs-stack — checkout degradado",
+        severity: "alta",
+        status: "declared",
+        "declared-by": "lead-sre",
+        "detected-at": "2027-04-08",
+        telemetry: {
+          source: "acme-obs-stack",
+          event: "checkout.error-rate",
+          "observed-at": "2027-04-08",
+        },
+        placar: "operational-bucket + MTTR pendente",
+      },
+    },
+  });
+  if (
+    incidentMismatch.ok ||
+    !incidentMismatch.issues.some((issue) => issue.rule === "incident-authority")
+  ) {
+    fail("incident.declare com declared-by divergente da authority não falhou fechado");
+  }
+
+  const incidentCommand = {
+    id: "cmd-check-runtime-incident",
+    type: "incident.declare",
+    envelope: envelope("cmd-check-runtime-incident", "2027-04-08", "lead-sre"),
+    payload: {
+      incident: {
+        id: "inc-check-runtime",
+        kind: "incident-response",
+        repo: "acme-checkout-api",
+        origin: "alerta do acme-obs-stack — checkout degradado",
+        severity: "alta",
+        status: "declared",
+        "declared-by": "lead-sre",
+        "detected-at": "2027-04-08",
+        telemetry: {
+          source: "acme-obs-stack",
+          event: "checkout.error-rate",
+          "observed-at": "2027-04-08",
+          query: "service=acme-checkout-api severity>=sev2",
+        },
+        placar: "operational-bucket + MTTR pendente",
+      },
+    },
+  };
+  const incident = writeRuntime.executeGovernedCommand(incidentCommand);
+  if (!incident.ok)
+    fail(`incident.declare rejeitado: ${incident.issues.map((i) => i.rule).join(", ")}`);
+  const incidentsDoc = parse(
+    readFileSync(path.join(governanceRoot, "incidents", "incidents.yml"), "utf8")
+  );
+  if (!incidentsDoc.incidents.some((item) => item.id === "inc-check-runtime")) {
+    fail("incident.declare não escreveu incident central");
+  }
+
+  const breakGlassSelfApproval = writeRuntime.executeGovernedCommand({
+    id: "cmd-check-runtime-break-glass-self",
+    type: "policy.break-glass",
+    envelope: envelope("cmd-check-runtime-break-glass-self", "2027-04-09", "pm-growth"),
+    payload: {
+      "break-glass": {
+        id: "bg-check-runtime-self",
+        mutation: "verdict-override",
+        subject: "intent:intent-cta-upgrade",
+        reason: "não deve passar porque requested-by e approved-by colapsam",
+        "requested-by": "pm-growth",
+        "approved-by": "pm-growth",
+        "issued-at": "2027-04-09",
+        "expires-at": "2027-04-10",
+        "review-at": "2027-04-11",
+        evidence: ["test:self-approval"],
+      },
+    },
+  });
+  if (
+    breakGlassSelfApproval.ok ||
+    !breakGlassSelfApproval.issues.some((issue) => issue.rule === "break-glass-sod")
+  ) {
+    fail("policy.break-glass self-approved não falhou fechado");
+  }
+
+  const breakGlassCommand = {
+    id: "cmd-check-runtime-break-glass",
+    type: "policy.break-glass",
+    envelope: envelope("cmd-check-runtime-break-glass", "2027-04-09", "sponsor-acme"),
+    payload: {
+      "break-glass": {
+        id: "bg-check-runtime-verdict",
+        mutation: "verdict-override",
+        subject: "intent:intent-cta-upgrade",
+        reason: "prova break-glass rastreável com sponsor e revisão retroativa",
+        "requested-by": "pm-growth",
+        "approved-by": "sponsor-acme",
+        "issued-at": "2027-04-09",
+        "expires-at": "2027-04-10",
+        "review-at": "2027-04-11",
+        evidence: ["incident-review:check-runtime", "fallback-law:break-glass"],
+      },
+    },
+  };
+  const breakGlass = writeRuntime.executeGovernedCommand(breakGlassCommand);
+  if (!breakGlass.ok)
+    fail(`policy.break-glass rejeitado: ${breakGlass.issues.map((i) => i.rule).join(", ")}`);
+  const policyDoc = parse(readFileSync(path.join(governanceRoot, "trust-policy.yml"), "utf8"));
+  if (!policyDoc["break-glass"].some((item) => item.id === "bg-check-runtime-verdict")) {
+    fail("policy.break-glass não escreveu trust-policy.yml");
+  }
+
+  const verdictWithoutOutcome = writeRuntime.executeGovernedCommand({
+    id: "cmd-check-runtime-verdict-sem-outcome",
+    type: "verdict.accept",
+    envelope: envelope("cmd-check-runtime-verdict-sem-outcome", "2027-04-10"),
+    payload: {
+      verdict: {
+        id: "verdict-check-runtime-sem-outcome",
+        intent: "intent-cta-upgrade",
+        outcome: "outcome-inexistente",
+        verdict: "won",
+        "decided-by": "pm-growth",
+        "decided-at": "2027-04-10",
+        "decision-rule": "não deve passar sem actual resolvido",
+        evidence: ["outcome:missing"],
+        next: "graduation",
+      },
+    },
+  });
+  if (
+    verdictWithoutOutcome.ok ||
+    !verdictWithoutOutcome.issues.some((issue) => issue.rule === "verdict-ref")
+  ) {
+    fail("verdict.accept sem outcome resolvido não falhou fechado");
+  }
+
+  const verdictCommand = {
+    id: "cmd-check-runtime-verdict",
+    type: "verdict.accept",
+    envelope: envelope("cmd-check-runtime-verdict", "2027-04-10"),
+    payload: {
+      verdict: {
+        id: "verdict-check-runtime-cta",
+        intent: "intent-cta-upgrade",
+        outcome: "out-cta-upgrade-2027q1",
+        verdict: "won",
+        "decided-by": "pm-growth",
+        "decided-at": "2027-04-10",
+        "decision-rule": "roda 4 semanas OU 50k exposições; ganha se conversão ↑ X% sem churn ↑",
+        evidence: ["outcome:out-cta-upgrade-2027q1", "resolver:valid-outcome"],
+        next: "graduation",
+      },
+    },
+  };
+  const verdict = writeRuntime.executeGovernedCommand(verdictCommand);
+  if (!verdict.ok)
+    fail(`verdict.accept rejeitado: ${verdict.issues.map((i) => i.rule).join(", ")}`);
+  const verdictsDoc = parse(
+    readFileSync(path.join(governanceRoot, "decisions", "verdicts.yml"), "utf8")
+  );
+  if (!verdictsDoc.verdicts.some((item) => item.id === "verdict-check-runtime-cta")) {
+    fail("verdict.accept não escreveu decisions/verdicts.yml");
+  }
 } finally {
   rmSync(tmp, { recursive: true, force: true });
 }

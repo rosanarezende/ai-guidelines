@@ -269,6 +269,7 @@ physical:
   repos-root: "repos/<repo>/ # repos de produto já existentes/adotados, cada um com seu sidecar"
   candidata: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml"
   ativada: "acme-governance/intents/<id>.yml"
+  verdict: "acme-governance/decisions/verdicts.yml # decision-point accept-verdict append-only"
   incidente: "acme-governance/incidents/incidents.yml # instrumento reativo central; gera follow-ups"
   por-repo: "repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml,backend.yml}"
   publications:
@@ -276,7 +277,7 @@ physical:
     repo-work-ack: "repo publica .governance/works/<intent>--<work>.yml com hash do breakdown central + touchpoint de código + lifecycle (acknowledged/active/blocked/done/dropped); host falha em repo-work-stale/missing e outcome-work-open/dropped"
     standalone-work: "repo publica .governance/works/<id>.yml com schema acme.standalone-work/v1 para fix/dep-bump avulso; host agrega no bucket operacional e valida repo/source/routing"
     repo-contract: "owner repo publica .governance/registry/contracts/<contract>.yml com hash de contracts.yml + interface versionada + touchpoint de código; host falha em repo-contract-stale/missing"
-    trust-policy: "host valida access-requests, authority-revocations, secret-quarantine e oracle-independence; política sem resolver é rejeitada como cerimônia"
+    trust-policy: "host valida access-requests, authority-revocations, secret-quarantine, break-glass e oracle-independence; política sem resolver é rejeitada como cerimônia"
   host: "acme-governance agrega projeções PUBLICADAS (context.json, repo-work-acks, repo-contracts), não abre banco nem confia só no YAML central"
   identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
   backend: [file, sqlite, neo4j, mongo]

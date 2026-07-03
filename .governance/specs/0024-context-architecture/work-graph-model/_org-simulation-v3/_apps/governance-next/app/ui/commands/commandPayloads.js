@@ -7,10 +7,19 @@ export const commandTypes = [
   "repo-work.ack",
   "contract.propose-revision",
   "outcome.publish",
+  "verdict.accept",
+  "incident.declare",
+  "policy.break-glass",
 ];
 
 export function today() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function addDays(days) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
 }
 
 export function makeEnvelope(snapshot, authority, type) {
@@ -57,6 +66,9 @@ function authorityForRepo(snapshot, repoId) {
 
 export function defaultAuthorityFor(type, snapshot) {
   if (type === "contract.propose-revision") return "head-platform";
+  if (type === "incident.declare") return "lead-sre";
+  if (type === "policy.break-glass") return "sponsor-acme";
+  if (type === "verdict.accept") return "pm-growth";
   if (type === "repo-work.ack") {
     const work = firstRepoWork(snapshot);
     return authorityForRepo(snapshot, work?.repo);
@@ -216,6 +228,62 @@ export function defaultPayloadFor(type, snapshot) {
       },
     };
   }
+  if (type === "verdict.accept") {
+    const outcome = snapshot.outcomes.find((item) => item.valid) || snapshot.outcomes[0];
+    const outcomeIntent = snapshot.portfolio.intents.find(
+      (item) => item.id === outcome?.["emitted-by"]
+    );
+    return {
+      verdict: {
+        id: `verdict-${outcome?.["emitted-by"] || "intent"}-${today().replaceAll("-", "")}`,
+        intent: outcome?.["emitted-by"] || outcomeIntent?.id || "intent-cta-upgrade",
+        outcome: outcome?.id || "out-cta-upgrade-2027q1",
+        verdict: "won",
+        "decided-by": "pm-growth",
+        "decided-at": today(),
+        "decision-rule": outcomeIntent?.["decision-rule"] || "decision-rule da intent aplicada",
+        evidence: [`outcome:${outcome?.id || "out-cta-upgrade-2027q1"}`, "resolver:valid-outcome"],
+        next: "graduation",
+      },
+    };
+  }
+  if (type === "incident.declare") {
+    return {
+      incident: {
+        id: `inc-ui-checkout-${today().replaceAll("-", "")}`,
+        kind: "incident-response",
+        repo: "acme-checkout-api",
+        origin: "alerta do acme-obs-stack — erro elevado no checkout",
+        severity: "alta",
+        status: "declared",
+        "declared-by": "lead-sre",
+        "detected-at": today(),
+        telemetry: {
+          source: "acme-obs-stack",
+          event: "checkout.error-rate",
+          "observed-at": today(),
+          query: "service=acme-checkout-api severity>=sev2",
+        },
+        placar: "operational-bucket + MTTR pendente",
+      },
+    };
+  }
+  if (type === "policy.break-glass") {
+    return {
+      "break-glass": {
+        id: `bg-verdict-override-${today().replaceAll("-", "")}`,
+        mutation: "verdict-override",
+        subject: "intent:intent-cta-upgrade",
+        reason: "janela operacional exige override rastreável em vez de bypass invisível",
+        "requested-by": "pm-growth",
+        "approved-by": "sponsor-acme",
+        "issued-at": today(),
+        "expires-at": addDays(1),
+        "review-at": addDays(2),
+        evidence: ["incident-review:manual", "fallback-law:break-glass"],
+      },
+    };
+  }
   const outcomeTarget =
     snapshot.targets.find((item) => item.id === intent?.["primary-target"]) || snapshot.targets[0];
   return {
@@ -244,6 +312,9 @@ function commandIdSource(type, payload) {
   if (type === "repo-work.ack") return `${payload.ack?.intent}-${payload.ack?.work}`;
   if (type === "contract.propose-revision") return `${payload.contract}-${payload.proposal?.id}`;
   if (type === "outcome.publish") return payload.outcome?.id;
+  if (type === "verdict.accept") return payload.verdict?.id;
+  if (type === "incident.declare") return payload.incident?.id;
+  if (type === "policy.break-glass") return payload["break-glass"]?.id;
   return type;
 }
 
