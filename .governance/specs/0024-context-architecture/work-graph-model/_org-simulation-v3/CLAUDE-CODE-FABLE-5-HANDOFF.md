@@ -61,9 +61,13 @@ Autonomia:
 ```text
 Estamos em ai-guidelines, Spec 0024, PR #45. Continue apenas dentro do checkpoint ativo.
 
-Objetivo: validar a direção de produto/UX do app Next/MUI antes de codar a próxima tela. Não implemente.
-Quero uma revisão adversarial, mas orientada a usuário humano: a nova entrada do app deve ser a
-Home de Adoção/Governança, não um grafo/console técnico.
+Objetivo: continuar a sim v3 a partir da base TypeScript/i18n. Implemente apenas a próxima fatia
+se o briefing governado permitir.
+
+Fatia recomendada: retomar o onboarding sobre o contrato compartilhado, não sobre estado local
+inventado. O app deve modelar account/user -> workspace/organization -> governance-host ->
+work-sources -> grafo governado, com pessoas -> papéis, locale pt-br e integração assistiva local
+como opção inicial.
 
 Leia:
 - .governance/specs/0024-context-architecture/work-graph-model/model.yml
@@ -73,6 +77,8 @@ Leia:
 - _org-simulation-v3/NEXT-STEPS.md
 - _org-simulation-v3/WALKTHROUGH-ITERATION.md
 - _org-simulation-v3/CLAUDE-CODE-FABLE-5-HANDOFF.md
+- _org-simulation-v3/_lib/domain/*.ts
+- _org-simulation-v3/_apps/governance-next/locales/pt-br.json
 - git diff/log desde HEAD~3, se houver
 
 Contexto físico obrigatório:

@@ -20,10 +20,12 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
   `standalone.complete` e publicou `out-fix-checkout-timeout-2027h1` sem intent planejada;
 - `acme-governance/trust-policy.yml` materializa controles de ACL local, revogação, fallback de matcher, secret quarantine e independência do oráculo;
 - `_lib/` materializa a primeira runtime DDD v3: adapter file, domínio/validador, command dry-run e read-model de grafo;
+- `_lib/domain/*.ts` materializa o contrato TypeScript compartilhado para a camada de adoção, snapshot, comandos e i18n; o app reexporta esses tipos em vez de duplicá-los;
 - `_examples/backends/` materializa exemplos derivados nos 4 formatos estudados na v2: file e Neo4j completos/prioritários, SQLite e Mongo completos como read-models derivados;
 - `check-backend-examples.mjs` prova o read-model file + Cypher Neo4j com hash, refs, event-log, cobertura de nós/arestas e contrato de ação;
 - `load-neo4j-example.mjs --dry-run` monta o plano executável de carga Neo4j; `--apply` é fail-closed e exige `--source-hash` + credenciais HTTP explícitas;
 - `_apps/governance-next/` materializa a superfície operacional v2 em React/Next + Material UI, agora em TypeScript strict, como workspace npm com dependências explícitas, consumindo a runtime v3 por API routes, enviando comandos governados e projetando uma tela inicial de configurações/integrações;
+- `_apps/governance-next/locales/pt-br.json` é o primeiro locale versionado; novas telas devem consumir strings de produto por locale e deixar o domínio emitir `messageKey` + `params`;
 - `integration-catalog.yml` registra adapters externos opcionais como evidence providers/importers/projections; ferramentas externas potencializam adoção, mas não substituem o SSOT file-first;
 - `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`, `repo-work.ack`, `standalone.complete`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`, `incident.declare` e `policy.break-glass` já têm dry-run/execute com `base-revision`, idempotency, nonce, authority resolvida, lock global por comando, escrita atômica, marker de recovery e event-log append-only;
 - `verdict.accept` do `intent-cta-upgrade` foi executado no estado canônico via runtime, criando `decisions/verdicts.yml` e `events/events.jsonl` sem edição manual;
@@ -81,13 +83,13 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **Validação de produto com Claude Design/Fable 5:** revisar a seção "Experiência de Produto e Informação" do [`app-requirements.md`](../app-requirements.md) antes de codar a próxima tela, com foco em linguagem para usuários humanos e adoção por organizações com perfis distintos.
-2. **Home de Adoção/Governança:** substituir a entrada atual por uma home orientada a tarefa humana: configurar organização, conectar repos, planejar ciclo, registrar iniciativa, acompanhar resultados, resolver pendências e auditar decisões.
+1. **Retomar onboarding sobre contrato TS:** implementar account local, seleção/criação de workspace, governance host, pessoas → papéis e fontes de trabalho consumindo `_lib/domain/adoption-shell.ts`; não reabrir a ontologia local congelada no stash.
+2. **Completar i18n da experiência humana:** migrar Home/Onboarding/Configurações para `locales/pt-br.json` por fatia, começando por títulos, CTAs e mensagens de confiança; dados do snapshot continuam vindo do runtime.
 3. **Walkthrough da owner:** percorrer no app Next/MUI v2 a cadeia `objective → target → intent → repo-work done → outcome → verdict/rollup → actual` e o caminho `incident → standalone.complete → outcome operacional`, usando [`WALKTHROUGH-ITERATION.md`](WALKTHROUGH-ITERATION.md) como doc de acompanhamento.
 4. **Config persistence:** transformar a aba `Configuracoes` em comando governado quando a UX estiver validada: `profile-declaration`, authority/billing roles e assistant runtime policy precisam de resolver, nao de formulario solto.
 5. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
 6. **Portabilidade v2 → v3:** completar matcher executável e authoring completo, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
-7. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo.
+7. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo. Prioridade prática: `assistant-runtime-local-cloud` (Ollama/LM Studio/LocalAI/vLLM), `git-provider`, `ci-status` e `observability`.
 8. **Revisão adversarial pós-R5:** pedir ao Claude Code/Fable 5 para revisar a sim com foco em outcomes de intent, outcome standalone, contrato e transação file-first.
 
 ## Comandos de aceite
