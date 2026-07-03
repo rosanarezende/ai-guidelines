@@ -25,6 +25,9 @@ const issues = [...validateOrg(o), ...repoContextIssues, ...repoWorkIssues, ...r
 const repoContexts = loadPublishedContexts();
 const repoWorks = loadPublishedRepoWorks();
 const repoContracts = loadPublishedRepoContracts();
+const repoWorkAcks = repoWorks.filter(
+  (x) => x.schema === "acme.repo-work/v1" || x.source?.kind === "central-breakdown"
+);
 
 const nodes = [];
 const edges = [];
@@ -76,7 +79,7 @@ for (const x of repoContexts) {
   N(cid, "repo-context", `${x.repo} context`, x);
   E(x.repo, cid, "publishes-context");
 }
-for (const x of repoWorks) {
+for (const x of repoWorkAcks) {
   const wid = `${x.id}::repo-ack`;
   N(wid, "repo-work-ack", `${x.repo}/${x.work}`, x);
   E(x.repo, wid, "publishes-work");
@@ -159,9 +162,17 @@ for (const it of o.intents) {
 for (const s of o.standalone) {
   N(s.id, "standalone", `${s.kind}: ${s.id}`, s);
   E(s.id, s.repo, "in-repo");
-  for (const f of s["follow-ups"] || []) {
+  if (s.origin) {
+    const [kind, id] = String(s.origin || "").split(":");
+    if (kind && id) E(id, s.id, "raises");
+  }
+}
+for (const x of o.incidents || []) {
+  N(x.id, "incident", `${x.severity}: ${x.id}`, x);
+  E(x.repo, x.id, "handles-incident");
+  for (const f of x["follow-ups"] || []) {
     const [kind, id] = String(f.ref || "").split(":");
-    if (kind && id) E(s.id, id, "raises");
+    if (kind && id) E(x.id, id, "raises");
   }
 }
 
@@ -184,7 +195,7 @@ const GRAPH = {
 
 mkdirSync(APPS, { recursive: true });
 const graphSource =
-  "// graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.\n" +
+  "// graph.js — GERADO por _tools/build-graph.mjs a partir de acme-governance/ + repos/ + model.yml — NÃO editar à mão.\n" +
   "window.GRAPH = " +
   JSON.stringify(GRAPH, null, 2) +
   ";\n";

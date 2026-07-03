@@ -265,17 +265,22 @@ decision-points: # G7 + F4 — gates NOMEADOS com requisitos VERIFICÁVEIS; todo
     approver: "owner da intent + attester independente do actual"
     on-block: "veredito segue pending; override = mutação verdict-override (dangerous, alerta q/r/d)"
 physical:
+  host-root: "acme-governance/ # host central da org simulada; representa o repo de governança"
+  repos-root: "repos/<repo>/ # repos de produto já existentes/adotados, cada um com seu sidecar"
   candidata: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml"
-  ativada: "acme-governance/intents/<id>/intent.yml"
-  por-repo: ".governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml,backend.yml}"
+  ativada: "acme-governance/intents/<id>.yml"
+  incidente: "acme-governance/incidents/incidents.yml # instrumento reativo central; gera follow-ups"
+  por-repo: "repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml,backend.yml}"
   publications:
     context-json: "repo publica capabilities/contratos/consumos derivados do manifest + package + código; host falha se divergir do inventário central"
     repo-work-ack: "repo publica .governance/works/<intent>--<work>.yml com hash do breakdown central + touchpoint de código + lifecycle (acknowledged/active/blocked/done/dropped); host falha em repo-work-stale/missing e outcome-work-open/dropped"
+    standalone-work: "repo publica .governance/works/<id>.yml com schema acme.standalone-work/v1 para fix/dep-bump avulso; host agrega no bucket operacional e valida repo/source/routing"
     repo-contract: "owner repo publica .governance/registry/contracts/<contract>.yml com hash de contracts.yml + interface versionada + touchpoint de código; host falha em repo-contract-stale/missing"
     trust-policy: "host valida access-requests, authority-revocations, secret-quarantine e oracle-independence; política sem resolver é rejeitada como cerimônia"
   host: "acme-governance agrega projeções PUBLICADAS (context.json, repo-work-acks, repo-contracts), não abre banco nem confia só no YAML central"
   identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
   backend: [file, sqlite, neo4j, mongo]
+  backend-status: "modelado e provado na v2; ainda NÃO portado para _org-simulation-v3, que hoje usa scripts file-first + graph.js gerado"
 
 # ═════════════════════ EXEMPLOS (validam o modelo; o _map desenha estes) ═════════════════════
 examples:

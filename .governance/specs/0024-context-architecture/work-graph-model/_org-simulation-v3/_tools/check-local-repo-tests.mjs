@@ -11,7 +11,7 @@ const repos = ["acme-core-api", "acme-checkout", "acme-analytics"];
 
 let failed = 0;
 for (const repo of repos) {
-  const cwd = path.join(root, "acme", "repos", repo);
+  const cwd = path.join(root, "repos", repo);
   const result = spawnSync(process.execPath, ["test.mjs"], {
     cwd,
     stdio: "inherit",

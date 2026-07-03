@@ -14,6 +14,7 @@ const targets = nodesBy("target");
 const outcomes = nodesBy("outcome");
 const intents = nodesBy("intent");
 const standalone = nodesBy("standalone");
+const incidents = nodesBy("incident");
 const contracts = nodesBy("contract");
 const proposals = nodesBy("proposal");
 
@@ -108,10 +109,11 @@ function Home({ go }) {
       <div className="card click" onClick=${() => go("operacional", null)}>
         <h2>operacional (nada some)</h2>
         <div className="kv">
-          <span className="big">${standalone.length}</span>itens reativos/avulsos
+          <span className="big">${standalone.length + incidents.length}</span>itens operacionais
         </div>
         <div className="kv">
-          ${standalone.map((s) => s.data.kind).join(" · ")} · ${proposals.length} proposal(s)
+          ${incidents.length} incidente(s) · ${standalone.map((s) => s.data.kind).join(" · ")} ·
+          ${proposals.length} proposal(s)
         </div>
       </div>
       <div className="card click" onClick=${() => go("perfil", null)}>
@@ -306,6 +308,30 @@ function Operacional() {
     return n ? `${ref} — ${n.label}` : ref;
   };
   return html`<div>
+    ${incidents.map(
+      (i) =>
+        html`<div className="card" key=${i.id}>
+          <h2>incidente <span className="pill">${i.data.repo}</span></h2>
+          <div className="kv"><b>origem:</b> ${i.data.origin}</div>
+          <div className="kv">
+            <b>severidade:</b> ${i.data.severity} · MTTR: ${i.data.mttr} · postmortem:
+            ${i.data.postmortem}
+          </div>
+          ${(i.data["follow-ups"] || []).length
+            ? html`<div className="kv">
+                <b>follow-ups:</b>
+                <ul>
+                  ${i.data["follow-ups"].map(
+                    (f, k) => html`<li key=${k}>${refLabel(f.ref)} — ${f.reason}</li>`
+                  )}
+                </ul>
+              </div>`
+            : null}
+          <div className="kv">
+            <b>placar:</b> ${i.data.placar} — resposta reativa, fora do rollup dos objetivos
+          </div>
+        </div>`
+    )}
     ${standalone.map(
       (s) =>
         html`<div className="card" key=${s.id}>

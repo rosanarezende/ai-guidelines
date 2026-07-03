@@ -173,8 +173,8 @@ Conjunto fechado de arestas, cada uma com critério único (anota-se 1 lado; o r
 - **Fluxo & researches:** [`research/2026-06-30-initiative-to-works-flow.md`](research/2026-06-30-initiative-to-works-flow.md) + [`research/`](research/).
 - **Features a implementar (roadmap):** [`features.md`](features.md).
 - **Auditorias adversariais (evidência):** [`_audits/`](_audits/) — 4 rodadas (benchmark · taxonomia · ponta-a-ponta · fronteiras de confiança).
-- **Simulação ativa:** [`_org-simulation-v3/`](_org-simulation-v3/) — dogfood físico repo-first. A [`_org-simulation-v2/`](_org-simulation-v2/) ficou arquivada como histórico e fonte de aprendizados de matcher/app.
-- **Templates:** [`_templates/`](_templates/).
+- **Simulação ativa:** [`_org-simulation-v3/`](_org-simulation-v3/) — dogfood físico repo-first. Layout aplicado: host central em `_org-simulation-v3/acme-governance/`; repos adotados em `_org-simulation-v3/repos/<repo>/`; standalone repo-local em `repos/<repo>/.governance/works/*.yml`; incidentes centrais em `acme-governance/incidents/`.
+- **Templates:** ativos da sim em [`_org-simulation-v3/_templates/`](_org-simulation-v3/_templates/); o caminho [`_templates/`](_templates/) é ponte histórica e os templates v2 foram arquivados em [`_archive/templates-v2/`](_archive/templates-v2/).
 
 ## 🔶 Abertos & próxima fase
 

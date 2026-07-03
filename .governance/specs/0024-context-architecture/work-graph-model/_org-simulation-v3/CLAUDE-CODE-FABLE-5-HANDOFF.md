@@ -31,6 +31,7 @@ Objetivo: evoluir a sim v3 até <resultado observável>.
 
 Contexto obrigatório:
 - Leia model.yml, tracker.md, _org-simulation-v3/README.md, NEXT-STEPS.md e o diff/HEAD atual.
+- Respeite o layout sanitizado: host central em _org-simulation-v3/acme-governance/; repos adotados em _org-simulation-v3/repos/<repo>/; standalone repo-local em repos/<repo>/.governance/works/*.yml; incidentes centrais em acme-governance/incidents/.
 - Repo vence memória/transcript.
 - Não avance Ready/Gate/merge.
 
@@ -61,7 +62,7 @@ Autonomia:
 Estamos em ai-guidelines, Spec 0024, PR #45. Continue apenas dentro do checkpoint ativo.
 
 Objetivo: revisar a sim v3 após a rodada Codex que implementou outcome real, lifecycle repo-local,
-contratos com interface, trust-policy e 57 fixtures adversariais. Não implemente ainda.
+contratos com interface, trust-policy, layout repo-first sanitizado e fixtures adversariais. Não implemente ainda.
 
 Leia:
 - .governance/specs/0024-context-architecture/work-graph-model/model.yml
@@ -70,6 +71,13 @@ Leia:
 - _org-simulation-v3/NEXT-STEPS.md
 - _org-simulation-v3/CLAUDE-CODE-FABLE-5-HANDOFF.md
 - git diff/log desde a970415b
+
+Contexto físico obrigatório:
+- _org-simulation-v3/acme-governance/ é o host central da org.
+- _org-simulation-v3/repos/<repo>/ são repos de produto adotados, com código MVP e sidecar .governance.
+- Fix/dep-bump standalone ficam em repos/<repo>/.governance/works/*.yml.
+- Incidente fica em acme-governance/incidents/incidents.yml e gera follow-ups para standalone/proposal.
+- A v3 ainda NÃO porta a _lib DDD/backends/read-models/app de autoria da v2. Avalie isso como gap explícito, não como implementação existente.
 
 Saída:
 1. fatos observados;

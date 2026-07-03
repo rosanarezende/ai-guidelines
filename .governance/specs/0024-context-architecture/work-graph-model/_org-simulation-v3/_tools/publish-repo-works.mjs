@@ -4,5 +4,5 @@ import { publishRepoWorks } from "./repo-works.mjs";
 
 const claims = publishRepoWorks(loadOrg());
 console.log(
-  `✓ ${claims.length} repo-work acknowledgement(s) publicado(s) em acme/repos/*/.governance/works`
+  `✓ ${claims.length} repo-work acknowledgement(s) publicado(s) em repos/*/.governance/works`
 );

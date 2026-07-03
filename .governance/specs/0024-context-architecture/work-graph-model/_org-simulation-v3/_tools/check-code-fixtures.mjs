@@ -1,26 +1,22 @@
-import { renderDesignSystemCatalog } from "../acme/repos/acme-design-system/src/index.mjs";
+import { renderDesignSystemCatalog } from "../repos/acme-design-system/src/index.mjs";
 import {
   resolveUserContext,
   publishUserContextContract,
-} from "../acme/repos/acme-web-host/src/index.mjs";
-import { renderBillingUpgrade, previewUpgrade } from "../acme/repos/acme-mfe-billing/src/index.mjs";
-import { renderCheckout, submitCheckout } from "../acme/repos/acme-checkout/src/index.mjs";
+} from "../repos/acme-web-host/src/index.mjs";
+import { renderBillingUpgrade, previewUpgrade } from "../repos/acme-mfe-billing/src/index.mjs";
+import { renderCheckout, submitCheckout } from "../repos/acme-checkout/src/index.mjs";
 import {
   renderOnboardingTour,
   completeOnboardingStep,
-} from "../acme/repos/acme-mfe-onboarding/src/index.mjs";
-import { searchArticles, openTicket } from "../acme/repos/acme-help-center/src/index.mjs";
-import { currentSubscription } from "../acme/repos/acme-api-billing/src/index.mjs";
+} from "../repos/acme-mfe-onboarding/src/index.mjs";
+import { searchArticles, openTicket } from "../repos/acme-help-center/src/index.mjs";
+import { currentSubscription } from "../repos/acme-api-billing/src/index.mjs";
 import {
   materializeDailyMetrics,
   targetActualSnapshot,
-} from "../acme/repos/acme-data-pipeline/src/index.mjs";
-import {
-  recordTrace,
-  sloSnapshot,
-  incidentAlert,
-} from "../acme/repos/acme-obs-stack/src/index.mjs";
-import { monolithModules } from "../acme/repos/acme-core-api/src/index.mjs";
+} from "../repos/acme-data-pipeline/src/index.mjs";
+import { recordTrace, sloSnapshot, incidentAlert } from "../repos/acme-obs-stack/src/index.mjs";
+import { monolithModules } from "../repos/acme-core-api/src/index.mjs";
 
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);

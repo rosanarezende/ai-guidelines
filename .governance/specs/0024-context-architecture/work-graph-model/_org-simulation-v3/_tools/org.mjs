@@ -8,9 +8,34 @@ import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-export const ACME = path.join(here, "..", "acme");
-const load = (p) => parse(readFileSync(path.join(ACME, p), "utf8"));
-const loadOptional = (p, fallback) => (existsSync(path.join(ACME, p)) ? load(p) : fallback);
+export const SIM_ROOT = path.join(here, "..");
+export const GOVERNANCE_ROOT = path.join(SIM_ROOT, "acme-governance");
+export const REPOS_ROOT = path.join(SIM_ROOT, "repos");
+const load = (p) => parse(readFileSync(path.join(GOVERNANCE_ROOT, p), "utf8"));
+const loadOptional = (p, fallback) =>
+  existsSync(path.join(GOVERNANCE_ROOT, p)) ? load(p) : fallback;
+
+function loadRepoStandaloneWorks() {
+  const out = [];
+  if (!existsSync(REPOS_ROOT)) return out;
+  for (const entry of readdirSync(REPOS_ROOT, { withFileTypes: true }).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  )) {
+    if (!entry.isDirectory()) continue;
+    const repo = entry.name;
+    const worksDir = path.join(REPOS_ROOT, repo, ".governance", "works");
+    if (!existsSync(worksDir)) continue;
+    for (const fileName of readdirSync(worksDir)
+      .filter((file) => file.endsWith(".yml"))
+      .sort()) {
+      const file = path.join(worksDir, fileName);
+      const doc = parse(readFileSync(file, "utf8"));
+      if (doc?.schema !== "acme.standalone-work/v1" && doc?.source?.kind !== "standalone") continue;
+      out.push({ ...doc, _file: file, _repo: repo });
+    }
+  }
+  return out.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+}
 
 export function loadOrg() {
   return {
@@ -22,18 +47,19 @@ export function loadOrg() {
     theses: load("business/theses.yml").theses,
     metrics: load("business/metrics.yml").metrics,
     targets: load("business/targets.yml").targets,
-    repos: load("repos/repos.yml").repos,
+    repos: load("repos.yml").repos,
     contracts: load("contracts/contracts.yml").contracts,
     proposals: load("intake/proposals.yml").proposals,
+    incidents: loadOptional("incidents/incidents.yml", { incidents: [] }).incidents,
     policy: loadOptional("trust-policy.yml", {
       "access-requests": [],
       "authority-revocations": [],
       "secret-quarantine": [],
     }),
-    intents: readdirSync(path.join(ACME, "intents"))
+    intents: readdirSync(path.join(GOVERNANCE_ROOT, "intents"))
       .filter((f) => f.endsWith(".yml"))
       .map((f) => load("intents/" + f)),
-    standalone: load("standalone/standalone.yml").standalone,
+    standalone: loadRepoStandaloneWorks(),
     outcomes: load("outcomes/outcomes.yml").outcomes || [],
   };
 }
@@ -43,7 +69,8 @@ const APPROACHES = ["validate-first", "direct"];
 const SIGNALS = ["none", "touches-contract", "operational-target"];
 const PURPOSES = ["create", "sustain", "discover", "operate"];
 const LIFECYCLE = ["proposed", "active", "closed", "superseded", "dropped"];
-const STANDALONE_KINDS = ["fix", "dep-bump", "incident-response"];
+const STANDALONE_KINDS = ["fix", "dep-bump"];
+const INCIDENT_KINDS = ["incident-response"];
 const AGGREGATIONS = ["sum", "avg", "p99", "last"];
 const CONTRACT_DECISIONS = ["single-revision", "sequenced-windows", "split", "rejected", "pending"];
 const ROUTING_DECISIONS = ["followed", "overrode"];
@@ -142,9 +169,14 @@ const SCHEMAS = {
   },
   next: { required: ["when", "then"], optional: ["gate"] },
   standalone: {
-    required: ["id", "kind", "repo", "origin", "placar"],
-    optional: ["review", "routing", "severity", "mttr", "postmortem", "follow-ups"],
+    required: ["id", "kind", "repo", "origin", "source", "placar"],
+    optional: ["schema", "review", "routing", "_file", "_repo"],
     enums: { kind: STANDALONE_KINDS },
+  },
+  incident: {
+    required: ["id", "kind", "repo", "origin", "severity", "mttr", "postmortem", "placar"],
+    optional: ["follow-ups"],
+    enums: { kind: INCIDENT_KINDS },
   },
   routing: {
     required: ["matcher", "query", "selected-repo", "decision", "decided-by", "suggestions"],
@@ -296,6 +328,9 @@ function checkAllSchemas(o, issues) {
       for (const [k, s] of (x.routing.suggestions || []).entries())
         checkSchema("matcher-suggestion", s, `${x.id}::routing.suggestions[${k}]`, issues);
     }
+  }
+  for (const x of o.incidents || []) {
+    checkSchema("incident", x, x.id, issues);
     for (const [k, f] of (x["follow-ups"] || []).entries())
       checkSchema("follow-up", f, `${x.id}::follow-ups[${k}]`, issues);
   }
@@ -415,6 +450,7 @@ export function validateOrg(o) {
     proposal: new Set((o.proposals || []).map((x) => x.id)),
     intent: new Set(o.intents.map((x) => x.id)),
     standalone: new Set(o.standalone.map((x) => x.id)),
+    incident: new Set((o.incidents || []).map((x) => x.id)),
   };
   const repoById = Object.fromEntries(o.repos.map((r) => [r.id, r]));
   const teamById = Object.fromEntries(o.teams.map((t) => [t.id, t]));
@@ -429,9 +465,14 @@ export function validateOrg(o) {
       return err(
         "refs",
         node,
-        `${field} "${ref}" deve usar GlobalRef simples kind:id (standalone|proposal|intent)`
+        `${field} "${ref}" deve usar GlobalRef simples kind:id (standalone|proposal|intent|incident)`
       );
-    const registry = { standalone: ids.standalone, proposal: ids.proposal, intent: ids.intent };
+    const registry = {
+      standalone: ids.standalone,
+      proposal: ids.proposal,
+      intent: ids.intent,
+      incident: ids.incident,
+    };
     if (!registry[kind])
       return err("refs", node, `${field} "${ref}" usa kind não suportado "${kind}"`);
     if (!registry[kind].has(id)) return err("refs", node, `${field} "${ref}" não resolve`);
@@ -839,12 +880,14 @@ export function validateOrg(o) {
   // standalone
   for (const s of o.standalone) {
     if (!ids.repo.has(s.repo)) err("refs", s.id, `repo "${s.repo}" não existe`);
-    if (s.kind === "incident-response" && !s.severity)
+    if (s._repo && s._repo !== s.repo)
       err(
-        "incident-evidence",
+        "standalone-location",
         s.id,
-        "incident-response sem severity (a declaração exige telemetria)"
+        `standalone repo-scoped mora em "${s._repo}", mas declara repo "${s.repo}"`
       );
+    if (s.source?.kind !== "standalone")
+      err("standalone-source", s.id, `source.kind "${s.source?.kind}" não é standalone`);
     if (s.routing) {
       if (!ids.repo.has(s.routing["selected-repo"]))
         err("matcher-routing", s.id, `selected-repo "${s.routing["selected-repo"]}" não existe`);
@@ -901,22 +944,28 @@ export function validateOrg(o) {
       if (s.routing.decision === "overrode" && !s.routing.reason)
         err("matcher-routing", s.id, "decision=overrode exige reason logado");
     }
-    for (const f of s["follow-ups"] || []) {
-      resolveGlobalRef(f.ref, s.id, "follow-up.ref");
+  }
+
+  // incidents — instrumento de resposta central; follow-ups executáveis ficam em repos/proposals.
+  for (const incident of o.incidents || []) {
+    if (!ids.repo.has(incident.repo))
+      err("refs", incident.id, `repo "${incident.repo}" não existe`);
+    for (const f of incident["follow-ups"] || []) {
+      resolveGlobalRef(f.ref, incident.id, "follow-up.ref");
       if (f.kind === "proposal" && !String(f.ref).startsWith("proposal:"))
-        err("follow-up-ref", s.id, `follow-up kind=proposal aponta para "${f.ref}"`);
+        err("follow-up-ref", incident.id, `follow-up kind=proposal aponta para "${f.ref}"`);
       if (f.kind === "proposal" && String(f.ref).startsWith("proposal:")) {
         const pid = String(f.ref).slice("proposal:".length);
         const p = proposalById[pid];
-        if (p && p["raised-by"] !== `standalone:${s.id}`)
+        if (p && p["raised-by"] !== `incident:${incident.id}`)
           err(
             "follow-up-ref",
-            s.id,
-            `proposal "${pid}" raised-by="${p["raised-by"]}" não volta para standalone:${s.id}`
+            incident.id,
+            `proposal "${pid}" raised-by="${p["raised-by"]}" não volta para incident:${incident.id}`
           );
       }
       if (f.kind === "fix" && !String(f.ref).startsWith("standalone:"))
-        err("follow-up-ref", s.id, `follow-up kind=fix aponta para "${f.ref}"`);
+        err("follow-up-ref", incident.id, `follow-up kind=fix aponta para "${f.ref}"`);
     }
   }
 

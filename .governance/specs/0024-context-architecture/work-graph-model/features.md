@@ -3,6 +3,30 @@
 > **O modelo prevê TODOS os fluxos; a construção se faseia aqui** (princípio da [Lente 1](tracker.md)). Este doc lista o que **modelamos** e ainda falta **implementar** — pra não confundir "fora do modelo" com "ainda não construído". Não-autoridade; alimentado junto com o [`tracker.md`](tracker.md) e as [`deliberation/`](deliberation/).
 > Legenda: **P0** = base da taxonomia v2 (destrava o resto) · **P1** = lifecycles/dimensões core · **P2** = escala/enterprise. ✅ feito · 🚧 parcial · ⬜ a fazer.
 
+> **Nota 2026-07-02:** a frente ativa de prova saiu da sim v2/\_lib para a [`_org-simulation-v3/`](_org-simulation-v3/) repo-first. Nela, o host central fica em `acme-governance/`, os repos adotados ficam em `repos/<repo>/`, e os templates operacionais da sim ficam em `_org-simulation-v3/_templates/`. O `_templates/` raiz virou ponte histórica; os moldes v2 foram arquivados em `_archive/templates-v2/`.
+>
+> **Correção importante:** "ativo na v3" NÃO significa "tudo da v2 foi migrado". A v2 provou `_lib` DDD, portas, adapters file/sqlite/neo4j/mongo, read-models por repo e app de autoria. A v3 ainda NÃO tem essa camada; hoje ela usa scripts determinísticos + `graph.js` gerado. Esses aprendizados ficam preservados abaixo como itens a portar, não como feitos da v3.
+
+---
+
+## Matriz v2 → v3 — o que foi migrado, preservado ou ainda falta
+
+| aprendizado/feature da v2                           | estado na v3                                                                                                      | decisão / próximo passo                                                                                                                                   |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.governance/` por repo + host agregador            | ✅ migrado e endurecido: `repos/<repo>/.governance/*` + `acme-governance/*`                                       | manter como base física.                                                                                                                                  |
+| `context.json` publicado e agregado pelo host       | ✅ migrado e endurecido: freshness contra manifest/package/src + `repo-context-*`                                 | próximo dente: envelope/ttl/producer real no `context.json`, não só `contentHash`.                                                                        |
+| Manifesto/capabilities por repo                     | ✅ migrado com `manifest.yml`, `capability-candidates.yml` e pacote de capability review                          | falta mecanismo de `owner-attested-by`/`observed-from` com dente real.                                                                                    |
+| Matcher léxico/local/LLM/API                        | 🚧 preservado conceitualmente; v3 só tem routing fixture e pacote de capability review, sem matcher executável    | portar depois da estabilização do manifesto v3: matcher deve consumir `context.json`, respeitar L9 e produzir saída com score/unknown/evidence/freshness. |
+| `_lib` DDD (`domain`, `ports`, `adapters`)          | ⬜ não migrado para v3                                                                                            | portar como próxima camada de runtime, sem substituir os YAML: domínio puro + portas para host/repo/projection, reaproveitando invariantes do `org.mjs`.  |
+| Backends plugáveis file/sqlite/neo4j/mongo          | ⬜ não migrados para v3; existem só na v2                                                                         | preservar prova v2; reintroduzir em v3 só quando houver contrato de porta sobre os nós v3 (`objective/intent/repo-work/outcome/contract/policy`).         |
+| Read-models `db.json` por repo + dashboard estático | ⬜ não migrados; v3 usa `context.json`, repo-work/contract registries e `_apps/graph.js` gerado                   | decidir se v3 precisa read-model por repo ou se `context.json` + registries publicados bastam; não declarar banco derivado v3 enquanto isso não existir.  |
+| App de autoria registro→triagem→gate                | ⬜ não migrado; v3 tem apps de visualização (`owner`/`company`), não authoring UI                                 | futuro: app de autoria deve escrever por comandos/envelope, não editar YAML solto nem contornar o validador.                                              |
+| Scaffold de repo novo                               | 🚧 v3 tem `adopt-existing-repos.mjs` para repos já existentes; não tem scaffold completo de repo novo/backend     | manter foco "empresa já tem repos"; se voltar scaffold, separar `adopt existing` de `create new`.                                                         |
+| Backend.yml por repo                                | ⬜ modelado em `physical.por-repo`, mas sem executor na v3                                                        | ou remover do layout v3 até portar adapters, ou manter marcado como "modelado, não implementado"; hoje NÃO pode ser aceito como evidência.                |
+| Templates v2 de work/brief/closing                  | 🧊 arquivados em `_archive/templates-v2`; v3 usa `_org-simulation-v3/_templates` apenas para prompts/artefatos v3 | não usar `_templates/` raiz como fonte ativa.                                                                                                             |
+| Deliberação q/r/d interna por work/repo             | ⬜ não migrada para v3 física                                                                                     | quando voltar, precisa morar no repo/host correto e projetar só o resultado necessário, não todo histórico privado.                                       |
+| Projeção visual                                     | ✅ migrada de outra forma: `_apps/graph.js` + owner/company apps sem build                                        | é uma projeção de sim, não um backend operacional.                                                                                                        |
+
 ---
 
 ## P0 · Migrar o modelo p/ a taxonomia v2 (destrava tudo)
@@ -98,13 +122,20 @@ _(Da sim adversarial rounds 1+2 — [deliberação](deliberation/2026-07-01-adve
 
 ## Backend & app (infra do modelo)
 
-- 🚧 **`Neo4jHostRepository`** (o host só tem File) + arestas da Lente 6 como **relações** no Neo4j (hoje nós-only).
-- ⬜ **Revisitar a D3** (arestas cross-repo derivadas — era tentativa).
-- ⬜ **Aposentar o `_viewer` legado** quando o `_app` cobrir o terreno.
-- ⬜ **Nova simulação robusta** sobre a taxonomia v2 — **só depois** de validarmos as lentes do tracker; arquivar a `_org-simulation-v2` se preciso.
+- ✅ **Nova simulação robusta sobre a taxonomia v2** — `_org-simulation-v3` é a frente ativa repo-first; `_org-simulation-v2` permanece como histórico/fonte de aprendizados de matcher/app/backend.
+- ⬜ **Portar a `_lib` DDD para v3** — domínio puro + portas sobre os nós v3 (`business-objective`, `intent`, `repo-work`, `contract`, `outcome`, `policy`), sem reimportar os 5 kinds antigos.
+- ⬜ **Porta de repositório v3** — separar `HostGovernanceRepository`, `ProductRepoProjectionRepository` e `PublishedProjectionStore`; scripts atuais (`org.mjs`, `repo-*.mjs`) viram harness/fixtures ou adaptadores file.
+- ⬜ **Backends plugáveis v3** — file primeiro; depois sqlite/neo4j/mongo sobre a MESMA porta. O critério de pronto é: validações/adoption-journey passam sem mudar domínio nem resolvers.
+- ⬜ **Read-model v3 derivado** — decidir formato (`db.json`, SQLite, Neo4j ou `graph.js` como snapshot) e declarar qual projeção é operacional versus só visualização.
+- ⬜ **Matcher executável v3** — portar o espectro léxico/local/API da v2 para consumir `context.json` v3 e produzir saída fail-closed (`score`, `unknown`, `evidence`, `freshness`, `policy/egress`).
+- ⬜ **Authoring app v3** — substituir o app v2 por uma UI/CLI que escreve via comandos/envelope e nunca por mutação YAML direta.
+- ⬜ **Revisitar a D3** (arestas cross-repo derivadas) à luz de `repo-contract`, `repo-work-ack` e `contract-revision-proposal` da v3.
+- ⬜ **Aposentar o `_viewer`/`_app` legado** só depois que a v3 cobrir autoria + runtime; até lá, são arquivo histórico, não fonte ativa.
 
 ---
 
 ## Já entregue nesta frente (contexto)
 
-✅ modelo file-first + banco derivado + backend plugável (4 paradigmas) · host agrega projeções publicadas · matcher advisory (léxico/LLM local/API, **simulável na triagem**) · manifesto-por-repo + auto-discovery · o **app `_app`** com o fluxo registro→triagem→gate→ativação · a estrutura `registers/{candidates,archived}` + `intents/` com `promote`/`discard` (consolida+move, `git mv`) · deliberações q/r/d (taxonomia · registro-triagem-gate · roteamento · manifesto · projeções).
+✅ **v2 entregue/preservada como aprendizado:** modelo file-first + banco derivado + backend plugável (4 paradigmas) · matcher advisory (léxico/LLM local/API) · app `_app` com fluxo registro→triagem→gate→ativação · estrutura `registers/{candidates,archived}` + `intents/` com `promote`/`discard` · deliberações q/r/d.
+
+✅ **v3 entregue/ativa:** host `acme-governance/` + repos adotados `repos/<repo>/` · código MVP por repo · manifests/contextos publicados · repo-work ack com lifecycle · repo-contract registry · outcome resolver · trust-policy física · graph/company/owner apps · red-team/adoption-journey. **Ainda não entregue na v3:** `_lib` DDD, backends plugáveis, read-model operacional por banco, matcher executável e authoring app.

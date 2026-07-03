@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-checkout-1click::flag-1click
+intent: intent-checkout-1click
+work: flag-1click
+repo: acme-checkout
+purpose: create
+desc: fluxo de 1 clique atrás da flag (só recorrentes)
+review: interno
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme-governance/intents/intent-checkout-1click.yml
+  breakdownHash: 3652af529491
+code:
+  touchpoints:
+    - src/index.mjs

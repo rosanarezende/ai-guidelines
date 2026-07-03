@@ -9,12 +9,16 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 
 - repos acme têm código MVP importável;
 - repos críticos (`acme-core-api`, `acme-checkout`, `acme-analytics`) têm testes locais sem dependência externa;
+- o host central fica em `acme-governance/`; os repos adotados ficam em `repos/<repo>/`;
 - cada repo tem `.governance/manifest.yml`, `context.json`, `works/*.yml` e, quando owner, `registry/contracts/*.yml`;
 - o host valida `repo-context-*`, `repo-work-*` e `repo-contract-*` por resolver fail-closed;
-- `intent-cta-upgrade` publica um outcome real em `acme/outcomes/outcomes.yml`, com source/revision/window/attester/envelope e rollup derivado;
+- `intent-cta-upgrade` publica um outcome real em `acme-governance/outcomes/outcomes.yml`, com source/revision/window/attester/envelope e rollup derivado;
 - peças repo-local têm lifecycle (`acknowledged|active|blocked|done|dropped`) e outcome não soma antes de `done`;
-- `acme/trust-policy.yml` materializa controles de ACL local, revogação, fallback de matcher, secret quarantine e independência do oráculo;
+- `acme-governance/trust-policy.yml` materializa controles de ACL local, revogação, fallback de matcher, secret quarantine e independência do oráculo;
+- standalone reativo/avulso executável mora no repo (`repos/<repo>/.governance/works/*.yml`); incidentes centrais moram em `acme-governance/incidents/incidents.yml` e geram follow-ups resolvíveis;
 - `node _tools/adoption-journey.mjs` exercita código, contextos, work acknowledgements, contratos, red-team, testes locais e grafo.
+
+Limite deliberado/pendente: a v3 ainda não migrou a infraestrutura runtime da v2 (`_lib`, portas, adapters file/sqlite/neo4j/mongo, read-models `db.json` por repo e app de autoria). Ela é a sim ativa de dogfood file-first; a portabilidade de backend precisa virar uma próxima fatia explícita, não uma suposição.
 
 ## Fases A–E fechadas nesta leva
 
@@ -22,7 +26,7 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 
 Fechado em `intent-cta-upgrade`:
 
-- outcome válido em `acme/outcomes/outcomes.yml`;
+- outcome válido em `acme-governance/outcomes/outcomes.yml`;
 - source, revision, window, metric, aggregation, attested-by, contract-revisions e envelope resolvidos;
 - grafo/dashboard projetam outcome → target → objective;
 - fixtures adversariais bloqueiam outcome sem revisão, agregação incompatível, target errado, contrato omitido e self-attestation sem colapso.
@@ -69,6 +73,7 @@ Fechado:
 3. **Segunda intent com outcome:** escolher uma intent que toque contrato ou objetivo operacional para provar que o mecanismo não está especial-cased no `intent-cta-upgrade`.
 4. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
 5. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
+6. **Portabilidade v2 → v3:** desenhar a porta runtime v3 e decidir como reaproveitar `_org-simulation-v2/_lib` sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
 
 ## Comandos de aceite
 

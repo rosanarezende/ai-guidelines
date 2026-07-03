@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-checkout-stack::adapta-api
+intent: intent-checkout-stack
+work: adapta-api
+repo: acme-checkout-api
+purpose: sustain
+desc: adapta os endpoints ao stack novo
+review: interno
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme-governance/intents/intent-checkout-stack.yml
+  breakdownHash: 5b3fa2012212
+code:
+  touchpoints:
+    - src/index.mjs

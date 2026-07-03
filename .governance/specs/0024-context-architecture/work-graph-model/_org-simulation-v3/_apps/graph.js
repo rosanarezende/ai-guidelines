@@ -1,6 +1,6 @@
-// graph.js — GERADO por _tools/build-graph.mjs a partir de acme/ + model.yml — NÃO editar à mão.
+// graph.js — GERADO por _tools/build-graph.mjs a partir de acme-governance/ + repos/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "ad94ce6a65cf",
+  contentHash: "fa83c7d54c46",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -187,7 +187,7 @@ window.GRAPH = {
       data: {
         id: "prop-checkout-hardening",
         title: "hardening planejado do checkout pós-incidente",
-        "raised-by": "standalone:incidente-checkout",
+        "raised-by": "incident:incidente-checkout",
         "authorized-by": "obj-efficiency",
         target: "tgt-sre-incidents",
         status: "proposed",
@@ -1478,14 +1478,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-1click.yml",
+          file: "acme-governance/intents/intent-checkout-1click.yml",
           breakdownHash: "5cbe64ba7be7",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-checkout-api\\.governance\\works\\intent-checkout-1click--api-token-pagamento.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout-api\\.governance\\works\\intent-checkout-1click--api-token-pagamento.yml",
         _repo: "acme-checkout-api",
       },
     },
@@ -1514,14 +1514,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-1click.yml",
+          file: "acme-governance/intents/intent-checkout-1click.yml",
           breakdownHash: "23e80c3be044",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-analytics\\.governance\\works\\intent-checkout-1click--baseline-1click.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-analytics\\.governance\\works\\intent-checkout-1click--baseline-1click.yml",
         _repo: "acme-analytics",
       },
     },
@@ -1550,14 +1550,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-1click.yml",
+          file: "acme-governance/intents/intent-checkout-1click.yml",
           breakdownHash: "3652af529491",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-checkout\\.governance\\works\\intent-checkout-1click--flag-1click.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout\\.governance\\works\\intent-checkout-1click--flag-1click.yml",
         _repo: "acme-checkout",
       },
     },
@@ -1586,14 +1586,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-stack.yml",
+          file: "acme-governance/intents/intent-checkout-stack.yml",
           breakdownHash: "5b3fa2012212",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-checkout-api\\.governance\\works\\intent-checkout-stack--adapta-api.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout-api\\.governance\\works\\intent-checkout-stack--adapta-api.yml",
         _repo: "acme-checkout-api",
       },
     },
@@ -1613,14 +1613,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-stack.yml",
+          file: "acme-governance/intents/intent-checkout-stack.yml",
           breakdownHash: "987a9b0c2de6",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-design-system\\.governance\\works\\intent-checkout-stack--componentes-ds.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-design-system\\.governance\\works\\intent-checkout-stack--componentes-ds.yml",
         _repo: "acme-design-system",
       },
     },
@@ -1649,7 +1649,7 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-stack.yml",
+          file: "acme-governance/intents/intent-checkout-stack.yml",
           breakdownHash: "221f7d022672",
         },
         code: {
@@ -1657,7 +1657,7 @@ window.GRAPH = {
         },
         module: "mod-orders",
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-core-api\\.governance\\works\\intent-checkout-stack--estrangula-pedidos.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-core-api\\.governance\\works\\intent-checkout-stack--estrangula-pedidos.yml",
         _repo: "acme-core-api",
       },
     },
@@ -1686,14 +1686,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-stack.yml",
+          file: "acme-governance/intents/intent-checkout-stack.yml",
           breakdownHash: "de92d0945cc0",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-obs-stack\\.governance\\works\\intent-checkout-stack--monitor-canary.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-obs-stack\\.governance\\works\\intent-checkout-stack--monitor-canary.yml",
         _repo: "acme-obs-stack",
       },
     },
@@ -1722,14 +1722,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-stack.yml",
+          file: "acme-governance/intents/intent-checkout-stack.yml",
           breakdownHash: "a81e4bcdf481",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-checkout\\.governance\\works\\intent-checkout-stack--porta-fluxo.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout\\.governance\\works\\intent-checkout-stack--porta-fluxo.yml",
         _repo: "acme-checkout",
       },
     },
@@ -1749,14 +1749,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-stack.yml",
+          file: "acme-governance/intents/intent-checkout-stack.yml",
           breakdownHash: "b393543f8f0b",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-web-host\\.governance\\works\\intent-checkout-stack--revisao-contrato.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-web-host\\.governance\\works\\intent-checkout-stack--revisao-contrato.yml",
         _repo: "acme-web-host",
       },
     },
@@ -1785,14 +1785,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-checkout-stack.yml",
+          file: "acme-governance/intents/intent-checkout-stack.yml",
           breakdownHash: "5f48ae2a00da",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-checkout\\.governance\\works\\intent-checkout-stack--spike-carrinho.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout\\.governance\\works\\intent-checkout-stack--spike-carrinho.yml",
         _repo: "acme-checkout",
       },
     },
@@ -1812,14 +1812,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-consent-center.yml",
+          file: "acme-governance/intents/intent-consent-center.yml",
           breakdownHash: "94815db34003",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-identity\\.governance\\works\\intent-consent-center--central-consentimento.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-identity\\.governance\\works\\intent-consent-center--central-consentimento.yml",
         _repo: "acme-identity",
       },
     },
@@ -1848,14 +1848,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-consent-center.yml",
+          file: "acme-governance/intents/intent-consent-center.yml",
           breakdownHash: "57a8e6be79cb",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-web-host\\.governance\\works\\intent-consent-center--contexto-consentimento.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-web-host\\.governance\\works\\intent-consent-center--contexto-consentimento.yml",
         _repo: "acme-web-host",
       },
     },
@@ -1875,14 +1875,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-consent-center.yml",
+          file: "acme-governance/intents/intent-consent-center.yml",
           breakdownHash: "b99fc5d63501",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-data-pipeline\\.governance\\works\\intent-consent-center--propagar-base-legal.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-data-pipeline\\.governance\\works\\intent-consent-center--propagar-base-legal.yml",
         _repo: "acme-data-pipeline",
       },
     },
@@ -1909,6 +1909,14 @@ window.GRAPH = {
         desc: "elegibilidade + endpoint (o fate do spike decide: reusar × construir)",
         review: "interno",
         status: "done",
+        source: {
+          kind: "central-breakdown",
+          file: "acme-governance/intents/intent-cta-upgrade.yml",
+          breakdownHash: "6a62facbd48d",
+        },
+        code: {
+          touchpoints: ["src/index.mjs"],
+        },
         owner: "lead-billing",
         "started-at": "2027-01-06",
         "base-revision": "acme-api-billing@ctx-v1",
@@ -1924,16 +1932,8 @@ window.GRAPH = {
           "checked-by": "lead-billing",
           result: "endpoint de elegibilidade coberto pela fixture de billing",
         },
-        source: {
-          kind: "central-breakdown",
-          file: "acme/intents/intent-cta-upgrade.yml",
-          breakdownHash: "6a62facbd48d",
-        },
-        code: {
-          touchpoints: ["src/index.mjs"],
-        },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-api-billing\\.governance\\works\\intent-cta-upgrade--api-elegibilidade.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-api-billing\\.governance\\works\\intent-cta-upgrade--api-elegibilidade.yml",
         _repo: "acme-api-billing",
       },
     },
@@ -1960,6 +1960,14 @@ window.GRAPH = {
         desc: "instrumenta com o schema EXISTENTE (consome sem revisão); pronto ANTES de ligar a flag",
         review: "externo: time-data",
         status: "done",
+        source: {
+          kind: "central-breakdown",
+          file: "acme-governance/intents/intent-cta-upgrade.yml",
+          breakdownHash: "5c870e399a68",
+        },
+        code: {
+          touchpoints: ["src/index.mjs"],
+        },
         owner: "lead-data",
         "started-at": "2027-01-03",
         "base-revision": "acme-analytics@ctx-v1",
@@ -1975,16 +1983,8 @@ window.GRAPH = {
           "checked-by": "lead-data",
           result: "baseline e eventos de exposicao/conversao prontos antes da flag",
         },
-        source: {
-          kind: "central-breakdown",
-          file: "acme/intents/intent-cta-upgrade.yml",
-          breakdownHash: "5c870e399a68",
-        },
-        code: {
-          touchpoints: ["src/index.mjs"],
-        },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-analytics\\.governance\\works\\intent-cta-upgrade--baseline-eventos.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-analytics\\.governance\\works\\intent-cta-upgrade--baseline-eventos.yml",
         _repo: "acme-analytics",
       },
     },
@@ -2002,6 +2002,15 @@ window.GRAPH = {
         desc: "expõe leitura de contas legadas p/ a elegibilidade — MONOLITO: o dono é o do MÓDULO",
         review: "externo: time-identity",
         status: "done",
+        source: {
+          kind: "central-breakdown",
+          file: "acme-governance/intents/intent-cta-upgrade.yml",
+          breakdownHash: "56cab9e860e6",
+        },
+        code: {
+          touchpoints: ["src/modules/accounts.mjs"],
+        },
+        module: "mod-accounts",
         owner: "lead-identity",
         "started-at": "2027-01-05",
         "base-revision": "acme-core-api@ctx-v1",
@@ -2017,17 +2026,8 @@ window.GRAPH = {
           "checked-by": "lead-identity",
           result: "seam de contas legado exposto sem mover ownership do modulo",
         },
-        source: {
-          kind: "central-breakdown",
-          file: "acme/intents/intent-cta-upgrade.yml",
-          breakdownHash: "56cab9e860e6",
-        },
-        code: {
-          touchpoints: ["src/modules/accounts.mjs"],
-        },
-        module: "mod-accounts",
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-core-api\\.governance\\works\\intent-cta-upgrade--contas-legadas.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-core-api\\.governance\\works\\intent-cta-upgrade--contas-legadas.yml",
         _repo: "acme-core-api",
       },
     },
@@ -2054,6 +2054,14 @@ window.GRAPH = {
         desc: "EXPLORATION — dá p/ reusar o motor de elegibilidade que já existe? pergunta falsificável + fate",
         review: "interno",
         status: "done",
+        source: {
+          kind: "central-breakdown",
+          file: "acme-governance/intents/intent-cta-upgrade.yml",
+          breakdownHash: "6ca57a180976",
+        },
+        code: {
+          touchpoints: ["src/index.mjs"],
+        },
         owner: "lead-billing",
         "started-at": "2027-01-03",
         "base-revision": "acme-api-billing@ctx-v1",
@@ -2069,16 +2077,8 @@ window.GRAPH = {
           "checked-by": "lead-billing",
           result: "elegibilidade existente reaproveitada para o endpoint",
         },
-        source: {
-          kind: "central-breakdown",
-          file: "acme/intents/intent-cta-upgrade.yml",
-          breakdownHash: "6ca57a180976",
-        },
-        code: {
-          touchpoints: ["src/index.mjs"],
-        },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-api-billing\\.governance\\works\\intent-cta-upgrade--spike-elegibilidade.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-api-billing\\.governance\\works\\intent-cta-upgrade--spike-elegibilidade.yml",
         _repo: "acme-api-billing",
       },
     },
@@ -2096,6 +2096,14 @@ window.GRAPH = {
         desc: "UI do CTA atrás da flag — constrói em paralelo com mock; a integração espera o endpoint",
         review: "interno",
         status: "done",
+        source: {
+          kind: "central-breakdown",
+          file: "acme-governance/intents/intent-cta-upgrade.yml",
+          breakdownHash: "dfa6744f17e8",
+        },
+        code: {
+          touchpoints: ["src/index.mjs"],
+        },
         owner: "lead-billing",
         "started-at": "2027-01-08",
         "base-revision": "acme-mfe-billing@ctx-v1",
@@ -2111,16 +2119,8 @@ window.GRAPH = {
           "checked-by": "lead-billing",
           result: "CTA renderiza atras de flag e integra com quote de billing",
         },
-        source: {
-          kind: "central-breakdown",
-          file: "acme/intents/intent-cta-upgrade.yml",
-          breakdownHash: "dfa6744f17e8",
-        },
-        code: {
-          touchpoints: ["src/index.mjs"],
-        },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-mfe-billing\\.governance\\works\\intent-cta-upgrade--ui-cta.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-mfe-billing\\.governance\\works\\intent-cta-upgrade--ui-cta.yml",
         _repo: "acme-mfe-billing",
       },
     },
@@ -2149,14 +2149,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-help-selfservice.yml",
+          file: "acme-governance/intents/intent-help-selfservice.yml",
           breakdownHash: "5c5f10e7d9bc",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-help-center\\.governance\\works\\intent-help-selfservice--base-conhecimento.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-help-center\\.governance\\works\\intent-help-selfservice--base-conhecimento.yml",
         _repo: "acme-help-center",
       },
     },
@@ -2185,14 +2185,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-help-selfservice.yml",
+          file: "acme-governance/intents/intent-help-selfservice.yml",
           breakdownHash: "aaf0a8c5a8a1",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-help-center\\.governance\\works\\intent-help-selfservice--chatbot-deflexao.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-help-center\\.governance\\works\\intent-help-selfservice--chatbot-deflexao.yml",
         _repo: "acme-help-center",
       },
     },
@@ -2212,14 +2212,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-help-selfservice.yml",
+          file: "acme-governance/intents/intent-help-selfservice.yml",
           breakdownHash: "d44a9abfd9b9",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-analytics\\.governance\\works\\intent-help-selfservice--eventos-deflexao.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-analytics\\.governance\\works\\intent-help-selfservice--eventos-deflexao.yml",
         _repo: "acme-analytics",
       },
     },
@@ -2239,14 +2239,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-onboarding-checklist.yml",
+          file: "acme-governance/intents/intent-onboarding-checklist.yml",
           breakdownHash: "9c770512563e",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-analytics\\.governance\\works\\intent-onboarding-checklist--baseline-ativacao.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-analytics\\.governance\\works\\intent-onboarding-checklist--baseline-ativacao.yml",
         _repo: "acme-analytics",
       },
     },
@@ -2266,14 +2266,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-onboarding-checklist.yml",
+          file: "acme-governance/intents/intent-onboarding-checklist.yml",
           breakdownHash: "f15ba6a81fc6",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-mfe-onboarding\\.governance\\works\\intent-onboarding-checklist--flag-checklist.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-mfe-onboarding\\.governance\\works\\intent-onboarding-checklist--flag-checklist.yml",
         _repo: "acme-mfe-onboarding",
       },
     },
@@ -2302,14 +2302,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-p99-hardening.yml",
+          file: "acme-governance/intents/intent-p99-hardening.yml",
           breakdownHash: "0f70c6be27fd",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-web-host\\.governance\\works\\intent-p99-hardening--cache-contexto.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-web-host\\.governance\\works\\intent-p99-hardening--cache-contexto.yml",
         _repo: "acme-web-host",
       },
     },
@@ -2329,14 +2329,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-p99-hardening.yml",
+          file: "acme-governance/intents/intent-p99-hardening.yml",
           breakdownHash: "ef3a17e773a8",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-obs-stack\\.governance\\works\\intent-p99-hardening--guardrails-p99.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-obs-stack\\.governance\\works\\intent-p99-hardening--guardrails-p99.yml",
         _repo: "acme-obs-stack",
       },
     },
@@ -2356,14 +2356,14 @@ window.GRAPH = {
         status: "acknowledged",
         source: {
           kind: "central-breakdown",
-          file: "acme/intents/intent-p99-hardening.yml",
+          file: "acme-governance/intents/intent-p99-hardening.yml",
           breakdownHash: "af8bd5f8d7e5",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-checkout-api\\.governance\\works\\intent-p99-hardening--timeouts-api.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout-api\\.governance\\works\\intent-p99-hardening--timeouts-api.yml",
         _repo: "acme-checkout-api",
       },
     },
@@ -2382,14 +2382,14 @@ window.GRAPH = {
         revisionProposals: [],
         source: {
           kind: "central-contract",
-          file: "acme/contracts/contracts.yml",
+          file: "acme-governance/contracts/contracts.yml",
           contractHash: "a99d3b5a3b91",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-design-system\\.governance\\registry\\contracts\\acme-design-tokens.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-design-system\\.governance\\registry\\contracts\\acme-design-tokens.yml",
         _repo: "acme-design-system",
       },
     },
@@ -2445,14 +2445,14 @@ window.GRAPH = {
         revisionProposals: [],
         source: {
           kind: "central-contract",
-          file: "acme/contracts/contracts.yml",
+          file: "acme-governance/contracts/contracts.yml",
           contractHash: "708818ce198b",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-analytics\\.governance\\registry\\contracts\\acme-events-schema.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-analytics\\.governance\\registry\\contracts\\acme-events-schema.yml",
         _repo: "acme-analytics",
       },
     },
@@ -2508,14 +2508,14 @@ window.GRAPH = {
         ],
         source: {
           kind: "central-contract",
-          file: "acme/contracts/contracts.yml",
+          file: "acme-governance/contracts/contracts.yml",
           contractHash: "0f17dc00de60",
         },
         code: {
           touchpoints: ["src/index.mjs"],
         },
         _file:
-          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\acme\\repos\\acme-web-host\\.governance\\registry\\contracts\\acme-user-context.yml",
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-web-host\\.governance\\registry\\contracts\\acme-user-context.yml",
         _repo: "acme-web-host",
       },
     },
@@ -3837,6 +3837,7 @@ window.GRAPH = {
       type: "standalone",
       label: "fix: bug-frete",
       data: {
+        schema: "acme.standalone-work/v1",
         id: "bug-frete",
         kind: "fix",
         repo: "acme-checkout",
@@ -3864,12 +3865,61 @@ window.GRAPH = {
         },
         review: "interno",
         placar: "operational-bucket",
+        source: {
+          kind: "standalone",
+          file: "repos/acme-checkout/.governance/works/bug-frete.yml",
+        },
+        _file:
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout\\.governance\\works\\bug-frete.yml",
+        _repo: "acme-checkout",
+      },
+    },
+    {
+      id: "dep-bump-host",
+      type: "standalone",
+      label: "dep-bump: dep-bump-host",
+      data: {
+        schema: "acme.standalone-work/v1",
+        id: "dep-bump-host",
+        kind: "dep-bump",
+        repo: "acme-web-host",
+        origin: "rotina: lib X 3.x → 4.x",
+        review: "externo: area-platform",
+        placar: "operational-bucket",
+        source: {
+          kind: "standalone",
+          file: "repos/acme-web-host/.governance/works/dep-bump-host.yml",
+        },
+        _file:
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-web-host\\.governance\\works\\dep-bump-host.yml",
+        _repo: "acme-web-host",
+      },
+    },
+    {
+      id: "fix-checkout-timeout",
+      type: "standalone",
+      label: "fix: fix-checkout-timeout",
+      data: {
+        schema: "acme.standalone-work/v1",
+        id: "fix-checkout-timeout",
+        kind: "fix",
+        repo: "acme-checkout-api",
+        origin: "follow-up de incident:incidente-checkout — reduzir timeout e fallback do checkout",
+        review: "interno",
+        placar: "operational-bucket",
+        source: {
+          kind: "standalone",
+          file: "repos/acme-checkout-api/.governance/works/fix-checkout-timeout.yml",
+        },
+        _file:
+          "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-checkout-api\\.governance\\works\\fix-checkout-timeout.yml",
+        _repo: "acme-checkout-api",
       },
     },
     {
       id: "incidente-checkout",
-      type: "standalone",
-      label: "incident-response: incidente-checkout",
+      type: "incident",
+      label: "alta: incidente-checkout",
       data: {
         id: "incidente-checkout",
         kind: "incident-response",
@@ -3891,33 +3941,6 @@ window.GRAPH = {
           },
         ],
         placar: "operational-bucket + MTTR",
-      },
-    },
-    {
-      id: "fix-checkout-timeout",
-      type: "standalone",
-      label: "fix: fix-checkout-timeout",
-      data: {
-        id: "fix-checkout-timeout",
-        kind: "fix",
-        repo: "acme-checkout-api",
-        origin:
-          "follow-up de standalone:incidente-checkout — reduzir timeout e fallback do checkout",
-        review: "interno",
-        placar: "operational-bucket",
-      },
-    },
-    {
-      id: "dep-bump-host",
-      type: "standalone",
-      label: "dep-bump: dep-bump-host",
-      data: {
-        id: "dep-bump-host",
-        kind: "dep-bump",
-        repo: "acme-web-host",
-        origin: "rotina: lib X 3.x → 4.x",
-        review: "externo: area-platform",
-        placar: "operational-bucket",
       },
     },
   ],
@@ -6143,10 +6166,40 @@ window.GRAPH = {
       type: "in-repo",
     },
     {
-      id: "in-repo:incidente-checkout->acme-checkout-api",
-      source: "incidente-checkout",
+      id: "raises: cupom duplo zera o frete->bug-frete",
+      source: " cupom duplo zera o frete",
+      target: "bug-frete",
+      type: "raises",
+    },
+    {
+      id: "in-repo:dep-bump-host->acme-web-host",
+      source: "dep-bump-host",
+      target: "acme-web-host",
+      type: "in-repo",
+    },
+    {
+      id: "raises: lib X 3.x → 4.x->dep-bump-host",
+      source: " lib X 3.x → 4.x",
+      target: "dep-bump-host",
+      type: "raises",
+    },
+    {
+      id: "in-repo:fix-checkout-timeout->acme-checkout-api",
+      source: "fix-checkout-timeout",
       target: "acme-checkout-api",
       type: "in-repo",
+    },
+    {
+      id: "raises:incidente-checkout — reduzir timeout e fallback do checkout->fix-checkout-timeout",
+      source: "incidente-checkout — reduzir timeout e fallback do checkout",
+      target: "fix-checkout-timeout",
+      type: "raises",
+    },
+    {
+      id: "handles-incident:acme-checkout-api->incidente-checkout",
+      source: "acme-checkout-api",
+      target: "incidente-checkout",
+      type: "handles-incident",
     },
     {
       id: "raises:incidente-checkout->fix-checkout-timeout",
@@ -6159,18 +6212,6 @@ window.GRAPH = {
       source: "incidente-checkout",
       target: "prop-checkout-hardening",
       type: "raises",
-    },
-    {
-      id: "in-repo:fix-checkout-timeout->acme-checkout-api",
-      source: "fix-checkout-timeout",
-      target: "acme-checkout-api",
-      type: "in-repo",
-    },
-    {
-      id: "in-repo:dep-bump-host->acme-web-host",
-      source: "dep-bump-host",
-      target: "acme-web-host",
-      type: "in-repo",
     },
   ],
   issues: [

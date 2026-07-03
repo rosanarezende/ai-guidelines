@@ -10,12 +10,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import prettier from "prettier";
 import { parse } from "yaml";
-import { ACME } from "./org.mjs";
+import { REPOS_ROOT } from "./org.mjs";
 import { inspectRepoCode } from "./repo-contexts.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(here, "..");
-const REPOS = path.join(ACME, "repos");
+const REPOS = REPOS_ROOT;
 const TEMPLATE = path.join(ROOT, "_templates", "capability-extraction-prompt.md");
 const args = process.argv.slice(2);
 const write = args.includes("--write");

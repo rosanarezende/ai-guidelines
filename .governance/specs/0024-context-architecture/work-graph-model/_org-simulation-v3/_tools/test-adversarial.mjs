@@ -439,9 +439,28 @@ const CASES = [
     expect: "refs",
     mutate: () => {
       const o = clone();
-      o.standalone
+      o.incidents
         .find((s) => s.id === "incidente-checkout")
         ["follow-ups"].find((f) => f.kind === "proposal").ref = "proposal:fantasma";
+      return o;
+    },
+  },
+  {
+    id: "S·1 standalone repo-local no repo errado falha",
+    expect: "standalone-location",
+    mutate: () => {
+      const o = clone();
+      o.standalone.find((s) => s.id === "bug-frete")._repo = "acme-web-host";
+      return o;
+    },
+  },
+  {
+    id: "S·2 proposal de incidente sem vínculo reverso falha",
+    expect: "follow-up-ref",
+    mutate: () => {
+      const o = clone();
+      o.proposals.find((p) => p.id === "prop-checkout-hardening")["raised-by"] =
+        "standalone:fix-checkout-timeout";
       return o;
     },
   },

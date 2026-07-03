@@ -4,14 +4,12 @@
 // but a human must review before it becomes manifest truth.
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { parse, stringify } from "yaml";
-import { ACME } from "./org.mjs";
+import { GOVERNANCE_ROOT, REPOS_ROOT, SIM_ROOT } from "./org.mjs";
 import { inspectRepoCode } from "./repo-contexts.mjs";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.join(here, "..");
-const REPOS = path.join(ACME, "repos");
+const ROOT = SIM_ROOT;
+const REPOS = REPOS_ROOT;
 const args = new Set(process.argv.slice(2));
 const check = args.has("--check");
 
@@ -33,7 +31,7 @@ function repoDirs() {
 }
 
 function centralRepos() {
-  const file = path.join(REPOS, "repos.yml");
+  const file = path.join(GOVERNANCE_ROOT, "repos.yml");
   if (!existsSync(file)) return new Map();
   const doc = readYaml(file);
   return new Map((doc.repos || []).map((repo) => [repo.id, repo]));

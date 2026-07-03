@@ -5,9 +5,9 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse, stringify } from "yaml";
-import { ACME } from "./org.mjs";
+import { REPOS_ROOT, SIM_ROOT } from "./org.mjs";
 
-const REPOS_DIR = path.join(ACME, "repos");
+const REPOS_DIR = REPOS_ROOT;
 const GOVERNANCE_DIR = ".governance";
 const WORK_SCHEMA = "acme.repo-work/v1";
 const WORK_STATUSES = ["acknowledged", "active", "blocked", "done", "dropped"];
@@ -96,7 +96,7 @@ function expectedClaim(intent, work) {
     status: "acknowledged",
     source: {
       kind: "central-breakdown",
-      file: `acme/intents/${intent.id}.yml`,
+      file: `acme-governance/intents/${intent.id}.yml`,
       breakdownHash: digest(breakdownPayload(intent, work)),
     },
     code: {
@@ -127,6 +127,10 @@ export function loadPublishedRepoWorks() {
     }
   }
   return claims.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+}
+
+function isStandaloneWork(claim) {
+  return claim?.schema === "acme.standalone-work/v1" || claim?.source?.kind === "standalone";
 }
 
 export function publishRepoWorks(o) {
@@ -265,7 +269,8 @@ export function validateRepoWorks(o, options = {}) {
   }
 
   for (const claim of published) {
-    const node = claim.id || path.relative(ACME, claim._file).replaceAll("\\", "/");
+    if (isStandaloneWork(claim)) continue;
+    const node = claim.id || path.relative(SIM_ROOT, claim._file).replaceAll("\\", "/");
     if (publishedById.has(claim.id)) err("repo-work-duplicate", node, "id duplicado");
     publishedById.set(claim.id, claim);
     checkClosedSchema(claim, node, issues);

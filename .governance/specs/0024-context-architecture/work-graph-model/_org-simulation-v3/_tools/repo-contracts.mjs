@@ -5,9 +5,9 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse, stringify } from "yaml";
-import { ACME } from "./org.mjs";
+import { REPOS_ROOT, SIM_ROOT } from "./org.mjs";
 
-const REPOS_DIR = path.join(ACME, "repos");
+const REPOS_DIR = REPOS_ROOT;
 const GOVERNANCE_DIR = ".governance";
 const CONTRACT_SCHEMA = "acme.repo-contract/v1";
 
@@ -67,7 +67,7 @@ function expectedContract(contract) {
     revisionProposals: contract["revision-proposals"] || [],
     source: {
       kind: "central-contract",
-      file: "acme/contracts/contracts.yml",
+      file: "acme-governance/contracts/contracts.yml",
       contractHash: digest(contractPayload(contract)),
     },
     code: {
@@ -161,7 +161,7 @@ export function validateRepoContracts(o, options = {}) {
   }
 
   for (const contract of published) {
-    const node = contract.id || path.relative(ACME, contract._file).replaceAll("\\", "/");
+    const node = contract.id || path.relative(SIM_ROOT, contract._file).replaceAll("\\", "/");
     if (publishedById.has(contract.id)) err("repo-contract-duplicate", node, "id duplicado");
     publishedById.set(contract.id, contract);
     checkClosedSchema(contract, node, issues);

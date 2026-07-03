@@ -1,0 +1,15 @@
+{
+  "name": "@acme-sim/acme-checkout",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test.mjs",
+    "smoke": "node ../../_tools/check-code-fixtures.mjs"
+  },
+  "dependencies": {
+    "@acme-sim/acme-analytics": "workspace:*",
+    "@acme-sim/acme-checkout-api": "workspace:*",
+    "@acme-sim/acme-design-system": "workspace:*",
+    "@acme-sim/acme-web-host": "workspace:*"
+  }
+}

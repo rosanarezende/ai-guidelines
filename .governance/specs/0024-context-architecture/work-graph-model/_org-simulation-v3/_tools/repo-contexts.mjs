@@ -5,9 +5,9 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse } from "yaml";
-import { ACME } from "./org.mjs";
+import { REPOS_ROOT } from "./org.mjs";
 
-const REPOS_DIR = path.join(ACME, "repos");
+const REPOS_DIR = REPOS_ROOT;
 const GOVERNANCE_DIR = ".governance";
 const CONTEXT_SCHEMA = "acme.repo-context/v1";
 

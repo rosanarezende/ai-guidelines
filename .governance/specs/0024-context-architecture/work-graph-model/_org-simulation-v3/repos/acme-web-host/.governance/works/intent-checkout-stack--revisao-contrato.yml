@@ -1,0 +1,17 @@
+schema: acme.repo-work/v1
+id: intent-checkout-stack::revisao-contrato
+intent: intent-checkout-stack
+work: revisao-contrato
+repo: acme-web-host
+purpose: sustain
+desc: acme-user-context v3 → v4 COM QUEBRA — abre a janela; mutação compat-window-change (dangerous
+  → alerta q/r/d)
+review: "externo: area-platform"
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme-governance/intents/intent-checkout-stack.yml
+  breakdownHash: b393543f8f0b
+code:
+  touchpoints:
+    - src/index.mjs

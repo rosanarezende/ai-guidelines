@@ -1,8 +1,0 @@
-{
-  "name": "@acme-sim/acme-obs-stack",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "smoke": "node ../../../_tools/check-code-fixtures.mjs"
-  }
-}
