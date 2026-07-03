@@ -64,6 +64,11 @@ const steps = [
     command: "node",
     args: ["_tools/build-graph.mjs"],
   },
+  {
+    name: "10. exemplos file/sqlite/neo4j/mongo estao frescos",
+    command: "node",
+    args: ["_tools/export-backend-examples.mjs", "--check"],
+  },
 ];
 
 for (const step of steps) {

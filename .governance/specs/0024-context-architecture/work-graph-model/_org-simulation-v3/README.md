@@ -35,6 +35,8 @@ node _tools/publish-repo-contracts.mjs # publica registry/contracts nos owner re
 node _tools/check-repo-contracts.mjs # falha se contracts.yml e registry local divergirem
 node _tools/check-local-repo-tests.mjs # roda os testes locais dos repos criticos
 node _tools/check-runtime.mjs # prova _lib runtime: file adapter + dominio + read-model + command dry-run
+node _tools/export-backend-examples.mjs # gera exemplos file/sqlite/neo4j/mongo a partir do read-model
+node _tools/export-backend-examples.mjs --check # confere freshness dos exemplos de banco
 node _tools/adoption-journey.mjs # dogfood completo da adoção repo-existente → host agregado
 node _tools/build-graph.mjs     # regenera _apps/graph.js (grafo + issues embutidos)
 node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada DEVE ser pega
@@ -66,7 +68,7 @@ node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada D
 ## Decisões de desenho
 
 - **File-first, com fronteira física explícita:** `acme-governance/` é o host central da org; `repos/` representa os repos já existentes da empresa; cada repo tem sidecar próprio (`repos/<repo>/.governance/manifest.yml` → `context.json`). O `repos.yml` central é inventário; a publicação por repo impede que ele vire a única fonte de verdade.
-- **Escopo honesto da v3:** esta sim agora porta a base `_lib` DDD (`domain`, `adapters/file`, command dry-run e read-model de grafo), mas ainda não porta backends plugáveis (sqlite/neo4j/mongo), read-models `db.json` por repo nem app de autoria da v2. A v3 prova dogfood repo-first, runtime file-first e resolvers fail-closed; a portabilidade de backend transacional fica como próxima camada, registrada em `features.md`.
+- **Escopo honesto da v3:** esta sim agora porta a base `_lib` DDD (`domain`, `adapters/file`, command dry-run e read-model de grafo) e exemplos verificáveis de backends derivados em `_examples/backends/` (`file`, `neo4j`, `sqlite`, `mongo`). Ainda não porta adapters transacionais sqlite/neo4j/mongo nem app de autoria da v2. A v3 prova dogfood repo-first, runtime file-first, projeções multi-backend e resolvers fail-closed; a portabilidade de backend transacional fica como próxima camada, registrada em `features.md`.
 - **Standalone é repo-local:** fixes/dep-bumps avulsos moram em `repos/<repo>/.governance/works/*.yml` com `schema: acme.standalone-work/v1`. O host só agrega. Incidente é instrumento central em `acme-governance/incidents/incidents.yml` e gera follow-ups para standalone/proposal.
 - **Adoção por empresa existente:** `_tools/adopt-existing-repos.mjs` faz scaffold minimo e gera `capability-candidates.yml` como rascunho revisavel. `_tools/prepare-capability-review.mjs` monta um pacote de revisão por repo com evidência estática para IA/humano. A extração por IA fica como canal assistivo (template em `_templates/capability-extraction-prompt.md`), nunca como mutação silenciosa do manifesto.
 - **Breakdown reconhecido pelo repo:** `intent.works` continua sendo a quebra central, mas cada repo publica `.governance/works/<intent>--<work>.yml` com hash do breakdown e touchpoint de código. Se a peça muda e o repo não reconhece a nova versão, o host falha em `repo-work-stale`.

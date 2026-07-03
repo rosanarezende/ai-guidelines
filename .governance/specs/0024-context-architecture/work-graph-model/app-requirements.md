@@ -475,5 +475,8 @@ de iniciar UI/API nova.
 - **Opção B:** criar backend HTTP fino sobre os scripts v3 atuais e refatorar depois.
 - **Motivo:** a opção B acelera tela, mas cristaliza scripts como domínio e repete o erro que a v3
   acabou de expor: texto/projeção parecendo mecanismo.
+- **Estado complementar:** `_org-simulation-v3/_examples/backends/` agora contém exemplos derivados
+  nos quatro formatos (`file`, `neo4j`, `sqlite`, `mongo`), gerados por runtime e verificados por
+  `export-backend-examples --check`.
 - **Próxima decisão:** implementar escrita real por comandos/event-log e escolher o primeiro backend
   transacional (`file` com lock/event-log ou SQLite) sem transformar banco/read-model em SSOT.
