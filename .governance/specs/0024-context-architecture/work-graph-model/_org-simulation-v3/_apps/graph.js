@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme-governance/ + repos/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "fa83c7d54c46",
+  contentHash: "e0a7bd47fffe",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -3875,6 +3875,15 @@ window.GRAPH = {
       },
     },
     {
+      id: "origin:bug-frete",
+      type: "origin",
+      label: "suporte reporta: cupom duplo zera o frete",
+      data: {
+        text: "suporte reporta: cupom duplo zera o frete",
+        target: "bug-frete",
+      },
+    },
+    {
       id: "dep-bump-host",
       type: "standalone",
       label: "dep-bump: dep-bump-host",
@@ -3893,6 +3902,15 @@ window.GRAPH = {
         _file:
           "C:\\Users\\Rosana\\dev\\ai-guidelines\\.governance\\specs\\0024-context-architecture\\work-graph-model\\_org-simulation-v3\\repos\\acme-web-host\\.governance\\works\\dep-bump-host.yml",
         _repo: "acme-web-host",
+      },
+    },
+    {
+      id: "origin:dep-bump-host",
+      type: "origin",
+      label: "rotina: lib X 3.x → 4.x",
+      data: {
+        text: "rotina: lib X 3.x → 4.x",
+        target: "dep-bump-host",
       },
     },
     {
@@ -4444,12 +4462,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-checkout-api->acme-checkout-api::src/index.mjs",
-      source: "acme-checkout-api",
-      target: "acme-checkout-api::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-work:acme-design-system->intent-checkout-stack::componentes-ds::repo-ack",
       source: "acme-design-system",
       target: "intent-checkout-stack::componentes-ds::repo-ack",
@@ -4540,12 +4552,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-checkout->acme-checkout::src/index.mjs",
-      source: "acme-checkout",
-      target: "acme-checkout::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-work:acme-web-host->intent-checkout-stack::revisao-contrato::repo-ack",
       source: "acme-web-host",
       target: "intent-checkout-stack::revisao-contrato::repo-ack",
@@ -4588,12 +4594,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-checkout->acme-checkout::src/index.mjs",
-      source: "acme-checkout",
-      target: "acme-checkout::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-work:acme-identity->intent-consent-center::central-consentimento::repo-ack",
       source: "acme-identity",
       target: "intent-consent-center::central-consentimento::repo-ack",
@@ -4634,12 +4634,6 @@ window.GRAPH = {
       source: "intent-consent-center::contexto-consentimento::repo-ack",
       target: "acme-web-host::src/index.mjs",
       type: "evidenced-by",
-    },
-    {
-      id: "contains-code:acme-web-host->acme-web-host::src/index.mjs",
-      source: "acme-web-host",
-      target: "acme-web-host::src/index.mjs",
-      type: "contains-code",
     },
     {
       id: "publishes-work:acme-data-pipeline->intent-consent-center::propagar-base-legal::repo-ack",
@@ -4708,12 +4702,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-analytics->acme-analytics::src/index.mjs",
-      source: "acme-analytics",
-      target: "acme-analytics::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-work:acme-core-api->intent-cta-upgrade::contas-legadas::repo-ack",
       source: "acme-core-api",
       target: "intent-cta-upgrade::contas-legadas::repo-ack",
@@ -4754,12 +4742,6 @@ window.GRAPH = {
       source: "intent-cta-upgrade::spike-elegibilidade::repo-ack",
       target: "acme-api-billing::src/index.mjs",
       type: "evidenced-by",
-    },
-    {
-      id: "contains-code:acme-api-billing->acme-api-billing::src/index.mjs",
-      source: "acme-api-billing",
-      target: "acme-api-billing::src/index.mjs",
-      type: "contains-code",
     },
     {
       id: "publishes-work:acme-mfe-billing->intent-cta-upgrade::ui-cta::repo-ack",
@@ -4828,12 +4810,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-help-center->acme-help-center::src/index.mjs",
-      source: "acme-help-center",
-      target: "acme-help-center::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-work:acme-analytics->intent-help-selfservice::eventos-deflexao::repo-ack",
       source: "acme-analytics",
       target: "intent-help-selfservice::eventos-deflexao::repo-ack",
@@ -4852,12 +4828,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-analytics->acme-analytics::src/index.mjs",
-      source: "acme-analytics",
-      target: "acme-analytics::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-work:acme-analytics->intent-onboarding-checklist::baseline-ativacao::repo-ack",
       source: "acme-analytics",
       target: "intent-onboarding-checklist::baseline-ativacao::repo-ack",
@@ -4874,12 +4844,6 @@ window.GRAPH = {
       source: "intent-onboarding-checklist::baseline-ativacao::repo-ack",
       target: "acme-analytics::src/index.mjs",
       type: "evidenced-by",
-    },
-    {
-      id: "contains-code:acme-analytics->acme-analytics::src/index.mjs",
-      source: "acme-analytics",
-      target: "acme-analytics::src/index.mjs",
-      type: "contains-code",
     },
     {
       id: "publishes-work:acme-mfe-onboarding->intent-onboarding-checklist::flag-checklist::repo-ack",
@@ -4924,12 +4888,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-web-host->acme-web-host::src/index.mjs",
-      source: "acme-web-host",
-      target: "acme-web-host::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-work:acme-obs-stack->intent-p99-hardening::guardrails-p99::repo-ack",
       source: "acme-obs-stack",
       target: "intent-p99-hardening::guardrails-p99::repo-ack",
@@ -4946,12 +4904,6 @@ window.GRAPH = {
       source: "intent-p99-hardening::guardrails-p99::repo-ack",
       target: "acme-obs-stack::src/index.mjs",
       type: "evidenced-by",
-    },
-    {
-      id: "contains-code:acme-obs-stack->acme-obs-stack::src/index.mjs",
-      source: "acme-obs-stack",
-      target: "acme-obs-stack::src/index.mjs",
-      type: "contains-code",
     },
     {
       id: "publishes-work:acme-checkout-api->intent-p99-hardening::timeouts-api::repo-ack",
@@ -4972,12 +4924,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-checkout-api->acme-checkout-api::src/index.mjs",
-      source: "acme-checkout-api",
-      target: "acme-checkout-api::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-contract-registry:acme-design-system->acme-design-system::contract::acme-design-tokens",
       source: "acme-design-system",
       target: "acme-design-system::contract::acme-design-tokens",
@@ -4994,12 +4940,6 @@ window.GRAPH = {
       source: "acme-design-system::contract::acme-design-tokens",
       target: "acme-design-system::src/index.mjs",
       type: "evidenced-by",
-    },
-    {
-      id: "contains-code:acme-design-system->acme-design-system::src/index.mjs",
-      source: "acme-design-system",
-      target: "acme-design-system::src/index.mjs",
-      type: "contains-code",
     },
     {
       id: "publishes-contract-registry:acme-analytics->acme-analytics::contract::acme-events-schema",
@@ -5020,12 +4960,6 @@ window.GRAPH = {
       type: "evidenced-by",
     },
     {
-      id: "contains-code:acme-analytics->acme-analytics::src/index.mjs",
-      source: "acme-analytics",
-      target: "acme-analytics::src/index.mjs",
-      type: "contains-code",
-    },
-    {
       id: "publishes-contract-registry:acme-web-host->acme-web-host::contract::acme-user-context",
       source: "acme-web-host",
       target: "acme-web-host::contract::acme-user-context",
@@ -5042,12 +4976,6 @@ window.GRAPH = {
       source: "acme-web-host::contract::acme-user-context",
       target: "acme-web-host::src/index.mjs",
       type: "evidenced-by",
-    },
-    {
-      id: "contains-code:acme-web-host->acme-web-host::src/index.mjs",
-      source: "acme-web-host",
-      target: "acme-web-host::src/index.mjs",
-      type: "contains-code",
     },
     {
       id: "publishes:acme-web-host->acme-user-context",
@@ -6166,8 +6094,8 @@ window.GRAPH = {
       type: "in-repo",
     },
     {
-      id: "raises: cupom duplo zera o frete->bug-frete",
-      source: " cupom duplo zera o frete",
+      id: "raises:origin:bug-frete->bug-frete",
+      source: "origin:bug-frete",
       target: "bug-frete",
       type: "raises",
     },
@@ -6178,8 +6106,8 @@ window.GRAPH = {
       type: "in-repo",
     },
     {
-      id: "raises: lib X 3.x → 4.x->dep-bump-host",
-      source: " lib X 3.x → 4.x",
+      id: "raises:origin:dep-bump-host->dep-bump-host",
+      source: "origin:dep-bump-host",
       target: "dep-bump-host",
       type: "raises",
     },
@@ -6190,8 +6118,8 @@ window.GRAPH = {
       type: "in-repo",
     },
     {
-      id: "raises:incidente-checkout — reduzir timeout e fallback do checkout->fix-checkout-timeout",
-      source: "incidente-checkout — reduzir timeout e fallback do checkout",
+      id: "raises:incidente-checkout->fix-checkout-timeout",
+      source: "incidente-checkout",
       target: "fix-checkout-timeout",
       type: "raises",
     },
@@ -6200,18 +6128,6 @@ window.GRAPH = {
       source: "acme-checkout-api",
       target: "incidente-checkout",
       type: "handles-incident",
-    },
-    {
-      id: "raises:incidente-checkout->fix-checkout-timeout",
-      source: "incidente-checkout",
-      target: "fix-checkout-timeout",
-      type: "raises",
-    },
-    {
-      id: "raises:incidente-checkout->prop-checkout-hardening",
-      source: "incidente-checkout",
-      target: "prop-checkout-hardening",
-      type: "raises",
     },
   ],
   issues: [

@@ -3,10 +3,10 @@
     "schema": "acme.backend-example/v1",
     "authority": "derived-read-model",
     "source": "acme-governance + repos/.governance + runtime v3",
-    "contentHash": "342b6ba5322e",
+    "contentHash": "2934a08da271",
     "counts": {
-      "nodes": 169,
-      "edges": 378,
+      "nodes": 171,
+      "edges": 361,
       "issues": 3
     },
     "note": "Example backend exports are derived. YAML/event-log remains authoritative."
@@ -3597,6 +3597,26 @@
       "dataHash": "4849d645e332"
     },
     {
+      "id": "origin:bug-frete",
+      "type": "origin",
+      "label": "suporte reporta: cupom duplo zera o frete",
+      "data": {
+        "text": "suporte reporta: cupom duplo zera o frete",
+        "target": "bug-frete"
+      },
+      "dataHash": "381ce5f55fcd"
+    },
+    {
+      "id": "origin:dep-bump-host",
+      "type": "origin",
+      "label": "rotina: lib X 3.x → 4.x",
+      "data": {
+        "text": "rotina: lib X 3.x → 4.x",
+        "target": "dep-bump-host"
+      },
+      "dataHash": "55c3db4e788c"
+    },
+    {
       "id": "out-cta-upgrade-2027q1",
       "type": "outcome",
       "label": "conversion-rate: +2.4 %",
@@ -4648,36 +4668,6 @@
       "type": "contains-code"
     },
     {
-      "id": "contains-code:acme-analytics->acme-analytics::src/index.mjs",
-      "source": "acme-analytics",
-      "target": "acme-analytics::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-analytics->acme-analytics::src/index.mjs",
-      "source": "acme-analytics",
-      "target": "acme-analytics::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-analytics->acme-analytics::src/index.mjs",
-      "source": "acme-analytics",
-      "target": "acme-analytics::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-analytics->acme-analytics::src/index.mjs",
-      "source": "acme-analytics",
-      "target": "acme-analytics::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-api-billing->acme-api-billing::src/index.mjs",
-      "source": "acme-api-billing",
-      "target": "acme-api-billing::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
       "id": "contains-code:acme-api-billing->acme-api-billing::src/index.mjs",
       "source": "acme-api-billing",
       "target": "acme-api-billing::src/index.mjs",
@@ -4687,30 +4677,6 @@
       "id": "contains-code:acme-checkout->acme-checkout::src/index.mjs",
       "source": "acme-checkout",
       "target": "acme-checkout::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-checkout->acme-checkout::src/index.mjs",
-      "source": "acme-checkout",
-      "target": "acme-checkout::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-checkout->acme-checkout::src/index.mjs",
-      "source": "acme-checkout",
-      "target": "acme-checkout::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-checkout-api->acme-checkout-api::src/index.mjs",
-      "source": "acme-checkout-api",
-      "target": "acme-checkout-api::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-checkout-api->acme-checkout-api::src/index.mjs",
-      "source": "acme-checkout-api",
-      "target": "acme-checkout-api::src/index.mjs",
       "type": "contains-code"
     },
     {
@@ -4744,18 +4710,6 @@
       "type": "contains-code"
     },
     {
-      "id": "contains-code:acme-design-system->acme-design-system::src/index.mjs",
-      "source": "acme-design-system",
-      "target": "acme-design-system::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-help-center->acme-help-center::src/index.mjs",
-      "source": "acme-help-center",
-      "target": "acme-help-center::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
       "id": "contains-code:acme-help-center->acme-help-center::src/index.mjs",
       "source": "acme-help-center",
       "target": "acme-help-center::src/index.mjs",
@@ -4783,30 +4737,6 @@
       "id": "contains-code:acme-obs-stack->acme-obs-stack::src/index.mjs",
       "source": "acme-obs-stack",
       "target": "acme-obs-stack::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-obs-stack->acme-obs-stack::src/index.mjs",
-      "source": "acme-obs-stack",
-      "target": "acme-obs-stack::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-web-host->acme-web-host::src/index.mjs",
-      "source": "acme-web-host",
-      "target": "acme-web-host::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-web-host->acme-web-host::src/index.mjs",
-      "source": "acme-web-host",
-      "target": "acme-web-host::src/index.mjs",
-      "type": "contains-code"
-    },
-    {
-      "id": "contains-code:acme-web-host->acme-web-host::src/index.mjs",
-      "source": "acme-web-host",
-      "target": "acme-web-host::src/index.mjs",
       "type": "contains-code"
     },
     {
@@ -6190,24 +6120,6 @@
       "type": "publishes"
     },
     {
-      "id": "raises: cupom duplo zera o frete->bug-frete",
-      "source": " cupom duplo zera o frete",
-      "target": "bug-frete",
-      "type": "raises"
-    },
-    {
-      "id": "raises: lib X 3.x → 4.x->dep-bump-host",
-      "source": " lib X 3.x → 4.x",
-      "target": "dep-bump-host",
-      "type": "raises"
-    },
-    {
-      "id": "raises:incidente-checkout — reduzir timeout e fallback do checkout->fix-checkout-timeout",
-      "source": "incidente-checkout — reduzir timeout e fallback do checkout",
-      "target": "fix-checkout-timeout",
-      "type": "raises"
-    },
-    {
       "id": "raises:incidente-checkout->fix-checkout-timeout",
       "source": "incidente-checkout",
       "target": "fix-checkout-timeout",
@@ -6220,9 +6132,15 @@
       "type": "raises"
     },
     {
-      "id": "raises:incidente-checkout->prop-checkout-hardening",
-      "source": "incidente-checkout",
-      "target": "prop-checkout-hardening",
+      "id": "raises:origin:bug-frete->bug-frete",
+      "source": "origin:bug-frete",
+      "target": "bug-frete",
+      "type": "raises"
+    },
+    {
+      "id": "raises:origin:dep-bump-host->dep-bump-host",
+      "source": "origin:dep-bump-host",
+      "target": "dep-bump-host",
       "type": "raises"
     },
     {

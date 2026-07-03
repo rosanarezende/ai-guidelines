@@ -263,7 +263,16 @@ export function buildBackendExampleArtifacts(graph) {
       "| sqlite | read-model relacional local | exemplo completo derivado |\n" +
       "| mongo | snapshot documental/event-like | exemplo completo derivado |\n\n" +
       `Snapshot: ${model.metadata.contentHash} · ${model.metadata.counts.nodes} nós · ${model.metadata.counts.edges} arestas · ${model.metadata.counts.issues} issues.\n\n` +
-      "Regra: estes arquivos são projeções. Ação governada deve reler o YAML/event-log autoritativo.\n",
+      "Regra: estes arquivos são projeções. Ação governada deve reler o YAML/event-log autoritativo.\n\n" +
+      "Veja `ACTION-CONTRACT.md` para o contrato operacional que impede o read-model de virar SSOT.\n",
+    "ACTION-CONTRACT.md":
+      "# Backend action contract\n\n" +
+      "Este contrato é parte do dogfood: um read-model pode acelerar consulta, mas não pode virar fonte de ação.\n\n" +
+      "- `READ_MODEL_IS_DERIVED_ONLY`: `file/read-model.json`, `neo4j/*.cypher`, `sqlite/*.sql` e `mongo/*.jsonl` são projeções derivadas.\n" +
+      "- `MUST_REREAD_AUTHORITATIVE_SOURCE`: qualquer comando governado deve reler YAML/event-log autoritativo antes de escrever, promover, aprovar ou publicar outcome.\n" +
+      "- `FAIL_CLOSED_ON_STALE_SOURCE`: se o hash/base-revision da fonte não bate, o comando deve falhar fechado.\n" +
+      "- `NO_ACTION_FROM_DERIVED_GRAPH`: Neo4j/SQLite/Mongo podem responder dashboard, impacto e investigação; não autorizam mutação por conta própria.\n\n" +
+      "A sim v3 ainda não tem adapters transacionais SQLite/Neo4j/Mongo. Estes arquivos são exemplos operacionais de projeção, não mudança de SSOT.\n",
     ...fileArtifacts(model),
     ...neo4jArtifacts(model),
     ...sqliteArtifacts(model),

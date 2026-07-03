@@ -1,6 +1,6 @@
 // Neo4j graph seed generated from the v3 runtime read-model.
-MERGE (m:ProjectionMetadata {contentHash: '342b6ba5322e'})
-SET m.schema = 'acme.backend-example/v1', m.nodeCount = 169, m.edgeCount = 378, m.issueCount = 3;
+MERGE (m:ProjectionMetadata {contentHash: '2934a08da271'})
+SET m.schema = 'acme.backend-example/v1', m.nodeCount = 171, m.edgeCount = 361, m.issueCount = 3;
 
 MERGE (n:GovernanceNode:REPO {id: 'acme-analytics'})
 SET n.type = 'repo', n.label = 'acme-analytics', n.data = '{"id":"acme-analytics","owner":"time-data","caps":["eventos","métricas","experimentos-fonte"]}', n.dataHash = '4040c3f3a52c';
@@ -276,6 +276,10 @@ MERGE (n:GovernanceNode:OBJECTIVE {id: 'obj-revenue'})
 SET n.type = 'objective', n.label = 'crescer receita via cross-sell', n.data = '{"id":"obj-revenue","level":"company","title":"crescer receita via cross-sell","period":"2027","owner":"sponsor-acme","status":"active"}', n.dataHash = '55a3e5b8efd7';
 MERGE (n:GovernanceNode:OBJECTIVE {id: 'obj-trust'})
 SET n.type = 'objective', n.label = 'confiança: privacidade e conformidade por padrão', n.data = '{"id":"obj-trust","level":"company","title":"confiança: privacidade e conformidade por padrão","period":"2027","owner":"sponsor-acme","status":"active"}', n.dataHash = '4849d645e332';
+MERGE (n:GovernanceNode:ORIGIN {id: 'origin:bug-frete'})
+SET n.type = 'origin', n.label = 'suporte reporta: cupom duplo zera o frete', n.data = '{"text":"suporte reporta: cupom duplo zera o frete","target":"bug-frete"}', n.dataHash = '381ce5f55fcd';
+MERGE (n:GovernanceNode:ORIGIN {id: 'origin:dep-bump-host'})
+SET n.type = 'origin', n.label = 'rotina: lib X 3.x → 4.x', n.data = '{"text":"rotina: lib X 3.x → 4.x","target":"dep-bump-host"}', n.dataHash = '55c3db4e788c';
 MERGE (n:GovernanceNode:OUTCOME {id: 'out-cta-upgrade-2027q1'})
 SET n.type = 'outcome', n.label = 'conversion-rate: +2.4 %', n.data = '{"id":"out-cta-upgrade-2027q1","emitted-by":"intent-cta-upgrade","source":"acme-analytics/conversion-rate@warehouse-rev42","window":{"start":"2027-01-01","end":"2027-03-31"},"metric":"conversion-rate","value":"+2.4 %","aggregation":"avg","attested-by":"acme-analytics","revision":"warehouse@rev42","contract-revisions":[],"contributes-to":"tgt-billing-conv","envelope":{"actor":"ana-dev","authority":"pm-growth","issued-at":"2027-04-02","idempotency-key":"out-cta-upgrade-2027q1","nonce":"nonce-out-cta-upgrade-2027q1"}}', n.dataHash = 'd9cf9a4c7a1a';
 MERGE (n:GovernanceNode:METRIC {id: 'p99-latency'})
@@ -629,38 +633,11 @@ SET r.type = 'consumes';
 MATCH (source:GovernanceNode {id: 'acme-analytics'}), (target:GovernanceNode {id: 'acme-analytics::src/index.mjs'})
 MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-analytics->acme-analytics::src/index.mjs'}]->(target)
 SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-analytics'}), (target:GovernanceNode {id: 'acme-analytics::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-analytics->acme-analytics::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-analytics'}), (target:GovernanceNode {id: 'acme-analytics::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-analytics->acme-analytics::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-analytics'}), (target:GovernanceNode {id: 'acme-analytics::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-analytics->acme-analytics::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-analytics'}), (target:GovernanceNode {id: 'acme-analytics::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-analytics->acme-analytics::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-api-billing'}), (target:GovernanceNode {id: 'acme-api-billing::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-api-billing->acme-api-billing::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
 MATCH (source:GovernanceNode {id: 'acme-api-billing'}), (target:GovernanceNode {id: 'acme-api-billing::src/index.mjs'})
 MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-api-billing->acme-api-billing::src/index.mjs'}]->(target)
 SET r.type = 'contains-code';
 MATCH (source:GovernanceNode {id: 'acme-checkout'}), (target:GovernanceNode {id: 'acme-checkout::src/index.mjs'})
 MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-checkout->acme-checkout::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-checkout'}), (target:GovernanceNode {id: 'acme-checkout::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-checkout->acme-checkout::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-checkout'}), (target:GovernanceNode {id: 'acme-checkout::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-checkout->acme-checkout::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-checkout-api'}), (target:GovernanceNode {id: 'acme-checkout-api::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-checkout-api->acme-checkout-api::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-checkout-api'}), (target:GovernanceNode {id: 'acme-checkout-api::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-checkout-api->acme-checkout-api::src/index.mjs'}]->(target)
 SET r.type = 'contains-code';
 MATCH (source:GovernanceNode {id: 'acme-checkout-api'}), (target:GovernanceNode {id: 'acme-checkout-api::src/index.mjs'})
 MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-checkout-api->acme-checkout-api::src/index.mjs'}]->(target)
@@ -677,12 +654,6 @@ SET r.type = 'contains-code';
 MATCH (source:GovernanceNode {id: 'acme-design-system'}), (target:GovernanceNode {id: 'acme-design-system::src/index.mjs'})
 MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-design-system->acme-design-system::src/index.mjs'}]->(target)
 SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-design-system'}), (target:GovernanceNode {id: 'acme-design-system::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-design-system->acme-design-system::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-help-center'}), (target:GovernanceNode {id: 'acme-help-center::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-help-center->acme-help-center::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
 MATCH (source:GovernanceNode {id: 'acme-help-center'}), (target:GovernanceNode {id: 'acme-help-center::src/index.mjs'})
 MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-help-center->acme-help-center::src/index.mjs'}]->(target)
 SET r.type = 'contains-code';
@@ -697,18 +668,6 @@ MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-mfe-onboarding->acme-mf
 SET r.type = 'contains-code';
 MATCH (source:GovernanceNode {id: 'acme-obs-stack'}), (target:GovernanceNode {id: 'acme-obs-stack::src/index.mjs'})
 MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-obs-stack->acme-obs-stack::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-obs-stack'}), (target:GovernanceNode {id: 'acme-obs-stack::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-obs-stack->acme-obs-stack::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-web-host'}), (target:GovernanceNode {id: 'acme-web-host::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-web-host->acme-web-host::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-web-host'}), (target:GovernanceNode {id: 'acme-web-host::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-web-host->acme-web-host::src/index.mjs'}]->(target)
-SET r.type = 'contains-code';
-MATCH (source:GovernanceNode {id: 'acme-web-host'}), (target:GovernanceNode {id: 'acme-web-host::src/index.mjs'})
-MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-web-host->acme-web-host::src/index.mjs'}]->(target)
 SET r.type = 'contains-code';
 MATCH (source:GovernanceNode {id: 'acme-web-host'}), (target:GovernanceNode {id: 'acme-web-host::src/index.mjs'})
 MERGE (source)-[r:CONTAINS_CODE {id: 'contains-code:acme-web-host->acme-web-host::src/index.mjs'}]->(target)
@@ -1400,23 +1359,17 @@ SET r.type = 'publishes';
 MATCH (source:GovernanceNode {id: 'acme-web-host'}), (target:GovernanceNode {id: 'acme-user-context'})
 MERGE (source)-[r:PUBLISHES {id: 'publishes:acme-web-host->acme-user-context'}]->(target)
 SET r.type = 'publishes';
-MATCH (source:GovernanceNode {id: ' cupom duplo zera o frete'}), (target:GovernanceNode {id: 'bug-frete'})
-MERGE (source)-[r:RAISES {id: 'raises: cupom duplo zera o frete->bug-frete'}]->(target)
-SET r.type = 'raises';
-MATCH (source:GovernanceNode {id: ' lib X 3.x → 4.x'}), (target:GovernanceNode {id: 'dep-bump-host'})
-MERGE (source)-[r:RAISES {id: 'raises: lib X 3.x → 4.x->dep-bump-host'}]->(target)
-SET r.type = 'raises';
-MATCH (source:GovernanceNode {id: 'incidente-checkout — reduzir timeout e fallback do checkout'}), (target:GovernanceNode {id: 'fix-checkout-timeout'})
-MERGE (source)-[r:RAISES {id: 'raises:incidente-checkout — reduzir timeout e fallback do checkout->fix-checkout-timeout'}]->(target)
-SET r.type = 'raises';
 MATCH (source:GovernanceNode {id: 'incidente-checkout'}), (target:GovernanceNode {id: 'fix-checkout-timeout'})
 MERGE (source)-[r:RAISES {id: 'raises:incidente-checkout->fix-checkout-timeout'}]->(target)
 SET r.type = 'raises';
 MATCH (source:GovernanceNode {id: 'incidente-checkout'}), (target:GovernanceNode {id: 'prop-checkout-hardening'})
 MERGE (source)-[r:RAISES {id: 'raises:incidente-checkout->prop-checkout-hardening'}]->(target)
 SET r.type = 'raises';
-MATCH (source:GovernanceNode {id: 'incidente-checkout'}), (target:GovernanceNode {id: 'prop-checkout-hardening'})
-MERGE (source)-[r:RAISES {id: 'raises:incidente-checkout->prop-checkout-hardening'}]->(target)
+MATCH (source:GovernanceNode {id: 'origin:bug-frete'}), (target:GovernanceNode {id: 'bug-frete'})
+MERGE (source)-[r:RAISES {id: 'raises:origin:bug-frete->bug-frete'}]->(target)
+SET r.type = 'raises';
+MATCH (source:GovernanceNode {id: 'origin:dep-bump-host'}), (target:GovernanceNode {id: 'dep-bump-host'})
+MERGE (source)-[r:RAISES {id: 'raises:origin:dep-bump-host->dep-bump-host'}]->(target)
 SET r.type = 'raises';
 MATCH (source:GovernanceNode {id: 'lead-billing'}), (target:GovernanceNode {id: 'req-billing-read-own-context'})
 MERGE (source)-[r:REQUESTS {id: 'requests:lead-billing->req-billing-read-own-context'}]->(target)

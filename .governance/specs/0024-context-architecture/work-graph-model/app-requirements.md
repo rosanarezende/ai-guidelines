@@ -478,5 +478,8 @@ de iniciar UI/API nova.
 - **Estado complementar:** `_org-simulation-v3/_examples/backends/` agora contém exemplos derivados
   nos quatro formatos (`file`, `neo4j`, `sqlite`, `mongo`), gerados por runtime e verificados por
   `export-backend-examples --check`.
+- **Estado complementar 2:** `check-backend-examples.mjs` valida hash, refs, event-log, cobertura
+  Neo4j e contrato de ação; `load-neo4j-example.mjs --dry-run` prova o plano de carga sem rede e
+  `--apply` exige `--source-hash` + credenciais explícitas.
 - **Próxima decisão:** implementar escrita real por comandos/event-log e escolher o primeiro backend
   transacional (`file` com lock/event-log ou SQLite) sem transformar banco/read-model em SSOT.

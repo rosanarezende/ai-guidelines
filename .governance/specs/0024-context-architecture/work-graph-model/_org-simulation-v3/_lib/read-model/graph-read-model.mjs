@@ -1,6 +1,27 @@
 // graph-read-model.mjs — projecao derivada da runtime v3; sem escrita em disco.
 import { deriveIntent } from "../domain/org-domain.mjs";
 
+const GLOBAL_REF_KINDS = [
+  "authority",
+  "contract",
+  "incident",
+  "intent",
+  "metric",
+  "objective",
+  "proposal",
+  "repo",
+  "standalone",
+  "target",
+  "team",
+  "thesis",
+];
+
+function findGlobalRef(value) {
+  const pattern = new RegExp(`\\b(${GLOBAL_REF_KINDS.join("|")}):([A-Za-z0-9_.#-]+)\\b`);
+  const match = String(value || "").match(pattern);
+  return match ? { kind: match[1], id: match[2] } : null;
+}
+
 export function buildGraphReadModel({
   org,
   issues = [],
@@ -12,13 +33,18 @@ export function buildGraphReadModel({
   const nodes = [];
   const edges = [];
   const nodeIds = new Set();
+  const edgeIds = new Set();
   const N = (id, type, label, data = {}) => {
     if (nodeIds.has(id)) return;
     nodeIds.add(id);
     nodes.push({ id, type, label, data });
   };
-  const E = (source, target, type) =>
-    edges.push({ id: `${type}:${source}->${target}`, source, target, type });
+  const E = (source, target, type) => {
+    const id = `${type}:${source}->${target}`;
+    if (edgeIds.has(id)) return;
+    edgeIds.add(id);
+    edges.push({ id, source, target, type });
+  };
 
   const repoWorkAcks = repoWorks.filter(
     (x) => x.schema === "acme.repo-work/v1" || x.source?.kind === "central-breakdown"
@@ -37,8 +63,8 @@ export function buildGraphReadModel({
     N(x.id, "proposal", x.title, x);
     E(x["authorized-by"], x.id, "authorizes");
     if (x.target) E(x.id, x.target, "proposes-for");
-    const [kind, id] = String(x["raised-by"] || "").split(":");
-    if (kind && id) E(id, x.id, "raises");
+    const raisedBy = findGlobalRef(x["raised-by"]);
+    if (raisedBy) E(raisedBy.id, x.id, "raises");
   }
   for (const x of org.authorities || []) {
     N(x.id, "authority", x.id, x);
@@ -147,16 +173,22 @@ export function buildGraphReadModel({
     N(s.id, "standalone", `${s.kind}: ${s.id}`, s);
     E(s.id, s.repo, "in-repo");
     if (s.origin) {
-      const [kind, id] = String(s.origin || "").split(":");
-      if (kind && id) E(id, s.id, "raises");
+      const originRef = findGlobalRef(s.origin);
+      if (originRef) {
+        E(originRef.id, s.id, "raises");
+      } else {
+        const originId = `origin:${s.id}`;
+        N(originId, "origin", s.origin, { text: s.origin, target: s.id });
+        E(originId, s.id, "raises");
+      }
     }
   }
   for (const x of org.incidents || []) {
     N(x.id, "incident", `${x.severity}: ${x.id}`, x);
     E(x.repo, x.id, "handles-incident");
     for (const f of x["follow-ups"] || []) {
-      const [kind, id] = String(f.ref || "").split(":");
-      if (kind && id) E(x.id, id, "raises");
+      const followUpRef = findGlobalRef(f.ref);
+      if (followUpRef) E(x.id, followUpRef.id, "raises");
     }
   }
 

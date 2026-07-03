@@ -37,6 +37,8 @@ node _tools/check-local-repo-tests.mjs # roda os testes locais dos repos critico
 node _tools/check-runtime.mjs # prova _lib runtime: file adapter + dominio + read-model + command dry-run
 node _tools/export-backend-examples.mjs # gera exemplos file/sqlite/neo4j/mongo a partir do read-model
 node _tools/export-backend-examples.mjs --check # confere freshness dos exemplos de banco
+node _tools/check-backend-examples.mjs # smoke operacional: file read-model + Neo4j Cypher + contrato de ação
+node _tools/load-neo4j-example.mjs --dry-run # valida plano executável de carga Neo4j sem tocar banco
 node _tools/adoption-journey.mjs # dogfood completo da adoção repo-existente → host agregado
 node _tools/build-graph.mjs     # regenera _apps/graph.js (grafo + issues embutidos)
 node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada DEVE ser pega
@@ -63,12 +65,15 @@ node _tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada D
 9. `node _tools/check-repo-works.mjs` prova que o breakdown central e os repos não divergiram.
 10. `node _tools/check-repo-contracts.mjs` prova que `contracts.yml` e os owner repos não divergiram.
 11. `node _tools/check-local-repo-tests.mjs` prova comportamento nos repos críticos sem depender só do manifesto.
-12. `node _tools/adoption-journey.mjs` executa o dogfood completo.
+12. `node _tools/check-backend-examples.mjs` prova que `file/read-model.json`, event-log exemplo e Cypher Neo4j não têm refs penduradas.
+13. `node _tools/load-neo4j-example.mjs --dry-run` prova o plano de carga Neo4j sem credenciais nem rede.
+14. `node _tools/adoption-journey.mjs` executa o dogfood completo.
 
 ## Decisões de desenho
 
 - **File-first, com fronteira física explícita:** `acme-governance/` é o host central da org; `repos/` representa os repos já existentes da empresa; cada repo tem sidecar próprio (`repos/<repo>/.governance/manifest.yml` → `context.json`). O `repos.yml` central é inventário; a publicação por repo impede que ele vire a única fonte de verdade.
-- **Escopo honesto da v3:** esta sim agora porta a base `_lib` DDD (`domain`, `adapters/file`, command dry-run e read-model de grafo) e exemplos verificáveis de backends derivados em `_examples/backends/` (`file`, `neo4j`, `sqlite`, `mongo`). Ainda não porta adapters transacionais sqlite/neo4j/mongo nem app de autoria da v2. A v3 prova dogfood repo-first, runtime file-first, projeções multi-backend e resolvers fail-closed; a portabilidade de backend transacional fica como próxima camada, registrada em `features.md`.
+- **Escopo honesto da v3:** esta sim agora porta a base `_lib` DDD (`domain`, `adapters/file`, command dry-run e read-model de grafo), exemplos verificáveis de backends derivados em `_examples/backends/` (`file`, `neo4j`, `sqlite`, `mongo`) e smoke operacional para `file + Neo4j`. Ainda não porta adapters transacionais sqlite/neo4j/mongo nem app de autoria da v2. A v3 prova dogfood repo-first, runtime file-first, projeções multi-backend, loader Neo4j dry-run e resolvers fail-closed; a portabilidade de backend transacional fica como próxima camada, registrada em `features.md`.
+- **Read-model não age sozinho:** `_examples/backends/ACTION-CONTRACT.md` declara que toda ação governada relê YAML/event-log autoritativo e falha fechado se o hash/base-revision divergir. O loader Neo4j só aplica com `--apply --source-hash <hash>` e credenciais explícitas; por padrão roda em dry-run.
 - **Standalone é repo-local:** fixes/dep-bumps avulsos moram em `repos/<repo>/.governance/works/*.yml` com `schema: acme.standalone-work/v1`. O host só agrega. Incidente é instrumento central em `acme-governance/incidents/incidents.yml` e gera follow-ups para standalone/proposal.
 - **Adoção por empresa existente:** `_tools/adopt-existing-repos.mjs` faz scaffold minimo e gera `capability-candidates.yml` como rascunho revisavel. `_tools/prepare-capability-review.mjs` monta um pacote de revisão por repo com evidência estática para IA/humano. A extração por IA fica como canal assistivo (template em `_templates/capability-extraction-prompt.md`), nunca como mutação silenciosa do manifesto.
 - **Breakdown reconhecido pelo repo:** `intent.works` continua sendo a quebra central, mas cada repo publica `.governance/works/<intent>--<work>.yml` com hash do breakdown e touchpoint de código. Se a peça muda e o repo não reconhece a nova versão, o host falha em `repo-work-stale`.

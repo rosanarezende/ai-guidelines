@@ -69,6 +69,16 @@ const steps = [
     command: "node",
     args: ["_tools/export-backend-examples.mjs", "--check"],
   },
+  {
+    name: "11. file + neo4j read-model passam smoke operacional",
+    command: "node",
+    args: ["_tools/check-backend-examples.mjs"],
+  },
+  {
+    name: "12. neo4j loader executa plano em dry-run",
+    command: "node",
+    args: ["_tools/load-neo4j-example.mjs", "--dry-run"],
+  },
 ];
 
 for (const step of steps) {
