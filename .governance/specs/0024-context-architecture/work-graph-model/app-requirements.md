@@ -26,6 +26,8 @@ O app não é um substituto genérico de Jira/Linear/BI. Ele é a superfície op
 5. **Confiança visível:** self-attested, collapsed SoD, break-glass, stale, unverified e unknown aparecem no dashboard; nunca são escondidos.
 6. **Escala colapsável:** o mesmo produto deve servir full-team, compact e solo por perfil de governança, sem impor cerimônia inútil nem permitir bypass silencioso.
 7. **Sem segundo SSOT:** Neo4j/SQLite/Mongo/search index nunca viram fonte autoritativa de ação. Toda ação relê a revisão fonte antes de escrever.
+8. **Contrato tipado antes da tela:** novos fluxos de produto nascem no domínio TypeScript compartilhado antes de virar estado local de React. A UI não pode inventar entidade ou enum que o backend/runtime não conhece.
+9. **Internacionalização por contrato:** textos de produto ficam em `locales/<locale>.json`; backend/domínio emite `messageKey` + `params`. Componentes não carregam copy longa hardcoded quando a string pertence à experiência de produto.
 
 ## 3. Personas e permissões
 
@@ -85,6 +87,46 @@ O backend deve gerar projeções, não persistir como verdade:
 - Ref resolvível é pré-condição para comando que dependa dela.
 
 ## 5. Arquitetura backend
+
+### 5.0 Adoption shell, conta e workspaces
+
+Antes do grafo de trabalho existe uma camada de adoção do produto:
+
+```text
+account/user → workspace/organization → governance-host → work-sources → grafo governado
+```
+
+Essa camada resolve três problemas de produto e segurança:
+
+- uma mesma pessoa pode governar múltiplas organizações/projetos/clientes;
+- `acme-*` é apenas demo/seed, não identidade implícita do app;
+- onboarding, perfil, pessoas, papéis, fontes de trabalho e assistente são escopados por workspace.
+
+Requisitos:
+
+- `Account` guarda identidade local/preferência de locale, mas não substitui `Authority` do workspace.
+- `Workspace` guarda `name`, `kind`, `governanceHost`, `workSources`, `memberships` e `onboardingStatus`.
+- `GovernanceHost` é obrigatório para governança real: repo dedicado, pasta local ou pasta dentro de repo existente. Sem host, o app só pode operar em demo/rascunho local.
+- `WorkSource` não deve ser descrita como "opcional" sem qualificação. Sem fonte, o framework ainda planeja/registra, mas execução, contratos e outcomes ficam rebaixados para evidência manual/declarada.
+- Membership é pessoa → N papéis. A UI não deve começar por lista de papéis soltos.
+- `ProfileDeclaration` deriva do diagnóstico e da política escolhida para acúmulo sensível; o usuário pode ajustar, mas o ajuste altera claramente o enforcement/risco visível.
+
+### 5.0.1 Contrato TypeScript e i18n
+
+O backend/runtime da sim v3 ainda contém scripts `.mjs` herdados, mas todo contrato novo deve nascer em TypeScript puro:
+
+```text
+_org-simulation-v3/_lib/domain/*.ts        # entidades, value objects, policies, DTOs
+_org-simulation-v3/_lib/application/*.ts   # casos de uso/ports quando existirem
+_apps/governance-next/locales/pt-br.json   # strings de produto
+```
+
+Critérios:
+
+- `GovernanceSnapshot`, comandos, adoption shell, integrações e mensagens de erro são tipos compartilhados, não duplicados em `lib/types.ts` do app.
+- O frontend pode ter view-models, mas eles derivam dos tipos de domínio.
+- Novas strings de tela entram em locale file; exceções são labels técnicos curtos ou dados vindos do snapshot.
+- Domínio/backend deve preferir `{ messageKey, params }` para erro/aviso, permitindo UI traduzir sem perder auditoria.
 
 ### 5.1 Camadas
 
