@@ -1,144 +1,253 @@
-# Features a implementar — roadmap da frente work-graph
+# Features a implementar — roadmap v3 do work-graph
 
-> **O modelo prevê TODOS os fluxos; a construção se faseia aqui** (princípio da [Lente 1](tracker.md)). Este doc lista o que **modelamos** e ainda falta **implementar** — pra não confundir "fora do modelo" com "ainda não construído". Não-autoridade; alimentado junto com o [`tracker.md`](tracker.md) e as [`deliberation/`](deliberation/).
-> Legenda: **P0** = base da taxonomia v2 (destrava o resto) · **P1** = lifecycles/dimensões core · **P2** = escala/enterprise. ✅ feito · 🚧 parcial · ⬜ a fazer.
-
-> **Nota 2026-07-02:** a frente ativa de prova saiu da sim v2/\_lib para a [`_org-simulation-v3/`](_org-simulation-v3/) repo-first. Nela, o host central fica em `acme-governance/`, os repos adotados ficam em `repos/<repo>/`, e os templates operacionais da sim ficam em `_org-simulation-v3/_templates/`. O `_templates/` raiz virou ponte histórica; os moldes v2 foram arquivados em `_archive/templates-v2/`.
+> **Autoridade:** o modelo tipado mora em [`model.yml`](model.yml). Este arquivo é um roteiro
+> operacional: registra o que já foi provado na sim v3, o que ainda falta mecanizar e o que foi
+> preservado da v2 como aprendizado.
 >
-> **Correção importante:** "ativo na v3" NÃO significa "tudo da v2 foi migrado". A v2 provou `_lib` DDD, portas, adapters file/sqlite/neo4j/mongo, read-models por repo e app de autoria. A v3 já tem a base `_lib` file-first (domínio, porta/adaptador file, command dry-run e read-model de grafo), exemplos derivados nos 4 formatos e smoke/loader de projeção para file+Neo4j, mas ainda NÃO tem adapters transacionais sqlite/neo4j/mongo, event-log completo nem authoring app.
->
-> **Contrato da próxima fatia de app:** [`app-requirements.md`](app-requirements.md) consolida requisitos de dados, backend, frontend, assistência por IA e robustez para a aplicação ponta-a-ponta. O `model.yml` continua sendo o SSOT; o documento de requisitos orienta a implementação.
+> **Regra central:** o framework deve funcionar sem ferramenta externa. Adapters e integrações são
+> opcionais: reduzem preenchimento manual, trazem evidência independente e conectam o grafo ao
+> ecossistema existente da empresa, mas nunca viram SSOT paralelo.
+
+Legenda: ✅ feito · 🚧 parcial · ⬜ a fazer · 🧊 histórico/arquivado.
 
 ---
 
-## Matriz v2 → v3 — o que foi migrado, preservado ou ainda falta
+## Estado atual da frente
 
-| aprendizado/feature da v2                           | estado na v3                                                                                                                                   | decisão / próximo passo                                                                                                                                   |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.governance/` por repo + host agregador            | ✅ migrado e endurecido: `repos/<repo>/.governance/*` + `acme-governance/*`                                                                    | manter como base física.                                                                                                                                  |
-| `context.json` publicado e agregado pelo host       | ✅ migrado e endurecido: freshness contra manifest/package/src + `repo-context-*`                                                              | próximo dente: envelope/ttl/producer real no `context.json`, não só `contentHash`.                                                                        |
-| Manifesto/capabilities por repo                     | ✅ migrado com `manifest.yml`, `capability-candidates.yml` e pacote de capability review                                                       | falta mecanismo de `owner-attested-by`/`observed-from` com dente real.                                                                                    |
-| Matcher léxico/local/LLM/API                        | 🚧 preservado conceitualmente; v3 só tem routing fixture e pacote de capability review, sem matcher executável                                 | portar depois da estabilização do manifesto v3: matcher deve consumir `context.json`, respeitar L9 e produzir saída com score/unknown/evidence/freshness. |
-| `_lib` DDD (`domain`, `ports`, `adapters`)          | 🚧 base migrada: domínio/validador saiu de `_tools/org.mjs`, adapter file carrega a org, command dry-run e read-model de grafo vivem em `_lib` | completar command handlers, event-log e adapters sem substituir os YAML nem reimportar taxonomia antiga.                                                  |
-| Backends plugáveis file/sqlite/neo4j/mongo          | 🚧 exemplos derivados gerados para os 4 formatos; file+Neo4j têm smoke/loader de projeção; adapter real só existe para file                    | usar `_examples/backends/` como contrato de shape; próximos adapters precisam passar o mesmo export/check sem mudar domínio/resolvers.                    |
-| Read-models `db.json` por repo + dashboard estático | 🚧 read-model de grafo migrado para `_lib`; exemplos file/sqlite/neo4j/mongo gerados e verificados; `db.json` operacional por repo ainda não   | manter `graph.js` como snapshot visual; decidir depois se o operacional vira SQLite/Neo4j/db.json sem virar SSOT.                                         |
-| App de autoria registro→triagem→gate                | ⬜ não migrado; v3 tem apps de visualização (`owner`/`company`), não authoring UI                                                              | futuro: app de autoria deve escrever por comandos/envelope, não editar YAML solto nem contornar o validador.                                              |
-| Scaffold de repo novo                               | 🚧 v3 tem `adopt-existing-repos.mjs` para repos já existentes; não tem scaffold completo de repo novo/backend                                  | manter foco "empresa já tem repos"; se voltar scaffold, separar `adopt existing` de `create new`.                                                         |
-| Backend.yml por repo                                | ⬜ modelado em `physical.por-repo`, mas sem executor na v3                                                                                     | ou remover do layout v3 até portar adapters, ou manter marcado como "modelado, não implementado"; hoje NÃO pode ser aceito como evidência.                |
-| Templates v2 de work/brief/closing                  | 🧊 arquivados em `_archive/templates-v2`; v3 usa `_org-simulation-v3/_templates` apenas para prompts/artefatos v3                              | não usar `_templates/` raiz como fonte ativa.                                                                                                             |
-| Deliberação q/r/d interna por work/repo             | ⬜ não migrada para v3 física                                                                                                                  | quando voltar, precisa morar no repo/host correto e projetar só o resultado necessário, não todo histórico privado.                                       |
-| Projeção visual                                     | ✅ migrada de outra forma: `_apps/graph.js` + owner/company apps sem build                                                                     | é uma projeção de sim, não um backend operacional.                                                                                                        |
+✅ A sim ativa é [`_org-simulation-v3/`](_org-simulation-v3/). Ela substitui a v2 como dogfood
+físico, mas não apaga os aprendizados da v2.
 
----
+✅ Já existe:
 
-## P0 · Migrar o modelo p/ a taxonomia v2 (destrava tudo)
+- host central `acme-governance/`;
+- repos adotados em `repos/<repo>/` com código MVP e sidecar `.governance/`;
+- manifests, `context.json`, repo-work ack e repo-contract registry;
+- runtime `_lib` v3 com domínio/validador, adapter file, command dry-run/execute mínimo e
+  read-model de grafo;
+- app operacional React/Next + Material UI em `_org-simulation-v3/_apps/governance-next/`;
+- exemplos derivados file/SQLite/Neo4j/Mongo em `_org-simulation-v3/_examples/backends/`;
+- smoke operacional de file + Neo4j, com Neo4j ainda como read-model/projeção;
+- resolvers fail-closed para schema, outcome, repo-work, contrato, trust-policy, authority,
+  break-glass, incident e verdict;
+- event-log append-only inicial no adapter file.
 
-- ⬜ **`model.ts`: famílias + membros** — `WorkKind` (5) → `delivery`/`maintenance` (CAPACIDADE) + mover `experiment`/`exploration` (APRENDIZADO), `incident` (RESPOSTA), `proposal`/`register` (INTAKE). Colapsar `fix`+`patch` em `maintenance`.
-- ⬜ **Dimensões no domínio** — `source` · `visibility` · `maintenance-mode` · `change-class` · `service-class` · `planned-in` (ortogonais; opcionais no modelo, exigidas conforme a família).
-- ⬜ **Presets (UX)** — "fix"/"security patch"/"bump de dep"/… → preenchem família + dimensões. Alias, não ontologia.
-- ⬜ **Migração da sim + templates** — os `registry-entry`/briefs; migrar os works existentes (login) p/ a forma nova.
-- ⬜ **Tirar `incident` das promoções planejadas** (proposal `promote-to`, breakdown) — incident nasce por gatilho.
+🚧 Ainda falta para considerar o work-graph pronto ponta a ponta:
 
-## P0 · Integridade transacional & segurança (o envelope — o que torna o file-first confiável)
-
-_(Da auditoria rodada 3 — o buraco sistêmico. Ver [Lente 8](tracker.md) + [`_audits/`](_audits/).)_
-
-- ⬜ **Envelope universal** em toda mutação/publicação: `actor` · `authority` · `base-revision` · `command-id`/`idempotency-key` · `revision`/`etag` · `schema-version` · `source-commit` · `generated-at` · `ttl` · `invalidates`.
-- ⬜ **Classificação & egress** — `classification` (public/internal/confidential/restricted) + `visibility/access` por nó; a escolha do matcher **léxico-local × API externa** se **amarra à classificação** (sensível não sai da máquina) + redaction.
-- ⬜ **Gate append-only + reversal** — `gate-decision` + `gate-reversal` + nova decisão; nunca overwrite.
-- ⬜ **`explore-resolution` ≠ gate** — renomear a derivada (`deriveGovernance`) p/ `unanswered|answered|pursued|not-pursued`; `accepted/rejected` só pro humano.
-- ⬜ **Stale-invalidation** — triage/gate guardam `base-revision`/digest do register; mudança **invalida** ou exige re-triagem.
-- ⬜ **Move idempotente com recuperação** — `promote`/`discard` como transação (`command-id`); falha no meio → retoma sem intent-órfã; lock curto por candidato.
-- ⬜ **`GlobalRef` + tombstone** — `family:namespace/id#anchor@revision`; random maior; tombstone p/ descartados; resolver desambiguador (candidate/intent/archived) + colisão.
-- ⬜ **Contrato = nó versionado** — owner/provider/consumers/compatibility/lifecycle/change-windows (não string); referenciado por GlobalRef.
-- ⬜ **`context.json` com envelope** — schema-version/source-commit/producer/ttl/hash; o host **valida** ao agregar.
-- ⬜ **Matcher accountability** — o gate registra `followed|overrode` + rationale; a sugestão fica versionada (score/why/unknown/freshness).
-
-## P0 · Confiança, política & red-team (Lente 9 — o que a autocertificação não resolve)
-
-_(Da auditoria rodada 4. Ver [Lente 9](tracker.md) + [`_audits/round-4-trust-boundaries.md`](_audits/round-4-trust-boundaries.md). **Segurança precisa de controle NORMATIVO versionado**, não "inspira-não-define".)_
-
-- ⬜ **Artefatos de política governados:** `threat-model.yml` · `egress-policy.yml` · `agent-delegation-policy.yml` · `policy-catalog.yml` · `red-team-corpus/` (register malicioso · capability envenenada · prompt injection).
-- ⬜ **Trust boundary de 1ª classe** — modelar onde a confiança termina, quem atravessa, com qual prova (matcher/agente/backend/API são fronteiras).
-- ⬜ **Egress por taint/classificação derivada** — nó que usa contexto restrito herda **teto de egress**; matcher externo só recebe fatias aprovadas por política (fecha o vazamento por **inferência**).
-- ⬜ **Matcher como input hostil** — validação estrutural da saída do matcher/agente; nunca vira ação direta; harness de red-team no CI.
-- ⬜ **Delegação formal do agente** — `actor=agent` → principal humano · workload-id · escopo · TTL · policy-id · max-mutations · confirmação-humana p/ gate/egress/escalation.
-- ⬜ **Verificação vs autocertificação** — trusted-producers · provenance (SLSA/transparência) · policy-check antes de aceitar `context.json`. **Capability** com `evidence`/`owner-attested-by`/`observed-from`/`last-verified` (IA só abre PR).
-- ⬜ **Anti-gaming (invariantes + quotas)** — `expedite` budget por time · `incident` exige evento/severidade/telemetria · downgrade de `classification` exige approver separado.
-- ⬜ **Hardening dos backends/matchers** — allowlist · secrets fora do YAML · least-privilege no DB · TLS/pin fora da sim · CLI-delegate em **sandbox** (sem rede/home/tokens). _(sim atual: `simsim123`/CORS `*`/`/match` client-config — só p/ sim.)_
-- ⬜ **Retenção & remoção** — `retention-class` · `purge-redaction-event` · anexos fora do git · secret-scanning antes de publicar contexto (append-only/tombstone × direito de remoção).
-
-## P0/P1/P2 · Achados da simulação adversarial (red-team 2026-07-01)
-
-_(Da sim adversarial rounds 1+2 — [deliberação](deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md). Veredito: o modelo está **sub-mecanizado, não over-engineered**. **Barra:** um controle só conta como enforcement quando especifica **resolver/invariante + fail-closed + evidência independente** — "controle nomeado" (acima) sem mecanismo ainda é cerimônia. Nada a **podar**; as 3 leis viram princípios na [Lente 9](tracker.md).)_
-
-**P0 — dar dente (cerimônia = perigo):**
-
-- ⬜ **A1 · contrato de aceitação do matcher** — a saída do matcher/agente só vira ação com evidência exigida · `unknown` · threshold · **comparação com capability/contrato** (afia o "matcher como input hostil" acima; advisory+gate humano sozinho ainda é carimbo).
-- ⬜ **B1 · evidência mínima com dente** — capability sem `owner-attested-by` **independente** / `evidence` / `observed-from` fresco → **excluída ou `unknown`** (não usada com peso igual). A _verdade_ semântica fica advisory + drift (rebaixada).
-- ⬜ **C2 · anti-replay da delegação** — revogação/nonce/TTL por `authority-ref` (idempotência L8 só barra duplicata, não replay pós-expiração).
-- ⬜ **D1 · fallback local rastreável** — quando o egress externo é bloqueado, oferecer alternativa local útil **e registrar o bloqueio** (Lei do fallback: senão o humano faz egress-sombra manual).
-- ⬜ **D2 · ACL por edge/consulta (deputy local)** — `visibility/access` no host por consulta/aresta, não só na saída p/ API externa (bloquear leitura lateral `restricted` entre repos).
-- ⬜ **E1 · invariantes de conteúdo** — validar `context.json` assinado contra código/contratos/fonte (provenance prova origem, não verdade; conteúdo org-wide).
-- ⬜ **F2 · telemetria verificável no incident** — `incident` exige **referência verificável** a alerta/SLO (não texto de severidade) como **pré-condição de declaração**.
-- ⬜ **F3 · break-glass** — todo controle anti-gaming que bloqueia emergência precisa de caminho break-glass rastreável (TTL + review post-facto); a _existência_ do caminho é modelo, o _threshold_ é policy-pack.
-- ⬜ **H1 · prevenção de segredo (pre-commit)** — secret-scan **pre-commit/pre-receive/quarantine** + purge de VCS/projeções (a reclassificação tardia não recupera git/archive/cache).
-- ⬜ **X · separação de deveres (SoD)** — `authority` carrega independência de 1ª classe: `requester ≠ approver ≠ owner-attester` p/ ações sensíveis (não só papel nominal).
-- ⬜ **O1 · independência do oráculo** — `red-team-corpus`/`policy-catalog`/expected-outcomes com autoria/aprovação **independente** dos atores que governam (o SoD no meta-nível).
-
-**P1:** ⬜ A2 (fetch/scan/egress de link externo) · ⬜ B2 (detecção de capability **subdeclarada** via `observed-from`×provides/código) · ⬜ C3 (risk-budget agregado/amostragem além do `max-mutations`) · ⬜ E2 (revogação/expiração de trusted-producer + namespace-reuse) · ⬜ G2 (bloquear ação sobre projeção derivada **stale** sem `source-revision` atual) · ⬜ H2 (`invalidates` inclui `policy-revision`).
-
-**P2:** ⬜ G1 (adapter-contract de import Jira/Linear: campo autoritativo/direção-sync/resolução/freeze-window) · ⬜ H3 (migrator-registry + fail-closed + log de perda semântica no salto de schema).
-
-**MOVER → policy-pack (config, não ontologia):** quota exata de `expedite` (F1 — o **contador** fica no modelo) · scoring/amostragem (C3) · regras finas de break-glass (F3).
-
-## P1 · Lifecycles próprios (cada família com o seu)
-
-- ⬜ **`experiment` — lifecycle operacional:** `experiment-brief` sela **hipótese + métricas**; roda atrás de **feature-flag** com **exposição · guardrails · duração · decision-rule**; fecha em **`experiment-outcome`** (won/lost/inconclusive) + **cleanup** (flag/variante morta). `won → delivery`.
-- ⬜ **`incident` — lifecycle dedicado (RESPOSTA):** **severidade** · **declarar** (destrava merge/CI com **prazo**, blameless) · **mitigar** · **resolver** · **postmortem** (garantido por **alerta**) → gera `fix`/`maintenance`/`proposal`. + arestas `occurred-during`/`caused-by`/`related-to`.
-- ⬜ **`maintenance` — modos:** `maintenance-mode` (corrective/adaptive/perfective/preventive, ISO 14764) + `reason`/`impact` (anti-buraco-negro).
-- 🚧 **`exploration` — endurecer:** timebox (✅ tem) + **pergunta falsificável** + **stop-rule** + `fate` obrigatório. Disparar a exploration **de verdade** no work-repo (hoje a triagem só registra a disposição).
-- ⬜ **Enforcement das dimensões** — cada dimensão afeta **workflow · lint · dashboard** (senão vira tag decorativa): ex. `change-class: emergency` destrava bypass; `service-class: expedite` prioriza; `security-visible` exige revisão.
-
-## P1 · Triagem, matcher & métricas
-
-- 🚧 **Matcher com contrato de confiança** — persistir **score + explicação + threshold + "unknown"** (fallback) + **freshness** da capability + escalonamento de owner. (Simulação já existe; falta o contrato.)
-- ⬜ **Gerador de capabilities** (skill/CLI) — apoia a IA a escrever/atualizar as capabilities dos manifestos (a **alavanca** da qualidade do match).
-- ⬜ **Métrica de tempo-bloqueado** (`needs-info`) — vista derivada: **quem** segura e **por quanto tempo** (a dor do remoto, medível).
-- ⬜ **Confirmar/anexar** as conexões sugeridas (hoje a sugestão só é exibida).
-
-## P1 · Release, entrega & acompanhamento
-
-- ⬜ **`release ≠ merge`** — separar o merge do **release**: rollout gradual/**canary** · **rollback** · feature-flag · **janela de verificação** (o momento "acompanhar" ganha dentes).
-- ⬜ **Anexos** (além de links) na iniciativa (upload).
-
-## P2 · Governança de portfólio & escala (enterprise)
-
-- ⬜ **Capacidade / WIP / classes of service** — limites, aging, políticas explícitas (Kanban).
-- ⬜ **Priorização entre iniciativas** — RICE/ICE no nível do portfólio; roadmap.
-- ⬜ **SLA / dono de fila / escalonamento** na triagem (aging + escalation).
-- ⬜ **SLO / error-budget / observabilidade** — manifestos ligam a **SLIs/SLOs · alertas · dashboards**; alertas **disparam** incident.
-- ⬜ **RACI / accountability** — accountable por fila, contrato, serviço, incidente, decisão, pós-ação.
-- ⬜ **Event-log append-only + resolver estável + snapshot publicado assinado** — o file-first ganha trilha semântica de domínio (além do git), concorrência e consulta operacional.
-- ⬜ **Query-API / provenance / envelope de tarefa-artefato p/ agentes** (MCP/A2A) — o grafo consultável por IA com permissões.
-
-## Backend & app (infra do modelo)
-
-- ✅ **Nova simulação robusta sobre a taxonomia v2** — `_org-simulation-v3` é a frente ativa repo-first; `_org-simulation-v2` permanece como histórico/fonte de aprendizados de matcher/app/backend.
-- ✅ **Especificação do app ponta-a-ponta** — [`app-requirements.md`](app-requirements.md) define a aplicação alvo antes da implementação: modelo operacional, command pipeline, read-models, UI por persona, assistências de IA e critérios de aceite.
-- 🚧 **Portar a `_lib` DDD para v3** — base entregue: `domain/org-domain.mjs`, `domain/commands.mjs`, `adapters/file/FileGovernanceRepository.mjs`, `read-model/graph-read-model.mjs` e runtime file. Falta write real/event-log/backends.
-- 🚧 **Porta de repositório v3** — `HostGovernanceRepository` file existe como adapter inicial; ainda falta separar `ProductRepoProjectionRepository` e `PublishedProjectionStore` dos scripts `repo-*.mjs`.
-- 🚧 **Backends plugáveis v3** — exemplos file/sqlite/neo4j/mongo entregues em `_org-simulation-v3/_examples/backends/`, gerados por `_tools/export-backend-examples.mjs`; file+Neo4j passam `check-backend-examples.mjs` e `load-neo4j-example.mjs --dry-run`. Próximo dente: primeiro adapter transacional real sobre a mesma porta.
-- 🚧 **Read-model v3 derivado** — grafo derivado em `_lib`; snapshots para file/SQLite/Neo4j/Mongo são verificáveis e têm contrato de ação derivada. Ainda falta declarar/implementar o read-model operacional persistido para o app.
-- ⬜ **Matcher executável v3** — portar o espectro léxico/local/API da v2 para consumir `context.json` v3 e produzir saída fail-closed (`score`, `unknown`, `evidence`, `freshness`, `policy/egress`).
-- ⬜ **Authoring app v3** — substituir o app v2 por uma UI/CLI que escreve via comandos/envelope e nunca por mutação YAML direta.
-- ⬜ **Revisitar a D3** (arestas cross-repo derivadas) à luz de `repo-contract`, `repo-work-ack` e `contract-revision-proposal` da v3.
-- ⬜ **Aposentar o `_viewer`/`_app` legado** só depois que a v3 cobrir autoria + runtime; até lá, são arquivo histórico, não fonte ativa.
+- backend transacional file-first com lock/event-log robusto;
+- segundo outcome real para provar que o fluxo não está especial-cased em `intent-cta-upgrade`;
+- caminho operacional sem intent planejada;
+- matcher executável v3;
+- authoring completo no app Next/MUI;
+- adapters externos como evidence providers;
+- decisão posterior sobre SQLite/Neo4j/Mongo write-capable, sem quebrar file-first.
 
 ---
 
-## Já entregue nesta frente (contexto)
+## Decisões fechadas nesta rodada
 
-✅ **v2 entregue/preservada como aprendizado:** modelo file-first + banco derivado + backend plugável (4 paradigmas) · matcher advisory (léxico/LLM local/API) · app `_app` com fluxo registro→triagem→gate→ativação · estrutura `registers/{candidates,archived}` + `intents/` com `promote`/`discard` · deliberações q/r/d.
+1. **App operacional**
+   - Decisão: o app Next/MUI continua incubado dentro da sim/spec por enquanto.
+   - Não é ainda o pacote oficial do framework.
+   - Promoção futura exige journeys adicionais, backend transacional mínimo e authoring básico.
 
-✅ **v3 entregue/ativa:** host `acme-governance/` + repos adotados `repos/<repo>/` · código MVP por repo · manifests/contextos publicados · repo-work ack com lifecycle · repo-contract registry · outcome resolver · trust-policy física · base `_lib` DDD file-first · exemplos file/sqlite/neo4j/mongo · smoke/loader file+Neo4j · graph/company/owner apps · red-team/adoption-journey. **Ainda não entregue na v3:** adapters transacionais SQLite/Neo4j/Mongo, read-model operacional do app, matcher executável e authoring app.
+2. **Primeiro backend transacional**
+   - Decisão: provar primeiro `file + event-log/lock`.
+   - SQLite vem depois como adapter local.
+   - Banco não entra para esconder problema de consistência do file-first.
+
+3. **Neo4j**
+   - Decisão: read-model derivado por padrão.
+   - Uso forte: impacto, dependências, exploração de grafo, dashboard.
+   - Mutação governada sempre relê YAML/event-log autoritativo.
+   - Write-capable só em fase futura explícita, com a mesma suíte transacional do file backend.
+
+4. **Authoring**
+   - Decisão: começar no app web Next/MUI.
+   - CLI/TUI fica para automação, adoção batch e operações repetíveis.
+   - Nenhuma tela edita YAML direto; toda escrita passa por comando/envelope/dry-run.
+
+5. **Perfil compact e dangerous mutations**
+   - Decisão: compact bloqueia hard mutações de confiança, segurança e contabilidade.
+   - O resto segue com warning append-only, visível em dashboard/auditoria.
+
+6. **Capability extraction**
+   - Decisão: fica dentro do framework como assistência de adoção/manutenção de manifestos.
+   - Análise estática profunda fica fora ou em plugin/adapter.
+   - Capability sem evidência/attestation vira `unknown`, não verdade.
+
+7. **Integrações externas**
+   - Decisão: criar catálogo versionado em [`integration-catalog.yml`](integration-catalog.yml).
+   - Integrações são adapters opcionais para evidência/importação/projeção.
+   - Ferramenta externa observa; o framework governa.
+
+---
+
+## Roadmap da sim v3
+
+### R1 · Sanitização documental
+
+Status: 🚧 em andamento.
+
+- ✅ atualizar README/NEXT-STEPS para refletir F6/F7;
+- ✅ registrar que app, runtime file e exemplos multi-backend existem;
+- ✅ marcar que SQLite/Neo4j/Mongo transacionais ainda não existem;
+- 🚧 atualizar handoff Fable 5, `model.yml`, `features.md`, `app-requirements.md`;
+- 🚧 criar catálogo versionado de integrações externas.
+
+### R2 · Revisão adversarial pós-F7
+
+Status: ⬜ a fazer.
+
+Objetivo: pedir revisão independente da sim robusta antes da próxima fatia de implementação.
+
+Deve percorrer:
+
+- `objective -> target -> intent -> repo-work done -> outcome -> verdict -> actual`;
+- jornada cross-repo com contrato;
+- jornada operacional/standalone;
+- perfil full/compact/solo;
+- stale, break-glass, SoD e self-attested target.
+
+### R3 · File backend transacional robusto
+
+Status: ⬜ a fazer.
+
+Objetivo: provar que file-first escreve com segurança.
+
+Critérios:
+
+- lock curto por escopo de mutação;
+- event-log semântico append-only;
+- replay por event-log;
+- recovery de escrita parcial;
+- `base-revision` stale falha fechado;
+- nonce/idempotency bloqueiam replay;
+- fixtures de concorrência;
+- read-model rebuild por fonte autoritativa.
+
+### R4 · Segundo outcome real
+
+Status: ⬜ a fazer.
+
+Objetivo: provar que outcome/verdict/dashboard não estão hardcoded no `intent-cta-upgrade`.
+
+Preferência:
+
+- uma intent que toque contrato; ou
+- uma intent operacional/reliability; ou
+- uma intent com profile compact/SoD parcial.
+
+### R5 · Operacional sem intent
+
+Status: ⬜ a fazer.
+
+Objetivo: provar que trabalho reativo/standalone entra no bucket operacional sem sumir do grafo.
+
+Critérios:
+
+- standalone repo-local com evidence;
+- incidente com follow-up resolvível;
+- outcome operacional sem `primary-target` de objetivo;
+- dashboard mostra custo/risco fora do rollup de objectives.
+
+### R6 · Matcher executável v3
+
+Status: ⬜ a fazer.
+
+Objetivo: substituir fixture/pacote de capability review por matcher real, mantendo ele advisory.
+
+Critérios:
+
+- consome `context.json` e manifestos v3;
+- respeita trust-policy/egress/classification;
+- emite `score`, `unknown`, `evidence`, `freshness`, `policy`;
+- capability sem evidence/owner attestation não pesa igual;
+- decisão humana registra `followed|overrode` + rationale.
+
+### R7 · Authoring completo no app Next/MUI
+
+Status: ⬜ a fazer.
+
+Ordem sugerida:
+
+1. intake/register/proposal;
+2. triage com matcher/dúvidas/contratos;
+3. gate/activation com diff append-only;
+4. breakdown planner;
+5. repo-work ack e contract revision;
+6. outcome/verdict.
+
+Critérios:
+
+- sem edição direta de YAML pela UI;
+- dry-run antes de escrita;
+- resolver error vira bloqueio compreensível;
+- cada card distingue valid/warning/stale/blocked/self-attested/break-glass.
+
+### R8 · Adapters externos como evidence providers
+
+Status: ⬜ a fazer.
+
+Fonte: [`integration-catalog.yml`](integration-catalog.yml).
+
+Primeiras famílias candidatas:
+
+- API/contract schemas: OpenAPI, GraphQL, protobuf, AsyncAPI;
+- CI/test reports: GitHub Actions, GitLab CI, Jenkins, JUnit, coverage;
+- observability/metrics: OpenTelemetry, Prometheus, Grafana, Datadog;
+- code quality/security: SonarQube, Semgrep, CodeQL, OSV, Dependency-Track;
+- repo ownership/catalog: CODEOWNERS, GitHub teams, Backstage;
+- backlog import: Jira, Linear, Azure DevOps.
+
+### R9 · SQLite/Neo4j/Mongo transacionais
+
+Status: ⬜ futuro, depois do file backend transacional.
+
+Direção:
+
+- SQLite primeiro candidato a adapter local transacional;
+- Neo4j continua read-model derivado por padrão;
+- Neo4j write-capable só com contrato explícito e mesma suíte do file backend;
+- Mongo/event-store opcional apenas com migration registry e fail-closed.
+
+---
+
+## Matriz v2 -> v3
+
+| aprendizado/feature da v2                | estado na v3                                                               | próximo passo                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `.governance/` por repo + host agregador | ✅ migrado e endurecido                                                    | manter base física.                                                                  |
+| `context.json` publicado                 | ✅ migrado com freshness                                                   | adicionar envelope/ttl/producer real.                                                |
+| Manifesto/capabilities                   | ✅ migrado com candidates/review packet                                    | owner-attested-by/observed-from com dente real.                                      |
+| Matcher léxico/local/API                 | 🚧 conceito preservado; executor v3 ainda não existe                       | implementar R6.                                                                      |
+| `_lib` DDD                               | ✅ base v3 criada                                                          | endurecer command/event-log/ports.                                                   |
+| Backends file/sqlite/neo4j/mongo         | 🚧 exemplos derivados; file adapter real; Neo4j loader dry-run             | R3 primeiro; R9 depois.                                                              |
+| Read-models                              | 🚧 graph read-model v3 existe; snapshots multi-backend existem             | persistência operacional depois do file backend.                                     |
+| App de autoria                           | 🚧 app Next/MUI existe com comandos principais; autoria completa ainda não | R7.                                                                                  |
+| Scaffold de repo novo                    | 🚧 foco atual é adoção de repos existentes                                 | manter separado de create-new-repo.                                                  |
+| `backend.yml` por repo                   | ⬜ modelado no layout, sem executor                                        | não aceitar como evidência até existir adapter real.                                 |
+| Templates v2                             | 🧊 arquivados em `_archive/templates-v2`                                   | usar `_org-simulation-v3/_templates` como fonte ativa.                               |
+| q/r/d físico por work/repo               | ⬜ não migrado fisicamente                                                 | reintroduzir só quando houver comando/resolver, sem vazar histórico privado de repo. |
+| Visualização                             | ✅ owner/company static apps + app Next/MUI                                | static apps são projeções; Next/MUI é superfície operacional em incubação.           |
+
+---
+
+## Perguntas ainda abertas
+
+1. Qual é o primeiro escopo de lock do file backend transacional: por arquivo, por nó, por aggregate ou por comando?
+2. Qual segunda intent deve publicar outcome real para provar generalidade?
+3. Qual caso operacional sem intent deve ser o primeiro: incidente, dep-bump ou bug standalone?
+4. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade ou ownership?
+5. Quando o app incubado deixa de ser sim e vira pacote do framework?
+
+---
+
+## Fora de escopo imediato
+
+- transformar Jira/Linear em SSOT;
+- tornar Neo4j write-capable antes do file backend transacional;
+- análise estática profunda dentro do core;
+- automação que fecha gate sem humano;
+- BI genérico;
+- editor visual de schema;
+- treinar modelo próprio de IA.

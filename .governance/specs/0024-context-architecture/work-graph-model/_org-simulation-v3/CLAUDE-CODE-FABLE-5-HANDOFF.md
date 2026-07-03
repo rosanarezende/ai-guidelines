@@ -39,7 +39,7 @@ Critério de sucesso:
 - mecanismo fail-closed;
 - fixture adversarial que falha antes/passa depois;
 - adoption-journey verde;
-- npm run validate verde antes de commit;
+- hooks normais de commit/push verdes; validações extras só quando a fatia exigir e, se recorrentes, devem virar hook/CI;
 - relatório separando fatos, interpretação e riscos.
 
 Autonomia:
@@ -62,7 +62,8 @@ Autonomia:
 Estamos em ai-guidelines, Spec 0024, PR #45. Continue apenas dentro do checkpoint ativo.
 
 Objetivo: revisar a sim v3 após a rodada Codex que implementou outcome real, lifecycle repo-local,
-contratos com interface, trust-policy, layout repo-first sanitizado e fixtures adversariais. Não implemente ainda.
+contratos com interface, trust-policy, layout repo-first sanitizado, runtime _lib v3, app Next/MUI,
+comandos governados, exemplos multi-backend e fixtures adversariais. Não implemente ainda.
 
 Leia:
 - .governance/specs/0024-context-architecture/work-graph-model/model.yml
@@ -77,7 +78,13 @@ Contexto físico obrigatório:
 - _org-simulation-v3/repos/<repo>/ são repos de produto adotados, com código MVP e sidecar .governance.
 - Fix/dep-bump standalone ficam em repos/<repo>/.governance/works/*.yml.
 - Incidente fica em acme-governance/incidents/incidents.yml e gera follow-ups para standalone/proposal.
-- A v3 ainda NÃO porta a _lib DDD/backends/read-models/app de autoria da v2. Avalie isso como gap explícito, não como implementação existente.
+- A v3 JÁ porta a base _lib DDD, adapter file, command dry-run/execute, read-model de grafo,
+  app operacional Next/MUI e exemplos derivados file/sqlite/neo4j/mongo.
+- A v3 ainda NÃO porta a autoria completa da v2 nem adapters transacionais SQLite/Neo4j/Mongo
+  write-capable. Neo4j é read-model derivado por padrão; o próximo backend transacional a provar
+  é file + event-log/lock.
+- Integrações externas são opcionais e devem entrar como evidence providers/importers/projections,
+  não como SSOT paralelo; ver integration-catalog.yml.
 
 Saída:
 1. fatos observados;

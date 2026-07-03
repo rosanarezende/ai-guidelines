@@ -2,7 +2,7 @@
 
 > **Status:** proposta de requisitos para a próxima fatia de backend/frontend da Spec 0024.
 > **Autoridade:** o modelo tipado continua em [`model.yml`](model.yml). Este documento traduz o modelo para requisitos de produto, dados, arquitetura e robustez do app.
-> **Contexto:** a v2 provou `_lib`, portas, adapters e app de autoria. A v3 provou o substrato repo-first, resolvers fail-closed, red-team e dashboards estáticos. O app alvo deve unir os dois sem reintroduzir taxonomia antiga nem controles cerimoniais.
+> **Contexto:** a v2 provou `_lib`, portas, adapters e app de autoria. A v3 já provou o substrato repo-first, resolvers fail-closed, red-team, runtime file-first, exemplos multi-backend e uma primeira superfície React/Next + Material UI. O app alvo deve unir esses aprendizados sem reintroduzir taxonomia antiga nem controles cerimoniais.
 
 ## 1. Objetivo
 
@@ -456,14 +456,25 @@ Antes de considerar o app robusto, a suíte deve provar que:
 - Escrita direta em repo de produto sem PR/hook/policy.
 - Treinar modelo próprio de IA.
 
-## 14. Perguntas abertas
+## 14. Decisões fechadas e perguntas remanescentes
 
-1. O app operacional deve morar dentro desta spec como sim avançada ou virar pacote do framework?
-2. O primeiro backend transacional deve ser SQLite ou event-log file + lock?
-3. Neo4j deve ser adapter write-capable ou read-model estritamente derivado?
-4. O authoring app deve começar como web app local ou CLI TUI com UI depois?
-5. Quais dangerous mutations entram em bloqueio hard no perfil compact?
-6. Qual é o limite entre capability extraction aceitável e análise estática de código que vira ferramenta separada?
+### Decisões fechadas
+
+1. **App operacional:** fica incubado dentro da sim/spec por enquanto. Só vira pacote do framework quando provar jornadas adicionais, backend transacional mínimo e authoring básico desacoplado de `acme-*`.
+2. **Primeiro backend transacional:** provar primeiro `file + event-log/lock`. SQLite vem depois como adapter local, não como atalho para resolver consistência.
+3. **Neo4j:** read-model derivado por padrão. Pode consultar impacto/grafo/dashboard; comando governado relê YAML/event-log autoritativo antes de agir.
+4. **Authoring:** começa no app web React/Next + Material UI. CLI/TUI fica como suporte operacional e automação.
+5. **Perfil compact:** bloqueia hard mutações de confiança, segurança e contabilidade; o resto segue com warning append-only.
+6. **Capability extraction:** é assistência de adoção/manutenção de manifesto. Análise estática profunda entra por adapter/plugin externo.
+7. **Integrações externas:** opcionais, versionadas em [`integration-catalog.yml`](integration-catalog.yml), sempre como evidência/importação/projeção. Não substituem SSOT file-first.
+
+### Perguntas remanescentes
+
+1. Qual é o primeiro escopo de lock do file backend transacional: arquivo, nó, aggregate ou comando?
+2. Qual segunda intent deve publicar outcome real para provar generalidade?
+3. Qual caminho operacional sem intent vem primeiro: incidente, dep-bump ou bug standalone?
+4. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade ou ownership?
+5. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
 
 ## 15. Estado da decisão Opção A
 
