@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-export function JsonBlock({ value }) {
+export function JsonBlock({ value }: { value: unknown }) {
   return (
     <Box
       component="pre"
@@ -12,6 +12,8 @@ export function JsonBlock({ value }) {
         overflow: "auto",
         fontSize: 12,
         maxHeight: 360,
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-word",
       }}
     >
       {JSON.stringify(value, null, 2)}

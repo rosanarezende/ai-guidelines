@@ -491,9 +491,10 @@ de iniciar UI/API nova.
 - **Estado complementar 2:** `check-backend-examples.mjs` valida hash, refs, event-log, cobertura
   Neo4j e contrato de ação; `load-neo4j-example.mjs --dry-run` prova o plano de carga sem rede e
   `--apply` exige `--source-hash` + credenciais explícitas.
-- **Estado complementar 3:** `_apps/governance-next/` implementa a primeira superfície React/Next +
-  Material UI. O app lê snapshot derivado da runtime, expõe tabs ponta-a-ponta e chama API routes
-  para `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`,
+- **Estado complementar 3:** `_apps/governance-next/` implementa a superfície operacional React/Next +
+  Material UI v2 em TypeScript strict. O app lê snapshot derivado da runtime, separa navegação por
+  audiência (stakeholder, owner, tech lead, operação, auditoria, admin), expõe tabs ponta-a-ponta e
+  chama API routes para `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`,
   `repo-work.ack`, `standalone.complete`, `contract.propose-revision`, `outcome.publish`,
   `verdict.accept`, `incident.declare` e `policy.break-glass` com dry-run/execute.
 - **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
