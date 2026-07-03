@@ -49,6 +49,10 @@
     "assistant.local.label": "Local com Ollama",
     "assistant.local.privacy": "Roda na sua máquina. Nem prompts, nem arquivos saem para a internet.",
     "assistant.cloud.label": "Na nuvem",
-    "assistant.none.label": "Sem assistente"
+    "assistant.none.label": "Sem assistente",
+    "assistant.ollama.health.ok": "Ollama respondeu localmente. Nenhum prompt ou arquivo foi enviado.",
+    "assistant.ollama.health.blockedEndpoint": "Endpoint bloqueado: o teste local só permite loopback por padrão.",
+    "assistant.ollama.health.invalidResponse": "Ollama respondeu, mas o formato não parece ser /api/tags.",
+    "assistant.ollama.health.unreachable": "Não foi possível conectar ao Ollama local. Verifique se ele está rodando."
   }
 }

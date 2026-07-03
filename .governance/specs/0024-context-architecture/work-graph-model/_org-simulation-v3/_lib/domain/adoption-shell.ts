@@ -82,6 +82,16 @@ export type AssistantPreference = {
   endpoint?: string;
 };
 
+export type AssistantConnectionResult = {
+  ok: boolean;
+  provider: "ollama";
+  endpoint: string;
+  checkedPath: "/api/tags";
+  models: string[];
+  error?: "blocked-endpoint" | "unreachable" | "invalid-response";
+  messageKey: string;
+};
+
 export type Workspace = {
   id: string;
   name: string;

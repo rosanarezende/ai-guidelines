@@ -18,6 +18,16 @@ const appPackageFile = path.join(appDir, "package.json");
 const rootPackageFile = path.join(repoRoot, "package.json");
 const domainTsconfigFile = path.join(root, "tsconfig.domain.json");
 const localeFile = path.join(appDir, "locales", "pt-br.json");
+const ollamaHealthRouteFile = path.join(
+  appDir,
+  "app",
+  "api",
+  "integrations",
+  "assistant",
+  "ollama",
+  "health",
+  "route.ts"
+);
 
 function fail(message) {
   console.error(`✗ governance app — ${message}`);
@@ -99,6 +109,19 @@ if (!fs.existsSync(localeFile)) {
 const locale = JSON.parse(fs.readFileSync(localeFile, "utf8"));
 if (locale.locale !== "pt-br" || !locale.messages?.["home.title"]) {
   fail("locale pt-br sem contrato minimo (locale/messages/home.title)");
+}
+if (!fs.existsSync(ollamaHealthRouteFile)) {
+  fail("rota de health-check do Ollama ausente");
+}
+const ollamaHealthRoute = fs.readFileSync(ollamaHealthRouteFile, "utf8");
+if (!ollamaHealthRoute.includes('const CHECKED_PATH = "/api/tags"')) {
+  fail("health-check do Ollama deve consultar somente /api/tags");
+}
+if (/\/api\/(chat|generate|embeddings)/.test(ollamaHealthRoute)) {
+  fail("health-check do Ollama nao pode chamar endpoints que enviam prompt/contexto");
+}
+if (!ollamaHealthRoute.includes("isAllowedLocalEndpoint")) {
+  fail("health-check do Ollama deve bloquear endpoint nao-local por padrao");
 }
 if (sourceFiles.some((file) => /\.(js|jsx|mjs)$/.test(file))) {
   fail("app v2 ainda contem arquivo JS/JSX/MJS");
