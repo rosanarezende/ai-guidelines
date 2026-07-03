@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { GovernanceSnapshot } from "@/lib/types";
+import { t } from "@/lib/i18n";
 import { Flex, ResponsiveGrid, SectionCard } from "../components";
 import {
   AttentionList,
@@ -63,10 +64,9 @@ export default function HomeView({ snapshot }: { snapshot: GovernanceSnapshot })
     return (
       <AppShell chip={profileChipLabel(profile)}>
         <Paper variant="outlined" sx={{ p: 3, maxWidth: 560 }}>
-          <Typography variant="h2">Verificando configuração local</Typography>
+          <Typography variant="h2">{t("home.loading.title")}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Se este navegador ainda não concluiu o onboarding, você será levado para a configuração
-            inicial.
+            {t("home.loading.body")}
           </Typography>
         </Paper>
       </AppShell>
@@ -78,7 +78,7 @@ export default function HomeView({ snapshot }: { snapshot: GovernanceSnapshot })
       <Box sx={{ display: "grid", gap: 3 }}>
         <Box sx={{ display: "grid", gap: 1 }}>
           <Typography sx={{ fontSize: 29, fontWeight: 800, letterSpacing: "-0.5px" }}>
-            O que você quer governar hoje?
+            {t("home.title")}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 640 }}>
             Ciclo {cycle} em andamento. {adoption.doneCount} de {adoption.totalCount} passos de
@@ -95,14 +95,12 @@ export default function HomeView({ snapshot }: { snapshot: GovernanceSnapshot })
           >
             <Flex justify="space-between" align="center" gap={2} wrap>
               <Box>
-                <Chip size="small" color="warning" label="Onboarding em andamento" />
+                <Chip size="small" color="warning" label={t("home.onboarding.partial.label")} />
                 <Typography variant="h2" sx={{ mt: 1 }}>
-                  Termine a configuração inicial
+                  {t("home.onboarding.partial.title")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 720 }}>
-                  Você já começou neste navegador. Enquanto não concluir, a Home continua útil, mas
-                  perfil, papéis, fontes de trabalho e assistente ainda podem estar só parcialmente
-                  configurados.
+                  {t("home.onboarding.partial.body")}
                 </Typography>
               </Box>
               <Flex gap={1} wrap>
@@ -121,44 +119,44 @@ export default function HomeView({ snapshot }: { snapshot: GovernanceSnapshot })
           <ShortcutCard
             href="/configuracoes"
             icon={<CorporateFareIcon fontSize="small" />}
-            title="Configurar organização"
+            title={t("home.shortcuts.configureOrg")}
             sub={`Papéis, aprovações e perfil da sua org (${profileOption(profile).label})`}
           />
           <ShortcutCard
             href="/onboarding"
             icon={<LinkIcon fontSize="small" />}
-            title="Conectar fontes de trabalho"
+            title={t("home.shortcuts.connectSources")}
             sub="Git, pastas, serviços ou módulos — de onde vem o trabalho"
           />
           <ShortcutCard
             href="/console?view=company"
             icon={<FlagIcon fontSize="small" />}
-            title="Planejar ciclo"
+            title={t("home.shortcuts.planCycle")}
             sub="Objetivos e metas do período"
           />
           <ShortcutCard
             href="/console?view=commands"
             icon={<LightbulbIcon fontSize="small" />}
-            title="Registrar iniciativa"
+            title={t("home.shortcuts.registerIntent")}
             sub="Uma aposta ou ideia que vira trabalho"
           />
           <ShortcutCard
             href="/console?view=owner"
             icon={<MonitorHeartIcon fontSize="small" />}
-            title="Acompanhar resultados"
+            title={t("home.shortcuts.results")}
             sub="O que as metas dizem hoje"
           />
           <ShortcutCard
             href="#pendencias"
             icon={<PendingActionsIcon fontSize="small" />}
-            title="Resolver pendências"
+            title={t("home.shortcuts.pending")}
             sub="Itens que esperam por alguém"
             badge={pendingCount || undefined}
           />
           <ShortcutCard
             href="/console?view=audit"
             icon={<HistoryIcon fontSize="small" />}
-            title="Auditar decisões"
+            title={t("home.shortcuts.audit")}
             sub="Quem decidiu o quê, e quando"
           />
         </ResponsiveGrid>

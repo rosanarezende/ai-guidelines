@@ -17,12 +17,13 @@ import TerminalIcon from "@mui/icons-material/Terminal";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { t } from "@/lib/i18n";
 import { theme } from "../theme";
 
 function ShellSkeleton() {
   return (
     <div className="app-shell-loading">
-      <div>Carregando governança...</div>
+      <div>{t("home.loading.title")}</div>
     </div>
   );
 }
@@ -30,7 +31,7 @@ function ShellSkeleton() {
 export default function AppShell({
   children,
   chip,
-  subtitle = "Governança",
+  subtitle = t("app.brand.product"),
   headerAction,
   maxWidth = "lg",
 }: {
@@ -80,7 +81,7 @@ export default function AppShell({
                 href="/"
                 sx={{ fontWeight: 700, color: "text.primary", textDecoration: "none" }}
               >
-                Acme
+                {t("app.brand.name")}
               </Typography>
               <Typography variant="body2" color="text.secondary" noWrap>
                 {subtitle}
@@ -90,7 +91,7 @@ export default function AppShell({
             <Box sx={{ flex: 1 }} />
             {headerAction}
             <Button component={Link} href="/configuracoes" size="small" color="inherit">
-              Configurações
+              {t("app.nav.settings")}
             </Button>
             <Button
               component={Link}
@@ -99,7 +100,7 @@ export default function AppShell({
               color="inherit"
               startIcon={<TerminalIcon fontSize="small" />}
             >
-              Console técnico
+              {t("app.nav.console")}
             </Button>
           </Toolbar>
         </AppBar>

@@ -16,6 +16,8 @@ const repoRoot = path.resolve(root, "../../../../..");
 const integrationCatalogFile = path.join(root, "..", "integration-catalog.yml");
 const appPackageFile = path.join(appDir, "package.json");
 const rootPackageFile = path.join(repoRoot, "package.json");
+const domainTsconfigFile = path.join(root, "tsconfig.domain.json");
+const localeFile = path.join(appDir, "locales", "pt-br.json");
 
 function fail(message) {
   console.error(`✗ governance app — ${message}`);
@@ -88,6 +90,16 @@ function assertWorkspaceDependencyContract(files) {
 
 const sourceFiles = readRelativeFiles();
 assertWorkspaceDependencyContract(sourceFiles);
+if (!fs.existsSync(domainTsconfigFile)) {
+  fail("contrato TypeScript da sim ausente: tsconfig.domain.json");
+}
+if (!fs.existsSync(localeFile)) {
+  fail("locale principal ausente: _apps/governance-next/locales/pt-br.json");
+}
+const locale = JSON.parse(fs.readFileSync(localeFile, "utf8"));
+if (locale.locale !== "pt-br" || !locale.messages?.["home.title"]) {
+  fail("locale pt-br sem contrato minimo (locale/messages/home.title)");
+}
 if (sourceFiles.some((file) => /\.(js|jsx|mjs)$/.test(file))) {
   fail("app v2 ainda contem arquivo JS/JSX/MJS");
 }
@@ -128,6 +140,14 @@ if (!Array.isArray(org.objectives) || !org.objectives.length) fail("snapshot sem
 if (!Array.isArray(org.targets) || !org.targets.length) fail("snapshot sem targets/dashboard");
 if (!assistantRuntime?.systems?.includes("ollama"))
   fail("catalogo sem assistant runtime local Ollama");
+
+const tscBin = path.join(repoRoot, "node_modules", "typescript", "bin", "tsc");
+const domainTsc = spawnSync(process.execPath, [tscBin, "-p", domainTsconfigFile], {
+  cwd: root,
+  stdio: "inherit",
+  shell: false,
+});
+if (domainTsc.status !== 0) fail("contrato TypeScript da sim falhou");
 
 const nextBin = path.join(repoRoot, "node_modules", "next", "dist", "bin", "next");
 const result = spawnSync(process.execPath, [nextBin, "build", "--webpack"], {
