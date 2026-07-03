@@ -15,6 +15,14 @@ const fail = (msg) => {
   process.exit(1);
 };
 
+function readEvents(governanceRoot) {
+  return readFileSync(path.join(governanceRoot, "events", "events.jsonl"), "utf8")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+}
+
 const runtime = openFileGovernanceRuntime();
 const org = runtime.loadOrg();
 const issues = runtime.validateOrg(org);
@@ -125,6 +133,10 @@ try {
   if (!eventLog.includes("cmd-check-runtime-proposal")) {
     fail("proposal.create não registrou event-log append-only");
   }
+  let events = readEvents(governanceRoot);
+  if (events.at(-1)?.receipt?.newRevision !== writeRuntime.currentRevision()) {
+    fail("event-log não referencia a revisão atual após proposal.create");
+  }
 
   const triageCommand = {
     id: "cmd-check-runtime-triage",
@@ -203,6 +215,94 @@ try {
   });
   if (stale.ok || !stale.issues.some((issue) => issue.rule === "command-stale")) {
     fail("execute não falhou fechado com base-revision stale");
+  }
+
+  const replay = writeRuntime.executeGovernedCommand({
+    ...proposalCommand,
+    id: "cmd-check-runtime-replay",
+    envelope: {
+      ...envelope("cmd-check-runtime-replay"),
+      "idempotency-key": "cmd-check-runtime-proposal",
+      nonce: "nonce-cmd-check-runtime-proposal",
+    },
+    payload: {
+      proposal: {
+        ...proposalCommand.payload.proposal,
+        id: "prop-check-runtime-replay",
+      },
+    },
+  });
+  if (replay.ok || !replay.issues.some((issue) => issue.rule === "command-replay")) {
+    fail("execute não bloqueou replay real de idempotency-key/nonce contra event-log");
+  }
+
+  const sharedBaseRevision = revision();
+  const concurrentA = {
+    ...proposalCommand,
+    id: "cmd-check-runtime-concurrent-a",
+    envelope: {
+      ...envelope("cmd-check-runtime-concurrent-a"),
+      "base-revision": sharedBaseRevision,
+    },
+    payload: {
+      proposal: {
+        ...proposalCommand.payload.proposal,
+        id: "prop-check-runtime-concurrent-a",
+      },
+    },
+  };
+  const concurrentB = {
+    ...proposalCommand,
+    id: "cmd-check-runtime-concurrent-b",
+    envelope: {
+      ...envelope("cmd-check-runtime-concurrent-b"),
+      "base-revision": sharedBaseRevision,
+    },
+    payload: {
+      proposal: {
+        ...proposalCommand.payload.proposal,
+        id: "prop-check-runtime-concurrent-b",
+      },
+    },
+  };
+  const firstConcurrent = writeRuntime.executeGovernedCommand(concurrentA);
+  if (!firstConcurrent.ok) {
+    fail(
+      `primeiro comando concorrente rejeitado: ${firstConcurrent.issues.map((i) => i.rule).join(", ")}`
+    );
+  }
+  const secondConcurrent = writeRuntime.executeGovernedCommand(concurrentB);
+  if (
+    secondConcurrent.ok ||
+    !secondConcurrent.issues.some((issue) => issue.rule === "command-stale")
+  ) {
+    fail("segundo comando com base-revision antiga não falhou fechado");
+  }
+
+  const heldLock = writeRuntime.repository.acquireCommandLock({
+    owner: "check-runtime-held-lock",
+    ttlMs: 30_000,
+  });
+  try {
+    let lockBlocked = false;
+    try {
+      writeRuntime.executeGovernedCommand({
+        ...proposalCommand,
+        id: "cmd-check-runtime-lock-blocked",
+        envelope: envelope("cmd-check-runtime-lock-blocked"),
+        payload: {
+          proposal: {
+            ...proposalCommand.payload.proposal,
+            id: "prop-check-runtime-lock-blocked",
+          },
+        },
+      });
+    } catch (error) {
+      lockBlocked = String(error?.message || error).includes("command lock ativo");
+    }
+    if (!lockBlocked) fail("lock de comando não bloqueou mutação concorrente");
+  } finally {
+    writeRuntime.repository.releaseCommandLock(heldLock);
   }
 
   const ownerMismatch = writeRuntime.executeGovernedCommand({
@@ -644,7 +744,7 @@ try {
     envelope: envelope("cmd-check-runtime-verdict", "2027-04-10"),
     payload: {
       verdict: {
-        id: "verdict-check-runtime-cta",
+        id: "verdict-check-runtime-cta-supersede",
         intent: "intent-cta-upgrade",
         outcome: "out-cta-upgrade-2027q1",
         verdict: "won",
@@ -653,6 +753,7 @@ try {
         "decision-rule": "roda 4 semanas OU 50k exposições; ganha se conversão ↑ X% sem churn ↑",
         evidence: ["outcome:out-cta-upgrade-2027q1", "resolver:valid-outcome"],
         next: "graduation",
+        supersedes: "verdict-cta-upgrade-2027q1",
       },
     },
   };
@@ -662,9 +763,61 @@ try {
   const verdictsDoc = parse(
     readFileSync(path.join(governanceRoot, "decisions", "verdicts.yml"), "utf8")
   );
-  if (!verdictsDoc.verdicts.some((item) => item.id === "verdict-check-runtime-cta")) {
+  if (!verdictsDoc.verdicts.some((item) => item.id === "verdict-check-runtime-cta-supersede")) {
     fail("verdict.accept não escreveu decisions/verdicts.yml");
   }
+  events = readEvents(governanceRoot);
+  if (events.at(-1)?.receipt?.newRevision !== writeRuntime.currentRevision()) {
+    fail("event-log não referencia a revisão atual após verdict.accept");
+  }
+
+  const crashCommand = {
+    ...proposalCommand,
+    id: "cmd-check-runtime-crash",
+    envelope: envelope("cmd-check-runtime-crash", "2027-04-11"),
+    payload: {
+      proposal: {
+        ...proposalCommand.payload.proposal,
+        id: "prop-check-runtime-crash",
+      },
+    },
+  };
+  let crashed = false;
+  try {
+    writeRuntime.executeGovernedCommand(crashCommand, { simulateCrashAfterApply: true });
+  } catch (error) {
+    crashed = String(error?.message || error).includes("simulated crash");
+  }
+  if (!crashed) fail("crash simulado após apply não foi disparado");
+  if (writeRuntime.repository.listPendingTransactions().length !== 1) {
+    fail("crash após apply não deixou transação pendente detectável");
+  }
+  const afterCrashProposals = parse(
+    readFileSync(path.join(governanceRoot, "intake", "proposals.yml"), "utf8")
+  ).proposals;
+  if (!afterCrashProposals.some((proposal) => proposal.id === "prop-check-runtime-crash")) {
+    fail("crash simulado não representou escrita canônica antes do event-log");
+  }
+  if (readEvents(governanceRoot).some((event) => event.command?.id === "cmd-check-runtime-crash")) {
+    fail("crash simulado appendou event-log apesar da falha antes do commit");
+  }
+  let recoveryBlocked = false;
+  try {
+    writeRuntime.executeGovernedCommand({
+      ...proposalCommand,
+      id: "cmd-check-runtime-after-crash",
+      envelope: envelope("cmd-check-runtime-after-crash", "2027-04-12"),
+      payload: {
+        proposal: {
+          ...proposalCommand.payload.proposal,
+          id: "prop-check-runtime-after-crash",
+        },
+      },
+    });
+  } catch (error) {
+    recoveryBlocked = String(error?.message || error).includes("file transaction pendente");
+  }
+  if (!recoveryBlocked) fail("runtime não bloqueou nova mutação após transação pendente");
 } finally {
   rmSync(tmp, { recursive: true, force: true });
 }

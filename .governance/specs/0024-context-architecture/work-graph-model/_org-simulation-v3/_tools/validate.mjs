@@ -1,11 +1,12 @@
 // validate.mjs — CLI dos lints da org (exit 1 se houver ERRO). Uso: node _tools/validate.mjs
-import { loadOrg, validateOrg } from "./org.mjs";
+import { loadOrg, validateOrg, validateRuntimeState } from "./org.mjs";
 import { validateRepoContracts } from "./repo-contracts.mjs";
 import { validateRepoContexts } from "./repo-contexts.mjs";
 import { validateRepoWorks } from "./repo-works.mjs";
 
 const org = loadOrg();
 const issues = [
+  ...validateRuntimeState(),
   ...validateOrg(org),
   ...(await validateRepoContexts(org)),
   ...validateRepoWorks(org),

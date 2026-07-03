@@ -285,7 +285,7 @@ physical:
   host: "acme-governance agrega projeções PUBLICADAS (context.json, repo-work-acks, repo-contracts), não abre banco nem confia só no YAML central"
   identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
   backend: [file, sqlite, neo4j, mongo]
-  backend-status: "v3 já porta runtime file-first (_lib domain + adapter file + commands + read-model), app Next/MUI e exemplos derivados file/sqlite/neo4j/mongo; Neo4j tem export/smoke/loader dry-run como read-model. Ainda NÃO há adapters transacionais SQLite/Neo4j/Mongo write-capable; o próximo dente é file + event-log/lock."
+  backend-status: "v3 já porta runtime file-first transacional mínimo (_lib domain + adapter file + lock de comando + escrita atômica + event-log + recovery marker), app Next/MUI e exemplos derivados file/sqlite/neo4j/mongo; Neo4j tem export/smoke/loader dry-run como read-model. Ainda NÃO há adapters transacionais SQLite/Neo4j/Mongo write-capable."
 
 # ═════════════════════ EXEMPLOS (validam o modelo; o _map desenha estes) ═════════════════════
 examples:

@@ -20,29 +20,53 @@ export function openFileGovernanceRuntime(options = {}) {
     dryRunGovernedCommand: (command, options = {}) =>
       dryRunGovernedCommand(command, repository.loadOrg(), options),
     executeGovernedCommand: (command, options = {}) => {
-      const currentRevision = repository.currentRevision();
-      const history = repository.loadCommandHistory();
-      const dryRun = dryRunGovernedCommand(command, repository.loadOrg(), {
-        ...options,
-        currentRevision,
-        history,
-      });
-      if (!dryRun.ok) return dryRun;
-      const write = repository.applyCommand(command);
-      const newRevision = repository.currentRevision();
-      const receipt = {
-        ...dryRun.receipt,
-        write,
-        previousRevision: currentRevision,
-        newRevision,
-      };
-      repository.appendEvent({
-        schema: "acme.event-log/v1",
-        id: eventId(command, newRevision),
+      return repository.withCommandLock(
         command,
-        receipt,
-      });
-      return { ok: true, issues: dryRun.issues, receipt };
+        () => {
+          repository.assertNoPendingTransactions();
+          const currentRevision = repository.currentRevision();
+          const history = repository.loadCommandHistory();
+          const dryRun = dryRunGovernedCommand(command, repository.loadOrg(), {
+            ...options,
+            currentRevision,
+            history,
+          });
+          if (!dryRun.ok) return dryRun;
+
+          const transaction = repository.beginTransaction(command, currentRevision);
+          try {
+            const write = repository.applyCommand(command);
+            const newRevision = repository.currentRevision();
+            repository.markTransactionApplied(transaction, write, newRevision);
+            if (options.simulateCrashAfterApply) {
+              throw new Error("simulated crash after apply before event-log append");
+            }
+            const receipt = {
+              ...dryRun.receipt,
+              write,
+              previousRevision: currentRevision,
+              newRevision,
+            };
+            const event = {
+              schema: "acme.event-log/v1",
+              id: eventId(command, newRevision),
+              command,
+              receipt,
+            };
+            repository.commitTransaction(transaction, event);
+            return { ok: true, issues: dryRun.issues, receipt };
+          } catch (error) {
+            const revisionAfterError = repository.currentRevision();
+            if (revisionAfterError === currentRevision) {
+              repository.abortTransaction(transaction);
+            } else {
+              repository.markTransactionFailed(transaction, error, revisionAfterError);
+            }
+            throw error;
+          }
+        },
+        options
+      );
     },
   };
 }

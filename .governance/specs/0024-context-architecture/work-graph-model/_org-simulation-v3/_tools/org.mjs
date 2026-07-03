@@ -8,3 +8,7 @@ const repository = new FileGovernanceRepository();
 export function loadOrg() {
   return repository.loadOrg();
 }
+
+export function validateRuntimeState() {
+  return repository.listRuntimeIssues();
+}

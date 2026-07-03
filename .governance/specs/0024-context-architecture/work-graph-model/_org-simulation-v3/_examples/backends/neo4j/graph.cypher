@@ -1,6 +1,6 @@
 // Neo4j graph seed generated from the v3 runtime read-model.
-MERGE (m:ProjectionMetadata {contentHash: '2934a08da271'})
-SET m.schema = 'acme.backend-example/v1', m.nodeCount = 171, m.edgeCount = 361, m.issueCount = 3;
+MERGE (m:ProjectionMetadata {contentHash: 'd4031295214d'})
+SET m.schema = 'acme.backend-example/v1', m.nodeCount = 172, m.edgeCount = 364, m.issueCount = 3;
 
 MERGE (n:GovernanceNode:REPO {id: 'acme-analytics'})
 SET n.type = 'repo', n.label = 'acme-analytics', n.data = '{"id":"acme-analytics","owner":"time-data","caps":["eventos","métricas","experimentos-fonte"]}', n.dataHash = '4040c3f3a52c';
@@ -344,7 +344,12 @@ MERGE (n:GovernanceNode:TEAM {id: 'time-sre'})
 SET n.type = 'team', n.label = 'time-sre', n.data = '{"id":"time-sre","area":"area-platform","lead":"lead-sre"}', n.dataHash = 'd5e93cd63c43';
 MERGE (n:GovernanceNode:TEAM {id: 'time-support'})
 SET n.type = 'team', n.label = 'time-support', n.data = '{"id":"time-support","area":"area-cx","lead":"lead-support"}', n.dataHash = 'd11ea3847aea';
+MERGE (n:GovernanceNode:VERDICT {id: 'verdict-cta-upgrade-2027q1'})
+SET n.type = 'verdict', n.label = 'won: intent-cta-upgrade', n.data = '{"id":"verdict-cta-upgrade-2027q1","intent":"intent-cta-upgrade","outcome":"out-cta-upgrade-2027q1","verdict":"won","decided-by":"pm-growth","decided-at":"2027-04-10","decision-rule":"roda 4 semanas OU 50k exposições; ganha se conversão ↑ X% sem churn ↑","evidence":["outcome:out-cta-upgrade-2027q1","resolver:valid-outcome"],"next":"graduation"}', n.dataHash = 'f3af22544c0e';
 
+MATCH (source:GovernanceNode {id: 'pm-growth'}), (target:GovernanceNode {id: 'verdict-cta-upgrade-2027q1'})
+MERGE (source)-[r:ACCEPTS_VERDICT {id: 'accepts-verdict:pm-growth->verdict-cta-upgrade-2027q1'}]->(target)
+SET r.type = 'accepts-verdict';
 MATCH (source:GovernanceNode {id: 'intent-checkout-1click::api-token-pagamento::repo-ack'}), (target:GovernanceNode {id: 'intent-checkout-1click::api-token-pagamento'})
 MERGE (source)-[r:ACKNOWLEDGES_WORK {id: 'acknowledges-work:intent-checkout-1click::api-token-pagamento::repo-ack->intent-checkout-1click::api-token-pagamento'}]->(target)
 SET r.type = 'acknowledges-work';
@@ -957,6 +962,9 @@ SET r.type = 'has-team';
 MATCH (source:GovernanceNode {id: 'area-platform'}), (target:GovernanceNode {id: 'time-sre'})
 MERGE (source)-[r:HAS_TEAM {id: 'has-team:area-platform->time-sre'}]->(target)
 SET r.type = 'has-team';
+MATCH (source:GovernanceNode {id: 'intent-cta-upgrade'}), (target:GovernanceNode {id: 'verdict-cta-upgrade-2027q1'})
+MERGE (source)-[r:HAS_VERDICT {id: 'has-verdict:intent-cta-upgrade->verdict-cta-upgrade-2027q1'}]->(target)
+SET r.type = 'has-verdict';
 MATCH (source:GovernanceNode {id: 'intent-checkout-stack::estrangula-pedidos'}), (target:GovernanceNode {id: 'acme-core-api#mod-orders'})
 MERGE (source)-[r:IN_MODULE {id: 'in-module:intent-checkout-stack::estrangula-pedidos->acme-core-api#mod-orders'}]->(target)
 SET r.type = 'in-module';
@@ -1395,6 +1403,9 @@ SET r.type = 'runs';
 MATCH (source:GovernanceNode {id: 'time-support'}), (target:GovernanceNode {id: 'intent-help-selfservice'})
 MERGE (source)-[r:RUNS {id: 'runs:time-support->intent-help-selfservice'}]->(target)
 SET r.type = 'runs';
+MATCH (source:GovernanceNode {id: 'out-cta-upgrade-2027q1'}), (target:GovernanceNode {id: 'verdict-cta-upgrade-2027q1'})
+MERGE (source)-[r:SUPPORTS_VERDICT {id: 'supports-verdict:out-cta-upgrade-2027q1->verdict-cta-upgrade-2027q1'}]->(target)
+SET r.type = 'supports-verdict';
 MATCH (source:GovernanceNode {id: 'tgt-billing-conv'}), (target:GovernanceNode {id: 'conversion-rate'})
 MERGE (source)-[r:USES_METRIC {id: 'uses-metric:tgt-billing-conv->conversion-rate'}]->(target)
 SET r.type = 'uses-metric';

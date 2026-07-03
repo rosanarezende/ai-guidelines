@@ -461,7 +461,7 @@ Antes de considerar o app robusto, a suíte deve provar que:
 ### Decisões fechadas
 
 1. **App operacional:** fica incubado dentro da sim/spec por enquanto. Só vira pacote do framework quando provar jornadas adicionais, backend transacional mínimo e authoring básico desacoplado de `acme-*`.
-2. **Primeiro backend transacional:** provar primeiro `file + event-log/lock`. SQLite vem depois como adapter local, não como atalho para resolver consistência.
+2. **Primeiro backend transacional:** `file + event-log/lock` já é o primeiro dente. SQLite vem depois como adapter local, não como atalho para resolver consistência.
 3. **Neo4j:** read-model derivado por padrão. Pode consultar impacto/grafo/dashboard; comando governado relê YAML/event-log autoritativo antes de agir.
 4. **Authoring:** começa no app web React/Next + Material UI. CLI/TUI fica como suporte operacional e automação.
 5. **Perfil compact:** detecta mutações dangerous, registra justificativa append-only e exige revisão retroativa em cadência; hard-block só entra por decisão futura explícita.
@@ -470,11 +470,10 @@ Antes de considerar o app robusto, a suíte deve provar que:
 
 ### Perguntas remanescentes
 
-1. Qual é o primeiro escopo de lock do file backend transacional: arquivo, nó, aggregate ou comando?
-2. Qual segunda intent deve publicar outcome real para provar generalidade?
-3. Qual caminho operacional sem intent vem primeiro: incidente, dep-bump ou bug standalone?
-4. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade ou ownership?
-5. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
+1. Qual segunda intent deve publicar outcome real para provar generalidade?
+2. Qual caminho operacional sem intent vem primeiro: incidente, dep-bump ou bug standalone?
+3. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
+4. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
 
 ## 15. Estado da decisão Opção A
 
@@ -498,9 +497,9 @@ de iniciar UI/API nova.
   `repo-work.ack`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`,
   `incident.declare` e `policy.break-glass` com dry-run/execute.
 - **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
-  `base-revision`, authority resolvida, idempotency, nonce, escrita YAML autoritativa e event-log
-  append-only. `currentRevision()` inclui triages e sidecars repo-local publicados, para que
-  repo-work/contract não virem mutações invisíveis ao stale-check. Ainda não há backend
-  transacional SQLite/Neo4j/Mongo write-capable.
-- **Próxima decisão:** escolher o primeiro backend transacional (`file` com lock/event-log ou
-  SQLite) sem transformar banco/read-model em SSOT.
+  `base-revision`, authority resolvida, idempotency, nonce, lock global por comando, escrita YAML
+  atômica, marker de recovery e event-log append-only. `currentRevision()` inclui triages e
+  sidecars repo-local publicados, para que repo-work/contract não virem mutações invisíveis ao
+  stale-check. Ainda não há backend transacional SQLite/Neo4j/Mongo write-capable.
+- **Próxima decisão:** escolher o segundo outcome real e o primeiro fluxo operacional sem intent,
+  sem transformar banco/read-model em SSOT.

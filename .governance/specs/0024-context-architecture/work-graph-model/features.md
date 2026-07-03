@@ -29,11 +29,12 @@ físico, mas não apaga os aprendizados da v2.
 - smoke operacional de file + Neo4j, com Neo4j ainda como read-model/projeção;
 - resolvers fail-closed para schema, outcome, repo-work, contrato, trust-policy, authority,
   break-glass, incident e verdict;
-- event-log append-only inicial no adapter file.
+- backend file-first transacional mínimo: lock global por comando, escrita atômica, event-log
+  append-only, marker de recovery para crash entre write e evento, replay por idempotency/nonce e
+  fixtures de concorrência.
 
 🚧 Ainda falta para considerar o work-graph pronto ponta a ponta:
 
-- backend transacional file-first com lock/event-log robusto;
 - segundo outcome real para provar que o fluxo não está especial-cased em `intent-cta-upgrade`;
 - caminho operacional sem intent planejada;
 - matcher executável v3;
@@ -110,20 +111,20 @@ Deve percorrer:
 
 ### R3 · File backend transacional robusto
 
-Status: ⬜ a fazer.
+Status: ✅ aplicado.
 
 Objetivo: provar que file-first escreve com segurança.
 
 Critérios:
 
-- lock curto por escopo de mutação;
-- event-log semântico append-only;
-- replay por event-log;
-- recovery de escrita parcial;
-- `base-revision` stale falha fechado;
-- nonce/idempotency bloqueiam replay;
-- fixtures de concorrência;
-- read-model rebuild por fonte autoritativa.
+- ✅ lock curto por comando;
+- ✅ event-log semântico append-only sem read-modify-write;
+- ✅ replay por event-log (`idempotency-key`/`nonce`);
+- ✅ marker de recovery para escrita aplicada sem evento;
+- ✅ `base-revision` stale falha fechado;
+- ✅ fixtures de concorrência, lock ativo, replay e crash;
+- ✅ verdict real de `intent-cta-upgrade` gravado por comando em `decisions/verdicts.yml` +
+  `events/events.jsonl`.
 
 ### R4 · Segundo outcome real
 
@@ -226,8 +227,8 @@ Direção:
 | `context.json` publicado                 | ✅ migrado com freshness                                                   | adicionar envelope/ttl/producer real.                                                |
 | Manifesto/capabilities                   | ✅ migrado com candidates/review packet                                    | owner-attested-by/observed-from com dente real.                                      |
 | Matcher léxico/local/API                 | 🚧 conceito preservado; executor v3 ainda não existe                       | implementar R6.                                                                      |
-| `_lib` DDD                               | ✅ base v3 criada                                                          | endurecer command/event-log/ports.                                                   |
-| Backends file/sqlite/neo4j/mongo         | 🚧 exemplos derivados; file adapter real; Neo4j loader dry-run             | R3 primeiro; R9 depois.                                                              |
+| `_lib` DDD                               | ✅ base v3 criada + file transaction mínimo                                | próximo dente: matcher/authoring, não bypassar command runtime.                      |
+| Backends file/sqlite/neo4j/mongo         | 🚧 file transacional mínimo + exemplos derivados; Neo4j loader dry-run     | R9 depois, com a mesma suíte transacional do file backend.                           |
 | Read-models                              | 🚧 graph read-model v3 existe; snapshots multi-backend existem             | persistência operacional depois do file backend.                                     |
 | App de autoria                           | 🚧 app Next/MUI existe com comandos principais; autoria completa ainda não | R7.                                                                                  |
 | Scaffold de repo novo                    | 🚧 foco atual é adoção de repos existentes                                 | manter separado de create-new-repo.                                                  |
@@ -240,11 +241,10 @@ Direção:
 
 ## Perguntas ainda abertas
 
-1. Qual é o primeiro escopo de lock do file backend transacional: por arquivo, por nó, por aggregate ou por comando?
-2. Qual segunda intent deve publicar outcome real para provar generalidade?
-3. Qual caso operacional sem intent deve ser o primeiro: incidente, dep-bump ou bug standalone?
-4. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
-5. Quando o app incubado deixa de ser sim e vira pacote do framework?
+1. Qual segunda intent deve publicar outcome real para provar generalidade?
+2. Qual caso operacional sem intent deve ser o primeiro: incidente, dep-bump ou bug standalone?
+3. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
+4. Quando o app incubado deixa de ser sim e vira pacote do framework?
 
 ---
 

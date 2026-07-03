@@ -3,10 +3,10 @@
     "schema": "acme.backend-example/v1",
     "authority": "derived-read-model",
     "source": "acme-governance + repos/.governance + runtime v3",
-    "contentHash": "2934a08da271",
+    "contentHash": "d4031295214d",
     "counts": {
-      "nodes": 171,
-      "edges": 361,
+      "nodes": 172,
+      "edges": 364,
       "issues": 3
     },
     "note": "Example backend exports are derived. YAML/event-log remains authoritative."
@@ -4088,9 +4088,32 @@
         "lead": "lead-support"
       },
       "dataHash": "d11ea3847aea"
+    },
+    {
+      "id": "verdict-cta-upgrade-2027q1",
+      "type": "verdict",
+      "label": "won: intent-cta-upgrade",
+      "data": {
+        "id": "verdict-cta-upgrade-2027q1",
+        "intent": "intent-cta-upgrade",
+        "outcome": "out-cta-upgrade-2027q1",
+        "verdict": "won",
+        "decided-by": "pm-growth",
+        "decided-at": "2027-04-10",
+        "decision-rule": "roda 4 semanas OU 50k exposições; ganha se conversão ↑ X% sem churn ↑",
+        "evidence": ["outcome:out-cta-upgrade-2027q1", "resolver:valid-outcome"],
+        "next": "graduation"
+      },
+      "dataHash": "f3af22544c0e"
     }
   ],
   "edges": [
+    {
+      "id": "accepts-verdict:pm-growth->verdict-cta-upgrade-2027q1",
+      "source": "pm-growth",
+      "target": "verdict-cta-upgrade-2027q1",
+      "type": "accepts-verdict"
+    },
     {
       "id": "acknowledges-work:intent-checkout-1click::api-token-pagamento::repo-ack->intent-checkout-1click::api-token-pagamento",
       "source": "intent-checkout-1click::api-token-pagamento::repo-ack",
@@ -5316,6 +5339,12 @@
       "type": "has-team"
     },
     {
+      "id": "has-verdict:intent-cta-upgrade->verdict-cta-upgrade-2027q1",
+      "source": "intent-cta-upgrade",
+      "target": "verdict-cta-upgrade-2027q1",
+      "type": "has-verdict"
+    },
+    {
       "id": "in-module:intent-checkout-stack::estrangula-pedidos->acme-core-api#mod-orders",
       "source": "intent-checkout-stack::estrangula-pedidos",
       "target": "acme-core-api#mod-orders",
@@ -6190,6 +6219,12 @@
       "source": "time-support",
       "target": "intent-help-selfservice",
       "type": "runs"
+    },
+    {
+      "id": "supports-verdict:out-cta-upgrade-2027q1->verdict-cta-upgrade-2027q1",
+      "source": "out-cta-upgrade-2027q1",
+      "target": "verdict-cta-upgrade-2027q1",
+      "type": "supports-verdict"
     },
     {
       "id": "uses-metric:tgt-billing-conv->conversion-rate",

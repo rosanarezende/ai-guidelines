@@ -1,6 +1,6 @@
 // graph.js — GERADO por _tools/build-graph.mjs a partir de acme-governance/ + repos/ + model.yml — NÃO editar à mão.
 window.GRAPH = {
-  contentHash: "e0a7bd47fffe",
+  contentHash: "b5380c0b1375",
   company: "acme",
   profileDeclaration: {
     scope: "acme (a org inteira)",
@@ -2971,6 +2971,22 @@ window.GRAPH = {
       },
     },
     {
+      id: "verdict-cta-upgrade-2027q1",
+      type: "verdict",
+      label: "won: intent-cta-upgrade",
+      data: {
+        id: "verdict-cta-upgrade-2027q1",
+        intent: "intent-cta-upgrade",
+        outcome: "out-cta-upgrade-2027q1",
+        verdict: "won",
+        "decided-by": "pm-growth",
+        "decided-at": "2027-04-10",
+        "decision-rule": "roda 4 semanas OU 50k exposições; ganha se conversão ↑ X% sem churn ↑",
+        evidence: ["outcome:out-cta-upgrade-2027q1", "resolver:valid-outcome"],
+        next: "graduation",
+      },
+    },
+    {
       id: "req-billing-read-own-context",
       type: "access-request",
       label: "read-context: acme-mfe-billing",
@@ -5474,6 +5490,24 @@ window.GRAPH = {
       source: "pm-growth",
       target: "out-cta-upgrade-2027q1",
       type: "authorizes-mutation",
+    },
+    {
+      id: "has-verdict:intent-cta-upgrade->verdict-cta-upgrade-2027q1",
+      source: "intent-cta-upgrade",
+      target: "verdict-cta-upgrade-2027q1",
+      type: "has-verdict",
+    },
+    {
+      id: "supports-verdict:out-cta-upgrade-2027q1->verdict-cta-upgrade-2027q1",
+      source: "out-cta-upgrade-2027q1",
+      target: "verdict-cta-upgrade-2027q1",
+      type: "supports-verdict",
+    },
+    {
+      id: "accepts-verdict:pm-growth->verdict-cta-upgrade-2027q1",
+      source: "pm-growth",
+      target: "verdict-cta-upgrade-2027q1",
+      type: "accepts-verdict",
     },
     {
       id: "requests:lead-billing->req-billing-read-own-context",

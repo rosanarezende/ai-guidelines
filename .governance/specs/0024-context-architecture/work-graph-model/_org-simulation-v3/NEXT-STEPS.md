@@ -21,12 +21,13 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - `load-neo4j-example.mjs --dry-run` monta o plano executável de carga Neo4j; `--apply` é fail-closed e exige `--source-hash` + credenciais HTTP explícitas;
 - `_apps/governance-next/` materializa a primeira superfície operacional em React/Next + Material UI, consumindo a runtime v3 por API routes e enviando comandos governados;
 - `integration-catalog.yml` registra adapters externos opcionais como evidence providers/importers/projections; ferramentas externas potencializam adoção, mas não substituem o SSOT file-first;
-- `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`, `repo-work.ack`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`, `incident.declare` e `policy.break-glass` já têm dry-run/execute com `base-revision`, idempotency, nonce, authority resolvida, escrita file-first e event-log append-only;
+- `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`, `repo-work.ack`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`, `incident.declare` e `policy.break-glass` já têm dry-run/execute com `base-revision`, idempotency, nonce, authority resolvida, lock global por comando, escrita atômica, marker de recovery e event-log append-only;
+- `verdict.accept` do `intent-cta-upgrade` foi executado no estado canônico via runtime, criando `decisions/verdicts.yml` e `events/events.jsonl` sem edição manual;
 - `currentRevision()` inclui também triages, repo-work claims e repo-contract registries, então sidecar repo-local não é uma mutação invisível para stale-check;
 - standalone reativo/avulso executável mora no repo (`repos/<repo>/.governance/works/*.yml`); incidentes centrais moram em `acme-governance/incidents/incidents.yml` e geram follow-ups resolvíveis;
 - `node _tools/adoption-journey.mjs` exercita código, contextos, work acknowledgements, contratos, red-team, testes locais e grafo.
 
-Limite deliberado/pendente: a v3 ainda não migrou a infraestrutura transacional completa da v2 (adapters sqlite/neo4j/mongo como portas write-capable e read-models `db.json` por repo). Ela é a sim ativa de dogfood file-first; Neo4j já tem export, smoke e loader opcional de projeção, mas continua read-model derivado, não SSOT.
+Limite deliberado/pendente: a v3 já prova o file backend transacional mínimo, mas ainda não migrou adapters sqlite/neo4j/mongo como portas write-capable nem read-models `db.json` por repo. Ela é a sim ativa de dogfood file-first; Neo4j já tem export, smoke e loader opcional de projeção, mas continua read-model derivado, não SSOT.
 
 ## Fases A–E fechadas nesta leva
 
@@ -76,13 +77,13 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **Revisão adversarial pós-F7:** pedir ao Claude Code/Fable 5 para revisar o diff desde `a970415b`, sem implementar, usando [`CLAUDE-CODE-FABLE-5-HANDOFF.md`](CLAUDE-CODE-FABLE-5-HANDOFF.md).
+1. **Segundo outcome real:** escolher uma intent que toque contrato ou objetivo operacional para provar que o mecanismo não está especial-cased no `intent-cta-upgrade`.
 2. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → verdict → actual`.
-3. **Segunda intent com outcome:** escolher uma intent que toque contrato ou objetivo operacional para provar que o mecanismo não está especial-cased no `intent-cta-upgrade`.
-4. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
-5. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
-6. **Portabilidade v2 → v3:** completar a runtime além dos exemplos: primeiro backend transacional real, matcher executável e authoring completo, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
-7. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade ou ownership) como evidence provider, não como SSOT paralelo.
+3. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
+4. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
+5. **Portabilidade v2 → v3:** completar matcher executável e authoring completo, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
+6. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo.
+7. **Revisão adversarial pós-R3:** pedir ao Claude Code/Fable 5 para revisar a sim com foco em transação file-first + primeiro verdict real, sem implementar.
 
 ## Comandos de aceite
 

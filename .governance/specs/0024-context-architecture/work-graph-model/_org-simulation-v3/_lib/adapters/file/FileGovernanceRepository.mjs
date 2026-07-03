@@ -1,6 +1,16 @@
 // FileGovernanceRepository.mjs — adapter file-first da runtime v3.
-import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { createHash, randomUUID } from "node:crypto";
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { parse, stringify } from "yaml";
 import {
@@ -40,6 +50,34 @@ function readJsonl(file) {
     .map((line) => JSON.parse(line));
 }
 
+function readJson(file, fallback = null) {
+  if (!existsSync(file)) return fallback;
+  return JSON.parse(readFileSync(file, "utf8"));
+}
+
+function writeTextAtomic(file, content) {
+  mkdirSync(path.dirname(file), { recursive: true });
+  const temp = path.join(
+    path.dirname(file),
+    `.${path.basename(file)}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`
+  );
+  try {
+    writeFileSync(temp, content, { encoding: "utf8", flag: "wx" });
+    renameSync(temp, file);
+  } catch (error) {
+    rmSync(temp, { force: true });
+    throw error;
+  }
+}
+
+function writeYamlAtomic(file, doc) {
+  writeTextAtomic(file, stringify(doc, { lineWidth: 100 }));
+}
+
+function writeJsonAtomic(file, doc) {
+  writeTextAtomic(file, `${JSON.stringify(doc, null, 2)}\n`);
+}
+
 function safeYamlId(id) {
   const value = String(id || "");
   if (!/^[A-Za-z0-9_.-]+$/.test(value)) {
@@ -52,6 +90,167 @@ export class FileGovernanceRepository {
   constructor({ governanceRoot = GOVERNANCE_ROOT, reposRoot = REPOS_ROOT } = {}) {
     this.governanceRoot = governanceRoot;
     this.reposRoot = reposRoot;
+  }
+
+  runtimeRoot() {
+    return path.join(this.governanceRoot, ".runtime");
+  }
+
+  lockDir() {
+    return path.join(this.runtimeRoot(), "command.lock");
+  }
+
+  transactionDir() {
+    return path.join(this.runtimeRoot(), "transactions");
+  }
+
+  acquireCommandLock({ owner = "unknown", ttlMs = 30_000 } = {}) {
+    mkdirSync(this.runtimeRoot(), { recursive: true });
+    const lockDir = this.lockDir();
+    const now = Date.now();
+    try {
+      mkdirSync(lockDir);
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error;
+      const current = readJson(path.join(lockDir, "lock.json"), {});
+      const expiresAt = Date.parse(current?.expiresAt || "");
+      if (Number.isFinite(expiresAt) && expiresAt < now) {
+        rmSync(lockDir, { recursive: true, force: true });
+        mkdirSync(lockDir);
+      } else {
+        throw new Error(
+          `command lock ativo por "${current?.owner || "unknown"}" até ${current?.expiresAt || "unknown"}`
+        );
+      }
+    }
+    const token = randomUUID();
+    const acquiredAt = new Date(now).toISOString();
+    writeJsonAtomic(path.join(lockDir, "lock.json"), {
+      schema: "acme.file-command-lock/v1",
+      owner,
+      token,
+      acquiredAt,
+      expiresAt: new Date(now + ttlMs).toISOString(),
+    });
+    return { dir: lockDir, token, owner };
+  }
+
+  releaseCommandLock(lock) {
+    const lockFile = path.join(lock.dir, "lock.json");
+    const current = readJson(lockFile, {});
+    if (current?.token && current.token !== lock.token) {
+      throw new Error(`command lock mudou de dono; esperado token ${lock.token}`);
+    }
+    rmSync(lock.dir, { recursive: true, force: true });
+  }
+
+  withCommandLock(command, fn, options = {}) {
+    const lock = this.acquireCommandLock({
+      owner: command?.id || command?.type || "unknown-command",
+      ttlMs: options.lockTtlMs,
+    });
+    try {
+      return fn();
+    } finally {
+      this.releaseCommandLock(lock);
+    }
+  }
+
+  listRuntimeIssues() {
+    const issues = [];
+    const lockFile = path.join(this.lockDir(), "lock.json");
+    if (existsSync(lockFile)) {
+      const lock = readJson(lockFile, {});
+      issues.push({
+        level: "error",
+        rule: "file-command-lock-present",
+        node: lock.owner || "command.lock",
+        msg: `lock de comando presente em .runtime; owner=${lock.owner || "unknown"} expiresAt=${lock.expiresAt || "unknown"}`,
+      });
+    }
+    for (const transaction of this.listPendingTransactions()) {
+      issues.push({
+        level: "error",
+        rule: "file-transaction-pending",
+        node: transaction.id || "transaction",
+        msg: `transação file-first pendente (${transaction.status || "unknown"}) precisa de recovery antes de novas mutações`,
+      });
+    }
+    return issues;
+  }
+
+  listPendingTransactions() {
+    const dir = this.transactionDir();
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir)
+      .filter((file) => file.endsWith(".json"))
+      .sort()
+      .map((file) => ({ ...readJson(path.join(dir, file), {}), _file: path.join(dir, file) }));
+  }
+
+  assertNoPendingTransactions() {
+    const pending = this.listPendingTransactions();
+    if (pending.length) {
+      const first = pending[0];
+      throw new Error(
+        `file transaction pendente "${first.id || path.basename(first._file)}" (${first.status || "unknown"}); recovery obrigatório antes de nova mutação`
+      );
+    }
+  }
+
+  beginTransaction(command, previousRevision) {
+    mkdirSync(this.transactionDir(), { recursive: true });
+    const id = safeYamlId(command.id || `${command.type}-${Date.now()}`);
+    const file = path.join(this.transactionDir(), `${id}.json`);
+    if (existsSync(file)) throw new Error(`transação "${id}" já existe`);
+    const transaction = {
+      schema: "acme.file-transaction/v1",
+      id,
+      status: "applying",
+      startedAt: new Date().toISOString(),
+      previousRevision,
+      command: {
+        id: command.id,
+        type: command.type,
+        envelope: command.envelope,
+      },
+    };
+    writeJsonAtomic(file, transaction);
+    return { id, file };
+  }
+
+  updateTransaction(transaction, patch) {
+    const current = readJson(transaction.file, {});
+    writeJsonAtomic(transaction.file, {
+      ...current,
+      ...patch,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  markTransactionApplied(transaction, write, newRevision) {
+    this.updateTransaction(transaction, {
+      status: "applied-pending-event",
+      write,
+      newRevision,
+    });
+  }
+
+  markTransactionFailed(transaction, error, revisionAfterError) {
+    this.updateTransaction(transaction, {
+      status: "failed",
+      error: String(error?.message || error),
+      revisionAfterError,
+    });
+  }
+
+  abortTransaction(transaction) {
+    unlinkSync(transaction.file);
+  }
+
+  commitTransaction(transaction, event) {
+    this.appendEvent(event);
+    unlinkSync(transaction.file);
   }
 
   readGovernanceYaml(relativePath) {
@@ -194,9 +393,7 @@ export class FileGovernanceRepository {
   appendEvent(event) {
     const file = path.join(this.governanceRoot, "events", "events.jsonl");
     mkdirSync(path.dirname(file), { recursive: true });
-    const previous = existsSync(file) ? readFileSync(file, "utf8").trimEnd() : "";
-    const next = `${previous ? previous + "\n" : ""}${JSON.stringify(event)}\n`;
-    writeFileSync(file, next);
+    appendFileSync(file, `${JSON.stringify(event)}\n`, "utf8");
   }
 
   appendGovernanceList(relativePath, rootKey, item) {
@@ -207,7 +404,7 @@ export class FileGovernanceRepository {
       throw new Error(`${rootKey} já contém id "${item.id}"`);
     }
     doc[rootKey] = [...items, item];
-    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+    writeYamlAtomic(file, doc);
     return { path: relativePath, id: item.id };
   }
 
@@ -220,7 +417,7 @@ export class FileGovernanceRepository {
       throw new Error(`${rootKey} já contém id "${item.id}"`);
     }
     doc[rootKey] = [...items, item];
-    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+    writeYamlAtomic(file, doc);
     return { path: relativePath, id: item.id };
   }
 
@@ -233,7 +430,7 @@ export class FileGovernanceRepository {
       throw new Error(`${rootKey} já contém id "${item.id}"`);
     }
     doc[rootKey] = [...items, item];
-    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+    writeYamlAtomic(file, doc);
     return { path: relativePath, id: item.id };
   }
 
@@ -248,7 +445,7 @@ export class FileGovernanceRepository {
       return { ...item, ...patch };
     });
     if (!changed) throw new Error(`${rootKey} não contém id "${id}"`);
-    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+    writeYamlAtomic(file, doc);
     return { path: relativePath, id };
   }
 
@@ -256,7 +453,7 @@ export class FileGovernanceRepository {
     const relativePath = `intents/${safeYamlId(intent.id)}.yml`;
     const file = path.join(this.governanceRoot, relativePath);
     if (existsSync(file)) throw new Error(`intent "${intent.id}" já existe`);
-    writeFileSync(file, stringify(intent, { lineWidth: 100 }));
+    writeYamlAtomic(file, intent);
     return { path: relativePath, id: intent.id };
   }
 
@@ -265,7 +462,7 @@ export class FileGovernanceRepository {
     const file = path.join(this.governanceRoot, relativePath);
     if (!existsSync(file)) throw new Error(`intent "${intentId}" não existe`);
     const intent = parse(readFileSync(file, "utf8")) || {};
-    writeFileSync(file, stringify({ ...intent, ...patch }, { lineWidth: 100 }));
+    writeYamlAtomic(file, { ...intent, ...patch });
     return { path: relativePath, id: intentId };
   }
 
@@ -273,7 +470,7 @@ export class FileGovernanceRepository {
     const relativePath = `intake/triage/${safeYamlId(triage.proposal)}.yml`;
     const file = path.join(this.governanceRoot, relativePath);
     mkdirSync(path.dirname(file), { recursive: true });
-    writeFileSync(file, stringify(triage, { lineWidth: 100 }));
+    writeYamlAtomic(file, triage);
     return { path: relativePath, id: triage.proposal };
   }
 
@@ -301,7 +498,7 @@ export class FileGovernanceRepository {
     }
     claim.status = ack.status || existing.status || claim.status;
     mkdirSync(path.dirname(file), { recursive: true });
-    writeFileSync(file, stringify(claim, { lineWidth: 100 }));
+    writeYamlAtomic(file, claim);
     return {
       path: path.relative(this.reposRoot, file).replaceAll("\\", "/"),
       id: claim.id,
@@ -323,7 +520,7 @@ export class FileGovernanceRepository {
       return updatedContract;
     });
     if (!updatedContract) throw new Error(`contract "${contractId}" não existe`);
-    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+    writeYamlAtomic(file, doc);
 
     const repoContract = expectedRepoContract(updatedContract);
     const registryFile = path.join(
@@ -335,7 +532,7 @@ export class FileGovernanceRepository {
       `${safeYamlId(repoContract.id)}.yml`
     );
     mkdirSync(path.dirname(registryFile), { recursive: true });
-    writeFileSync(registryFile, stringify(repoContract, { lineWidth: 100 }));
+    writeYamlAtomic(registryFile, repoContract);
 
     return {
       path: relativePath,

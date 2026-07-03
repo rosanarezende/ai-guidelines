@@ -1,0 +1,12 @@
+verdicts:
+  - id: verdict-cta-upgrade-2027q1
+    intent: intent-cta-upgrade
+    outcome: out-cta-upgrade-2027q1
+    verdict: won
+    decided-by: pm-growth
+    decided-at: 2027-04-10
+    decision-rule: roda 4 semanas OU 50k exposições; ganha se conversão ↑ X% sem churn ↑
+    evidence:
+      - outcome:out-cta-upgrade-2027q1
+      - resolver:valid-outcome
+    next: graduation
