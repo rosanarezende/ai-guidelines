@@ -465,10 +465,15 @@ Antes de considerar o app robusto, a suíte deve provar que:
 5. Quais dangerous mutations entram em bloqueio hard no perfil compact?
 6. Qual é o limite entre capability extraction aceitável e análise estática de código que vira ferramenta separada?
 
-## 15. Próxima decisão recomendada
+## 15. Estado da decisão Opção A
 
-Antes de implementar backend/frontend, fechar uma decisão de arquitetura curta:
+Decisão executada na base da v3: portar a `_org-simulation-v2/_lib` para uma runtime DDD v3 antes
+de iniciar UI/API nova.
 
-- **Opção A:** portar `_org-simulation-v2/_lib` para v3 como runtime DDD primeiro, depois UI.
+- **Opção A adotada:** `_org-simulation-v3/_lib` agora contém domínio/validador,
+  `FileGovernanceRepository`, command dry-run e read-model de grafo.
 - **Opção B:** criar backend HTTP fino sobre os scripts v3 atuais e refatorar depois.
-- **Recomendação:** Opção A. A opção B acelera tela, mas cristaliza scripts como domínio e repete o erro que a v3 acabou de expor: texto/projeção parecendo mecanismo.
+- **Motivo:** a opção B acelera tela, mas cristaliza scripts como domínio e repete o erro que a v3
+  acabou de expor: texto/projeção parecendo mecanismo.
+- **Próxima decisão:** implementar escrita real por comandos/event-log e escolher o primeiro backend
+  transacional (`file` com lock/event-log ou SQLite) sem transformar banco/read-model em SSOT.

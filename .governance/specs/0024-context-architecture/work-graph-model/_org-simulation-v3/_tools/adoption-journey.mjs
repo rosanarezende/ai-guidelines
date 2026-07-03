@@ -25,6 +25,11 @@ const steps = [
     args: ["_tools/check-local-repo-tests.mjs"],
   },
   {
+    name: "2c. runtime DDD v3 carrega adapter file + dominio + read-model",
+    command: "node",
+    args: ["_tools/check-runtime.mjs"],
+  },
+  {
     name: "3. contextos publicados estao frescos",
     command: "node",
     args: ["_tools/check-repo-contexts.mjs"],
