@@ -84,6 +84,12 @@ físico, mas não apaga os aprendizados da v2.
    - Integrações são adapters opcionais para evidência/importação/projeção.
    - Ferramenta externa observa; o framework governa.
 
+8. **Primeira tela do app**
+   - Decisão: o app abre na Home de Adoção/Governança orientada a tarefa humana.
+   - Grafo, YAML/JSON, comandos, resolvers e event-log ficam como console técnico ou detalhe
+     progressivo.
+   - A próxima UI deve começar por "o que você quer governar hoje?", não por taxonomia interna.
+
 ---
 
 ## Roadmap da sim v3
@@ -240,7 +246,7 @@ Direção:
 | `_lib` DDD                               | ✅ base v3 criada + file transaction mínimo                                                                                                                      | próximo dente: matcher/authoring, não bypassar command runtime.                      |
 | Backends file/sqlite/neo4j/mongo         | 🚧 file transacional mínimo + exemplos derivados; Neo4j loader dry-run                                                                                           | R9 depois, com a mesma suíte transacional do file backend.                           |
 | Read-models                              | 🚧 graph read-model v3 existe; snapshots multi-backend existem                                                                                                   | persistência operacional depois do file backend.                                     |
-| App de autoria                           | 🚧 app Next/MUI v2 em TypeScript strict existe como workspace com deps explícitas, comandos principais + onboarding de configurações; autoria completa ainda não | R7 depois de revisar UX/produto contra `app-requirements.md`.                        |
+| App de autoria                           | 🚧 app Next/MUI v2 em TypeScript strict existe como workspace com deps explícitas, comandos principais + onboarding de configurações; autoria completa ainda não | R7 depois de validar a Home de Adoção/Governança com Fable/owner.                    |
 | Scaffold de repo novo                    | 🚧 foco atual é adoção de repos existentes                                                                                                                       | manter separado de create-new-repo.                                                  |
 | `backend.yml` por repo                   | ⬜ modelado como futuro (`physical.por-repo-futuro`), sem executor                                                                                               | não aceitar como evidência até existir adapter real.                                 |
 | Templates v2                             | 🧊 arquivados em `_archive/templates-v2`                                                                                                                         | usar `_org-simulation-v3/_templates` como fonte ativa.                               |

@@ -28,6 +28,7 @@ necessario e avisos honestos quando ha colapso ou cerimonia.
 | W4  | arquitetura   | app deve ser TypeScript robusto; backend/runtime tambem sera migrado depois            | P0         | decidido          |
 | W5  | configuracoes | integracoes e assistente inicial precisam aparecer no onboarding sem fingir mecanismo  | P0         | fechado como UX   |
 | W6  | perfis        | admin, payer, sponsor, owner tecnico e actual-attester nao podem colapsar sem risco    | P0         | fechado como UX   |
+| W7  | primeira tela | a entrada deve ser Home de Adocao/Governanca orientada a tarefa humana, nao grafo      | P0         | decidido          |
 
 ## Bugs Tecnicos
 
@@ -59,9 +60,10 @@ necessario e avisos honestos quando ha colapso ou cerimonia.
 
 ## Proximas Fatias
 
-1. App v2 TypeScript strict e sem warnings de boot.
-2. Primeira tela por perfil: stakeholder/company dashboard.
-3. Navegacao por periodo/ciclo.
+1. Validar a nova secao de experiencia de produto do `app-requirements.md` com Claude Design/Fable 5.
+2. Implementar a Home de Adocao/Governanca como primeira tela: configurar organizacao, conectar repos,
+   planejar ciclo, registrar iniciativa, acompanhar resultados, resolver pendencias e auditar decisoes.
+3. Navegacao por periodo/ciclo dentro dos dashboards de objetivos e resultados.
 4. Separacao de console tecnico/admin da experiencia de leitura da owner.
 5. Migracao futura da runtime `_lib` para TypeScript com portas explicitas.
 6. Persistencia futura das configuracoes via comando governado, nao por formulario direto.

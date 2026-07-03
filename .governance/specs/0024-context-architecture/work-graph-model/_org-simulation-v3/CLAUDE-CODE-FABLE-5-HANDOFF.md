@@ -61,17 +61,19 @@ Autonomia:
 ```text
 Estamos em ai-guidelines, Spec 0024, PR #45. Continue apenas dentro do checkpoint ativo.
 
-Objetivo: revisar a sim v3 após a rodada Codex que implementou outcome real, lifecycle repo-local,
-contratos com interface, trust-policy, layout repo-first sanitizado, runtime _lib v3, app Next/MUI,
-comandos governados, exemplos multi-backend e fixtures adversariais. Não implemente ainda.
+Objetivo: validar a direção de produto/UX do app Next/MUI antes de codar a próxima tela. Não implemente.
+Quero uma revisão adversarial, mas orientada a usuário humano: a nova entrada do app deve ser a
+Home de Adoção/Governança, não um grafo/console técnico.
 
 Leia:
 - .governance/specs/0024-context-architecture/work-graph-model/model.yml
+- .governance/specs/0024-context-architecture/work-graph-model/app-requirements.md
 - tracker.md
 - _org-simulation-v3/README.md
 - _org-simulation-v3/NEXT-STEPS.md
+- _org-simulation-v3/WALKTHROUGH-ITERATION.md
 - _org-simulation-v3/CLAUDE-CODE-FABLE-5-HANDOFF.md
-- git diff/log desde a970415b
+- git diff/log desde HEAD~3, se houver
 
 Contexto físico obrigatório:
 - _org-simulation-v3/acme-governance/ é o host central da org.
@@ -85,10 +87,16 @@ Contexto físico obrigatório:
   é file + event-log/lock.
 - Integrações externas são opcionais e devem entrar como evidence providers/importers/projections,
   não como SSOT paralelo; ver integration-catalog.yml.
+- A decisão nova do app-requirements é: primeira tela = Home de Adoção/Governança, orientada a
+  tarefa humana. Grafo, YAML/JSON, comandos, resolvers e event-log ficam como console técnico ou
+  detalhe progressivo.
 
 Saída:
 1. fatos observados;
-2. gaps ou contradições;
-3. plano de próxima fatia;
-4. o menor conjunto de validações que provaria a fatia.
+2. gaps de usabilidade ou contradições entre app-requirements, README, NEXT-STEPS e app real;
+3. proposta de IA/design para a Home: blocos, hierarquia de informação, linguagem por perfil e
+   progressive disclosure;
+4. riscos de segurança/permissão em onboarding: admin, payer, sponsor, security, technical owner,
+   actual-attester e assistente local/cloud;
+5. o menor conjunto de critérios de aceite para implementar a Home sem virar console de auditor.
 ```

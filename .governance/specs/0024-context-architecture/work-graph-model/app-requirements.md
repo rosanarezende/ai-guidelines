@@ -176,9 +176,106 @@ O app deve manter dois planos:
 
 Git sozinho não basta como log transacional: ele registra bytes, não intenção de domínio. O event-log é obrigatório para idempotência, replay, reversão de gate, auditoria e conflito concorrente.
 
-## 6. Arquitetura frontend
+## 6. Experiência de Produto e Informação
 
-### 6.1 Estrutura de produto
+### 6.1 Porta de entrada
+
+A primeira tela do app é a **Home de Adoção/Governança**. Ela não começa pelo grafo, por YAML,
+por event-log nem por taxonomia interna. Ela começa por intenção humana:
+
+```text
+O que você quer governar hoje?
+```
+
+A tela deve responder, sem exigir vocabulário técnico:
+
+- o que já está configurado;
+- o que precisa de atenção;
+- qual é o próximo passo seguro;
+- quais ações estão bloqueadas por falta de evidência, autoridade ou configuração.
+
+O grafo, os comandos, os arquivos, os resolvers e o event-log continuam visíveis, mas como detalhe
+técnico progressivo. Eles não são a navegação principal para stakeholder, owner, sponsor, payer ou
+adoption-admin.
+
+### 6.2 Atalhos primários
+
+A Home deve oferecer atalhos orientados a tarefa:
+
+1. **Configurar organização:** perfil de governança, papéis críticos, autoridade, pagador/sponsor e
+   política de assistente.
+2. **Conectar repos existentes:** adoção repo-first, manifests, context freshness, capabilities e
+   contratos publicados.
+3. **Planejar ciclo:** objectives, targets, allocation, período e continuidade anual.
+4. **Registrar iniciativa:** proposal/register, anexos, classificação, business-link e triage.
+5. **Acompanhar resultados:** targets, outcomes, verdicts, badges de confiança e rollup narrativo.
+6. **Resolver pendências:** gates, blockers, stale refs, self-attestation, break-glass, contract
+   contention e warnings de política.
+7. **Auditar decisões:** envelopes, event-log, dangerous mutations, authority registry e evidências.
+
+### 6.3 Camadas de informação
+
+O app deve separar três camadas, sem misturá-las na primeira tela:
+
+- **Home humana:** linguagem de produto, estado da adoção, decisões pendentes e próximos passos.
+- **Workspaces operacionais:** telas por papel e jornada para owner, tech lead, SRE, adoption-admin,
+  auditor e stakeholder.
+- **Console técnico:** grafo completo, refs, YAML/JSON, event-log, comandos, resolvers e debug de
+  projeções.
+
+Uma mesma pessoa pode acessar mais de uma camada conforme autoridade, mas a navegação não deve
+assumir que todo usuário entende ou precisa ver o modelo interno.
+
+### 6.4 Progressive disclosure
+
+Detalhes técnicos devem aparecer sob demanda:
+
+- `GlobalRef`, ids e paths aparecem em "ver detalhe técnico".
+- Evidência aparece em "ver prova" ou "por que este badge existe?".
+- YAML/JSON e event-log aparecem em "abrir console técnico".
+- Resolver failure aparece como mensagem acionável: o que está faltando, quem pode resolver e qual
+  comando seria necessário.
+
+O app nunca deve esconder a verdade do modelo, mas também não deve usar a estrutura interna como
+copy primária para usuários leigos.
+
+### 6.5 Linguagem e labels
+
+Labels de produto vêm antes dos nomes do modelo:
+
+| Conceito do modelo | Label primário sugerido                     |
+| ------------------ | ------------------------------------------- |
+| business-objective | Objetivo                                    |
+| target             | Meta mensurável                             |
+| proposal/register  | Ideia ou solicitação                        |
+| intent             | Iniciativa ativada                          |
+| execution-unit     | Frente coordenada                           |
+| repo-work          | Peça por repositório                        |
+| outcome            | Resultado medido                            |
+| authority          | Pessoa/papel com autorização                |
+| resolver           | Verificação automática                      |
+| event-log          | Trilha de decisões e comandos               |
+| self-attested      | Atestado pelo próprio responsável           |
+| break-glass        | Exceção emergencial com revisão obrigatória |
+
+O termo técnico pode aparecer como subtítulo, tooltip ou detalhe de auditoria, mas não deve ser a
+única forma de entender a tela.
+
+### 6.6 Critérios de aceite UX
+
+A primeira implementação do app só é aceitável se:
+
+- um stakeholder entende em até 30 segundos quais objetivos estão saudáveis, frágeis ou sem medição;
+- um adoption-admin sabe qual configuração vem a seguir antes de habilitar assistente ou integração;
+- um owner registra uma iniciativa sem conhecer YAML, `GlobalRef` ou event-log;
+- um tech lead entende qual evidência bloqueia outcome, contrato ou repo-work;
+- um auditor consegue perfurar até o console técnico sem poluir a home dos demais perfis;
+- nenhuma tela vende como "válido" algo que o resolver só marcou como warning, collapsed, unverified
+  ou unknown.
+
+## 7. Arquitetura frontend
+
+### 7.1 Estrutura de produto
 
 O app deve ter módulos navegáveis por audiência:
 
@@ -195,7 +292,7 @@ O app deve ter módulos navegáveis por audiência:
 11. **Capability & Adoption Center:** repos existentes, scaffold, capability extraction, context freshness e owner attestation.
 12. **Policy/Audit Center:** authority registry, profile declarations, break-glass, egress, red-team, replay/nonce e dangerous-unreviewed.
 
-### 6.2 UX por perfil de governança
+### 7.2 UX por perfil de governança
 
 - **Full:** mostra SoD completo, filas separadas e blockers normativos.
 - **Compact:** colapsa papéis com badges e revisão retroativa em cadência.
@@ -203,7 +300,7 @@ O app deve ter módulos navegáveis por audiência:
 
 O perfil muda a obrigatoriedade e o bloqueio, não o modelo de dados.
 
-### 6.3 Estados visuais obrigatórios
+### 7.3 Estados visuais obrigatórios
 
 Cada tela que mostra resultado derivado deve distinguir:
 
@@ -220,9 +317,9 @@ Cada tela que mostra resultado derivado deve distinguir:
 
 Não pode haver card verde para dado que o resolver marcou como fraco.
 
-## 7. Assistência por IA
+## 8. Assistência por IA
 
-### 7.1 Regras globais
+### 8.1 Regras globais
 
 - Toda assistência é opcional.
 - Toda saída de IA é `AssistantSuggestion`, não mutação.
@@ -231,7 +328,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Egress externo só recebe fatias aprovadas por policy; fallback local/manual é rastreável.
 - Aceitar sugestão cria comando humano com referência à sugestão aceita.
 
-### 7.2 Assistências por etapa
+### 8.2 Assistências por etapa
 
 | Etapa                   | Assistência permitida                                                              | Dente obrigatório                                         |
 | ----------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------- |
@@ -248,9 +345,9 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 | Dashboard               | gerar narrativa executiva                                                          | narrativa não altera actual nem rollup                    |
 | Q/R/D                   | rascunhar research/decision                                                        | decision humana append-only                               |
 
-## 8. Requisitos funcionais
+## 9. Requisitos funcionais
 
-### 8.1 Planejamento e dashboard
+### 9.1 Planejamento e dashboard
 
 - Criar, revisar, fechar e versionar objectives por ciclo.
 - Criar targets com metric-definition, expected, attester e allocation.
@@ -258,7 +355,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Mostrar continuidade anual (`continues-from`, split, merge) sem migrar schema.
 - Mostrar operational bucket para trabalho sem objective.
 
-### 8.2 Intake até gate
+### 9.2 Intake até gate
 
 - Criar proposal/register com `authorized-by` ou `standalone`.
 - Permitir anexos com classificação, scan e política de egress.
@@ -267,7 +364,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Registrar se o gate seguiu ou contrariou matcher, com rationale.
 - Promover/descartar por comando idempotente e append-only.
 
-### 8.3 Breakdown e execução
+### 9.3 Breakdown e execução
 
 - Criar execution-unit quando a scaling-law exigir.
 - Colapsar/reabrir unit de forma reversível.
@@ -275,7 +372,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Publicar repo-work-ack nos repos e detectar stale/missing/open/dropped.
 - Bloquear outcome quando peça necessária não estiver `done`.
 
-### 8.4 Contratos
+### 9.4 Contratos
 
 - Listar contratos providos/consumidos por repo.
 - Detectar quando uma intent toca contrato.
@@ -283,21 +380,21 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Validar consumers, owner approval e compatibility-window.
 - Projetar impacto cross-intent por contrato compartilhado.
 
-### 8.5 Outcomes e verdicts
+### 9.5 Outcomes e verdicts
 
 - Publicar outcome com fonte, janela, métrica, value, aggregation, attester, revision, contracts e envelope.
 - Resolver outcome antes de somar em target.
 - Aceitar verdict de experiment-run apenas com outcome válido ou override perigoso.
 - Criar forks `graduation`, `cleanup` ou novo `experiment/discovery` conforme verdict.
 
-### 8.6 Incidentes e operação
+### 9.6 Incidentes e operação
 
 - Declarar incident apenas com telemetria/severidade verificável.
 - Acompanhar declarar → mitigar → resolver → postmortem.
 - Gerar follow-ups para standalone/proposal com referência reversa.
 - Mostrar custo/risco operacional no dashboard.
 
-### 8.7 Adoção de repos existentes
+### 9.7 Adoção de repos existentes
 
 - Descobrir repos e criar sidecar mínimo sem sobrescrever.
 - Gerar pacote de capability review.
@@ -305,9 +402,9 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Publicar context.json com freshness e producer.
 - Detectar capability inflada, omitida ou stale por evidência estática e histórico.
 
-## 9. Requisitos não funcionais
+## 10. Requisitos não funcionais
 
-### 9.1 Segurança e privacidade
+### 10.1 Segurança e privacidade
 
 - Classificação obrigatória em nós sensíveis e anexos.
 - Secret scanning antes de persistir/publicar.
@@ -316,7 +413,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Agent delegation com principal humano, workload-id, escopo, TTL, max-mutations e revogação.
 - Nenhum token/chave em YAML versionado.
 
-### 9.2 Concorrência e consistência
+### 10.2 Concorrência e consistência
 
 - Todo comando exige `base-revision`.
 - Conflito concorrente falha com diff de rebase humano.
@@ -324,7 +421,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Read-model deve declarar source revision.
 - Ação a partir de dashboard stale é bloqueada até reler fonte.
 
-### 9.3 Auditabilidade
+### 10.3 Auditabilidade
 
 - Dangerous mutations aparecem em fila própria.
 - q/r/d é alerta/soft-mandatory conforme perfil, não decoração.
@@ -332,7 +429,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Toda assistência aceita/rejeitada é rastreável.
 - Export de auditoria por nó, por comando e por target.
 
-### 9.4 Performance e escala
+### 10.4 Performance e escala
 
 - Modo local deve abrir rápido em file backend.
 - Host enterprise deve indexar N repos incrementalmente por content hash.
@@ -340,16 +437,16 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 - Matcher deve suportar cache por context revision e policy revision.
 - Graph UI deve paginar/agrupar por objective, repo, contract e risk.
 
-### 9.5 Operabilidade
+### 10.5 Operabilidade
 
 - Health checks de adapters, policy store, read-model freshness e assistant gateways.
 - Migrations versionadas e fail-closed.
 - Backup/replay do event-log.
 - Observabilidade de comandos: latency, validation failures, stale rate, matcher unknown rate, assistant acceptance rate.
 
-## 10. API mínima
+## 11. API mínima
 
-### 10.1 Commands
+### 11.1 Commands
 
 - `POST /commands/objective.create`
 - `POST /commands/target.define`
@@ -368,7 +465,7 @@ Não pode haver card verde para dado que o resolver marcou como fraco.
 
 Cada resposta retorna `CommandReceipt`, arquivos/projeções afetados e warnings/blocks.
 
-### 10.2 Queries
+### 11.2 Queries
 
 - `GET /graph`
 - `GET /dashboards/company`
@@ -381,7 +478,7 @@ Cada resposta retorna `CommandReceipt`, arquivos/projeções afetados e warnings
 - `GET /nodes/:globalRef`
 - `GET /audit/:globalRef`
 
-### 10.3 Assistant
+### 11.3 Assistant
 
 - `POST /assist/objective`
 - `POST /assist/intake`
@@ -394,7 +491,7 @@ Cada resposta retorna `CommandReceipt`, arquivos/projeções afetados e warnings
 
 Endpoints de assistência nunca escrevem estado. Eles retornam `AssistantSuggestion`.
 
-## 11. Critérios de aceite da primeira implementação
+## 12. Critérios de aceite da primeira implementação
 
 ### Slice 1 — runtime v3
 
@@ -431,7 +528,7 @@ Endpoints de assistência nunca escrevem estado. Eles retornam `AssistantSuggest
 - Neo4j é read-model de grafo ou adapter explícito, sem virar SSOT de ação.
 - Mongo/event-store opcional só entra com migration registry e fail-closed.
 
-## 12. Falsificações obrigatórias
+## 13. Falsificações obrigatórias
 
 Antes de considerar o app robusto, a suíte deve provar que:
 
@@ -448,7 +545,7 @@ Antes de considerar o app robusto, a suíte deve provar que:
 - Agent delegation revogada não executa comando.
 - External LLM proibido por classification exige fallback rastreável.
 
-## 13. Fora de escopo inicial
+## 14. Fora de escopo inicial
 
 - Substituir Jira/Linear como tracker universal.
 - BI genérico com exploração livre de dados.
@@ -457,7 +554,7 @@ Antes de considerar o app robusto, a suíte deve provar que:
 - Escrita direta em repo de produto sem PR/hook/policy.
 - Treinar modelo próprio de IA.
 
-## 14. Decisões fechadas e perguntas remanescentes
+## 15. Decisões fechadas e perguntas remanescentes
 
 ### Decisões fechadas
 
@@ -468,16 +565,16 @@ Antes de considerar o app robusto, a suíte deve provar que:
 5. **Perfil compact:** detecta mutações dangerous, registra justificativa append-only e exige revisão retroativa em cadência; hard-block só entra por decisão futura explícita.
 6. **Capability extraction:** é assistência de adoção/manutenção de manifesto. Análise estática profunda entra por adapter/plugin externo.
 7. **Integrações externas:** opcionais, versionadas em [`integration-catalog.yml`](integration-catalog.yml), sempre como evidência/importação/projeção. Não substituem SSOT file-first; assistentes locais/cloud e canais de coding agent são plugáveis, enquanto gateways agentivos amplos ficam adiados até delegação/sandbox/auditoria.
+8. **Primeira tela do app:** a entrada padrão é a Home de Adoção/Governança orientada a tarefa humana. Grafo, comandos, JSON/YAML, resolvers e event-log ficam no console técnico ou em disclosure progressivo, não como navegação principal.
 
 ### Perguntas remanescentes
 
 1. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
 2. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
-3. A arquitetura/frontend planejada neste documento está adequada para usuários humanos não técnicos,
-   ou a navegação atual ficou excessivamente orientada a agentes/auditores?
-4. Qual primeira tela write-capable do app deve sair do modo demo para fluxo de trabalho real?
+3. Qual primeira tela write-capable do app deve sair do modo demo para fluxo de trabalho real depois
+   da Home de Adoção/Governança?
 
-## 15. Estado da decisão Opção A
+## 16. Estado da decisão Opção A
 
 Decisão executada na base da v3: portar a `_org-simulation-v2/_lib` para uma runtime DDD v3 antes
 de iniciar UI/API nova.
@@ -505,10 +602,9 @@ de iniciar UI/API nova.
   assistente local/cloud (com Ollama como primeira opção local) e tags `em breve` para adapters sem
   mecanismo. Ainda é UX/projeção: persistência futura precisa entrar como comando governado com
   resolver de authority, billing role, egress/classification e policy revision.
-- **Estado complementar 3c:** antes de ampliar authoring ou persistir configurações, a próxima fatia
-  deve revisar este próprio `app-requirements.md` contra o app real. A interface atual ainda serve
-  melhor a agentes/auditores do que a usuários humanos que estão adotando o framework; isso precisa
-  virar requisito de produto antes de virar mais código.
+- **Estado complementar 3c:** a revisão de produto decidiu que a primeira tela do app deve ser a
+  Home de Adoção/Governança, orientada a tarefa humana e adoção progressiva. A próxima fatia de UI
+  deve refletir a seção 6 antes de ampliar authoring ou persistir configurações.
 - **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
   `base-revision`, authority resolvida, idempotency, nonce, lock global por comando, escrita YAML
   atômica, marker de recovery e event-log append-only. `currentRevision()` inclui triages e
