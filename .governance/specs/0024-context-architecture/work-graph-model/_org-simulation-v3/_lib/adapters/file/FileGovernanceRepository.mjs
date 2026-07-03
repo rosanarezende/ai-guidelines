@@ -3,6 +3,12 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse, stringify } from "yaml";
+import {
+  expectedRepoContract,
+  expectedRepoWorkClaim,
+  REPO_WORK_LIFECYCLE_KEYS,
+  REPO_WORK_SCHEMA,
+} from "../../domain/repo-projections.mjs";
 import { GOVERNANCE_ROOT, REPOS_ROOT } from "../../paths.mjs";
 
 function stable(value) {
@@ -88,6 +94,59 @@ export class FileGovernanceRepository {
       .map((file) => this.readGovernanceYaml("intents/" + file));
   }
 
+  loadTriages() {
+    const triageDir = path.join(this.governanceRoot, "intake", "triage");
+    if (!existsSync(triageDir)) return [];
+    return readdirSync(triageDir)
+      .filter((file) => file.endsWith(".yml"))
+      .sort()
+      .map((file) => this.readGovernanceYaml(`intake/triage/${file}`));
+  }
+
+  loadRepoWorkClaims() {
+    const claims = [];
+    if (!existsSync(this.reposRoot)) return claims;
+    for (const entry of readdirSync(this.reposRoot, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )) {
+      if (!entry.isDirectory()) continue;
+      const repo = entry.name;
+      const worksDir = path.join(this.reposRoot, repo, ".governance", "works");
+      if (!existsSync(worksDir)) continue;
+      for (const fileName of readdirSync(worksDir)
+        .filter((file) => file.endsWith(".yml"))
+        .sort()) {
+        const file = path.join(worksDir, fileName);
+        const doc = parse(readFileSync(file, "utf8"));
+        if (doc?.schema !== REPO_WORK_SCHEMA && doc?.source?.kind !== "central-breakdown") {
+          continue;
+        }
+        claims.push({ ...doc, _file: file, _repo: repo });
+      }
+    }
+    return claims.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  }
+
+  loadRepoContracts() {
+    const contracts = [];
+    if (!existsSync(this.reposRoot)) return contracts;
+    for (const entry of readdirSync(this.reposRoot, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )) {
+      if (!entry.isDirectory()) continue;
+      const repo = entry.name;
+      const contractsDir = path.join(this.reposRoot, repo, ".governance", "registry", "contracts");
+      if (!existsSync(contractsDir)) continue;
+      for (const fileName of readdirSync(contractsDir)
+        .filter((file) => file.endsWith(".yml"))
+        .sort()) {
+        const file = path.join(contractsDir, fileName);
+        contracts.push({ ...parse(readFileSync(file, "utf8")), _file: file, _repo: repo });
+      }
+    }
+    return contracts.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  }
+
   loadOrg() {
     return {
       org: this.readGovernanceYaml("org.yml"),
@@ -101,6 +160,7 @@ export class FileGovernanceRepository {
       repos: this.readGovernanceYaml("repos.yml").repos,
       contracts: this.readGovernanceYaml("contracts/contracts.yml").contracts,
       proposals: this.readGovernanceYaml("intake/proposals.yml").proposals,
+      triages: this.loadTriages(),
       incidents: this.readOptionalGovernanceYaml("incidents/incidents.yml", {
         incidents: [],
       }).incidents,
@@ -111,6 +171,8 @@ export class FileGovernanceRepository {
       }),
       intents: this.loadIntents(),
       standalone: this.loadRepoStandaloneWorks(),
+      repoWorkClaims: this.loadRepoWorkClaims(),
+      repoContracts: this.loadRepoContracts(),
       outcomes: this.readGovernanceYaml("outcomes/outcomes.yml").outcomes || [],
     };
   }
@@ -177,7 +239,94 @@ export class FileGovernanceRepository {
     return { path: relativePath, id: intentId };
   }
 
+  writeTriage(triage) {
+    const relativePath = `intake/triage/${safeYamlId(triage.proposal)}.yml`;
+    const file = path.join(this.governanceRoot, relativePath);
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(file, stringify(triage, { lineWidth: 100 }));
+    return { path: relativePath, id: triage.proposal };
+  }
+
+  findIntentWork(intentId, workId) {
+    const intent = this.loadIntents().find((item) => item.id === intentId);
+    const work = (intent?.works || []).find((item) => item.id === workId);
+    return { intent, work };
+  }
+
+  writeRepoWorkAck(ack) {
+    const { intent, work } = this.findIntentWork(ack.intent, ack.work);
+    if (!intent || !work) throw new Error(`repo-work "${ack.intent}::${ack.work}" não existe`);
+    const file = path.join(
+      this.reposRoot,
+      work.repo,
+      ".governance",
+      "works",
+      `${safeYamlId(intent.id)}--${safeYamlId(work.id)}.yml`
+    );
+    const existing = existsSync(file) ? parse(readFileSync(file, "utf8")) || {} : {};
+    const claim = expectedRepoWorkClaim(intent, work);
+    for (const key of REPO_WORK_LIFECYCLE_KEYS) {
+      if (existing[key] !== undefined) claim[key] = existing[key];
+      if (ack[key] !== undefined) claim[key] = ack[key];
+    }
+    claim.status = ack.status || existing.status || claim.status;
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(file, stringify(claim, { lineWidth: 100 }));
+    return {
+      path: path.relative(this.reposRoot, file).replaceAll("\\", "/"),
+      id: claim.id,
+    };
+  }
+
+  appendContractRevisionProposal(contractId, proposal) {
+    const relativePath = "contracts/contracts.yml";
+    const file = path.join(this.governanceRoot, relativePath);
+    const doc = parse(readFileSync(file, "utf8")) || {};
+    const contracts = Array.isArray(doc.contracts) ? doc.contracts : [];
+    let updatedContract = null;
+    doc.contracts = contracts.map((contract) => {
+      if (contract.id !== contractId) return contract;
+      updatedContract = {
+        ...contract,
+        "revision-proposals": [...(contract["revision-proposals"] || []), proposal],
+      };
+      return updatedContract;
+    });
+    if (!updatedContract) throw new Error(`contract "${contractId}" não existe`);
+    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+
+    const repoContract = expectedRepoContract(updatedContract);
+    const registryFile = path.join(
+      this.reposRoot,
+      repoContract.ownerRepo,
+      ".governance",
+      "registry",
+      "contracts",
+      `${safeYamlId(repoContract.id)}.yml`
+    );
+    mkdirSync(path.dirname(registryFile), { recursive: true });
+    writeFileSync(registryFile, stringify(repoContract, { lineWidth: 100 }));
+
+    return {
+      path: relativePath,
+      id: `${contractId}::${proposal.id}`,
+      registryPath: path.relative(this.reposRoot, registryFile).replaceAll("\\", "/"),
+    };
+  }
+
   applyCommand(command) {
+    if (command.type === "triage.save") {
+      return this.writeTriage(command.payload.triage);
+    }
+    if (command.type === "repo-work.ack") {
+      return this.writeRepoWorkAck(command.payload.ack);
+    }
+    if (command.type === "contract.propose-revision") {
+      return this.appendContractRevisionProposal(
+        command.payload.contract,
+        command.payload.proposal
+      );
+    }
     if (command.type === "gate.decide") {
       const gate = command.payload.gate;
       if (gate.decision === "discard") {

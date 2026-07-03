@@ -192,27 +192,51 @@ function IntakeTab({ snapshot }) {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} md={5}>
-        <Card variant="outlined">
-          <CardContent>
-            <Typography variant="h2" gutterBottom>
-              Proposals
-            </Typography>
-            <Stack spacing={1}>
-              {snapshot.operations.proposals.map((proposal) => (
-                <Paper key={proposal.id} variant="outlined" sx={{ p: 1.5 }}>
-                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                    <Typography fontWeight={700}>{proposal.title}</Typography>
-                    <Chip size="small" label={proposal.status} />
-                  </Stack>
-                  <Typography variant="body2" color="text.secondary">
-                    {proposal.id} · {proposal["authorized-by"]}
-                  </Typography>
-                  <Typography variant="body2">{proposal.note}</Typography>
-                </Paper>
-              ))}
-            </Stack>
-          </CardContent>
-        </Card>
+        <Stack spacing={2}>
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="h2" gutterBottom>
+                Proposals
+              </Typography>
+              <Stack spacing={1}>
+                {snapshot.operations.proposals.map((proposal) => (
+                  <Paper key={proposal.id} variant="outlined" sx={{ p: 1.5 }}>
+                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                      <Typography fontWeight={700}>{proposal.title}</Typography>
+                      <Chip size="small" label={proposal.status} />
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary">
+                      {proposal.id} · {proposal["authorized-by"]}
+                    </Typography>
+                    <Typography variant="body2">{proposal.note}</Typography>
+                  </Paper>
+                ))}
+              </Stack>
+            </CardContent>
+          </Card>
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="h2" gutterBottom>
+                Triages
+              </Typography>
+              <Stack spacing={1}>
+                {snapshot.operations.triages.length ? (
+                  snapshot.operations.triages.map((triage) => (
+                    <Paper key={triage.proposal} variant="outlined" sx={{ p: 1.5 }}>
+                      <Typography fontWeight={700}>{triage.proposal}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {triage["recorded-by"]} · {(triage.items || []).length} item(s)
+                      </Typography>
+                      <Typography variant="body2">{triage.summary}</Typography>
+                    </Paper>
+                  ))
+                ) : (
+                  <Alert severity="info">Sem triage salva.</Alert>
+                )}
+              </Stack>
+            </CardContent>
+          </Card>
+        </Stack>
       </Grid>
       <Grid item xs={12} md={7}>
         <Card variant="outlined">

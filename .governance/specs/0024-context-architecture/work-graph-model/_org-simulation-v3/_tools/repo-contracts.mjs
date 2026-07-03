@@ -1,15 +1,14 @@
 // repo-contracts.mjs — contratos publicados pelo owner repo.
 // contracts.yml continua a visão coordenada da org; o owner repo precisa publicar o
 // contrato localmente em .governance/registry/contracts/<id>.yml.
-import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse, stringify } from "yaml";
+import { deriveExpectedRepoContracts } from "../_lib/domain/repo-projections.mjs";
 import { REPOS_ROOT, SIM_ROOT } from "./org.mjs";
 
 const REPOS_DIR = REPOS_ROOT;
 const GOVERNANCE_DIR = ".governance";
-const CONTRACT_SCHEMA = "acme.repo-contract/v1";
 
 const readYaml = (file) => parse(readFileSync(file, "utf8"));
 
@@ -25,13 +24,6 @@ function stable(value) {
   return value;
 }
 
-function digest(value) {
-  return createHash("sha256")
-    .update(JSON.stringify(stable(value)))
-    .digest("hex")
-    .slice(0, 12);
-}
-
 function repoDirs() {
   return readdirSync(REPOS_DIR)
     .map((name) => path.join(REPOS_DIR, name))
@@ -41,43 +33,6 @@ function repoDirs() {
 
 function contractFile(repo, contractId) {
   return path.join(REPOS_DIR, repo, GOVERNANCE_DIR, "registry", "contracts", `${contractId}.yml`);
-}
-
-function contractPayload(contract) {
-  return {
-    id: contract.id,
-    revision: contract.revision,
-    ownerRepo: contract["owner-repo"],
-    consumers: contract.consumers || [],
-    compatibilityWindow: contract["compatibility-window"] ?? null,
-    interface: contract.interface || null,
-    revisionProposals: contract["revision-proposals"] || [],
-  };
-}
-
-function expectedContract(contract) {
-  return {
-    schema: CONTRACT_SCHEMA,
-    id: contract.id,
-    revision: contract.revision,
-    ownerRepo: contract["owner-repo"],
-    consumers: contract.consumers || [],
-    compatibilityWindow: contract["compatibility-window"] ?? null,
-    interface: contract.interface || null,
-    revisionProposals: contract["revision-proposals"] || [],
-    source: {
-      kind: "central-contract",
-      file: "acme-governance/contracts/contracts.yml",
-      contractHash: digest(contractPayload(contract)),
-    },
-    code: {
-      touchpoints: ["src/index.mjs"],
-    },
-  };
-}
-
-export function deriveExpectedRepoContracts(o) {
-  return (o.contracts || []).map(expectedContract).sort((a, b) => a.id.localeCompare(b.id));
 }
 
 export function loadPublishedRepoContracts() {

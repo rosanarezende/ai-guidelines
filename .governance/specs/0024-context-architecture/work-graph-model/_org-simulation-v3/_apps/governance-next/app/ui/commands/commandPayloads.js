@@ -1,8 +1,11 @@
 export const commandTypes = [
   "proposal.create",
+  "triage.save",
   "gate.decide",
   "intent.activate",
   "breakdown.apply",
+  "repo-work.ack",
+  "contract.propose-revision",
   "outcome.publish",
 ];
 
@@ -39,10 +42,38 @@ function firstIntent(snapshot) {
   return snapshot.portfolio.intents[0];
 }
 
+function firstRepoWork(snapshot) {
+  return snapshot.repos.flatMap((repo) => repo.works || [])[0];
+}
+
+function authorityForOwner(snapshot, owner) {
+  return snapshot.authorities.find((authority) => authority.of === owner)?.id || "";
+}
+
+function authorityForRepo(snapshot, repoId) {
+  const repo = snapshot.repos.find((item) => item.id === repoId);
+  return authorityForOwner(snapshot, repo?.owner) || "pm-growth";
+}
+
+export function defaultAuthorityFor(type, snapshot) {
+  if (type === "contract.propose-revision") return "head-platform";
+  if (type === "repo-work.ack") {
+    const work = firstRepoWork(snapshot);
+    return authorityForRepo(snapshot, work?.repo);
+  }
+  if (type === "triage.save") return "lead-checkout";
+  return (
+    snapshot.authorities.find((authority) => authority.id === "pm-growth")?.id ||
+    snapshot.authorities[0]?.id ||
+    ""
+  );
+}
+
 export function defaultPayloadFor(type, snapshot) {
   const proposal = firstProposal(snapshot);
   const target = firstOperationalTarget(snapshot);
   const intent = firstIntent(snapshot);
+  const repoWork = firstRepoWork(snapshot);
   if (type === "proposal.create") {
     return {
       proposal: {
@@ -55,6 +86,49 @@ export function defaultPayloadFor(type, snapshot) {
         target: snapshot.targets[0]?.id || "tgt-billing-conv",
         status: "proposed",
         note: "registrada pelo app operacional Next/MUI",
+      },
+    };
+  }
+  if (type === "triage.save") {
+    return {
+      triage: {
+        proposal: proposal?.id || "prop-checkout-hardening",
+        "recorded-by": "lead-checkout",
+        summary: "triagem técnica registrada pelo app operacional",
+        items: [
+          {
+            id: "impacto-checkout",
+            question: "qual repo deve responder pelo hardening pós-incidente?",
+            disposition: "answer-direct",
+            answer:
+              "o fluxo crítico está em acme-checkout/acme-checkout-api; owners confirmam no breakdown",
+          },
+          {
+            id: "medicao-incidentes",
+            question: "como medir redução de incidentes sem outcome textual?",
+            disposition: "explore",
+            owner: "lead-sre",
+            timebox: "3d",
+          },
+        ],
+        "matcher-run": {
+          matcher: "local-capability-matcher",
+          query: "hardening checkout pós-incidente",
+          suggestions: [
+            {
+              repo: "acme-checkout",
+              score: 0.91,
+              unknown: false,
+              evidence: ["cap:checkout-ui", "owner:time-checkout"],
+            },
+            {
+              repo: "acme-checkout-api",
+              score: 0.87,
+              unknown: false,
+              evidence: ["cap:pedidos", "owner:time-checkout"],
+            },
+          ],
+        },
       },
     };
   }
@@ -114,6 +188,34 @@ export function defaultPayloadFor(type, snapshot) {
       },
     };
   }
+  if (type === "repo-work.ack") {
+    return {
+      ack: {
+        intent: repoWork?.intent || "intent-cta-upgrade",
+        work: repoWork?.work || "api-elegibilidade",
+        repo: repoWork?.repo || "acme-api-billing",
+        status: "active",
+        owner: authorityForRepo(snapshot, repoWork?.repo || "acme-api-billing") || "lead-billing",
+        "started-at": today(),
+        "base-revision": `${repoWork?.repo || "acme-api-billing"}@ctx-local`,
+      },
+    };
+  }
+  if (type === "contract.propose-revision") {
+    return {
+      contract: "acme-user-context",
+      proposal: {
+        id: `acme-user-context-v5-ui-${today().replaceAll("-", "")}`,
+        revision: "v5",
+        breaking: true,
+        intents: ["intent-checkout-stack", "intent-consent-center"],
+        consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
+        "owner-approval": "head-platform",
+        decision: "sequenced-windows",
+        "compatibility-window": "v4+v5 durante rollout coordenado dos consumidores",
+      },
+    };
+  }
   const outcomeTarget =
     snapshot.targets.find((item) => item.id === intent?.["primary-target"]) || snapshot.targets[0];
   return {
@@ -135,9 +237,12 @@ export function defaultPayloadFor(type, snapshot) {
 
 function commandIdSource(type, payload) {
   if (type === "proposal.create") return payload.proposal?.id;
+  if (type === "triage.save") return payload.triage?.proposal;
   if (type === "gate.decide") return payload.gate?.proposal;
   if (type === "intent.activate") return payload.intent?.id;
   if (type === "breakdown.apply") return payload.breakdown?.intent;
+  if (type === "repo-work.ack") return `${payload.ack?.intent}-${payload.ack?.work}`;
+  if (type === "contract.propose-revision") return `${payload.contract}-${payload.proposal?.id}`;
   if (type === "outcome.publish") return payload.outcome?.id;
   return type;
 }

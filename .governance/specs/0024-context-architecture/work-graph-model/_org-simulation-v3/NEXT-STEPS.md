@@ -20,11 +20,12 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - `check-backend-examples.mjs` prova o read-model file + Cypher Neo4j com hash, refs, event-log, cobertura de nós/arestas e contrato de ação;
 - `load-neo4j-example.mjs --dry-run` monta o plano executável de carga Neo4j; `--apply` é fail-closed e exige `--source-hash` + credenciais HTTP explícitas;
 - `_apps/governance-next/` materializa a primeira superfície operacional em React/Next + Material UI, consumindo a runtime v3 por API routes e enviando comandos governados;
-- `proposal.create`, `gate.decide`, `intent.activate`, `breakdown.apply` e `outcome.publish` já têm dry-run/execute com `base-revision`, idempotency, nonce, authority resolvida, escrita file-first e event-log append-only;
+- `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`, `repo-work.ack`, `contract.propose-revision` e `outcome.publish` já têm dry-run/execute com `base-revision`, idempotency, nonce, authority resolvida, escrita file-first e event-log append-only;
+- `currentRevision()` inclui também triages, repo-work claims e repo-contract registries, então sidecar repo-local não é uma mutação invisível para stale-check;
 - standalone reativo/avulso executável mora no repo (`repos/<repo>/.governance/works/*.yml`); incidentes centrais moram em `acme-governance/incidents/incidents.yml` e geram follow-ups resolvíveis;
 - `node _tools/adoption-journey.mjs` exercita código, contextos, work acknowledgements, contratos, red-team, testes locais e grafo.
 
-Limite deliberado/pendente: a v3 ainda não migrou a infraestrutura transacional completa da v2 (adapters sqlite/neo4j/mongo como portas write-capable, event-log completo para todos os comandos, read-models `db.json` por repo e authoring completo de triage/repo-work/contract). Ela é a sim ativa de dogfood file-first; Neo4j já tem export, smoke e loader opcional de projeção, mas continua read-model derivado, não SSOT.
+Limite deliberado/pendente: a v3 ainda não migrou a infraestrutura transacional completa da v2 (adapters sqlite/neo4j/mongo como portas write-capable, event-log completo para todos os comandos, read-models `db.json` por repo e comandos de verdict/incident/policy). Ela é a sim ativa de dogfood file-first; Neo4j já tem export, smoke e loader opcional de projeção, mas continua read-model derivado, não SSOT.
 
 ## Fases A–E fechadas nesta leva
 
@@ -74,7 +75,7 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **Completar authoring por comandos:** expandir o app Next/MUI/runtime para `triage.save`, `repo-work.ack`, `contract.propose-revision`, `verdict.accept`, `incident.declare` e `policy.break-glass`, sempre via command pipeline com resolver e event-log.
+1. **Completar comandos operacionais remanescentes:** expandir o app Next/MUI/runtime para `verdict.accept`, `incident.declare` e `policy.break-glass`, sempre via command pipeline com resolver e event-log.
 2. **Revisão adversarial pós-F7:** pedir ao Claude Code/Fable 5 para revisar o diff desde `a970415b`, sem implementar, usando [`CLAUDE-CODE-FABLE-5-HANDOFF.md`](CLAUDE-CODE-FABLE-5-HANDOFF.md).
 3. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → actual`.
 4. **Segunda intent com outcome:** escolher uma intent que toque contrato ou objetivo operacional para provar que o mecanismo não está especial-cased no `intent-cta-upgrade`.

@@ -1,50 +1,20 @@
 // repo-works.mjs — acknowledgements repo-first das peças de intent.
 // A intent central quebra o trabalho; o repo precisa publicar um arquivo local dizendo
 // "esta peça existe aqui" + hash do breakdown + evidência de código local.
-import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse, stringify } from "yaml";
+import {
+  deriveExpectedRepoWorks,
+  REPO_WORK_LIFECYCLE_KEYS,
+  REPO_WORK_STATUSES,
+} from "../_lib/domain/repo-projections.mjs";
 import { REPOS_ROOT, SIM_ROOT } from "./org.mjs";
 
 const REPOS_DIR = REPOS_ROOT;
 const GOVERNANCE_DIR = ".governance";
-const WORK_SCHEMA = "acme.repo-work/v1";
-const WORK_STATUSES = ["acknowledged", "active", "blocked", "done", "dropped"];
-const LIFECYCLE_KEYS = [
-  "owner",
-  "started-at",
-  "base-revision",
-  "completed-at",
-  "source-commit",
-  "evidence",
-  "verification",
-  "blocked-by",
-  "reason",
-  "decision",
-  "fate",
-];
 
 const readYaml = (file) => parse(readFileSync(file, "utf8"));
-
-function stable(value) {
-  if (Array.isArray(value)) return value.map(stable);
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.keys(value)
-        .sort()
-        .map((key) => [key, stable(value[key])])
-    );
-  }
-  return value;
-}
-
-function digest(value) {
-  return createHash("sha256")
-    .update(JSON.stringify(stable(value)))
-    .digest("hex")
-    .slice(0, 12);
-}
 
 function repoDirs() {
   return readdirSync(REPOS_DIR)
@@ -55,62 +25,6 @@ function repoDirs() {
 
 function claimFile(repo, intentId, workId) {
   return path.join(REPOS_DIR, repo, GOVERNANCE_DIR, "works", `${intentId}--${workId}.yml`);
-}
-
-function moduleTouchpoint(moduleId) {
-  const base = String(moduleId || "").replace(/^mod-/, "");
-  return base ? `src/modules/${base}.mjs` : "src/index.mjs";
-}
-
-function codeTouchpoints(work) {
-  return [work.module ? moduleTouchpoint(work.module) : "src/index.mjs"];
-}
-
-function breakdownPayload(intent, work) {
-  return {
-    intent: intent.id,
-    work: {
-      id: work.id,
-      repo: work.repo,
-      module: work.module || null,
-      purpose: work.purpose,
-      desc: work.desc,
-      review: work.review,
-      timebox: work.timebox || null,
-      blockedBy: work["blocked-by"] || [],
-      deliveryAfter: work["delivery-after"] || [],
-    },
-  };
-}
-
-function expectedClaim(intent, work) {
-  const claim = {
-    schema: WORK_SCHEMA,
-    id: `${intent.id}::${work.id}`,
-    intent: intent.id,
-    work: work.id,
-    repo: work.repo,
-    purpose: work.purpose,
-    desc: work.desc,
-    review: work.review,
-    status: "acknowledged",
-    source: {
-      kind: "central-breakdown",
-      file: `acme-governance/intents/${intent.id}.yml`,
-      breakdownHash: digest(breakdownPayload(intent, work)),
-    },
-    code: {
-      touchpoints: codeTouchpoints(work),
-    },
-  };
-  if (work.module) claim.module = work.module;
-  return claim;
-}
-
-export function deriveExpectedRepoWorks(o) {
-  return (o.intents || [])
-    .flatMap((intent) => (intent.works || []).map((work) => expectedClaim(intent, work)))
-    .sort((a, b) => a.id.localeCompare(b.id));
 }
 
 export function loadPublishedRepoWorks() {
@@ -138,7 +52,7 @@ export function publishRepoWorks(o) {
   const existingById = new Map(loadPublishedRepoWorks().map((claim) => [claim.id, claim]));
   for (const claim of claims) {
     const existing = existingById.get(claim.id) || {};
-    for (const key of LIFECYCLE_KEYS) {
+    for (const key of REPO_WORK_LIFECYCLE_KEYS) {
       if (existing[key] !== undefined) claim[key] = existing[key];
     }
     if (existing.status && existing.status !== "acknowledged") claim.status = existing.status;
@@ -200,10 +114,10 @@ function checkClosedSchema(claim, node, issues) {
   for (const key of Object.keys(claim?.verification || {}))
     if (!verificationKeys.has(key))
       err("repo-work-schema", `verification.${key} é chave desconhecida`);
-  if (claim?.status && !WORK_STATUSES.includes(claim.status))
+  if (claim?.status && !REPO_WORK_STATUSES.includes(claim.status))
     err(
       "repo-work-schema",
-      `status "${claim.status}" inválido (aceitos: ${WORK_STATUSES.join(" · ")})`
+      `status "${claim.status}" inválido (aceitos: ${REPO_WORK_STATUSES.join(" · ")})`
     );
 }
 

@@ -20,19 +20,22 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import SaveIcon from "@mui/icons-material/Save";
 import { useMemo, useState } from "react";
 import { JsonBlock } from "../shared/JsonBlock.jsx";
-import { commandFromPayload, commandTypes, defaultPayloadFor } from "./commandPayloads.js";
+import {
+  commandFromPayload,
+  commandTypes,
+  defaultAuthorityFor,
+  defaultPayloadFor,
+} from "./commandPayloads.js";
 
 function formatPayload(value) {
   return JSON.stringify(value, null, 2);
 }
 
 export default function CommandWorkspace({ snapshot, onReload }) {
-  const defaultAuthority =
-    snapshot.authorities.find((authority) => authority.id === "pm-growth")?.id ||
-    snapshot.authorities[0]?.id ||
-    "";
   const [type, setType] = useState("proposal.create");
-  const [authority, setAuthority] = useState(defaultAuthority);
+  const [authority, setAuthority] = useState(() =>
+    defaultAuthorityFor("proposal.create", snapshot)
+  );
   const [payloadText, setPayloadText] = useState(() =>
     formatPayload(defaultPayloadFor("proposal.create", snapshot))
   );
@@ -59,6 +62,7 @@ export default function CommandWorkspace({ snapshot, onReload }) {
 
   function resetPayload(nextType = type) {
     setType(nextType);
+    setAuthority(defaultAuthorityFor(nextType, snapshot));
     setPayloadText(formatPayload(defaultPayloadFor(nextType, snapshot)));
     clearDryRun();
   }

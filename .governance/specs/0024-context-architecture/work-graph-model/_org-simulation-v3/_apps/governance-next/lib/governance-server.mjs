@@ -65,6 +65,7 @@ function buildOperationalBucket(org) {
     incidents: sortById(org.incidents || []),
     standalone: sortById(org.standalone || []),
     proposals: sortById(org.proposals || []),
+    triages: sortById(org.triages || []),
   };
 }
 
@@ -122,6 +123,7 @@ export async function loadGovernanceSnapshot() {
       contracts: org.contracts.length,
       outcomes: org.outcomes.length,
       incidents: (org.incidents || []).length,
+      triages: (org.triages || []).length,
       graphNodes: graph.nodes.length,
       graphEdges: graph.edges.length,
       errors: errors.length,

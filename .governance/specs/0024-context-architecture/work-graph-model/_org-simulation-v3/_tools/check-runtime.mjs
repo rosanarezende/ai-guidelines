@@ -83,12 +83,14 @@ if (noEnvelope.ok || !noEnvelope.issues.some((issue) => issue.rule === "command-
 const tmp = mkdtempSync(path.join(os.tmpdir(), "acme-runtime-"));
 try {
   const governanceRoot = path.join(tmp, "acme-governance");
+  const reposRoot = path.join(tmp, "repos");
   cpSync(GOVERNANCE_ROOT, governanceRoot, { recursive: true });
-  const writeRuntime = openFileGovernanceRuntime({ governanceRoot, reposRoot: REPOS_ROOT });
+  cpSync(REPOS_ROOT, reposRoot, { recursive: true });
+  const writeRuntime = openFileGovernanceRuntime({ governanceRoot, reposRoot });
   const revision = () => writeRuntime.currentRevision();
-  const envelope = (id, issuedAt = "2027-04-04") => ({
+  const envelope = (id, issuedAt = "2027-04-04", authority = "pm-growth") => ({
     actor: "tool:check-runtime",
-    authority: "pm-growth",
+    authority,
     "base-revision": revision(),
     "idempotency-key": id,
     "issued-at": issuedAt,
@@ -123,6 +125,66 @@ try {
   if (!eventLog.includes("cmd-check-runtime-proposal")) {
     fail("proposal.create não registrou event-log append-only");
   }
+
+  const triageCommand = {
+    id: "cmd-check-runtime-triage",
+    type: "triage.save",
+    envelope: envelope("cmd-check-runtime-triage", "2027-04-04", "lead-billing"),
+    payload: {
+      triage: {
+        proposal: "prop-check-runtime",
+        "recorded-by": "lead-billing",
+        summary: "triage em cópia temporária prova authoring pré-gate",
+        items: [
+          {
+            id: "duvida-api",
+            question: "o endpoint de billing existente cobre a proposta?",
+            disposition: "explore",
+            owner: "lead-billing",
+            timebox: "2d",
+          },
+          {
+            id: "repo-provavel",
+            question: "qual repo recebe o primeiro corte?",
+            disposition: "answer-direct",
+            answer: "acme-api-billing concentra elegibilidade e assinatura",
+          },
+        ],
+        "matcher-run": {
+          matcher: "local-capability-matcher",
+          query: "billing upgrade eligibility",
+          suggestions: [
+            {
+              repo: "acme-api-billing",
+              score: 0.9,
+              unknown: false,
+              evidence: ["cap:elegibilidade", "owner:time-billing"],
+            },
+          ],
+        },
+      },
+    },
+  };
+  const triageMismatch = writeRuntime.executeGovernedCommand({
+    ...triageCommand,
+    id: "cmd-check-runtime-triage-mismatch",
+    envelope: envelope("cmd-check-runtime-triage-mismatch", "2027-04-04", "pm-growth"),
+  });
+  if (
+    triageMismatch.ok ||
+    !triageMismatch.issues.some((issue) => issue.rule === "triage-authority")
+  ) {
+    fail("triage.save com recorded-by divergente da authority não falhou fechado");
+  }
+  const triage = writeRuntime.executeGovernedCommand(triageCommand);
+  if (!triage.ok) fail(`triage.save rejeitado: ${triage.issues.map((i) => i.rule).join(", ")}`);
+  const triageDoc = parse(
+    readFileSync(path.join(governanceRoot, "intake", "triage", "prop-check-runtime.yml"), "utf8")
+  );
+  if (triageDoc.proposal !== "prop-check-runtime" || triageDoc.items.length !== 2) {
+    fail("triage.save não escreveu triage canônica");
+  }
+
   const stale = writeRuntime.executeGovernedCommand({
     ...proposalCommand,
     id: "cmd-check-runtime-stale",
@@ -141,6 +203,152 @@ try {
   });
   if (stale.ok || !stale.issues.some((issue) => issue.rule === "command-stale")) {
     fail("execute não falhou fechado com base-revision stale");
+  }
+
+  const ownerMismatch = writeRuntime.executeGovernedCommand({
+    id: "cmd-check-runtime-repo-work-owner-mismatch",
+    type: "repo-work.ack",
+    envelope: envelope("cmd-check-runtime-repo-work-owner-mismatch", "2027-04-04"),
+    payload: {
+      ack: {
+        intent: "intent-checkout-stack",
+        work: "spike-carrinho",
+        status: "active",
+        owner: "lead-checkout",
+        "started-at": "2027-04-04",
+        "base-revision": "acme-checkout@ctx-local",
+      },
+    },
+  });
+  if (
+    ownerMismatch.ok ||
+    !ownerMismatch.issues.some((issue) => issue.rule === "repo-work-authority")
+  ) {
+    fail("repo-work.ack com owner diferente da authority não falhou fechado");
+  }
+
+  const repoWorkAckCommand = {
+    id: "cmd-check-runtime-repo-work-ack",
+    type: "repo-work.ack",
+    envelope: {
+      ...envelope("cmd-check-runtime-repo-work-ack", "2027-04-04"),
+      authority: "lead-checkout",
+    },
+    payload: {
+      ack: {
+        intent: "intent-checkout-stack",
+        work: "spike-carrinho",
+        status: "active",
+        owner: "lead-checkout",
+        "started-at": "2027-04-04",
+        "base-revision": "acme-checkout@ctx-local",
+      },
+    },
+  };
+  const repoWorkAck = writeRuntime.executeGovernedCommand(repoWorkAckCommand);
+  if (!repoWorkAck.ok)
+    fail(`repo-work.ack rejeitado: ${repoWorkAck.issues.map((i) => i.rule).join(", ")}`);
+  const repoWorkDoc = parse(
+    readFileSync(
+      path.join(
+        reposRoot,
+        "acme-checkout",
+        ".governance",
+        "works",
+        "intent-checkout-stack--spike-carrinho.yml"
+      ),
+      "utf8"
+    )
+  );
+  if (repoWorkDoc.status !== "active" || repoWorkDoc.owner !== "lead-checkout") {
+    fail("repo-work.ack não escreveu lifecycle repo-local");
+  }
+
+  const contractMismatch = writeRuntime.executeGovernedCommand({
+    id: "cmd-check-runtime-contract-mismatch",
+    type: "contract.propose-revision",
+    envelope: envelope("cmd-check-runtime-contract-mismatch", "2027-04-04"),
+    payload: {
+      contract: "acme-user-context",
+      proposal: {
+        id: "acme-user-context-v5-mismatch",
+        revision: "v5",
+        breaking: true,
+        intents: ["intent-checkout-stack", "intent-consent-center"],
+        consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
+        "owner-approval": "head-platform",
+        decision: "sequenced-windows",
+        "compatibility-window": "v4+v5 durante rollout coordenado",
+      },
+    },
+  });
+  if (
+    contractMismatch.ok ||
+    !contractMismatch.issues.some((issue) => issue.rule === "contract-owner-approval")
+  ) {
+    fail("contract.propose-revision com authority divergente não falhou fechado");
+  }
+
+  const contractCommand = {
+    id: "cmd-check-runtime-contract-proposal",
+    type: "contract.propose-revision",
+    envelope: {
+      ...envelope("cmd-check-runtime-contract-proposal", "2027-04-04"),
+      authority: "head-platform",
+    },
+    payload: {
+      contract: "acme-user-context",
+      proposal: {
+        id: "acme-user-context-v5-check-runtime",
+        revision: "v5",
+        breaking: true,
+        intents: ["intent-checkout-stack", "intent-consent-center"],
+        consumers: ["acme-mfe-billing", "acme-mfe-onboarding", "acme-checkout"],
+        "owner-approval": "head-platform",
+        decision: "sequenced-windows",
+        "compatibility-window": "v4+v5 durante rollout coordenado",
+      },
+    },
+  };
+  const contractProposal = writeRuntime.executeGovernedCommand(contractCommand);
+  if (!contractProposal.ok)
+    fail(
+      `contract.propose-revision rejeitado: ${contractProposal.issues
+        .map((i) => i.rule)
+        .join(", ")}`
+    );
+  const contractsDoc = parse(
+    readFileSync(path.join(governanceRoot, "contracts", "contracts.yml"), "utf8")
+  );
+  const userContext = contractsDoc.contracts.find(
+    (contract) => contract.id === "acme-user-context"
+  );
+  if (
+    !userContext["revision-proposals"].some(
+      (proposal) => proposal.id === "acme-user-context-v5-check-runtime"
+    )
+  ) {
+    fail("contract.propose-revision não atualizou contracts.yml");
+  }
+  const localContract = parse(
+    readFileSync(
+      path.join(
+        reposRoot,
+        "acme-web-host",
+        ".governance",
+        "registry",
+        "contracts",
+        "acme-user-context.yml"
+      ),
+      "utf8"
+    )
+  );
+  if (
+    !localContract.revisionProposals.some(
+      (proposal) => proposal.id === "acme-user-context-v5-check-runtime"
+    )
+  ) {
+    fail("contract.propose-revision não atualizou registry local do owner repo");
   }
 
   const activationWithoutGate = writeRuntime.executeGovernedCommand({
