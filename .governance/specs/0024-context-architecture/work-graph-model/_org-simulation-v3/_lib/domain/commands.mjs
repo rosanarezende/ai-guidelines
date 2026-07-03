@@ -2,10 +2,15 @@
 import { validateOrg } from "./org-domain.mjs";
 
 export const COMMAND_TYPES = new Map([
+  ["breakdown.apply", { mutates: true, payloadKey: "breakdown" }],
+  ["gate.decide", { mutates: true, payloadKey: "gate" }],
+  ["intent.activate", { mutates: true, payloadKey: "intent" }],
   ["proposal.create", { mutates: true, payloadKey: "proposal" }],
   ["read-model.rebuild", { mutates: false }],
   ["outcome.publish", { mutates: true, payloadKey: "outcome" }],
 ]);
+
+const GATE_DECISIONS = ["activate", "discard"];
 
 const requiredEnvelope = [
   "actor",
@@ -18,6 +23,21 @@ const requiredEnvelope = [
 
 function issue(rule, node, msg) {
   return { level: "error", rule, node, msg };
+}
+
+function domainErrorsFor(candidate, nodePrefix) {
+  return validateOrg(candidate).filter(
+    (domainIssue) =>
+      domainIssue.level === "error" &&
+      (domainIssue.node === nodePrefix || String(domainIssue.node).startsWith(`${nodePrefix}::`))
+  );
+}
+
+function gateDecisionFor(history, proposalId) {
+  return history.find(
+    (previous) =>
+      previous?.type === "gate.decide" && previous.payload?.gate?.proposal === proposalId
+  );
 }
 
 export function validateGovernedCommand(command, org, options = {}) {
@@ -98,6 +118,112 @@ export function validateGovernedCommand(command, org, options = {}) {
 
   if (spec?.payloadKey && !command.payload?.[spec.payloadKey]) {
     issues.push(issue("command-payload", node, `payload sem "${spec.payloadKey}"`));
+  }
+
+  if (command.type === "gate.decide" && command.payload?.gate) {
+    const gate = command.payload.gate;
+    if (!gate.proposal) issues.push(issue("gate-schema", node, "gate.proposal é obrigatório"));
+    if (!GATE_DECISIONS.includes(gate.decision))
+      issues.push(
+        issue(
+          "gate-schema",
+          node,
+          `gate.decision "${gate.decision}" inválida (aceitas: ${GATE_DECISIONS.join(" · ")})`
+        )
+      );
+    if (!gate.reason)
+      issues.push(issue("gate-schema", node, "gate.reason é obrigatório e auditável"));
+    const proposal = (org.proposals || []).find((item) => item.id === gate.proposal);
+    if (gate.proposal && !proposal)
+      issues.push(issue("gate-proposal", node, `proposal "${gate.proposal}" não existe`));
+    if (proposal && proposal.status !== "proposed")
+      issues.push(
+        issue(
+          "gate-proposal",
+          node,
+          `proposal "${proposal.id}" está "${proposal.status}" — gate só decide proposed`
+        )
+      );
+    const previousGate = gateDecisionFor(history, gate.proposal);
+    if (previousGate) {
+      issues.push(
+        issue(
+          "gate-duplicate",
+          node,
+          `proposal "${gate.proposal}" já teve gate em "${previousGate.id || previousGate.type}"`
+        )
+      );
+    }
+  }
+
+  if (command.type === "intent.activate" && command.payload?.intent) {
+    const intent = command.payload.intent;
+    const proposalId = command.payload.proposal;
+    if (!proposalId) {
+      issues.push(issue("gate-required", node, "intent.activate exige payload.proposal"));
+    }
+    if ((org.intents || []).some((item) => item.id === intent.id)) {
+      issues.push(issue("command-duplicate", node, `intent "${intent.id}" já existe`));
+    }
+    if (proposalId) {
+      const proposal = (org.proposals || []).find((item) => item.id === proposalId);
+      if (!proposal)
+        issues.push(issue("gate-required", node, `proposal "${proposalId}" não existe`));
+      const gate = gateDecisionFor(history, proposalId);
+      if (!gate)
+        issues.push(
+          issue(
+            "gate-required",
+            node,
+            `intent.activate exige gate.decide prévio para "${proposalId}"`
+          )
+        );
+      else if (gate.payload?.gate?.decision !== "activate")
+        issues.push(
+          issue(
+            "gate-required",
+            node,
+            `gate de "${proposalId}" decidiu "${gate.payload?.gate?.decision}", não activate`
+          )
+        );
+      if (proposal && intent["authorized-by"] !== proposal["authorized-by"])
+        issues.push(
+          issue(
+            "gate-coherence",
+            node,
+            `intent.authorized-by "${intent["authorized-by"]}" diverge da proposal "${proposal["authorized-by"]}"`
+          )
+        );
+      if (proposal?.target && intent["primary-target"] !== proposal.target)
+        issues.push(
+          issue(
+            "gate-coherence",
+            node,
+            `intent.primary-target "${intent["primary-target"]}" diverge da proposal target "${proposal.target}"`
+          )
+        );
+    }
+    if (!issues.some((item) => item.rule === "command-duplicate")) {
+      const candidate = structuredClone(org);
+      candidate.intents = [...(candidate.intents || []), intent];
+      issues.push(...domainErrorsFor(candidate, intent.id));
+    }
+  }
+
+  if (command.type === "breakdown.apply" && command.payload?.breakdown) {
+    const breakdown = command.payload.breakdown;
+    const intentId = breakdown.intent;
+    const intent = (org.intents || []).find((item) => item.id === intentId);
+    if (!intent) issues.push(issue("breakdown-intent", node, `intent "${intentId}" não existe`));
+    if (!Array.isArray(breakdown.works) || breakdown.works.length === 0)
+      issues.push(issue("breakdown-schema", node, "breakdown.works precisa ter ao menos uma peça"));
+    if (intent && Array.isArray(breakdown.works) && breakdown.works.length) {
+      const candidate = structuredClone(org);
+      candidate.intents = candidate.intents.map((item) =>
+        item.id === intentId ? { ...item, works: breakdown.works } : item
+      );
+      issues.push(...domainErrorsFor(candidate, intentId));
+    }
   }
 
   if (command.type === "proposal.create" && command.payload?.proposal) {

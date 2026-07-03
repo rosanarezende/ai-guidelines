@@ -483,11 +483,12 @@ de iniciar UI/API nova.
   `--apply` exige `--source-hash` + credenciais explícitas.
 - **Estado complementar 3:** `_apps/governance-next/` implementa a primeira superfície React/Next +
   Material UI. O app lê snapshot derivado da runtime, expõe tabs ponta-a-ponta e chama API routes
-  para `proposal.create` e `outcome.publish` com dry-run/execute.
+  para `proposal.create`, `gate.decide`, `intent.activate`, `breakdown.apply` e `outcome.publish`
+  com dry-run/execute.
 - **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
   `base-revision`, authority resolvida, idempotency, nonce, escrita YAML autoritativa e event-log
-  append-only. Ainda não há authoring completo de triage/gate/intent/breakdown nem backend
+  append-only. Ainda não há authoring completo de triage/repo-work/contract nem backend
   transacional SQLite/Neo4j/Mongo.
 - **Próxima decisão:** escolher o primeiro backend transacional (`file` com lock/event-log ou
-  SQLite) e expandir o command pipeline para triage/gate/breakdown sem transformar
+  SQLite) e expandir o command pipeline para triage/repo-work/contract sem transformar
   banco/read-model em SSOT.

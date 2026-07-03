@@ -34,6 +34,14 @@ function readJsonl(file) {
     .map((line) => JSON.parse(line));
 }
 
+function safeYamlId(id) {
+  const value = String(id || "");
+  if (!/^[A-Za-z0-9_.-]+$/.test(value)) {
+    throw new Error(`id "${value}" não é seguro para path YAML`);
+  }
+  return value;
+}
+
 export class FileGovernanceRepository {
   constructor({ governanceRoot = GOVERNANCE_ROOT, reposRoot = REPOS_ROOT } = {}) {
     this.governanceRoot = governanceRoot;
@@ -137,7 +145,69 @@ export class FileGovernanceRepository {
     return { path: relativePath, id: item.id };
   }
 
+  updateGovernanceListItem(relativePath, rootKey, id, patch) {
+    const file = path.join(this.governanceRoot, relativePath);
+    const doc = parse(readFileSync(file, "utf8")) || {};
+    const items = Array.isArray(doc[rootKey]) ? doc[rootKey] : [];
+    let changed = false;
+    doc[rootKey] = items.map((item) => {
+      if (item.id !== id) return item;
+      changed = true;
+      return { ...item, ...patch };
+    });
+    if (!changed) throw new Error(`${rootKey} não contém id "${id}"`);
+    writeFileSync(file, stringify(doc, { lineWidth: 100 }));
+    return { path: relativePath, id };
+  }
+
+  writeIntent(intent) {
+    const relativePath = `intents/${safeYamlId(intent.id)}.yml`;
+    const file = path.join(this.governanceRoot, relativePath);
+    if (existsSync(file)) throw new Error(`intent "${intent.id}" já existe`);
+    writeFileSync(file, stringify(intent, { lineWidth: 100 }));
+    return { path: relativePath, id: intent.id };
+  }
+
+  updateIntent(intentId, patch) {
+    const relativePath = `intents/${safeYamlId(intentId)}.yml`;
+    const file = path.join(this.governanceRoot, relativePath);
+    if (!existsSync(file)) throw new Error(`intent "${intentId}" não existe`);
+    const intent = parse(readFileSync(file, "utf8")) || {};
+    writeFileSync(file, stringify({ ...intent, ...patch }, { lineWidth: 100 }));
+    return { path: relativePath, id: intentId };
+  }
+
   applyCommand(command) {
+    if (command.type === "gate.decide") {
+      const gate = command.payload.gate;
+      if (gate.decision === "discard") {
+        return this.updateGovernanceListItem("intake/proposals.yml", "proposals", gate.proposal, {
+          status: "dropped",
+        });
+      }
+      return this.updateGovernanceListItem("intake/proposals.yml", "proposals", gate.proposal, {
+        status: "active",
+      });
+    }
+    if (command.type === "intent.activate") {
+      const write = this.writeIntent(command.payload.intent);
+      if (command.payload.proposal) {
+        this.updateGovernanceListItem(
+          "intake/proposals.yml",
+          "proposals",
+          command.payload.proposal,
+          {
+            status: "closed",
+          }
+        );
+      }
+      return write;
+    }
+    if (command.type === "breakdown.apply") {
+      return this.updateIntent(command.payload.breakdown.intent, {
+        works: command.payload.breakdown.works,
+      });
+    }
     if (command.type === "proposal.create") {
       return this.appendGovernanceList(
         "intake/proposals.yml",

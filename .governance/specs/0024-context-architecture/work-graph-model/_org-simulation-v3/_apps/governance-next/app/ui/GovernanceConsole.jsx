@@ -11,13 +11,9 @@ import {
   Container,
   CssBaseline,
   Divider,
-  FormControl,
   Grid,
-  InputLabel,
   LinearProgress,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   Tab,
   Table,
@@ -27,7 +23,6 @@ import {
   TableHead,
   TableRow,
   Tabs,
-  TextField,
   ThemeProvider,
   Toolbar,
   Tooltip,
@@ -38,11 +33,10 @@ import BugReportIcon from "@mui/icons-material/BugReport";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
 import HubIcon from "@mui/icons-material/Hub";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import SaveIcon from "@mui/icons-material/Save";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useMemo, useState } from "react";
+import CommandWorkspace from "./commands/CommandWorkspace.jsx";
 
 const theme = createTheme({
   palette: {
@@ -87,26 +81,6 @@ const tabs = [
   "Operação",
   "Comandos",
 ];
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function commandSuffix() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function makeEnvelope(snapshot, authority, prefix) {
-  const suffix = commandSuffix();
-  return {
-    actor: "ui:governance-next",
-    authority,
-    "base-revision": snapshot.revision,
-    "idempotency-key": `${prefix}-${suffix}`,
-    "issued-at": today(),
-    nonce: `nonce-${prefix}-${suffix}`,
-  };
-}
 
 function countBy(items, field) {
   return items.reduce((acc, item) => {
@@ -155,9 +129,7 @@ function MetricCard({ label, value, tone = "default", icon = null }) {
 
 function IssueList({ issues, limit = 8 }) {
   const visible = issues.slice(0, limit);
-  if (!visible.length) {
-    return <Alert severity="success">Sem issues no recorte atual.</Alert>;
-  }
+  if (!visible.length) return <Alert severity="success">Sem issues no recorte atual.</Alert>;
   return (
     <Stack spacing={1}>
       {visible.map((issue, index) => (
@@ -174,25 +146,6 @@ function IssueList({ issues, limit = 8 }) {
         </Typography>
       ) : null}
     </Stack>
-  );
-}
-
-function JsonBlock({ value }) {
-  return (
-    <Box
-      component="pre"
-      sx={{
-        bgcolor: "#111827",
-        color: "#e5e7eb",
-        p: 2,
-        borderRadius: 1,
-        overflow: "auto",
-        fontSize: 12,
-        maxHeight: 360,
-      }}
-    >
-      {JSON.stringify(value, null, 2)}
-    </Box>
   );
 }
 
@@ -247,9 +200,12 @@ function IntakeTab({ snapshot }) {
             <Stack spacing={1}>
               {snapshot.operations.proposals.map((proposal) => (
                 <Paper key={proposal.id} variant="outlined" sx={{ p: 1.5 }}>
-                  <Typography fontWeight={700}>{proposal.title}</Typography>
+                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                    <Typography fontWeight={700}>{proposal.title}</Typography>
+                    <Chip size="small" label={proposal.status} />
+                  </Stack>
                   <Typography variant="body2" color="text.secondary">
-                    {proposal.id} · {proposal.status} · {proposal["authorized-by"]}
+                    {proposal.id} · {proposal["authorized-by"]}
                   </Typography>
                   <Typography variant="body2">{proposal.note}</Typography>
                 </Paper>
@@ -522,381 +478,6 @@ function OperationsTab({ snapshot }) {
   );
 }
 
-function CommandTab({ snapshot, onReload }) {
-  const defaultAuthority =
-    snapshot.authorities.find((authority) => authority.id === "pm-growth")?.id ||
-    snapshot.authorities[0]?.id ||
-    "";
-  const [mode, setMode] = useState("proposal.create");
-  const [authority, setAuthority] = useState(defaultAuthority);
-  const [proposal, setProposal] = useState({
-    id: "prop-new-growth-idea",
-    title: "nova hipótese de growth",
-    raisedBy: snapshot.operations.incidents[0]
-      ? `incident:${snapshot.operations.incidents[0].id}`
-      : "proposal:prop-checkout-hardening",
-    authorizedBy: snapshot.portfolio.objectives[0]?.id || "",
-    target: snapshot.targets[0]?.id || "",
-    note: "registrada pelo app operacional Next/MUI",
-  });
-  const firstIntent = snapshot.portfolio.intents[0];
-  const firstTarget =
-    snapshot.targets.find((target) => target.id === firstIntent?.["primary-target"]) ||
-    snapshot.targets[0];
-  const [outcome, setOutcome] = useState({
-    id: `out-ui-${today().replaceAll("-", "")}`,
-    emittedBy: firstIntent?.id || "",
-    metric: firstTarget?.metric?.id || firstTarget?.metric || "",
-    contributesTo: firstTarget?.id || "",
-    source: "acme-analytics/ui-published@warehouse-rev-local",
-    value: "+0.1 %",
-    aggregation: firstTarget?.metric?.aggregation || "avg",
-    attestedBy: firstTarget?.metric?.source || "acme-analytics",
-    revision: "warehouse@rev-local",
-    windowStart: "2027-04-01",
-    windowEnd: "2027-04-30",
-    contractRevisions: "",
-  });
-  const [lastCommand, setLastCommand] = useState(null);
-  const [result, setResult] = useState(null);
-  const [busy, setBusy] = useState(false);
-
-  function buildCommand() {
-    const envelope = makeEnvelope(snapshot, authority, mode);
-    if (mode === "proposal.create") {
-      return {
-        id: `cmd-${proposal.id}`,
-        type: mode,
-        envelope,
-        payload: {
-          proposal: {
-            id: proposal.id,
-            title: proposal.title,
-            "raised-by": proposal.raisedBy,
-            "authorized-by": proposal.authorizedBy,
-            target: proposal.target || undefined,
-            status: "proposed",
-            note: proposal.note,
-          },
-        },
-      };
-    }
-    return {
-      id: `cmd-${outcome.id}`,
-      type: mode,
-      envelope,
-      payload: {
-        outcome: {
-          id: outcome.id,
-          "emitted-by": outcome.emittedBy,
-          source: outcome.source,
-          window: { start: outcome.windowStart, end: outcome.windowEnd },
-          metric: outcome.metric,
-          value: outcome.value,
-          aggregation: outcome.aggregation,
-          "attested-by": outcome.attestedBy,
-          revision: outcome.revision,
-          "contract-revisions": outcome.contractRevisions
-            .split(",")
-            .map((item) => item.trim())
-            .filter(Boolean),
-          "contributes-to": outcome.contributesTo,
-          envelope,
-        },
-      },
-    };
-  }
-
-  async function submit(kind) {
-    const command = kind === "execute" && lastCommand ? lastCommand : buildCommand();
-    setBusy(true);
-    setResult(null);
-    try {
-      const response = await fetch(`/api/commands/${kind === "execute" ? "execute" : "dry-run"}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(command),
-      });
-      const json = await response.json();
-      setLastCommand(command);
-      setResult({ status: response.status, ...json });
-      if (kind === "execute" && json.ok) await onReload();
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={5}>
-        <Card variant="outlined">
-          <CardContent>
-            <Stack spacing={2}>
-              <Typography variant="h2">Command pipeline</Typography>
-              <FormControl fullWidth size="small">
-                <InputLabel>Tipo</InputLabel>
-                <Select label="Tipo" value={mode} onChange={(event) => setMode(event.target.value)}>
-                  <MenuItem value="proposal.create">proposal.create</MenuItem>
-                  <MenuItem value="outcome.publish">outcome.publish</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl fullWidth size="small">
-                <InputLabel>Authority</InputLabel>
-                <Select
-                  label="Authority"
-                  value={authority}
-                  onChange={(event) => setAuthority(event.target.value)}
-                >
-                  {snapshot.authorities.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.id}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <Alert severity="info">base-revision atual: {snapshot.revision}</Alert>
-              {mode === "proposal.create" ? (
-                <Stack spacing={1.5}>
-                  <TextField
-                    size="small"
-                    label="id"
-                    value={proposal.id}
-                    onChange={(event) => setProposal({ ...proposal, id: event.target.value })}
-                  />
-                  <TextField
-                    size="small"
-                    label="title"
-                    value={proposal.title}
-                    onChange={(event) => setProposal({ ...proposal, title: event.target.value })}
-                  />
-                  <TextField
-                    size="small"
-                    label="raised-by"
-                    value={proposal.raisedBy}
-                    onChange={(event) => setProposal({ ...proposal, raisedBy: event.target.value })}
-                  />
-                  <FormControl size="small">
-                    <InputLabel>authorized-by</InputLabel>
-                    <Select
-                      label="authorized-by"
-                      value={proposal.authorizedBy}
-                      onChange={(event) =>
-                        setProposal({ ...proposal, authorizedBy: event.target.value })
-                      }
-                    >
-                      {snapshot.portfolio.objectives.map((objective) => (
-                        <MenuItem key={objective.id} value={objective.id}>
-                          {objective.id}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl size="small">
-                    <InputLabel>target</InputLabel>
-                    <Select
-                      label="target"
-                      value={proposal.target}
-                      onChange={(event) => setProposal({ ...proposal, target: event.target.value })}
-                    >
-                      {snapshot.targets.map((target) => (
-                        <MenuItem key={target.id} value={target.id}>
-                          {target.id}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <TextField
-                    size="small"
-                    label="note"
-                    value={proposal.note}
-                    multiline
-                    minRows={3}
-                    onChange={(event) => setProposal({ ...proposal, note: event.target.value })}
-                  />
-                </Stack>
-              ) : (
-                <Stack spacing={1.5}>
-                  <TextField
-                    size="small"
-                    label="id"
-                    value={outcome.id}
-                    onChange={(event) => setOutcome({ ...outcome, id: event.target.value })}
-                  />
-                  <FormControl size="small">
-                    <InputLabel>emitted-by</InputLabel>
-                    <Select
-                      label="emitted-by"
-                      value={outcome.emittedBy}
-                      onChange={(event) =>
-                        setOutcome({ ...outcome, emittedBy: event.target.value })
-                      }
-                    >
-                      {snapshot.portfolio.intents.map((intent) => (
-                        <MenuItem key={intent.id} value={intent.id}>
-                          {intent.id}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <Grid container spacing={1}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="metric"
-                        value={outcome.metric}
-                        onChange={(event) => setOutcome({ ...outcome, metric: event.target.value })}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="contributes-to"
-                        value={outcome.contributesTo}
-                        onChange={(event) =>
-                          setOutcome({ ...outcome, contributesTo: event.target.value })
-                        }
-                      />
-                    </Grid>
-                  </Grid>
-                  <Grid container spacing={1}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="value"
-                        value={outcome.value}
-                        onChange={(event) => setOutcome({ ...outcome, value: event.target.value })}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="aggregation"
-                        value={outcome.aggregation}
-                        onChange={(event) =>
-                          setOutcome({ ...outcome, aggregation: event.target.value })
-                        }
-                      />
-                    </Grid>
-                  </Grid>
-                  <TextField
-                    size="small"
-                    label="source"
-                    value={outcome.source}
-                    onChange={(event) => setOutcome({ ...outcome, source: event.target.value })}
-                  />
-                  <Grid container spacing={1}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="attested-by"
-                        value={outcome.attestedBy}
-                        onChange={(event) =>
-                          setOutcome({ ...outcome, attestedBy: event.target.value })
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="revision"
-                        value={outcome.revision}
-                        onChange={(event) =>
-                          setOutcome({ ...outcome, revision: event.target.value })
-                        }
-                      />
-                    </Grid>
-                  </Grid>
-                  <Grid container spacing={1}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="window.start"
-                        value={outcome.windowStart}
-                        onChange={(event) =>
-                          setOutcome({ ...outcome, windowStart: event.target.value })
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="window.end"
-                        value={outcome.windowEnd}
-                        onChange={(event) =>
-                          setOutcome({ ...outcome, windowEnd: event.target.value })
-                        }
-                      />
-                    </Grid>
-                  </Grid>
-                  <TextField
-                    size="small"
-                    label="contract-revisions"
-                    value={outcome.contractRevisions}
-                    onChange={(event) =>
-                      setOutcome({ ...outcome, contractRevisions: event.target.value })
-                    }
-                  />
-                </Stack>
-              )}
-              <Stack direction="row" spacing={1}>
-                <Button
-                  variant="contained"
-                  startIcon={<PlayArrowIcon />}
-                  disabled={busy}
-                  onClick={() => submit("dry-run")}
-                >
-                  Dry-run
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<SaveIcon />}
-                  disabled={busy || !lastCommand || result?.ok !== true}
-                  onClick={() => submit("execute")}
-                >
-                  Execute
-                </Button>
-              </Stack>
-              {busy ? <LinearProgress /> : null}
-            </Stack>
-          </CardContent>
-        </Card>
-      </Grid>
-      <Grid item xs={12} md={7}>
-        <Stack spacing={2}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h2" gutterBottom>
-                Comando
-              </Typography>
-              <JsonBlock value={lastCommand || buildCommand()} />
-            </CardContent>
-          </Card>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h2" gutterBottom>
-                Resultado
-              </Typography>
-              {result ? (
-                <JsonBlock value={result} />
-              ) : (
-                <Alert severity="info">Nenhum dry-run ainda.</Alert>
-              )}
-            </CardContent>
-          </Card>
-        </Stack>
-      </Grid>
-    </Grid>
-  );
-}
-
 function ActiveTab({ tab, snapshot, onReload }) {
   if (tab === 0) return <PlanningTab snapshot={snapshot} />;
   if (tab === 1) return <IntakeTab snapshot={snapshot} />;
@@ -905,7 +486,7 @@ function ActiveTab({ tab, snapshot, onReload }) {
   if (tab === 4) return <OutcomesTab snapshot={snapshot} />;
   if (tab === 5) return <ReposTab snapshot={snapshot} />;
   if (tab === 6) return <OperationsTab snapshot={snapshot} />;
-  return <CommandTab snapshot={snapshot} onReload={onReload} />;
+  return <CommandWorkspace snapshot={snapshot} onReload={onReload} />;
 }
 
 export default function GovernanceConsole({ initialSnapshot }) {

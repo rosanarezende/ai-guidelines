@@ -85,18 +85,19 @@ try {
   const governanceRoot = path.join(tmp, "acme-governance");
   cpSync(GOVERNANCE_ROOT, governanceRoot, { recursive: true });
   const writeRuntime = openFileGovernanceRuntime({ governanceRoot, reposRoot: REPOS_ROOT });
-  const revision = writeRuntime.currentRevision();
+  const revision = () => writeRuntime.currentRevision();
+  const envelope = (id, issuedAt = "2027-04-04") => ({
+    actor: "tool:check-runtime",
+    authority: "pm-growth",
+    "base-revision": revision(),
+    "idempotency-key": id,
+    "issued-at": issuedAt,
+    nonce: `nonce-${id}`,
+  });
   const proposalCommand = {
     id: "cmd-check-runtime-proposal",
     type: "proposal.create",
-    envelope: {
-      actor: "tool:check-runtime",
-      authority: "pm-growth",
-      "base-revision": revision,
-      "idempotency-key": "cmd-check-runtime-proposal",
-      "issued-at": "2027-04-04",
-      nonce: "nonce-cmd-check-runtime-proposal",
-    },
+    envelope: envelope("cmd-check-runtime-proposal"),
     payload: {
       proposal: {
         id: "prop-check-runtime",
@@ -140,6 +141,151 @@ try {
   });
   if (stale.ok || !stale.issues.some((issue) => issue.rule === "command-stale")) {
     fail("execute não falhou fechado com base-revision stale");
+  }
+
+  const activationWithoutGate = writeRuntime.executeGovernedCommand({
+    id: "cmd-check-runtime-activation-sem-gate",
+    type: "intent.activate",
+    envelope: envelope("cmd-check-runtime-activation-sem-gate"),
+    payload: {
+      proposal: "prop-check-runtime",
+      intent: {
+        id: "intent-check-runtime-sem-gate",
+        title: "intent sem gate deve falhar",
+        team: "time-billing",
+        "authorized-by": "obj-revenue",
+        "primary-target": "tgt-billing-conv",
+        approach: "direct",
+        signal: "none",
+        works: [
+          {
+            id: "work-sem-gate",
+            repo: "acme-api-billing",
+            purpose: "create",
+            desc: "não deve ser escrito sem gate append-only",
+            review: "interno",
+          },
+        ],
+        next: [{ when: "done", then: "não deveria ativar", gate: "accept-verdict" }],
+      },
+    },
+  });
+  if (
+    activationWithoutGate.ok ||
+    !activationWithoutGate.issues.some((issue) => issue.rule === "gate-required")
+  ) {
+    fail("intent.activate sem gate prévio não falhou fechado");
+  }
+
+  const gateCommand = {
+    id: "cmd-check-runtime-gate",
+    type: "gate.decide",
+    envelope: envelope("cmd-check-runtime-gate", "2027-04-05"),
+    payload: {
+      gate: {
+        proposal: "prop-check-runtime",
+        decision: "activate",
+        reason: "target e origem resolvem; check-runtime prova gate append-only antes da intent",
+      },
+    },
+  };
+  const gate = writeRuntime.executeGovernedCommand(gateCommand);
+  if (!gate.ok) fail(`gate.decide rejeitado: ${gate.issues.map((i) => i.rule).join(", ")}`);
+  const afterGateProposals = parse(
+    readFileSync(path.join(governanceRoot, "intake", "proposals.yml"), "utf8")
+  ).proposals;
+  if (
+    afterGateProposals.find((proposal) => proposal.id === "prop-check-runtime")?.status !== "active"
+  ) {
+    fail("gate.decide não marcou proposal como active");
+  }
+
+  const intentCommand = {
+    id: "cmd-check-runtime-intent",
+    type: "intent.activate",
+    envelope: envelope("cmd-check-runtime-intent", "2027-04-06"),
+    payload: {
+      proposal: "prop-check-runtime",
+      intent: {
+        id: "intent-check-runtime-hardening",
+        title: "hardening operacional ativado pelo check-runtime",
+        team: "time-billing",
+        "authorized-by": "obj-revenue",
+        "primary-target": "tgt-billing-conv",
+        approach: "direct",
+        signal: "none",
+        works: [
+          {
+            id: "work-check-runtime-api",
+            repo: "acme-api-billing",
+            purpose: "create",
+            desc: "peça mínima válida para provar escrita de intent governada",
+            review: "interno",
+          },
+        ],
+        next: [
+          {
+            when: "peça done",
+            then: "publicar outcome ou descartar sem outcome",
+            gate: "accept-verdict",
+          },
+        ],
+      },
+    },
+  };
+  const intent = writeRuntime.executeGovernedCommand(intentCommand);
+  if (!intent.ok) fail(`intent.activate rejeitado: ${intent.issues.map((i) => i.rule).join(", ")}`);
+  const writtenIntent = parse(
+    readFileSync(path.join(governanceRoot, "intents", "intent-check-runtime-hardening.yml"), "utf8")
+  );
+  if (writtenIntent.id !== "intent-check-runtime-hardening") {
+    fail("intent.activate não escreveu intent canônica na cópia temporária");
+  }
+  const afterIntentProposals = parse(
+    readFileSync(path.join(governanceRoot, "intake", "proposals.yml"), "utf8")
+  ).proposals;
+  if (
+    afterIntentProposals.find((proposal) => proposal.id === "prop-check-runtime")?.status !==
+    "closed"
+  ) {
+    fail("intent.activate não fechou proposal de origem");
+  }
+
+  const breakdownCommand = {
+    id: "cmd-check-runtime-breakdown",
+    type: "breakdown.apply",
+    envelope: envelope("cmd-check-runtime-breakdown", "2027-04-07"),
+    payload: {
+      breakdown: {
+        intent: "intent-check-runtime-hardening",
+        works: [
+          {
+            id: "work-check-runtime-api",
+            repo: "acme-api-billing",
+            purpose: "create",
+            desc: "peça atualizada por breakdown.apply",
+            review: "interno",
+          },
+          {
+            id: "work-check-runtime-analytics",
+            repo: "acme-analytics",
+            purpose: "create",
+            desc: "instrumenta medição sem virar outcome por texto",
+            review: "externo: time-data",
+            "delivery-after": ["work-check-runtime-api"],
+          },
+        ],
+      },
+    },
+  };
+  const breakdown = writeRuntime.executeGovernedCommand(breakdownCommand);
+  if (!breakdown.ok)
+    fail(`breakdown.apply rejeitado: ${breakdown.issues.map((i) => i.rule).join(", ")}`);
+  const updatedIntent = parse(
+    readFileSync(path.join(governanceRoot, "intents", "intent-check-runtime-hardening.yml"), "utf8")
+  );
+  if (!updatedIntent.works.some((work) => work.id === "work-check-runtime-analytics")) {
+    fail("breakdown.apply não substituiu works da intent");
   }
 } finally {
   rmSync(tmp, { recursive: true, force: true });
