@@ -68,12 +68,13 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **Revisão adversarial pós-F7:** pedir ao Claude Code/Fable 5 para revisar o diff desde `a970415b`, sem implementar, usando [`CLAUDE-CODE-FABLE-5-HANDOFF.md`](CLAUDE-CODE-FABLE-5-HANDOFF.md).
-2. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → actual`.
-3. **Segunda intent com outcome:** escolher uma intent que toque contrato ou objetivo operacional para provar que o mecanismo não está especial-cased no `intent-cta-upgrade`.
-4. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
-5. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
-6. **Portabilidade v2 → v3:** desenhar a porta runtime v3 e decidir como reaproveitar `_org-simulation-v2/_lib` sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
+1. **Requisitos do app antes de implementar:** usar [`../app-requirements.md`](../app-requirements.md) como contrato da próxima fatia de backend/frontend; não começar UI/API nova por tentativa e erro.
+2. **Revisão adversarial pós-F7:** pedir ao Claude Code/Fable 5 para revisar o diff desde `a970415b`, sem implementar, usando [`CLAUDE-CODE-FABLE-5-HANDOFF.md`](CLAUDE-CODE-FABLE-5-HANDOFF.md).
+3. **Walkthrough da owner:** percorrer no app company/owner a cadeia `objective → target → intent → repo-work done → outcome → actual`.
+4. **Segunda intent com outcome:** escolher uma intent que toque contrato ou objetivo operacional para provar que o mecanismo não está especial-cased no `intent-cta-upgrade`.
+5. **Operacional sem intent:** publicar um outcome standalone no bucket operacional para validar o caminho solo/reativo.
+6. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
+7. **Portabilidade v2 → v3:** desenhar a porta runtime v3 e decidir como reaproveitar `_org-simulation-v2/_lib` sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
 
 ## Comandos de aceite
 

@@ -6,6 +6,8 @@
 > **Nota 2026-07-02:** a frente ativa de prova saiu da sim v2/\_lib para a [`_org-simulation-v3/`](_org-simulation-v3/) repo-first. Nela, o host central fica em `acme-governance/`, os repos adotados ficam em `repos/<repo>/`, e os templates operacionais da sim ficam em `_org-simulation-v3/_templates/`. O `_templates/` raiz virou ponte histórica; os moldes v2 foram arquivados em `_archive/templates-v2/`.
 >
 > **Correção importante:** "ativo na v3" NÃO significa "tudo da v2 foi migrado". A v2 provou `_lib` DDD, portas, adapters file/sqlite/neo4j/mongo, read-models por repo e app de autoria. A v3 ainda NÃO tem essa camada; hoje ela usa scripts determinísticos + `graph.js` gerado. Esses aprendizados ficam preservados abaixo como itens a portar, não como feitos da v3.
+>
+> **Contrato da próxima fatia de app:** [`app-requirements.md`](app-requirements.md) consolida requisitos de dados, backend, frontend, assistência por IA e robustez para a aplicação ponta-a-ponta. O `model.yml` continua sendo o SSOT; o documento de requisitos orienta a implementação.
 
 ---
 
@@ -123,6 +125,7 @@ _(Da sim adversarial rounds 1+2 — [deliberação](deliberation/2026-07-01-adve
 ## Backend & app (infra do modelo)
 
 - ✅ **Nova simulação robusta sobre a taxonomia v2** — `_org-simulation-v3` é a frente ativa repo-first; `_org-simulation-v2` permanece como histórico/fonte de aprendizados de matcher/app/backend.
+- ✅ **Especificação do app ponta-a-ponta** — [`app-requirements.md`](app-requirements.md) define a aplicação alvo antes da implementação: modelo operacional, command pipeline, read-models, UI por persona, assistências de IA e critérios de aceite.
 - ⬜ **Portar a `_lib` DDD para v3** — domínio puro + portas sobre os nós v3 (`business-objective`, `intent`, `repo-work`, `contract`, `outcome`, `policy`), sem reimportar os 5 kinds antigos.
 - ⬜ **Porta de repositório v3** — separar `HostGovernanceRepository`, `ProductRepoProjectionRepository` e `PublishedProjectionStore`; scripts atuais (`org.mjs`, `repo-*.mjs`) viram harness/fixtures ou adaptadores file.
 - ⬜ **Backends plugáveis v3** — file primeiro; depois sqlite/neo4j/mongo sobre a MESMA porta. O critério de pronto é: validações/adoption-journey passam sem mudar domínio nem resolvers.
