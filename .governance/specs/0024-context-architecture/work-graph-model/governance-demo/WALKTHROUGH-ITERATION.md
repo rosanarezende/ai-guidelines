@@ -10,13 +10,56 @@ Validar se a sim v3 e compreensivel e util para uma organizacao que esta adotand
 repos existentes. A barra e a mesma do red-team: evidencia mecanizada, falha fechada quando
 necessario e avisos honestos quando ha colapso ou cerimonia.
 
+## Meta corrente — anti-compactacao
+
+Esta seção e o ponto de retomada operacional da rodada atual. Se o contexto da conversa compactar,
+retomar daqui antes de pedir nova rodada externa.
+
+**Direção decidida agora:**
+
+1. O app deve sair do estado de prototipo: signup, organizacoes/workspaces, onboarding, pessoas,
+   papeis, fontes, assistente, integracoes e planejamento precisam ser exercitaveis por tela ou API
+   real, sem depender do console tecnico.
+2. O backend ativo da demo deve ser TypeScript strict no caminho importavel (`backend/src`,
+   `frontend/server`, `mock-api/src`, testes novos). Código novo não deve nascer em `.mjs`.
+3. Os `.mjs` remanescentes em `backend/tools`, `backend/backends`, repos acme e testes de repos são
+   legado/CLI/fixture a auditar por lote; não devem crescer silenciosamente.
+4. A mock-api e suas seeds são contrato de desenvolvimento, não apenas conveniência. As seeds devem
+   virar matriz de regressão E2E para proteger os cenários de onboarding, perfis, convites, host,
+   fontes, assistente, stack, planejamento e modos de organização.
+5. Antes de encerrar esta meta, fazer uma auditoria final de legado em `governance-demo` e decidir
+   para cada superfície se fica ativa, migra para TypeScript, move para `_archive` ou é removida.
+
+**Próxima fatia autorizada nesta trilha:** cobertura E2E por seeds da mock-api, seguida da auditoria
+de legado descrita abaixo.
+
+**Legado a auditar antes de declarar a meta pronta:**
+
+| area                      | estado atual observado                                                  | decisão pendente                                            |
+| ------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `backend/tools/*.mjs`     | CLIs/checks herdados da sim v3; ainda executam validações centrais      | migrar por lote para TS ou manter como CLI legado explícito |
+| `backend/backends/*.mjs`  | scripts de export/smoke dos exemplos de backend derivados               | migrar para TS ou mover para `examples/backends/tools`      |
+| `examples/backends/*`     | read-models derivados file/sqlite/neo4j/mongo + contrato de ação        | manter como artefato ativo ou regenerar em outro layout     |
+| `acme/repos/**/src/*.mjs` | código MVP dos repos ficticios acme, usado como fixture de empresa real | manter como fixture ou migrar repos críticos para TS        |
+| `acme/repos/**/test.mjs`  | testes locais dos repos ficticios, usados por adapters/smokes           | manter fixture ou migrar junto dos repos                    |
+| `_archive/*`              | historico v2 e apps estaticos v3 ja arquivados                          | confirmar que nada ativo ainda depende disso                |
+
 ## Estado Atual
 
 - Branch: `feat/spec-0024-artifact-taxonomy-and-model-review-contract`
 - Head inicial desta iteracao: `78ef7462`
+- Head de referencia apos R0/R1 + seguranca do shell + format scripts: `12df9ea5`
 - App: `frontend`
 - Stack decidida: TypeScript strict + React/Next + Material UI
-- Decisao: substituir o app JS/JSX em lugar; nao manter adapter entre app antigo e app novo
+- Decisao: app ativo em `frontend/`, backend importavel em `backend/src/`, mock-api em
+  `mock-api/`; nao manter adapter entre app antigo e app novo.
+- Backend R0/R1: entregue em TypeScript no caminho ativo, com `mock-api` Hono/lowdb, data source
+  `real-runtime|mock-api|demo-acme`, shell local file-first e APIs `/api/local/*`.
+- Segurança R1.1: shell usa `applyAuthorizedShellCommand` antes do reducer; invite tokenizado cria
+  membership real; `actorPersonId` vindo do cliente não é aceito como autoridade; onboarding
+  `finished` exige host governado válido ou sandbox explícito.
+- Formatação: scripts governados `format:governance-demo` e `format:governance-demo:check`
+  existem para evitar depender de `validate` completo durante iteração da demo.
 
 ## Observacoes da Owner
 
@@ -35,18 +78,24 @@ necessario e avisos honestos quando ha colapso ou cerimonia.
 | W11 | arquitetura   | onboarding multi-org nao pode nascer como estado local improvisado no frontend          | P0         | decidido          |
 | W12 | i18n          | copy de produto deve sair de strings hardcoded e ir para locale versionado colocalizado | P0         | fechado no app    |
 | W13 | arquitetura   | paginas/views estavam confusas; app deve organizar experiencias por feature             | P0         | fechado no app    |
+| W14 | backend       | rotas locais nao podem confiar em payload do cliente para authority                     | P0         | fechado R1.1      |
+| W15 | backend       | convite aceito precisa virar membership real, nao apenas estado visual                  | P0         | fechado R1.1      |
+| W16 | onboarding    | `finished` nao pode ser setado sem host governado ou sandbox explicito                  | P0         | fechado R1.1      |
+| W17 | e2e           | seeds da mock-api precisam virar cobertura de regressao, nao so fixture manual          | P1         | proxima fatia     |
+| W18 | legado        | identificar o que ainda e legado em `governance-demo` antes de deletar/arquivar         | P1         | proxima fatia     |
 
 ## Bugs Tecnicos
 
-| id  | sintoma                                                   | causa provavel                                               | correcao esperada                                                                | status      |
-| --- | --------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------- | ----------- |
-| T1  | `item` vazando para DOM                                   | uso de `Grid` incompatível com a versao atual do MUI         | remover `Grid`; usar layout CSS grid via `Box`                                   | fechado     |
-| T2  | `alignItems`/`justifyContent`/`flexWrap` vazando para DOM | props de layout vazando por componentes de layout            | remover `Stack`/`Grid` da camada principal; usar `Box sx`                        | fechado     |
-| T3  | hydration mismatch                                        | MUI/Emotion sem integracao SSR dedicada no App Router        | shell MUI client-only enquanto a sim nao instala pacote SSR dedicado             | fechado     |
-| T4  | app sem tipos                                             | app em JS/JSX com `jsconfig`                                 | migrar para TS/TSX + `tsconfig` strict                                           | fechado     |
-| T5  | runtime/backend sem contrato TS compartilhado             | `backend` ainda e majoritariamente `.mjs`; app duplica tipos | criar dominio TS puro em `backend/domain/*.ts` e migrar runtime em fatia propria | em execucao |
-| T6  | strings de produto hardcoded                              | locale global ou por feature ampla escalaria mal             | locale colocalizado por view/step/section/componente/subdomínio/shell            | fechado     |
-| T7  | telas em `app/ui/views` e arquivos grandes                | camada `ui` misturava produto, console e shared              | mover experiencias para `app/features/*`; `ui` fica shell/shared/theme           | fechado     |
+| id  | sintoma                                                   | causa provavel                                               | correcao esperada                                                         | status     |
+| --- | --------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- | ---------- |
+| T1  | `item` vazando para DOM                                   | uso de `Grid` incompatível com a versao atual do MUI         | remover `Grid`; usar layout CSS grid via `Box`                            | fechado    |
+| T2  | `alignItems`/`justifyContent`/`flexWrap` vazando para DOM | props de layout vazando por componentes de layout            | remover `Stack`/`Grid` da camada principal; usar `Box sx`                 | fechado    |
+| T3  | hydration mismatch                                        | MUI/Emotion sem integracao SSR dedicada no App Router        | shell MUI client-only enquanto a sim nao instala pacote SSR dedicado      | fechado    |
+| T4  | app sem tipos                                             | app em JS/JSX com `jsconfig`                                 | migrar para TS/TSX + `tsconfig` strict                                    | fechado    |
+| T5  | runtime/backend sem contrato TS compartilhado             | `backend` tinha caminho ativo em `.mjs`; app duplicava tipos | criar dominio TS puro em `backend/src/domain/*.ts` e migrar runtime ativa | fechado R1 |
+| T6  | strings de produto hardcoded                              | locale global ou por feature ampla escalaria mal             | locale colocalizado por view/step/section/componente/subdomínio/shell     | fechado    |
+| T7  | telas em `app/ui/views` e arquivos grandes                | camada `ui` misturava produto, console e shared              | mover experiencias para `app/features/*`; `ui` fica shell/shared/theme    | fechado    |
+| T8  | tools/scripts ainda em `.mjs`                             | CLIs herdados da sim v3 e fixtures acme continuam em JS      | auditar por area: migrar TS, manter fixture ou arquivar                   | aberto     |
 
 ## Perfis de Uso
 
@@ -66,15 +115,20 @@ necessario e avisos honestos quando ha colapso ou cerimonia.
 3. `incident -> standalone.complete -> outcome operacional -> warning self-attested visivel`
 4. `issue/warning -> causa -> quem decide -> proxima mutacao governada`
 5. `configuracoes -> perfil da org -> papeis -> assistente Ollama -> catalogo de integracoes -> revisao de riscos`
+6. `seed -> rota relevante -> assert essencial`, para cada seed da mock-api que representa um
+   estado de produto.
+7. `auditoria de legado -> decisao por pasta`, cobrindo `examples`, `backend/backends`,
+   `backend/tools`, repos acme e `_archive`.
 
 ## Proximas Fatias
 
-1. Validar a nova secao de experiencia de produto do `app-requirements.md` com Claude Design/Fable 5.
-2. Migrar backend/runtime para TypeScript em fatia propria, começando pelos contratos que o app consome.
-3. Retomar o onboarding diagnostico no app real consumindo o contrato compartilhado, com account local,
-   selecao/criacao de workspace e pessoas -> papeis.
-4. Persistencia governada real das configuracoes de onboarding; `partial/finished` continua apenas
-   estado local por workspace ate existir comando governado.
-5. Navegacao por periodo/ciclo dentro dos dashboards de objetivos e resultados.
-6. Separacao de console tecnico/admin da experiencia de leitura da owner.
-7. Migracao incremental da runtime `backend` para TypeScript por comando/porta, sem big-bang.
+1. Criar matriz E2E por seed da mock-api: pelo menos smoke de rota + 2/3 asserts essenciais por
+   seed relevante.
+2. Completar telas dedicadas de pessoas/papéis/fontes usando as APIs R1 ja existentes, evitando
+   depender do console técnico.
+3. Persistir mudanças reais de perfil/stack/host/fontes/assistente via comandos governados já
+   existentes, com feedback humano claro na UI.
+4. Navegação por periodo/ciclo dentro dos dashboards de objetivos e resultados.
+5. Separação de console técnico/admin da experiência de leitura da owner.
+6. Auditoria final de legado em `governance-demo`: decidir manter, migrar, arquivar ou remover cada
+   superfície listada na seção "Meta corrente".
