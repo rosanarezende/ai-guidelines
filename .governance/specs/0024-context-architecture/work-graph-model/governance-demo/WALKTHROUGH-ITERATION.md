@@ -30,19 +30,20 @@ retomar daqui antes de pedir nova rodada externa.
 5. Antes de encerrar esta meta, fazer uma auditoria final de legado em `governance-demo` e decidir
    para cada superfície se fica ativa, migra para TypeScript, move para `_archive` ou é removida.
 
-**Próxima fatia autorizada nesta trilha:** cobertura E2E por seeds da mock-api, seguida da auditoria
-de legado descrita abaixo.
+**Fatia de controle fechada nesta trilha:** cobertura E2E base por seeds da mock-api, telas base de
+settings e auditoria de legado. A auditoria versionada mora em
+[`reviews/2026-07-04-legacy-surface-audit.md`](reviews/2026-07-04-legacy-surface-audit.md).
 
 **Legado a auditar antes de declarar a meta pronta:**
 
 | area                      | estado atual observado                                                  | decisão pendente                                            |
 | ------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `backend/tools/*.mjs`     | CLIs/checks herdados da sim v3; ainda executam validações centrais      | migrar por lote para TS ou manter como CLI legado explícito |
-| `backend/backends/*.mjs`  | scripts de export/smoke dos exemplos de backend derivados               | migrar para TS ou mover para `examples/backends/tools`      |
-| `examples/backends/*`     | read-models derivados file/sqlite/neo4j/mongo + contrato de ação        | manter como artefato ativo ou regenerar em outro layout     |
-| `acme/repos/**/src/*.mjs` | código MVP dos repos ficticios acme, usado como fixture de empresa real | manter como fixture ou migrar repos críticos para TS        |
-| `acme/repos/**/test.mjs`  | testes locais dos repos ficticios, usados por adapters/smokes           | manter fixture ou migrar junto dos repos                    |
-| `_archive/*`              | historico v2 e apps estaticos v3 ja arquivados                          | confirmar que nada ativo ainda depende disso                |
+| `backend/tools/*.mjs`     | CLIs/checks herdados da sim v3; ainda executam validações centrais      | manter como CLI ativo por enquanto; migrar por lote para TS |
+| `backend/backends/*.mjs`  | scripts de export/smoke dos exemplos de backend derivados               | manter como projeção ativa; migrar/mover em fatia própria   |
+| `examples/backends/*`     | read-models derivados file/sqlite/neo4j/mongo + contrato de ação        | manter como artefato ativo derivado                         |
+| `acme/repos/**/src/*.mjs` | código MVP dos repos ficticios acme, usado como fixture de empresa real | manter como fixture polyglot; adicionar TS só se útil       |
+| `acme/repos/**/test.mjs`  | testes locais dos repos ficticios, usados por adapters/smokes           | manter fixture ou migrar junto do repo correspondente       |
+| `_archive/*`              | historico v2 e apps estaticos v3 ja arquivados                          | manter arquivado; não reimportar para superfície ativa      |
 
 ## Estado Atual
 
@@ -82,7 +83,7 @@ de legado descrita abaixo.
 | W15 | backend       | convite aceito precisa virar membership real, nao apenas estado visual                  | P0         | fechado R1.1      |
 | W16 | onboarding    | `finished` nao pode ser setado sem host governado ou sandbox explicito                  | P0         | fechado R1.1      |
 | W17 | e2e           | seeds da mock-api precisam virar cobertura de regressao, nao so fixture manual          | P1         | fechado base      |
-| W18 | legado        | identificar o que ainda e legado em `governance-demo` antes de deletar/arquivar         | P1         | proxima fatia     |
+| W18 | legado        | identificar o que ainda e legado em `governance-demo` antes de deletar/arquivar         | P1         | fechado base      |
 | W19 | e2e           | telas críticas precisam provar UX real, nao só estado JSON das seeds                    | P1         | fechado base      |
 | W20 | settings      | pessoas, papéis e fontes precisam ser exercitáveis por tela, sem console técnico        | P1         | fechado base      |
 
@@ -120,7 +121,8 @@ de legado descrita abaixo.
 6. `seed -> rota relevante -> assert essencial`, para cada seed da mock-api que representa um
    estado de produto.
 7. `auditoria de legado -> decisao por pasta`, cobrindo `examples`, `backend/backends`,
-   `backend/tools`, repos acme e `_archive`.
+   `backend/tools`, repos acme e `_archive` — base fechada em
+   `reviews/2026-07-04-legacy-surface-audit.md`.
 
 ## Proximas Fatias
 
@@ -128,5 +130,5 @@ de legado descrita abaixo.
    existentes, com feedback humano claro na UI.
 2. Navegação por periodo/ciclo dentro dos dashboards de objetivos e resultados.
 3. Separação de console técnico/admin da experiência de leitura da owner.
-4. Auditoria final de legado em `governance-demo`: decidir manter, migrar, arquivar ou remover cada
-   superfície listada na seção "Meta corrente".
+4. Migração gradual de CLIs legados `.mjs` para TypeScript, em lotes funcionais, sem apagar fixtures
+   acme nem exemplos derivados que ainda exercitam o dogfood.
