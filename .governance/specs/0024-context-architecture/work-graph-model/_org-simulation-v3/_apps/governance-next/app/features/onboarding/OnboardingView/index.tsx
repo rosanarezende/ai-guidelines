@@ -3,11 +3,9 @@
 // OnboardingView.tsx — orquestra o onboarding; cada passo vive em `steps/*`.
 // IMPORTANTE: nada aqui persiste. É projeção de UX sobre o snapshot; a declaração real
 // vive em org.yml/authorities.yml e só muda por comando governado (fatia futura).
-import { Box, Button, Chip, Paper, Typography } from "@mui/material";
+import { Box, Button, Paper } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CheckIcon from "@mui/icons-material/Check";
-import LockIcon from "@mui/icons-material/Lock";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -15,7 +13,6 @@ import type { GovernanceSnapshot } from "@/lib/types";
 import { Flex } from "@/app/ui/shared/components";
 import {
   DEFAULT_ASSIGNMENTS,
-  assistantCloudNote,
   assistantSystems,
   deriveAdoption,
   profileChipLabel,
@@ -33,7 +30,6 @@ import {
 import AppShell from "@/app/ui/shell/AppShell";
 import {
   CONFLICT_POLICIES,
-  STEP_LABELS,
   effectiveRecommendation,
   recommendProfile,
   recommendationIsReady,
@@ -46,7 +42,9 @@ import { SourcesStep } from "../steps/SourcesStep";
 import { AssistantStep } from "../steps/AssistantStep";
 import { IntegrationsStep } from "../steps/IntegrationsStep";
 import { ReviewStep } from "../steps/ReviewStep";
+import { OnboardingStepper } from "./OnboardingStepper";
 import copy from "./locales/pt-br.json";
+import { derivePendingSummary, deriveRiskSummary, deriveWorkingSummary } from "./summary";
 
 export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnapshot }) {
   const router = useRouter();
@@ -142,45 +140,6 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
     setSourceKinds((current) => ({ ...current, [source]: !current[source] }));
   }
 
-  const stepper = (
-    <Box sx={{ position: { md: "sticky" }, top: 86, alignSelf: "start" }}>
-      {STEP_LABELS.map((label, index) => {
-        const number = index + 1;
-        const current = number === step;
-        const done = number < step;
-        return (
-          <Flex key={label} gap={1.25} align="center" sx={{ py: 1 }}>
-            <Chip
-              size="small"
-              label={done ? <CheckIcon sx={{ fontSize: 15 }} /> : number}
-              color={current || done ? "primary" : "default"}
-              variant={current || done ? "filled" : "outlined"}
-              sx={{ width: 28, height: 28 }}
-            />
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: current ? 800 : done ? 700 : 500,
-                color: current ? "text.primary" : done ? "text.primary" : "text.secondary",
-              }}
-            >
-              {label}
-            </Typography>
-          </Flex>
-        );
-      })}
-      <Paper
-        variant="outlined"
-        sx={{ mt: 2, p: 1.5, borderStyle: "dashed", display: "flex", gap: 1.25 }}
-      >
-        <LockIcon sx={{ fontSize: 17, color: "text.secondary", mt: 0.25 }} />
-        <Typography variant="caption" color="text.secondary">
-          {copy.stepper.privacyNotice}
-        </Typography>
-      </Paper>
-    </Box>
-  );
-
   return (
     <AppShell
       subtitle={copy.shell.subtitle}
@@ -202,7 +161,7 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
             gridTemplateColumns: { xs: "1fr", md: "264px 1fr" },
           }}
         >
-          {stepper}
+          <OnboardingStepper step={step} />
           <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 4 }, display: "grid", gap: 2.5 }}>
             {step === 1 ? (
               <ProfileDiagnosisStep
@@ -295,74 +254,5 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
         </Box>
       )}
     </AppShell>
-  );
-}
-
-function deriveWorkingSummary({
-  profile,
-  effectiveProfileLabel,
-  selectedSourceCount,
-  assistant,
-  conflictLabel,
-  conflictReview,
-}: {
-  profile: ProfileId;
-  effectiveProfileLabel: string;
-  selectedSourceCount: number;
-  assistant: AssistantChoice;
-  conflictLabel?: string;
-  conflictReview?: string;
-}): string[] {
-  const works = [
-    format(copy.summary.works.profile, { profile: effectiveProfileLabel }),
-    profile === "solo" ? copy.summary.works.soloRoles : copy.summary.works.declaredRoles,
-    copy.summary.works.planning,
-    copy.summary.works.auditTrail,
-  ];
-  if (selectedSourceCount > 0) {
-    works.push(format(copy.summary.works.sources, { count: String(selectedSourceCount) }));
-  }
-  if (assistant === "local") works.push(copy.summary.works.localAssistant);
-  if (conflictLabel && conflictReview) {
-    works.push(
-      format(copy.summary.works.conflict, { label: conflictLabel, review: conflictReview })
-    );
-  }
-  return works;
-}
-
-function derivePendingSummary({
-  selectedSourceCount,
-  assistant,
-  profile,
-}: {
-  selectedSourceCount: number;
-  assistant: AssistantChoice;
-  profile: ProfileId;
-}): string[] {
-  const pending = [];
-  if (selectedSourceCount === 0) {
-    pending.push(copy.summary.pending.noSources);
-  }
-  if (assistant === "cloud") pending.push(assistantCloudNote(profile));
-  pending.push(copy.summary.pending.noIntegrations);
-  pending.push(copy.summary.pending.roleAcceptance);
-  return pending;
-}
-
-function deriveRiskSummary(profile: ProfileId): string[] {
-  if (profile === "full") {
-    return copy.summary.risks.full;
-  }
-  if (profile === "solo") {
-    return copy.summary.risks.solo;
-  }
-  return copy.summary.risks.default;
-}
-
-function format(template: string, values: Record<string, string>): string {
-  return Object.entries(values).reduce(
-    (result, [key, value]) => result.replaceAll(`{${key}}`, value),
-    template
   );
 }
