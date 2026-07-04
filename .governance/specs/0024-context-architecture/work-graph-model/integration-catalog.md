@@ -67,6 +67,47 @@ Em uma frase:
 - agent gateways amplos, como OpenClaw, ficam fora do caminho padrão até existirem delegação
   formal, sandbox, isolamento de secrets, TTL, limite de mutações, aprovação humana e auditoria.
 
+## Projeção de release e backlog
+
+A primeira integração cloud real além de autenticação é **GitHub como work-source/repo provider**.
+Isso é separado de `github-oauth`: login responde quem é a pessoa; GitHub work-source responde quais
+repos, PRs, commits, checks, CODEOWNERS e arquivos de governança podem alimentar o grafo.
+
+Para a release 1, GitHub work-source deve:
+
+- listar organizações/repos autorizados;
+- permitir selecionar repos para governança;
+- ler default branch, commits, PRs, checks, CODEOWNERS e `.governance/`;
+- publicar `sourceTrust: provider-versioned`;
+- nunca criar authority automaticamente a partir do login;
+- nunca escrever estado autoritativo sem comando governado.
+
+### Mapa por ponto do fluxo
+
+| Ponto do fluxo          | Integrações de maior valor                                                             | Uso no app                                                                   |
+| ----------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Onboarding              | GitHub work-source, identity/directory, assistant runtime, service catalog             | reduzir atrito, explicar o que será manual vs integrado                      |
+| Fontes de trabalho      | GitHub/GitLab/Bitbucket/Gitea, CODEOWNERS, Backstage/OpsLevel/Cortex, Drive/SharePoint | descobrir repos, owners, capabilities, source revisions e contexto           |
+| Assistente e matcher    | Ollama, OpenAI-compatible, LiteLLM, Onyx/Open WebUI, Claude Code/Codex CLI             | sugerir matches, perguntas, resumo, policy e patches sem virar autoridade    |
+| Planejamento e outcomes | BigQuery/Snowflake/dbt, PostHog/Amplitude, cloud billing, Prometheus/Grafana           | provar actual, target, janela, aggregation e attester                        |
+| Execução                | CI, JUnit/coverage/Playwright, SonarQube/Semgrep/CodeQL, deploy/release                | provar done, testes, qualidade, rollout, rollback e risco                    |
+| Contratos               | OpenAPI, GraphQL, protobuf, AsyncAPI, Pact                                             | materializar interfaces versionadas e compatibilidade provider/consumer      |
+| Incidentes/operação     | OpenTelemetry/Prometheus/Grafana, PagerDuty/Opsgenie/incident.io                       | declarar incidente com evento, severidade, timeline e follow-up verificáveis |
+| Intake/backlog          | Jira, Linear, Azure DevOps, GitHub Issues, knowledge base                              | importar trabalho existente como proposal/register ou link, sem segundo SSOT |
+| Grafo/read-model        | Neo4j, Graphistry, custom graph API                                                    | explorar impacto e dependências sem autorizar ação a partir do read-model    |
+
+### Copy de UI
+
+A tela de integrações deve mostrar explicitamente:
+
+```text
+Já disponível: Assistente local, Git local, CI local, qualidade local, observabilidade local e Neo4j como read-model.
+Primeira integração cloud da release 1: GitHub como fonte de trabalho.
+Disponíveis em breve: GitLab, Bitbucket, OpenAPI/GraphQL, Jira/Linear, BigQuery/dbt, PostHog/Amplitude, PagerDuty, SonarQube/Semgrep e Backstage.
+```
+
+O texto precisa ser honesto: `em breve` significa backlog priorizado, não mecanismo ativo.
+
 ## Contrato mínimo
 
 Todo adapter precisa declarar:

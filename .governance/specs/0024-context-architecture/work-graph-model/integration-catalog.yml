@@ -71,6 +71,128 @@ common-contract:
     - "promover capability sem owner/attestation"
     - "autorizar mutacao a partir de read-model stale"
 
+app-projection:
+  first-release-cloud-integration:
+    id: git-provider
+    system: github
+    role: work-source/repo-provider
+    reason: >
+      Conecta o grafo ao codigo real, repos, PRs, checks, CODEOWNERS e revisoes.
+      Login GitHub continua separado de GitHub como fonte de trabalho.
+    required-capabilities:
+      - list-authorized-repositories
+      - select-repositories
+      - read-default-branch
+      - read-commits
+      - read-pull-requests
+      - read-checks
+      - read-codeowners
+      - read-governance-folder
+      - publish-sourceTrust-provider-versioned
+    must-not:
+      - "criar authority automaticamente a partir do login"
+      - "escrever estado autoritativo sem comando governado"
+      - "tratar GitHub Issues como SSOT sem contrato de sync"
+
+  ui-alerts:
+    available-now:
+      - assistant-runtime-local-cloud
+      - git-provider
+      - ci-status
+      - code-quality
+      - observability
+      - graph-export
+    first-release:
+      - git-provider:github
+      - assistant-runtime-local-cloud:ollama
+      - assistant-runtime-local-cloud:openai-compatible
+      - graph-export:neo4j
+    coming-soon:
+      - api-schema
+      - test-reports
+      - analytics-warehouse
+      - git-provider:gitlab
+      - git-provider:bitbucket
+      - identity-directory
+      - backlog-import
+      - deploy-release-evidence
+      - feature-flags
+      - incident-management
+      - code-security
+      - service-catalog
+      - finops-cost
+      - product-analytics
+      - knowledge-assistant
+      - design-system
+      - knowledge-base
+    deferred:
+      - agent-gateway-deferred
+
+  integration-points:
+    onboarding:
+      purpose: "reduzir atrito de adocao e explicar o que sera manual vs integrado"
+      high-value:
+        - git-provider
+        - identity-directory
+        - assistant-runtime-local-cloud
+        - service-catalog
+      ui-copy: "Integracoes disponiveis em breve: GitLab, Bitbucket, Google Workspace/Okta, Backstage/OpsLevel."
+    work-sources:
+      purpose: "descobrir repos, pastas, ownership, capabilities e source revisions"
+      high-value:
+        - git-provider
+        - codeowners
+        - service-catalog
+        - knowledge-base
+      ui-copy: "Em breve: GitLab, Bitbucket, Gitea, Backstage, Google Drive/SharePoint com revision."
+    assistant-and-matcher:
+      purpose: "sugerir matches, perguntas de triagem, resumos e explicacoes de policy"
+      high-value:
+        - assistant-runtime-local-cloud
+        - knowledge-assistant
+        - coding-agent-channel
+      ui-copy: "Em breve: LM Studio, LiteLLM, Onyx/Open WebUI e canais Claude Code/Codex CLI."
+    planning-and-outcomes:
+      purpose: "provar actual, target, janela, aggregation e attester"
+      high-value:
+        - analytics-warehouse
+        - product-analytics
+        - finops-cost
+        - observability
+      ui-copy: "Em breve: BigQuery/Snowflake/dbt, PostHog/Amplitude, cloud billing e Prometheus/Grafana."
+    execution-evidence:
+      purpose: "provar done, testes, qualidade, deploy, rollout e rollback"
+      high-value:
+        - ci-status
+        - test-reports
+        - code-quality
+        - code-security
+        - deploy-release-evidence
+      ui-copy: "Em breve: GitHub Actions, JUnit/Playwright, CodeQL/Semgrep e Argo/GitHub Deployments."
+    contracts:
+      purpose: "materializar interfaces versionadas e compatibilidade provider/consumer"
+      high-value:
+        - api-schema
+        - contract-testing
+      ui-copy: "Em breve: OpenAPI, GraphQL, protobuf, AsyncAPI e Pact."
+    incidents-and-ops:
+      purpose: "declarar incidentes com evento, severidade, timeline e follow-up verificaveis"
+      high-value:
+        - observability
+        - incident-management
+      ui-copy: "Em breve: PagerDuty/Opsgenie/incident.io integrados a SLO e follow-ups."
+    backlog-and-intake:
+      purpose: "importar trabalho existente sem criar segundo SSOT"
+      high-value:
+        - backlog-import
+        - knowledge-base
+      ui-copy: "Em breve: Jira, Linear, Azure DevOps e GitHub Issues como origem importada."
+    governance-graph:
+      purpose: "explorar impacto e dependencia sem transformar read-model em SSOT"
+      high-value:
+        - graph-export
+      ui-copy: "Disponivel como read-model opcional: Neo4j; em breve, Graphistry/custom graph API."
+
 integrations:
   - id: git-provider
     category: repo-adoption
