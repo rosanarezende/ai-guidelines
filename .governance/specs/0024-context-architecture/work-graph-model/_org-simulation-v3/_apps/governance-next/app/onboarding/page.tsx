@@ -1,5 +1,5 @@
 import { loadGovernanceSnapshot } from "@/lib/governance-server";
-import OnboardingView from "../features/onboarding/views/OnboardingView";
+import OnboardingView from "./_view/OnboardingView";
 
 export const dynamic = "force-dynamic";
 

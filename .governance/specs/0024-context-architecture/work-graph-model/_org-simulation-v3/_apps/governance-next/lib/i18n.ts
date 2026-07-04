@@ -1,10 +1,10 @@
 import { translate, type LocaleDictionary, type MessageDescriptor } from "../../../_lib/domain";
-import assistantPtBr from "../app/features/adoption/assistant/locales/pt-br.json";
-import homePtBr from "../app/features/home/views/HomeView/locales/pt-br.json";
-import onboardingPtBr from "../app/features/onboarding/views/OnboardingView/locales/pt-br.json";
-import settingsPtBr from "../app/features/settings/views/SettingsView/locales/pt-br.json";
-import sharedPtBr from "../app/ui/shared/locales/pt-br.json";
-import shellPtBr from "../app/ui/shell/locales/pt-br.json";
+import assistantPtBr from "../app/_domain/adoption/assistant/_locales/pt-br.json";
+import homePtBr from "../app/(home)/_view/HomeView/_locales/pt-br.json";
+import onboardingPtBr from "../app/onboarding/_view/OnboardingView/_locales/pt-br.json";
+import settingsPtBr from "../app/settings/_view/SettingsView/_locales/pt-br.json";
+import sharedPtBr from "../app/_ui/shared/_locales/pt-br.json";
+import shellPtBr from "../app/_ui/shell/_locales/pt-br.json";
 
 export type AppLocale = "pt-br";
 

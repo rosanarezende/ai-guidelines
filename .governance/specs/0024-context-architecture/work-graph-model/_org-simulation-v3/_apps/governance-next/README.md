@@ -4,18 +4,19 @@ Aplicacao Next.js/React/MUI da simulacao v3 do `work-graph-model`.
 
 Ela e a interface humana sobre a governanca file-first da org ficticia `acme-*`. O app nao e a fonte autoritativa: ele le o snapshot derivado de `_org-simulation-v3/acme/**`, chama o runtime local para comandos/dry-runs e mostra, em linguagem de produto, o que o modelo ja consegue provar.
 
-## Estado Atual
+## Estado atual
 
 Pronto nesta fatia:
 
 - App Next em TypeScript, isolado no workspace `acme-governance-next-app`.
 - Home de adocao em `/`, com tarefas de entrada, pendencias e proximo passo derivado do snapshot.
-- Onboarding em `/onboarding`, com diagnostico de perfil, papeis, fontes de trabalho, assistente, integracoes e revisao final.
-- Configuracoes em `/settings`, separando Organizacao, Papeis, Fontes, Assistente, Integracoes e Avancado.
+- Onboarding em `/onboarding`, com diagnostico guiado de perfil, papeis, fontes de trabalho, assistente, integracoes e revisao final.
+- Configuracoes em `/settings`, separando organizacao, papeis, fontes, assistente, integracoes e avancado.
 - Console tecnico em `/console`, mantendo grafo, comandos, resolver, operacao e auditoria para quem precisa inspecionar a camada tecnica.
 - APIs locais para snapshot, comandos e health-check do Ollama.
-- Locales colocalizados por view, step, section, componente ou subdominio com texto de usuario.
-- Guard em `check-governance-app.mjs` para impedir retorno ao locale global e para validar o build/snapshot do app.
+- Estrutura route-first com `app/*/page.tsx` fino e implementacao colocalizada em pastas privadas da rota.
+- Locales privados (`_locales/pt-br.json`) colocalizados com view, step, section, componente compartilhado ou subdominio que consome o texto.
+- Guard em `check-governance-app.mjs` para impedir retorno a `app/features`, `app/ui`, locale global, componente monolitico compartilhado e warnings conhecidos de MUI/React.
 - Health-check do Ollama sem envio de prompt ou contexto; apenas consulta local de disponibilidade/modelos.
 
 Ainda por vir:
@@ -43,115 +44,133 @@ Ainda por vir:
 | `/api/commands/execute`                     | Execucao de comando governado.                                                                   |
 | `/api/integrations/assistant/ollama/health` | Health-check local do Ollama.                                                                    |
 
-## Arvore de Pastas
+## Arvore de pastas
 
 ```text
 governance-next/
   app/
-    api/
-      commands/
-        dry-run/
-        execute/
-      integrations/
-        assistant/
-          ollama/
-            health/
-      snapshot/
-    settings/
-    console/
-    onboarding/
-    page.tsx
     layout.tsx
     styles.css
-    features/
-      adoption/
-        assistant/
-          locales/
-        components/
-          attention-list/
-            locales/
-          cards/
-            locales/
-          role-contract-list/
-            locales/
-          source-list/
-            locales/
-          status/
-            locales/
-        confidence/
-          locales/
-        profiles/
-          locales/
-        roles/
-          locales/
-        sources/
-          locales/
-        summary/
-          locales/
-      console/
-        commands/
-        views/
-      home/
-        views/
-          HomeView/
-            locales/
-      onboarding/
-        components/
-          locales/
+    (home)/
+      page.tsx                       # rota /, fina; route group nao altera a URL
+      _view/
+        HomeView/
+          _locales/pt-br.json
+          index.tsx
+          HomeHeader.tsx
+          ShortcutGrid.tsx
+          SnapshotBadges.tsx
+          OnboardingPartialCard.tsx
+          AssistantPrompt.tsx
+    onboarding/
+      page.tsx                       # rota /onboarding, fina
+      _view/
+        OnboardingView/
+          _locales/pt-br.json
+          index.tsx
+          OnboardingActions.tsx
+          OnboardingStepper.tsx
+          OnboardingStepContent.tsx
+          summary.ts
+      _steps/
+        WelcomeStep/
+          _locales/pt-br.json
+          index.tsx
+        ProfileDiagnosisStep/
+          _locales/pt-br.json
+          index.tsx
+          ManualProfileOptions.tsx
+          RecommendationCard.tsx
+        PeopleStep/
+        SourcesStep/
+        AssistantStep/
+        IntegrationsStep/
+        ReviewStep/
+      _components/
+        _locales/pt-br.json
+        DiagnosisQuestion.tsx
+        OptionCard.tsx
+        ProfileDetailList.tsx
+        StepHeading.tsx
+        WelcomeCard.tsx
+        index.ts
+      _model/
         diagnosis/
-          locales/
-        steps/
-          WelcomeStep/
-            locales/
-          ProfileDiagnosisStep/
-            locales/
-          PeopleStep/
-            locales/
-          SourcesStep/
-            locales/
-          AssistantStep/
-            locales/
-          IntegrationsStep/
-            locales/
-          ReviewStep/
-            locales/
-        views/
-          OnboardingView/
-            locales/
-      settings/
-        sections/
-          OrganizationSection/
-            locales/
-          RolesSection/
-            locales/
-          SourcesSection/
-            locales/
-          AssistantSection/
-            locales/
-          IntegrationsSection/
-            locales/
-          AdvancedSection/
-            locales/
-        settings-model/
-          locales/
-        views/
-          SettingsView/
-            locales/
-    ui/
+          _locales/pt-br.json
+          index.ts
+      _state/
+        OnboardingContext.tsx
+    settings/
+      page.tsx                       # rota /settings, fina
+      _view/
+        SettingsView/
+          _locales/pt-br.json
+          index.tsx
+      _sections/
+        OrganizationSection/
+        RolesSection/
+        SourcesSection/
+        AssistantSection/
+        IntegrationsSection/
+        AdvancedSection/
+      _model/
+        _locales/pt-br.json
+        index.ts
+    console/
+      page.tsx                       # rota /console, fina
+      _view/
+        GovernanceConsole.tsx
+        ConsoleHeader.tsx
+        ConsoleStats.tsx
+        ConsoleTabs.tsx
+        ConsoleHealthAlerts.tsx
+        ConsoleProfilePanel.tsx
+        consoleNavigation.tsx
+      _panels/
+        CompanyDashboard.tsx
+        OwnerWorkspace.tsx
+        ExecutionWorkspace.tsx
+        OpsWorkspace.tsx
+        AuditConsole.tsx
+      _commands/
+        CommandWorkspace.tsx
+        commandTypes.ts
+        commandPayloads.ts
+        commandEnvelope.ts
+    _domain/
+      adoption/
+        model.ts
+        onboardingStorage.ts
+        assistant/
+        confidence/
+        profiles/
+        roles/
+        sources/
+        summary/
+    _ui/
       shared/
+        _locales/pt-br.json
         DataPill.tsx
         EntityCard.tsx
         Flex.tsx
         IssueList.tsx
+        JsonBlock.tsx
         ResponsiveGrid.tsx
         SectionCard.tsx
         StatCard.tsx
         StatusChip.tsx
         index.ts
-        locales/
+      adoption/
+        index.ts
+        components/
       shell/
-        locales/
+        _locales/pt-br.json
+        AppShell.tsx
       theme.ts
+    api/
+      snapshot/
+      commands/
+      integrations/
   lib/
     governance-server.ts
     i18n.ts
@@ -163,19 +182,21 @@ governance-next/
 
 ## Convencoes
 
-- Rotas em `app/*` devem ser finas: carregar dados e delegar a experiencia para `features/*`.
-- Pastas e arquivos de codigo usam nomes em ingles. Portugues fica em labels, copy e `locales/pt-br.json`.
-- `features/*` contem experiencia de produto e regras de apresentacao por dominio.
-- Views de tela inteira ficam em `features/<feature>/views/<ViewName>`. Nao crie uma pasta global `views`.
-- `ui/*` contem casca, tema e componentes compartilhados que nao pertencem a uma feature especifica.
-- Cada componente em `ui/shared` deve viver em arquivo proprio; `index.ts` e apenas o barrel de exports.
-- `lib/*` contem bordas do app: servidor, i18n e tipos importados do dominio da simulacao.
-- Texto visivel de usuario deve morar em `locales/pt-br.json` colocalizado com a view, step, section, componente ou subdominio que o consome.
-- Nao recriar ontologia do modelo no frontend; prefira tipos reexportados por `@/lib/types` e derivacoes em `features/adoption/*`.
+- `app/*/page.tsx` deve ser fino: carregar dados e delegar para a view privada da rota.
+- A Home usa `app/(home)/page.tsx` porque route groups do Next organizam a rota raiz `/` sem criar o segmento `/home`.
+- Pastas privadas do App Router usam `_nome` quando nao devem virar rota.
+- Experiencia de tela mora perto da propria rota: `/onboarding` usa `app/onboarding/_view`, `_steps`, `_components` e `_model`.
+- Estado de fluxo local pode viver em `_state` da rota; evite prop drilling quando uma mesma tela coordena varios passos.
+- Codigo compartilhado de dominio de produto fica em `app/_domain/<domain>`.
+- UI compartilhada fica em `app/_ui`. Ela nao deve conhecer detalhes de rota, comando ou arquivo YAML.
+- Cada componente em `app/_ui/shared` deve viver em arquivo proprio; `index.ts` e apenas o barrel de exports.
+- Pastas e arquivos de codigo usam nomes em ingles. Portugues fica em labels, copy e `_locales/pt-br.json`.
+- Texto visivel de usuario deve morar em `_locales/pt-br.json` colocalizado com a view, step, section, componente ou subdominio que o consome.
+- Nao recriar ontologia do modelo no frontend; prefira tipos reexportados por `@/lib/types` e derivacoes em `app/_domain/adoption/*`.
 - Evitar `Date.now()`, `Math.random()` e formatacao dependente do cliente durante render para nao reabrir mismatch de hydration.
 - Evitar componentes que vazem props invalidas para DOM; o app ja abandonou o uso problematico de `Grid`/`Stack` nessa superficie.
 
-## Comandos Uteis
+## Comandos uteis
 
 Rodar o app:
 
@@ -186,6 +207,7 @@ npm --prefix .governance/specs/0024-context-architecture/work-graph-model/_org-s
 Checar TypeScript do app:
 
 ```bash
+cd .governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v3
 npm --workspace acme-governance-next-app exec tsc -- --noEmit
 ```
 
@@ -196,6 +218,6 @@ cd .governance/specs/0024-context-architecture/work-graph-model/_org-simulation-
 node _tools/check-governance-app.mjs
 ```
 
-## Limite Importante
+## Limite importante
 
 A aplicacao deve ser honesta sobre o que e prova e o que e configuracao local. Quando uma tela ainda nao escreve estado governado, ela precisa dizer isso explicitamente. Quando uma integracao ainda e futura, ela deve aparecer como catalogada ou em breve, nao como mecanismo ativo.

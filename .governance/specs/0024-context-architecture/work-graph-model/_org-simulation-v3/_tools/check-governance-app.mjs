@@ -18,101 +18,92 @@ const appPackageFile = path.join(appDir, "package.json");
 const rootPackageFile = path.join(repoRoot, "package.json");
 const domainTsconfigFile = path.join(root, "tsconfig.domain.json");
 const legacyLocaleDir = path.join(appDir, "locales");
-const legacyViewsDir = path.join(appDir, "app", "ui", "views");
-const legacySharedComponentsFile = path.join(appDir, "app", "ui", "shared", "components.tsx");
+const legacyFeaturesDir = path.join(appDir, "app", "features");
+const legacyUiDir = path.join(appDir, "app", "ui");
+const legacyViewsDir = path.join(appDir, "app", "_ui", "views");
+const legacySharedComponentsFile = path.join(appDir, "app", "_ui", "shared", "components.tsx");
+const legacyOnboardingComponentsFile = path.join(
+  appDir,
+  "app",
+  "onboarding",
+  "_components",
+  "index.tsx"
+);
 const legacyPortugueseRouteDirs = [path.join(appDir, "app", "configuracoes")];
 const obsoleteLocaleDirs = [
-  path.join(appDir, "app", "features", "adoption", "locales"),
-  path.join(appDir, "app", "features", "home", "locales"),
-  path.join(appDir, "app", "features", "onboarding", "locales"),
-  path.join(appDir, "app", "features", "settings", "locales"),
+  path.join(appDir, "app", "(home)", "locales"),
+  path.join(appDir, "app", "onboarding", "locales"),
+  path.join(appDir, "app", "settings", "locales"),
+  path.join(appDir, "app", "_ui", "locales"),
+  path.join(appDir, "app", "_domain", "adoption", "locales"),
 ];
 const requiredLocaleFiles = [
   {
-    file: path.join(appDir, "app", "ui", "shell", "locales", "pt-br.json"),
+    file: path.join(appDir, "app", "_ui", "shell", "_locales", "pt-br.json"),
     key: "app.brand.name",
   },
   {
-    file: path.join(appDir, "app", "ui", "shared", "locales", "pt-br.json"),
+    file: path.join(appDir, "app", "_ui", "shared", "_locales", "pt-br.json"),
     key: "common.continue",
   },
   {
-    file: path.join(appDir, "app", "features", "adoption", "assistant", "locales", "pt-br.json"),
+    file: path.join(appDir, "app", "_domain", "adoption", "assistant", "_locales", "pt-br.json"),
     key: "assistant.ollama.health.ok",
   },
   {
-    file: path.join(
-      appDir,
-      "app",
-      "features",
-      "home",
-      "views",
-      "HomeView",
-      "locales",
-      "pt-br.json"
-    ),
+    file: path.join(appDir, "app", "(home)", "_view", "HomeView", "_locales", "pt-br.json"),
     key: "home.title",
   },
   {
     file: path.join(
       appDir,
       "app",
-      "features",
       "onboarding",
-      "views",
+      "_view",
       "OnboardingView",
-      "locales",
+      "_locales",
       "pt-br.json"
     ),
     key: "onboarding.profile.title",
   },
   {
-    file: path.join(
-      appDir,
-      "app",
-      "features",
-      "settings",
-      "views",
-      "SettingsView",
-      "locales",
-      "pt-br.json"
-    ),
+    file: path.join(appDir, "app", "settings", "_view", "SettingsView", "_locales", "pt-br.json"),
     key: "settings.title",
   },
 ];
 const requiredColocatedLocaleFiles = [
-  "app/features/adoption/assistant/locales/pt-br.json",
-  "app/features/adoption/components/attention-list/locales/pt-br.json",
-  "app/features/adoption/components/cards/locales/pt-br.json",
-  "app/features/adoption/components/role-contract-list/locales/pt-br.json",
-  "app/features/adoption/components/source-list/locales/pt-br.json",
-  "app/features/adoption/components/status/locales/pt-br.json",
-  "app/features/adoption/confidence/locales/pt-br.json",
-  "app/features/adoption/profiles/locales/pt-br.json",
-  "app/features/adoption/roles/locales/pt-br.json",
-  "app/features/adoption/sources/locales/pt-br.json",
-  "app/features/adoption/summary/locales/pt-br.json",
-  "app/features/home/views/HomeView/locales/pt-br.json",
-  "app/features/onboarding/components/locales/pt-br.json",
-  "app/features/onboarding/diagnosis/locales/pt-br.json",
-  "app/features/onboarding/views/OnboardingView/locales/pt-br.json",
-  "app/features/onboarding/steps/AssistantStep/locales/pt-br.json",
-  "app/features/onboarding/steps/IntegrationsStep/locales/pt-br.json",
-  "app/features/onboarding/steps/PeopleStep/locales/pt-br.json",
-  "app/features/onboarding/steps/ProfileDiagnosisStep/locales/pt-br.json",
-  "app/features/onboarding/steps/ReviewStep/locales/pt-br.json",
-  "app/features/onboarding/steps/SourcesStep/locales/pt-br.json",
-  "app/features/onboarding/steps/WelcomeStep/locales/pt-br.json",
-  "app/features/settings/sections/AdvancedSection/locales/pt-br.json",
-  "app/features/settings/sections/AssistantSection/locales/pt-br.json",
-  "app/features/settings/sections/IntegrationsSection/locales/pt-br.json",
-  "app/features/settings/sections/OrganizationSection/locales/pt-br.json",
-  "app/features/settings/sections/RolesSection/locales/pt-br.json",
-  "app/features/settings/sections/SourcesSection/locales/pt-br.json",
-  "app/features/settings/settings-model/locales/pt-br.json",
-  "app/features/settings/views/SettingsView/locales/pt-br.json",
-  "app/ui/shared/locales/pt-br.json",
-  "app/ui/shell/locales/pt-br.json",
+  "app/_domain/adoption/assistant/_locales/pt-br.json",
+  "app/_domain/adoption/confidence/_locales/pt-br.json",
+  "app/_domain/adoption/profiles/_locales/pt-br.json",
+  "app/_domain/adoption/roles/_locales/pt-br.json",
+  "app/_domain/adoption/sources/_locales/pt-br.json",
+  "app/_domain/adoption/summary/_locales/pt-br.json",
+  "app/(home)/_view/HomeView/_locales/pt-br.json",
+  "app/_ui/adoption/components/attention-list/_locales/pt-br.json",
+  "app/_ui/adoption/components/cards/_locales/pt-br.json",
+  "app/_ui/adoption/components/role-contract-list/_locales/pt-br.json",
+  "app/_ui/adoption/components/source-list/_locales/pt-br.json",
+  "app/_ui/adoption/components/status/_locales/pt-br.json",
+  "app/_ui/shared/_locales/pt-br.json",
+  "app/_ui/shell/_locales/pt-br.json",
+  "app/onboarding/_components/_locales/pt-br.json",
+  "app/onboarding/_model/diagnosis/_locales/pt-br.json",
+  "app/onboarding/_steps/AssistantStep/_locales/pt-br.json",
+  "app/onboarding/_steps/IntegrationsStep/_locales/pt-br.json",
+  "app/onboarding/_steps/PeopleStep/_locales/pt-br.json",
+  "app/onboarding/_steps/ProfileDiagnosisStep/_locales/pt-br.json",
+  "app/onboarding/_steps/ReviewStep/_locales/pt-br.json",
+  "app/onboarding/_steps/SourcesStep/_locales/pt-br.json",
+  "app/onboarding/_steps/WelcomeStep/_locales/pt-br.json",
+  "app/onboarding/_view/OnboardingView/_locales/pt-br.json",
+  "app/settings/_model/_locales/pt-br.json",
+  "app/settings/_sections/AdvancedSection/_locales/pt-br.json",
+  "app/settings/_sections/AssistantSection/_locales/pt-br.json",
+  "app/settings/_sections/IntegrationsSection/_locales/pt-br.json",
+  "app/settings/_sections/OrganizationSection/_locales/pt-br.json",
+  "app/settings/_sections/RolesSection/_locales/pt-br.json",
+  "app/settings/_sections/SourcesSection/_locales/pt-br.json",
+  "app/settings/_view/SettingsView/_locales/pt-br.json",
 ];
 const ollamaHealthRouteFile = path.join(
   appDir,
@@ -202,11 +193,24 @@ if (!fs.existsSync(domainTsconfigFile)) {
 if (fs.existsSync(legacyLocaleDir)) {
   fail("locale centralizado legado proibido: _apps/governance-next/locales");
 }
+if (fs.existsSync(legacyFeaturesDir)) {
+  fail(
+    "features globais proibidas no App Router; use rotas + pastas privadas _view/_steps/_sections"
+  );
+}
+if (fs.existsSync(legacyUiDir)) {
+  fail("app/ui legado proibido; use app/_ui para infraestrutura compartilhada privada");
+}
 if (fs.existsSync(legacyViewsDir)) {
-  fail("views humanas nao devem viver em app/ui/views; use app/features/<feature>");
+  fail("views humanas nao devem viver em _ui/views; use a pasta privada da rota");
 }
 if (fs.existsSync(legacySharedComponentsFile)) {
-  fail("componentes compartilhados devem viver em arquivos proprios sob app/ui/shared");
+  fail("componentes compartilhados devem viver em arquivos proprios sob app/_ui/shared");
+}
+if (fs.existsSync(legacyOnboardingComponentsFile)) {
+  fail(
+    "componentes do onboarding devem viver em arquivos proprios; index.ts deve ser apenas barrel"
+  );
 }
 for (const dir of legacyPortugueseRouteDirs) {
   if (fs.existsSync(dir)) {

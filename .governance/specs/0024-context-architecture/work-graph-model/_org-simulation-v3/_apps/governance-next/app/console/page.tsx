@@ -1,5 +1,5 @@
 import { loadGovernanceSnapshot } from "@/lib/governance-server";
-import GovernanceConsole from "../features/console/views/GovernanceConsole";
+import GovernanceConsole from "./_view/GovernanceConsole";
 
 export const dynamic = "force-dynamic";
 
