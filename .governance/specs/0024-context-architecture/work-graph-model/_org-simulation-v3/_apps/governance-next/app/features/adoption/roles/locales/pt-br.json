@@ -1,0 +1,51 @@
+{
+  "locale": "pt-br",
+  "contract": [
+    {
+      "key": "admin",
+      "role": "Admin",
+      "desc": "Instala e administra o app. Não decide nada sozinho.",
+      "sensitive": false
+    },
+    {
+      "key": "payer",
+      "role": "Payer",
+      "desc": "Responde pelo custo. Aprova o que gera cobrança.",
+      "sensitive": true
+    },
+    {
+      "key": "sponsor",
+      "role": "Sponsor",
+      "desc": "Autoriza objetivos e dá autoridade às decisões.",
+      "sensitive": true
+    },
+    {
+      "key": "security",
+      "role": "Security",
+      "desc": "Aprova políticas e qualquer saída de dados (egress).",
+      "sensitive": true
+    },
+    {
+      "key": "technical",
+      "role": "Owner técnico",
+      "desc": "Responde pela execução e pelos contratos técnicos.",
+      "sensitive": false
+    },
+    {
+      "key": "attester",
+      "role": "Actual-attester",
+      "desc": "Confirma resultados com evidência. Não é quem define a meta.",
+      "sensitive": true
+    }
+  ],
+  "acceptanceNotice": "Papéis são um contrato de responsabilidade declarado nos arquivos. Aceite/convite das pessoas ainda não é mecanismo: fica como risco pendente, visível aqui, até existir comando governado para isso.",
+  "warnings": {
+    "adminSponsor": "Admin e Sponsor colapsaram: no perfil full isso precisa de par ou break-glass — fica registrado.",
+    "adminPayer": "Quem administra também paga a conta: habilitar e pagar integração deixa o risco financeiro sem independência.",
+    "sponsorAttester": "Quem aprova a regra também atesta o actual: o placar pode inflar sem um atestador independente.",
+    "technicalAttester": "Owner técnico e actual-attester colapsaram: resultados do próprio time carregam o selo Auto-declarado.",
+    "payerUnresolved": "O Payer ainda não resolve no registro de autoridades — precisa de authority local (ou identity-provider futuro) antes de aprovar custo.",
+    "solo": "Perfil solo aceita colapso, mas não o esconde: o self-log aparece na auditoria e no placar.",
+    "ok": "Separação mínima coerente para a escolha atual."
+  }
+}

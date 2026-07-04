@@ -62,7 +62,8 @@ adoption-shell:
   i18n:
     rule: "strings de produto moram em locale files versionados; domínio/backend emite messageKey + params, não frase hardcoded"
     default-locale: pt-br
-    first-file: "_apps/governance-next/locales/pt-br.json"
+    layout: "_apps/governance-next/app/{features,ui}/**/locales/pt-br.json"
+    note: "locale é colocalizado no menor dono estável da copy: view, step, section, componente compartilhado, subdomínio ou shell/shared; arquivo global `_apps/governance-next/locales` e locale amplo por feature são legado proibido pelo check do app"
   typed-runtime:
     rule: "novos contratos de domínio/app nascem em TypeScript puro dentro de `_org-simulation-v3/_lib/domain/*.ts`; scripts `.mjs` legados podem coexistir até migração incremental, mas novas telas não devem criar ontologia local ad hoc"
 

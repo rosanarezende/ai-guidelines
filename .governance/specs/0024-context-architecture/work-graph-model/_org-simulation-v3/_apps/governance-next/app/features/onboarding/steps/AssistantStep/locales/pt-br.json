@@ -1,0 +1,23 @@
+{
+  "heading": {
+    "title": "Quer um assistente? É opcional.",
+    "lead": "Ele explica termos e sugere próximos passos em linguagem simples. O app inteiro funciona sem ele."
+  },
+  "local": {
+    "title": "Local com Ollama",
+    "badge": "Recomendado · privado",
+    "body": "Roda na sua máquina. Nem prompts, nem arquivos saem para a internet.",
+    "endpointLabel": "Endereço local",
+    "modelLabel": "Modelo",
+    "testCta": "Testar conexão (mecanismo futuro)"
+  },
+  "cloud": {
+    "title": "Na nuvem",
+    "fallbackProviders": "provedores externos",
+    "body": "Mais capaz, mas seus dados saem da máquina. Você vê e aprova o que é enviado (egress)."
+  },
+  "none": {
+    "title": "Sem assistente",
+    "body": "Dá para ativar depois em Configurações."
+  }
+}

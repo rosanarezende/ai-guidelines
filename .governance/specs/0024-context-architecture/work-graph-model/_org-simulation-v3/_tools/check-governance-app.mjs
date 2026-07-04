@@ -17,7 +17,82 @@ const integrationCatalogFile = path.join(root, "..", "integration-catalog.yml");
 const appPackageFile = path.join(appDir, "package.json");
 const rootPackageFile = path.join(repoRoot, "package.json");
 const domainTsconfigFile = path.join(root, "tsconfig.domain.json");
-const localeFile = path.join(appDir, "locales", "pt-br.json");
+const legacyLocaleDir = path.join(appDir, "locales");
+const legacyViewsDir = path.join(appDir, "app", "ui", "views");
+const obsoleteLocaleDirs = [
+  path.join(appDir, "app", "features", "adoption", "locales"),
+  path.join(appDir, "app", "features", "home", "locales"),
+  path.join(appDir, "app", "features", "onboarding", "locales"),
+  path.join(appDir, "app", "features", "settings", "locales"),
+];
+const requiredLocaleFiles = [
+  {
+    file: path.join(appDir, "app", "ui", "shell", "locales", "pt-br.json"),
+    key: "app.brand.name",
+  },
+  {
+    file: path.join(appDir, "app", "ui", "shared", "locales", "pt-br.json"),
+    key: "common.continue",
+  },
+  {
+    file: path.join(appDir, "app", "features", "adoption", "assistant", "locales", "pt-br.json"),
+    key: "assistant.ollama.health.ok",
+  },
+  {
+    file: path.join(appDir, "app", "features", "home", "HomeView", "locales", "pt-br.json"),
+    key: "home.title",
+  },
+  {
+    file: path.join(
+      appDir,
+      "app",
+      "features",
+      "onboarding",
+      "OnboardingView",
+      "locales",
+      "pt-br.json"
+    ),
+    key: "onboarding.profile.title",
+  },
+  {
+    file: path.join(appDir, "app", "features", "settings", "SettingsView", "locales", "pt-br.json"),
+    key: "settings.title",
+  },
+];
+const requiredColocatedLocaleFiles = [
+  "app/features/adoption/assistant/locales/pt-br.json",
+  "app/features/adoption/components/attention-list/locales/pt-br.json",
+  "app/features/adoption/components/cards/locales/pt-br.json",
+  "app/features/adoption/components/role-contract-list/locales/pt-br.json",
+  "app/features/adoption/components/source-list/locales/pt-br.json",
+  "app/features/adoption/components/status/locales/pt-br.json",
+  "app/features/adoption/confidence/locales/pt-br.json",
+  "app/features/adoption/profiles/locales/pt-br.json",
+  "app/features/adoption/roles/locales/pt-br.json",
+  "app/features/adoption/sources/locales/pt-br.json",
+  "app/features/adoption/summary/locales/pt-br.json",
+  "app/features/home/HomeView/locales/pt-br.json",
+  "app/features/onboarding/components/locales/pt-br.json",
+  "app/features/onboarding/diagnosis/locales/pt-br.json",
+  "app/features/onboarding/OnboardingView/locales/pt-br.json",
+  "app/features/onboarding/steps/AssistantStep/locales/pt-br.json",
+  "app/features/onboarding/steps/IntegrationsStep/locales/pt-br.json",
+  "app/features/onboarding/steps/PeopleStep/locales/pt-br.json",
+  "app/features/onboarding/steps/ProfileDiagnosisStep/locales/pt-br.json",
+  "app/features/onboarding/steps/ReviewStep/locales/pt-br.json",
+  "app/features/onboarding/steps/SourcesStep/locales/pt-br.json",
+  "app/features/onboarding/steps/WelcomeStep/locales/pt-br.json",
+  "app/features/settings/sections/AdvancedSection/locales/pt-br.json",
+  "app/features/settings/sections/AssistantSection/locales/pt-br.json",
+  "app/features/settings/sections/IntegrationsSection/locales/pt-br.json",
+  "app/features/settings/sections/OrganizationSection/locales/pt-br.json",
+  "app/features/settings/sections/RolesSection/locales/pt-br.json",
+  "app/features/settings/sections/SourcesSection/locales/pt-br.json",
+  "app/features/settings/settings-model/locales/pt-br.json",
+  "app/features/settings/SettingsView/locales/pt-br.json",
+  "app/ui/shared/locales/pt-br.json",
+  "app/ui/shell/locales/pt-br.json",
+];
 const ollamaHealthRouteFile = path.join(
   appDir,
   "app",
@@ -103,12 +178,37 @@ assertWorkspaceDependencyContract(sourceFiles);
 if (!fs.existsSync(domainTsconfigFile)) {
   fail("contrato TypeScript da sim ausente: tsconfig.domain.json");
 }
-if (!fs.existsSync(localeFile)) {
-  fail("locale principal ausente: _apps/governance-next/locales/pt-br.json");
+if (fs.existsSync(legacyLocaleDir)) {
+  fail("locale centralizado legado proibido: _apps/governance-next/locales");
 }
-const locale = JSON.parse(fs.readFileSync(localeFile, "utf8"));
-if (locale.locale !== "pt-br" || !locale.messages?.["home.title"]) {
-  fail("locale pt-br sem contrato minimo (locale/messages/home.title)");
+if (fs.existsSync(legacyViewsDir)) {
+  fail("views humanas nao devem viver em app/ui/views; use app/features/<feature>");
+}
+for (const dir of obsoleteLocaleDirs) {
+  if (fs.existsSync(dir)) {
+    fail(
+      `locale em nivel amplo demais; colocalize no componente/view/section: ${path.relative(appDir, dir).replaceAll("\\", "/")}`
+    );
+  }
+}
+for (const relativeFile of requiredColocatedLocaleFiles) {
+  const file = path.join(appDir, ...relativeFile.split("/"));
+  if (!fs.existsSync(file)) {
+    fail(`locale colocalizado ausente: ${relativeFile}`);
+  }
+}
+for (const { file, key } of requiredLocaleFiles) {
+  if (!fs.existsSync(file)) {
+    fail(`locale colocalizado ausente: ${path.relative(appDir, file).replaceAll("\\", "/")}`);
+  }
+  const locale = JSON.parse(fs.readFileSync(file, "utf8"));
+  if (locale.locale !== "pt-br" || !locale.messages?.[key]) {
+    fail(
+      `locale colocalizado sem contrato minimo (${key}): ${path
+        .relative(appDir, file)
+        .replaceAll("\\", "/")}`
+    );
+  }
 }
 if (!fs.existsSync(ollamaHealthRouteFile)) {
   fail("rota de health-check do Ollama ausente");
@@ -137,6 +237,12 @@ for (const file of sourceFiles) {
   }
   if (/Date\.now\(|Math\.random\(/.test(text)) {
     fail(`input nao deterministico no app: ${relative}`);
+  }
+  if (/^app\/features\/[^/]+\/[^/]+View\.tsx$/.test(relative)) {
+    const lineCount = text.split(/\r?\n/).length;
+    if (lineCount > 380) {
+      fail(`view de feature grande demais (${lineCount} linhas): ${relative}`);
+    }
   }
 }
 

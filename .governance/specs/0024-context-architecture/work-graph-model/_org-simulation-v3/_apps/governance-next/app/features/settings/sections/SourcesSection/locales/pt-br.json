@@ -1,0 +1,8 @@
+{
+  "title": "Fontes de trabalho",
+  "subtitle": "De onde vem o trabalho que o app pode provar. Sem fonte, a evidência é só manual/declarada.",
+  "addTooltip": "Adoção de fonte nova roda pelos comandos de adoção (adopt-existing-repos) — fora da UI nesta fatia",
+  "addCta": "Adicionar fonte",
+  "allConnected": "{connected} de {total} fontes publicam contexto — evidência automática habilitada.",
+  "partiallyConnected": "{connected} de {total} fontes publicam contexto. {downgrade}"
+}

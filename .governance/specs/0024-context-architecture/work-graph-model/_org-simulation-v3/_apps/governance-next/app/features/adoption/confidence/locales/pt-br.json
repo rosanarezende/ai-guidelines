@@ -1,0 +1,19 @@
+{
+  "locale": "pt-br",
+  "states": {
+    "valid": "Válido",
+    "pending": "Pendente",
+    "no-evidence": "Sem evidência",
+    "self-attested": "Auto-declarado",
+    "break-glass": "Exceção registrada",
+    "stale": "Desatualizado"
+  },
+  "legend": [
+    { "state": "valid", "label": "Válido" },
+    { "state": "pending", "label": "Pendente" },
+    { "state": "no-evidence", "label": "Sem evidência" },
+    { "state": "self-attested", "label": "Auto-declarado" },
+    { "state": "break-glass", "label": "Exceção (break-glass)" },
+    { "state": "stale", "label": "Desatualizado (stale)" }
+  ]
+}

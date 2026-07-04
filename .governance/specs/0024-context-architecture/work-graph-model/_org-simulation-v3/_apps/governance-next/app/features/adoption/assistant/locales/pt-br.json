@@ -1,0 +1,31 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "assistant.local.label": "Local com Ollama",
+    "assistant.local.privacy": "Roda na sua máquina. Nem prompts, nem arquivos saem para a internet.",
+    "assistant.cloud.label": "Na nuvem",
+    "assistant.none.label": "Sem assistente",
+    "assistant.ollama.health.ok": "Ollama respondeu localmente. Nenhum prompt ou arquivo foi enviado.",
+    "assistant.ollama.health.blockedEndpoint": "Endpoint bloqueado: o teste local só permite loopback por padrão.",
+    "assistant.ollama.health.invalidResponse": "Ollama respondeu, mas o formato não parece ser /api/tags.",
+    "assistant.ollama.health.unreachable": "Não foi possível conectar ao Ollama local. Verifique se ele está rodando."
+  },
+  "labels": {
+    "local": "Local com Ollama",
+    "localPrivacy": "Roda na sua máquina. Nem prompts, nem arquivos saem para a internet.",
+    "cloud": "Na nuvem",
+    "none": "Sem assistente"
+  },
+  "ollamaHealth": {
+    "ok": "Ollama respondeu localmente. Nenhum prompt ou arquivo foi enviado.",
+    "blockedEndpoint": "Endpoint bloqueado: o teste local só permite loopback por padrão.",
+    "invalidResponse": "Ollama respondeu, mas o formato não parece ser /api/tags.",
+    "unreachable": "Não foi possível conectar ao Ollama local. Verifique se ele está rodando."
+  },
+  "cloudNotes": {
+    "full": "Nuvem exige aprovação do papel Security e política de egress explícita antes de ativar — fica Pendente até lá.",
+    "solo": "Você aprova por si: a decisão e o que passa a ser enviado ficam registrados como auto-declarados.",
+    "compact": "A aprovação de egress pode acumular papéis — o acúmulo fica registrado e visível na auditoria.",
+    "trio": "A aprovação de egress pode acumular papéis — o acúmulo fica registrado e visível na auditoria."
+  }
+}

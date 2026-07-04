@@ -1,0 +1,47 @@
+{
+  "heading": {
+    "title": "Como sua organização toma decisões hoje?",
+    "lead": "Vamos ajustar a cerimônia ao tamanho e à separação real de responsabilidades. Você pode revisar a recomendação antes de continuar."
+  },
+  "questions": {
+    "size": {
+      "title": "Quantas pessoas participam das decisões e da execução?",
+      "helper": "Não precisa ser exato; queremos entender se há gente suficiente para separar papéis."
+    },
+    "responsibility": {
+      "title": "Como as responsabilidades se dividem hoje?",
+      "helper": "Pense em quem define objetivo, quem executa, quem aprova risco e quem confirma resultado."
+    },
+    "conflict": {
+      "title": "Quando a mesma pessoa acumula papéis sensíveis, o app deve...",
+      "helper": "Essa resposta define se a governança bloqueia, avisa ou registra com transparência."
+    }
+  },
+  "recommendation": {
+    "manualLabel": "Escolha manual",
+    "recommendedLabel": "Recomendado",
+    "recommendedByAnswers": "Recomendação pelas respostas: {profile}. Você pode manter sua escolha manual.",
+    "manualWithoutAnswers": "Você escolheu manualmente. Responda às perguntas se quiser uma recomendação automática.",
+    "useRecommendation": "Usar recomendação",
+    "hideOptions": "Ocultar opções",
+    "showOptions": "Ver outras opções",
+    "manualOverride": {
+      "strong": "Você escolheu um perfil diferente da recomendação.",
+      "body": "Pela sua resposta sobre acúmulo sensível, a recomendação automática seria {profile}. O perfil manual aplica a regra abaixo: {rule}"
+    },
+    "columns": {
+      "will": "O app vai",
+      "willNot": "O app não vai",
+      "risks": "Riscos visíveis"
+    },
+    "changes": "O que isso muda:",
+    "empty": "Comece pelo tamanho da organização. Depois mostramos apenas as perguntas necessárias para chegar a uma recomendação explicada.",
+    "manualCta": "Escolher manualmente"
+  },
+  "policyCard": {
+    "label": "Regra escolhida"
+  },
+  "manualOptions": {
+    "title": "Escolha manualmente se a recomendação não representar sua organização"
+  }
+}

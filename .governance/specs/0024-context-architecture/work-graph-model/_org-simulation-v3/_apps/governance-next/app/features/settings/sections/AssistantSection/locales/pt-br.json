@@ -1,0 +1,22 @@
+{
+  "title": "Assistente (opcional)",
+  "subtitle": "Explica termos e sugere próximos passos. O app funciona sem ele; a decisão continua governada.",
+  "providerSummary": "{mode} · {provider} · {model}",
+  "localMode": "Local",
+  "cloudMode": "Nuvem",
+  "sessionPreference": "{url} · preferência desta sessão — ainda não persistida",
+  "localBadge": "Sem saída de dados",
+  "cloudBadge": "egress requer aprovação",
+  "providerLabel": "Provider",
+  "recommendedSuffix": " (recomendado)",
+  "endpointLabel": "Endpoint",
+  "modelLabel": "Modelo",
+  "classificationLabel": "Política de classificação",
+  "classificationOptions": {
+    "localOnly": "local-only: restricted não sai da máquina",
+    "policyGated": "policy-gated: egress exige allowlist",
+    "publicOnly": "public-only: apenas contexto público"
+  },
+  "localSuccess": "Provider local reduz risco de egress e é a primeira configuração recomendada.",
+  "governanceNote": "Sugestões do assistente carregam score, unknown, evidence e policy. Humano confirma; o resolver valida refs. O assistente não altera manifest, meta, gate, actual ou veredito."
+}

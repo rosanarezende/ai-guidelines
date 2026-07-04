@@ -1,7 +1,7 @@
 "use client";
 
 // AppShell.tsx — casca das telas humanas (Home/Onboarding/Configurações).
-// O console técnico mantém a própria casca em GovernanceApp.
+// O console técnico mantém a própria casca em GovernanceConsole.
 import {
   AppBar,
   Box,

@@ -1,0 +1,16 @@
+{
+  "sections": [
+    { "id": "org", "label": "Organização" },
+    { "id": "papeis", "label": "Papéis" },
+    { "id": "fontes", "label": "Fontes de trabalho" },
+    { "id": "assistente", "label": "Assistente" },
+    { "id": "integracoes", "label": "Integrações" },
+    { "id": "avancado", "label": "Avançado" }
+  ],
+  "integrationStatus": {
+    "localAssistant": "configurável (local)",
+    "graphExport": "parcial hoje",
+    "deferred": "adiado",
+    "futureAdapter": "catalogado · adapter futuro"
+  }
+}

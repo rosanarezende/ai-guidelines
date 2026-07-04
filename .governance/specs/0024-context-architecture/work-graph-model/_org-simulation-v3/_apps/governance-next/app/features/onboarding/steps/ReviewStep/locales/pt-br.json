@@ -1,0 +1,16 @@
+{
+  "heading": {
+    "title": "Pronto. Eis o retrato honesto.",
+    "lead": "Nada aqui trava o uso — pendências e riscos ficam visíveis na Home."
+  },
+  "projectionNotice": "Esta configuração ainda não é persistida: é uma projeção de UX. A declaração real vive nos arquivos de governança e mudará por comando governado em fatia futura.",
+  "sections": {
+    "works": "Já funciona",
+    "pending": "Pendente — avisa, não trava",
+    "risks": "Riscos que ficam visíveis"
+  },
+  "actions": {
+    "finish": "Concluir e abrir a Home",
+    "console": "Ver os arquivos no console técnico"
+  }
+}

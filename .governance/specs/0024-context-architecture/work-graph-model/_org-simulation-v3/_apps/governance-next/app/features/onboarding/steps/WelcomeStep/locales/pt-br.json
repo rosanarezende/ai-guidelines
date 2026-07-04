@@ -1,0 +1,24 @@
+{
+  "eyebrow": "CONFIGURAÇÃO INICIAL · ~10 MIN",
+  "title": "Vamos montar a governança do seu jeito",
+  "lead": "Seis passos curtos. Começamos com algumas perguntas para recomendar a cerimônia certa para sua realidade — você revisa antes de continuar.",
+  "cards": [
+    {
+      "id": "files",
+      "title": "Tudo vira arquivos seus",
+      "text": "Versionados, auditáveis e portáveis. Nenhuma decisão fica escondida em banco de dados de terceiros."
+    },
+    {
+      "id": "privacy",
+      "title": "Nada sai da sua máquina sem você aprovar",
+      "text": "Assistente e integrações são opcionais. O framework funciona sem serviços externos; para provar execução e resultados, conecte uma fonte de trabalho local ou versionada."
+    },
+    {
+      "id": "honesty",
+      "title": "Honesto com a sua realidade",
+      "text": "Uma pessoa, time enxuto ou organização com responsabilidades separadas: o app ajusta a cerimônia em vez de fingir independência que não existe."
+    }
+  ],
+  "cta": "Começar",
+  "note": "Já tem arquivos de governança? A sim v3 já vem adotada — este fluxo apenas projeta as escolhas."
+}

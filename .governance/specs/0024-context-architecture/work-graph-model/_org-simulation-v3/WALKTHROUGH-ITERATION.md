@@ -33,18 +33,20 @@ necessario e avisos honestos quando ha colapso ou cerimonia.
 | W9  | onboarding    | perguntas dependentes e recomendacao so aparecem quando fazem sentido pelo diagnostico  | P0         | fechado no app    |
 | W10 | home          | primeira visita sem onboarding concluido deve ir ao onboarding; parcial mostra retomada | P0         | fechado no app    |
 | W11 | arquitetura   | onboarding multi-org nao pode nascer como estado local improvisado no frontend          | P0         | decidido          |
-| W12 | i18n          | copy de produto deve sair de strings hardcoded e ir para locale versionado              | P0         | decidido          |
+| W12 | i18n          | copy de produto deve sair de strings hardcoded e ir para locale versionado colocalizado | P0         | fechado no app    |
+| W13 | arquitetura   | paginas/views estavam confusas; app deve organizar experiencias por feature             | P0         | fechado no app    |
 
 ## Bugs Tecnicos
 
-| id  | sintoma                                                   | causa provavel                                            | correcao esperada                                                     | status      |
-| --- | --------------------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------- | ----------- |
-| T1  | `item` vazando para DOM                                   | uso de `Grid` incompatível com a versao atual do MUI      | remover `Grid`; usar layout CSS grid via `Box`                        | fechado     |
-| T2  | `alignItems`/`justifyContent`/`flexWrap` vazando para DOM | props de layout vazando por componentes de layout         | remover `Stack`/`Grid` da camada principal; usar `Box sx`             | fechado     |
-| T3  | hydration mismatch                                        | MUI/Emotion sem integracao SSR dedicada no App Router     | shell MUI client-only enquanto a sim nao instala pacote SSR dedicado  | fechado     |
-| T4  | app sem tipos                                             | app em JS/JSX com `jsconfig`                              | migrar para TS/TSX + `tsconfig` strict                                | fechado     |
-| T5  | runtime/backend sem contrato TS compartilhado             | `_lib` ainda e majoritariamente `.mjs`; app duplica tipos | criar dominio TS puro em `_lib/domain/*.ts` e fazer app importar dele | em execucao |
-| T6  | strings de produto hardcoded                              | nao ha `locales/pt-br.json`                               | locale versionado + helper tipado; dominio emite messageKey/params    | em execucao |
+| id  | sintoma                                                   | causa provavel                                            | correcao esperada                                                             | status      |
+| --- | --------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------- |
+| T1  | `item` vazando para DOM                                   | uso de `Grid` incompatível com a versao atual do MUI      | remover `Grid`; usar layout CSS grid via `Box`                                | fechado     |
+| T2  | `alignItems`/`justifyContent`/`flexWrap` vazando para DOM | props de layout vazando por componentes de layout         | remover `Stack`/`Grid` da camada principal; usar `Box sx`                     | fechado     |
+| T3  | hydration mismatch                                        | MUI/Emotion sem integracao SSR dedicada no App Router     | shell MUI client-only enquanto a sim nao instala pacote SSR dedicado          | fechado     |
+| T4  | app sem tipos                                             | app em JS/JSX com `jsconfig`                              | migrar para TS/TSX + `tsconfig` strict                                        | fechado     |
+| T5  | runtime/backend sem contrato TS compartilhado             | `_lib` ainda e majoritariamente `.mjs`; app duplica tipos | criar dominio TS puro em `_lib/domain/*.ts` e migrar runtime em fatia propria | em execucao |
+| T6  | strings de produto hardcoded                              | locale global ou por feature ampla escalaria mal          | locale colocalizado por view/step/section/componente/subdomínio/shell         | fechado     |
+| T7  | telas em `app/ui/views` e arquivos grandes                | camada `ui` misturava produto, console e shared           | mover experiencias para `app/features/*`; `ui` fica shell/shared/theme        | fechado     |
 
 ## Perfis de Uso
 
@@ -68,8 +70,7 @@ necessario e avisos honestos quando ha colapso ou cerimonia.
 ## Proximas Fatias
 
 1. Validar a nova secao de experiencia de produto do `app-requirements.md` com Claude Design/Fable 5.
-2. Congelar o WIP de onboarding multi-org antes que vire segunda ontologia local; implementar primeiro
-   a base TS compartilhada (`account/workspace/governance-host/work-source/membership`) + i18n.
+2. Migrar backend/runtime para TypeScript em fatia propria, começando pelos contratos que o app consome.
 3. Retomar o onboarding diagnostico no app real consumindo o contrato compartilhado, com account local,
    selecao/criacao de workspace e pessoas -> papeis.
 4. Persistencia governada real das configuracoes de onboarding; `partial/finished` continua apenas

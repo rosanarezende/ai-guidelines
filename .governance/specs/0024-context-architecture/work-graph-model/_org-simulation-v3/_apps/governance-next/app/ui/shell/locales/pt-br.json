@@ -1,0 +1,10 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "app.brand.name": "Acme",
+    "app.brand.product": "Governança",
+    "app.nav.home": "Home",
+    "app.nav.settings": "Configurações",
+    "app.nav.console": "Console técnico"
+  }
+}

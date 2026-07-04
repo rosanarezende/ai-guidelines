@@ -78,7 +78,8 @@ Leia:
 - _org-simulation-v3/WALKTHROUGH-ITERATION.md
 - _org-simulation-v3/CLAUDE-CODE-FABLE-5-HANDOFF.md
 - _org-simulation-v3/_lib/domain/*.ts
-- _org-simulation-v3/_apps/governance-next/locales/pt-br.json
+- _org-simulation-v3/_apps/governance-next/app/{features,ui}/**/locales/pt-br.json
+  (colocalizado no menor dono estável da copy: view, step, section, componente compartilhado, subdomínio ou shell)
 - git diff/log desde HEAD~3, se houver
 
 Contexto físico obrigatório:

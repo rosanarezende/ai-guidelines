@@ -27,7 +27,7 @@ O app não é um substituto genérico de Jira/Linear/BI. Ele é a superfície op
 6. **Escala colapsável:** o mesmo produto deve servir full-team, compact e solo por perfil de governança, sem impor cerimônia inútil nem permitir bypass silencioso.
 7. **Sem segundo SSOT:** Neo4j/SQLite/Mongo/search index nunca viram fonte autoritativa de ação. Toda ação relê a revisão fonte antes de escrever.
 8. **Contrato tipado antes da tela:** novos fluxos de produto nascem no domínio TypeScript compartilhado antes de virar estado local de React. A UI não pode inventar entidade ou enum que o backend/runtime não conhece.
-9. **Internacionalização por contrato:** textos de produto ficam em `locales/<locale>.json`; backend/domínio emite `messageKey` + `params`. Componentes não carregam copy longa hardcoded quando a string pertence à experiência de produto.
+9. **Internacionalização por contrato:** textos de produto ficam em `locales/<locale>.json` colocalizado com a feature/view/shell que usa a string; backend/domínio emite `messageKey` + `params`. Componentes não carregam copy longa hardcoded quando a string pertence à experiência de produto.
 
 ## 3. Personas e permissões
 
@@ -118,14 +118,22 @@ O backend/runtime da sim v3 ainda contém scripts `.mjs` herdados, mas todo cont
 ```text
 _org-simulation-v3/_lib/domain/*.ts        # entidades, value objects, policies, DTOs
 _org-simulation-v3/_lib/application/*.ts   # casos de uso/ports quando existirem
-_apps/governance-next/locales/pt-br.json   # strings de produto
+_apps/governance-next/app/features/<feature>/<View>/locales/pt-br.json
+_apps/governance-next/app/features/<feature>/steps/<Step>/locales/pt-br.json
+_apps/governance-next/app/features/<feature>/sections/<Section>/locales/pt-br.json
+_apps/governance-next/app/features/<feature>/<subdomain>/locales/pt-br.json
+_apps/governance-next/app/ui/<area>/locales/pt-br.json
 ```
 
 Critérios:
 
 - `GovernanceSnapshot`, comandos, adoption shell, integrações e mensagens de erro são tipos compartilhados, não duplicados em `lib/types.ts` do app.
 - O frontend pode ter view-models, mas eles derivam dos tipos de domínio.
-- Novas strings de tela entram em locale file; exceções são labels técnicos curtos ou dados vindos do snapshot.
+- Rotas do App Router (`app/*/page.tsx`) ficam finas e só carregam dados + delegam para `app/features/<feature>`.
+- Experiências de produto vivem por feature: `home`, `onboarding`, `settings`, `console`; passos/seções/componentes específicos ficam dentro da pasta da própria feature.
+- `app/ui/` guarda apenas shell, tema e componentes realmente compartilhados. Não deve conter views de produto.
+- Novas strings de tela entram no locale do menor dono estável da copy: view, step, section, componente compartilhado, subdomínio ou shell. Exceções são labels técnicos curtos ou dados vindos do snapshot.
+- O diretório global `_apps/governance-next/locales/` e locales amplos por feature são legado proibido; eles tornam manutenção e ownership de copy difusos.
 - Domínio/backend deve preferir `{ messageKey, params }` para erro/aviso, permitindo UI traduzir sem perder auditoria.
 
 ### 5.1 Camadas

@@ -1,5 +1,5 @@
 import { loadGovernanceSnapshot } from "@/lib/governance-server";
-import HomeView from "./ui/views/HomeView";
+import HomeView from "./features/home/HomeView";
 
 export const dynamic = "force-dynamic";
 
