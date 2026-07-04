@@ -3,7 +3,7 @@
 import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import type { Authority } from "@/lib/types";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import {
   ROLE_CONTRACT,
   type ProfileId,

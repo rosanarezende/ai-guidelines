@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import {
   CONFIDENCE_STATES,
   TRUST_LEGEND,

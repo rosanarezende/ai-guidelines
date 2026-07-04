@@ -15,7 +15,7 @@ import {
 import type { SelectChangeEvent } from "@mui/material/Select";
 import LockIcon from "@mui/icons-material/Lock";
 import MemoryIcon from "@mui/icons-material/Memory";
-import { Flex, ResponsiveGrid, SectionCard } from "@/app/ui/shared/components";
+import { Flex, ResponsiveGrid, SectionCard } from "@/app/ui/shared";
 import { StatusPill } from "@/app/features/adoption/components";
 import { assistantCloudNote, providerIsLocal, type ProfileId } from "@/app/features/adoption/model";
 import copy from "./locales/pt-br.json";

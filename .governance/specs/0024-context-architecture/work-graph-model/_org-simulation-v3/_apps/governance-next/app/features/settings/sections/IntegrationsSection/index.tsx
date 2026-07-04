@@ -8,7 +8,7 @@ import {
   Flex,
   ResponsiveGrid,
   SectionCard,
-} from "@/app/ui/shared/components";
+} from "@/app/ui/shared";
 import { integrationStatus } from "../../settings-model";
 import copy from "./locales/pt-br.json";
 

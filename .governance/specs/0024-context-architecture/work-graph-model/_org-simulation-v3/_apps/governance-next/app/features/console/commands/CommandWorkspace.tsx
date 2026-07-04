@@ -20,7 +20,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import { useMemo, useState } from "react";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import type { CommandResult, CommandType, GovernedCommand, GovernanceSnapshot } from "@/lib/types";
-import { Flex, SectionCard } from "@/app/ui/shared/components";
+import { Flex, SectionCard } from "@/app/ui/shared";
 import { JsonBlock } from "@/app/ui/shared/JsonBlock";
 import {
   commandFromPayload,

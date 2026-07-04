@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import type { GovernanceSnapshot } from "@/lib/types";
-import { IssueList, ResponsiveGrid, SectionCard, StatCard } from "@/app/ui/shared/components";
+import { IssueList, ResponsiveGrid, SectionCard, StatCard } from "@/app/ui/shared";
 import { JsonBlock } from "@/app/ui/shared/JsonBlock";
 
 export default function AuditConsole({ snapshot }: { snapshot: GovernanceSnapshot }) {

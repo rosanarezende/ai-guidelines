@@ -3,8 +3,8 @@
 import { Box, Chip, Paper, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import LockIcon from "@mui/icons-material/Lock";
-import { Flex } from "@/app/ui/shared/components";
-import { STEP_LABELS } from "../diagnosis";
+import { Flex } from "@/app/ui/shared";
+import { STEP_LABELS } from "../../diagnosis";
 import copy from "./locales/pt-br.json";
 
 export function OnboardingStepper({ step }: { step: number }) {

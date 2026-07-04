@@ -4,13 +4,10 @@
 // IMPORTANTE: nada aqui persiste. É projeção de UX sobre o snapshot; a declaração real
 // vive em org.yml/authorities.yml e só muda por comando governado (fatia futura).
 import { Box, Button, Paper } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { GovernanceSnapshot } from "@/lib/types";
-import { Flex } from "@/app/ui/shared/components";
 import {
   DEFAULT_ASSIGNMENTS,
   assistantSystems,
@@ -34,15 +31,11 @@ import {
   recommendProfile,
   recommendationIsReady,
   type DiagnosisAnswers,
-} from "../diagnosis";
-import { WelcomeStep } from "../steps/WelcomeStep";
-import { ProfileDiagnosisStep } from "../steps/ProfileDiagnosisStep";
-import { PeopleStep } from "../steps/PeopleStep";
-import { SourcesStep } from "../steps/SourcesStep";
-import { AssistantStep } from "../steps/AssistantStep";
-import { IntegrationsStep } from "../steps/IntegrationsStep";
-import { ReviewStep } from "../steps/ReviewStep";
+} from "../../diagnosis";
+import { WelcomeStep } from "../../steps/WelcomeStep";
+import { OnboardingActions } from "./OnboardingActions";
 import { OnboardingStepper } from "./OnboardingStepper";
+import { OnboardingStepContent } from "./OnboardingStepContent";
 import copy from "./locales/pt-br.json";
 import { derivePendingSummary, deriveRiskSummary, deriveWorkingSummary } from "./summary";
 
@@ -163,93 +156,50 @@ export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnaps
         >
           <OnboardingStepper step={step} />
           <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 4 }, display: "grid", gap: 2.5 }}>
-            {step === 1 ? (
-              <ProfileDiagnosisStep
-                diagnosis={diagnosis}
-                profile={profile}
-                recommendedProfileId={recommendedProfileId}
-                recommendedProfile={recommendedProfile}
-                selectedProfile={selectedProfile}
-                effectiveProfile={effectiveProfile}
-                shouldAskResponsibility={shouldAskResponsibility}
-                shouldAskConflict={shouldAskConflict}
-                hasRecommendation={hasRecommendation}
-                manualProfileSelected={manualProfileSelected}
-                manualProfileOpen={manualProfileOpen}
-                conflictPolicy={conflictPolicy}
-                shouldShowConflictPolicy={shouldShowConflictPolicy}
-                shouldShowManualOverrideNotice={shouldShowManualOverrideNotice}
-                updateDiagnosis={updateDiagnosis}
-                setProfile={setProfile}
-                setManualProfileOpen={setManualProfileOpen}
-                setManualProfileSelected={setManualProfileSelected}
-              />
-            ) : null}
-
-            {step === 2 ? (
-              <PeopleStep
-                assignments={assignments}
-                authorities={snapshot.authorities}
-                profile={profile}
-                onChange={(role: RoleKey, value: string) =>
-                  setAssignments((current) => ({ ...current, [role]: value }))
-                }
-              />
-            ) : null}
-
-            {step === 3 ? (
-              <SourcesStep
-                sourceKinds={sourceKinds}
-                selectedSourceCount={selectedSourceCount}
-                adoption={adoption}
-                onToggle={toggleSource}
-              />
-            ) : null}
-
-            {step === 4 ? (
-              <AssistantStep
-                assistant={assistant}
-                profile={profile}
-                systems={systems}
-                onSelect={setAssistant}
-              />
-            ) : null}
-
-            {step === 5 ? <IntegrationsStep integrations={catalogHighlights} /> : null}
-
-            {step === 6 ? (
-              <ReviewStep
-                works={works}
-                pending={pending}
-                risks={risks}
-                onFinish={finishOnboarding}
-              />
-            ) : null}
-
-            {step >= 1 && step <= 5 ? (
-              <Flex
-                justify="space-between"
-                align="center"
-                sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}
-              >
-                <Button
-                  color="inherit"
-                  startIcon={<ArrowBackIcon />}
-                  disabled={step === 1}
-                  onClick={() => setStep(step - 1)}
-                >
-                  {copy.actions.back}
-                </Button>
-                <Button
-                  variant="contained"
-                  endIcon={<ArrowForwardIcon />}
-                  disabled={step === 1 && !canContinueProfileStep}
-                  onClick={() => setStep(step + 1)}
-                >
-                  {copy.actions.next}
-                </Button>
-              </Flex>
-            ) : null}
+            <OnboardingStepContent
+              step={step}
+              diagnosis={diagnosis}
+              profile={profile}
+              recommendedProfileId={recommendedProfileId}
+              recommendedProfile={recommendedProfile}
+              selectedProfile={selectedProfile}
+              effectiveProfile={effectiveProfile}
+              shouldAskResponsibility={shouldAskResponsibility}
+              shouldAskConflict={shouldAskConflict}
+              hasRecommendation={hasRecommendation}
+              manualProfileSelected={manualProfileSelected}
+              manualProfileOpen={manualProfileOpen}
+              conflictPolicy={conflictPolicy}
+              shouldShowConflictPolicy={shouldShowConflictPolicy}
+              shouldShowManualOverrideNotice={shouldShowManualOverrideNotice}
+              updateDiagnosis={updateDiagnosis}
+              setProfile={setProfile}
+              setManualProfileOpen={setManualProfileOpen}
+              setManualProfileSelected={setManualProfileSelected}
+              assignments={assignments}
+              authorities={snapshot.authorities}
+              onAssignmentChange={(role: RoleKey, value: string) =>
+                setAssignments((current) => ({ ...current, [role]: value }))
+              }
+              sourceKinds={sourceKinds}
+              selectedSourceCount={selectedSourceCount}
+              adoption={adoption}
+              onToggleSource={toggleSource}
+              assistant={assistant}
+              systems={systems}
+              onAssistantSelect={setAssistant}
+              catalogHighlights={catalogHighlights}
+              works={works}
+              pending={pending}
+              risks={risks}
+              onFinish={finishOnboarding}
+            />
+            <OnboardingActions
+              step={step}
+              canContinueProfileStep={canContinueProfileStep}
+              onBack={() => setStep(step - 1)}
+              onNext={() => setStep(step + 1)}
+            />
           </Paper>
         </Box>
       )}

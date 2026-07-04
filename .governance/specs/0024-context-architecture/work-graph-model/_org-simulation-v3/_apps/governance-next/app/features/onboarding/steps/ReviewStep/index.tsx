@@ -2,7 +2,7 @@ import { Alert, Box, Button, Paper, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import Link from "next/link";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import { StepHeading } from "../../components";
 import copy from "./locales/pt-br.json";
 

@@ -9,5 +9,9 @@
     "common.optional": "Opcional",
     "common.comingSoon": "Em breve",
     "common.demo": "Demo"
+  },
+  "issueList": {
+    "empty": "Sem issues neste recorte.",
+    "more": "+{count} issue(s)"
   }
 }

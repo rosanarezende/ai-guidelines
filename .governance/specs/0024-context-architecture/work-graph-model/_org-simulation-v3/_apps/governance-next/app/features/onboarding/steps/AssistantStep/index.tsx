@@ -2,7 +2,7 @@ import { Alert, Box, Button, Chip, TextField, Typography } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import {
   assistantCloudNote,
   type AssistantChoice,

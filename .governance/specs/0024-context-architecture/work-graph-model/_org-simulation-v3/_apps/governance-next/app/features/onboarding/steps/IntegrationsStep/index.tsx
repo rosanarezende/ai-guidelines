@@ -1,6 +1,6 @@
 import { Box, Chip, Paper, Typography } from "@mui/material";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import { Flex, ResponsiveGrid } from "@/app/ui/shared/components";
+import { Flex, ResponsiveGrid } from "@/app/ui/shared";
 import type { IntegrationItem } from "@/lib/types";
 import { StepHeading } from "../../components";
 import copy from "./locales/pt-br.json";

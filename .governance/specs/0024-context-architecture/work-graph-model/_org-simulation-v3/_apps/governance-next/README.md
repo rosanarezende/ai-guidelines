@@ -11,7 +11,7 @@ Pronto nesta fatia:
 - App Next em TypeScript, isolado no workspace `acme-governance-next-app`.
 - Home de adocao em `/`, com tarefas de entrada, pendencias e proximo passo derivado do snapshot.
 - Onboarding em `/onboarding`, com diagnostico de perfil, papeis, fontes de trabalho, assistente, integracoes e revisao final.
-- Configuracoes em `/configuracoes`, separando Organizacao, Papeis, Fontes, Assistente, Integracoes e Avancado.
+- Configuracoes em `/settings`, separando Organizacao, Papeis, Fontes, Assistente, Integracoes e Avancado.
 - Console tecnico em `/console`, mantendo grafo, comandos, resolver, operacao e auditoria para quem precisa inspecionar a camada tecnica.
 - APIs locais para snapshot, comandos e health-check do Ollama.
 - Locales colocalizados por view, step, section, componente ou subdominio com texto de usuario.
@@ -36,7 +36,7 @@ Ainda por vir:
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `/`                                         | Home de adocao para usuario nao tecnico: o que fazer agora, pendencias e estado do ciclo.        |
 | `/onboarding`                               | Fluxo guiado de configuracao inicial da organizacao.                                             |
-| `/configuracoes`                            | Configuracoes humanas por area: organizacao, papeis, fontes, assistente, integracoes e avancado. |
+| `/settings`                                 | Configuracoes humanas por area: organizacao, papeis, fontes, assistente, integracoes e avancado. |
 | `/console`                                  | Console tecnico com graph, commands, resolver, ops e audit.                                      |
 | `/api/snapshot`                             | Snapshot derivado do runtime file-first.                                                         |
 | `/api/commands/dry-run`                     | Validacao de comando sem escrita.                                                                |
@@ -57,7 +57,7 @@ governance-next/
           ollama/
             health/
       snapshot/
-    configuracoes/
+    settings/
     console/
     onboarding/
     page.tsx
@@ -92,11 +92,10 @@ governance-next/
         commands/
         views/
       home/
-        HomeView/
-          locales/
+        views/
+          HomeView/
+            locales/
       onboarding/
-        OnboardingView/
-          locales/
         components/
           locales/
         diagnosis/
@@ -116,9 +115,10 @@ governance-next/
             locales/
           ReviewStep/
             locales/
+        views/
+          OnboardingView/
+            locales/
       settings/
-        SettingsView/
-          locales/
         sections/
           OrganizationSection/
             locales/
@@ -134,8 +134,20 @@ governance-next/
             locales/
         settings-model/
           locales/
+        views/
+          SettingsView/
+            locales/
     ui/
       shared/
+        DataPill.tsx
+        EntityCard.tsx
+        Flex.tsx
+        IssueList.tsx
+        ResponsiveGrid.tsx
+        SectionCard.tsx
+        StatCard.tsx
+        StatusChip.tsx
+        index.ts
         locales/
       shell/
         locales/
@@ -152,8 +164,11 @@ governance-next/
 ## Convencoes
 
 - Rotas em `app/*` devem ser finas: carregar dados e delegar a experiencia para `features/*`.
+- Pastas e arquivos de codigo usam nomes em ingles. Portugues fica em labels, copy e `locales/pt-br.json`.
 - `features/*` contem experiencia de produto e regras de apresentacao por dominio.
+- Views de tela inteira ficam em `features/<feature>/views/<ViewName>`. Nao crie uma pasta global `views`.
 - `ui/*` contem casca, tema e componentes compartilhados que nao pertencem a uma feature especifica.
+- Cada componente em `ui/shared` deve viver em arquivo proprio; `index.ts` e apenas o barrel de exports.
 - `lib/*` contem bordas do app: servidor, i18n e tipos importados do dominio da simulacao.
 - Texto visivel de usuario deve morar em `locales/pt-br.json` colocalizado com a view, step, section, componente ou subdominio que o consome.
 - Nao recriar ontologia do modelo no frontend; prefira tipos reexportados por `@/lib/types` e derivacoes em `features/adoption/*`.

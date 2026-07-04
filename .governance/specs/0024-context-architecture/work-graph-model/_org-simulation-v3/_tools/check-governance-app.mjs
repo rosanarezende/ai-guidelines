@@ -19,6 +19,8 @@ const rootPackageFile = path.join(repoRoot, "package.json");
 const domainTsconfigFile = path.join(root, "tsconfig.domain.json");
 const legacyLocaleDir = path.join(appDir, "locales");
 const legacyViewsDir = path.join(appDir, "app", "ui", "views");
+const legacySharedComponentsFile = path.join(appDir, "app", "ui", "shared", "components.tsx");
+const legacyPortugueseRouteDirs = [path.join(appDir, "app", "configuracoes")];
 const obsoleteLocaleDirs = [
   path.join(appDir, "app", "features", "adoption", "locales"),
   path.join(appDir, "app", "features", "home", "locales"),
@@ -39,7 +41,16 @@ const requiredLocaleFiles = [
     key: "assistant.ollama.health.ok",
   },
   {
-    file: path.join(appDir, "app", "features", "home", "HomeView", "locales", "pt-br.json"),
+    file: path.join(
+      appDir,
+      "app",
+      "features",
+      "home",
+      "views",
+      "HomeView",
+      "locales",
+      "pt-br.json"
+    ),
     key: "home.title",
   },
   {
@@ -48,6 +59,7 @@ const requiredLocaleFiles = [
       "app",
       "features",
       "onboarding",
+      "views",
       "OnboardingView",
       "locales",
       "pt-br.json"
@@ -55,7 +67,16 @@ const requiredLocaleFiles = [
     key: "onboarding.profile.title",
   },
   {
-    file: path.join(appDir, "app", "features", "settings", "SettingsView", "locales", "pt-br.json"),
+    file: path.join(
+      appDir,
+      "app",
+      "features",
+      "settings",
+      "views",
+      "SettingsView",
+      "locales",
+      "pt-br.json"
+    ),
     key: "settings.title",
   },
 ];
@@ -71,10 +92,10 @@ const requiredColocatedLocaleFiles = [
   "app/features/adoption/roles/locales/pt-br.json",
   "app/features/adoption/sources/locales/pt-br.json",
   "app/features/adoption/summary/locales/pt-br.json",
-  "app/features/home/HomeView/locales/pt-br.json",
+  "app/features/home/views/HomeView/locales/pt-br.json",
   "app/features/onboarding/components/locales/pt-br.json",
   "app/features/onboarding/diagnosis/locales/pt-br.json",
-  "app/features/onboarding/OnboardingView/locales/pt-br.json",
+  "app/features/onboarding/views/OnboardingView/locales/pt-br.json",
   "app/features/onboarding/steps/AssistantStep/locales/pt-br.json",
   "app/features/onboarding/steps/IntegrationsStep/locales/pt-br.json",
   "app/features/onboarding/steps/PeopleStep/locales/pt-br.json",
@@ -89,7 +110,7 @@ const requiredColocatedLocaleFiles = [
   "app/features/settings/sections/RolesSection/locales/pt-br.json",
   "app/features/settings/sections/SourcesSection/locales/pt-br.json",
   "app/features/settings/settings-model/locales/pt-br.json",
-  "app/features/settings/SettingsView/locales/pt-br.json",
+  "app/features/settings/views/SettingsView/locales/pt-br.json",
   "app/ui/shared/locales/pt-br.json",
   "app/ui/shell/locales/pt-br.json",
 ];
@@ -184,6 +205,14 @@ if (fs.existsSync(legacyLocaleDir)) {
 if (fs.existsSync(legacyViewsDir)) {
   fail("views humanas nao devem viver em app/ui/views; use app/features/<feature>");
 }
+if (fs.existsSync(legacySharedComponentsFile)) {
+  fail("componentes compartilhados devem viver em arquivos proprios sob app/ui/shared");
+}
+for (const dir of legacyPortugueseRouteDirs) {
+  if (fs.existsSync(dir)) {
+    fail(`rota fisica deve usar nome canonico em ingles: ${path.relative(appDir, dir)}`);
+  }
+}
 for (const dir of obsoleteLocaleDirs) {
   if (fs.existsSync(dir)) {
     fail(
@@ -238,10 +267,10 @@ for (const file of sourceFiles) {
   if (/Date\.now\(|Math\.random\(/.test(text)) {
     fail(`input nao deterministico no app: ${relative}`);
   }
-  if (/^app\/features\/[^/]+\/[^/]+View\.tsx$/.test(relative)) {
+  if (/\.(ts|tsx)$/.test(relative)) {
     const lineCount = text.split(/\r?\n/).length;
-    if (lineCount > 380) {
-      fail(`view de feature grande demais (${lineCount} linhas): ${relative}`);
+    if (lineCount > 320) {
+      fail(`arquivo de app grande demais (${lineCount} linhas): ${relative}`);
     }
   }
 }

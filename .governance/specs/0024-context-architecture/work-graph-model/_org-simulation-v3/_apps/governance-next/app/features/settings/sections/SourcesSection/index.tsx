@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Box, Button, Tooltip } from "@mui/material";
-import { SectionCard } from "@/app/ui/shared/components";
+import { SectionCard } from "@/app/ui/shared";
 import { SourceList } from "@/app/features/adoption/components";
 import { NO_SOURCE_DOWNGRADE, type AdoptionSummary } from "@/app/features/adoption/model";
 import copy from "./locales/pt-br.json";

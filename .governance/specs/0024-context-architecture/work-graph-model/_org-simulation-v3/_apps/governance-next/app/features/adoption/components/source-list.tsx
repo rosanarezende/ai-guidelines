@@ -2,7 +2,7 @@
 
 import { Box, Button, Tooltip, Typography } from "@mui/material";
 import Link from "next/link";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import type { WorkSource } from "@/app/features/adoption/model";
 import { StatusPill } from "./status";
 import copy from "./source-list/locales/pt-br.json";

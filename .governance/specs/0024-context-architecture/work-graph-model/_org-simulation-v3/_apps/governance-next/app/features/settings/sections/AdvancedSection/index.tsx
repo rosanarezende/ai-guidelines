@@ -4,7 +4,7 @@ import { Box, Button, Chip } from "@mui/material";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import Link from "next/link";
 import type { GovernanceSnapshot } from "@/lib/types";
-import { Flex, SectionCard } from "@/app/ui/shared/components";
+import { Flex, SectionCard } from "@/app/ui/shared";
 import copy from "./locales/pt-br.json";
 
 export function AdvancedSection({ snapshot }: { snapshot: GovernanceSnapshot }) {

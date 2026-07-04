@@ -15,7 +15,7 @@ import {
   Flex,
   ResponsiveGrid,
   SectionCard,
-} from "@/app/ui/shared/components";
+} from "@/app/ui/shared";
 
 export default function ExecutionWorkspace({ snapshot }: { snapshot: GovernanceSnapshot }) {
   return (

@@ -2,7 +2,7 @@ import { Box, Button, Typography } from "@mui/material";
 import BalanceIcon from "@mui/icons-material/Balance";
 import FolderIcon from "@mui/icons-material/Folder";
 import LockIcon from "@mui/icons-material/Lock";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import { WelcomeCard } from "../../components";
 import copy from "./locales/pt-br.json";
 

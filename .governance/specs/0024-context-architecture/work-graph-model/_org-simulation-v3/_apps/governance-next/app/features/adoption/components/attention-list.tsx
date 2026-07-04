@@ -2,7 +2,7 @@
 
 import { Box, Button, Typography } from "@mui/material";
 import Link from "next/link";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import type { AttentionItem } from "@/app/features/adoption/model";
 import { StatusPill } from "./status";
 import copy from "./attention-list/locales/pt-br.json";

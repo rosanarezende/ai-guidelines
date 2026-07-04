@@ -6,7 +6,7 @@ import {
   Flex,
   ResponsiveGrid,
   SectionCard,
-} from "@/app/ui/shared/components";
+} from "@/app/ui/shared";
 
 export default function OpsWorkspace({ snapshot }: { snapshot: GovernanceSnapshot }) {
   const operationalOutcomes = snapshot.outcomes.filter((outcome) =>

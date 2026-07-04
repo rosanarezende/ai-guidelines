@@ -15,7 +15,7 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import type { ChecklistItem, NextStep } from "@/app/features/adoption/model";
 import copy from "./cards/locales/pt-br.json";
 

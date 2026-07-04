@@ -8,7 +8,7 @@ import {
   ResponsiveGrid,
   SectionCard,
   StatCard,
-} from "@/app/ui/shared/components";
+} from "@/app/ui/shared";
 
 function periods(snapshot: GovernanceSnapshot): string[] {
   return [...new Set(snapshot.targets.map((target) => target.period))].sort();

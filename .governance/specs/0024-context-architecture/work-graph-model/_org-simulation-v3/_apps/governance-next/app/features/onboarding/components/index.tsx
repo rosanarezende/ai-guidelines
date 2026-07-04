@@ -2,7 +2,7 @@ import { Box, Card, CardActionArea, Paper, Typography } from "@mui/material";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import type { ReactNode } from "react";
-import { Flex, ResponsiveGrid } from "@/app/ui/shared/components";
+import { Flex, ResponsiveGrid } from "@/app/ui/shared";
 import type { DiagnosisChoice } from "../diagnosis";
 import copy from "./locales/pt-br.json";
 

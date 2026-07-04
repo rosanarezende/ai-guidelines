@@ -1,5 +1,5 @@
 import { loadGovernanceSnapshot } from "@/lib/governance-server";
-import SettingsView from "../features/settings/SettingsView";
+import SettingsView from "../features/settings/views/SettingsView";
 
 export const dynamic = "force-dynamic";
 

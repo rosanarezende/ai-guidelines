@@ -4,7 +4,7 @@ import { Box, Button, Typography } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useMemo, useState } from "react";
 import type { GovernanceSnapshot } from "@/lib/types";
-import { Flex } from "@/app/ui/shared/components";
+import { Flex } from "@/app/ui/shared";
 import {
   DEFAULT_ASSIGNMENTS,
   assistantSystems,
@@ -17,13 +17,13 @@ import {
   type RoleAssignments,
 } from "@/app/features/adoption/model";
 import AppShell from "@/app/ui/shell/AppShell";
-import { SECTIONS, priorityWeight } from "../settings-model";
-import { AdvancedSection } from "../sections/AdvancedSection";
-import { AssistantSection } from "../sections/AssistantSection";
-import { IntegrationsSection } from "../sections/IntegrationsSection";
-import { OrganizationSection } from "../sections/OrganizationSection";
-import { RolesSection } from "../sections/RolesSection";
-import { SourcesSection } from "../sections/SourcesSection";
+import { SECTIONS, priorityWeight } from "../../settings-model";
+import { AdvancedSection } from "../../sections/AdvancedSection";
+import { AssistantSection } from "../../sections/AssistantSection";
+import { IntegrationsSection } from "../../sections/IntegrationsSection";
+import { OrganizationSection } from "../../sections/OrganizationSection";
+import { RolesSection } from "../../sections/RolesSection";
+import { SourcesSection } from "../../sections/SourcesSection";
 import copy from "./locales/pt-br.json";
 
 export default function SettingsView({ snapshot }: { snapshot: GovernanceSnapshot }) {

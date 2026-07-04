@@ -2,7 +2,7 @@
 
 import { Alert, Box } from "@mui/material";
 import type { Authority } from "@/lib/types";
-import { SectionCard } from "@/app/ui/shared/components";
+import { SectionCard } from "@/app/ui/shared";
 import { RoleContractList } from "@/app/features/adoption/components";
 import {
   ROLE_ACCEPTANCE_NOTICE,

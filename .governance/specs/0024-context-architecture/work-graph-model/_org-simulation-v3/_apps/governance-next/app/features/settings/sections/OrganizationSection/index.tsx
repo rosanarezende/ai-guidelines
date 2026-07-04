@@ -2,7 +2,7 @@
 
 import { Box, Button, Chip, Tooltip, Typography } from "@mui/material";
 import type { GovernanceSnapshot } from "@/lib/types";
-import { Flex, SectionCard } from "@/app/ui/shared/components";
+import { Flex, SectionCard } from "@/app/ui/shared";
 import type { ProfileOption } from "@/app/features/adoption/model";
 import copy from "./locales/pt-br.json";
 

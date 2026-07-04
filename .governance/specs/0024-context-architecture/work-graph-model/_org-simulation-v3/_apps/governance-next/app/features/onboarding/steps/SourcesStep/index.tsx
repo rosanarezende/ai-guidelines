@@ -1,7 +1,7 @@
 import { Alert, Box, Chip, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import { Flex, ResponsiveGrid } from "@/app/ui/shared/components";
+import { Flex, ResponsiveGrid } from "@/app/ui/shared";
 import {
   NO_SOURCE_DOWNGRADE,
   SOURCE_KINDS,

@@ -90,7 +90,7 @@ export default function AppShell({
             {chip ? <Chip size="small" variant="outlined" label={chip} /> : null}
             <Box sx={{ flex: 1 }} />
             {headerAction}
-            <Button component={Link} href="/configuracoes" size="small" color="inherit">
+            <Button component={Link} href="/settings" size="small" color="inherit">
               {t("app.nav.settings")}
             </Button>
             <Button
