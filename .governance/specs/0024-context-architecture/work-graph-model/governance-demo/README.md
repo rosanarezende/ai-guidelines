@@ -9,11 +9,11 @@
 | fase | entrega                                                                                                                                                                                                                                                                                                                                             | status |
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | F0   | fechar a fase de iteração do flow-explorer (commit selado)                                                                                                                                                                                                                                                                                          | ✅     |
-| F1   | **a org file-first** — `acme/governance/` como host central (`business/`, `contracts/`, `intake/`, `intents/`, `decisions/`, `incidents/`, `outcomes/`, `repos.yml`, `trust-policy.yml`) + `acme/repos/<repo>/.governance/` como sidecar dos repos adotados + `templates/` (rascunhos v3, pendentes do gate da P12)                                 | ✅     |
-| F2   | **ferramentas** — `backend/tools/validate.mjs`, `test-adversarial.mjs`, runtime `backend/` e checks repo-first/backend/app — mecanismos reais da barra do red-team sem depender de projeção estática                                                                                                                                                | ✅     |
+| F1   | **a org file-first** — `acme/governance/` como host central (`business/`, `contracts/`, `intake/`, `intents/`, `decisions/`, `incidents/`, `outcomes/`, `repos.yml`, `trust-policy.yml`) + `acme/repos/<repo>/.governance/` como sidecar dos repos adotados + `backend/templates/` (rascunhos v3, pendentes do gate da P12)                         | ✅     |
+| F2   | **ferramentas** — `tools/checks/validate.ts`, `tools/checks/test-adversarial.ts`, runtime `backend/` e checks repo-first/read-model/app — mecanismos reais da barra do red-team sem depender de projeção estática                                                                                                                                   | ✅     |
 | F3   | **protótipo estático da owner** — antigo `_apps/owner/` (React UMD + Cytoscape) usado para explorar o grafo; hoje arquivado em `_archive/org-simulation-v3-static-apps-v1` e substituído pelo console técnico do `governance-next`                                                                                                                  | ✅     |
 | F4   | **protótipo estático das empresas** — antigo `_apps/company/` usado para perfis/dashboards; hoje arquivado em `_archive/org-simulation-v3-static-apps-v1` e substituído pela Home/Settings/Console do `governance-next`                                                                                                                             | ✅     |
-| F5   | **rodada Codex** — FEITA: 16/16 findings aceitos; reconciliação em [`_reviews/2026-07-02-f5-adversarial-review.md`](_reviews/2026-07-02-f5-adversarial-review.md) (veredito: a sim ainda aceita texto bem-formado como evidência — blocos I–N aguardam gate)                                                                                        | ✅     |
+| F5   | **rodada Codex** — FEITA: 16/16 findings aceitos; reconciliação em [`../_reviews/2026-07-02-f5-adversarial-review.md`](../_reviews/2026-07-02-f5-adversarial-review.md) (veredito: a sim ainda aceita texto bem-formado como evidência — blocos I–N aguardam gate)                                                                                  | ✅     |
 | F6   | aplicar os blocos da F5 NA ORDEM (**I/J/K/L/M/N aplicados**: schema fail-closed + resolver + authority/envelope + self-attested targets com colapso logado + fila de revisão de contrato/deps cross-intent + derivação/drift/follow-ups/matcher + vendor/CSP) + substrate repo-first (código MVP, contextos, repo-work ack, repo-contract registry) | ✅     |
 | F7   | outcomes reais + lifecycle repo-local + aprofundamento dos repos críticos (`NEXT-STEPS.md`): primeiro outcome válido, peças `done` com evidência, testes locais, interfaces de contrato, trust-policy e fixtures adversariais novas                                                                                                                 | ✅     |
 | F8   | file backend transacional mínimo: lock global por comando, escrita atômica, marker de recovery, event-log append-only, fixtures de concorrência/replay/crash e primeiro `verdict.accept` real via runtime                                                                                                                                           | ✅     |
@@ -25,34 +25,34 @@
 
 ```bash
 cd governance-demo
-node backend/tools/validate.mjs        # lints da org (exit 1 se houver ERRO)
-node backend/tools/adopt-existing-repos.mjs # cria sidecars minimos para repos existentes (idempotente)
-node backend/tools/adopt-existing-repos.mjs --check # confere se todo repo tem scaffold minimo
-node backend/tools/prepare-capability-review.mjs --write # gera pacotes p/ AI-assisted capability extraction
-node backend/tools/prepare-capability-review.mjs --check # confere freshness dos pacotes de revisao
-node backend/tools/publish-contexts.mjs # publica acme/repos/*/.governance/context.json a partir dos manifestos + codigo
-node backend/tools/check-repo-contexts.mjs # falha se repos.yml, manifestos e context.json divergirem
-node backend/tools/publish-repo-works.mjs # publica acks repo-local p/ as peças do breakdown central
-node backend/tools/check-repo-works.mjs # falha se intent.works e repo/.governance/works divergirem
-node backend/tools/publish-repo-contracts.mjs # publica registry/contracts nos owner repos
-node backend/tools/check-repo-contracts.mjs # falha se contracts.yml e registry local divergirem
-node backend/tools/check-local-repo-tests.mjs # roda os testes locais dos repos criticos
-node backend/tools/check-runtime.mjs # prova backend runtime: file adapter + dominio + read-model + command dry-run
-node backend/tools/check-governance-app.mjs # prova app Next/MUI v2: TypeScript strict + snapshot runtime + next build
-node backend/tools/export-backend-examples.mjs # gera exemplos file/sqlite/neo4j/mongo a partir do read-model
-node backend/tools/export-backend-examples.mjs --check # confere freshness dos exemplos de banco
-node backend/tools/check-backend-examples.mjs # smoke operacional: file read-model + Neo4j Cypher + contrato de ação
-node backend/tools/load-neo4j-example.mjs --dry-run # valida plano executável de carga Neo4j sem tocar banco
-node backend/tools/check-integrations.mjs # smoke dos integration adapters + API handlers (sucesso · falha · egress bloqueado · evidência adulterada)
+node tools/checks/validate.ts        # lints da org (exit 1 se houver ERRO)
+node tools/repo-first/adopt-existing-repos.ts # cria sidecars minimos para repos existentes (idempotente)
+node tools/repo-first/adopt-existing-repos.ts --check # confere se todo repo tem scaffold minimo
+node tools/repo-first/prepare-capability-review.ts --write # gera pacotes p/ AI-assisted capability extraction
+node tools/repo-first/prepare-capability-review.ts --check # confere freshness dos pacotes de revisao
+node tools/repo-first/publish-contexts.ts # publica acme/repos/*/.governance/context.json a partir dos manifestos + codigo
+node tools/repo-first/check-repo-contexts.ts # falha se repos.yml, manifestos e context.json divergirem
+node tools/repo-first/publish-repo-works.ts # publica acks repo-local p/ as peças do breakdown central
+node tools/repo-first/check-repo-works.ts # falha se intent.works e repo/.governance/works divergirem
+node tools/repo-first/publish-repo-contracts.ts # publica registry/contracts nos owner repos
+node tools/repo-first/check-repo-contracts.ts # falha se contracts.yml e registry local divergirem
+node tools/checks/check-local-repo-tests.ts # roda os testes locais dos repos criticos
+node tools/checks/check-runtime.ts # prova backend runtime: file adapter + dominio + read-model + command dry-run
+node tools/checks/check-governance-app.ts # prova app Next/MUI v2: TypeScript strict + snapshot runtime + next build
+node tools/read-models/export-backend-examples.ts # gera exemplos file/sqlite/neo4j/mongo a partir do read-model
+node tools/read-models/export-backend-examples.ts --check # confere freshness dos exemplos de banco
+node tools/read-models/check-backend-examples.ts # smoke operacional: file read-model + Neo4j Cypher + contrato de ação
+node tools/read-models/load-neo4j-example.ts --dry-run # valida plano executável de carga Neo4j sem tocar banco
+node tools/checks/check-integrations.ts # smoke dos integration adapters + API handlers (sucesso · falha · egress bloqueado · evidência adulterada)
 npm --workspace acme-governance-backend run typecheck # TypeScript strict do backend (src/)
-node backend/tools/adoption-journey.mjs # dogfood completo da adoção repo-existente → host agregado
+node tools/journeys/adoption-journey.ts # dogfood completo da adoção repo-existente → host agregado
 # produto (R0/R1) — na RAIZ do repositório:
 npm --workspace acme-governance-next-app run dev:real   # app em modo real (file-first .local-state)
 npm --workspace acme-governance-next-app run dev:mock   # mock-api + app em modo mock (lowdb)
 npm --workspace acme-governance-mock-api run dev        # só a mock-api (porta 3025)
 npm --workspace acme-governance-mock-api run reset      # reseta seed (24 cenários; default blank)
 npm --workspace acme-governance-e2e run test:e2e        # jornada Playwright contra mock seedada
-node backend/tools/test-adversarial.mjs # fixtures adversariais: cada quebra plantada DEVE ser pega
+node tools/checks/test-adversarial.ts # fixtures adversariais: cada quebra plantada DEVE ser pega
 # app operacional Next/MUI:
 npm --workspace acme-governance-next-app run dev
 # abrir http://127.0.0.1:3024
@@ -61,48 +61,48 @@ npm --workspace acme-governance-next-app run dev
 ## O loop de iteração (o ponto da v3)
 
 1. Editar os YAML de `acme/governance/` ou dos sidecars `acme/repos/<repo>/.governance/` (ou pedir ao Claude) — o SSOT da sim é o arquivo.
-2. `node backend/tools/validate.mjs` → os erros aparecem nos checks e no app operacional.
+2. `node tools/checks/validate.ts` → os erros aparecem nos checks e no app operacional.
 3. `npm --workspace acme-governance-next-app run dev` → a Home, o onboarding, as configurações e o console técnico refletem a runtime v3.
 4. O que a sim provar que está errado NO MODELO vira provocação no `model.yml`.
 
 ## Loop de adoção de uma empresa existente
 
 1. A empresa aponta a ferramenta para repos que já têm código.
-2. `node backend/tools/adopt-existing-repos.mjs` cria o sidecar mínimo `.governance/` sem sobrescrever manifestos existentes.
-3. `node backend/tools/prepare-capability-review.mjs --write` monta o pacote revisável para IA/humano.
+2. `node tools/repo-first/adopt-existing-repos.ts` cria o sidecar mínimo `.governance/` sem sobrescrever manifestos existentes.
+3. `node tools/repo-first/prepare-capability-review.ts --write` monta o pacote revisável para IA/humano.
 4. A IA sugere patch; o humano dono do repo revisa e edita `.governance/manifest.yml`.
-5. `node backend/tools/publish-contexts.mjs` publica `context.json` por repo.
-6. `node backend/tools/publish-repo-works.mjs` publica o reconhecimento repo-local das peças já quebradas.
-7. `node backend/tools/publish-repo-contracts.mjs` publica o contrato no registry do owner repo.
-8. `node backend/tools/check-repo-contexts.mjs` prova que `repos.yml`, manifestos e contexts não divergiram.
-9. `node backend/tools/check-repo-works.mjs` prova que o breakdown central e os repos não divergiram.
-10. `node backend/tools/check-repo-contracts.mjs` prova que `contracts.yml` e os owner repos não divergiram.
-11. `node backend/tools/check-local-repo-tests.mjs` prova comportamento nos repos críticos sem depender só do manifesto.
-12. `node backend/tools/check-backend-examples.mjs` prova que `file/read-model.json`, event-log exemplo e Cypher Neo4j não têm refs penduradas.
-13. `node backend/tools/load-neo4j-example.mjs --dry-run` prova o plano de carga Neo4j sem credenciais nem rede.
-14. `node backend/tools/adoption-journey.mjs` executa o dogfood completo.
+5. `node tools/repo-first/publish-contexts.ts` publica `context.json` por repo.
+6. `node tools/repo-first/publish-repo-works.ts` publica o reconhecimento repo-local das peças já quebradas.
+7. `node tools/repo-first/publish-repo-contracts.ts` publica o contrato no registry do owner repo.
+8. `node tools/repo-first/check-repo-contexts.ts` prova que `repos.yml`, manifestos e contexts não divergiram.
+9. `node tools/repo-first/check-repo-works.ts` prova que o breakdown central e os repos não divergiram.
+10. `node tools/repo-first/check-repo-contracts.ts` prova que `contracts.yml` e os owner repos não divergiram.
+11. `node tools/checks/check-local-repo-tests.ts` prova comportamento nos repos críticos sem depender só do manifesto.
+12. `node tools/read-models/check-backend-examples.ts` prova que `file/read-model.json`, event-log exemplo e Cypher Neo4j não têm refs penduradas.
+13. `node tools/read-models/load-neo4j-example.ts --dry-run` prova o plano de carga Neo4j sem credenciais nem rede.
+14. `node tools/journeys/adoption-journey.ts` executa o dogfood completo.
 
 ## Decisões de desenho
 
 - **File-first, com fronteira física explícita:** `acme/governance/` é o host central da org; `acme/repos/` representa os repos já existentes da empresa; cada repo tem sidecar próprio (`acme/repos/<repo>/.governance/manifest.yml` → `context.json`). O `repos.yml` central é inventário; a publicação por repo impede que ele vire a única fonte de verdade.
-- **Escopo honesto da v3:** esta sim agora porta a base `backend` DDD (`domain`, `adapters/file`, command dry-run/execute, transação file-first mínima e read-model de grafo), exemplos verificáveis de read-models derivados em `examples/read-models/` (`file`, `neo4j`, `sqlite`, `mongo`) e smoke operacional para `file + Neo4j`. Ainda não porta adapters transacionais sqlite/neo4j/mongo write-capable nem a autoria completa da v2. A v3 prova dogfood repo-first, runtime file-first, app operacional Next/MUI, projeções multi-backend, loader Neo4j dry-run e resolvers fail-closed; a portabilidade multi-backend write-capable fica como próxima camada, registrada em `features.md`.
+- **Escopo honesto da v3:** esta sim agora porta a base `backend` DDD (`domain`, `adapters/file`, command dry-run/execute, transação file-first mínima e read-model de grafo), exemplos verificáveis de read-models derivados em `backend/examples/read-models/` (`file`, `neo4j`, `sqlite`, `mongo`) e smoke operacional para `file + Neo4j`. Ainda não porta adapters transacionais sqlite/neo4j/mongo write-capable nem a autoria completa da v2. A v3 prova dogfood repo-first, runtime file-first, app operacional Next/MUI, projeções multi-backend, loader Neo4j dry-run e resolvers fail-closed; a portabilidade multi-backend write-capable fica como próxima camada, registrada em `features.md`.
 - **App operacional Next/MUI v2:** `frontend/` é a primeira superfície de produto do app-requirements e agora roda como app TypeScript strict, sem camada JS/JSX legada. Ele lê a runtime v3 server-side, já cobre signup, seleção/criação de workspace, onboarding inicial, Home, Settings e console técnico; o restante do fluxo de produto (planning, intake, triagem, execução, contratos, outcomes, operação e auditoria humana) está especificado em [`APP-FUNCTIONAL-SPEC.md`](APP-FUNCTIONAL-SPEC.md) e ainda precisa sair do console técnico/read-model para telas operáveis. Nesta fatia, os comandos mutáveis mecanizados são `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`, `repo-work.ack`, `standalone.complete`, `contract.propose-revision`, `outcome.publish`, `verdict.accept`, `incident.declare` e `policy.break-glass`; qualquer expansão de authoring precisa entrar como comando com resolver, não como edição direta de YAML pela UI.
-- **Backend TypeScript hexagonal:** a runtime ativa mora em `backend/src/` (workspace npm `acme-governance-backend`), em TypeScript strict rodando nativo no Node ≥ 22.18 (type stripping, sem build step): `domain/` puro (validador, comandos, projeções, grafo — sem fs/HTTP/framework), `ports/` (GovernanceRepository/EventLog, GraphReadModelSource, IntegrationAdapter/EvidenceProvider, AssistantProvider), `adapters/` (file, repo-first, graph-memory, integrations), `application/` (runtime, snapshot, graph queries, egress/redaction, serviço de integrações) e `api/` (schemas + contratos + handlers agnósticos de framework). As projeções dos exemplos derivados moram em `backend/src/application/backend-examples/` e entram no typecheck do backend. Os `.mjs` remanescentes (`index.mjs`, `paths.mjs`, `tools/org.mjs`, `tools/repo-*.mjs` e demais `tools/*.mjs`) são shims/CLIs de compatibilidade — feature nova entra em `src/`, e o guard falha se `.mjs` voltar para `src/` ou se os módulos legados reaparecerem.
+- **Backend TypeScript hexagonal:** a runtime ativa mora em `backend/src/` (workspace npm `acme-governance-backend`), em TypeScript strict rodando nativo no Node ≥ 22.18 (type stripping, sem build step): `domain/` puro (validador, comandos, projeções, grafo — sem fs/HTTP/framework), `ports/` (GovernanceRepository/EventLog, GraphReadModelSource, IntegrationAdapter/EvidenceProvider, AssistantProvider), `adapters/` (file, repo-first, graph-memory, integrations), `application/` (runtime, snapshot, graph queries, egress/redaction, serviço de integrações) e `api/` (schemas + contratos + handlers agnósticos de framework). As projeções dos exemplos derivados moram em `backend/src/application/backend-examples/` e entram no typecheck do backend. Os `.mjs` remanescentes (`backend/index.mjs`, `backend/paths.mjs`) são shims técnicos temporários; os CLIs operacionais ficam em `tools/**/*.ts`. Feature nova entra em `backend/src/`, e o guard falha se `.mjs` voltar para `src/` ou se módulos legados reaparecerem na superfície ativa errada.
 - **Contrato TypeScript compartilhado:** o app importa apenas o SDK `@demo/backend` (server-side) e `@demo/backend/domain` (browser-safe: tipos + funções puras). `check-governance-app.mjs` roda o typecheck strict do backend inteiro e barra import solto de módulo interno/`.mjs` no app.
 - **Shell de adoção R1 com reducer único:** toda mutação do shell local É um comando (`local.*`) aplicado pelo reducer puro `backend/src/domain/adoption-commands.ts`. O backend real persiste file-first (lock + escrita atômica + event-log + idempotência em `.local-state/`); a `mock-api/` (Hono + lowdb) usa o MESMO reducer para validar UX/e2e — mock valida experiência, nunca governança. Fonte de dados por env (`GOVERNANCE_DATA_SOURCE=real-runtime|mock-api|demo-acme`), nunca localStorage; mock proibida em produção. O R1 persiste: perfil + regra de acúmulo sensível, workspace-mode, stack (execution/store/graph-read-model/identity), pessoas/grupos/convites/papéis com aceite (authority sempre derivada), governance host (3 distribuições + sandbox explícito, fit-check + scaffold com sourceRevision), fontes com `sourceTrust` explícito e assistente multi-provider com egress fail-closed. E2E: `test/` roda a primeira jornada Playwright (signup → workspace → onboarding parcial → Home) contra a mock seedada.
 - **Graph query service real:** `/api/graph*` expõe listagem, nó por id/GlobalRef, adjacência, caminho, impacto de contrato (`contract → consumers → intents/outcomes/targets`), dependências de intent e conflitos/contensões — sempre sobre projeção DERIVADA com `sourceRevision` explícita (memória por padrão; `GOVERNANCE_GRAPH_SOURCE=exported-file` lê o read-model exportado hash-verificado). Ação continua passando pelo command runtime, nunca pelo grafo.
 - **Integration adapters executáveis:** os adapters ficam agrupados por capability em `backend/src/adapters/integrations/<capability>/`, com utilitários comuns em `shared/`: `assistant/ollama.ts` (health/models via `/api/tags` loopback; advisory local com política de egress fail-closed + redação mínima), `git/local.ts` (revision/status/último commit via git CLI), `ci/local.ts` (executa o `test.mjs` que o repo define e reporta exit code real), `code-quality/local-report.ts` (relatório local Sonar-compatível hash-verificado; `SONARQUBE_URL` externo só com allowlist de egress) e `observability/local-report.ts` (relatório do `acme-obs-stack` hash-verificado, declarado como fixture). Nenhum adapter escreve YAML autoritativo; `check-integrations.mjs` prova sucesso, falha honesta, egress bloqueado e evidência adulterada.
 
-- **Ferramentas operacionais ainda em `backend/tools`:** estes CLIs não são backend de produto; são checks, publishers repo-first, smokes e dogfood da sim. Permanecem funcionando por compatibilidade, mas o destino arquitetural é mover a superfície para `governance-demo/tools/` e migrar por grupos para TypeScript. Até lá, `backend/tools` é legado operacional explícito, não lugar para feature nova.
+- **Ferramentas operacionais em `tools/`:** estes CLIs não são backend de produto; são checks, publishers repo-first, smokes e dogfood da sim. A superfície operacional já saiu de `backend/`, está em TypeScript e fica organizada em `tools/checks`, `tools/repo-first`, `tools/read-models` e `tools/journeys` (ver [`tools/README.md`](tools/README.md)). `tools/` é ferramenta de prova e manutenção da sim, não lugar para feature nova de produto.
 - **API local com contrato verificável:** requests validadas por schema tipado (combinadores próprios, sem dependência externa) com projeção JSON Schema por rota servida em `/api/contract`; comando malformado recebe 400 e `base-revision` stale recebe 422 — fail-closed nos dois eixos.
 - **Locale versionado e colocalizado:** strings centrais de produto ficam junto do menor dono estável da copy (view, step, section, componente compartilhado, subdomínio ou shell) em `frontend/app/**/_locales/pt-br.json`. Backend/domínio deve evoluir para emitir `messageKey` + `params`, não frases soltas. O check do app rejeita o antigo locale global e locales amplos por feature.
 - **Dependências explícitas do app:** `frontend/` é o workspace npm `acme/governance-next-app`, com dependências declaradas no próprio package do app e lockfile único na raiz. `check-governance-app.mjs` falha se o app importar pacote externo sem declarar no package do workspace.
 - **Configurações de adoção e integrações:** a aba `Configuracoes` projeta o `integration-catalog.yml` dentro do app e simula o onboarding inicial: escolha de perfil de governança (`full`, `compact`, `trio`, `solo`), contrato de papéis (`admin`, `sponsor`, `payer`, `security`, `technical owner`, `actual-attester`) e primeira integração de assistente (`ollama`/runtime local-cloud). Ela não grava YAML ainda; serve para validar UX e revelar colapsos de autoridade antes de mecanizar persistence. A evolução multi-organização deve partir do `adoption-shell` tipado (`account → workspace → governance-host → work-sources`) e não de estado local inventado na tela.
 - **Primeiro adapter local/open-source:** o app expõe `GET /api/integrations/assistant/ollama/health`, que testa somente `/api/tags` em endpoint loopback (`127.0.0.1`/`localhost`). Ele não envia prompt, arquivo, contexto do repo nem classificação; endpoints não-locais falham fechado até existir política de egress aprovada.
 - **Iteração guiada do walkthrough:** [`WALKTHROUGH-ITERATION.md`](WALKTHROUGH-ITERATION.md) registra as observações da owner, os bugs de UI/hydration já tratados no app v2 e os próximos recortes de usabilidade.
-- **Read-model não age sozinho:** `examples/read-models/ACTION-CONTRACT.md` declara que toda ação governada relê YAML/event-log autoritativo e falha fechado se o hash/base-revision divergir. O loader Neo4j só aplica com `--apply --source-hash <hash>` e credenciais explícitas; por padrão roda em dry-run.
+- **Read-model não age sozinho:** `backend/examples/read-models/ACTION-CONTRACT.md` declara que toda ação governada relê YAML/event-log autoritativo e falha fechado se o hash/base-revision divergir. O loader Neo4j só aplica com `--apply --source-hash <hash>` e credenciais explícitas; por padrão roda em dry-run.
 - **Standalone é repo-local:** fixes/dep-bumps avulsos moram em `acme/repos/<repo>/.governance/works/*.yml` com `schema: acme.standalone-work/v1`. O host só agrega. Incidente é instrumento central em `acme/governance/incidents/incidents.yml` e gera follow-ups para standalone/proposal.
-- **Adoção por empresa existente:** `backend/tools/adopt-existing-repos.mjs` faz scaffold minimo e gera `capability-candidates.yml` como rascunho revisavel. `backend/tools/prepare-capability-review.mjs` monta um pacote de revisão por repo com evidência estática para IA/humano. A extração por IA fica como canal assistivo (template em `templates/capability-extraction-prompt.md`), nunca como mutação silenciosa do manifesto.
+- **Adoção por empresa existente:** `tools/repo-first/adopt-existing-repos.ts` faz scaffold minimo e gera `capability-candidates.yml` como rascunho revisavel. `tools/repo-first/prepare-capability-review.ts` monta um pacote de revisão por repo com evidência estática para IA/humano. A extração por IA fica como canal assistivo (template em `backend/templates/assistant/capability-extraction-prompt.md`), nunca como mutação silenciosa do manifesto.
 - **Breakdown reconhecido pelo repo:** `intent.works` continua sendo a quebra central, mas cada repo publica `.governance/works/<intent>--<work>.yml` com hash do breakdown e touchpoint de código. Se a peça muda e o repo não reconhece a nova versão, o host falha em `repo-work-stale`.
 - **Lifecycle repo-local:** o acknowledgement não é só presença. Peças podem estar `acknowledged`, `active`, `blocked`, `done` ou `dropped`; `done` exige evidência de código/teste e verificação, e outcome não entra no dashboard enquanto peça necessária estiver aberta ou descartada.
 - **Contratos reconhecidos pelo owner repo:** `contracts.yml` continua sendo a visão coordenada da org, mas cada owner repo publica `.governance/registry/contracts/<contract>.yml` com hash do contrato central e touchpoint de código. Se a revisão, consumers ou owner mudam sem publicação local, o host falha em `repo-contract-stale`.
@@ -113,7 +113,7 @@ npm --workspace acme-governance-next-app run dev
 - **Outcome operacional sem intent:** `fix-checkout-timeout` é follow-up de `incident:incidente-checkout`, mora no repo `acme-checkout-api`, fecha via `standalone.complete` com evidência e publica `out-fix-checkout-timeout-2027h1` em `tgt-sre-incidents`. O resolver falha se standalone aberto tentar emitir outcome, e o dashboard deve manter visível o colapso de attestation do `acme-obs-stack`.
 - **Trust-policy físico:** `acme/governance/trust-policy.yml` materializa ACL local, fallback de matcher/egress, revogações, quarantine de segredo e independência do oráculo. O validador rejeita política declarativa sem referência resolvível.
 - **Integrações externas são opcionais:** o framework funciona sem ferramentas externas; adapters entram como evidence providers/importers/projections para aproveitar o que a empresa já usa. O catálogo versionado mora em [`../integration-catalog.yml`](../integration-catalog.yml).
-- **Legado estático arquivado:** os antigos apps sem build (`owner`, `company`, `vendor`, `graph.js`, `build-graph.mjs`, `check-app-security.mjs`) ficam em `_archive/org-simulation-v3-static-apps-v1` como histórico F3/F4. A pasta ativa `_apps/` deve conter somente `governance-next`; `check-governance-app.mjs` e `test-adversarial.mjs` falham se o legado voltar para a superfície ativa.
+- **Legado estático arquivado:** os antigos apps sem build (`owner`, `company`, `vendor`, `graph.js`, `build-graph.mjs`, `check-app-security.mjs`) ficam em `_archive/org-simulation-v3-static-apps-v1` como histórico F3/F4. A pasta ativa `_apps/` deve conter somente `governance-next`; `check-governance-app.mjs` e `test-adversarial.ts` falham se o legado voltar para a superfície ativa.
 - O validador implementa **um subconjunto honesto** das regras da P10/P11/P12/P13: schema fail-closed, resolver de outcome, repo-first substrate, lifecycle repo-work, contrato local, drift de contexto e controles físicos de confiança. O que não está mecanizado fica registrado como próxima fatia, não como campo cerimonial.
 - **Self-attested target não é maquiado:** se a fonte que atesta pertence ao próprio time medido, o target exige `attestation-collapse` aprovado por sponsor; o dashboard mantém o badge/warning em vez de fingir independência.
 - **Contenção de contrato não é nota solta:** se múltiplas intents mudam o mesmo contrato, o contrato precisa de `revision-proposals` com intents cobertas, consumers afetados, owner-approval resolvido e decision não-pendente; deps cross-intent resolvem e o grafo global não pode ciclar.

@@ -15,7 +15,7 @@ completed-at: 2027-04-09
 source-commit: acme-checkout-api@fix-timeout-rev3
 evidence:
   kind: code-fixture
-  command: node backend/tools/check-code-fixtures.mjs --repo acme-checkout-api
+  command: node tools/checks/check-code-fixtures.ts --repo acme-checkout-api
   result: passed
   files:
     - src/routes/checkout.mjs

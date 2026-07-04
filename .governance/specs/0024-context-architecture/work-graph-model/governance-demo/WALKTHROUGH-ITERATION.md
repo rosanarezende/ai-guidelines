@@ -22,11 +22,11 @@ retomar daqui antes de pedir nova rodada externa.
    real, sem depender do console tecnico.
 2. O backend ativo da demo deve ser TypeScript strict no caminho importavel (`backend/src`,
    `frontend/server`, `mock-api/src`, testes novos). Código novo não deve nascer em `.mjs`.
-3. Os `.mjs` remanescentes em `backend/tools`, repos acme e testes de repos são legado/CLI/fixture
-   a auditar por lote; não devem crescer silenciosamente. O antigo grupo `backend/backends` foi
+3. Os CLIs em `tools/` agora estão em TypeScript e ficam fora do backend de produto. Os `.mjs`
+   remanescentes são fixtures dos repos acme, testes de repos ou shims técnicos pontuais; não
+   devem crescer silenciosamente. O antigo grupo `backend/backends` foi
    substituído por `backend/src/application/backend-examples/`, em TypeScript e dentro do typecheck.
-   `backend/tools` fica classificado como ferramental operacional legado: deve sair para
-   `governance-demo/tools/` e migrar por grupos para TypeScript, mas não nesta mudança em lote.
+   `tools/` é a casa correta do ferramental operacional da sim.
 4. A mock-api e suas seeds são contrato de desenvolvimento, não apenas conveniência. As seeds devem
    virar matriz de regressão E2E para proteger os cenários de onboarding, perfis, convites, host,
    fontes, assistente, stack, planejamento e modos de organização.
@@ -35,18 +35,18 @@ retomar daqui antes de pedir nova rodada externa.
 
 **Fatia de controle fechada nesta trilha:** cobertura E2E base por seeds da mock-api, telas base de
 settings e auditoria de legado. A auditoria versionada mora em
-[`reviews/2026-07-04-legacy-surface-audit.md`](reviews/2026-07-04-legacy-surface-audit.md).
+[`../_reviews/2026-07-04-legacy-surface-audit.md`](../_reviews/2026-07-04-legacy-surface-audit.md).
 
 **Legado a auditar antes de declarar a meta pronta:**
 
-| area                                            | estado atual observado                                                  | decisão pendente                                              |
-| ----------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `backend/tools/*.mjs`                           | CLIs/checks herdados da sim v3; ainda executam validações centrais      | mover para `governance-demo/tools/` e migrar por lote para TS |
-| `backend/src/application/backend-examples/*.ts` | build/smoke dos exemplos de backend derivados                           | manter como projeção ativa tipada                             |
-| `examples/read-models/*`                        | read-models derivados file/sqlite/neo4j/mongo + contrato de ação        | manter como artefato ativo derivado                           |
-| `acme/repos/**/src/*.mjs`                       | código MVP dos repos ficticios acme, usado como fixture de empresa real | manter como fixture polyglot; adicionar TS só se útil         |
-| `acme/repos/**/test.mjs`                        | testes locais dos repos ficticios, usados por adapters/smokes           | manter fixture ou migrar junto do repo correspondente         |
-| `_archive/*`                                    | historico v2 e apps estaticos v3 ja arquivados                          | manter arquivado; não reimportar para superfície ativa        |
+| area                                            | estado atual observado                                                  | decisão pendente                                                   |
+| ----------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `tools/**/*.ts`                                 | CLIs/checks operacionais da sim v3; executam validações centrais        | manter fora do backend; fortalecer tipos quando tocar a ferramenta |
+| `backend/src/application/backend-examples/*.ts` | build/smoke dos exemplos de backend derivados                           | manter como projeção ativa tipada                                  |
+| `backend/examples/read-models/*`                | read-models derivados file/sqlite/neo4j/mongo + contrato de ação        | manter como artefato ativo derivado                                |
+| `acme/repos/**/src/*.mjs`                       | código MVP dos repos ficticios acme, usado como fixture de empresa real | manter como fixture polyglot; adicionar TS só se útil              |
+| `acme/repos/**/test.mjs`                        | testes locais dos repos ficticios, usados por adapters/smokes           | manter fixture ou migrar junto do repo correspondente              |
+| `_archive/*`                                    | historico v2 e apps estaticos v3 ja arquivados                          | manter arquivado; não reimportar para superfície ativa             |
 
 ## Estado Atual
 
@@ -92,16 +92,16 @@ settings e auditoria de legado. A auditoria versionada mora em
 
 ## Bugs Tecnicos
 
-| id  | sintoma                                                   | causa provavel                                               | correcao esperada                                                         | status                   |
-| --- | --------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- | ------------------------ |
-| T1  | `item` vazando para DOM                                   | uso de `Grid` incompatível com a versao atual do MUI         | remover `Grid`; usar layout CSS grid via `Box`                            | fechado                  |
-| T2  | `alignItems`/`justifyContent`/`flexWrap` vazando para DOM | props de layout vazando por componentes de layout            | remover `Stack`/`Grid` da camada principal; usar `Box sx`                 | fechado                  |
-| T3  | hydration mismatch                                        | MUI/Emotion sem integracao SSR dedicada no App Router        | shell MUI client-only enquanto a sim nao instala pacote SSR dedicado      | fechado                  |
-| T4  | app sem tipos                                             | app em JS/JSX com `jsconfig`                                 | migrar para TS/TSX + `tsconfig` strict                                    | fechado                  |
-| T5  | runtime/backend sem contrato TS compartilhado             | `backend` tinha caminho ativo em `.mjs`; app duplicava tipos | criar dominio TS puro em `backend/src/domain/*.ts` e migrar runtime ativa | fechado R1               |
-| T6  | strings de produto hardcoded                              | locale global ou por feature ampla escalaria mal             | locale colocalizado por view/step/section/componente/subdomínio/shell     | fechado                  |
-| T7  | telas em `app/ui/views` e arquivos grandes                | camada `ui` misturava produto, console e shared              | mover experiencias para `app/features/*`; `ui` fica shell/shared/theme    | fechado                  |
-| T8  | tools/scripts ainda em `.mjs`                             | CLIs herdados da sim v3 e fixtures acme continuam em JS      | auditar por area: migrar TS, manter fixture ou arquivar                   | aberto; backends migrado |
+| id  | sintoma                                                   | causa provavel                                               | correcao esperada                                                         | status                              |
+| --- | --------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------- | ----------------------------------- |
+| T1  | `item` vazando para DOM                                   | uso de `Grid` incompatível com a versao atual do MUI         | remover `Grid`; usar layout CSS grid via `Box`                            | fechado                             |
+| T2  | `alignItems`/`justifyContent`/`flexWrap` vazando para DOM | props de layout vazando por componentes de layout            | remover `Stack`/`Grid` da camada principal; usar `Box sx`                 | fechado                             |
+| T3  | hydration mismatch                                        | MUI/Emotion sem integracao SSR dedicada no App Router        | shell MUI client-only enquanto a sim nao instala pacote SSR dedicado      | fechado                             |
+| T4  | app sem tipos                                             | app em JS/JSX com `jsconfig`                                 | migrar para TS/TSX + `tsconfig` strict                                    | fechado                             |
+| T5  | runtime/backend sem contrato TS compartilhado             | `backend` tinha caminho ativo em `.mjs`; app duplicava tipos | criar dominio TS puro em `backend/src/domain/*.ts` e migrar runtime ativa | fechado R1                          |
+| T6  | strings de produto hardcoded                              | locale global ou por feature ampla escalaria mal             | locale colocalizado por view/step/section/componente/subdomínio/shell     | fechado                             |
+| T7  | telas em `app/ui/views` e arquivos grandes                | camada `ui` misturava produto, console e shared              | mover experiencias para `app/features/*`; `ui` fica shell/shared/theme    | fechado                             |
+| T8  | tools/scripts ainda eram `.mjs`                           | CLIs herdados da sim v3 misturavam ferramenta e backend      | mover para `tools/` e converter para TS; fixtures acme podem seguir JS    | fechado para tools; fixtures seguem |
 
 ## Perfis de Uso
 
@@ -123,9 +123,9 @@ settings e auditoria de legado. A auditoria versionada mora em
 5. `configuracoes -> perfil da org -> papeis -> assistente Ollama -> catalogo de integracoes -> revisao de riscos`
 6. `seed -> rota relevante -> assert essencial`, para cada seed da mock-api que representa um
    estado de produto.
-7. `auditoria de legado -> decisao por pasta`, cobrindo `examples`, `backend/tools`, repos acme e
+7. `auditoria de legado -> decisao por pasta`, cobrindo `examples`, `tools`, repos acme e
    `_archive`; o antigo `backend/backends` ja foi absorvido por `backend/src/application` — base fechada em
-   `reviews/2026-07-04-legacy-surface-audit.md`.
+   `../_reviews/2026-07-04-legacy-surface-audit.md`.
 
 ## Proximas Fatias
 
@@ -133,6 +133,5 @@ settings e auditoria de legado. A auditoria versionada mora em
    existentes, com feedback humano claro na UI.
 2. Navegação por periodo/ciclo dentro dos dashboards de objetivos e resultados.
 3. Separação de console técnico/admin da experiência de leitura da owner.
-4. Mover `backend/tools` para `governance-demo/tools/` e migrar os CLIs legados `.mjs` para
-   TypeScript em lotes funcionais, sem apagar fixtures acme nem exemplos derivados que ainda
-   exercitam o dogfood.
+4. Fortalecer a tipagem interna dos CLIs grandes de `tools/**/*.ts` quando a própria ferramenta
+   for alterada, sem apagar fixtures acme nem exemplos derivados que ainda exercitam o dogfood.

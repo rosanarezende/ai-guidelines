@@ -179,7 +179,7 @@ Conjunto fechado de arestas, cada uma com critério único (anota-se 1 lado; o r
 - **Auditorias adversariais (evidência):** [`_audits/`](_audits/) — 4 rodadas (benchmark · taxonomia · ponta-a-ponta · fronteiras de confiança).
 - **Simulação ativa:** [`governance-demo/`](governance-demo/) — dogfood físico repo-first + runtime `backend/` + app `frontend/` + exemplos de backends derivados + smoke/loader file+Neo4j. Layout aplicado: host central em `governance-demo/acme/governance/`; repos adotados em `governance-demo/acme/repos/<repo>/`; standalone repo-local em `governance-demo/acme/repos/<repo>/.governance/works/*.yml`; incidentes centrais em `governance-demo/acme/governance/incidents/`; exemplos em `governance-demo/examples/backends/{file,neo4j,sqlite,mongo}`.
 - **Requisitos do app ponta-a-ponta:** [`app-requirements.md`](app-requirements.md) — contrato de produto/arquitetura para portar backend/frontend v3 sem perder os aprendizados da v2.
-- **Templates:** ativos da sim em [`governance-demo/templates/`](governance-demo/templates/); o caminho [`_templates/`](_templates/) é ponte histórica e os templates v2 foram arquivados em [`_archive/templates-v2/`](_archive/templates-v2/).
+- **Templates:** ativos da sim em [`governance-demo/backend/templates/`](governance-demo/backend/templates/); o caminho [`_templates/`](_templates/) é ponte histórica e os templates v2 foram arquivados em [`_archive/templates-v2/`](_archive/templates-v2/).
 
 ## 🔶 Abertos & próxima fase
 

@@ -1,4 +1,4 @@
-// FileReadModelSource.ts — lê o read-model exportado (examples/read-models/file).
+// FileReadModelSource.ts — lê o read-model exportado (backend/examples/read-models/file).
 // Fail-closed: se o contentHash do arquivo não bate com o corpo, a projeção é
 // considerada adulterada/stale e a leitura falha em vez de fingir frescor.
 import { createHash } from "node:crypto";

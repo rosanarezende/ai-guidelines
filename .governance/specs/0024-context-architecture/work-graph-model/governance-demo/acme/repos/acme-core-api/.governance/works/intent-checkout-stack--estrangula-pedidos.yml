@@ -22,7 +22,7 @@ completed-at: 2027-09-12
 source-commit: git:core-api-orders-strangler-001
 evidence:
   kind: code-fixture
-  command: node backend/tools/check-code-fixtures.mjs
+  command: node tools/checks/check-code-fixtures.ts
   result: passed
   files:
     - src/modules/orders.mjs

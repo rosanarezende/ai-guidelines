@@ -22,7 +22,7 @@ completed-at: 2027-01-11
 source-commit: git:core-api-accounts-seam-001
 evidence:
   kind: code-fixture
-  command: node backend/tools/check-code-fixtures.mjs
+  command: node tools/checks/check-code-fixtures.ts
   result: passed
   files:
     - src/modules/accounts.mjs

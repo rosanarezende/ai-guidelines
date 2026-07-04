@@ -1,5 +1,5 @@
 # trust-policy.yml — política mínima da sim v3.
-# Barra: todo item aqui precisa ser resolvido por backend/tools/validate.mjs; campo sem executor é cerimônia.
+# Barra: todo item aqui precisa ser resolvido por tools/checks/validate.ts; campo sem executor é cerimônia.
 
 access-requests:
   - id: req-billing-read-own-context
@@ -18,7 +18,7 @@ authority-revocations:
 secret-quarantine: []
 
 oracle-independence:
-  corpus: backend/tools/test-adversarial.mjs
+  corpus: tools/checks/test-adversarial.ts
   attack-by: codex
   expected-by: claude
   approved-by: owner

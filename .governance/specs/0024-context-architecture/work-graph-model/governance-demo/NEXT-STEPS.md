@@ -23,9 +23,9 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - `backend/src/domain/` materializa o contrato TypeScript compartilhado (snapshot, comandos, adoption shell, i18n, graph queries); o app consome só o SDK `@demo/backend[/domain]` — import interno/`.mjs` é barrado por guard;
 - `/api/graph*` expõe graph queries reais sobre a projeção derivada (listagem, nó, adjacência, caminho, impacto de contrato, deps de intent, conflitos) com `sourceRevision` explícita; `/api/contract` publica o contrato verificável da API;
 - integration adapters executáveis com política de egress fail-closed + redação mínima: `assistant-ollama` (health + advisory local), `git-local`, `ci-local`, `code-quality` e `observability`; `check-integrations.mjs` prova sucesso, falha honesta, egress bloqueado e evidência adulterada;
-- `examples/read-models/` materializa exemplos derivados nos 4 formatos estudados na v2: file e Neo4j completos/prioritários, SQLite e Mongo completos como read-models derivados;
+- `backend/examples/read-models/` materializa exemplos derivados nos 4 formatos estudados na v2: file e Neo4j completos/prioritários, SQLite e Mongo completos como read-models derivados;
 - `check-backend-examples.mjs` prova o read-model file + Cypher Neo4j com hash, refs, event-log, cobertura de nós/arestas e contrato de ação;
-- `load-neo4j-example.mjs --dry-run` monta o plano executável de carga Neo4j; `--apply` é fail-closed e exige `--source-hash` + credenciais HTTP explícitas;
+- `load-neo4j-example.ts --dry-run` monta o plano executável de carga Neo4j; `--apply` é fail-closed e exige `--source-hash` + credenciais HTTP explícitas;
 - `frontend/` materializa a superfície operacional em React/Next + Material UI, TypeScript strict, como workspace npm com dependências explícitas, consumindo a runtime v3 por API routes e enviando comandos governados;
 - o app é route-first: rotas `app/*/page.tsx` finas com gate server-side, implementação colocalizada em pastas privadas (`_view`, `_steps`, `_sections`, `_components`, `_model`, `_state`), domínio de frontend em `app/_domain` e UI compartilhada em `app/_ui`; locales `_locales/pt-br.json` vivem no menor dono estável da copy;
 - o fluxo inicial é real: `/signup` cria `local-principal` (identidade LOCAL honesta, sem auth), `/organizations` cria/seleciona organizações (multi-org com contexto separado; demo `acme-*` anexável como fixture `sandbox-demo`), onboarding e status por organização; o shell local persiste file-first em `frontend/.local-state/` (JSON + event-log + lock + idempotência) via backend TS `server/adoption/` com domínio compartilhado puro em `backend/domain/adoption-shell.ts`;
@@ -36,7 +36,7 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - `verdict.accept` do `intent-cta-upgrade` foi executado no estado canônico via runtime, criando `decisions/verdicts.yml` e `events/events.jsonl` sem edição manual;
 - `currentRevision()` inclui também triages, repo-work claims e repo-contract registries, então sidecar repo-local não é uma mutação invisível para stale-check;
 - standalone reativo/avulso executável mora no repo (`acme/repos/<repo>/.governance/works/*.yml`); incidentes centrais moram em `acme/governance/incidents/incidents.yml` e geram follow-ups resolvíveis;
-- `node backend/tools/adoption-journey.mjs` exercita código, contextos, work acknowledgements, contratos, red-team, testes locais, exemplos de backend derivados e app Next/MUI ativo.
+- `node tools/journeys/adoption-journey.ts` exercita código, contextos, work acknowledgements, contratos, red-team, testes locais, exemplos de backend derivados e app Next/MUI ativo.
 
 Limite deliberado/pendente: a v3 já prova o file backend transacional mínimo, mas ainda não migrou adapters sqlite/neo4j/mongo como portas write-capable nem read-models `db.json` por repo. Ela é a sim ativa de dogfood file-first; Neo4j já tem export, smoke e loader opcional de projeção, mas continua read-model derivado, não SSOT.
 
@@ -89,7 +89,7 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **FEITO — backend/runtime TypeScript:** `backend/src/` é domínio/aplicação/ports/adapters/api em TS strict; `backend/src/application/backend-examples/` já cobre export/smoke dos exemplos derivados e entra no typecheck do backend. Sobra desta fatia: migrar os CLIs grandes (`check-runtime`, `test-adversarial`, `adoption-journey`, publishers repo-first e demais `tools/*.mjs`) para `.ts` por lote funcional quando houver motivo.
+1. **FEITO — backend/runtime TypeScript + tools fora do backend:** `backend/src/` é domínio/aplicação/ports/adapters/api em TS strict; `backend/src/application/backend-examples/` já cobre export/smoke dos exemplos derivados e entra no typecheck do backend. Os CLIs operacionais saíram de `backend/` e vivem em `tools/{checks,repo-first,read-models,journeys}` como TypeScript executado pelo Node nativo. Sobra futura: fortalecer tipos internos dos wrappers grandes e remover `backend/index.mjs`/`backend/paths.mjs` quando não forem mais necessários como shims.
 2. **Declaracao de produto do app: FEITO.** [`APP-PRODUCT-STATEMENT.md`](APP-PRODUCT-STATEMENT.md) define o app como superficie humana local-first do framework, explicita o que ele nao e (SaaS pago assumido, segundo SSOT, clone de backlog) e estabelece a integracao com a CLI `ai-guidelines`.
 3. **Contrato funcional do app: FEITO.** [`APP-FUNCTIONAL-SPEC.md`](APP-FUNCTIONAL-SPEC.md) descreve todas as telas/fluxos desejados e separa `UI real`, `UI parcial`, `Backend real`, `Console tecnico`, `Demo/read-only` e `Futuro`. Ele e a referencia para decidir o que criar agora e o que manter como feature futura.
 4. **Decisoes QRD do app: FEITO.** [`APP-DECISIONS.md`](APP-DECISIONS.md) registra as decisoes ja tomadas sobre ambientes, mock API (`mock-api`), lowdb, Hono, MSW, Playwright/e2e, governance host, membros/papeis, subjects/grupos, natureza do app e integracao app x CLI.
@@ -107,18 +107,18 @@ Fechado:
 
 ```bash
 cd governance-demo
-node backend/tools/validate.mjs
-node backend/tools/test-adversarial.mjs
-node backend/tools/check-local-repo-tests.mjs
-node backend/tools/check-runtime.mjs
-node backend/tools/check-governance-app.mjs
-node backend/tools/export-backend-examples.mjs --check
-node backend/tools/check-backend-examples.mjs
-node backend/tools/load-neo4j-example.mjs --dry-run
-node backend/tools/check-integrations.mjs
+node tools/checks/validate.ts
+node tools/checks/test-adversarial.ts
+node tools/checks/check-local-repo-tests.ts
+node tools/checks/check-runtime.ts
+node tools/checks/check-governance-app.ts
+node tools/read-models/export-backend-examples.ts --check
+node tools/read-models/check-backend-examples.ts
+node tools/read-models/load-neo4j-example.ts --dry-run
+node tools/checks/check-integrations.ts
 npm --workspace acme-governance-backend run typecheck
 npm --workspace acme-governance-mock-api run typecheck
 npm --workspace acme-governance-mock-api run reset
 npm --workspace acme-governance-e2e run test:e2e
-node backend/tools/adoption-journey.mjs
+node tools/journeys/adoption-journey.ts
 ```

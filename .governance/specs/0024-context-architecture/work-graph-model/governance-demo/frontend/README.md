@@ -11,7 +11,7 @@ Pronto nesta fatia:
 - App Next em TypeScript, isolado no workspace `acme/governance-next-app`.
 - Fluxo inicial real: `/signup` (identidade local honesta, `local-principal`) -> `/organizations` (criar/escolher organizacao; multi-organizacao com contexto separado) -> `/onboarding` por organizacao -> `/` Home da organizacao atual.
 - Backend TypeScript do shell local em `server/adoption/` com boundaries claros: dominio puro em `backend/src/domain/adoption-shell.ts`, use-cases em `application/`, persistencia file-first em `infrastructure/` (estado JSON + event-log JSONL + lock + escrita atomica + idempotencia por comando) e interface em `app/api/local/*` + cookie de sessao httpOnly.
-- Fronteira backend por SDK: o app consome apenas `@demo/backend` (use cases/handlers server-side) e `@demo/backend/domain` (contrato browser-safe). Import de modulo interno (`backend/src/...`, `backend/tools/...`, qualquer `.mjs`) e barrado pelo guard — a fronteira ja nasce pronta para clientes web/native separados.
+- Fronteira backend por SDK: o app consome apenas `@demo/backend` (use cases/handlers server-side) e `@demo/backend/domain` (contrato browser-safe). Import de modulo interno (`backend/src/...`, `tools/...`, qualquer `.mjs`) e barrado pelo guard — a fronteira ja nasce pronta para clientes web/native separados.
 - API local tipada: rotas de graph queries (`/api/graph*`), integracoes (`/api/integrations*`), advisory do assistente e contrato verificavel em `/api/contract`; requests validadas por schema (400 fail-closed) na camada `backend/src/api`.
 - Demo `acme-*` anexavel como organizacao `sandbox-demo` (badge demo); organizacao nova/vazia tem Home, Settings e Console honestos, sem dados da acme.
 - Home de adocao (demo) com tarefas, pendencias derivadas e proximo passo; Home de organizacao nova com checklist real (perfil/host/fontes).
@@ -276,7 +276,7 @@ Checar build/snapshot da sim:
 
 ```bash
 cd .governance/specs/0024-context-architecture/work-graph-model/governance-demo
-node backend/tools/check-governance-app.mjs
+node tools/checks/check-governance-app.ts
 ```
 
 ## Shell local de adocao — o que e real e o que nao e

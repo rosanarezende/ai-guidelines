@@ -236,7 +236,7 @@ export function authorizeShellCommand(
       const completion = workspace
         ? canCompleteOnboarding(workspace)
         : { ok: false as const, blockers: ["unknown-workspace"] };
-      if (!completion.ok) {
+      if (completion.ok === false) {
         return {
           ok: false,
           error: `onboarding-incomplete:${completion.blockers.join(",")}`,
@@ -307,6 +307,6 @@ export function applyAuthorizedShellCommand(
   command: LocalShellCommand
 ): ShellReduceResult {
   const decision = authorizeShellCommand(state, command);
-  if (!decision.ok) return { ok: false, error: decision.error };
+  if (decision.ok === false) return { ok: false, error: decision.error };
   return applyShellCommand(state, command);
 }

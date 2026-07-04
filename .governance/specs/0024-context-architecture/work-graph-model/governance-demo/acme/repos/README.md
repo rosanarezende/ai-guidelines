@@ -13,7 +13,7 @@ They intentionally keep runtime small: plain ESM modules, no install step, no re
 Run the source smoke from the simulation root:
 
 ```bash
-node backend/tools/check-code-fixtures.mjs
+node tools/checks/check-code-fixtures.ts
 ```
 
 The governance SSOT is still the YAML model. These files are product-code fixtures that will let later manifest/context derivation inspect real repo surfaces instead of a flat central catalog.

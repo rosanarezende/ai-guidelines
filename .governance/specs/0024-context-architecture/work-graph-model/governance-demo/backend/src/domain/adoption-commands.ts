@@ -192,7 +192,9 @@ export function applyShellCommand(
         if (workspace.onboardingStatus === "finished" && status === "partial") return workspace;
         if (status === "finished") {
           const completion = canCompleteOnboarding(workspace);
-          if (!completion.ok) return { error: `onboarding-incomplete:${completion.blockers[0]}` };
+          if (completion.ok === false) {
+            return { error: `onboarding-incomplete:${completion.blockers[0]}` };
+          }
         }
         return { ...workspace, onboardingStatus: status as Workspace["onboardingStatus"] };
       });

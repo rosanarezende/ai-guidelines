@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "smoke": "node ../../../backend/tools/check-code-fixtures.mjs"
+    "smoke": "node ../../../tools/checks/check-code-fixtures.ts"
   },
   "dependencies": {
     "@acme-sim/acme-analytics": "workspace:*"

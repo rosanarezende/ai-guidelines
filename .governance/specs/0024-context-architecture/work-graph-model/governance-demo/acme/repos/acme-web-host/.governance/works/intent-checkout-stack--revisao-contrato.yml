@@ -22,7 +22,7 @@ completed-at: 2027-09-15
 source-commit: git:web-host-user-context-v4-001
 evidence:
   kind: code-fixture
-  command: node backend/tools/check-code-fixtures.mjs
+  command: node tools/checks/check-code-fixtures.ts
   result: passed
   files:
     - src/index.mjs

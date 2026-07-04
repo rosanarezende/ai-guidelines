@@ -161,7 +161,7 @@ export function defaultPayloadFor(type: CommandType, snapshot: GovernanceSnapsho
         "source-commit": `${standalone?.repo || "acme-checkout"}@ui-local`,
         evidence: {
           kind: "code-fixture",
-          command: `node backend/tools/check-code-fixtures.mjs --repo ${standalone?.repo || "acme-checkout"}`,
+          command: `node tools/checks/check-code-fixtures.ts --repo ${standalone?.repo || "acme-checkout"}`,
           result: "passed",
           files: ["src/index.mjs"],
         },

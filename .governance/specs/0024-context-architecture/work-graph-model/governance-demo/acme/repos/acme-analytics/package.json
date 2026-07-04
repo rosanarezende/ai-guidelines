@@ -4,6 +4,6 @@
   "type": "module",
   "scripts": {
     "test": "node test.mjs",
-    "smoke": "node ../../../backend/tools/check-code-fixtures.mjs"
+    "smoke": "node ../../../tools/checks/check-code-fixtures.ts"
   }
 }

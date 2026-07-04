@@ -21,7 +21,7 @@ completed-at: 2027-01-06
 source-commit: git:api-billing-spike-001
 evidence:
   kind: code-fixture
-  command: node backend/tools/check-code-fixtures.mjs
+  command: node tools/checks/check-code-fixtures.ts
   result: passed
   files:
     - src/index.mjs
