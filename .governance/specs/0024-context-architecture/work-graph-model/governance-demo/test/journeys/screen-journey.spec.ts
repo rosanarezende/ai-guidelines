@@ -75,6 +75,43 @@ test("settings permite declarar sandbox sem fingir governança real", async ({ p
   await expect(page.getByText("Sandbox declarado — sem governança real.")).toBeVisible();
 });
 
+test("settings gerencia pessoas, papéis e fontes sem console técnico", async ({
+  page,
+  request,
+}) => {
+  await openSeedWorkspace(page, request, "empty-workspace");
+
+  await page.goto("/settings");
+
+  await expect(page.getByText("Pessoas, times e convites")).toBeVisible();
+  await page.getByLabel("Nome da pessoa").fill("Bia Produto");
+  await page.getByLabel("E-mail opcional").fill("bia@acme.example");
+  await page.getByRole("button", { name: "Criar convite" }).click();
+  await expect(page.getByText(/Token do convite criado:/)).toBeVisible();
+  await expect(page.getByText("Bia Produto")).toBeVisible();
+
+  await page.getByLabel("Nome do time/grupo").fill("Time Produto");
+  await page.getByLabel("IDs de pessoas separados por vírgula").fill("person-ana");
+  await page.getByRole("button", { name: "Criar grupo" }).click();
+  await expect(page.getByText("Time Produto")).toBeVisible();
+
+  await expect(page.getByText("Papéis e autoridade")).toBeVisible();
+  await page.getByLabel("Papel").click();
+  await page.getByRole("option", { name: "Atesta resultados" }).click();
+  await page.getByRole("button", { name: "Registrar papel" }).click();
+  await expect(page.getByText("Autoridade efetiva", { exact: true })).toBeVisible();
+  await expect(page.getByText("Atesta resultados").first()).toBeVisible();
+
+  await expect(page.getByRole("heading", { name: "Fontes de trabalho" })).toBeVisible();
+  await page.getByLabel("Nome legível").fill("Repo checkout");
+  await page.getByLabel("Caminho ou URL").fill("C:/acme/acme-checkout");
+  await page.getByRole("button", { name: "Adicionar fonte" }).click();
+  await expect(page.getByText("Repo checkout")).toBeVisible();
+  await page.getByRole("button", { name: "Escanear" }).click();
+  await expect(page.getByText("hash: mock000000")).toBeVisible();
+  await expect(page.getByText("arquivos: 42")).toBeVisible();
+});
+
 test("onboarding diagnostica time enxuto e leva para papéis sem autoridade fake", async ({
   page,
   request,

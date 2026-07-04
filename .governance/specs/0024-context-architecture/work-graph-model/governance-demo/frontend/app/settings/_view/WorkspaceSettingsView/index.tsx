@@ -12,7 +12,13 @@ import {
   type Workspace,
 } from "@demo/backend/domain";
 import GovernanceHostSection from "./GovernanceHostSection";
+import MembersSection from "./MembersSection";
+import membersCopy from "./MembersSection/_locales/pt-br.json";
+import RolesSection from "./RolesSection";
+import rolesCopy from "./RolesSection/_locales/pt-br.json";
 import SwitchSection from "./SwitchSection";
+import WorkSourcesSection from "./WorkSourcesSection";
+import sourcesCopy from "./WorkSourcesSection/_locales/pt-br.json";
 import copy from "./_locales/pt-br.json";
 
 const m = copy.messages;
@@ -72,6 +78,18 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
               suggestions,
             }}
           />
+        </SectionCard>
+
+        <SectionCard title={membersCopy.title}>
+          <MembersSection />
+        </SectionCard>
+
+        <SectionCard title={rolesCopy.title}>
+          <RolesSection />
+        </SectionCard>
+
+        <SectionCard title={sourcesCopy.title}>
+          <WorkSourcesSection />
         </SectionCard>
 
         <SwitchSection />
