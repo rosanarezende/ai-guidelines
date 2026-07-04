@@ -81,7 +81,7 @@ de legado descrita abaixo.
 | W14 | backend       | rotas locais nao podem confiar em payload do cliente para authority                     | P0         | fechado R1.1      |
 | W15 | backend       | convite aceito precisa virar membership real, nao apenas estado visual                  | P0         | fechado R1.1      |
 | W16 | onboarding    | `finished` nao pode ser setado sem host governado ou sandbox explicito                  | P0         | fechado R1.1      |
-| W17 | e2e           | seeds da mock-api precisam virar cobertura de regressao, nao so fixture manual          | P1         | proxima fatia     |
+| W17 | e2e           | seeds da mock-api precisam virar cobertura de regressao, nao so fixture manual          | P1         | fechado base      |
 | W18 | legado        | identificar o que ainda e legado em `governance-demo` antes de deletar/arquivar         | P1         | proxima fatia     |
 
 ## Bugs Tecnicos
@@ -122,8 +122,8 @@ de legado descrita abaixo.
 
 ## Proximas Fatias
 
-1. Criar matriz E2E por seed da mock-api: pelo menos smoke de rota + 2/3 asserts essenciais por
-   seed relevante.
+1. Aprofundar E2E por tela a partir das seeds mais críticas: pessoas/papéis, host/fontes,
+   assistente/integrações e planning.
 2. Completar telas dedicadas de pessoas/papéis/fontes usando as APIs R1 ja existentes, evitando
    depender do console técnico.
 3. Persistir mudanças reais de perfil/stack/host/fontes/assistente via comandos governados já

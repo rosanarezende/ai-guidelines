@@ -2,7 +2,7 @@
 // Prova que convite cria membership real e que membership comum não autoriza
 // configuração sensível do workspace.
 import { test, expect } from "@playwright/test";
-import { MOCK_API_URL } from "../playwright.config";
+import { MOCK_API_URL } from "../playwright.config.ts";
 
 test.beforeEach(async ({ request }) => {
   const reset = await request.post(`${MOCK_API_URL}/__reset`, { data: { seed: "blank" } });

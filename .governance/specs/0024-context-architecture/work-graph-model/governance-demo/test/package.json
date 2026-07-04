@@ -4,7 +4,8 @@
   "type": "module",
   "description": "Jornadas e2e (Playwright) da governance-demo contra Next em modo mock-api com seeds resetaveis. e2e valida EXPERIENCIA; governanca real e provada pelos checks do backend.",
   "scripts": {
-    "test:e2e": "playwright test"
+    "typecheck": "tsc -p tsconfig.json",
+    "test:e2e": "npm run typecheck && playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",
