@@ -481,7 +481,9 @@ export function normalizeWorkspace(workspace: Workspace): Workspace {
 export type PrincipalMembership = {
   principalId: string;
   workspaceId: string;
+  personId?: string;
   roles: MembershipRole[];
+  status?: "active" | "revoked";
 };
 
 export const ADOPTION_STATE_SCHEMA = "governance.local-adoption/v1";
@@ -601,10 +603,25 @@ export function buildEmptyWorkspace(id: string, name: string, kind: WorkspaceKin
 export function principalWorkspaces(state: AdoptionState, principalId: string): Workspace[] {
   const ids = new Set(
     state.memberships
-      .filter((membership) => membership.principalId === principalId)
+      .filter(
+        (membership) => membership.principalId === principalId && membership.status !== "revoked"
+      )
       .map((membership) => membership.workspaceId)
   );
   return state.workspaces.filter((workspace) => ids.has(workspace.id));
+}
+
+export function principalMembershipForWorkspace(
+  state: AdoptionState,
+  principalId: string,
+  workspaceId: string
+): PrincipalMembership | undefined {
+  return state.memberships.find(
+    (membership) =>
+      membership.principalId === principalId &&
+      membership.workspaceId === workspaceId &&
+      membership.status !== "revoked"
+  );
 }
 
 export function principalCanAccessWorkspace(
@@ -612,9 +629,15 @@ export function principalCanAccessWorkspace(
   principalId: string,
   workspaceId: string
 ): boolean {
-  return state.memberships.some(
-    (membership) => membership.principalId === principalId && membership.workspaceId === workspaceId
-  );
+  return Boolean(principalMembershipForWorkspace(state, principalId, workspaceId));
+}
+
+export function principalPersonId(
+  state: AdoptionState,
+  principalId: string,
+  workspaceId: string
+): string | undefined {
+  return principalMembershipForWorkspace(state, principalId, workspaceId)?.personId;
 }
 
 export function isDemoWorkspace(workspace: Pick<Workspace, "id" | "kind">): boolean {
@@ -665,6 +688,35 @@ export function resolveWorkspaceAuthority(workspace: Workspace): AuthorityGrant[
 
 export function personAuthority(workspace: Workspace, personId: string): AuthorityGrant[] {
   return resolveWorkspaceAuthority(workspace).filter((grant) => grant.personId === personId);
+}
+
+export function principalAuthority(
+  state: AdoptionState,
+  principalId: string,
+  workspaceId: string
+): AuthorityGrant[] {
+  const workspace = state.workspaces.find((item) => item.id === workspaceId);
+  const personId = principalPersonId(state, principalId, workspaceId);
+  if (!workspace || !personId) return [];
+  return personAuthority(workspace, personId);
+}
+
+export function principalHasAnyWorkspaceRole(
+  state: AdoptionState,
+  principalId: string,
+  workspaceId: string,
+  roleIds: WorkspaceRoleId[]
+): boolean {
+  const membership = principalMembershipForWorkspace(state, principalId, workspaceId);
+  if (!membership) return false;
+  if (membership.roles.includes("admin")) return true;
+  return principalAuthority(state, principalId, workspaceId).some((grant) =>
+    roleIds.includes(grant.roleId)
+  );
+}
+
+export function roleIsSensitive(roleId: WorkspaceRoleId): boolean {
+  return SENSITIVE_ROLE_IDS.includes(roleId);
 }
 
 // Acumulação sensível detectada (não bloqueada aqui — política decide).
@@ -731,10 +783,39 @@ export function workspaceHasGovernanceHost(workspace: Workspace): boolean {
   return Boolean(workspace.governanceHost?.kind && workspace.governanceHost.pathOrUrl);
 }
 
+export function workspaceHasValidGovernanceHost(workspace: Workspace): boolean {
+  if (isDemoWorkspace(workspace)) return workspaceHasGovernanceHost(workspace);
+  const host = workspace.governanceHost;
+  if (!host?.kind || !host.pathOrUrl) return false;
+  if (host.status !== "linked" && host.status !== "scaffolded") return false;
+  const fit = host.fitCheck;
+  return Boolean(fit?.ok && fit.manifestPresent && fit.eventLogPresent);
+}
+
 export function workspaceHasEvidenceSource(workspace: Workspace): boolean {
   return workspace.workSources.some(sourceCanProveExecution);
 }
 
 export function workspaceIsGovernable(workspace: Workspace): boolean {
-  return workspaceHasGovernanceHost(workspace);
+  return workspaceHasValidGovernanceHost(workspace);
+}
+
+export type OnboardingCompletionResult = { ok: true } | { ok: false; blockers: string[] };
+
+export function canCompleteOnboarding(workspace: Workspace): OnboardingCompletionResult {
+  const ws = normalizeWorkspace(workspace);
+  if (isDemoWorkspace(ws)) return { ok: true };
+  const blockers: string[] = [];
+  if (!ws.profileDeclaration) blockers.push("missing-profile");
+  if (!ws.mode) blockers.push("missing-workspace-mode");
+  if (!ws.stack) blockers.push("missing-workspace-stack");
+  if (!ws.sandboxDeclared && !workspaceHasValidGovernanceHost(ws)) {
+    blockers.push("missing-governance-host");
+  }
+  if (ws.mode && ws.stack) {
+    for (const warning of stackCompatibilityWarnings(ws.mode, ws.stack)) {
+      blockers.push(`stack-warning:${warning}`);
+    }
+  }
+  return blockers.length ? { ok: false, blockers } : { ok: true };
 }

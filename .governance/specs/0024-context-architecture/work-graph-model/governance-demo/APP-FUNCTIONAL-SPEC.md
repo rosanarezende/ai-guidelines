@@ -851,13 +851,15 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 
 **Estado atual:**
 
-- representacao parcial.
+- backend real existe para convite local, aceite tokenizado, revogacao, status de membro,
+  membership `principal -> person`, atribuicao de papeis por subject e authority derivada;
+- a UI ainda e parcial: falta uma tela humana dedicada para gerenciar pessoas, grupos, convites,
+  aceite/rejeicao e explicacao de autoridade herdada.
 
 **Backend pendente:**
 
-- membership/authority real para app.
-- subject model tipado.
-- access-policy por workspace.
+- access-policy por workspace para restringir quem pode convidar, propor papel e alterar grupos;
+- integracao futura com identity-provider real para substituir a sessao local nao assinada.
 
 ### 9.3 Fontes de trabalho
 
@@ -1477,9 +1479,9 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 | ---------------- | ------------------------------------------------------------------------------- | ------------------------------------------- |
 | Signup           | principal local + sessao                                                        | existe                                      |
 | Multi-workspace  | create/select/list workspace                                                    | existe parcialmente                         |
-| Governance host  | create/link/validate/scaffold                                                   | falta produto                               |
-| Membros/convites | invite/accept/assign/revoke                                                     | falta                                       |
-| Perfil           | recommend/save/change/approve                                                   | falta persistencia real                     |
+| Governance host  | create/link/validate/scaffold                                                   | backend existe; falta UI completa           |
+| Membros/convites | invite/accept/assign/revoke                                                     | backend existe; falta UI completa           |
+| Perfil           | recommend/save/change/approve                                                   | save persiste; change/approve falta         |
 | Fontes           | add/scan/publish context                                                        | backend parcial por CLI/adapters; falta UI  |
 | Assistente       | providers/defaults/health/probe/test/advisory/audit                             | backend parcial; UI parcial                 |
 | Integracoes      | list/configure/test/evidence feed                                               | backend parcial; UI parcial                 |

@@ -18,12 +18,23 @@ const NOW = "2027-01-10T12:00:00.000Z";
 const LATER = "2027-01-17T12:00:00.000Z";
 
 function base(mutate?: (workspace: Workspace) => Workspace): AdoptionState {
-  const workspace = buildEmptyWorkspace("acme-honey", "Acme Honey", "company");
+  const workspace = {
+    ...buildEmptyWorkspace("acme-honey", "Acme Honey", "company"),
+    people: [{ id: "person-ana", displayName: "Ana" }],
+  };
   return {
     ...emptyAdoptionState(),
     principals: [ANA],
     workspaces: [mutate ? mutate(workspace) : workspace],
-    memberships: [{ principalId: ANA.id, workspaceId: "acme-honey", roles: ["admin"] }],
+    memberships: [
+      {
+        principalId: ANA.id,
+        workspaceId: "acme-honey",
+        personId: "person-ana",
+        roles: ["admin"],
+        status: "active",
+      },
+    ],
   };
 }
 
@@ -397,7 +408,7 @@ export const SEEDS: Record<string, () => AdoptionState> = {
   "workspace-planning-progressivo": () => {
     // planejamento mora no host governado; a seed representa o cenário com a
     // demo acme anexada (objectives/targets reais) + workspace próprio pronto
-    const state = base((ws) => ({ ...ws, onboardingStatus: "finished" }));
+    const state = base((ws) => ({ ...ws, onboardingStatus: "finished", sandboxDeclared: true }));
     return {
       ...state,
       workspaces: [...state.workspaces, buildDemoWorkspace("Acme")],

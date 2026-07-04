@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Container,
-  CssBaseline,
-  ThemeProvider,
-} from "@mui/material";
+import { Box, Container, CssBaseline, ThemeProvider } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import type { GovernanceSnapshot } from "@/lib/types";
 import { theme } from "@/app/_ui/theme";

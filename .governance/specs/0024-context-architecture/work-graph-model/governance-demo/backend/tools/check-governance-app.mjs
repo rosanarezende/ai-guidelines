@@ -456,6 +456,13 @@ const backendTsc = spawnSync(process.execPath, [tscBin, "-p", backendTsconfigFil
 });
 if (backendTsc.status !== 0) fail("typecheck strict do backend falhou");
 
+const backendShellTests = spawnSync(process.execPath, ["--test", "tests/**/*.test.ts"], {
+  cwd: backendRoot,
+  stdio: "inherit",
+  shell: false,
+});
+if (backendShellTests.status !== 0) fail("testes do shell de adoção falharam");
+
 const nextBin = path.join(repoRoot, "node_modules", "next", "dist", "bin", "next");
 const result = spawnSync(process.execPath, [nextBin, "build", "--webpack"], {
   cwd: appDir,

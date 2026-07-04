@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import {
   detectSensitiveAccumulation,
   normalizeWorkspace,
+  principalPersonId,
   resolveWorkspaceAuthority,
   type AuthorityGrant,
   type SubjectRef,
@@ -12,7 +13,13 @@ import {
   type WorkspaceInvite,
   type WorkspaceRoleId,
 } from "@demo/backend/domain";
-import { dispatchForWorkspace, readShellState, type UseCaseResult } from "./use-cases";
+import {
+  dispatchForWorkspace,
+  dispatchShellCommand,
+  newShellCommand,
+  readShellState,
+  type UseCaseResult,
+} from "./use-cases";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -72,7 +79,7 @@ export async function invitePerson(input: {
 
 export async function decideInvite(input: {
   principalId: string;
-  workspaceId: string;
+  workspaceId?: string;
   inviteId: string;
   action: "accept" | "decline" | "revoke";
   token?: unknown;
@@ -83,11 +90,31 @@ export async function decideInvite(input: {
       : input.action === "decline"
         ? "local.invite.decline"
         : "local.invite.revoke";
-  return dispatchForWorkspace(type, input.principalId, input.workspaceId, {
-    inviteId: input.inviteId,
-    ...(typeof input.token === "string" ? { token: input.token } : {}),
-    ...(input.action === "accept" ? { personId: `person-${randomUUID()}` } : {}),
-  });
+  const state = await readShellState();
+  const workspaceId =
+    input.workspaceId ||
+    state.workspaces.find((workspace) =>
+      normalizeWorkspace(workspace).invites.some(
+        (invite) =>
+          invite.id === input.inviteId &&
+          typeof input.token === "string" &&
+          invite.token === input.token
+      )
+    )?.id;
+  if (!workspaceId) return { ok: false, error: "unknown-invite" };
+  const result = await dispatchShellCommand(
+    newShellCommand(type, input.principalId, {
+      workspaceId,
+      inviteId: input.inviteId,
+      ...(typeof input.token === "string" ? { token: input.token } : {}),
+      ...(input.action === "accept" ? { personId: `person-${randomUUID()}` } : {}),
+    })
+  );
+  if (!result.ok) return result;
+  const workspace = result.state.workspaces.find((item) => item.id === workspaceId);
+  return workspace
+    ? { ok: true, value: normalizeWorkspace(workspace) }
+    : { ok: false, error: "unknown-workspace" };
 }
 
 export async function createGroup(input: {
@@ -113,9 +140,10 @@ export async function assignRole(input: {
   workspaceId: string;
   subject: SubjectRef;
   roleId: unknown;
-  actorPersonId?: unknown;
   reason?: unknown;
 }): Promise<UseCaseResult<Workspace>> {
+  const state = await readShellState();
+  const actorPersonId = principalPersonId(state, input.principalId, input.workspaceId);
   return dispatchForWorkspace("local.role.assign", input.principalId, input.workspaceId, {
     assignment: {
       id: `role-${randomUUID()}`,
@@ -126,7 +154,7 @@ export async function assignRole(input: {
       proposedAt: new Date().toISOString(),
       ...(typeof input.reason === "string" && input.reason ? { reason: input.reason } : {}),
     },
-    ...(typeof input.actorPersonId === "string" ? { actorPersonId: input.actorPersonId } : {}),
+    ...(actorPersonId ? { actorPersonId } : {}),
   });
 }
 

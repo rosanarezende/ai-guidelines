@@ -39,9 +39,7 @@ export function RecommendationCard() {
                   : copy.recommendation.recommendedLabel
               }
             />
-            <Typography sx={{ fontSize: 18, fontWeight: 800 }}>
-              {effectiveProfile.label}
-            </Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 800 }}>{effectiveProfile.label}</Typography>
           </Flex>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {deriveRecommendationSubtitle({
@@ -55,11 +53,7 @@ export function RecommendationCard() {
         </Box>
         <Flex gap={1} wrap>
           {manualProfileSelected && profile !== recommendedProfileId ? (
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={useRecommendedProfile}
-            >
+            <Button size="small" variant="outlined" onClick={useRecommendedProfile}>
               {copy.recommendation.useRecommendation}
             </Button>
           ) : null}
@@ -91,7 +85,10 @@ export function RecommendationCard() {
       ) : null}
 
       <ResponsiveGrid min={210} gap={1.5}>
-        <ProfileDetailList title={copy.recommendation.columns.will} items={effectiveProfile.appWill} />
+        <ProfileDetailList
+          title={copy.recommendation.columns.will}
+          items={effectiveProfile.appWill}
+        />
         <ProfileDetailList
           title={copy.recommendation.columns.willNot}
           items={effectiveProfile.appWillNot}
@@ -107,7 +104,12 @@ export function RecommendationCard() {
           {copy.recommendation.changes}
         </Typography>
         {effectiveProfile.ceremony.map((item) => (
-          <Chip key={item} size="small" label={item} sx={{ bgcolor: "#eaf1ec", color: "#1a5632" }} />
+          <Chip
+            key={item}
+            size="small"
+            label={item}
+            sx={{ bgcolor: "#eaf1ec", color: "#1a5632" }}
+          />
         ))}
       </Flex>
 

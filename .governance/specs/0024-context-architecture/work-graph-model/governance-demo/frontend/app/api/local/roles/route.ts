@@ -29,7 +29,6 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     subject?: SubjectRef;
     roleId?: unknown;
-    actorPersonId?: unknown;
     reason?: unknown;
   } | null;
   if (!body?.subject)
@@ -38,7 +37,6 @@ export async function POST(request: Request) {
     ...check.session,
     subject: body.subject,
     roleId: body.roleId,
-    actorPersonId: body.actorPersonId,
     reason: body.reason,
   });
   if (!result.ok) return NextResponse.json(result, { status: 422 });

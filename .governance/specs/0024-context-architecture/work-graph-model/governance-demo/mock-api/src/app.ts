@@ -6,7 +6,10 @@
 //   POST /__reset             — { seed? } recarrega a seed (default: blank)
 // A mock API valida EXPERIÊNCIA (UX/e2e); nunca conta como governança real.
 import { Hono } from "hono";
-import { applyShellCommand, type LocalShellCommand } from "../../backend/src/domain/index.ts";
+import {
+  applyAuthorizedShellCommand,
+  type LocalShellCommand,
+} from "../../backend/src/domain/index.ts";
 import { emptyDb, openDb } from "./db.ts";
 import { buildSeed, seedNames } from "./seeds/index.ts";
 
@@ -35,7 +38,7 @@ export function createMockApp(): Hono {
     if (db.data.events.some((event) => event.command.id === command.id)) {
       return c.json({ ok: false, error: "duplicate-command" }, 422);
     }
-    const result = applyShellCommand(db.data.state, command);
+    const result = applyAuthorizedShellCommand(db.data.state, command);
     if (!result.ok) return c.json(result, 422);
     db.data.state = result.state;
     db.data.events.push({ schema: "governance.local-adoption-event/v1", command });

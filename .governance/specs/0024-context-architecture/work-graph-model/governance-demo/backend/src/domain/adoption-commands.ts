@@ -8,6 +8,7 @@
 import {
   buildDemoWorkspace,
   buildEmptyWorkspace,
+  canCompleteOnboarding,
   defaultWorkspaceStack,
   deriveSourceTrust,
   normalizeWorkspace,
@@ -107,7 +108,19 @@ export function applyShellCommand(
         return err("invalid-workspace-kind");
       if (state.workspaces.some((workspace) => workspace.id === id))
         return err("duplicate-workspace");
-      const workspace = buildEmptyWorkspace(id, String(name), kind);
+      const principal = state.principals.find((item) => item.id === command.principalId);
+      if (!principal) return err("unknown-principal");
+      const personId = `person-${command.principalId}`;
+      const workspace = {
+        ...buildEmptyWorkspace(id, String(name), kind),
+        people: [
+          {
+            id: personId,
+            displayName: principal.displayName,
+            ...(principal.email ? { email: principal.email } : {}),
+          },
+        ],
+      };
       return {
         ok: true,
         state: {
@@ -115,7 +128,13 @@ export function applyShellCommand(
           workspaces: [...state.workspaces, workspace],
           memberships: [
             ...state.memberships,
-            { principalId: command.principalId, workspaceId: id, roles: ["admin"] },
+            {
+              principalId: command.principalId,
+              workspaceId: id,
+              personId,
+              roles: ["admin"],
+              status: "active",
+            },
           ],
         },
       };
@@ -171,6 +190,10 @@ export function applyShellCommand(
       if (membership) return err(membership);
       return updateWorkspace(state, workspaceId, (workspace) => {
         if (workspace.onboardingStatus === "finished" && status === "partial") return workspace;
+        if (status === "finished") {
+          const completion = canCompleteOnboarding(workspace);
+          if (!completion.ok) return { error: `onboarding-incomplete:${completion.blockers[0]}` };
+        }
         return { ...workspace, onboardingStatus: status as Workspace["onboardingStatus"] };
       });
     }
@@ -273,7 +296,7 @@ export function applyShellCommand(
         const membership = requireMember(state, command, workspaceId);
         if (membership) return err(membership);
       }
-      return updateWorkspace(state, workspaceId, (workspace) => {
+      const updated = updateWorkspace(state, workspaceId, (workspace) => {
         const invite = workspace.invites.find((item) => item.id === inviteId);
         if (!invite) return { error: "unknown-invite" };
         if (invite.status !== "pending") return { error: "invite-not-pending" };
@@ -317,6 +340,36 @@ export function applyShellCommand(
           ),
         };
       });
+      if (!updated.ok || command.type !== "local.invite.accept") return updated;
+      const personId = text(payload, "personId");
+      if (!command.principalId || !personId) return updated;
+      const alreadyMember = updated.state.memberships.some(
+        (membership) =>
+          membership.principalId === command.principalId && membership.workspaceId === workspaceId
+      );
+      return {
+        ok: true,
+        state: {
+          ...updated.state,
+          memberships: alreadyMember
+            ? updated.state.memberships.map((membership) =>
+                membership.principalId === command.principalId &&
+                membership.workspaceId === workspaceId
+                  ? { ...membership, personId, status: "active" }
+                  : membership
+              )
+            : [
+                ...updated.state.memberships,
+                {
+                  principalId: command.principalId,
+                  workspaceId,
+                  personId,
+                  roles: [],
+                  status: "active",
+                },
+              ],
+        },
+      };
     }
 
     case "local.group.create": {

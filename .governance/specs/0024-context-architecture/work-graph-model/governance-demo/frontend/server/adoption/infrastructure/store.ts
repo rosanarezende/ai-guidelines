@@ -3,9 +3,9 @@
 //   file  → .local-state file-first (lock + escrita atômica + event-log)
 //   http  → mock-api (Hono+lowdb) com o MESMO contrato de comando/reducer
 //   demo  → file-first com mutações de configuração bloqueadas (read-mostly)
-// O reducer puro (applyShellCommand, domínio) garante semântica idêntica.
+// O executor autorizado do domínio garante semântica idêntica em real-runtime e mock-api.
 import {
-  applyShellCommand,
+  applyAuthorizedShellCommand,
   type AdoptionState,
   type LocalShellCommand,
   type LocalShellCommandType,
@@ -26,7 +26,7 @@ const fileStore: ShellStore = {
   },
   async dispatch(command) {
     return applyLocalShellCommand(command, (state) => {
-      const result = applyShellCommand(state, command);
+      const result = applyAuthorizedShellCommand(state, command);
       return result.ok ? result.state : { error: result.error };
     });
   },

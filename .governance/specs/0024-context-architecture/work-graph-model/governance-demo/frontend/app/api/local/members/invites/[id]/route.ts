@@ -3,13 +3,11 @@
 import { NextResponse } from "next/server";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { decideInvite } from "@/server/adoption/application/members";
+import { readSession } from "@/server/adoption/session";
 
 const ACTIONS = ["accept", "decline", "revoke"] as const;
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
-  const check = await requireWorkspaceSession();
-  if (!check.ok)
-    return NextResponse.json({ ok: false, error: check.error }, { status: check.status });
   const { id } = await context.params;
   const body = (await request.json().catch(() => null)) as {
     action?: unknown;
@@ -17,8 +15,18 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   } | null;
   const action = ACTIONS.find((item) => item === body?.action);
   if (!action) return NextResponse.json({ ok: false, error: "invalid-action" }, { status: 400 });
+  const session =
+    action === "revoke"
+      ? await requireWorkspaceSession()
+      : { ok: true as const, session: await readSession() };
+  if (!session.ok)
+    return NextResponse.json({ ok: false, error: session.error }, { status: session.status });
+  if (!session.session) {
+    return NextResponse.json({ ok: false, error: "no-session" }, { status: 401 });
+  }
   const result = await decideInvite({
-    ...check.session,
+    principalId: session.session.principalId,
+    ...(action === "revoke" ? { workspaceId: session.session.workspaceId } : {}),
     inviteId: id,
     action,
     token: body?.token,

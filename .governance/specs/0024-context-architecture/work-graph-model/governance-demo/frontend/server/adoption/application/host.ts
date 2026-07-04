@@ -83,10 +83,10 @@ export async function createOrLinkHost(input: {
   } catch (error) {
     return { ok: false, error: String((error as Error).message) };
   }
-  if (!input.scaffold && !fitCheck.manifestPresent) {
+  if (!input.scaffold && (!fitCheck.manifestPresent || !fitCheck.eventLogPresent)) {
     return {
       ok: false,
-      error: "host-sem-manifesto: rode o fit-check e use scaffold=true para criar",
+      error: "host-incompleto: rode o fit-check e use scaffold=true para criar",
     };
   }
 
@@ -98,7 +98,7 @@ export async function createOrLinkHost(input: {
       host: {
         kind,
         pathOrUrl,
-        status: fitCheck.ok ? "scaffolded" : "linked",
+        status: input.scaffold ? "scaffolded" : "linked",
         ...(typeof input.fitReason === "string" && input.fitReason
           ? { fitReason: input.fitReason }
           : {}),

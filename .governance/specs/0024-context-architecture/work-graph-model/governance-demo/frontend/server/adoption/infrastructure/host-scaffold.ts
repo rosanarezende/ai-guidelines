@@ -79,8 +79,11 @@ export function runHostFitCheck(kind: GovernanceHostKind, pathOrUrl: string): Ho
     warnings.push("repo dedicado sem .git: versione o host ou trate como pasta local");
   }
 
-  const ok =
-    writable && (!pathExists || manifestPresent === existsSync(path.join(hostDir, "host.yml")));
+  if (!manifestPresent)
+    warnings.push("host.yml ausente: pronto para criar scaffold, não para linkar");
+  if (manifestPresent && !eventLogPresent) warnings.push("events/events.jsonl ausente no host");
+
+  const ok = writable && manifestPresent && eventLogPresent;
   return {
     checkedAt: new Date().toISOString(),
     pathExists,
@@ -89,7 +92,7 @@ export function runHostFitCheck(kind: GovernanceHostKind, pathOrUrl: string): Ho
     eventLogPresent,
     ...(pathExists && manifestPresent ? { sourceRevision: hostRevision(hostDir) } : {}),
     warnings,
-    ok: ok && (manifestPresent ? eventLogPresent : true),
+    ok,
   };
 }
 
