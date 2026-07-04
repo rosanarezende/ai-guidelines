@@ -11,12 +11,13 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
       "@/*": ["./*"],
-      "@demo/backend": ["../backend/index.mjs"],
-      "@demo/backend/*": ["../backend/*"]
+      "@demo/backend": ["../backend/src/index.ts"],
+      "@demo/backend/domain": ["../backend/src/domain/index.ts"]
     },
     "plugins": [
       {

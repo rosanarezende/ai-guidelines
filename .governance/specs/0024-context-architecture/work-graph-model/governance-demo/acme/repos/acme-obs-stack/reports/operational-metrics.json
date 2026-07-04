@@ -1,0 +1,39 @@
+{
+  "schema": "acme.operational-metrics/v1",
+  "source": "acme-obs-stack",
+  "generatedAt": "2027-12-31T23:59:00Z",
+  "body": {
+    "mode": "fixture",
+    "window": {
+      "start": "2027-07-01",
+      "end": "2027-12-31"
+    },
+    "metrics": [
+      {
+        "id": "p99-latency",
+        "repo": "acme-checkout-api",
+        "value": "180ms",
+        "unit": "ms"
+      },
+      {
+        "id": "incident-count",
+        "repo": "acme-checkout-api",
+        "value": "1",
+        "unit": "count"
+      },
+      {
+        "id": "p99-latency",
+        "repo": "acme-core-api",
+        "value": "240ms",
+        "unit": "ms"
+      },
+      {
+        "id": "cost-to-serve",
+        "repo": "acme-data-pipeline",
+        "value": "0.41",
+        "unit": "usd/1k-req"
+      }
+    ]
+  },
+  "contentHash": "2beeafe17b2c"
+}

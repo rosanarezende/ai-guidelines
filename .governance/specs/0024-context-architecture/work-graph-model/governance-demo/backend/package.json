@@ -1,0 +1,19 @@
+{
+  "name": "acme-governance-backend",
+  "private": true,
+  "type": "module",
+  "description": "Runtime file-first da governance-demo: dominio puro + use cases + ports/adapters + contratos de API. Roda em TypeScript nativo (Node >= 22.18, type stripping).",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "yaml": "^2.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.2",
+    "typescript": "^6.0.3"
+  }
+}

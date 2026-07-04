@@ -18,7 +18,7 @@ const repoRoot = path.resolve(root, "../../../../..");
 const integrationCatalogFile = path.join(root, "..", "integration-catalog.yml");
 const appPackageFile = path.join(appDir, "package.json");
 const rootPackageFile = path.join(repoRoot, "package.json");
-const domainTsconfigFile = path.join(root, "tsconfig.domain.json");
+const backendTsconfigFile = path.join(backendRoot, "tsconfig.json");
 const legacyLocaleDir = path.join(appDir, "locales");
 const legacyFeaturesDir = path.join(appDir, "app", "features");
 const legacyUiDir = path.join(appDir, "app", "ui");
@@ -130,8 +130,15 @@ const legacyActiveArtifacts = [
   path.join(root, "_tools"),
   path.join(root, "acme-governance"),
   path.join(root, "repos"),
+  path.join(root, "tsconfig.domain.json"),
   path.join(backendRoot, "tools", "build-graph.mjs"),
   path.join(backendRoot, "tools", "check-app-security.mjs"),
+  // runtime .mjs migrada para backend/src (TypeScript); a volta é regressão
+  path.join(backendRoot, "domain"),
+  path.join(backendRoot, "read-model"),
+  path.join(backendRoot, "adapters"),
+  path.join(backendRoot, "runtime.mjs"),
+  path.join(backendRoot, "ports.mjs"),
 ];
 
 function fail(message) {
@@ -216,8 +223,11 @@ for (const artifact of legacyActiveArtifacts) {
     );
   }
 }
-if (!fs.existsSync(domainTsconfigFile)) {
-  fail("contrato TypeScript da sim ausente: tsconfig.domain.json");
+if (!fs.existsSync(backendTsconfigFile)) {
+  fail("tsconfig do backend ausente: backend/tsconfig.json");
+}
+if (!fs.existsSync(path.join(backendRoot, "package.json"))) {
+  fail("package.json do backend ausente: backend/package.json");
 }
 if (fs.existsSync(legacyLocaleDir)) {
   fail("locale centralizado legado proibido: frontend/locales");
@@ -272,6 +282,48 @@ for (const { file, key } of requiredLocaleFiles) {
     );
   }
 }
+// ── fronteira backend: app consome apenas o SDK (@demo/backend[/domain]) ────
+// Import solto de módulo interno (.mjs, backend/src/..., backend/tools/...)
+// quebra o contrato de gateway estável para web/native futuros.
+for (const file of sourceFiles.filter((item) => /\.(ts|tsx)$/.test(item))) {
+  const text = fs.readFileSync(file, "utf8");
+  const relative = path.relative(appDir, file).replaceAll("\\", "/");
+  const importRegex = /(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?["']([^"']+)["']/g;
+  for (const match of text.matchAll(importRegex)) {
+    const specifier = match[1] || "";
+    const isSdkEntry = specifier === "@demo/backend" || specifier === "@demo/backend/domain";
+    if (!isSdkEntry && /backend\//.test(specifier)) {
+      fail(`import interno do backend fora do SDK (@demo/backend): ${relative} -> ${specifier}`);
+    }
+    if (specifier.endsWith(".mjs")) {
+      fail(
+        `import de .mjs proibido no app (backend ativo é TypeScript): ${relative} -> ${specifier}`
+      );
+    }
+  }
+}
+// ── API local: toda rota declarada no contrato precisa existir como handler ─
+const requiredApiRoutes = [
+  "app/api/snapshot/route.ts",
+  "app/api/commands/dry-run/route.ts",
+  "app/api/commands/execute/route.ts",
+  "app/api/graph/route.ts",
+  "app/api/graph/node/route.ts",
+  "app/api/graph/adjacency/route.ts",
+  "app/api/graph/path/route.ts",
+  "app/api/graph/contract-impact/route.ts",
+  "app/api/graph/intent-deps/route.ts",
+  "app/api/graph/conflicts/route.ts",
+  "app/api/integrations/route.ts",
+  "app/api/integrations/[id]/test/route.ts",
+  "app/api/integrations/assistant/advisory/route.ts",
+  "app/api/contract/route.ts",
+];
+for (const relativeFile of requiredApiRoutes) {
+  if (!fs.existsSync(path.join(appDir, ...relativeFile.split("/")))) {
+    fail(`rota da API local declarada no contrato ausente: ${relativeFile}`);
+  }
+}
 // ── fluxo inicial signup → organizações → onboarding → home ────────────────
 const requiredFlowRoutes = [
   "app/signup/page.tsx",
@@ -319,12 +371,20 @@ for (const file of readRelativeFiles()) {
     fail(`localStorage proibido (use o shell local via /api/local/*): ${relative}`);
   }
 }
-const domainDir = path.join(backendRoot, "domain");
+const domainDir = path.join(backendRoot, "src", "domain");
 for (const file of walk(domainDir).filter((item) => /\.ts$/.test(item))) {
   const text = fs.readFileSync(file, "utf8");
   const relative = path.relative(root, file).replaceAll("\\", "/");
-  if (/from "(next|react|@mui|node:fs|node:path|yaml)/.test(text)) {
+  if (/from "(next|react|@mui|node:fs|node:path|node:child_process|yaml)/.test(text)) {
     fail(`dominio compartilhado deve ser puro (sem framework/fs/yaml): ${relative}`);
+  }
+}
+// backend ativo é TypeScript: .mjs só sobrevive como shim/CLI fora de src
+for (const file of walk(path.join(backendRoot, "src"))) {
+  if (/\.(mjs|jsx|js)$/.test(file)) {
+    fail(
+      `backend/src deve ser TypeScript puro: ${path.relative(root, file).replaceAll("\\", "/")}`
+    );
   }
 }
 
@@ -389,12 +449,12 @@ if (!assistantRuntime?.systems?.includes("ollama"))
   fail("catalogo sem assistant runtime local Ollama");
 
 const tscBin = path.join(repoRoot, "node_modules", "typescript", "bin", "tsc");
-const domainTsc = spawnSync(process.execPath, [tscBin, "-p", domainTsconfigFile], {
-  cwd: root,
+const backendTsc = spawnSync(process.execPath, [tscBin, "-p", backendTsconfigFile], {
+  cwd: backendRoot,
   stdio: "inherit",
   shell: false,
 });
-if (domainTsc.status !== 0) fail("contrato TypeScript da sim falhou");
+if (backendTsc.status !== 0) fail("typecheck strict do backend falhou");
 
 const nextBin = path.join(repoRoot, "node_modules", "next", "dist", "bin", "next");
 const result = spawnSync(process.execPath, [nextBin, "build", "--webpack"], {

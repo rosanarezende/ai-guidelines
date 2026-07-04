@@ -113,17 +113,22 @@ Requisitos:
 
 ### 5.0.1 Contrato TypeScript e i18n
 
-O backend/runtime da sim v3 ainda contém scripts `.mjs` herdados, mas todo contrato novo deve nascer em TypeScript puro:
+O backend/runtime ativo da sim v3 é TypeScript strict em `backend/src/` (Node ≥ 22.18 roda `.ts` nativo); `.mjs` sobrevive apenas como shim de compatibilidade/CLI de check, nunca como caminho principal:
 
 ```text
-governance-demo/backend/domain/*.ts        # entidades, value objects, policies, DTOs
-governance-demo/backend/application/*.ts   # casos de uso/ports quando existirem
+governance-demo/backend/src/domain/**       # entidades, policies, validador, comandos, grafo (puro)
+governance-demo/backend/src/ports/**        # GovernanceRepository/EventLog, GraphReadModelSource, IntegrationAdapter, AssistantProvider
+governance-demo/backend/src/adapters/**     # file, repo-first, graph-memory, integrations (IO mora aqui)
+governance-demo/backend/src/application/**  # runtime, snapshot, graph queries, egress/redaction, integrações
+governance-demo/backend/src/api/**          # schemas tipados + contrato verificável + handlers agnósticos
 governance-demo/frontend/app/<route>/_view/<View>/_locales/pt-br.json
 governance-demo/frontend/app/<route>/_steps/<Step>/_locales/pt-br.json
 governance-demo/frontend/app/<route>/_sections/<Section>/_locales/pt-br.json
 governance-demo/frontend/app/<route>/_components/<Component>/_locales/pt-br.json
 governance-demo/frontend/app/_components/<area>/_locales/pt-br.json
 ```
+
+O app consome exclusivamente o SDK `@demo/backend` (server-side) e `@demo/backend/domain` (browser-safe); import solto de módulo interno/`.mjs` do backend é barrado pelo guard do app.
 
 Critérios:
 

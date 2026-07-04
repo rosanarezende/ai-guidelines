@@ -10,7 +10,9 @@ Pronto nesta fatia:
 
 - App Next em TypeScript, isolado no workspace `acme/governance-next-app`.
 - Fluxo inicial real: `/signup` (identidade local honesta, `local-principal`) -> `/organizations` (criar/escolher organizacao; multi-organizacao com contexto separado) -> `/onboarding` por organizacao -> `/` Home da organizacao atual.
-- Backend TypeScript do shell local em `server/adoption/` com boundaries claros: dominio puro em `backend/domain/adoption-shell.ts`, use-cases em `application/`, persistencia file-first em `infrastructure/` (estado JSON + event-log JSONL + lock + escrita atomica + idempotencia por comando) e interface em `app/api/local/*` + cookie de sessao httpOnly.
+- Backend TypeScript do shell local em `server/adoption/` com boundaries claros: dominio puro em `backend/src/domain/adoption-shell.ts`, use-cases em `application/`, persistencia file-first em `infrastructure/` (estado JSON + event-log JSONL + lock + escrita atomica + idempotencia por comando) e interface em `app/api/local/*` + cookie de sessao httpOnly.
+- Fronteira backend por SDK: o app consome apenas `@demo/backend` (use cases/handlers server-side) e `@demo/backend/domain` (contrato browser-safe). Import de modulo interno (`backend/src/...`, `backend/tools/...`, qualquer `.mjs`) e barrado pelo guard — a fronteira ja nasce pronta para clientes web/native separados.
+- API local tipada: rotas de graph queries (`/api/graph*`), integracoes (`/api/integrations*`), advisory do assistente e contrato verificavel em `/api/contract`; requests validadas por schema (400 fail-closed) na camada `backend/src/api`.
 - Demo `acme-*` anexavel como organizacao `sandbox-demo` (badge demo); organizacao nova/vazia tem Home, Settings e Console honestos, sem dados da acme.
 - Home de adocao (demo) com tarefas, pendencias derivadas e proximo passo; Home de organizacao nova com checklist real (perfil/host/fontes).
 - Onboarding workspace-aware: diagnostico guiado, papeis (vazio honesto fora da demo), fontes, assistente Ollama-first, integracoes (catalogo neutro) e revisao; progresso partial/finished persiste por organizacao no servidor.
@@ -27,9 +29,8 @@ Ainda por vir:
 - Persistencia governada do onboarding alem do status: as escolhas (perfil/papeis/fontes) ainda sao UX; viram comandos governados em fatia futura.
 - Vincular host de governanca a organizacao nova (hoje so a demo tem host) e importar/adaptar repos reais.
 - Convites e aceite de papeis (hoje: contrato declarado + risco pendente).
-- Assistente conversacional/matcher com politica de egress; hoje ha health-check local e preferencia de sessao.
-- Adapters externos alem do catalogo.
-- Migracao TypeScript da runtime `backend`/`backend/tools` da sim (o shell local ja nasceu TS; o motor governado segue MJS).
+- Assistente conversacional completo: hoje ha health-check local e advisory local (`/api/integrations/assistant/advisory`) com egress fail-closed + redacao minima; UI conversacional e fatia futura.
+- Adapters cloud alem dos locais (git-local, ci-local, code-quality, observability ja tem mecanismo executavel; SonarQube remoto exige allowlist de egress e cliente ainda nao mecanizado).
 - Empacotamento desktop/mobile.
 
 ## Rotas
@@ -47,9 +48,20 @@ Ainda por vir:
 | `/api/local/organizations/select`           | Troca a organizacao ativa da sessao.                                                            |
 | `/api/local/onboarding/status`              | Marca partial/finished por organizacao (nunca rebaixa finished).                                |
 | `/api/snapshot`                             | Snapshot derivado do runtime file-first (demo).                                                 |
-| `/api/commands/dry-run`                     | Validacao de comando sem escrita.                                                               |
+| `/api/commands/dry-run`                     | Validacao de comando sem escrita (request validada por schema; 400 fail-closed).                |
 | `/api/commands/execute`                     | Execucao de comando governado.                                                                  |
+| `/api/graph`                                | Nos/arestas do grafo DERIVADO com filtro por tipo/texto (inclui `sourceRevision`).              |
+| `/api/graph/node`                           | No por id/GlobalRef com vizinhanca imediata.                                                    |
+| `/api/graph/adjacency`                      | Vizinhanca ate N saltos.                                                                        |
+| `/api/graph/path`                           | Menor caminho entre dois nos (repo/objective/target/intent/...).                                |
+| `/api/graph/contract-impact`                | Impacto de contrato: consumers, intents, outcomes citando revisao, targets.                     |
+| `/api/graph/intent-deps`                    | Dependencias diretas/transitivas e superficie da intent.                                        |
+| `/api/graph/conflicts`                      | Conflitos/contensoes modelados (contrato, atestacao, erros de validacao).                       |
+| `/api/integrations`                         | Adapters mecanizados + status honesto de cada um.                                               |
+| `/api/integrations/[id]/test`               | Testa um adapter real (opcionalmente contra um repo).                                           |
 | `/api/integrations/assistant/ollama/health` | Health-check local do Ollama.                                                                   |
+| `/api/integrations/assistant/advisory`      | Conselho do assistente LOCAL (egress fail-closed + redacao minima; nunca vira mutacao).         |
+| `/api/contract`                             | Contrato verificavel da API local (schemas JSON por rota).                                      |
 
 ## Arvore de pastas
 

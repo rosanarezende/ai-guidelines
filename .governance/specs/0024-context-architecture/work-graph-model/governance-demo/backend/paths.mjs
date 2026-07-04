@@ -1,9 +1,9 @@
-// paths.mjs — fronteiras fisicas da demo de governança.
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const here = path.dirname(fileURLToPath(import.meta.url));
-
-export const SIM_ROOT = path.join(here, "..");
-export const GOVERNANCE_ROOT = path.join(SIM_ROOT, "acme", "governance");
-export const REPOS_ROOT = path.join(SIM_ROOT, "acme", "repos");
+// paths.mjs — shim de compatibilidade; fonte ativa em src/shared/paths.ts.
+export {
+  SIM_ROOT,
+  GOVERNANCE_ROOT,
+  REPOS_ROOT,
+  WORK_GRAPH_ROOT,
+  EXAMPLES_BACKENDS_ROOT,
+  INTEGRATION_CATALOG_FILE,
+} from "./src/shared/paths.ts";

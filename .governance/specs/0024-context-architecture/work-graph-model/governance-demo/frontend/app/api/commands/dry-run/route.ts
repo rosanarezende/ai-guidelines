@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { dryRunCommand } from "@/lib/governance-server";
-import type { GovernedCommand } from "@/lib/types";
+import { handleCommandDryRun } from "@demo/backend";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const command = (await request.json()) as GovernedCommand;
-  const result = dryRunCommand(command);
-  return NextResponse.json(result, { status: result.ok ? 200 : 422 });
+  const body = await request.json().catch(() => null);
+  const result = await handleCommandDryRun(body);
+  return NextResponse.json(result.body, { status: result.status });
 }

@@ -19,8 +19,10 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - standalone repo-local também tem lifecycle comprovado: `fix-checkout-timeout` foi fechado por
   `standalone.complete` e publicou `out-fix-checkout-timeout-2027h1` sem intent planejada;
 - `acme/governance/trust-policy.yml` materializa controles de ACL local, revogação, fallback de matcher, secret quarantine e independência do oráculo;
-- `backend/` materializa a primeira runtime DDD v3: adapter file, domínio/validador, command dry-run e read-model de grafo;
-- `backend/domain/*.ts` materializa o contrato TypeScript compartilhado para a camada de adoção, snapshot, comandos e i18n; o app reexporta esses tipos em vez de duplicá-los;
+- `backend/src/` é a runtime ativa em TypeScript strict (workspace `acme-governance-backend`, Node ≥ 22.18 com type stripping): domínio puro + ports + adapters (file, repo-first, graph-memory, integrations) + application (snapshot, graph queries, egress/redaction) + api (schemas/contratos/handlers); os `.mjs` que restam são shims/CLIs, nunca o caminho principal;
+- `backend/src/domain/` materializa o contrato TypeScript compartilhado (snapshot, comandos, adoption shell, i18n, graph queries); o app consome só o SDK `@demo/backend[/domain]` — import interno/`.mjs` é barrado por guard;
+- `/api/graph*` expõe graph queries reais sobre a projeção derivada (listagem, nó, adjacência, caminho, impacto de contrato, deps de intent, conflitos) com `sourceRevision` explícita; `/api/contract` publica o contrato verificável da API;
+- integration adapters executáveis com política de egress fail-closed + redação mínima: `assistant-ollama` (health + advisory local), `git-local`, `ci-local`, `code-quality` e `observability`; `check-integrations.mjs` prova sucesso, falha honesta, egress bloqueado e evidência adulterada;
 - `examples/backends/` materializa exemplos derivados nos 4 formatos estudados na v2: file e Neo4j completos/prioritários, SQLite e Mongo completos como read-models derivados;
 - `check-backend-examples.mjs` prova o read-model file + Cypher Neo4j com hash, refs, event-log, cobertura de nós/arestas e contrato de ação;
 - `load-neo4j-example.mjs --dry-run` monta o plano executável de carga Neo4j; `--apply` é fail-closed e exige `--source-hash` + credenciais HTTP explícitas;
@@ -87,13 +89,13 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **Backend/runtime TypeScript como fatia própria:** migrar `backend` herdado em `.mjs` para domínio/aplicação/ports/adapters em TypeScript incremental, começando pelos contratos usados pelo app. Não misturar com nova UX.
-2. **Shell local: próxima fatia.** Signup/organizações/onboarding-por-organização JÁ EXISTEM sobre `backend/domain/adoption-shell.ts` + `server/adoption/` (file-first, event-log, lock). Falta: vincular governance host a organização não-demo, persistir as ESCOLHAS do onboarding (perfil/papéis/fontes) como comandos governados, cadastro/aceite de pessoas e, depois, adapter de auth real (identity-provider) substituindo o cookie local não assinado.
+1. **FEITO — backend/runtime TypeScript:** `backend/src/` é domínio/aplicação/ports/adapters/api em TS strict; sobra desta fatia: migrar os CLIs grandes (`check-runtime`, `test-adversarial`, `backends/*`) de `.mjs` para `.ts` quando houver motivo funcional (hoje são checks estáveis atrás de shims).
+2. **Shell local: próxima fatia.** Signup/organizações/onboarding-por-organização JÁ EXISTEM sobre `backend/src/domain/adoption-shell.ts` + `server/adoption/` (file-first, event-log, lock). Falta: vincular governance host a organização não-demo, persistir as ESCOLHAS do onboarding (perfil/papéis/fontes) como comandos governados, cadastro/aceite de pessoas e, depois, adapter de auth real (identity-provider) substituindo o cookie local não assinado.
 3. **Walkthrough da owner:** percorrer no app Next/MUI v2 a cadeia `objective → target → intent → repo-work done → outcome → verdict/rollup → actual` e o caminho `incident → standalone.complete → outcome operacional`, usando [`WALKTHROUGH-ITERATION.md`](WALKTHROUGH-ITERATION.md) como doc de acompanhamento.
 4. **Config persistence:** transformar a aba `Configuracoes` em comando governado quando a UX estiver validada: `profile-declaration`, authority/billing roles e assistant runtime policy precisam de resolver, nao de formulario solto.
 5. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
 6. **Portabilidade do legado v2 arquivado → v3:** completar matcher executável e authoring completo aproveitando `_archive/org-simulation-v2` como referência histórica, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
-7. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo. Prioridade prática: `assistant-runtime-local-cloud` (Ollama/LM Studio/LocalAI/vLLM), `git-provider`, `ci-status` e `observability`.
+7. **Adapters externos — spikes locais FEITOS:** `assistant-runtime` (Ollama health + advisory), `git-provider` (git-local), `ci-status` (ci-local), `code-quality` e `observability` têm adapter executável com egress fail-closed e evidência verificável. Próximo: ligar essa evidência ao resolver de outcome/repo-work (evidence provider alimentando o dashboard, não SSOT paralelo) e o primeiro adapter genuinamente cloud atrás de allowlist.
 8. **Revisão adversarial pós-R5:** pedir ao Claude Code/Fable 5 para revisar a sim com foco em outcomes de intent, outcome standalone, contrato e transação file-first.
 
 ## Comandos de aceite
@@ -108,5 +110,7 @@ node backend/tools/check-governance-app.mjs
 node backend/tools/export-backend-examples.mjs --check
 node backend/tools/check-backend-examples.mjs
 node backend/tools/load-neo4j-example.mjs --dry-run
+node backend/tools/check-integrations.mjs
+npm --workspace acme-governance-backend run typecheck
 node backend/tools/adoption-journey.mjs
 ```

@@ -7,6 +7,11 @@ principle: >
   existente da empresa. Nenhuma integracao substitui o SSOT file-first nem autoriza
   mutacao sem comando governado.
 
+# local-adapter: quando presente, indica o adapter local EXECUTAVEL da governance-demo
+# (backend/src/adapters/integrations) que ja materializa o spike minimo deste item,
+# com egress fail-closed e evidencia verificavel (smoke: backend/tools/check-integrations.mjs).
+# Entradas sem local-adapter continuam catalogadas, nao mecanizadas.
+
 adapter-kinds:
   evidence-provider:
     purpose: "coleta sinais externos normalizados como evidencia governada"
@@ -76,6 +81,7 @@ integrations:
     value-add: "descobre repos, commits, PRs, paths tocados e evidencia basica sem preenchimento manual"
     authority: "observa codigo e metadata; nao decide ownership nem readiness"
     priority: P0
+    local-adapter: git-local
 
   - id: codeowners
     category: repo-adoption
@@ -126,6 +132,7 @@ integrations:
     value-add: "usa evidencia real de CI em vez de prova manual"
     authority: "CI atesta execucao; owner ainda assina done quando exigido"
     priority: P0
+    local-adapter: ci-local
 
   - id: test-reports
     category: execution-evidence
@@ -156,6 +163,7 @@ integrations:
     value-add: "traz sinais de qualidade/manutencao para priorizacao e evidence"
     authority: "sinal externo nao cria trabalho sozinho; sugere maintenance/proposal"
     priority: P1
+    local-adapter: code-quality
 
   - id: code-security
     category: quality-security
@@ -176,6 +184,7 @@ integrations:
     value-add: "dente real para SLO, outcome operacional e incidentes"
     authority: "fonte pode atestar actual somente se producer/owner for independente ou colapso for logado"
     priority: P0
+    local-adapter: observability
 
   - id: analytics-warehouse
     category: metrics-outcomes
@@ -277,6 +286,7 @@ integrations:
     value-add: "permite que a organizacao escolha assistente local/cloud por politica de classificacao e egress"
     authority: "gera sugestao com score/unknown/evidence/policy; humano confirma e resolver valida refs"
     priority: P0
+    local-adapter: assistant-ollama
 
   - id: knowledge-assistant
     category: ai-assistance

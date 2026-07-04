@@ -80,6 +80,15 @@ Todo adapter precisa declarar:
 
 Se uma integração não consegue responder isso, ela ainda é conveniente demais e governada de menos.
 
+Cinco itens já têm o spike mínimo mecanizado na governance-demo (campo `local-adapter` no YAML):
+`assistant-runtime-local-cloud` → `assistant-ollama` (health/models por `/api/tags` loopback +
+advisory local com redação mínima), `git-provider` → `git-local` (revision/status/último commit via
+git CLI), `ci-status` → `ci-local` (executa o `test.mjs` do repo e reporta exit code real),
+`code-quality` (relatório local Sonar-compatível hash-verificado; endpoint remoto só com allowlist
+de egress) e `observability` (relatório do `acme-obs-stack` hash-verificado, declarado fixture).
+Todos falham fechado — egress negado, evidência adulterada ou dependência ausente nunca viram
+sucesso textual; o smoke é `backend/tools/check-integrations.mjs`.
+
 Assistentes entram pelo mesmo contrato: podem sugerir, resumir, procurar contexto ou propor patch,
 mas não viram fonte da verdade. O framework precisa conseguir rodar sem eles e precisa degradar para
 humano/local quando classificação ou egress bloquearem o provedor escolhido.

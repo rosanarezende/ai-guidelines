@@ -75,7 +75,12 @@ const steps = [
     args: ["backend/tools/load-neo4j-example.mjs", "--dry-run"],
   },
   {
-    name: "12. app Next/MUI carrega runtime e builda",
+    name: "12. integration adapters + API handlers passam smoke",
+    command: "node",
+    args: ["backend/tools/check-integrations.mjs"],
+  },
+  {
+    name: "13. app Next/MUI carrega runtime e builda",
     command: "node",
     args: ["backend/tools/check-governance-app.mjs"],
   },
