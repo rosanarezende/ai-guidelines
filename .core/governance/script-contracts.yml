@@ -49,6 +49,18 @@ profiles:
         mutates: false
         consumers: [script]
         description: Verifica formatacao sem alterar arquivos.
+      - name: format:governance-demo
+        command: prettier --write .governance/specs/0024-context-architecture/work-graph-model/governance-demo
+        category: format
+        mutates: true
+        consumers: [human]
+        description: Formata apenas a governance-demo.
+      - name: format:governance-demo:check
+        command: prettier --check .governance/specs/0024-context-architecture/work-graph-model/governance-demo
+        category: format
+        mutates: false
+        consumers: [script, human]
+        description: Verifica a formatacao apenas da governance-demo.
       - name: lint-staged
         command: lint-staged
         category: format
