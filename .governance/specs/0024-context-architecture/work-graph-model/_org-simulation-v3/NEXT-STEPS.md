@@ -34,7 +34,7 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - `verdict.accept` do `intent-cta-upgrade` foi executado no estado canônico via runtime, criando `decisions/verdicts.yml` e `events/events.jsonl` sem edição manual;
 - `currentRevision()` inclui também triages, repo-work claims e repo-contract registries, então sidecar repo-local não é uma mutação invisível para stale-check;
 - standalone reativo/avulso executável mora no repo (`repos/<repo>/.governance/works/*.yml`); incidentes centrais moram em `acme-governance/incidents/incidents.yml` e geram follow-ups resolvíveis;
-- `node _tools/adoption-journey.mjs` exercita código, contextos, work acknowledgements, contratos, red-team, testes locais e grafo.
+- `node _tools/adoption-journey.mjs` exercita código, contextos, work acknowledgements, contratos, red-team, testes locais, exemplos de backend derivados e app Next/MUI ativo.
 
 Limite deliberado/pendente: a v3 já prova o file backend transacional mínimo, mas ainda não migrou adapters sqlite/neo4j/mongo como portas write-capable nem read-models `db.json` por repo. Ela é a sim ativa de dogfood file-first; Neo4j já tem export, smoke e loader opcional de projeção, mas continua read-model derivado, não SSOT.
 
@@ -81,8 +81,9 @@ Fechado como primeira versão física de `trust-policy.yml`:
 
 Fechado:
 
-- `_org-simulation-v2` fica arquivada como histórico operacional e referência de aprendizados únicos;
-- `_org-simulation-v3` é a única frente ativa de dogfood físico.
+- `_archive/org-simulation-v2` fica arquivada como histórico operacional e referência de aprendizados únicos;
+- `_archive/org-simulation-v3-static-apps-v1` preserva os protótipos estáticos F3/F4 (`owner`, `company`, `vendor`, `graph.js` e tools associadas);
+- `_org-simulation-v3` é a única frente ativa de dogfood físico, com `_apps/governance-next/` como superfície ativa.
 
 ## Próximo ciclo
 
@@ -91,7 +92,7 @@ Fechado:
 3. **Walkthrough da owner:** percorrer no app Next/MUI v2 a cadeia `objective → target → intent → repo-work done → outcome → verdict/rollup → actual` e o caminho `incident → standalone.complete → outcome operacional`, usando [`WALKTHROUGH-ITERATION.md`](WALKTHROUGH-ITERATION.md) como doc de acompanhamento.
 4. **Config persistence:** transformar a aba `Configuracoes` em comando governado quando a UX estiver validada: `profile-declaration`, authority/billing roles e assistant runtime policy precisam de resolver, nao de formulario solto.
 5. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
-6. **Portabilidade v2 → v3:** completar matcher executável e authoring completo, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
+6. **Portabilidade do legado v2 arquivado → v3:** completar matcher executável e authoring completo aproveitando `_archive/org-simulation-v2` como referência histórica, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
 7. **Adapters externos:** escolher o primeiro spike de integração do catálogo (contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence) como evidence provider, não como SSOT paralelo. Prioridade prática: `assistant-runtime-local-cloud` (Ollama/LM Studio/LocalAI/vLLM), `git-provider`, `ci-status` e `observability`.
 8. **Revisão adversarial pós-R5:** pedir ao Claude Code/Fable 5 para revisar a sim com foco em outcomes de intent, outcome standalone, contrato e transação file-first.
 
@@ -108,5 +109,4 @@ node _tools/export-backend-examples.mjs --check
 node _tools/check-backend-examples.mjs
 node _tools/load-neo4j-example.mjs --dry-run
 node _tools/adoption-journey.mjs
-node _tools/build-graph.mjs
 ```

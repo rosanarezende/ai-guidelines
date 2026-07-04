@@ -140,7 +140,7 @@ quiser plugar embeddings/LLM depois). Esse é o critério de aceite do v1.
 **✅ v2 (LLM LOCAL) FEITO** (commits `da5a17bf` foundation + `98b57b88` tier 2/bench) — rodou no Ollama da owner (RTX
 3060): porta async + `OllamaEmbedMatcher` (tier 1) + `OllamaGenerateMatcher` (tier 2) + `matcher.yml` (raiz do host) +
 `routing-bench.ts` + build resiliente (LLM fora → léxico). **Medido:** léxico/embed(`nomic`) **4/4** (0.0s / 0.6s warm);
-generativo + lento e **não** + exato (o `qwen3:4b` regrediu p/ 3/4) → **embeddings é o workhorse** (ver `../_org-simulation-v2/MATCHER.md`).
+generativo + lento e **não** + exato (o `qwen3:4b` regrediu p/ 3/4) → **embeddings é o workhorse** (ver `../_archive/org-simulation-v2/MATCHER.md`).
 
 **Pendente:** a **viz** (cards de roteamento + grafo repo×tag na tela) → vai pra a **rodada do `_viewer`** (o app vai
 ser bem mexido; os dados já estão no `db.json`, evita view dupla).

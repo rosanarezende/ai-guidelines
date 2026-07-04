@@ -1,12 +1,16 @@
 // test-adversarial.mjs — fixtures ADVERSARIAIS (barra do red-team): cada quebra plantada DEVE
 // ser pega pelo validador; exit 1 se alguma passar. As 6 quebras da revisão F5 moram aqui p/ sempre.
 // Uso: node _tools/test-adversarial.mjs
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { loadOrg, validateOrg } from "./org.mjs";
-import { checkAppSecurity } from "./check-app-security.mjs";
 import { loadPublishedRepoContracts, validateRepoContracts } from "./repo-contracts.mjs";
 import { loadPublishedContexts, validateRepoContexts } from "./repo-contexts.mjs";
 import { loadPublishedRepoWorks, validateRepoWorks } from "./repo-works.mjs";
 
+const here = path.dirname(fileURLToPath(import.meta.url));
+const activeApps = path.join(here, "..", "_apps");
 const base = loadOrg();
 const clone = () => structuredClone(base);
 const intent = (o, id) => o.intents.find((i) => i.id === id);
@@ -738,13 +742,31 @@ export async function run(cases) {
   return fails;
 }
 
+function checkActiveAppSurface() {
+  const issues = [];
+  for (const name of ["company", "owner", "vendor", "graph.js"]) {
+    const target = path.join(activeApps, name);
+    if (fs.existsSync(target)) {
+      issues.push({
+        rule: "legacy-static-app-active",
+        file: `_apps/${name}`,
+        msg: "protótipo estático legado deve ficar em _archive/org-simulation-v3-static-apps-v1",
+      });
+    }
+  }
+  return issues;
+}
+
 const fails = await run(CASES);
-const securityIssues = checkAppSecurity();
-for (const i of securityIssues) console.log(`✗ [${i.rule}] ${i.file} — ${i.msg}`);
-if (securityIssues.length === 0) console.log("✓ N·app-security — vendors locais + hashes + CSP ok");
+const surfaceIssues = checkActiveAppSurface();
+for (const i of surfaceIssues) console.log(`✗ [${i.rule}] ${i.file} — ${i.msg}`);
+if (surfaceIssues.length === 0)
+  console.log(
+    "✓ N·app-surface — protótipos estáticos arquivados; governance-next é a superfície ativa"
+  );
 console.log(
-  fails === 0 && securityIssues.length === 0
+  fails === 0 && surfaceIssues.length === 0
     ? `✓ ${CASES.length} fixtures — todas as quebras pegas`
-    : `✗ ${fails + securityIssues.length} fixture/check(s) falharam`
+    : `✗ ${fails + surfaceIssues.length} fixture/check(s) falharam`
 );
-process.exit(fails || securityIssues.length ? 1 : 0);
+process.exit(fails || surfaceIssues.length ? 1 : 0);

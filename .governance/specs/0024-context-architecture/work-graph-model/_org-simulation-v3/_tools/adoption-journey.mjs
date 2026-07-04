@@ -1,6 +1,6 @@
 // adoption-journey.mjs — dogfood ponta-a-ponta da adoção em uma empresa com repos existentes.
-// A jornada e write-safe: build-graph pode regenerar projection, mas os checks seguintes
-// exigem que scaffold/context/capability-review estejam frescos.
+// A jornada e write-safe: exercita scaffold/context/capability-review, runtime, exemplos de
+// backend derivados e app Next/MUI ativo sem depender dos protótipos estáticos arquivados.
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -60,27 +60,22 @@ const steps = [
     args: ["_tools/test-adversarial.mjs"],
   },
   {
-    name: "9. host agrega grafo publicado",
-    command: "node",
-    args: ["_tools/build-graph.mjs"],
-  },
-  {
-    name: "10. exemplos file/sqlite/neo4j/mongo estao frescos",
+    name: "9. exemplos file/sqlite/neo4j/mongo estao frescos",
     command: "node",
     args: ["_tools/export-backend-examples.mjs", "--check"],
   },
   {
-    name: "11. file + neo4j read-model passam smoke operacional",
+    name: "10. file + neo4j read-model passam smoke operacional",
     command: "node",
     args: ["_tools/check-backend-examples.mjs"],
   },
   {
-    name: "12. neo4j loader executa plano em dry-run",
+    name: "11. neo4j loader executa plano em dry-run",
     command: "node",
     args: ["_tools/load-neo4j-example.mjs", "--dry-run"],
   },
   {
-    name: "13. app Next/MUI carrega runtime e builda",
+    name: "12. app Next/MUI carrega runtime e builda",
     command: "node",
     args: ["_tools/check-governance-app.mjs"],
   },

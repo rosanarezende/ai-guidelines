@@ -11,6 +11,8 @@ import { parse } from "yaml";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, "..");
+const workGraphRoot = path.resolve(root, "..");
+const activeAppsDir = path.join(root, "_apps");
 const appDir = path.join(root, "_apps", "governance-next");
 const repoRoot = path.resolve(root, "../../../../..");
 const integrationCatalogFile = path.join(root, "..", "integration-catalog.yml");
@@ -120,6 +122,15 @@ const ollamaHealthRouteFile = path.join(
   "health",
   "route.ts"
 );
+const legacyActiveArtifacts = [
+  path.join(workGraphRoot, "_org-simulation-v2"),
+  path.join(activeAppsDir, "company"),
+  path.join(activeAppsDir, "owner"),
+  path.join(activeAppsDir, "vendor"),
+  path.join(activeAppsDir, "graph.js"),
+  path.join(root, "_tools", "build-graph.mjs"),
+  path.join(root, "_tools", "check-app-security.mjs"),
+];
 
 function fail(message) {
   console.error(`✗ governance app — ${message}`);
@@ -193,6 +204,15 @@ function assertWorkspaceDependencyContract(files) {
 
 const sourceFiles = readRelativeFiles();
 assertWorkspaceDependencyContract(sourceFiles);
+for (const artifact of legacyActiveArtifacts) {
+  if (fs.existsSync(artifact)) {
+    fail(
+      `artefato legado ainda na superficie ativa; arquive ou remova: ${path
+        .relative(workGraphRoot, artifact)
+        .replaceAll("\\", "/")}`
+    );
+  }
+}
 if (!fs.existsSync(domainTsconfigFile)) {
   fail("contrato TypeScript da sim ausente: tsconfig.domain.json");
 }

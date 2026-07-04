@@ -630,7 +630,7 @@ Antes de considerar o app robusto, a suíte deve provar que:
 
 ## 16. Estado da decisão Opção A
 
-Decisão executada na base da v3: portar a `_org-simulation-v2/_lib` para uma runtime DDD v3 antes
+Decisão executada na base da v3: portar os aprendizados da `_archive/org-simulation-v2/_lib` para uma runtime DDD v3 antes
 de iniciar UI/API nova.
 
 - **Opção A adotada:** `_org-simulation-v3/_lib` agora contém domínio/validador,
