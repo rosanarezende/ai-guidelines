@@ -1,14 +1,12 @@
 // use-cases.ts — application layer of the local adoption shell.
 //
-// Pure orchestration over the backend domain (adoption-shell) and the file
-// state store. Não toca Next/React/MUI. Cada caso de uso é um comando com id,
-// registrado no event-log local; a sessão (cookie) é responsabilidade da
-// camada de interface.
+// Cada caso de uso monta um LocalShellCommand (id/issuedAt/payload completos) e
+// despacha pela porta de store (file-first, mock-api ou demo). A transição de
+// estado mora no reducer PURO do domínio (applyShellCommand) — mesma semântica
+// em todas as fontes de dados. A sessão (cookie) é da camada de interface.
 import { randomUUID } from "node:crypto";
 import {
-  buildDemoWorkspace,
-  buildEmptyWorkspace,
-  principalCanAccessWorkspace,
+  normalizeWorkspace,
   validDisplayName,
   validWorkspaceName,
   workspaceSlugId,
@@ -21,13 +19,13 @@ import {
   type Workspace,
   type WorkspaceKind,
 } from "@demo/backend/domain";
-import { applyLocalShellCommand, loadAdoptionState } from "../infrastructure/file-state-store";
+import { shellStore, type DispatchResult } from "../infrastructure/store";
 
 export type UseCaseResult<T> = { ok: true; value: T } | { ok: false; error: string };
 
 const CREATABLE_KINDS: WorkspaceKind[] = ["company", "personal", "client"];
 
-function command(
+export function newShellCommand(
   type: LocalShellCommandType,
   principalId: string | undefined,
   payload: Record<string, unknown>
@@ -41,8 +39,28 @@ function command(
   };
 }
 
-export function readShellState(): AdoptionState {
-  return loadAdoptionState();
+export async function readShellState(): Promise<AdoptionState> {
+  return shellStore().load();
+}
+
+export async function dispatchShellCommand(command: LocalShellCommand): Promise<DispatchResult> {
+  return shellStore().dispatch(command);
+}
+
+// Despacha e devolve o workspace atualizado (padrão dos use cases de config).
+export async function dispatchForWorkspace(
+  type: LocalShellCommandType,
+  principalId: string,
+  workspaceId: string,
+  payload: Record<string, unknown>
+): Promise<UseCaseResult<Workspace>> {
+  const result = await dispatchShellCommand(
+    newShellCommand(type, principalId, { workspaceId, ...payload })
+  );
+  if (!result.ok) return result;
+  const workspace = result.state.workspaces.find((item) => item.id === workspaceId);
+  if (!workspace) return { ok: false, error: "unknown-workspace" };
+  return { ok: true, value: normalizeWorkspace(workspace) };
 }
 
 export async function signupLocalPrincipal(input: {
@@ -58,9 +76,8 @@ export async function signupLocalPrincipal(input: {
     ...(email ? { email } : {}),
     preferredLocale: "pt-br",
   };
-  const result = await applyLocalShellCommand(
-    command("local.principal.create", principal.id, { displayName: principal.displayName }),
-    (state) => ({ ...state, principals: [...state.principals, principal] })
+  const result = await dispatchShellCommand(
+    newShellCommand("local.principal.create", principal.id, { principal })
   );
   return result.ok ? { ok: true, value: principal } : result;
 }
@@ -73,84 +90,52 @@ export async function createWorkspace(input: {
   if (!validWorkspaceName(input.name)) return { ok: false, error: "invalid-workspace-name" };
   const kind = CREATABLE_KINDS.find((item) => item === input.kind);
   if (!kind) return { ok: false, error: "invalid-workspace-kind" };
-  let created: Workspace | null = null;
-  const result = await applyLocalShellCommand(
-    command("local.workspace.create", input.principalId, { name: input.name, kind }),
-    (state) => {
-      if (!state.principals.some((principal) => principal.id === input.principalId)) {
-        return { error: "unknown-principal" };
-      }
-      const id = workspaceSlugId(
-        String(input.name),
-        state.workspaces.map((workspace) => workspace.id)
-      );
-      created = buildEmptyWorkspace(id, String(input.name), kind);
-      return {
-        ...state,
-        workspaces: [...state.workspaces, created],
-        memberships: [
-          ...state.memberships,
-          { principalId: input.principalId, workspaceId: id, roles: ["admin"] },
-        ],
-      };
-    }
+  const state = await readShellState();
+  const workspaceId = workspaceSlugId(
+    String(input.name),
+    state.workspaces.map((workspace) => workspace.id)
+  );
+  const result = await dispatchShellCommand(
+    newShellCommand("local.workspace.create", input.principalId, {
+      workspaceId,
+      name: input.name,
+      kind,
+    })
   );
   if (!result.ok) return result;
+  const created = result.state.workspaces.find((item) => item.id === workspaceId);
   if (!created) return { ok: false, error: "workspace-not-created" };
-  return { ok: true, value: created };
+  return { ok: true, value: normalizeWorkspace(created) };
 }
 
 export async function attachDemoWorkspace(input: {
   principalId: string;
   companyName: string;
 }): Promise<UseCaseResult<Workspace>> {
-  let attached: Workspace | null = null;
-  const result = await applyLocalShellCommand(
-    command("local.workspace.attach-demo", input.principalId, { company: input.companyName }),
-    (state) => {
-      if (!state.principals.some((principal) => principal.id === input.principalId)) {
-        return { error: "unknown-principal" };
-      }
-      const existing = state.workspaces.find((workspace) => workspace.id === DEMO_WORKSPACE_ID);
-      attached = existing || buildDemoWorkspace(input.companyName);
-      const workspaces = existing ? state.workspaces : [...state.workspaces, attached];
-      const hasMembership = principalCanAccessWorkspace(
-        state,
-        input.principalId,
-        DEMO_WORKSPACE_ID
-      );
-      return {
-        ...state,
-        workspaces,
-        memberships: hasMembership
-          ? state.memberships
-          : [
-              ...state.memberships,
-              { principalId: input.principalId, workspaceId: DEMO_WORKSPACE_ID, roles: ["admin"] },
-            ],
-      };
-    }
+  const result = await dispatchShellCommand(
+    newShellCommand("local.workspace.attach-demo", input.principalId, {
+      company: input.companyName,
+    })
   );
   if (!result.ok) return result;
+  const attached = result.state.workspaces.find((item) => item.id === DEMO_WORKSPACE_ID);
   if (!attached) return { ok: false, error: "demo-not-attached" };
-  return { ok: true, value: attached };
+  return { ok: true, value: normalizeWorkspace(attached) };
 }
 
 export async function selectWorkspace(input: {
   principalId: string;
   workspaceId: string;
 }): Promise<UseCaseResult<Workspace>> {
-  const state = loadAdoptionState();
-  if (!principalCanAccessWorkspace(state, input.principalId, input.workspaceId)) {
-    return { ok: false, error: "not-a-member" };
-  }
-  const workspace = state.workspaces.find((item) => item.id === input.workspaceId);
-  if (!workspace) return { ok: false, error: "unknown-workspace" };
-  const result = await applyLocalShellCommand(
-    command("local.workspace.select", input.principalId, { workspaceId: input.workspaceId }),
-    (current) => current
+  const result = await dispatchShellCommand(
+    newShellCommand("local.workspace.select", input.principalId, {
+      workspaceId: input.workspaceId,
+    })
   );
-  return result.ok ? { ok: true, value: workspace } : result;
+  if (!result.ok) return result;
+  const workspace = result.state.workspaces.find((item) => item.id === input.workspaceId);
+  if (!workspace) return { ok: false, error: "unknown-workspace" };
+  return { ok: true, value: normalizeWorkspace(workspace) };
 }
 
 export async function setOnboardingStatus(input: {
@@ -161,32 +146,7 @@ export async function setOnboardingStatus(input: {
   if (!["partial", "finished"].includes(input.status)) {
     return { ok: false, error: "invalid-status" };
   }
-  let updated: Workspace | null = null;
-  const result = await applyLocalShellCommand(
-    command("local.onboarding.set-status", input.principalId, {
-      workspaceId: input.workspaceId,
-      status: input.status,
-    }),
-    (state) => {
-      if (!principalCanAccessWorkspace(state, input.principalId, input.workspaceId)) {
-        return { error: "not-a-member" };
-      }
-      const workspace = state.workspaces.find((item) => item.id === input.workspaceId);
-      if (!workspace) return { error: "unknown-workspace" };
-      if (workspace.onboardingStatus === "finished" && input.status === "partial") {
-        updated = workspace;
-        return state;
-      }
-      updated = { ...workspace, onboardingStatus: input.status };
-      return {
-        ...state,
-        workspaces: state.workspaces.map((item) =>
-          item.id === input.workspaceId ? (updated as Workspace) : item
-        ),
-      };
-    }
-  );
-  if (!result.ok) return result;
-  if (!updated) return { ok: false, error: "unknown-workspace" };
-  return { ok: true, value: updated };
+  return dispatchForWorkspace("local.onboarding.set-status", input.principalId, input.workspaceId, {
+    status: input.status,
+  });
 }

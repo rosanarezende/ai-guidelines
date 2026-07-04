@@ -42,6 +42,46 @@ Quando uma funcionalidade ainda nao tem backend real, isso fica explicitamente m
 | `Futuro`          | Nao existe mecanismo suficiente; precisa ser decidido e implementado.                                    |
 | `Nao fazer agora` | Deve permanecer fora do escopo atual para evitar over-engineering.                                       |
 
+## 2.1 Cobertura QRD-01..07 → mecanismo (R0 entregue)
+
+| QRD    | Mecanismo entregue                                                                                                                                                                                 |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| QRD-01 | `GOVERNANCE_APP_ENV` + `GOVERNANCE_DATA_SOURCE` + `GOVERNANCE_API_BASE_URL` em `frontend/server/adoption/data-source.ts`; mock proibida em produção (fail-closed); fonte NUNCA vem de localStorage |
+| QRD-02 | `mock-api/` com lowdb + handlers TypeScript; contratos reaproveitados do domínio real (reducer único)                                                                                              |
+| QRD-03 | pasta separada `governance-demo/mock-api/`; nome oficial `mock-api`                                                                                                                                |
+| QRD-04 | Hono + `@hono/node-server`; frontend consome via `GOVERNANCE_API_BASE_URL`                                                                                                                         |
+| QRD-05 | MSW entra quando houver primeiros testes de componente/hook (ainda não há)                                                                                                                         |
+| QRD-06 | Playwright em `governance-demo/test/`; primeira jornada: signup → workspace → onboarding parcial → Home; seed resetada por teste                                                                   |
+| QRD-07 | régua aplicada: jornada e2e = `UX-provada`; persistência via `/api/local/*` = `Produto-integrado`; governança real segue nos checks do backend                                                     |
+
+## 2.2 APIs de produto do shell (R1 entregue)
+
+Rotas Next (`frontend/app/api/local/*`) sobre use cases + reducer puro
+(`backend/src/domain/adoption-commands.ts`); toda mutação vira comando + evento:
+
+| Rota                                   | Método   | Função                                                                         |
+| -------------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `/api/local/signup`                    | POST     | cria local-principal + sessão                                                  |
+| `/api/local/organizations[/select]`    | POST     | criar/anexar demo/selecionar workspace                                         |
+| `/api/local/onboarding/status`         | POST     | partial/finished (nunca rebaixa finished)                                      |
+| `/api/local/onboarding/path`           | POST     | guided/advanced                                                                |
+| `/api/local/onboarding/profile`        | POST     | perfil de governança + regra de acúmulo sensível                               |
+| `/api/local/onboarding/workspace-mode` | POST     | local/shared/controlled                                                        |
+| `/api/local/onboarding/stack`          | POST     | execution-mode, operational-store, graph-read-model, identity (+ warnings)     |
+| `/api/local/members`                   | GET/POST | visão pessoas/grupos/convites/papéis/authority derivada · convidar (token)     |
+| `/api/local/members/invites/[id]`      | POST     | accept (com token) / decline / revoke; expiração honesta                       |
+| `/api/local/members/groups`            | POST     | criar time/grupo local                                                         |
+| `/api/local/roles`                     | GET/POST | catálogo + atribuições · propor papel por subject (proposed; self-assigned)    |
+| `/api/local/roles/[id]`                | POST     | accept / reject / revoke                                                       |
+| `/api/local/governance-host`           | GET/POST | fit-check · create (scaffold real + sourceRevision) · link · sandbox           |
+| `/api/local/work-sources`              | GET/POST | listar/adicionar fonte (entra como `declared`)                                 |
+| `/api/local/work-sources/[id]/scan`    | POST     | scan local real (git head, hash, cloud-sync) → `sourceTrust` derivado          |
+| `/api/local/assistant`                 | GET/POST | config providers · salvar provider (teste real) · dismiss                      |
+| `/api/local/assistant/test`            | POST     | Ollama `/api/tags` ou OpenAI-compatible `/v1/models`; egress fail-closed       |
+| `/api/local/assistant/defaults`        | POST     | default por função (QRD-24)                                                    |
+| `/api/local/integration-backlog`       | GET      | catálogo projetado: disponivel/release-1/em-breve/adiado + nota de honestidade |
+| `/api/local/integrations/[id]`         | POST     | configured/disabled por workspace                                              |
+
 ## 3. Principios de produto
 
 1. **A pessoa nao deve precisar entender YAML, GlobalRef, resolver ou event-log para comecar.**

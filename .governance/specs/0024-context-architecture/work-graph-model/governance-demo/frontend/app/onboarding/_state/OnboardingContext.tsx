@@ -14,7 +14,14 @@ import {
   type RoleKey,
   type SourceKindId,
 } from "@/app/_domain/adoption/model";
-import { reportOnboardingStatus } from "@/app/_domain/adoption/shellClient";
+import {
+  addDeclaredWorkSource,
+  dismissAssistantChoice,
+  listWorkSources,
+  reportOnboardingStatus,
+  saveAssistantProviderChoice,
+  saveProfileChoice,
+} from "@/app/_domain/adoption/shellClient";
 import {
   CONFLICT_POLICIES,
   effectiveRecommendation,
@@ -158,7 +165,49 @@ function useOnboardingState(snapshot: GovernanceSnapshot | null, org: Onboarding
     setSourceKinds((current) => ({ ...current, [source]: !current[source] }));
   }
 
+  // Persistência REAL das escolhas ao concluir (R1): perfil + regra de
+  // acúmulo, fontes declaradas e assistente viram comandos no shell.
+  // Papéis seguem como contrato declarado (aceite/convite via API de membros).
+  async function persistChoices() {
+    if (org.isDemo) return; // demo é fixture: não grava configuração
+    const policy =
+      diagnosis.conflict === "warn"
+        ? "warn-review"
+        : (diagnosis.conflict ?? (profile === "solo" ? "record" : "warn-review"));
+    await saveProfileChoice({
+      profile,
+      sensitiveAccumulationPolicy: policy,
+      reason: manualProfileSelected
+        ? "escolha manual no onboarding"
+        : "recomendado pelo diagnóstico guiado",
+    });
+    const existing = await listWorkSources();
+    if (existing.length === 0) {
+      const kindMap: Record<SourceKindId, { kind: string; label: string }> = {
+        git: { kind: "git-repo", label: "Fontes Git (declarado no onboarding)" },
+        local: { kind: "local-folder", label: "Pastas locais (declarado no onboarding)" },
+        mono: { kind: "monorepo-module", label: "Monorepo com módulos (declarado no onboarding)" },
+        svc: { kind: "external-link", label: "Serviços/URLs (declarado no onboarding)" },
+        ext: { kind: "manual-upload", label: "Evidência manual (declarado no onboarding)" },
+      };
+      for (const [source, selected] of Object.entries(sourceKinds)) {
+        if (selected) await addDeclaredWorkSource(kindMap[source as SourceKindId]);
+      }
+    }
+    if (assistant === "local") {
+      await saveAssistantProviderChoice({
+        kind: "ollama",
+        label: "Ollama local",
+        endpoint: "http://127.0.0.1:11434",
+      });
+    } else if (assistant === "none") {
+      await dismissAssistantChoice();
+    }
+    // assistant === "cloud": nada é salvo — exige aprovação/egress explícitos
+  }
+
   async function finishOnboarding() {
+    await persistChoices();
     await reportOnboardingStatus("finished");
     router.push("/");
   }

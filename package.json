@@ -22,7 +22,9 @@
   "bin": "dist/cli/main.js",
   "workspaces": [
     ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/backend",
-    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/frontend"
+    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/frontend",
+    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/mock-api",
+    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/test"
   ],
   "files": [
     "dist",

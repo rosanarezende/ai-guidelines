@@ -1,9 +1,17 @@
 # Backend R0/R1 — achados para tirar o app do papel
 
-> Status: diagnostico de produto/arquitetura para a proxima fatia da `governance-demo`.
+> Status: **IMPLEMENTADO no essencial (2026-07-04).** R0 = `mock-api/` (Hono+lowdb, 24
+> seeds, mesmo reducer do domínio) + `test/` (Playwright, jornada 1) + data-source switch
+> por env. R1 = domínio/APIs de produto persistindo perfil/regra/modo/stack, pessoas/
+> grupos/convites/papéis com authority derivada, governance host (3 formatos + sandbox,
+> fit-check/scaffold com sourceRevision), fontes com sourceTrust e assistente multi-provider.
+> Fechados no essencial: F-R0-01/02/03 · F-R1-01/02/03/04/05. Parciais: F-R1-06 (GitHub
+> work-source: contrato/kind/backlog modelados; conexão cloud é fatia seguinte) · F-R1-07
+> (graph-read-model neo4j persiste config/status/sourceRevision; health-check vivo é fatia
+> seguinte). QRD-05 (MSW) aguarda primeiros testes de componente/hook.
 > Autoridade: `../model.yml`, `APP-PRODUCT-STATEMENT.md`, `APP-FUNCTIONAL-SPEC.md`,
 > `APP-DECISIONS.md` e `../integration-catalog.yml`.
-> Data: 2026-07-04.
+> Data original do diagnostico: 2026-07-04.
 
 ## Base verificada
 

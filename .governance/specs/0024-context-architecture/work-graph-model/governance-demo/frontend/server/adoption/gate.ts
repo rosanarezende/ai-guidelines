@@ -23,7 +23,7 @@ export type AdoptionGate = {
 };
 
 export async function resolveAdoptionGate(): Promise<AdoptionGate> {
-  const state = readShellState();
+  const state = await readShellState();
   const session = await readSession();
   const principal = session
     ? state.principals.find((item) => item.id === session.principalId) || null

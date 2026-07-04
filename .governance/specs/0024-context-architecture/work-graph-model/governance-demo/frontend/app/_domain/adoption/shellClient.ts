@@ -53,6 +53,50 @@ export function reportOnboardingStatus(status: Extract<OnboardingStatus, "partia
   });
 }
 
+// ── persistência das ESCOLHAS do onboarding (R1) ───────────────────────────
+
+export function saveProfileChoice(input: {
+  profile: string;
+  sensitiveAccumulationPolicy: string;
+  reason: string;
+}) {
+  return postJson<{ profileDeclaration: unknown }>("/api/local/onboarding/profile", input);
+}
+
+export function saveOnboardingPath(path: "guided" | "advanced") {
+  return postJson<{ onboardingPath: string }>("/api/local/onboarding/path", { path });
+}
+
+export function addDeclaredWorkSource(input: { kind: string; label: string; pathOrUrl?: string }) {
+  return postJson<{ source: unknown }>("/api/local/work-sources", input);
+}
+
+export async function listWorkSources(): Promise<Array<{ id: string; kind: string }>> {
+  try {
+    const response = await fetch("/api/local/work-sources");
+    const body = (await response.json()) as {
+      ok: boolean;
+      workSources?: Array<{ id: string; kind: string }>;
+    };
+    return body.ok ? body.workSources || [] : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveAssistantProviderChoice(input: {
+  kind: string;
+  label?: string;
+  endpoint?: string;
+  runTest?: boolean;
+}) {
+  return postJson<{ provider: unknown }>("/api/local/assistant", input);
+}
+
+export function dismissAssistantChoice() {
+  return postJson<{ dismissed: boolean }>("/api/local/assistant", { action: "dismiss" });
+}
+
 export function routeAfterSelect(workspace: ShellWorkspaceSummary): string {
   return workspace.onboardingStatus === "not-started" ? "/onboarding" : "/";
 }

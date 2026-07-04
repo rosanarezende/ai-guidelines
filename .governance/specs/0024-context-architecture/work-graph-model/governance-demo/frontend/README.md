@@ -23,45 +23,59 @@ Pronto nesta fatia:
 - Locales privados (`_locales/pt-br.json`) colocalizados.
 - Guards em `check-governance-app.mjs`: rotas do fluxo inicial obrigatorias, paginas com gate, snapshot da demo so com distincao `isDemo`, sem `localStorage`, dominio compartilhado puro, sem `app/features`/locale global/componente monolitico/JS novo.
 
+Feito nesta fatia (R0/R1):
+
+- Escolhas do onboarding persistem como comandos reais ao concluir: perfil + regra de acumulo, fontes declaradas e assistente (local salva provider com teste real; cloud fica pendente de aprovacao/egress). Recarregar preserva tudo.
+- Governance host para organizacao nova: fit-check, scaffold real (`host.yml` + `events/events.jsonl` + `sourceRevision`) e vinculo pelos 3 formatos, ou sandbox explicito — na secao Governanca das configuracoes.
+- Convites com token local (pending → accepted/declined/revoked/expired) e papeis por subject com aceite via `/api/local/members*` e `/api/local/roles*` (API de produto; telas dedicadas de membros/papeis sao fatia seguinte — o painel do onboarding segue como contrato declarado, marcado como pendente de aceite).
+- mock-api + Playwright: jornada signup → workspace → onboarding parcial → Home roda contra seed resetavel.
+
 Ainda por vir:
 
 - Auth real (senha/SSO/identity-provider): o signup atual e identidade LOCAL, sem seguranca de conta; o cookie de sessao nao e assinado.
-- Persistencia governada do onboarding alem do status: as escolhas (perfil/papeis/fontes) ainda sao UX; viram comandos governados em fatia futura.
-- Vincular host de governanca a organizacao nova (hoje so a demo tem host) e importar/adaptar repos reais.
-- Convites e aceite de papeis (hoje: contrato declarado + risco pendente).
+- Telas dedicadas de membros/papeis/fontes (hoje: APIs de produto + secoes minimas; PeopleStep/SourcesStep do onboarding continuam parcialmente UX e estao marcados assim).
+- GitHub work-source cloud real (contrato/kind/backlog modelados; conexao OAuth/App e fatia seguinte — nunca aparece como `connected` sem mecanismo).
+- Health-check vivo do Neo4j como graph-read-model (config/status/sourceRevision persistem; verificacao ativa e fatia seguinte).
 - Assistente conversacional completo: hoje ha health-check local e advisory local (`/api/integrations/assistant/advisory`) com egress fail-closed + redacao minima; UI conversacional e fatia futura.
 - Adapters cloud alem dos locais (git-local, ci-local, code-quality, observability ja tem mecanismo executavel; SonarQube remoto exige allowlist de egress e cliente ainda nao mecanizado).
 - Empacotamento desktop/mobile.
 
 ## Rotas
 
-| Rota                                        | Responsabilidade                                                                                |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `/`                                         | Home da organizacao ATUAL (demo: snapshot; nova: checklist honesto). Gate redireciona o fluxo.  |
-| `/signup`                                   | Identidade local minima (`local-principal`); honesto: nao e conta segura nem auth cloud.        |
-| `/organizations`                            | Criar/escolher organizacao (empresa/pessoal/cliente, perguntas guiadas) + anexar demo `acme-*`. |
-| `/onboarding`                               | Fluxo guiado da ORGANIZACAO atual; progresso partial/finished persiste por organizacao.         |
-| `/settings`                                 | Configuracoes da organizacao atual (demo: secoes completas; nova: identidade/governanca/troca). |
-| `/console`                                  | Console tecnico da organizacao com host de governanca (hoje a demo).                            |
-| `/api/local/signup`                         | Cria local-principal + sessao (cookie httpOnly, nao assinado — nao e auth).                     |
-| `/api/local/organizations`                  | Cria organizacao vazia ou anexa a demo; atualiza sessao.                                        |
-| `/api/local/organizations/select`           | Troca a organizacao ativa da sessao.                                                            |
-| `/api/local/onboarding/status`              | Marca partial/finished por organizacao (nunca rebaixa finished).                                |
-| `/api/snapshot`                             | Snapshot derivado do runtime file-first (demo).                                                 |
-| `/api/commands/dry-run`                     | Validacao de comando sem escrita (request validada por schema; 400 fail-closed).                |
-| `/api/commands/execute`                     | Execucao de comando governado.                                                                  |
-| `/api/graph`                                | Nos/arestas do grafo DERIVADO com filtro por tipo/texto (inclui `sourceRevision`).              |
-| `/api/graph/node`                           | No por id/GlobalRef com vizinhanca imediata.                                                    |
-| `/api/graph/adjacency`                      | Vizinhanca ate N saltos.                                                                        |
-| `/api/graph/path`                           | Menor caminho entre dois nos (repo/objective/target/intent/...).                                |
-| `/api/graph/contract-impact`                | Impacto de contrato: consumers, intents, outcomes citando revisao, targets.                     |
-| `/api/graph/intent-deps`                    | Dependencias diretas/transitivas e superficie da intent.                                        |
-| `/api/graph/conflicts`                      | Conflitos/contensoes modelados (contrato, atestacao, erros de validacao).                       |
-| `/api/integrations`                         | Adapters mecanizados + status honesto de cada um.                                               |
-| `/api/integrations/[id]/test`               | Testa um adapter real (opcionalmente contra um repo).                                           |
-| `/api/integrations/assistant/ollama/health` | Health-check local do Ollama.                                                                   |
-| `/api/integrations/assistant/advisory`      | Conselho do assistente LOCAL (egress fail-closed + redacao minima; nunca vira mutacao).         |
-| `/api/contract`                             | Contrato verificavel da API local (schemas JSON por rota).                                      |
+| Rota                                                        | Responsabilidade                                                                                |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `/`                                                         | Home da organizacao ATUAL (demo: snapshot; nova: checklist honesto). Gate redireciona o fluxo.  |
+| `/signup`                                                   | Identidade local minima (`local-principal`); honesto: nao e conta segura nem auth cloud.        |
+| `/organizations`                                            | Criar/escolher organizacao (empresa/pessoal/cliente, perguntas guiadas) + anexar demo `acme-*`. |
+| `/onboarding`                                               | Fluxo guiado da ORGANIZACAO atual; progresso partial/finished persiste por organizacao.         |
+| `/settings`                                                 | Configuracoes da organizacao atual (demo: secoes completas; nova: identidade/governanca/troca). |
+| `/console`                                                  | Console tecnico da organizacao com host de governanca (hoje a demo).                            |
+| `/api/local/signup`                                         | Cria local-principal + sessao (cookie httpOnly, nao assinado — nao e auth).                     |
+| `/api/local/organizations`                                  | Cria organizacao vazia ou anexa a demo; atualiza sessao.                                        |
+| `/api/local/organizations/select`                           | Troca a organizacao ativa da sessao.                                                            |
+| `/api/local/onboarding/status`                              | Marca partial/finished por organizacao (nunca rebaixa finished).                                |
+| `/api/local/onboarding/{path,profile,workspace-mode,stack}` | Persistem caminho, perfil+regra de acumulo, modo e stack (R1).                                  |
+| `/api/local/members` + `invites/[id]` + `groups`            | Pessoas, convites com token/aceite/expiracao e times/grupos locais.                             |
+| `/api/local/roles` + `roles/[id]`                           | Papeis por subject (proposed → accept/reject/revoke); authority sempre derivada.                |
+| `/api/local/governance-host`                                | Fit-check, criar (scaffold real + sourceRevision), vincular ou declarar sandbox.                |
+| `/api/local/work-sources` + `[id]/scan`                     | Fontes com sourceTrust explicito; scan local real (git head, hash, cloud-sync).                 |
+| `/api/local/assistant` + `test` + `defaults`                | Providers multi-assistente com teste real, egress fail-closed e default por funcao.             |
+| `/api/local/integration-backlog` + `integrations/[id]`      | Backlog honesto (disponivel/release-1/em-breve/adiado) + estado por workspace.                  |
+| `/api/snapshot`                                             | Snapshot derivado do runtime file-first (demo).                                                 |
+| `/api/commands/dry-run`                                     | Validacao de comando sem escrita (request validada por schema; 400 fail-closed).                |
+| `/api/commands/execute`                                     | Execucao de comando governado.                                                                  |
+| `/api/graph`                                                | Nos/arestas do grafo DERIVADO com filtro por tipo/texto (inclui `sourceRevision`).              |
+| `/api/graph/node`                                           | No por id/GlobalRef com vizinhanca imediata.                                                    |
+| `/api/graph/adjacency`                                      | Vizinhanca ate N saltos.                                                                        |
+| `/api/graph/path`                                           | Menor caminho entre dois nos (repo/objective/target/intent/...).                                |
+| `/api/graph/contract-impact`                                | Impacto de contrato: consumers, intents, outcomes citando revisao, targets.                     |
+| `/api/graph/intent-deps`                                    | Dependencias diretas/transitivas e superficie da intent.                                        |
+| `/api/graph/conflicts`                                      | Conflitos/contensoes modelados (contrato, atestacao, erros de validacao).                       |
+| `/api/integrations`                                         | Adapters mecanizados + status honesto de cada um.                                               |
+| `/api/integrations/[id]/test`                               | Testa um adapter real (opcionalmente contra um repo).                                           |
+| `/api/integrations/assistant/ollama/health`                 | Health-check local do Ollama.                                                                   |
+| `/api/integrations/assistant/advisory`                      | Conselho do assistente LOCAL (egress fail-closed + redacao minima; nunca vira mutacao).         |
+| `/api/contract`                                             | Contrato verificavel da API local (schemas JSON por rota).                                      |
 
 ## Arvore de pastas
 
@@ -234,10 +248,21 @@ governance-next/
 
 ## Comandos uteis
 
-Rodar o app:
+Rodar o app (na raiz do repositorio):
 
 ```bash
-npm --prefix .governance/specs/0024-context-architecture/work-graph-model/governance-demo/frontend run dev
+npm --workspace acme-governance-next-app run dev:real   # backend real (file-first .local-state)
+npm --workspace acme-governance-next-app run dev:mock   # mock-api + app em modo mock (lowdb)
+npm --workspace acme-governance-mock-api run dev        # so a mock-api (porta 3025)
+npm --workspace acme-governance-mock-api run reset      # reset de seed (default blank)
+npm --workspace acme-governance-e2e run test:e2e        # jornada Playwright contra mock seedada
+```
+
+Fonte de dados por env (QRD-01) — nunca por localStorage:
+
+```text
+GOVERNANCE_DATA_SOURCE=real-runtime | mock-api | demo-acme
+GOVERNANCE_API_BASE_URL=http://127.0.0.1:3025   # quando mock-api
 ```
 
 Checar TypeScript do app:

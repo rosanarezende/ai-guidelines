@@ -1,0 +1,3 @@
+# artefatos de execução do Playwright — nunca versionados
+test-results/
+playwright-report/

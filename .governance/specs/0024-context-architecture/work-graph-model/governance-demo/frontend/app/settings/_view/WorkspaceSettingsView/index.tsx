@@ -2,17 +2,28 @@
 
 // WorkspaceSettingsView — configurações de organização NÃO-demo.
 // Não renderiza dados da acme: contexto é da organização atual.
-import { Alert, Box, Button, Chip, Typography } from "@mui/material";
-import Link from "next/link";
+import { Box, Chip, Typography } from "@mui/material";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
-import { workspaceHasGovernanceHost, type Workspace } from "@demo/backend/domain";
+import {
+  governanceHostDirName,
+  workspaceSlugId,
+  type GovernanceHostKind,
+  type Workspace,
+} from "@demo/backend/domain";
+import GovernanceHostSection from "./GovernanceHostSection";
+import SwitchSection from "./SwitchSection";
 import copy from "./_locales/pt-br.json";
 
 const m = copy.messages;
 
 export default function WorkspaceSettingsView({ workspace }: { workspace: Workspace }) {
-  const hasHost = workspaceHasGovernanceHost(workspace);
+  const slug = workspaceSlugId(workspace.name, []);
+  const suggestions = {
+    "dedicated-repo": governanceHostDirName("dedicated-repo", slug),
+    "local-folder": governanceHostDirName("local-folder", slug),
+    "existing-repo-folder": "",
+  } as Record<GovernanceHostKind, string>;
   return (
     <AppShell chip={workspace.name}>
       <Box sx={{ maxWidth: 720, mx: "auto", display: "grid", gap: 2.5 }}>
@@ -46,35 +57,24 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
         </SectionCard>
 
         <SectionCard title={m["workspaceSettings.governance.title"]}>
-          {hasHost ? (
-            <Chip size="small" color="success" label={workspace.governanceHost?.pathOrUrl} />
-          ) : (
-            <Box sx={{ display: "grid", gap: 1.5 }}>
-              <Alert severity="warning">{m["workspaceSettings.governance.missing"]}</Alert>
-              <Box>
-                <Button component={Link} href="/onboarding" size="small" variant="outlined">
-                  {m["workspaceSettings.governance.cta"]}
-                </Button>
-              </Box>
-            </Box>
-          )}
+          <GovernanceHostSection
+            initial={{
+              governanceHost: workspace.governanceHost
+                ? {
+                    kind: workspace.governanceHost.kind,
+                    pathOrUrl: workspace.governanceHost.pathOrUrl,
+                    ...(workspace.governanceHost.fitCheck
+                      ? { fitCheck: workspace.governanceHost.fitCheck }
+                      : {}),
+                  }
+                : null,
+              sandboxDeclared: Boolean(workspace.sandboxDeclared),
+              suggestions,
+            }}
+          />
         </SectionCard>
 
-        <SectionCard title={m["workspaceSettings.switch.title"]}>
-          <Box sx={{ display: "grid", gap: 1.5 }}>
-            <Typography variant="body2" color="text.secondary">
-              {m["workspaceSettings.switch.desc"]}
-            </Typography>
-            <Box>
-              <Button component={Link} href="/organizations" size="small" variant="outlined">
-                {m["workspaceSettings.switch.cta"]}
-              </Button>
-            </Box>
-            <Typography variant="caption" color="text.secondary">
-              {m["workspaceSettings.demo.note"]}
-            </Typography>
-          </Box>
-        </SectionCard>
+        <SwitchSection />
       </Box>
     </AppShell>
   );
