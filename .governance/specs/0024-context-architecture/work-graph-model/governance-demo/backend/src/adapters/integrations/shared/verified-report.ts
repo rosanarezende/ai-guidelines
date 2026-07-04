@@ -3,7 +3,7 @@
 // (tamper-evidence); relatório ausente é not-configured, corpo adulterado
 // é fail-closed. Fixtures de desenvolvimento seguem o MESMO contrato.
 import { existsSync, readFileSync } from "node:fs";
-import { digest12 } from "../../shared/stable-digest.ts";
+import { digest12 } from "../../../shared/stable-digest.ts";
 
 export type VerifiedReport<TBody> = {
   schema: string;

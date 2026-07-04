@@ -23,7 +23,7 @@ A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem 
 - `backend/src/domain/` materializa o contrato TypeScript compartilhado (snapshot, comandos, adoption shell, i18n, graph queries); o app consome só o SDK `@demo/backend[/domain]` — import interno/`.mjs` é barrado por guard;
 - `/api/graph*` expõe graph queries reais sobre a projeção derivada (listagem, nó, adjacência, caminho, impacto de contrato, deps de intent, conflitos) com `sourceRevision` explícita; `/api/contract` publica o contrato verificável da API;
 - integration adapters executáveis com política de egress fail-closed + redação mínima: `assistant-ollama` (health + advisory local), `git-local`, `ci-local`, `code-quality` e `observability`; `check-integrations.mjs` prova sucesso, falha honesta, egress bloqueado e evidência adulterada;
-- `examples/backends/` materializa exemplos derivados nos 4 formatos estudados na v2: file e Neo4j completos/prioritários, SQLite e Mongo completos como read-models derivados;
+- `examples/read-models/` materializa exemplos derivados nos 4 formatos estudados na v2: file e Neo4j completos/prioritários, SQLite e Mongo completos como read-models derivados;
 - `check-backend-examples.mjs` prova o read-model file + Cypher Neo4j com hash, refs, event-log, cobertura de nós/arestas e contrato de ação;
 - `load-neo4j-example.mjs --dry-run` monta o plano executável de carga Neo4j; `--apply` é fail-closed e exige `--source-hash` + credenciais HTTP explícitas;
 - `frontend/` materializa a superfície operacional em React/Next + Material UI, TypeScript strict, como workspace npm com dependências explícitas, consumindo a runtime v3 por API routes e enviando comandos governados;
@@ -89,7 +89,7 @@ Fechado:
 
 ## Próximo ciclo
 
-1. **FEITO — backend/runtime TypeScript:** `backend/src/` é domínio/aplicação/ports/adapters/api em TS strict; sobra desta fatia: migrar os CLIs grandes (`check-runtime`, `test-adversarial`, `backends/*`) de `.mjs` para `.ts` quando houver motivo funcional (hoje são checks estáveis atrás de shims).
+1. **FEITO — backend/runtime TypeScript:** `backend/src/` é domínio/aplicação/ports/adapters/api em TS strict; `backend/src/application/backend-examples/` já cobre export/smoke dos exemplos derivados e entra no typecheck do backend. Sobra desta fatia: migrar os CLIs grandes (`check-runtime`, `test-adversarial`, `adoption-journey`, publishers repo-first e demais `tools/*.mjs`) para `.ts` por lote funcional quando houver motivo.
 2. **Declaracao de produto do app: FEITO.** [`APP-PRODUCT-STATEMENT.md`](APP-PRODUCT-STATEMENT.md) define o app como superficie humana local-first do framework, explicita o que ele nao e (SaaS pago assumido, segundo SSOT, clone de backlog) e estabelece a integracao com a CLI `ai-guidelines`.
 3. **Contrato funcional do app: FEITO.** [`APP-FUNCTIONAL-SPEC.md`](APP-FUNCTIONAL-SPEC.md) descreve todas as telas/fluxos desejados e separa `UI real`, `UI parcial`, `Backend real`, `Console tecnico`, `Demo/read-only` e `Futuro`. Ele e a referencia para decidir o que criar agora e o que manter como feature futura.
 4. **Decisoes QRD do app: FEITO.** [`APP-DECISIONS.md`](APP-DECISIONS.md) registra as decisoes ja tomadas sobre ambientes, mock API (`mock-api`), lowdb, Hono, MSW, Playwright/e2e, governance host, membros/papeis, subjects/grupos, natureza do app e integracao app x CLI.

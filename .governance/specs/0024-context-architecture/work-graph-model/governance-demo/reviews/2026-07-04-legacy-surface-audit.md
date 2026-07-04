@@ -1,8 +1,14 @@
 # Legacy Surface Audit — governance-demo
 
-Data: 2026-07-04  
-Escopo: `governance-demo/` + arquivos arquivados referenciados por ela em `../_archive/`  
-HEAD auditado: `5778dfb6`
+Data: 2026-07-04
+
+Escopo: `governance-demo/` + arquivos arquivados referenciados por ela em `../_archive/`
+
+HEAD auditado inicialmente: `5778dfb6`
+
+Atualizacao nesta mesma trilha: o antigo `backend/backends` foi removido como pasta de runtime; sua
+responsabilidade agora vive em `backend/src/application/backend-examples/`, em TypeScript e dentro
+do typecheck do backend.
 
 ## Veredito
 
@@ -14,9 +20,10 @@ A decisao correta para esta fatia e classificar e congelar crescimento silencios
 
 - codigo novo de produto/runtime continua proibido em `.mjs`;
 - `backend/src`, `frontend`, `mock-api` e `test` sao os caminhos ativos em TypeScript;
-- `backend/tools/*.mjs` e `backend/backends/*.mjs` ficam como CLIs/projecoes ativas ate migracao
-  planejada por lote;
-- `examples/backends/*` fica ativo como evidencia derivada para file/Neo4j/SQLite/Mongo;
+- `backend/tools/*.mjs` fica como CLI ativo ate migracao planejada por lote, mas seu destino
+  arquitetural e sair de `backend/` para `governance-demo/tools/`;
+- `backend/src/application/backend-examples/*.ts` fica ativo como projecao derivada tipada;
+- `examples/read-models/*` fica ativo como evidencia derivada para file/Neo4j/SQLite/Mongo;
 - `acme/repos/**/*.mjs` fica ativo como fixture de empresa existente, nao como padrao de app novo;
 - `_archive/*` permanece historico e nao deve voltar para a superficie ativa.
 
@@ -24,36 +31,37 @@ A decisao correta para esta fatia e classificar e congelar crescimento silencios
 
 - Working tree limpo no inicio da auditoria.
 - `governance-demo/README.md` declara `frontend/` como superficie ativa, `backend/src/` como runtime
-  TypeScript e `examples/backends/` como exemplos derivados verificados.
+  TypeScript e `examples/read-models/` como exemplos derivados verificados.
 - `governance-demo/NEXT-STEPS.md` ja registra a v2 e os apps estaticos v3 como arquivados.
 - `backend/tools/check-governance-app.mjs` ja barra retorno de pastas ativas antigas como
   `_org-simulation-v2`, `_org-simulation-v3`, `_apps`, `_lib`, `_tools`, `acme-governance` e `repos`.
 - Inventario `.mjs` atual:
   - `backend/tools`: 23 arquivos;
-  - `backend/backends`: 2 arquivos;
+  - `backend/backends`: removido como pasta rastreada;
+  - `backend/src/application/backend-examples`: 2 arquivos `.ts`;
   - `backend/index.mjs` e `backend/paths.mjs`: 2 shims;
   - `acme/repos`: 20 arquivos de codigo/teste fixture;
   - outros: 0.
 
 ## Classificacao por superficie
 
-| Superficie                                     | Papel atual                                                               | Classificacao                      | Decisao agora       | Proxima acao                                                              |
-| ---------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------- | ------------------- | ------------------------------------------------------------------------- |
-| `backend/src/`                                 | runtime tipado: dominio, aplicacao, ports/adapters, API                   | ativo primario                     | manter              | toda feature nova de backend entra aqui                                   |
-| `frontend/`                                    | app Next/MUI ativo                                                        | ativo primario                     | manter              | continuar telas humanas sem reintroduzir console como fluxo principal     |
-| `mock-api/`                                    | harness local de desenvolvimento/e2e                                      | ativo primario                     | manter              | expandir seeds e cenarios E2E quando houver novas jornadas                |
-| `test/`                                        | Playwright/e2e da demo                                                    | ativo primario                     | manter              | cobrir seeds criticas progressivamente                                    |
-| `backend/index.mjs`                            | shim de compatibilidade; reexporta `./src/index.ts` e backends de exemplo | legado tecnico ativo               | manter temporario   | remover quando CLIs nao precisarem mais do barrel `.mjs`                  |
-| `backend/paths.mjs`                            | shim de compatibilidade; reexporta `src/shared/paths.ts`                  | legado tecnico ativo               | manter temporario   | remover quando todos os CLIs forem TS ou importarem paths TS diretamente  |
-| `backend/tools/*.mjs`                          | checks, publishers, adopcao repo-first, dogfood e smokes operacionais     | CLI ativo em linguagem legada      | manter, nao crescer | migrar por grupos funcionais para TS quando forem tocados                 |
-| `backend/backends/*.mjs`                       | export/smoke deterministico dos exemplos de backend derivados             | projecao ativa em linguagem legada | manter, nao crescer | migrar para TS ou mover para `examples/backends/tools` em fatia propria   |
-| `examples/backends/*`                          | read-models derivados file/Neo4j/SQLite/Mongo + contrato de acao          | artefato ativo derivado            | manter              | regenerar apenas via exporter; nao editar como SSOT                       |
-| `acme/repos/**/*.mjs`                          | codigo MVP de repos ficticios, simulando empresa que ja tem JS            | fixture ativa                      | manter              | opcional: adicionar um repo TS futuro; nao converter todos por padronismo |
-| `acme/repos/**/test.mjs`                       | testes locais que os adapters/smokes executam                             | fixture ativa                      | manter              | migrar apenas junto do repo fixture correspondente                        |
-| `frontend/app/settings/_sections/*`            | secoes da Settings demo acme, importadas por `SettingsView`               | ativo de demo                      | manter              | renomear se a duplicidade com WorkspaceSettings continuar confundindo     |
-| `../_archive/org-simulation-v2`                | historico operacional v2 e referencia de aprendizados                     | arquivo historico                  | manter arquivado    | usar so como referencia; nao importar no fluxo ativo                      |
-| `../_archive/org-simulation-v3-static-apps-v1` | prototipos estaticos F3/F4 e ferramentas antigas                          | arquivo historico                  | manter arquivado    | nao mover de volta; guards ja falham se retornar a superficie ativa       |
-| `templates/`                                   | templates ativos de adocao/capability extraction                          | ativo auxiliar                     | manter              | revisar junto de fluxos de scaffold/adocao                                |
+| Superficie                                      | Papel atual                                                               | Classificacao                 | Decisao agora       | Proxima acao                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------- | ------------------- | ------------------------------------------------------------------------------- |
+| `backend/src/`                                  | runtime tipado: dominio, aplicacao, ports/adapters, API                   | ativo primario                | manter              | toda feature nova de backend entra aqui                                         |
+| `frontend/`                                     | app Next/MUI ativo                                                        | ativo primario                | manter              | continuar telas humanas sem reintroduzir console como fluxo principal           |
+| `mock-api/`                                     | harness local de desenvolvimento/e2e                                      | ativo primario                | manter              | expandir seeds e cenarios E2E quando houver novas jornadas                      |
+| `test/`                                         | Playwright/e2e da demo                                                    | ativo primario                | manter              | cobrir seeds criticas progressivamente                                          |
+| `backend/index.mjs`                             | shim de compatibilidade; reexporta `./src/index.ts` e backends de exemplo | legado tecnico ativo          | manter temporario   | remover quando CLIs nao precisarem mais do barrel `.mjs`                        |
+| `backend/paths.mjs`                             | shim de compatibilidade; reexporta `src/shared/paths.ts`                  | legado tecnico ativo          | manter temporario   | remover quando todos os CLIs forem TS ou importarem paths TS diretamente        |
+| `backend/tools/*.mjs`                           | checks, publishers, adopcao repo-first, dogfood e smokes operacionais     | CLI ativo em linguagem legada | manter, nao crescer | mover para `governance-demo/tools/` e migrar por grupos funcionais para TS      |
+| `backend/src/application/backend-examples/*.ts` | export/smoke deterministico dos exemplos de backend derivados             | projecao ativa tipada         | manter              | manter junto da aplicacao backend; exporter CLI continua so como invocador fino |
+| `examples/read-models/*`                        | read-models derivados file/Neo4j/SQLite/Mongo + contrato de acao          | artefato ativo derivado       | manter              | regenerar apenas via exporter; nao editar como SSOT                             |
+| `acme/repos/**/*.mjs`                           | codigo MVP de repos ficticios, simulando empresa que ja tem JS            | fixture ativa                 | manter              | opcional: adicionar um repo TS futuro; nao converter todos por padronismo       |
+| `acme/repos/**/test.mjs`                        | testes locais que os adapters/smokes executam                             | fixture ativa                 | manter              | migrar apenas junto do repo fixture correspondente                              |
+| `frontend/app/settings/_sections/*`             | secoes da Settings demo acme, importadas por `SettingsView`               | ativo de demo                 | manter              | renomear se a duplicidade com WorkspaceSettings continuar confundindo           |
+| `../_archive/org-simulation-v2`                 | historico operacional v2 e referencia de aprendizados                     | arquivo historico             | manter arquivado    | usar so como referencia; nao importar no fluxo ativo                            |
+| `../_archive/org-simulation-v3-static-apps-v1`  | prototipos estaticos F3/F4 e ferramentas antigas                          | arquivo historico             | manter arquivado    | nao mover de volta; guards ja falham se retornar a superficie ativa             |
+| `templates/`                                    | templates ativos de adocao/capability extraction                          | ativo auxiliar                | manter              | revisar junto de fluxos de scaffold/adocao                                      |
 
 ## Decisoes explicitas
 
@@ -75,16 +83,16 @@ A migracao de `.mjs` deve ser por lote funcional, nao por extensao de arquivo:
    `adoption-journey.mjs` primeiro, porque sao guards centrais.
 2. publishers repo-first (`publish-*`, `check-repo-*`, `prepare-capability-review`) depois, porque
    ainda exercitam o dogfood de repos existentes.
-3. `backend/backends/*.mjs` junto com eventual reposicionamento para `examples/backends/tools`.
-4. fixtures acme apenas quando houver valor de simulacao, por exemplo adicionar um repo TypeScript,
+3. fixtures acme apenas quando houver valor de simulacao, por exemplo adicionar um repo TypeScript,
    nao converter todos os repos ficticios como se empresas reais fossem homogeneas.
 
 ## Guardrails
 
 - Proibido criar novo `.mjs` em `backend/src`, `frontend`, `mock-api` ou `test`.
 - Novo mecanismo de produto/backend entra em TypeScript.
-- `.mjs` existente em `backend/tools` so deve ser alterado quando o proprio CLI for a fatia.
-- `examples/backends` e read-model derivado, nao SSOT; toda acao governada deve reler YAML/event-log.
+- `.mjs` existente em `backend/tools` so deve ser alterado quando o proprio CLI for a fatia; o
+  destino dessa pasta e `governance-demo/tools/`, fora do runtime backend.
+- `examples/read-models` e read-model derivado, nao SSOT; toda acao governada deve reler YAML/event-log.
 - `_archive` e referencia historica; import ativo de la precisa ser tratado como regressao.
 
 ## Impacto no acompanhamento

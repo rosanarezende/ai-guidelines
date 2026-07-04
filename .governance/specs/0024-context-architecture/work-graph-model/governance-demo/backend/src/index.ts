@@ -53,6 +53,15 @@ export {
   type GraphQueryMeta,
 } from "./application/queries/graph.ts";
 export {
+  buildBackendExampleArtifacts,
+  type BackendExampleArtifacts,
+} from "./application/backend-examples/build.ts";
+export {
+  loadBackendExampleModel,
+  runBackendExampleSmoke,
+  splitCypherStatements,
+} from "./application/backend-examples/smoke.ts";
+export {
   resolveEgress,
   isLoopbackUrl,
   type EgressDecision,
@@ -72,25 +81,25 @@ export {
   isAllowedLocalEndpoint,
   OLLAMA_DEFAULT_ENDPOINT,
   OLLAMA_TAGS_PATH,
-} from "./adapters/integrations/assistant-ollama.ts";
-export { GitLocalAdapter, discoverLocalRepos } from "./adapters/integrations/git-local.ts";
-export { CiLocalAdapter } from "./adapters/integrations/ci-local.ts";
+} from "./adapters/integrations/assistant/ollama.ts";
+export { GitLocalAdapter, discoverLocalRepos } from "./adapters/integrations/git/local.ts";
+export { CiLocalAdapter } from "./adapters/integrations/ci/local.ts";
 export {
   CodeQualityAdapter,
   CODE_QUALITY_REPORT_SCHEMA,
   CODE_QUALITY_REPORT_FILE,
-} from "./adapters/integrations/code-quality.ts";
+} from "./adapters/integrations/code-quality/local-report.ts";
 export {
   ObservabilityAdapter,
   OBSERVABILITY_REPORT_SCHEMA,
   OBSERVABILITY_SOURCE_REPO,
   OBSERVABILITY_REPORT_FILE,
-} from "./adapters/integrations/observability.ts";
+} from "./adapters/integrations/observability/local-report.ts";
 export {
   readVerifiedReport,
   reportBodyHash,
   type VerifiedReport,
-} from "./adapters/integrations/verified-report.ts";
+} from "./adapters/integrations/shared/verified-report.ts";
 
 export type {
   GovernanceRepository,

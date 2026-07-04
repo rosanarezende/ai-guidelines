@@ -1,11 +1,11 @@
 // service.ts — use cases de integração: listar adapters mecanizados, testar um
 // adapter e coletar evidência por repo. O catálogo (integration-catalog.yml)
 // continua sendo o inventário; aqui só aparece o que TEM mecanismo executável.
-import { OllamaAssistantProvider } from "../../adapters/integrations/assistant-ollama.ts";
-import { CiLocalAdapter } from "../../adapters/integrations/ci-local.ts";
-import { CodeQualityAdapter } from "../../adapters/integrations/code-quality.ts";
-import { GitLocalAdapter } from "../../adapters/integrations/git-local.ts";
-import { ObservabilityAdapter } from "../../adapters/integrations/observability.ts";
+import { OllamaAssistantProvider } from "../../adapters/integrations/assistant/ollama.ts";
+import { CiLocalAdapter } from "../../adapters/integrations/ci/local.ts";
+import { CodeQualityAdapter } from "../../adapters/integrations/code-quality/local-report.ts";
+import { GitLocalAdapter } from "../../adapters/integrations/git/local.ts";
+import { ObservabilityAdapter } from "../../adapters/integrations/observability/local-report.ts";
 import type { EvidenceProvider, IntegrationResult } from "../../ports/IntegrationAdapter.ts";
 
 const assistant = new OllamaAssistantProvider();

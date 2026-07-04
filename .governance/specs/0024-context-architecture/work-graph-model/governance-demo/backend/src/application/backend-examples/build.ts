@@ -1,38 +1,96 @@
-// backend-example-export.mjs — exports determinísticos de exemplos de banco derivado.
+// build.ts — monta exports determinísticos de exemplos de banco derivado.
 import { createHash } from "node:crypto";
 
-function hash(value) {
+type BackendGraphNode = {
+  id: string;
+  type: string;
+  label: string;
+  data?: unknown;
+};
+
+type BackendGraphEdge = {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+};
+
+type BackendGraphIssue = {
+  level: string;
+  rule: string;
+  node: string;
+  msg: string;
+  [key: string]: unknown;
+};
+
+type BackendGraph = {
+  nodes: BackendGraphNode[];
+  edges: BackendGraphEdge[];
+  issues?: BackendGraphIssue[];
+};
+
+type BackendExampleNode = Required<BackendGraphNode> & {
+  dataHash: string;
+};
+
+type BackendExampleEdge = BackendGraphEdge;
+
+type BackendExampleIssue = BackendGraphIssue & {
+  id: string;
+};
+
+type BackendExampleModel = {
+  metadata: {
+    schema: "acme.backend-example/v1";
+    authority: "derived-read-model";
+    source: string;
+    contentHash: string;
+    counts: {
+      nodes: number;
+      edges: number;
+      issues: number;
+    };
+    note: string;
+  };
+  nodes: BackendExampleNode[];
+  edges: BackendExampleEdge[];
+  issues: BackendExampleIssue[];
+};
+
+export type BackendExampleArtifacts = Record<string, string>;
+
+function hash(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex").slice(0, 12);
 }
 
-function json(value) {
+function json(value: unknown): string {
   return JSON.stringify(value, null, 2) + "\n";
 }
 
-function jsonl(values) {
+function jsonl(values: unknown[]): string {
   return values.map((value) => JSON.stringify(value)).join("\n") + "\n";
 }
 
-function sql(value) {
+function sql(value: unknown): string {
   return "'" + String(value).replaceAll("'", "''") + "'";
 }
 
-function cypher(value) {
+function cypher(value: unknown): string {
   return "'" + String(value).replace(/\\/g, "\\\\").replaceAll("'", "\\'") + "'";
 }
 
-function relType(type) {
+function relType(type: unknown): string {
   const clean = String(type)
     .replace(/[^A-Za-z0-9_]/g, "_")
     .toUpperCase();
   return /^[A-Z_]/.test(clean) ? clean : "EDGE_" + clean;
 }
 
-function sortedById(items) {
+function sortedById<T extends { id: string }>(items: T[]): T[] {
   return [...items].sort((a, b) => String(a.id).localeCompare(String(b.id)));
 }
 
-function backendModel(graph) {
+function backendModel(graph: BackendGraph): BackendExampleModel {
   const nodes = sortedById(graph.nodes).map((node) => ({
     id: node.id,
     type: node.type,
@@ -46,7 +104,7 @@ function backendModel(graph) {
     target: edge.target,
     type: edge.type,
   }));
-  const issues = sortedById(graph.issues || []).map((issue) => ({
+  const issues = (graph.issues || []).map((issue) => ({
     id: `${issue.level}:${issue.rule}:${issue.node}`,
     ...issue,
   }));
@@ -70,7 +128,7 @@ function backendModel(graph) {
   };
 }
 
-function fileArtifacts(model) {
+function fileArtifacts(model: BackendExampleModel): BackendExampleArtifacts {
   const rebuildEvent = {
     schema: "acme.event-log/v1",
     id: `evt-read-model-${model.metadata.contentHash}`,
@@ -105,7 +163,7 @@ function fileArtifacts(model) {
   };
 }
 
-function sqliteArtifacts(model) {
+function sqliteArtifacts(model: BackendExampleModel): BackendExampleArtifacts {
   const schema =
     "-- SQLite read-model example. Derived only; not an authoritative SSOT.\n" +
     "PRAGMA foreign_keys = ON;\n\n" +
@@ -171,7 +229,7 @@ function sqliteArtifacts(model) {
   };
 }
 
-function neo4jArtifacts(model) {
+function neo4jArtifacts(model: BackendExampleModel): BackendExampleArtifacts {
   const schema =
     "// Neo4j read-model example. Derived only; not an authoritative SSOT.\n" +
     "CREATE CONSTRAINT governance_node_id IF NOT EXISTS FOR (n:GovernanceNode) REQUIRE n.id IS UNIQUE;\n" +
@@ -218,7 +276,7 @@ function neo4jArtifacts(model) {
   };
 }
 
-function mongoArtifacts(model) {
+function mongoArtifacts(model: BackendExampleModel): BackendExampleArtifacts {
   const collections = {
     schema: "acme.mongo-backend-example/v1",
     database: "acme_governance_read_model",
@@ -250,11 +308,11 @@ function mongoArtifacts(model) {
   };
 }
 
-export function buildBackendExampleArtifacts(graph) {
+export function buildBackendExampleArtifacts(graph: BackendGraph): BackendExampleArtifacts {
   const model = backendModel(graph);
   return {
     "README.md":
-      "# Backend examples\n\n" +
+      "# Read-model examples\n\n" +
       "Exemplos derivados da runtime v3 para os quatro formatos estudados na v2.\n\n" +
       "| formato | papel | status neste exemplo |\n" +
       "| --- | --- | --- |\n" +

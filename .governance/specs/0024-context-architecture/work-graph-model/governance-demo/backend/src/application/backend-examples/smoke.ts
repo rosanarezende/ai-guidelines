@@ -1,36 +1,100 @@
-// backend-example-smoke.mjs — valida que os exemplos de backend são utilizáveis como read-model.
+// smoke.ts — valida que os exemplos de backend são utilizáveis como read-model.
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-function hash(value) {
+type BackendExampleNode = {
+  id: string;
+  type: string;
+  label: string;
+  data?: unknown;
+  dataHash: string;
+};
+
+type BackendExampleEdge = {
+  id: string;
+  source: string;
+  target: string;
+  type: string;
+};
+
+type BackendExampleIssue = {
+  id: string;
+  level: string;
+  rule: string;
+  node: string;
+  msg: string;
+};
+
+type BackendExampleModel = {
+  metadata: {
+    schema?: string;
+    contentHash: string;
+    counts?: {
+      nodes?: number;
+      edges?: number;
+      issues?: number;
+    };
+  };
+  nodes: BackendExampleNode[];
+  edges: BackendExampleEdge[];
+  issues: BackendExampleIssue[];
+};
+
+type BackendExampleFailure = {
+  code: string;
+  msg: string;
+};
+
+type BackendExampleSmokeReport = {
+  ok: boolean;
+  failures: BackendExampleFailure[];
+  counts: {
+    nodes: number;
+    edges: number;
+    issues: number;
+    eventLogEvents: number;
+    neo4jSchemaStatements: number;
+    neo4jGraphStatements: number;
+    neo4jQueryStatements: number;
+  };
+  contentHash: string;
+};
+
+function hash(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex").slice(0, 12);
 }
 
-function readJson(file) {
+function readJson(file: string): unknown {
   return JSON.parse(readFileSync(file, "utf8"));
 }
 
-function readText(file) {
+function readText(file: string): string {
   return readFileSync(file, "utf8");
 }
 
-function parseJsonl(file) {
+function parseJsonl(file: string): Array<Record<string, any>> {
   return readText(file)
     .split(/\r?\n/)
     .filter(Boolean)
     .map((line) => JSON.parse(line));
 }
 
-function fail(failures, code, msg) {
+function fail(failures: BackendExampleFailure[], code: string, msg: string): void {
   failures.push({ code, msg });
 }
 
-function setDiff(a, b) {
+function setDiff(a: Set<string>, b: Set<string>): string[] {
   return [...a].filter((value) => !b.has(value)).sort();
 }
 
-function ensureSameSet(failures, code, label, expected, actual) {
+function ensureSameSet(
+  failures: BackendExampleFailure[],
+  code: string,
+  label: string,
+  expected: Set<string>,
+  actual: Set<string>
+): void {
   const missing = setDiff(expected, actual);
   const extra = setDiff(actual, expected);
   if (missing.length || extra.length) {
@@ -44,17 +108,17 @@ function ensureSameSet(failures, code, label, expected, actual) {
   }
 }
 
-function unescapeCypher(value) {
+function unescapeCypher(value: string): string {
   return value.replace(/\\\\/g, "\\").replace(/\\'/g, "'");
 }
 
-function extractMatches(text, regex) {
+function extractMatches(text: string, regex: RegExp): string[] {
   const matches = [];
   for (const match of text.matchAll(regex)) matches.push(unescapeCypher(match[1]));
   return matches;
 }
 
-export function splitCypherStatements(text) {
+export function splitCypherStatements(text: string): string[] {
   const statements = [];
   let current = "";
   for (const rawLine of text.split(/\r?\n/)) {
@@ -70,15 +134,15 @@ export function splitCypherStatements(text) {
   return statements;
 }
 
-export function loadBackendExampleModel(outRoot) {
-  return readJson(path.join(outRoot, "file", "read-model.json"));
+export function loadBackendExampleModel(outRoot: string): BackendExampleModel {
+  return readJson(path.join(outRoot, "file", "read-model.json")) as BackendExampleModel;
 }
 
-export function runBackendExampleSmoke(outRoot) {
-  const failures = [];
+export function runBackendExampleSmoke(outRoot: string): BackendExampleSmokeReport {
+  const failures: BackendExampleFailure[] = [];
   const model = loadBackendExampleModel(outRoot);
-  const nodeIds = new Set();
-  const edgeIds = new Set();
+  const nodeIds = new Set<string>();
+  const edgeIds = new Set<string>();
 
   if (model.metadata?.schema !== "acme.backend-example/v1") {
     fail(failures, "metadata-schema", "read-model schema inesperado");
@@ -139,10 +203,10 @@ export function runBackendExampleSmoke(outRoot) {
   const schemaCypher = readText(path.join(outRoot, "neo4j", "schema.cypher"));
   const graphCypher = readText(path.join(outRoot, "neo4j", "graph.cypher"));
   const queriesCypher = readText(path.join(outRoot, "neo4j", "queries.cypher"));
-  const neo4jNodeIds = new Set(
+  const neo4jNodeIds = new Set<string>(
     extractMatches(graphCypher, /MERGE \(n:GovernanceNode:[^{]+ \{id: '((?:\\'|\\\\|[^'])*)'\}\)/g)
   );
-  const neo4jEdgeIds = new Set(
+  const neo4jEdgeIds = new Set<string>(
     extractMatches(
       graphCypher,
       /MERGE \(source\)-\[r:[^\s]+ \{id: '((?:\\'|\\\\|[^'])*)'\}\]->\(target\)/g

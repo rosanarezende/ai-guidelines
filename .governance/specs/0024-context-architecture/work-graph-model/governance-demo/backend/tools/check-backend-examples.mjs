@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { runBackendExampleSmoke } from "../index.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const outRoot = path.join(here, "..", "..", "examples", "backends");
+const outRoot = path.join(here, "..", "..", "examples", "read-models");
 
 const report = runBackendExampleSmoke(outRoot);
 
@@ -19,7 +19,7 @@ if (!report.ok) {
 }
 
 console.log(
-  "✓ backend operational smoke — " +
+  "✓ read-model operational smoke — " +
     `file ${report.counts.nodes} nós/${report.counts.edges} arestas · ` +
     `event-log ${report.counts.eventLogEvents} evento(s) · ` +
     `neo4j ${report.counts.neo4jSchemaStatements} schema + ${report.counts.neo4jGraphStatements} graph + ${report.counts.neo4jQueryStatements} query statement(s) · ` +

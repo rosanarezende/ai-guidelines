@@ -17,7 +17,7 @@ import { loadPublishedRepoWorks, validateRepoWorks } from "./repo-works.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const demoRoot = path.join(here, "..", "..");
-const outRoot = path.join(demoRoot, "examples", "backends");
+const outRoot = path.join(demoRoot, "examples", "read-models");
 const check = process.argv.includes("--check");
 const prettierConfig = (await prettier.resolveConfig(demoRoot)) ?? {};
 
@@ -69,7 +69,7 @@ for (const [relativePath, content] of Object.entries(artifacts)) {
 }
 
 if (check && stale.length) {
-  console.error("✗ backend examples stale:");
+  console.error("✗ read-model examples stale:");
   for (const file of stale) console.error(`  - ${file}`);
   console.error("Rode: node backend/tools/export-backend-examples.mjs");
   process.exit(1);
@@ -77,6 +77,6 @@ if (check && stale.length) {
 
 console.log(
   check
-    ? `✓ backend examples frescos (${Object.keys(artifacts).length} arquivo(s))`
-    : `✓ backend examples gerados em ${path.relative(demoRoot, outRoot)} (${Object.keys(artifacts).length} arquivo(s))`
+    ? `✓ read-model examples frescos (${Object.keys(artifacts).length} arquivo(s))`
+    : `✓ read-model examples gerados em ${path.relative(demoRoot, outRoot)} (${Object.keys(artifacts).length} arquivo(s))`
 );

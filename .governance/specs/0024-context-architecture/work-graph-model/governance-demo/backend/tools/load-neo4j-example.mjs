@@ -15,7 +15,7 @@ import {
 } from "../index.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const outRoot = path.join(here, "..", "..", "examples", "backends");
+const outRoot = path.join(here, "..", "..", "examples", "read-models");
 const args = process.argv.slice(2);
 const apply = args.includes("--apply");
 const dryRun = args.includes("--dry-run") || !apply;

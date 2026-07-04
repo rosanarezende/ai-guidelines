@@ -1,4 +1,4 @@
-// assistant-ollama.ts — primeiro assistant runtime local/open-source mecanizado.
+// ollama.ts — primeiro assistant runtime local/open-source mecanizado.
 // health/listModels consultam SOMENTE /api/tags. advise envia prompt APENAS quando
 // a decisão de egress permite (loopback por padrão) e depois da redação mínima.
 // Endpoint não-local falha fechado; nunca inventamos resposta.
@@ -6,10 +6,10 @@ import type {
   AssistantAdvice,
   AssistantHealth,
   AssistantProvider,
-} from "../../ports/AssistantProvider.ts";
-import type { IntegrationResult } from "../../ports/IntegrationAdapter.ts";
-import { resolveEgress } from "../../application/integrations/egress-policy.ts";
-import { redactSensitiveText } from "../../application/integrations/redaction.ts";
+} from "../../../ports/AssistantProvider.ts";
+import type { IntegrationResult } from "../../../ports/IntegrationAdapter.ts";
+import { resolveEgress } from "../../../application/integrations/egress-policy.ts";
+import { redactSensitiveText } from "../../../application/integrations/redaction.ts";
 
 export const OLLAMA_DEFAULT_ENDPOINT = "http://127.0.0.1:11434";
 export const OLLAMA_TAGS_PATH = "/api/tags";

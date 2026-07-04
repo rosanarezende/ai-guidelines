@@ -1,11 +1,11 @@
-// FileReadModelSource.ts — lê o read-model exportado (examples/backends/file).
+// FileReadModelSource.ts — lê o read-model exportado (examples/read-models/file).
 // Fail-closed: se o contentHash do arquivo não bate com o corpo, a projeção é
 // considerada adulterada/stale e a leitura falha em vez de fingir frescor.
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { GraphReadModel } from "../../domain/index.ts";
-import { EXAMPLES_BACKENDS_ROOT } from "../../shared/paths.ts";
+import { READ_MODEL_EXAMPLES_ROOT } from "../../shared/paths.ts";
 import type { GraphReadModelSource, GraphSnapshot } from "../../ports/GraphReadModelSource.ts";
 
 type ExportedReadModel = GraphReadModel & {
@@ -28,7 +28,7 @@ function bodyHash(model: ExportedReadModel): string {
 export class FileReadModelSource implements GraphReadModelSource {
   private readonly file: string;
 
-  constructor(file = path.join(EXAMPLES_BACKENDS_ROOT, "file", "read-model.json")) {
+  constructor(file = path.join(READ_MODEL_EXAMPLES_ROOT, "file", "read-model.json")) {
     this.file = file;
   }
 

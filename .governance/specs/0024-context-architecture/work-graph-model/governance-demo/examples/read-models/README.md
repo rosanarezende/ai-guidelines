@@ -1,4 +1,4 @@
-# Backend examples
+# Read-model examples
 
 Exemplos derivados da runtime v3 para os quatro formatos estudados na v2.
 

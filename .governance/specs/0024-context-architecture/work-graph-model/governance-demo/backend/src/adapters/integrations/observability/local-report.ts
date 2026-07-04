@@ -4,9 +4,9 @@
 // É honesto por construção: fixture verificável, declarada como fixture —
 // nunca telemetria em tempo real fingida.
 import path from "node:path";
-import type { EvidenceProvider, IntegrationResult } from "../../ports/IntegrationAdapter.ts";
-import { REPOS_ROOT } from "../../shared/paths.ts";
-import { readVerifiedReport } from "./verified-report.ts";
+import type { EvidenceProvider, IntegrationResult } from "../../../ports/IntegrationAdapter.ts";
+import { REPOS_ROOT } from "../../../shared/paths.ts";
+import { readVerifiedReport } from "../shared/verified-report.ts";
 
 export const OBSERVABILITY_REPORT_SCHEMA = "acme.operational-metrics/v1";
 export const OBSERVABILITY_SOURCE_REPO = "acme-obs-stack";
