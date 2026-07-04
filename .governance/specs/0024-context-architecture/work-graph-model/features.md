@@ -14,18 +14,18 @@ Legenda: ✅ feito · 🚧 parcial · ⬜ a fazer · 🧊 histórico/arquivado.
 
 ## Estado atual da frente
 
-✅ A sim ativa é [`_org-simulation-v3/`](_org-simulation-v3/). Ela substitui a v2 como dogfood
+✅ A sim ativa é [`governance-demo/`](governance-demo/). Ela substitui a v2 como dogfood
 físico, mas não apaga os aprendizados da v2.
 
 ✅ Já existe:
 
-- host central `acme-governance/`;
-- repos adotados em `repos/<repo>/` com código MVP e sidecar `.governance/`;
+- host central `governance-demo/acme/governance/`;
+- repos adotados em `governance-demo/acme/repos/<repo>/` com código MVP e sidecar `.governance/`;
 - manifests, `context.json`, repo-work ack e repo-contract registry;
-- runtime `_lib` v3 com domínio/validador, adapter file, command dry-run/execute mínimo e
+- runtime `governance-demo/backend/` com domínio/validador, adapter file, command dry-run/execute mínimo e
   read-model de grafo;
-- app operacional React/Next + Material UI em `_org-simulation-v3/_apps/governance-next/`;
-- exemplos derivados file/SQLite/Neo4j/Mongo em `_org-simulation-v3/_examples/backends/`;
+- app operacional React/Next + Material UI em `governance-demo/frontend/`;
+- exemplos derivados file/SQLite/Neo4j/Mongo em `governance-demo/examples/backends/`;
 - smoke operacional de file + Neo4j, com Neo4j ainda como read-model/projeção;
 - resolvers fail-closed para schema, outcome, repo-work, contrato, trust-policy, authority,
   break-glass, incident e verdict;
@@ -243,13 +243,13 @@ Direção:
 | `context.json` publicado                 | ✅ migrado com freshness                                                                                                                                         | adicionar envelope/ttl/producer real.                                                |
 | Manifesto/capabilities                   | ✅ migrado com candidates/review packet                                                                                                                          | owner-attested-by/observed-from com dente real.                                      |
 | Matcher léxico/local/API                 | 🚧 conceito preservado; executor v3 ainda não existe                                                                                                             | implementar R6.                                                                      |
-| `_lib` DDD                               | ✅ base v3 criada + file transaction mínimo                                                                                                                      | próximo dente: matcher/authoring, não bypassar command runtime.                      |
+| `governance-demo/backend` DDD            | ✅ base v3 criada + file transaction mínimo                                                                                                                      | próximo dente: matcher/authoring, não bypassar command runtime.                      |
 | Backends file/sqlite/neo4j/mongo         | 🚧 file transacional mínimo + exemplos derivados; Neo4j loader dry-run                                                                                           | R9 depois, com a mesma suíte transacional do file backend.                           |
 | Read-models                              | 🚧 graph read-model v3 existe; snapshots multi-backend existem                                                                                                   | persistência operacional depois do file backend.                                     |
 | App de autoria                           | 🚧 app Next/MUI v2 em TypeScript strict existe como workspace com deps explícitas, comandos principais + onboarding de configurações; autoria completa ainda não | R7 depois de validar a Home de Adoção/Governança com Fable/owner.                    |
 | Scaffold de repo novo                    | 🚧 foco atual é adoção de repos existentes                                                                                                                       | manter separado de create-new-repo.                                                  |
 | `backend.yml` por repo                   | ⬜ modelado como futuro (`physical.por-repo-futuro`), sem executor                                                                                               | não aceitar como evidência até existir adapter real.                                 |
-| Templates v2                             | 🧊 arquivados em `_archive/templates-v2`                                                                                                                         | usar `_org-simulation-v3/_templates` como fonte ativa.                               |
+| Templates v2                             | 🧊 arquivados em `_archive/templates-v2`                                                                                                                         | usar `governance-demo/templates` como fonte ativa.                                   |
 | q/r/d físico por work/repo               | ⬜ não migrado fisicamente                                                                                                                                       | reintroduzir só quando houver comando/resolver, sem vazar histórico privado de repo. |
 | Visualização                             | ✅ owner/company static apps + app Next/MUI                                                                                                                      | static apps são projeções; Next/MUI é superfície operacional em incubação.           |
 

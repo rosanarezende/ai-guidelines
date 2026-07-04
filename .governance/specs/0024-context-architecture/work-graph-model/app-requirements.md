@@ -2,7 +2,7 @@
 
 > **Status:** proposta de requisitos para a próxima fatia de backend/frontend da Spec 0024.
 > **Autoridade:** o modelo tipado continua em [`model.yml`](model.yml). Este documento traduz o modelo para requisitos de produto, dados, arquitetura e robustez do app.
-> **Contexto:** a v2 provou `_lib`, portas, adapters e app de autoria. A v3 já provou o substrato repo-first, resolvers fail-closed, red-team, runtime file-first, exemplos multi-backend e uma primeira superfície React/Next + Material UI. O app alvo deve unir esses aprendizados sem reintroduzir taxonomia antiga nem controles cerimoniais.
+> **Contexto:** a v2 provou lib, portas, adapters e app de autoria. A v3/governance-demo já provou o substrato repo-first, resolvers fail-closed, red-team, runtime file-first, exemplos multi-backend e uma primeira superfície React/Next + Material UI. O app alvo deve unir esses aprendizados sem reintroduzir taxonomia antiga nem controles cerimoniais.
 
 ## 1. Objetivo
 
@@ -116,13 +116,13 @@ Requisitos:
 O backend/runtime da sim v3 ainda contém scripts `.mjs` herdados, mas todo contrato novo deve nascer em TypeScript puro:
 
 ```text
-_org-simulation-v3/_lib/domain/*.ts        # entidades, value objects, policies, DTOs
-_org-simulation-v3/_lib/application/*.ts   # casos de uso/ports quando existirem
-_apps/governance-next/app/features/<feature>/<View>/locales/pt-br.json
-_apps/governance-next/app/features/<feature>/steps/<Step>/locales/pt-br.json
-_apps/governance-next/app/features/<feature>/sections/<Section>/locales/pt-br.json
-_apps/governance-next/app/features/<feature>/<subdomain>/locales/pt-br.json
-_apps/governance-next/app/ui/<area>/locales/pt-br.json
+governance-demo/backend/domain/*.ts        # entidades, value objects, policies, DTOs
+governance-demo/backend/application/*.ts   # casos de uso/ports quando existirem
+governance-demo/frontend/app/<route>/_view/<View>/_locales/pt-br.json
+governance-demo/frontend/app/<route>/_steps/<Step>/_locales/pt-br.json
+governance-demo/frontend/app/<route>/_sections/<Section>/_locales/pt-br.json
+governance-demo/frontend/app/<route>/_components/<Component>/_locales/pt-br.json
+governance-demo/frontend/app/_components/<area>/_locales/pt-br.json
 ```
 
 Critérios:
@@ -133,7 +133,7 @@ Critérios:
 - Experiências de produto vivem por feature: `home`, `onboarding`, `settings`, `console`; passos/seções/componentes específicos ficam dentro da pasta da própria feature.
 - `app/ui/` guarda apenas shell, tema e componentes realmente compartilhados. Não deve conter views de produto.
 - Novas strings de tela entram no locale do menor dono estável da copy: view, step, section, componente compartilhado, subdomínio ou shell. Exceções são labels técnicos curtos ou dados vindos do snapshot.
-- O diretório global `_apps/governance-next/locales/` e locales amplos por feature são legado proibido; eles tornam manutenção e ownership de copy difusos.
+- O diretório global `governance-demo/frontend/locales/` e locales amplos por feature são legado proibido; eles tornam manutenção e ownership de copy difusos.
 - Domínio/backend deve preferir `{ messageKey, params }` para erro/aviso, permitindo UI traduzir sem perder auditoria.
 
 ### 5.1 Camadas
@@ -221,7 +221,7 @@ O domínio não pode depender do adapter. Trocar backend não pode alterar o res
 
 O app deve manter dois planos:
 
-- **Arquivos canônicos:** estado materializado legível no repo (`acme-governance/*`, `repos/<repo>/.governance/*`).
+- **Arquivos canônicos:** estado materializado legível no repo (`governance-demo/acme/governance/*`, `governance-demo/acme/repos/<repo>/.governance/*`).
 - **Event-log semântico:** comandos append-only que explicam por que o arquivo mudou.
 
 Git sozinho não basta como log transacional: ele registra bytes, não intenção de domínio. O event-log é obrigatório para idempotência, replay, reversão de gate, auditoria e conflito concorrente.
@@ -630,21 +630,21 @@ Antes de considerar o app robusto, a suíte deve provar que:
 
 ## 16. Estado da decisão Opção A
 
-Decisão executada na base da v3: portar os aprendizados da `_archive/org-simulation-v2/_lib` para uma runtime DDD v3 antes
+Decisão executada na base da v3: portar os aprendizados da `_archive/org-simulation-v2/_lib` para uma runtime DDD em `governance-demo/backend/` antes
 de iniciar UI/API nova.
 
-- **Opção A adotada:** `_org-simulation-v3/_lib` agora contém domínio/validador,
+- **Opção A adotada:** `governance-demo/backend/` agora contém domínio/validador,
   `FileGovernanceRepository`, command dry-run e read-model de grafo.
 - **Opção B:** criar backend HTTP fino sobre os scripts v3 atuais e refatorar depois.
 - **Motivo:** a opção B acelera tela, mas cristaliza scripts como domínio e repete o erro que a v3
   acabou de expor: texto/projeção parecendo mecanismo.
-- **Estado complementar:** `_org-simulation-v3/_examples/backends/` agora contém exemplos derivados
+- **Estado complementar:** `governance-demo/examples/backends/` agora contém exemplos derivados
   nos quatro formatos (`file`, `neo4j`, `sqlite`, `mongo`), gerados por runtime e verificados por
   `export-backend-examples --check`.
 - **Estado complementar 2:** `check-backend-examples.mjs` valida hash, refs, event-log, cobertura
   Neo4j e contrato de ação; `load-neo4j-example.mjs --dry-run` prova o plano de carga sem rede e
   `--apply` exige `--source-hash` + credenciais explícitas.
-- **Estado complementar 3:** `_apps/governance-next/` implementa a superfície operacional React/Next +
+- **Estado complementar 3:** `governance-demo/frontend/` implementa a superfície operacional React/Next +
   Material UI v2 em TypeScript strict, como npm workspace com dependências explícitas no package do app.
   O app lê snapshot derivado da runtime, separa navegação por
   audiência (stakeholder, owner, tech lead, operação, admin de adoção, auditoria, admin), expõe tabs ponta-a-ponta e

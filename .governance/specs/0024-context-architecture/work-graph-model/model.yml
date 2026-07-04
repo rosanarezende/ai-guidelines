@@ -10,7 +10,7 @@
 
 meta:
   version: 2
-  status: applied-in-sim-v3 # 3 camadas + business-tier + approach/signal + repo-first substrate + outcome/lifecycle/trust-policy aplicados; próximos passos em _org-simulation-v3/NEXT-STEPS.md
+  status: applied-in-governance-demo # 3 camadas + business-tier + approach/signal + repo-first substrate + outcome/lifecycle/trust-policy aplicados; próximos passos em governance-demo/NEXT-STEPS.md
   grounded-by: tracker.md
   artifact: _map/model-map.html # navegável; data.js é GERADO por _map/generate.mjs (node generate.mjs · --check verifica o sync do SUBCONJUNTO projetado — coverage impressa a cada run; --check FORA do validate por decisão da owner 2026-07-01)
 
@@ -58,14 +58,14 @@ adoption-shell:
         governance:last-workspace-id,
         governance:workspace:<id>:onboarding-status,
       ]
-    demo-policy: "`acme-governance` é workspace demo/seed; não deve aparecer como conta real por padrão"
+    demo-policy: "`governance-demo/acme/governance` é workspace demo/seed; não deve aparecer como conta real por padrão"
   i18n:
     rule: "strings de produto moram em locale files versionados; domínio/backend emite messageKey + params, não frase hardcoded"
     default-locale: pt-br
-    layout: "_apps/governance-next/app/{features,ui}/**/locales/pt-br.json"
-    note: "locale é colocalizado no menor dono estável da copy: view, step, section, componente compartilhado, subdomínio ou shell/shared; arquivo global `_apps/governance-next/locales` e locale amplo por feature são legado proibido pelo check do app"
+    layout: "governance-demo/frontend/app/**/_locales/pt-br.json"
+    note: "locale é colocalizado no menor dono estável da copy: view, step, section, componente compartilhado, subdomínio ou shell/shared; arquivo global `governance-demo/frontend/locales` e locale amplo por feature são legado proibido pelo check do app"
   typed-runtime:
-    rule: "novos contratos de domínio/app nascem em TypeScript puro dentro de `_org-simulation-v3/_lib/domain/*.ts`; scripts `.mjs` legados podem coexistir até migração incremental, mas novas telas não devem criar ontologia local ad hoc"
+    rule: "novos contratos de domínio/app nascem em TypeScript puro dentro de `governance-demo/backend/domain/*.ts`; scripts `.mjs` legados podem coexistir até migração incremental, mas novas telas não devem criar ontologia local ad hoc"
 
 # ═════════════════════ AS 3 CAMADAS ═════════════════════
 layers:
@@ -318,27 +318,27 @@ decision-points: # G7 + F4 — gates NOMEADOS com requisitos VERIFICÁVEIS; todo
     approver: "owner da intent + attester independente do actual"
     on-block: "veredito segue pending; override = mutação verdict-override (dangerous, alerta q/r/d)"
 physical:
-  host-root: "acme-governance/ # host central da org simulada; representa o repo de governança"
-  repos-root: "repos/<repo>/ # repos de produto já existentes/adotados, cada um com seu sidecar"
-  intake-proposals: "acme-governance/intake/proposals.yml # proposal/register pré-intent; substitui o layout v2 registers/candidates na sim v3"
-  intake-triage: "acme-governance/intake/triage/<proposal-id>.yml # triagem por proposta/candidata antes do gate"
-  ativada: "acme-governance/intents/<id>.yml"
-  decisions: "acme-governance/decisions/verdicts.yml # decision-point accept-verdict append-only; criado por comando quando houver verdict físico"
-  events: "acme-governance/events/events.jsonl # event-log append-only do runtime file-first; obrigatório quando a mutação passa por comando"
-  incidente: "acme-governance/incidents/incidents.yml # instrumento reativo central; gera follow-ups"
-  por-repo: "repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml}"
-  por-repo-futuro: "repos/<repo>/.governance/backend.yml # modelado para adapters futuros; sem executor v3 e não aceito como evidência"
-  historico-v2: "acme-governance/registers/candidates/<id>/{register,triage,gate}.yml pertence ao fluxo v2; não criar estrutura paralela na v3"
+  host-root: "governance-demo/acme/governance/ # host central da org simulada; representa o repo de governança"
+  repos-root: "governance-demo/acme/repos/<repo>/ # repos de produto já existentes/adotados, cada um com seu sidecar"
+  intake-proposals: "governance-demo/acme/governance/intake/proposals.yml # proposal/register pré-intent; substitui o layout v2 registers/candidates na sim v3"
+  intake-triage: "governance-demo/acme/governance/intake/triage/<proposal-id>.yml # triagem por proposta/candidata antes do gate"
+  ativada: "governance-demo/acme/governance/intents/<id>.yml"
+  decisions: "governance-demo/acme/governance/decisions/verdicts.yml # decision-point accept-verdict append-only; criado por comando quando houver verdict físico"
+  events: "governance-demo/acme/governance/events/events.jsonl # event-log append-only do runtime file-first; obrigatório quando a mutação passa por comando"
+  incidente: "governance-demo/acme/governance/incidents/incidents.yml # instrumento reativo central; gera follow-ups"
+  por-repo: "governance-demo/acme/repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml}"
+  por-repo-futuro: "governance-demo/acme/repos/<repo>/.governance/backend.yml # modelado para adapters futuros; sem executor v3 e não aceito como evidência"
+  historico-v2: "governance-demo/acme/governance/registers/candidates/<id>/{register,triage,gate}.yml pertence ao fluxo v2; não criar estrutura paralela na v3"
   publications:
     context-json: "repo publica capabilities/contratos/consumos derivados do manifest + package + código; host falha se divergir do inventário central"
     repo-work-ack: "repo publica .governance/works/<intent>--<work>.yml com hash do breakdown central + touchpoint de código + lifecycle (acknowledged/active/blocked/done/dropped); host falha em repo-work-stale/missing e outcome-work-open/dropped"
     standalone-work: "repo publica .governance/works/<id>.yml com schema acme.standalone-work/v1 para fix/dep-bump avulso; host agrega no bucket operacional e valida repo/source/routing"
     repo-contract: "owner repo publica .governance/registry/contracts/<contract>.yml com hash de contracts.yml + interface versionada + touchpoint de código; host falha em repo-contract-stale/missing"
     trust-policy: "host valida access-requests, authority-revocations, secret-quarantine, break-glass e oracle-independence; política sem resolver é rejeitada como cerimônia"
-  host: "acme-governance agrega projeções PUBLICADAS (context.json, repo-work-acks, repo-contracts), não abre banco nem confia só no YAML central"
+  host: "governance-demo/acme/governance agrega projeções PUBLICADAS (context.json, repo-work-acks, repo-contracts), não abre banco nem confia só no YAML central"
   identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
   backend: [file, sqlite, neo4j, mongo]
-  backend-status: "v3 já porta runtime file-first transacional mínimo (_lib domain + adapter file + lock de comando + escrita atômica + event-log + recovery marker), app Next/MUI e exemplos derivados file/sqlite/neo4j/mongo; Neo4j tem export/smoke/loader dry-run como read-model. Ainda NÃO há adapters transacionais SQLite/Neo4j/Mongo write-capable."
+  backend-status: "governance-demo já porta runtime file-first transacional mínimo (backend/domain + adapter file + lock de comando + escrita atômica + event-log + recovery marker), app Next/MUI em frontend/ e exemplos derivados file/sqlite/neo4j/mongo; Neo4j tem export/smoke/loader dry-run como read-model. Ainda NÃO há adapters transacionais SQLite/Neo4j/Mongo write-capable."
 
 # ═════════════════════ EXEMPLOS (validam o modelo; o _map desenha estes) ═════════════════════
 examples:

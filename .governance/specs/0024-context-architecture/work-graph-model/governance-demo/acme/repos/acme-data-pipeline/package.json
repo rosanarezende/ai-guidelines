@@ -1,0 +1,11 @@
+{
+  "name": "@acme-sim/acme-data-pipeline",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node ../../../backend/tools/check-code-fixtures.mjs"
+  },
+  "dependencies": {
+    "@acme-sim/acme-analytics": "workspace:*"
+  }
+}

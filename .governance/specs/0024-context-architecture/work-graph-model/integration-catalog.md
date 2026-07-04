@@ -86,7 +86,7 @@ humano/local quando classificação ou egress bloquearem o provedor escolhido.
 
 ## Projeção no app
 
-`_org-simulation-v3/_apps/governance-next/` projeta este catálogo na aba `Configuracoes`.
+`governance-demo/frontend/` projeta este catálogo na tela de Configurações.
 Essa tela é intencionalmente fluida: mostra o que o framework já entrega sem integração, permite
 simular a escolha de perfil da organização e prioriza o assistente inicial local/cloud (Ollama como
 primeiro caminho local). O que ainda não tem mecanismo aparece como `em breve`, não como controle

@@ -1,8 +1,0 @@
-schema: acme.standalone-work/v1
-id: dep-bump-host
-kind: dep-bump # preset: sustain + adaptive + internal
-repo: acme-web-host
-origin: "rotina: lib X 3.x → 4.x"
-review: "externo: area-platform"
-placar: operational-bucket
-source: { kind: standalone, file: repos/acme-web-host/.governance/works/dep-bump-host.yml }

@@ -21,7 +21,7 @@
   ],
   "bin": "dist/cli/main.js",
   "workspaces": [
-    ".governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v3/_apps/governance-next"
+    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/frontend"
   ],
   "files": [
     "dist",

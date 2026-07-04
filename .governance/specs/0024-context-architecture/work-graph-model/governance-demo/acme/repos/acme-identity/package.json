@@ -1,0 +1,8 @@
+{
+  "name": "@acme-sim/acme-identity",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node ../../../backend/tools/check-code-fixtures.mjs"
+  }
+}

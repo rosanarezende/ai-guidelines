@@ -1,9 +1,0 @@
-{
-  "name": "@acme-sim/acme-core-api",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node test.mjs",
-    "smoke": "node ../../_tools/check-code-fixtures.mjs"
-  }
-}

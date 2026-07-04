@@ -125,15 +125,15 @@ Conjunto fechado de arestas, cada uma com critério único (anota-se 1 lado; o r
 
 ## Lente 7 · Camadas físicas & governança (o mais genérico/concreto)
 
-- **Intake (pré-ativação, v3):** `acme-governance/intake/proposals.yml` + `acme-governance/intake/triage/<proposal-id>.yml`. O layout v2 `registers/candidates/<id>/{register,triage,gate}.yml` é histórico e não deve ser recriado na v3.
-- **A intent ativada:** `acme-governance/intents/<id>.yml` (só o relevante, consolidado).
+- **Intake (pré-ativação, v3):** `governance-demo/acme/governance/intake/proposals.yml` + `governance-demo/acme/governance/intake/triage/<proposal-id>.yml`. O layout v2 `registers/candidates/<id>/{register,triage,gate}.yml` é histórico e não deve ser recriado na v3.
+- **A intent ativada:** `governance-demo/acme/governance/intents/<id>.yml` (só o relevante, consolidado).
 - **Por repo de trabalho:** `.governance/` (sidecar) com `manifest.yml` (a camada de **CONHECIMENTO**: role/owner/domain/provides/consumes/capabilities/architecture) · `works/…` · `registry/contracts/…` · `context.json` (projeção **publicada**, versionada; freshness no pre-commit) · `.cache/` (gitignored). `backend.yml` segue modelado para adapters futuros, mas sem executor v3.
-- **O host** (`acme-governance`) auto-descobre os repos, deriva as arestas cross-repo (`provides×consumes` → `coordinates-with`) e agrega os `context.json`.
+- **O host** (`governance-demo/acme/governance`) auto-descobre os repos, deriva as arestas cross-repo (`provides×consumes` → `coordinates-with`) e agrega os `context.json`.
 - **Identidade — `GlobalRef` (🟢 novo):** `family:namespace/id#anchor@revision` (não só `slug_random`); random maior; **tombstone** p/ descartados; o resolver desambigua candidate/intent/archived e detecta reuso/colisão.
 - **`context.json` com ENVELOPE (🟢 novo):** `schema-version`/`generated-at`/`source-commit`/`producer`/`ttl`/`hash` — o host valida schema/frescor/origem ao agregar (não confia num snapshot cru).
 - **Contrato = nó versionado (🟢 novo):** vive na governança (owner/provider/consumers/compatibility/lifecycle); os repos referenciam por `GlobalRef` — resolve N iniciativas / versão / breaking-change.
 - **O matcher** (roteamento vertical, advisory): porta plugável — espectro **léxico (zero infra) → LLM local (Ollama embed/generate) → API/plano (Gemini/Claude/OpenAI)**. Simulável na triagem. Lição: no fácil o barato basta; no difícil o LLM ganha; a **qualidade da capability** é a alavanca. _(Detalhe histórico: [`_archive/org-simulation-v2/MATCHER.md`](_archive/org-simulation-v2/MATCHER.md).)_
-- **A app** (`_org-simulation-v3/_apps/governance-next`): superfície React/Next + Material UI v2 em TypeScript strict sobre a runtime v3; faz dry-run/execute por comando governado e não edita YAML direto. É **projeção operacional**, não o modelo.
+- **A app** (`governance-demo/frontend`): superfície React/Next + Material UI v2 em TypeScript strict sobre a runtime v3; faz dry-run/execute por comando governado e não edita YAML direto. É **projeção operacional**, não o modelo.
 
 ## Lente 8 · Integridade transacional & o envelope de governança (o primitivo que sustenta o file-first)
 
@@ -177,9 +177,9 @@ Conjunto fechado de arestas, cada uma com critério único (anota-se 1 lado; o r
 - **Fluxo & researches:** [`research/2026-06-30-initiative-to-works-flow.md`](research/2026-06-30-initiative-to-works-flow.md) + [`research/`](research/).
 - **Features a implementar (roadmap):** [`features.md`](features.md).
 - **Auditorias adversariais (evidência):** [`_audits/`](_audits/) — 4 rodadas (benchmark · taxonomia · ponta-a-ponta · fronteiras de confiança).
-- **Simulação ativa:** [`_org-simulation-v3/`](_org-simulation-v3/) — dogfood físico repo-first + base runtime `_lib` + exemplos de backends derivados + smoke/loader file+Neo4j. Layout aplicado: host central em `_org-simulation-v3/acme-governance/`; repos adotados em `_org-simulation-v3/repos/<repo>/`; standalone repo-local em `repos/<repo>/.governance/works/*.yml`; incidentes centrais em `acme-governance/incidents/`; exemplos em `_org-simulation-v3/_examples/backends/{file,neo4j,sqlite,mongo}`.
+- **Simulação ativa:** [`governance-demo/`](governance-demo/) — dogfood físico repo-first + runtime `backend/` + app `frontend/` + exemplos de backends derivados + smoke/loader file+Neo4j. Layout aplicado: host central em `governance-demo/acme/governance/`; repos adotados em `governance-demo/acme/repos/<repo>/`; standalone repo-local em `governance-demo/acme/repos/<repo>/.governance/works/*.yml`; incidentes centrais em `governance-demo/acme/governance/incidents/`; exemplos em `governance-demo/examples/backends/{file,neo4j,sqlite,mongo}`.
 - **Requisitos do app ponta-a-ponta:** [`app-requirements.md`](app-requirements.md) — contrato de produto/arquitetura para portar backend/frontend v3 sem perder os aprendizados da v2.
-- **Templates:** ativos da sim em [`_org-simulation-v3/_templates/`](_org-simulation-v3/_templates/); o caminho [`_templates/`](_templates/) é ponte histórica e os templates v2 foram arquivados em [`_archive/templates-v2/`](_archive/templates-v2/).
+- **Templates:** ativos da sim em [`governance-demo/templates/`](governance-demo/templates/); o caminho [`_templates/`](_templates/) é ponte histórica e os templates v2 foram arquivados em [`_archive/templates-v2/`](_archive/templates-v2/).
 
 ## 🔶 Abertos & próxima fase
 
