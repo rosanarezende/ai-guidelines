@@ -7,27 +7,41 @@ import Link from "next/link";
 import type { GovernanceSnapshot } from "@/lib/types";
 import { profileChipLabel } from "@/app/_domain/adoption/model";
 import AppShell from "@/app/_ui/shell/AppShell";
-import { OnboardingProvider, useOnboarding } from "../../_state/OnboardingContext";
+import {
+  OnboardingProvider,
+  useOnboarding,
+  type OnboardingOrg,
+} from "../../_state/OnboardingContext";
 import { WelcomeStep } from "../../_steps/WelcomeStep";
 import { OnboardingActions } from "./OnboardingActions";
 import { OnboardingStepper } from "./OnboardingStepper";
 import { OnboardingStepContent } from "./OnboardingStepContent";
 import copy from "./_locales/pt-br.json";
 
-export default function OnboardingView({ snapshot }: { snapshot: GovernanceSnapshot }) {
+export default function OnboardingView({
+  snapshot,
+  org,
+}: {
+  snapshot: GovernanceSnapshot | null;
+  org: OnboardingOrg;
+}) {
   return (
-    <OnboardingProvider snapshot={snapshot}>
+    <OnboardingProvider snapshot={snapshot} org={org}>
       <OnboardingScreen />
     </OnboardingProvider>
   );
 }
 
 function OnboardingScreen() {
-  const { snapshot, step } = useOnboarding();
+  const { snapshot, org, step } = useOnboarding();
   return (
     <AppShell
       subtitle={copy.shell.subtitle}
-      chip={profileChipLabel(snapshot.profileDeclaration.profile)}
+      chip={
+        snapshot && org.isDemo
+          ? `${profileChipLabel(snapshot.profileDeclaration.profile)} · demo`
+          : org.workspaceName
+      }
       headerAction={
         <Button component={Link} href="/" size="small" color="inherit">
           {copy.shell.saveForLater}

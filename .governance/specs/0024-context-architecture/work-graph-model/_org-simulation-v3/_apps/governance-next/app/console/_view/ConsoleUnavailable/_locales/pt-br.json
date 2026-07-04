@@ -1,0 +1,10 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "consoleUnavailable.title": "Console técnico — {name}",
+    "consoleUnavailable.body": "Esta organização ainda não tem repositório de governança vinculado, então não há grafo, comandos nem event-log para mostrar. Isso é o estado real, não um erro.",
+    "consoleUnavailable.next": "Vincule um host de governança no onboarding para habilitar o console.",
+    "consoleUnavailable.cta.onboarding": "Abrir onboarding",
+    "consoleUnavailable.cta.demo": "Ver o console na demo acme (em Organizações)"
+  }
+}

@@ -3,6 +3,7 @@
     "title": "Conectar fontes de trabalho",
     "lead": "De onde vem o trabalho que você quer provar? Sem uma fonte, dá para planejar e registrar intenções — mas não provar execução, contratos ou resultados."
   },
-  "success": "Evidência automática habilitada para {count} tipo(s) de fonte. Execução, contratos e resultados poderão ser provados, não só declarados. Na sim, {connected} de {total} fontes já publicam contexto.",
+  "success": "Evidência automática habilitada para {count} tipo(s) de fonte. Execução, contratos e resultados poderão ser provados, não só declarados.",
+  "successDemoSuffix": "Na demo, {connected} de {total} fontes já publicam contexto.",
   "warningSuffix": "Dá para conectar depois."
 }

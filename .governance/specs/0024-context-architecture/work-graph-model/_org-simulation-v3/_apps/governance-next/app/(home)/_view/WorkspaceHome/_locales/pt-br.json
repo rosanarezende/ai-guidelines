@@ -1,0 +1,23 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "workspaceHome.title": "{name}",
+    "workspaceHome.lead": "Organização recém-criada. O retrato abaixo é honesto: nada aqui é inventado — o que não foi configurado aparece como pendente.",
+    "workspaceHome.partial.title": "Onboarding em andamento",
+    "workspaceHome.partial.body": "Você começou a configurar esta organização. Dá para continuar de onde parou.",
+    "workspaceHome.partial.cta": "Continuar onboarding",
+    "workspaceHome.checklist.title": "O que esta organização já tem",
+    "workspaceHome.checklist.profile": "Perfil de governança",
+    "workspaceHome.checklist.profile.missing": "definido no onboarding",
+    "workspaceHome.checklist.host": "Repositório/pasta de governança",
+    "workspaceHome.checklist.host.missing": "sem host vinculado — decisões ainda não têm onde morar",
+    "workspaceHome.checklist.sources": "Fontes de trabalho",
+    "workspaceHome.checklist.sources.missing": "nenhuma conectada — execução/contratos/resultados só com evidência manual/declarada",
+    "workspaceHome.checklist.done": "configurado",
+    "workspaceHome.next.title": "Próximo passo",
+    "workspaceHome.next.onboarding": "Completar o onboarding define perfil, papéis e fontes — em arquivos seus.",
+    "workspaceHome.next.cta": "Abrir onboarding",
+    "workspaceHome.console.note": "O console técnico mostra o grafo governado de uma organização. Esta organização ainda não tem repositório de governança vinculado, então não há grafo para mostrar — isso é honesto, não um erro.",
+    "workspaceHome.demo.hint": "Quer ver o produto cheio de dados? Abra a organização demo acme em Organizações."
+  }
+}

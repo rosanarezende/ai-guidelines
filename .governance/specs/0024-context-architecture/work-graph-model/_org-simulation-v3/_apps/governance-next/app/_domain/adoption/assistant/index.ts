@@ -1,13 +1,11 @@
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { IntegrationCatalog } from "@/lib/types";
 import assistantPtBr from "./_locales/pt-br.json";
 import type { ProfileId } from "../profiles";
 
 export type AssistantChoice = "local" | "cloud" | "none";
 
-export function assistantSystems(snapshot: GovernanceSnapshot): string[] {
-  const runtime = snapshot.integrationCatalog.integrations.find(
-    (item) => item.id === "assistant-runtime-local-cloud"
-  );
+export function assistantSystems(catalog: IntegrationCatalog): string[] {
+  const runtime = catalog.integrations.find((item) => item.id === "assistant-runtime-local-cloud");
   const systems = runtime?.systems || ["ollama"];
   return [...systems].sort((a, b) => {
     if (a === "ollama") return -1;

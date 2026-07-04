@@ -230,7 +230,11 @@ Git sozinho não basta como log transacional: ele registra bytes, não intençã
 
 ### 6.1 Porta de entrada
 
-A primeira tela do app é a **Home de Adoção/Governança**. Ela não começa pelo grafo, por YAML,
+Antes da Home existe o **shell de adoção**: um usuário novo cria identidade local
+(`local-principal`; honesto — não é auth cloud), cria ou escolhe uma **organização/workspace**
+(multi-organização com contexto separado; a `acme-*` entra como fixture demo, nunca como a
+realidade do usuário) e faz o onboarding daquela organização. Só então chega à
+**Home de Adoção/Governança** da organização atual. Ela não começa pelo grafo, por YAML,
 por event-log nem por taxonomia interna. Ela começa por intenção humana:
 
 ```text

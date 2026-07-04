@@ -178,7 +178,9 @@ function buildRepoStatus(
   }));
 }
 
-function loadIntegrationCatalog(): IntegrationCatalog {
+// Catálogo de integrações é dado NEUTRO (adapter kinds), não dado da org acme:
+// pode alimentar onboarding/settings de qualquer organização sem vazar a demo.
+export function loadIntegrationCatalog(): IntegrationCatalog {
   return parse(readFileSync(integrationCatalogFile, "utf8")) as IntegrationCatalog;
 }
 

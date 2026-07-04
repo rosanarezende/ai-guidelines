@@ -1,11 +1,11 @@
 "use client";
 
-// HomeView.tsx — Home de Adoção/Governança: a primeira tela, orientada a tarefa humana.
-// Tudo que aparece aqui deriva do snapshot; o que ainda não tem mecanismo diz isso na copy.
-import { Box, Button, Paper, Typography } from "@mui/material";
+// HomeView.tsx — Home da organização DEMO acme-*: deriva tudo do snapshot
+// governado da sim. O gate de fluxo (signup/organização/onboarding) roda no
+// servidor, em app/(home)/page.tsx; aqui só se renderiza.
+import { Box, Button, Chip, Paper } from "@mui/material";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { GovernanceSnapshot } from "@/lib/types";
 import { SectionCard } from "@/app/_ui/shared";
 import {
@@ -16,10 +16,6 @@ import {
   TrustLegend,
 } from "@/app/_ui/adoption";
 import { deriveAdoption, profileChipLabel } from "@/app/_domain/adoption/model";
-import {
-  readOnboardingStatus,
-  type OnboardingStatus,
-} from "@/app/_domain/adoption/onboardingStorage";
 import AppShell from "@/app/_ui/shell/AppShell";
 import { AssistantPrompt } from "./AssistantPrompt";
 import { HomeHeader } from "./HomeHeader";
@@ -29,42 +25,26 @@ import { SnapshotBadges } from "./SnapshotBadges";
 import { format } from "./format";
 import copy from "./_locales/pt-br.json";
 
-export default function HomeView({ snapshot }: { snapshot: GovernanceSnapshot }) {
-  const router = useRouter();
+export default function HomeView({
+  snapshot,
+  workspaceName,
+  onboardingStatus,
+}: {
+  snapshot: GovernanceSnapshot;
+  workspaceName: string;
+  onboardingStatus: "partial" | "finished";
+}) {
   const adoption = useMemo(() => deriveAdoption(snapshot), [snapshot]);
   const [assistantDismissed, setAssistantDismissed] = useState(false);
-  const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus | "checking" | null>(
-    "checking"
-  );
 
   const profile = snapshot.profileDeclaration.profile;
   const pendingCount = adoption.attention.length;
 
-  useEffect(() => {
-    const status = readOnboardingStatus();
-    if (!status) {
-      setOnboardingStatus(null);
-      router.replace("/onboarding");
-      return;
-    }
-    setOnboardingStatus(status);
-  }, [router]);
-
-  if (onboardingStatus === "checking" || onboardingStatus === null) {
-    return (
-      <AppShell chip={profileChipLabel(profile)}>
-        <Paper variant="outlined" sx={{ p: 3, maxWidth: 560 }}>
-          <Typography variant="h2">{copy.loading.title}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {copy.loading.body}
-          </Typography>
-        </Paper>
-      </AppShell>
-    );
-  }
-
   return (
-    <AppShell chip={profileChipLabel(profile)}>
+    <AppShell
+      chip={profileChipLabel(profile)}
+      headerAction={<Chip size="small" color="info" label={`${workspaceName} · demo`} />}
+    >
       <Box sx={{ display: "grid", gap: 3 }}>
         <HomeHeader adoption={adoption} profile={profile} />
 

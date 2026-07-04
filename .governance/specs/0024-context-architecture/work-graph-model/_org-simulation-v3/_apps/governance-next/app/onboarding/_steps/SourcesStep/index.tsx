@@ -2,10 +2,7 @@ import { Alert, Box, Chip, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { Flex, ResponsiveGrid } from "@/app/_ui/shared";
-import {
-  NO_SOURCE_DOWNGRADE,
-  SOURCE_KINDS,
-} from "@/app/_domain/adoption/model";
+import { NO_SOURCE_DOWNGRADE, SOURCE_KINDS } from "@/app/_domain/adoption/model";
 import { OptionCard, StepHeading } from "../../_components";
 import { useOnboarding } from "../../_state/OnboardingContext";
 import copy from "./_locales/pt-br.json";
@@ -49,10 +46,12 @@ export function SourcesStep() {
       </ResponsiveGrid>
       {selectedSourceCount > 0 ? (
         <Alert severity="success">
-          {copy.success
-            .replace("{count}", String(selectedSourceCount))
-            .replace("{connected}", String(adoption.sourcesConnected))
-            .replace("{total}", String(adoption.sources.length))}
+          {copy.success.replace("{count}", String(selectedSourceCount))}
+          {adoption
+            ? ` ${copy.successDemoSuffix
+                .replace("{connected}", String(adoption.sourcesConnected))
+                .replace("{total}", String(adoption.sources.length))}`
+            : ""}
         </Alert>
       ) : (
         <Alert severity="warning">

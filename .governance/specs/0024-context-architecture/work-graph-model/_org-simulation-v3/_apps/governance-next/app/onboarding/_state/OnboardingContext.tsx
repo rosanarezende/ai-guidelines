@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot, IntegrationCatalog } from "@/lib/types";
 import {
   DEFAULT_ASSIGNMENTS,
   assistantSystems,
@@ -14,10 +14,7 @@ import {
   type RoleKey,
   type SourceKindId,
 } from "@/app/_domain/adoption/model";
-import {
-  markOnboardingPartialIfNeeded,
-  writeOnboardingStatus,
-} from "@/app/_domain/adoption/onboardingStorage";
+import { reportOnboardingStatus } from "@/app/_domain/adoption/shellClient";
 import {
   CONFLICT_POLICIES,
   effectiveRecommendation,
@@ -25,7 +22,21 @@ import {
   recommendationIsReady,
   type DiagnosisAnswers,
 } from "../_model/diagnosis";
-import { derivePendingSummary, deriveRiskSummary, deriveWorkingSummary } from "../_view/OnboardingView/summary";
+import {
+  derivePendingSummary,
+  deriveRiskSummary,
+  deriveWorkingSummary,
+} from "../_view/OnboardingView/summary";
+
+// Contexto da ORGANIZAÇÃO em onboarding. `snapshot` só existe na demo acme;
+// organização nova não recebe dados da demo (catálogo de adapters é neutro).
+export type OnboardingOrg = {
+  workspaceId: string;
+  workspaceName: string;
+  isDemo: boolean;
+  initialProfile: ProfileId;
+  catalog: IntegrationCatalog;
+};
 
 type OnboardingContextValue = ReturnType<typeof useOnboardingState>;
 
@@ -33,12 +44,14 @@ const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
 export function OnboardingProvider({
   snapshot,
+  org,
   children,
 }: {
-  snapshot: GovernanceSnapshot;
+  snapshot: GovernanceSnapshot | null;
+  org: OnboardingOrg;
   children: ReactNode;
 }) {
-  const value = useOnboardingState(snapshot);
+  const value = useOnboardingState(snapshot, org);
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 }
 
@@ -48,13 +61,11 @@ export function useOnboarding() {
   return value;
 }
 
-function useOnboardingState(snapshot: GovernanceSnapshot) {
+function useOnboardingState(snapshot: GovernanceSnapshot | null, org: OnboardingOrg) {
   const router = useRouter();
-  const adoption = useMemo(() => deriveAdoption(snapshot), [snapshot]);
+  const adoption = useMemo(() => (snapshot ? deriveAdoption(snapshot) : null), [snapshot]);
   const [step, setStep] = useState(0);
-  const [profile, setProfile] = useState<ProfileId>(
-    snapshot.profileDeclaration.profile === "full" ? "full" : "compact"
-  );
+  const [profile, setProfile] = useState<ProfileId>(org.initialProfile);
   const [diagnosis, setDiagnosis] = useState<DiagnosisAnswers>({});
   const [manualProfileOpen, setManualProfileOpen] = useState(false);
   const [manualProfileSelected, setManualProfileSelected] = useState(false);
@@ -88,19 +99,21 @@ function useOnboardingState(snapshot: GovernanceSnapshot) {
     shouldShowConflictPolicy
   );
   const selectedSourceCount = Object.values(sourceKinds).filter(Boolean).length;
-  const systems = assistantSystems(snapshot);
+  const systems = assistantSystems(org.catalog);
 
   useEffect(() => {
-    if (step > 0) markOnboardingPartialIfNeeded();
+    // Progresso é estado da organização, persistido file-first no servidor
+    // (fire-and-forget: o servidor nunca rebaixa finished para partial).
+    if (step > 0) void reportOnboardingStatus("partial");
   }, [step]);
 
   const catalogHighlights = useMemo(() => {
     const weight = (priority: string) =>
       priority === "P0" ? 0 : priority === "P1" ? 1 : priority === "P2" ? 2 : 3;
-    return [...snapshot.integrationCatalog.integrations]
+    return [...org.catalog.integrations]
       .sort((a, b) => weight(a.priority) - weight(b.priority) || a.id.localeCompare(b.id))
       .slice(0, 6);
-  }, [snapshot.integrationCatalog.integrations]);
+  }, [org.catalog.integrations]);
 
   const works = deriveWorkingSummary({
     profile,
@@ -145,13 +158,14 @@ function useOnboardingState(snapshot: GovernanceSnapshot) {
     setSourceKinds((current) => ({ ...current, [source]: !current[source] }));
   }
 
-  function finishOnboarding() {
-    writeOnboardingStatus("finished");
+  async function finishOnboarding() {
+    await reportOnboardingStatus("finished");
     router.push("/");
   }
 
   return {
     snapshot,
+    org,
     adoption,
     step,
     profile,

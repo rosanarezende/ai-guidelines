@@ -1,0 +1,20 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "signup.title": "Quem está governando?",
+    "signup.lead": "Crie sua identidade local para começar. Isto NÃO é uma conta na nuvem: é um perfil local desta máquina (local-principal), registrado em arquivo seu.",
+    "signup.name.label": "Seu nome",
+    "signup.name.help": "Como você aparece em decisões e registros.",
+    "signup.email.label": "E-mail (opcional)",
+    "signup.email.help": "Só um identificador legível; nada é enviado para fora.",
+    "signup.honesty.title": "O que isto é — e o que não é",
+    "signup.honesty.local": "Identidade local em arquivo: sem senha, sem servidor, sem sincronização.",
+    "signup.honesty.future": "Autenticação real (SSO/identity-provider) é um adapter futuro; nada aqui fecha essa porta.",
+    "signup.honesty.privacy": "Não pedimos dados sensíveis. Não chame isto de conta segura — não é.",
+    "signup.submit": "Criar identidade local",
+    "signup.submitting": "Criando...",
+    "signup.error.invalid-display-name": "Informe um nome com pelo menos 2 caracteres.",
+    "signup.error.generic": "Não foi possível criar a identidade local. Detalhe: {error}",
+    "signup.next": "Depois disto você cria ou escolhe uma organização."
+  }
+}

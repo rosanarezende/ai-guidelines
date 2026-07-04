@@ -1,15 +1,21 @@
-import { Card, CardActionArea } from "@mui/material";
+import { Box, Card, CardActionArea } from "@mui/material";
 import type { ReactNode } from "react";
 
+// OptionCard — cartão selecionável. `children` vira o alvo clicável; conteúdo
+// INTERATIVO (inputs/botões) deve ir em `detail`, renderizado fora do
+// CardActionArea — <button> não pode conter <button>/<input> (HTML inválido
+// quebra hydration).
 export function OptionCard({
   selected,
   onClick,
   children,
+  detail,
   disabled = false,
 }: {
   selected: boolean;
   onClick?: () => void;
   children: ReactNode;
+  detail?: ReactNode;
   disabled?: boolean;
 }) {
   return (
@@ -30,6 +36,7 @@ export function OptionCard({
       >
         {children}
       </CardActionArea>
+      {detail ? <Box sx={{ px: 2, pb: 2 }}>{detail}</Box> : null}
     </Card>
   );
 }

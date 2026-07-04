@@ -104,6 +104,11 @@ const requiredColocatedLocaleFiles = [
   "app/settings/_sections/RolesSection/_locales/pt-br.json",
   "app/settings/_sections/SourcesSection/_locales/pt-br.json",
   "app/settings/_view/SettingsView/_locales/pt-br.json",
+  "app/signup/_view/SignupView/_locales/pt-br.json",
+  "app/organizations/_view/OrganizationsView/_locales/pt-br.json",
+  "app/(home)/_view/WorkspaceHome/_locales/pt-br.json",
+  "app/settings/_view/WorkspaceSettingsView/_locales/pt-br.json",
+  "app/console/_view/ConsoleUnavailable/_locales/pt-br.json",
 ];
 const ollamaHealthRouteFile = path.join(
   appDir,
@@ -134,6 +139,7 @@ function readRelativeFiles() {
     const relative = path.relative(appDir, file).replaceAll("\\", "/");
     if (relative.startsWith(".next/")) return false;
     if (relative.startsWith("node_modules/")) return false;
+    if (relative.startsWith(".local-state/")) return false;
     return /\.(ts|tsx|js|jsx|mjs|css|json)$/.test(relative);
   });
 }
@@ -243,6 +249,62 @@ for (const { file, key } of requiredLocaleFiles) {
     );
   }
 }
+// ── fluxo inicial signup → organizações → onboarding → home ────────────────
+const requiredFlowRoutes = [
+  "app/signup/page.tsx",
+  "app/organizations/page.tsx",
+  "app/onboarding/page.tsx",
+  "app/settings/page.tsx",
+  "app/console/page.tsx",
+];
+for (const relativeFile of requiredFlowRoutes) {
+  if (!fs.existsSync(path.join(appDir, ...relativeFile.split("/")))) {
+    fail(`rota obrigatoria do fluxo inicial ausente: ${relativeFile}`);
+  }
+}
+// A rota raiz e as rotas de contexto precisam resolver o estado inicial
+// (principal/organização/onboarding) no servidor antes de renderizar.
+const gatedPages = [
+  "app/(home)/page.tsx",
+  "app/signup/page.tsx",
+  "app/onboarding/page.tsx",
+  "app/settings/page.tsx",
+  "app/console/page.tsx",
+  "app/organizations/page.tsx",
+];
+for (const relativeFile of gatedPages) {
+  const text = fs.readFileSync(path.join(appDir, ...relativeFile.split("/")), "utf8");
+  if (!text.includes("resolveAdoptionGate")) {
+    fail(`pagina sem gate de estado inicial (resolveAdoptionGate): ${relativeFile}`);
+  }
+}
+// A UI não pode assumir a acme como realidade do usuário: snapshot governado
+// só entra em página que distingue a organização demo.
+for (const relativeFile of gatedPages) {
+  const text = fs.readFileSync(path.join(appDir, ...relativeFile.split("/")), "utf8");
+  if (text.includes("loadGovernanceSnapshot") && !text.includes("isDemo")) {
+    fail(`pagina carrega snapshot da demo sem distinguir organização demo: ${relativeFile}`);
+  }
+}
+// Sessão/estado local: sem localStorage na UI (gateway é fetch + cookie httpOnly
+// + arquivo no servidor local); o dominio compartilhado fica livre de framework.
+for (const file of readRelativeFiles()) {
+  const relative = path.relative(appDir, file).replaceAll("\\", "/");
+  if (!/\.(ts|tsx)$/.test(relative)) continue;
+  const text = fs.readFileSync(file, "utf8");
+  if (/localStorage/.test(text)) {
+    fail(`localStorage proibido (use o shell local via /api/local/*): ${relative}`);
+  }
+}
+const domainDir = path.join(root, "_lib", "domain");
+for (const file of walk(domainDir).filter((item) => /\.ts$/.test(item))) {
+  const text = fs.readFileSync(file, "utf8");
+  const relative = path.relative(root, file).replaceAll("\\", "/");
+  if (/from "(next|react|@mui|node:fs|node:path|yaml)/.test(text)) {
+    fail(`dominio compartilhado deve ser puro (sem framework/fs/yaml): ${relative}`);
+  }
+}
+
 if (!fs.existsSync(ollamaHealthRouteFile)) {
   fail("rota de health-check do Ollama ausente");
 }

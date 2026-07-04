@@ -46,7 +46,7 @@ export default function SettingsView({ snapshot }: { snapshot: GovernanceSnapsho
     [snapshot.authorities]
   );
   const warnings = roleWarnings(assignments, declaredProfile, authorityIds);
-  const systems = assistantSystems(snapshot);
+  const systems = assistantSystems(snapshot.integrationCatalog);
   const categories = [
     ...new Set(snapshot.integrationCatalog.integrations.map((item) => item.category)),
   ].sort();

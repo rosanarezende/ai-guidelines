@@ -14,7 +14,31 @@ export function AssistantStep() {
     <>
       <StepHeading step={4} title={copy.heading.title} lead={copy.heading.lead} />
       <Box sx={{ display: "grid", gap: 1.5 }}>
-        <OptionCard selected={assistant === "local"} onClick={() => setAssistant("local")}>
+        <OptionCard
+          selected={assistant === "local"}
+          onClick={() => setAssistant("local")}
+          detail={
+            assistant === "local" ? (
+              <Flex gap={1.25} wrap sx={{ ml: 4 }}>
+                <TextField
+                  size="small"
+                  label={copy.local.endpointLabel}
+                  value="http://127.0.0.1:11434"
+                  slotProps={{ input: { readOnly: true } }}
+                />
+                <TextField
+                  size="small"
+                  label={copy.local.modelLabel}
+                  value="llama3.2"
+                  slotProps={{ input: { readOnly: true } }}
+                />
+                <Button size="small" variant="outlined" disabled>
+                  {copy.local.testCta}
+                </Button>
+              </Flex>
+            ) : null
+          }
+        >
           <Box sx={{ display: "grid", gap: 1 }}>
             <Flex align="center" gap={1.25} wrap>
               {assistant === "local" ? (
@@ -33,25 +57,6 @@ export function AssistantStep() {
             <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
               {copy.local.body}
             </Typography>
-            {assistant === "local" ? (
-              <Flex gap={1.25} wrap sx={{ ml: 4 }}>
-                <TextField
-                  size="small"
-                  label={copy.local.endpointLabel}
-                  value="http://127.0.0.1:11434"
-                  slotProps={{ input: { readOnly: true } }}
-                />
-                <TextField
-                  size="small"
-                  label={copy.local.modelLabel}
-                  value="llama3.2"
-                  slotProps={{ input: { readOnly: true } }}
-                />
-                <Button size="small" variant="outlined" disabled>
-                  {copy.local.testCta}
-                </Button>
-              </Flex>
-            ) : null}
           </Box>
         </OptionCard>
         <OptionCard selected={assistant === "cloud"} onClick={() => setAssistant("cloud")}>
