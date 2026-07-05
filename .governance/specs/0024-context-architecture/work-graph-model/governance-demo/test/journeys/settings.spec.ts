@@ -3,7 +3,7 @@ import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Settings, membros, papeis e assistentes", () => {
   test("APP-07 pessoas, times e papeis sao modelados por sujeito", async ({ page, request }) => {
-    pendingContract("APP-07");
+    pendingContract("APP-07", "expected-fail");
 
     await openWorkspace(page, request, "workspace-groups-teams", "/settings");
     await expect(page.getByTestId("people-list")).toContainText("Ana");
@@ -19,7 +19,7 @@ test.describe("Settings, membros, papeis e assistentes", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-10");
+    pendingContract("APP-10", "expected-fail");
 
     await openWorkspace(page, request, "workspace-multi-assistant", "/settings");
     await expect(page.getByTestId("assistant-provider-list")).toBeVisible();
@@ -35,7 +35,7 @@ test.describe("Settings, membros, papeis e assistentes", () => {
   });
 
   test("APP-15 Settings de organizacao espelha onboarding", async ({ page, request }) => {
-    pendingContract("APP-15");
+    pendingContract("APP-15", "expected-fail");
 
     await openWorkspace(page, request, "workspace-compact-policy", "/settings");
     const profile = page.getByTestId("settings-governance-profile");
@@ -48,7 +48,7 @@ test.describe("Settings, membros, papeis e assistentes", () => {
   });
 
   test("APP-16 Settings gerencia pessoas, grupos, convites e roles", async ({ page, request }) => {
-    pendingContract("APP-16");
+    pendingContract("APP-16", "expected-fail");
 
     await openWorkspace(page, request, "workspace-shared-convites", "/settings");
     await page.getByTestId("invite-create-name").fill("Bia Produto");
@@ -63,7 +63,7 @@ test.describe("Settings, membros, papeis e assistentes", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-19");
+    pendingContract("APP-19", "expected-fail");
 
     await openWorkspace(page, request, "workspace-multi-assistant", "/settings");
     await expect(page.getByTestId("assistant-default-explain-policy")).toBeVisible();

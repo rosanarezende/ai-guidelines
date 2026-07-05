@@ -8,7 +8,7 @@ import {
 
 test.describe("Auth, workspace e shell", () => {
   test("APP-02 cria workspace novo sem vazar dados da demo", async ({ page, request }) => {
-    pendingContract("APP-02");
+    pendingContract("APP-02", "expected-fail");
 
     await resetSeed(request, "blank");
     await page.goto("/");
@@ -29,7 +29,7 @@ test.describe("Auth, workspace e shell", () => {
   });
 
   test("APP-13 Home de workspace novo mostra proximo passo real", async ({ page, request }) => {
-    pendingContract("APP-13");
+    pendingContract("APP-13", "expected-fail");
 
     await openWorkspace(page, request, "empty-workspace", "/");
     await expect(page.getByTestId("home-next-safe-step")).toBeVisible();
@@ -40,9 +40,9 @@ test.describe("Auth, workspace e shell", () => {
   });
 
   test("APP-14 demo acme permanece explicitamente demo", async ({ page, request }) => {
-    pendingContract("APP-14");
+    pendingContract("APP-14", "expected-fail");
 
-    await openWorkspace(page, request, "demo-acme", "/organizations", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/organizations", "sandbox-demo");
     await expect(page.getByTestId("workspace-demo-badge")).toBeVisible();
     await page.goto("/");
     await expect(page.getByTestId("home-demo-banner")).toContainText(/demo|sandbox/i);

@@ -405,6 +405,94 @@ export const SEEDS: Record<string, () => AdoptionState> = {
       },
     })),
 
+  "workspace-with-integration-statuses": () =>
+    base((ws) => ({
+      ...ws,
+      onboardingStatus: "partial",
+      governanceHost: {
+        kind: "local-folder",
+        pathOrUrl: "acme-honey-governance",
+        status: "scaffolded",
+        fitReason: "seed para contratos de integração e fontes",
+        fitCheck: {
+          checkedAt: NOW,
+          pathExists: true,
+          writable: true,
+          manifestPresent: true,
+          eventLogPresent: true,
+          sourceRevision: "seed00000006",
+          warnings: [],
+          ok: true,
+        },
+      },
+      workSources: [
+        {
+          id: "src-local-api",
+          kind: "git-repo",
+          label: "acme-core-api",
+          pathOrUrl: "C:/acme/acme-core-api",
+          adapterId: "git-local",
+          status: "connected",
+          sourceTrust: "provider-versioned",
+          freshness: "fresh",
+          limitations: sourceTrustLimitations("provider-versioned"),
+          lastScan: {
+            scannedAt: NOW,
+            fileCount: 42,
+            contentHash: "seed00000007",
+            gitHead: "seedgit0001",
+            gitDirtyFiles: 0,
+            errors: [],
+          },
+        },
+        {
+          id: "src-drive-evidence",
+          kind: "cloud-synced-folder",
+          label: "evidências no Drive",
+          pathOrUrl: "C:/Users/ana/Google Drive/acme-evidencias",
+          status: "manual-evidence",
+          sourceTrust: "cloud-sync-unverified",
+          freshness: "unknown",
+          limitations: sourceTrustLimitations("cloud-sync-unverified"),
+        },
+      ],
+      assistantConfig: {
+        providers: [
+          {
+            id: "prov-lexical",
+            kind: "lexical-deterministic",
+            label: "Baseline lexical",
+            maxClassification: "restricted",
+            egressApproved: false,
+          },
+          {
+            id: "prov-ollama",
+            kind: "ollama",
+            label: "Ollama local",
+            endpoint: "http://127.0.0.1:11434",
+            maxClassification: "confidential",
+            egressApproved: false,
+            lastHealth: { status: "ok", checkedAt: NOW, models: ["acme-local-model"] },
+          },
+        ],
+        defaults: {
+          "suggest-matches": "prov-lexical",
+          "explain-policy": "prov-ollama",
+        },
+        dismissed: false,
+      },
+      integrations: [
+        { id: "git-provider", status: "configured", configuredAt: NOW },
+        { id: "assistant-runtime-local", status: "configured", configuredAt: NOW },
+        {
+          id: "observability",
+          status: "disabled",
+          configuredAt: NOW,
+          note: "catalogada; precisa de fonte externa antes de virar evidência automática",
+        },
+      ],
+    })),
+
   "workspace-planning-progressivo": () => {
     // planejamento mora no host governado; a seed representa o cenário com a
     // demo acme anexada (objectives/targets reais) + workspace próprio pronto

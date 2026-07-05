@@ -10,7 +10,7 @@ import {
   applyAuthorizedShellCommand,
   type LocalShellCommand,
 } from "../../backend/src/domain/index.ts";
-import { emptyDb, openDb } from "./db.ts";
+import { emptyDb, openDb, writeDb } from "./db.ts";
 import { buildSeed, seedNames } from "./seeds/index.ts";
 
 export function createMockApp(): Hono {
@@ -34,16 +34,18 @@ export function createMockApp(): Hono {
     if (!command?.id || !command.type) {
       return c.json({ ok: false, error: "command-schema" }, 400);
     }
-    const db = await openDb();
-    if (db.data.events.some((event) => event.command.id === command.id)) {
-      return c.json({ ok: false, error: "duplicate-command" }, 422);
-    }
-    const result = applyAuthorizedShellCommand(db.data.state, command);
-    if (!result.ok) return c.json(result, 422);
-    db.data.state = result.state;
-    db.data.events.push({ schema: "governance.local-adoption-event/v1", command });
-    await db.write();
-    return c.json({ ok: true, state: result.state });
+    const response = await writeDb((db) => {
+      if (db.data.events.some((event) => event.command.id === command.id)) {
+        return { status: 422, body: { ok: false, error: "duplicate-command" } };
+      }
+      const result = applyAuthorizedShellCommand(db.data.state, command);
+      if (!result.ok) return { status: 422, body: result };
+      db.data.state = result.state;
+      db.data.events.push({ schema: "governance.local-adoption-event/v1", command });
+      return { status: 200, body: { ok: true, state: result.state } };
+    });
+    if (response.status === 422) return c.json(response.body, 422);
+    return c.json(response.body);
   });
 
   app.get("/__seeds", (c) => c.json({ seeds: seedNames() }));
@@ -58,9 +60,9 @@ export function createMockApp(): Hono {
         400
       );
     }
-    const db = await openDb();
-    db.data = { ...emptyDb(seedName), state };
-    await db.write();
+    await writeDb((db) => {
+      db.data = { ...emptyDb(seedName), state };
+    });
     return c.json({ ok: true, seed: seedName });
   });
 

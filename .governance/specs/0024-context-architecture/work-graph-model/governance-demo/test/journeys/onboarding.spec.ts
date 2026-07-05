@@ -6,7 +6,7 @@ test.describe("Onboarding como contrato funcional", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-05");
+    pendingContract("APP-05", "expected-fail");
 
     await openWorkspace(page, request, "empty-workspace", "/onboarding");
     await page.getByTestId("onboarding-start").click();
@@ -29,7 +29,7 @@ test.describe("Onboarding como contrato funcional", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-06");
+    pendingContract("APP-06", "expected-fail");
 
     await openWorkspace(page, request, "empty-workspace", "/onboarding");
     await page.getByTestId("onboarding-start").click();
@@ -44,7 +44,7 @@ test.describe("Onboarding como contrato funcional", () => {
   });
 
   test("APP-12 revisao final do onboarding e honesta", async ({ page, request }) => {
-    pendingContract("APP-12");
+    pendingContract("APP-12", "expected-fail");
 
     await openWorkspace(page, request, "workspace-host-local", "/onboarding");
     await page.getByTestId("onboarding-review-step").click();

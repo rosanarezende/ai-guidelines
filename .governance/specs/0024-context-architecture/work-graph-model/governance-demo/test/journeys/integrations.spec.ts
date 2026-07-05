@@ -6,7 +6,7 @@ test.describe("Integracoes como produto", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-11");
+    pendingContract("APP-11", "expected-fail");
 
     await openWorkspace(page, request, "workspace-with-integration-statuses", "/onboarding");
     await page.getByTestId("onboarding-step-integrations").click();
@@ -15,7 +15,7 @@ test.describe("Integracoes como produto", () => {
   });
 
   test("APP-20 Settings resume integracoes e aponta para hub", async ({ page, request }) => {
-    pendingContract("APP-20");
+    pendingContract("APP-20", "expected-fail");
 
     await openWorkspace(page, request, "workspace-with-integration-statuses", "/settings");
     await expect(page.getByTestId("settings-integration-summary")).toBeVisible();
@@ -24,7 +24,7 @@ test.describe("Integracoes como produto", () => {
   });
 
   test("INT-01 hub compara providers por valor, permissao e risco", async ({ page, request }) => {
-    pendingContract("INT-01");
+    pendingContract("INT-01", "fixme");
 
     await openWorkspace(page, request, "workspace-with-integration-statuses", "/integrations");
     await expect(page.getByTestId("integration-filter-available")).toBeVisible();
@@ -38,7 +38,7 @@ test.describe("Integracoes como produto", () => {
   });
 
   test("INT-02 sugestoes contextuais aparecem no fluxo certo", async ({ page, request }) => {
-    pendingContract("INT-02");
+    pendingContract("INT-02", "expected-fail");
 
     await openWorkspace(page, request, "workspace-with-integration-statuses", "/sources");
     await expect(page.getByTestId("contextual-integration-github-work-source")).toBeVisible();
@@ -49,7 +49,7 @@ test.describe("Integracoes como produto", () => {
   });
 
   test("INT-03 GitHub work-source nao se confunde com GitHub login", async ({ page, request }) => {
-    pendingContract("INT-03");
+    pendingContract("INT-03", "expected-fail");
 
     await openWorkspace(page, request, "workspace-github-work-source", "/integrations");
     await expect(page.getByTestId("github-login-status")).toContainText(/identity|login/i);

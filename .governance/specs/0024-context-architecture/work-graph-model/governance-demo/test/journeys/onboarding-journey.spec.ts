@@ -9,7 +9,9 @@ test.beforeEach(async ({ request }) => {
   expect(reset.ok()).toBeTruthy();
 });
 
-test("signup → workspace → onboarding parcial → Home com continuar", async ({ page }) => {
+test("APP-01 APP-03 APP-04 signup → workspace → onboarding parcial → Home com continuar", async ({
+  page,
+}) => {
   // sem principal, a raiz redireciona para /signup (gate server-side)
   await page.goto("/");
   await expect(page).toHaveURL(/\/signup$/);

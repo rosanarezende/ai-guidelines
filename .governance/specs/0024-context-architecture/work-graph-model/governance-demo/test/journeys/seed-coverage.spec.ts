@@ -326,6 +326,35 @@ const CASES: SeedCase[] = [
     },
   },
   {
+    name: "workspace-with-integration-statuses",
+    proves: "contratos de integração têm seed rica sem depender de UI pronta",
+    assert: (state) => {
+      const ws = workspace(state);
+      expect(ws.governanceHost?.status).toBe("scaffolded");
+      expect(ws.workSources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: "src-local-api",
+            status: "connected",
+            sourceTrust: "provider-versioned",
+          }),
+          expect.objectContaining({
+            id: "src-drive-evidence",
+            status: "manual-evidence",
+            sourceTrust: "cloud-sync-unverified",
+          }),
+        ])
+      );
+      expect(ws.integrations).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "git-provider", status: "configured" }),
+          expect.objectContaining({ id: "assistant-runtime-local", status: "configured" }),
+          expect.objectContaining({ id: "observability", status: "disabled" }),
+        ])
+      );
+    },
+  },
+  {
     name: "workspace-planning-progressivo",
     proves: "planejamento usa demo acme e workspace próprio explicitamente sandbox",
     assert: (state) => {

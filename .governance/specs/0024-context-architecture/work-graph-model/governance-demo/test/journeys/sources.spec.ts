@@ -3,7 +3,7 @@ import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Governance host e fontes de trabalho", () => {
   test("APP-08 governance host e escolhido antes das fontes", async ({ page, request }) => {
-    pendingContract("APP-08");
+    pendingContract("APP-08", "expected-fail");
 
     await openWorkspace(page, request, "workspace-sem-host", "/sources");
     await expect(page.getByTestId("host-required-before-sources")).toBeVisible();
@@ -14,7 +14,7 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-09 onboarding de fontes guia local vs nuvem", async ({ page, request }) => {
-    pendingContract("APP-09");
+    pendingContract("APP-09", "expected-fail");
 
     await openWorkspace(page, request, "workspace-host-local", "/onboarding");
     await page.getByTestId("onboarding-step-sources").click();
@@ -26,7 +26,7 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-17 Settings gerencia governance host com fit-check", async ({ page, request }) => {
-    pendingContract("APP-17");
+    pendingContract("APP-17", "expected-fail");
 
     await openWorkspace(page, request, "workspace-host-local", "/settings");
     await expect(page.getByTestId("governance-host-card")).toContainText("sourceRevision");
@@ -36,7 +36,7 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-18 Settings e Sources mostram as mesmas fontes", async ({ page, request }) => {
-    pendingContract("APP-18");
+    pendingContract("APP-18", "expected-fail");
 
     await openWorkspace(page, request, "workspace-provider-versioned-source", "/sources");
     const sourceName = await page.getByTestId("source-card-primary-name").innerText();
@@ -47,7 +47,7 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-21 Sources dedicada cadastra fonte local/cloud/manual", async ({ page, request }) => {
-    pendingContract("APP-21");
+    pendingContract("APP-21", "expected-fail");
 
     await openWorkspace(page, request, "workspace-host-local", "/sources");
     await page.getByTestId("source-add").click();

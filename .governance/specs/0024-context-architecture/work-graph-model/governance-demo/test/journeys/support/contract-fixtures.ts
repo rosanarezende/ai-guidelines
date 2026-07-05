@@ -3,9 +3,19 @@ import { MOCK_API_URL } from "../../playwright.config.ts";
 
 const APP_URL = "http://127.0.0.1:3024";
 const SESSION_COOKIE = "governance-local-session";
+export type PendingContractMode = "fixme" | "expected-fail";
 
-export function pendingContract(id: string, reason = "produto-alvo ainda nao implementado"): void {
-  test.fixme(true, `${id}: ${reason}`);
+export function pendingContract(
+  id: string,
+  mode: PendingContractMode,
+  reason = "produto-alvo ainda nao implementado"
+): void {
+  if (mode === "fixme") {
+    test.fixme(true, `${id}: ${reason}`);
+    return;
+  }
+
+  test.fail(true, `${id}: ${reason}`);
 }
 
 export async function resetSeed(request: APIRequestContext, seed: string): Promise<void> {

@@ -6,7 +6,7 @@ test.describe("Cup / Contextual Work Partner", () => {
     page,
     request,
   }) => {
-    pendingContract("CUP-01");
+    pendingContract("CUP-01", "expected-fail");
 
     await openWorkspace(page, request, "empty-workspace", "/onboarding");
     await page.getByTestId("cup-open-button").click();
@@ -18,7 +18,7 @@ test.describe("Cup / Contextual Work Partner", () => {
   });
 
   test("CUP-02 Cup explica policies versionadas", async ({ page, request }) => {
-    pendingContract("CUP-02");
+    pendingContract("CUP-02", "expected-fail");
 
     await openWorkspace(page, request, "workspace-controlled", "/integrations");
     await page.getByTestId("cloud-provider-request").click();
@@ -28,7 +28,7 @@ test.describe("Cup / Contextual Work Partner", () => {
   });
 
   test("CUP-03 Cup nao executa mutacao sem confirmacao humana", async ({ page, request }) => {
-    pendingContract("CUP-03");
+    pendingContract("CUP-03", "expected-fail");
 
     await openWorkspace(page, request, "workspace-host-local", "/sources");
     await page.getByTestId("cup-open-button").click();
@@ -43,7 +43,7 @@ test.describe("Cup / Contextual Work Partner", () => {
     page,
     request,
   }) => {
-    pendingContract("CUP-04");
+    pendingContract("CUP-04", "expected-fail");
 
     await openWorkspace(page, request, "workspace-controlled", "/triage");
     await page.getByTestId("cup-open-button").click();

@@ -6,7 +6,7 @@ test.describe("Triagem, matcher e gates", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-24");
+    pendingContract("APP-24", "fixme");
 
     await openWorkspace(page, request, "workspace-provider-versioned-source", "/triage");
     await page.getByTestId("triage-item-create-from-question").click();
@@ -21,7 +21,7 @@ test.describe("Triagem, matcher e gates", () => {
   });
 
   test("APP-25 gate/ativacao exige autoridade e evidencia visivel", async ({ page, request }) => {
-    pendingContract("APP-25");
+    pendingContract("APP-25", "fixme");
 
     await openWorkspace(page, request, "workspace-shared", "/gates");
     await expect(page.getByTestId("gate-requester")).toBeVisible();

@@ -10,6 +10,9 @@ export const MOCK_API_URL = `http://127.0.0.1:${MOCK_API_PORT}`;
 export default defineConfig({
   testDir: "./journeys",
   timeout: 60_000,
+  expect: {
+    timeout: 2_000,
+  },
   retries: 0,
   workers: 1, // estado compartilhado (lowdb): jornadas rodam em série
   reporter: [
@@ -20,6 +23,8 @@ export default defineConfig({
   ],
   use: {
     baseURL: `http://127.0.0.1:${APP_PORT}`,
+    actionTimeout: 2_000,
+    navigationTimeout: 15_000,
     trace: "retain-on-failure",
   },
   webServer: [
