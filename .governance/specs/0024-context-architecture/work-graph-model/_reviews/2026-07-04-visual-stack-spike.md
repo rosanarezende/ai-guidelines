@@ -1,9 +1,10 @@
 # Spike da stack visual da governance-demo (QRD-27)
 
 > **Tipo:** relatório de spike comparativo (artefato de apoio, sem autoridade própria).
-> **Data:** 2026-07-04.
-> **Autoridade:** a decisão registrada mora em [`../governance-demo/APP-DECISIONS.md`](../governance-demo/APP-DECISIONS.md) (QRD-27/QRD-28). Este relatório é a evidência.
+> **Data:** 2026-07-04 (rodada 1) · 2026-07-04 (rodada 2, pós-validação da owner — ver seção 7).
+> **Autoridade:** a decisão registrada mora em [`../governance-demo/APP-DECISIONS.md`](../governance-demo/APP-DECISIONS.md) (QRD-27/QRD-28/QRD-29). Este relatório é a evidência.
 > **Código do spike:** `governance-demo/frontend/app/spikes/visual-stack/` (rota interna `/spikes/visual-stack`, fora da navegação de produto).
+> **Atenção:** as seções 1–6 são a rodada 1 (histórico). A seção 7 registra a rodada 2, que RECONCILIA os vereditos após validação de produto da owner — em caso de divergência, vale a seção 7 + QRD-29.
 
 ## 1. O que foi feito (FATOS)
 
@@ -166,9 +167,70 @@ INTERPRETAÇÃO: adotar TanStack Query quando as telas saírem do read-only, com
 - Reagraph: <https://reagraph.dev/>
 - Versões/licenças/peer deps conferidas no registro npm em 2026-07-04 (`npm view <pkg> version license peerDependencies`).
 
-## 6. Recomendação
+## 6. Recomendação (rodada 1 — superada em parte pela seção 7)
 
 Registrar em `APP-DECISIONS.md` (QRD-28): React Flow+ELK (mapas), MUI X Charts primário + ECharts complementar
 (dashboards), MUI X Data Grid (tabelas), Sigma.js+Graphology (grafo técnico) e TanStack Query (server state).
 Único ponto deliberadamente NÃO cravado: o par dashboards fica com regra de uso (Community-first, ECharts quando o
 tier Pro seria exigido), porque a evidência não sustenta exclusividade de uma única lib para todos os gráficos.
+
+## 7. Rodada 2 — validação da owner e reconciliação (QRD-29)
+
+### 7.1 O que motivou a rodada
+
+FATO: a owner navegou na bancada e trouxe validação de produto que contradiz parte do QRD-28:
+React Flow adequado mas raso de interação (faltavam tooltips/filtros/busca/foco); **ECharts pareceu muito
+melhor que MUI X Charts** nos dashboards; **TanStack Table pareceu muito melhor** nas tabelas; **Reagraph
+não agradou**; Sigma e ECharts agradaram no grafo mas faltava segurança sobre filtros avançados; TanStack
+Query aprovado, pedindo copy explícita de que é o React Query atual.
+
+INTERPRETAÇÃO: a rodada 1 mediu bem licença/SSR/perf/tipagem, mas subponderou a percepção de UX de produto
+da owner — que é critério decisório do QRD-27 ("a experiência precisa servir stakeholders e líderes").
+
+### 7.2 O que foi implementado na rodada 2 (FATOS)
+
+- **Mapa (React Flow+ELK):** tooltips/popovers por nó (MUI Tooltip), filtros por tipo/confiança/risco/time/
+  contrato, busca com autocomplete, foco de vizinhança (dimming até 2 saltos), painel lateral de detalhe
+  (campos completos + conexões + CTA), legenda por tipo e estados visuais de confiança. Filtros/busca/
+  vizinhança vivem no view-model (`map-ops.ts`), não na lib. Campos `owner`/`team`/`touchesContract`
+  adicionados ao `GovernanceMapNode`.
+- **Mapa (ECharts):** reposicionado como "visualização relacional OPCIONAL" (copy + alerta na tela); recebe
+  os mesmos filtros/seleção; limitação registrada: sem card rico nem CTA — não concorre com o mapa guiado.
+- **Dashboards (ambos os candidatos, mesmas séries):** target vs actual, outcomes por ciclo (válido ×
+  inválido), confiança empilhada por ciclo, breakdown de atingimento por objetivo, série temporal e
+  drill-down por clique + filtro por objetivo na seção.
+- **Tabelas:** coluna de evidência no view-model (real: verdict/review/actual; fixture tipada); TanStack
+  Table com filtros REAIS por coluna (tipo/status/confiança/risco) renderizados 100% com MUI (headless ≠ UI
+  inconsistente); barra de **ação governada simulada** (dry-run `proposal.create` com a `base-revision` do
+  dataset ativo): com read-model real retorna 200 ok; com fixture retorna 422 `command-stale` — projeção
+  derivada não autoriza ação, provado na tela.
+- **Grafo técnico:** **Reagraph removido** da bancada e desinstalado do `package.json`; busca por nó
+  (autocomplete), agrupamento por tipo (clusters determinísticos idênticos nos dois candidatos, via
+  `clusterPositionsByType`), fixture ~6k nós; Sigma × ECharts mantêm vizinhança/caminho/impacto/deps do
+  view-model.
+- **Server state:** alerta visível: "TanStack Query É o React Query atual (`@tanstack/react-query` v5)";
+  escopo (cache/fetching/mutations/invalidation/stale) e o que NÃO substitui (banco, Context API,
+  Zustand/Redux, SSOT); `queryKey [workspace, recurso, filtro]` exibida como chip.
+
+Verificação da rodada 2: `tsc --noEmit` limpo; `next build --webpack` limpo; arquivos do spike ≤300 linhas;
+sem `Math.random`/`Date.now`/`localStorage`; navegação verificada no browser (ver relato da sessão).
+
+### 7.3 Vereditos reconciliados
+
+| Superfície              | Estado após rodada 2 (QRD-29)                                                                                                                                                                                                 |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mapa de governança      | **DECIDIDO: React Flow + ELK primário**; ECharts graph = aba relacional opcional.                                                                                                                                             |
+| Dashboards              | **PROVÁVEL PRIMÁRIO: Apache ECharts** (validação da owner + Apache-2.0 sem tier pago); confirmar na primeira tela real (`/results`). MUI X Charts = alternativa.                                                              |
+| Tabelas / data grid     | **PROVÁVEL PRIMÁRIO: TanStack Table + MUI**; confirmar `@tanstack/react-virtual` em lista real. MUI X Data Grid e AG Grid = alternativas.                                                                                     |
+| Grafo técnico / console | **PENDENTE DE DECISÃO: Sigma × ECharts.** Evidência atual: Sigma melhor para console denso (WebGL, reducers, 3–6k nós); ECharts melhor para visualização amigável coerente com dashboards. **Reagraph rejeitado e removido.** |
+| Server state            | **DECIDIDO: TanStack Query** (= React Query atual).                                                                                                                                                                           |
+
+Linguagem honesta: "provável primário" e "pendente de decisão" significam exatamente isso — a confirmação
+acontece nas primeiras telas reais e numa sessão da owner na bancada do grafo, não neste relatório.
+
+### 7.4 Próxima recomendação para as telas reais
+
+1. `/results` com Apache ECharts + TanStack Query (confirma o provável primário de dashboards).
+2. Primeira lista operacional real com TanStack Table + MUI + `@tanstack/react-virtual` (confirma tabelas).
+3. Sessão da owner na bancada do grafo (busca/filtros/agrupamento) → QRD próprio para Sigma × ECharts.
+4. Mapa guiado real na Home/planejamento com React Flow + ELK (mover ELK para web worker se crescer).

@@ -1718,6 +1718,9 @@ Copy obrigatoria:
 
 ## QRD-28 - Resultado dos spikes da stack visual
 
+> **Status:** parcialmente RECONCILIADO por [QRD-29](#qrd-29---reconciliacao-pos-validacao-da-owner)
+> apos validacao de produto da owner na bancada. Mantido como historico da rodada 1.
+
 **Q - Question**
 
 Os spikes obrigatorios do QRD-27 foram executados com o mesmo dataset, os mesmos
@@ -1784,6 +1787,67 @@ Ponto deliberadamente NAO cravado: exclusividade de uma unica lib de graficos
 para dashboards. A regra e Community-first (MUI X Charts) com ECharts aprovado
 como complemento; consolidar em uma so exige evidencia futura de uso real.
 
+## QRD-29 - Reconciliacao pos-validacao da owner
+
+**Q - Question**
+
+A owner navegou na bancada `/spikes/visual-stack` e trouxe validacao real de
+produto que contradiz parte do QRD-28. O que a evidencia combinada (spike
+rodada 1 + percepcao da owner + spike rodada 2) sustenta agora?
+
+**R - Reasoning/Research**
+
+Percepcoes da owner (fonte primaria de UX de produto):
+
+- mapa: React Flow+ELK mais adequado para nao tecnicos, mas faltavam tooltips,
+  filtros, busca/foco e visualizacoes otimizadas; ECharts pode existir como aba
+  relacional opcional, nao como mapa principal;
+- dashboards: Apache ECharts pareceu muito melhor que MUI X Charts;
+- tabelas: TanStack Table pareceu muito melhor (renderizado com MUI);
+- grafo tecnico: Reagraph rejeitado; Sigma e ECharts agradaram, mas falta
+  seguranca sobre filtros e funcionalidades avancadas;
+- server state: TanStack Query aprovado; documentar que e o React Query atual.
+
+Rodada 2 do spike (mesma bancada, mesmos view-models) adicionou o que faltava
+para decidir com seguranca: no mapa, tooltips/popovers, filtros por
+tipo/confianca/risco/time/contrato, busca com autocomplete, foco de vizinhanca,
+painel lateral de detalhe e legenda; nos dashboards, target vs actual, outcomes
+por ciclo (valido x invalido), confianca empilhada, breakdown por objetivo e
+filtro/drill nos DOIS candidatos; nas tabelas, coluna de evidencia, filtros
+reais por coluna no TanStack (100% MUI), e acao governada simulada por dry-run
+(read-model real passa; fixture falha fechado por command-stale); no grafo,
+Reagraph removido da bancada e do package.json, busca por no, agrupamento por
+tipo (clusters deterministicos identicos nos dois candidatos) e fixture ~6k;
+no server state, copy explicita e queryKey visivel.
+
+A rodada 1 permanece valida como evidencia tecnica (licencas, SSR, medidas);
+o que muda e o peso da validacao de produto da owner sobre UX.
+
+**D - Decision**
+
+| Superficie            | Estado apos QRD-29                                                                                                                                                                                                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mapas de governanca   | DECIDIDO: React Flow + ELK e o PRIMARIO. ECharts graph vira aba relacional OPCIONAL (secundaria), nunca o mapa principal.                                                                                                                                                          |
+| Dashboards            | PROVAVEL PRIMARIO: Apache ECharts (validacao da owner + Apache-2.0 sem tier pago). Confirmar na primeira tela real de resultados antes de cravar. MUI X Charts vira alternativa.                                                                                                   |
+| Tabelas/data grids    | PROVAVEL PRIMARIO: TanStack Table renderizado com MUI (headless != UI inconsistente; provado na bancada). Confirmar virtualizacao (`@tanstack/react-virtual`) em lista real. MUI X Data Grid e AG Grid ficam como alternativas documentadas.                                       |
+| Grafo tecnico/console | Reagraph REJEITADO e removido. Sigma.js+Graphology x ECharts graph = PENDENTE DE DECISAO: evidencia atual indica Sigma para console denso (WebGL, reducers, 3-6k nos) e ECharts para visualizacao amigavel coerente com dashboards; a owner decide com os filtros avancados novos. |
+| Server state          | DECIDIDO: TanStack Query (`@tanstack/react-query` v5 — e o React Query atual, renomeado). Escopo: server state (cache, fetching, mutations, invalidation, stale). NAO substitui banco, Context API, Zustand/Redux nem o SSOT file-first.                                           |
+
+Regras que continuam valendo (QRD-27/28): view-models independentes de
+renderer; lib visual nao le YAML/event-log nem vira SSOT; acao governada rele
+fonte/sourceRevision (provado por dry-run na bancada); sigma via
+dynamic(ssr:false); ELK para web worker se o mapa crescer; pagina >100 linhas
+revisita a decisao de tabela; Cytoscape permanece banido.
+
+Proxima recomendacao para as telas reais:
+
+1. `/results` (primeira tela de dashboards reais) com Apache ECharts +
+   TanStack Query — e o teste de confirmacao do "provavel primario".
+2. Primeira lista operacional real (ex.: pendencias/intents) com TanStack
+   Table + MUI + `@tanstack/react-virtual` — confirma o segundo "provavel".
+3. Sessao curta da owner na bancada do grafo (filtros/busca/agrupamento) para
+   bater o martelo Sigma x ECharts em QRD proprio.
+
 ## Proximas acoes derivadas
 
 1. Atualizar o onboarding para refletir QRD-08/09/21: workspace pode existir sem host, mas onboarding real nao conclui sem host ou sandbox explicito; os tres formatos de host entram no primeiro release com fit-check.
@@ -1801,7 +1865,7 @@ como complemento; consolidar em uma so exige evidencia futura de uso real.
 13. Implementar GitHub como primeira cloud work-source/repo provider, separado de `github-oauth`, com sourceTrust e leitura de repos/PRs/checks/CODEOWNERS.
 14. Projetar o backlog de integracoes do `integration-catalog.yml` na UI, com status `disponivel`, `release 1`, `em breve` e `adiado`.
 15. Garantir que novas telas sigam QRD-12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27: app como superficie humana local-first, sem segundo SSOT, sem presumir SaaS pago, sem amarrar postura de workspace a vendor, sem expor banco/Docker como primeira pergunta do usuario comum, com Neo4j como read-model opcional suportado, Docker Compose como opcao oficial nao universal, Ollama externo por default, auth/membership/authority separados, providers externos GitHub/Google/OIDC sem authority automatica, governance host distribuido por fit-check, fontes sem Git com confianca explicita, politica explicavel, matcher/assistente multi-provider, planning progressivo com todos os campos disponiveis, backlog de integracoes visivel e stack visual definida.
-16. ~~Executar os spikes da stack visual antes de cravar dependencias finais~~ — FEITO em 2026-07-04: spikes executados em `frontend/app/spikes/visual-stack/` com read-model real + fixture sintetica; resultado e decisoes em QRD-28 e evidencia em `../_reviews/2026-07-04-visual-stack-spike.md`. Cytoscape permanece banido.
+16. ~~Executar os spikes da stack visual antes de cravar dependencias finais~~ — FEITO em 2026-07-04 (rodadas 1 e 2): spikes executados em `frontend/app/spikes/visual-stack/` com read-model real + fixture sintetica e validacao da owner; estado vigente em QRD-29 (QRD-28 e historico da rodada 1); evidencia em `../_reviews/2026-07-04-visual-stack-spike.md`. Pendencias honestas: confirmar ECharts em `/results` real, confirmar TanStack Table+virtualizacao em lista real e decidir Sigma x ECharts no console com a owner. Cytoscape permanece banido.
 17. Criar `governance-demo/mock-api/` com Hono + lowdb.
 18. Criar seeds iniciais: workspace vazio, onboarding parcial, acme demo, workspace sem host, workspace com host local, workspace com host embutido, workspace local, workspace shared, workspace controlled, workspace controlled+neo4j, workspace docker-compose, workspace docker-compose+ollama-profile, workspace com groups/teams, workspace shared com convites pendentes, workspace shared+github, workspace shared+google, workspace controlled+oidc, workspace com cloud-synced-folder, workspace com provider-versioned-source, workspace compact com policy examples, workspace com multiplos assistant providers, workspace com planning progressivo completo e workspace com GitHub work-source conectado.
 19. Adicionar scripts:

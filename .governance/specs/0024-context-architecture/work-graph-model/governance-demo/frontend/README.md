@@ -29,11 +29,13 @@ Feito nesta fatia (R0/R1):
 - Governance host para organizacao nova: fit-check, scaffold real (`host.yml` + `events/events.jsonl` + `sourceRevision`) e vinculo pelos 3 formatos, ou sandbox explicito — na secao Governanca das configuracoes.
 - Convites com token local (pending → accepted/declined/revoked/expired) e papeis por subject com aceite via `/api/local/members*` e `/api/local/roles*` (API de produto; telas dedicadas de membros/papeis sao fatia seguinte — o painel do onboarding segue como contrato declarado, marcado como pendente de aceite).
 - mock-api + Playwright: jornada signup → workspace → onboarding parcial → Home roda contra seed resetavel.
-- Spike da stack visual (QRD-27/28) em `app/spikes/visual-stack/`: view-models independentes de renderer
-  (`_model/`), 11 candidatos isolados (`_candidates/`), fixture sintetica seedada e tela comparativa interna.
-  Stack decidida: React Flow+ELK (mapas), MUI X Charts primario + ECharts complementar (dashboards),
-  MUI X Data Grid (tabelas), Sigma.js+Graphology (grafo tecnico, ssr:false), TanStack Query (server state).
-  Evidencia: `../../_reviews/2026-07-04-visual-stack-spike.md`.
+- Spike da stack visual (QRD-27/28/29) em `app/spikes/visual-stack/`: view-models independentes de renderer
+  (`_model/`), candidatos isolados (`_candidates/`), fixture sintetica seedada (ate ~6k nos/10k linhas) e tela
+  comparativa interna com busca, filtros, foco, painel de detalhe e acao governada simulada (dry-run).
+  Estado apos validacao da owner (QRD-29): React Flow+ELK DECIDIDO para o mapa (ECharts = aba relacional
+  opcional); Apache ECharts provavel primario de dashboards; TanStack Table+MUI provavel primario de tabelas;
+  Sigma x ECharts no console tecnico pendente de decisao (Reagraph rejeitado/removido); TanStack Query
+  (= React Query atual) decidido para server state. Evidencia: `../../_reviews/2026-07-04-visual-stack-spike.md`.
 
 Ainda por vir:
 
