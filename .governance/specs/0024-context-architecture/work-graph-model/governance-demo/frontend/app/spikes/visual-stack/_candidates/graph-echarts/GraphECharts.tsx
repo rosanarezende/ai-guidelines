@@ -6,20 +6,30 @@
 import { Box, Typography } from "@mui/material";
 import { useCallback, useMemo } from "react";
 import type { EChartsOption } from "echarts";
-import { degreeIndex, nodeSize, typeColor, type GraphCandidateProps } from "../shared/graph-shared";
+import {
+  clusterPositionsByType,
+  degreeIndex,
+  nodeSize,
+  typeColor,
+  type GraphCandidateProps,
+} from "../shared/graph-shared";
 import { EChartsPanel } from "../shared/EChartsPanel";
+
+const CLUSTER_SCALE = 14;
 
 export function GraphECharts({
   nodes,
   edges,
   selectedId,
   highlight,
+  grouped,
   onSelect,
 }: GraphCandidateProps) {
   const option = useMemo<EChartsOption>(() => {
     const degrees = degreeIndex(edges);
     const types = [...new Set(nodes.map((node) => node.type))];
     const dimmed = highlight.size > 0;
+    const clusters = grouped ? clusterPositionsByType(nodes) : null;
     return {
       tooltip: {
         formatter: (params: unknown) => {
@@ -31,7 +41,7 @@ export function GraphECharts({
       series: [
         {
           type: "graph",
-          layout: "force",
+          layout: grouped ? "none" : "force",
           roam: true,
           draggable: false,
           force: {
@@ -48,6 +58,12 @@ export function GraphECharts({
             id: node.id,
             name: node.label,
             category: types.indexOf(node.type),
+            ...(clusters
+              ? {
+                  x: (clusters.get(node.id)?.x ?? 0) * CLUSTER_SCALE,
+                  y: (clusters.get(node.id)?.y ?? 0) * CLUSTER_SCALE,
+                }
+              : {}),
             symbolSize: nodeSize(degrees.get(node.id) ?? 0) * 1.6,
             itemStyle:
               dimmed && !highlight.has(node.id) && node.id !== selectedId
@@ -77,7 +93,7 @@ export function GraphECharts({
         },
       ],
     };
-  }, [nodes, edges, selectedId, highlight]);
+  }, [nodes, edges, selectedId, highlight, grouped]);
 
   const handleClick = useCallback(
     (payload: { id?: string }) => {
@@ -90,7 +106,9 @@ export function GraphECharts({
     <Box sx={{ display: "grid", gap: 0.5 }}>
       <EChartsPanel option={option} height={440} onNodeClick={handleClick} />
       <Typography variant="caption" color="text.secondary">
-        {nodes.length} nós · {edges.length} arestas · canvas 2D com render progressivo
+        {nodes.length} nós · {edges.length} arestas ·{" "}
+        {grouped ? "agrupado por tipo (layout none)" : "força animada"} · canvas 2D com render
+        progressivo
       </Typography>
     </Box>
   );

@@ -55,5 +55,34 @@ export type GraphCandidateProps = {
   edges: GovernanceGraphEdge[];
   selectedId: string | null;
   highlight: ReadonlySet<string>;
+  grouped: boolean;
   onSelect: (id: string | null) => void;
 };
+
+// Agrupamento por categoria: clusters determinísticos por tipo (grade de
+// clusters + espiral phyllotaxis dentro de cada cluster). Mesmas posições nos
+// dois candidatos para a comparação medir o renderer, não o layout.
+export function clusterPositionsByType(
+  nodes: GovernanceGraphNode[]
+): Map<string, { x: number; y: number }> {
+  const types = [...new Set(nodes.map((node) => node.type))].sort();
+  const columns = Math.ceil(Math.sqrt(types.length));
+  const clusterGap = 60;
+  const positions = new Map<string, { x: number; y: number }>();
+  const perTypeIndex = new Map<string, number>();
+  for (const node of nodes) {
+    const typeIndex = types.indexOf(node.type);
+    const indexInType = perTypeIndex.get(node.type) ?? 0;
+    perTypeIndex.set(node.type, indexInType + 1);
+    const clusterX = (typeIndex % columns) * clusterGap;
+    const clusterY = Math.floor(typeIndex / columns) * clusterGap;
+    // espiral phyllotaxis: densa, determinística e sem sobreposição grosseira
+    const radius = 0.9 * Math.sqrt(indexInType + 1);
+    const angle = (indexInType + 1) * 2.399963229728653;
+    positions.set(node.id, {
+      x: clusterX + Math.cos(angle) * radius,
+      y: clusterY + Math.sin(angle) * radius,
+    });
+  }
+  return positions;
+}

@@ -1,10 +1,12 @@
 "use client";
 
-// GraphSection — spike 4: grafo técnico/console. Mesmo view-model (read-model
-// real ou fixture grande) nos três candidatos; vizinhança, caminho, impacto de
-// contrato e deps de intent calculados no view-model (graph-ops), nunca na lib.
+// GraphSection — spike 4 (rodada 2): grafo técnico/console. Sigma × ECharts
+// com o mesmo view-model; Reagraph foi REMOVIDO da bancada (validação da owner
+// + custo three.js/ssr:false sem motor de grafo). Busca, filtros, agrupamento
+// por tipo, vizinhança, caminho, impacto e deps calculados no view-model.
 import {
   Alert,
+  Autocomplete,
   Chip,
   FormControlLabel,
   Paper,
@@ -12,6 +14,7 @@ import {
   Switch,
   Tab,
   Tabs,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
@@ -22,14 +25,6 @@ import { Flex, SectionCard } from "@/app/_ui/shared";
 import { CandidatePanel } from "../../_candidates/shared/CandidatePanel";
 import { GraphTextualFallback } from "../../_candidates/shared/TextualFallback";
 import { GraphECharts } from "../../_candidates/graph-echarts/GraphECharts";
-import { GraphReagraph } from "../../_candidates/graph-reagraph/GraphReagraph";
-
-// Sigma v3 referencia WebGL2RenderingContext na avaliação do módulo — não
-// sobrevive a SSR (achado do spike): entra via dynamic(ssr:false).
-const GraphSigma = dynamic(
-  () => import("../../_candidates/graph-sigma/GraphSigma").then((module) => module.GraphSigma),
-  { ssr: false, loading: () => <Skeleton variant="rounded" height={440} /> }
-);
 import {
   applyGraphFilter,
   contractImpactSlice,
@@ -38,16 +33,27 @@ import {
   shortestPath,
 } from "../../_model/graph-ops";
 import { buildSyntheticGraph } from "../../_model/synthetic-fixture";
-import type { GovernanceGraphViewModel, GraphFilterState } from "../../_model/view-models";
+import type {
+  GovernanceGraphNode,
+  GovernanceGraphViewModel,
+  GraphFilterState,
+} from "../../_model/view-models";
 import { EMPTY_GRAPH_FILTER } from "../../_model/view-models";
 import { GraphSectionControls, type GraphMode } from "./GraphSectionControls";
 import { FindingsFooter } from "./FindingsFooter";
 import { findingById } from "./findings";
 import copy from "./_locales/pt-br.json";
 
+// Sigma v3 referencia WebGL2RenderingContext na avaliação do módulo — não
+// sobrevive a SSR (achado do spike): entra via dynamic(ssr:false).
+const GraphSigma = dynamic(
+  () => import("../../_candidates/graph-sigma/GraphSigma").then((module) => module.GraphSigma),
+  { ssr: false, loading: () => <Skeleton variant="rounded" height={440} /> }
+);
+
 const m = copy.messages;
 
-type DatasetKey = "real" | "syn1k" | "syn3k";
+type DatasetKey = "real" | "syn1k" | "syn3k" | "syn6k";
 
 export function GraphSection({ realGraph }: { realGraph: GovernanceGraphViewModel }) {
   const [dataset, setDataset] = useState<DatasetKey>("real");
@@ -56,11 +62,13 @@ export function GraphSection({ realGraph }: { realGraph: GovernanceGraphViewMode
   const [mode, setMode] = useState<GraphMode>("explore");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pathFrom, setPathFrom] = useState<string | null>(null);
+  const [grouped, setGrouped] = useState(false);
   const [textual, setTextual] = useState(false);
 
   const graph = useMemo(() => {
     if (dataset === "syn1k") return buildSyntheticGraph(1000);
     if (dataset === "syn3k") return buildSyntheticGraph(3000);
+    if (dataset === "syn6k") return buildSyntheticGraph(6000);
     return realGraph;
   }, [dataset, realGraph]);
 
@@ -105,6 +113,7 @@ export function GraphSection({ realGraph }: { realGraph: GovernanceGraphViewMode
     edges: filtered.edges,
     selectedId,
     highlight: operation.ids as ReadonlySet<string>,
+    grouped,
     onSelect,
   };
 
@@ -127,11 +136,55 @@ export function GraphSection({ realGraph }: { realGraph: GovernanceGraphViewMode
             <ToggleButton value="real">{m["spikes.dataset.real"]}</ToggleButton>
             <ToggleButton value="syn1k">{m["spikes.dataset.syn1k"]}</ToggleButton>
             <ToggleButton value="syn3k">{m["spikes.dataset.syn3k"]}</ToggleButton>
+            <ToggleButton value="syn6k">{m["spikes.dataset.syn6k"]}</ToggleButton>
           </ToggleButtonGroup>
           <Typography variant="caption" color="text.secondary">
             {filtered.nodes.length}/{graph.nodes.length} nós · {filtered.edges.length} arestas ·
             revisão {graph.sourceRevision}
           </Typography>
+        </Flex>
+
+        <Flex align="center" gap={2} wrap>
+          <Autocomplete<GovernanceGraphNode>
+            size="small"
+            sx={{ minWidth: 280 }}
+            options={filtered.nodes}
+            filterOptions={(options, state) => {
+              const query = state.inputValue.trim().toLowerCase();
+              if (!query) return [];
+              return options
+                .filter(
+                  (node) =>
+                    node.label.toLowerCase().includes(query) ||
+                    node.id.toLowerCase().includes(query)
+                )
+                .slice(0, 10);
+            }}
+            getOptionLabel={(option) => option.label}
+            renderOption={(props, option) => (
+              <li {...props} key={option.id}>
+                <Typography variant="caption">
+                  [{option.type}] {option.label}
+                </Typography>
+              </li>
+            )}
+            onChange={(_event, value) => onSelect(value?.id ?? null)}
+            renderInput={(params) => (
+              <TextField {...params} placeholder={m["spikes.graph.search"]} />
+            )}
+            noOptionsText={m["spikes.graph.search.empty"]}
+            clearOnBlur={false}
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                size="small"
+                checked={grouped}
+                onChange={(event) => setGrouped(event.target.checked)}
+              />
+            }
+            label={<Typography variant="caption">{m["spikes.graph.grouped"]}</Typography>}
+          />
           <FormControlLabel
             control={
               <Switch
@@ -188,9 +241,8 @@ export function GraphSection({ realGraph }: { realGraph: GovernanceGraphViewMode
         ) : null}
 
         <Tabs value={candidate} onChange={(_e, value: number) => setCandidate(value)}>
-          <Tab label="Sigma.js + Graphology" />
-          <Tab label="Reagraph" />
-          <Tab label="ECharts graph" />
+          <Tab label="Sigma.js + Graphology (console)" />
+          <Tab label="ECharts graph (visualização amigável)" />
         </Tabs>
 
         {textual ? (
@@ -201,13 +253,6 @@ export function GraphSection({ realGraph }: { realGraph: GovernanceGraphViewMode
             footer={<FindingsFooter finding={findingById("graph-sigma")} />}
           >
             <GraphSigma {...candidateProps} />
-          </CandidatePanel>
-        ) : candidate === 1 ? (
-          <CandidatePanel
-            meta={findingById("graph-reagraph")}
-            footer={<FindingsFooter finding={findingById("graph-reagraph")} />}
-          >
-            <GraphReagraph {...candidateProps} />
           </CandidatePanel>
         ) : (
           <CandidatePanel

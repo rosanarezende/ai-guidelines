@@ -1,27 +1,41 @@
 "use client";
 
 // GraphSigma — candidato Sigma.js v3 + Graphology para o grafo técnico.
-// WebGL, vocação large-graph. Posição inicial determinística em círculo por
-// tipo + ForceAtlas2 síncrono (iterações limitadas) — sem aleatoriedade.
+// WebGL, vocação large-graph. Dois layouts determinísticos: força (círculo
+// inicial + ForceAtlas2 síncrono) e agrupado por tipo (clusters phyllotaxis).
 import { Box, Typography } from "@mui/material";
 import Graph from "graphology";
 import forceAtlas2 from "graphology-layout-forceatlas2";
 import { useEffect, useRef, useState } from "react";
 import Sigma from "sigma";
-import { degreeIndex, nodeSize, typeColor, type GraphCandidateProps } from "../shared/graph-shared";
+import {
+  clusterPositionsByType,
+  degreeIndex,
+  nodeSize,
+  typeColor,
+  type GraphCandidateProps,
+} from "../shared/graph-shared";
 
-export function GraphSigma({ nodes, edges, selectedId, highlight, onSelect }: GraphCandidateProps) {
+export function GraphSigma({
+  nodes,
+  edges,
+  selectedId,
+  highlight,
+  grouped,
+  onSelect,
+}: GraphCandidateProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sigmaRef = useRef<Sigma | null>(null);
   const [layoutMs, setLayoutMs] = useState<number | null>(null);
 
-  // (re)construção do grafo quando o dataset muda
+  // (re)construção do grafo quando o dataset ou o layout muda
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const graph = new Graph({ multi: true, type: "mixed" });
     const degrees = degreeIndex(edges);
+    const clusters = grouped ? clusterPositionsByType(nodes) : null;
     const typeOrder = [...new Set(nodes.map((node) => node.type))];
     const perType = new Map<string, number>();
     for (const node of nodes) {
@@ -31,12 +45,16 @@ export function GraphSigma({ nodes, edges, selectedId, highlight, onSelect }: Gr
       // círculo determinístico por tipo (raio cresce com o tipo)
       const angle = indexInType * 2.399963; // golden angle: espalha sem RNG
       const radius = 4 + typeIndex * 3 + (indexInType % 7) * 0.35;
+      const position = clusters?.get(node.id) ?? {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
+      };
       graph.addNode(node.id, {
         label: node.label,
         color: typeColor(node.type),
         size: nodeSize(degrees.get(node.id) ?? 0),
-        x: Math.cos(angle) * radius,
-        y: Math.sin(angle) * radius,
+        x: position.x,
+        y: position.y,
       });
     }
     for (const edge of edges) {
@@ -45,13 +63,17 @@ export function GraphSigma({ nodes, edges, selectedId, highlight, onSelect }: Gr
       }
     }
 
-    const startedAt = performance.now();
-    const iterations = nodes.length > 2000 ? 30 : 80;
-    forceAtlas2.assign(graph, {
-      iterations,
-      settings: { ...forceAtlas2.inferSettings(graph), adjustSizes: false },
-    });
-    setLayoutMs(Math.round(performance.now() - startedAt));
+    if (!grouped) {
+      const startedAt = performance.now();
+      const iterations = nodes.length > 2000 ? 30 : 80;
+      forceAtlas2.assign(graph, {
+        iterations,
+        settings: { ...forceAtlas2.inferSettings(graph), adjustSizes: false },
+      });
+      setLayoutMs(Math.round(performance.now() - startedAt));
+    } else {
+      setLayoutMs(null);
+    }
 
     const sigma = new Sigma(graph, container, {
       renderLabels: nodes.length <= 400,
@@ -68,9 +90,9 @@ export function GraphSigma({ nodes, edges, selectedId, highlight, onSelect }: Gr
       sigma.kill();
       sigmaRef.current = null;
     };
-    // onSelect estável via section; dataset é a dependência real
+    // onSelect estável via section; dataset/layout são as dependências reais
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes, edges]);
+  }, [nodes, edges, grouped]);
 
   // realce de seleção/caminho sem reconstruir o grafo
   useEffect(() => {
@@ -108,7 +130,11 @@ export function GraphSigma({ nodes, edges, selectedId, highlight, onSelect }: Gr
       />
       <Typography variant="caption" color="text.secondary">
         {nodes.length} nós · {edges.length} arestas
-        {layoutMs !== null ? ` · ForceAtlas2 em ${layoutMs}ms (main thread)` : ""}
+        {grouped
+          ? " · agrupado por tipo (clusters determinísticos, sem força)"
+          : layoutMs !== null
+            ? ` · ForceAtlas2 em ${layoutMs}ms (main thread)`
+            : ""}
       </Typography>
     </Box>
   );
