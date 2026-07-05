@@ -12,6 +12,21 @@ Governanca real continua sendo provada por backend/checks especificos. Estes
 testes provam que a pessoa consegue usar o produto sem console tecnico e que as
 telas continuam consistentes entre si.
 
+Camadas rapidas FORA do e2e (preferidas quando nao precisam de browser; ver
+`TESTING-STRATEGY.md`):
+
+- `backend/tests/*.test.ts` (`node --test`, via `acme-governance-backend run
+test:shell`): authority (matriz papel x comando), invariantes de seed,
+  **regressao das seeds** (`seed-coverage.test.ts`, migrada do Playwright) e
+  read-model/rollup/grafo derivado.
+- `mock-api/tests/*.test.ts` (`acme-governance-mock-api run test:api`): handler
+  `/api/shell/commands` via Hono `app.request()` sem servidor.
+- Ambas entram no check oficial `tools/checks/check-governance-app.ts`.
+
+Regra de nivel: se uma regra pode ser provada por dominio + estado, ela NAO deve
+virar teste Playwright. O e2e fica para jornada humana, cross-screen e a casca de
+rota (sessao/gate) que so o handler real prova.
+
 ## Comandos
 
 ```bash
