@@ -95,27 +95,27 @@ Rotas Next (`frontend/app/api/local/*`) sobre use cases + reducer puro
 
 ## 3.1 Stack visual e spikes obrigatorios
 
-Autoridade: [`APP-DECISIONS.md#qrd-27---stack-de-visualizacao-do-app`](APP-DECISIONS.md#qrd-27---stack-de-visualizacao-do-app).
+Autoridade: [`APP-DECISIONS.md#qrd-27---stack-de-visualizacao-do-app`](APP-DECISIONS.md#qrd-27---stack-de-visualizacao-do-app)
+e [`APP-DECISIONS.md#qrd-28---resultado-dos-spikes-da-stack-visual`](APP-DECISIONS.md#qrd-28---resultado-dos-spikes-da-stack-visual).
 
-O app deve separar quatro superficies visuais e validar cada uma com spike
-comparativo antes de cravar dependencia final:
+Os spikes comparativos foram executados em 2026-07-04 (`frontend/app/spikes/visual-stack/`,
+evidencia em `../_reviews/2026-07-04-visual-stack-spike.md`). Stack por superficie:
 
-| Superficie            | Uso principal                                                                               | Stack decidida / em avaliacao                                  |
-| --------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Mapas de governanca   | Explicar caminhos de decisao, evidencias, contratos, riscos, objetivos e proximos passos.   | Spike: React Flow (`@xyflow/react`) + ELK (`elkjs`) x ECharts. |
-| Dashboards            | Mostrar resultados derivados, comparativos de ciclo, targets, outcomes e confianca.         | Spike: MUI X Charts x Apache ECharts.                          |
-| Tabelas/data grids    | Operar listas densas de iniciativas, contratos, pendencias, evidencias, auditoria e fontes. | Spike: MUI X Data Grid x TanStack Table x AG Grid Community.   |
-| Grafo tecnico/console | Explorar vizinhanca, shortest path, impacto de contrato, dependencias e densidade.          | Spike comparativo: Sigma.js + Graphology x Reagraph x ECharts. |
-| Server state do app   | Cache, mutations, invalidacao e atualizacao das rotas do produto.                           | TanStack Query.                                                |
+| Superficie            | Uso principal                                                                               | Stack decidida (QRD-28)                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Mapas de governanca   | Explicar caminhos de decisao, evidencias, contratos, riscos, objetivos e proximos passos.   | React Flow (`@xyflow/react`) + ELK (`elkjs`).                                           |
+| Dashboards            | Mostrar resultados derivados, comparativos de ciclo, targets, outcomes e confianca.         | MUI X Charts (Community) primario; ECharts como complemento aprovado (tier Pro/volume). |
+| Tabelas/data grids    | Operar listas densas de iniciativas, contratos, pendencias, evidencias, auditoria e fontes. | MUI X Data Grid (Community).                                                            |
+| Grafo tecnico/console | Explorar vizinhanca, shortest path, impacto de contrato, dependencias e densidade.          | Sigma.js + Graphology (via dynamic ssr:false).                                          |
+| Server state do app   | Cache, mutations, invalidacao e atualizacao das rotas do produto.                           | TanStack Query (cache por workspace/sourceRevision).                                    |
 
 Regras de produto:
 
-- React Flow + ELK e o candidato principal para mapas de governanca, mas ainda
-  precisa ser validado com prototipo comparavel.
 - O grafo tecnico nunca substitui Home, onboarding, planejamento nem dashboards.
-- ECharts entra nos spikes de dashboard e grafo porque pode oferecer uma
-  visualizacao mais amigavel e coerente com dashboards, mas precisa provar que
-  suporta as interacoes e o volume do read-model real.
+- ECharts fica restrito a dashboards/visualizacoes auxiliares; nao e o console
+  tecnico nem o mapa de governanca.
+- Se listas operacionais exigirem scroll infinito real (>100 linhas por pagina),
+  a decisao de tabela volta para novo QRD (limite do Data Grid Community).
 - Cytoscape esta banido do produto, do roadmap e dos spikes.
 - A camada de dados deve expor view-models independentes de renderer
   (`GovernanceMapViewModel`, `GovernanceDashboardViewModel`,

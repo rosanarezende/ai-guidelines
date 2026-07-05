@@ -29,6 +29,11 @@ Feito nesta fatia (R0/R1):
 - Governance host para organizacao nova: fit-check, scaffold real (`host.yml` + `events/events.jsonl` + `sourceRevision`) e vinculo pelos 3 formatos, ou sandbox explicito — na secao Governanca das configuracoes.
 - Convites com token local (pending → accepted/declined/revoked/expired) e papeis por subject com aceite via `/api/local/members*` e `/api/local/roles*` (API de produto; telas dedicadas de membros/papeis sao fatia seguinte — o painel do onboarding segue como contrato declarado, marcado como pendente de aceite).
 - mock-api + Playwright: jornada signup → workspace → onboarding parcial → Home roda contra seed resetavel.
+- Spike da stack visual (QRD-27/28) em `app/spikes/visual-stack/`: view-models independentes de renderer
+  (`_model/`), 11 candidatos isolados (`_candidates/`), fixture sintetica seedada e tela comparativa interna.
+  Stack decidida: React Flow+ELK (mapas), MUI X Charts primario + ECharts complementar (dashboards),
+  MUI X Data Grid (tabelas), Sigma.js+Graphology (grafo tecnico, ssr:false), TanStack Query (server state).
+  Evidencia: `../../_reviews/2026-07-04-visual-stack-spike.md`.
 
 Ainda por vir:
 
@@ -50,6 +55,7 @@ Ainda por vir:
 | `/onboarding`                                               | Fluxo guiado da ORGANIZACAO atual; progresso partial/finished persiste por organizacao.         |
 | `/settings`                                                 | Configuracoes da organizacao atual (demo: secoes completas; nova: identidade/governanca/troca). |
 | `/console`                                                  | Console tecnico da organizacao com host de governanca (hoje a demo).                            |
+| `/spikes/visual-stack`                                      | Bancada INTERNA do spike da stack visual (QRD-27/28); fora da navegacao de produto.             |
 | `/api/local/signup`                                         | Cria local-principal + sessao (cookie httpOnly, nao assinado — nao e auth).                     |
 | `/api/local/organizations`                                  | Cria organizacao vazia ou anexa a demo; atualiza sessao.                                        |
 | `/api/local/organizations/select`                           | Troca a organizacao ativa da sessao.                                                            |

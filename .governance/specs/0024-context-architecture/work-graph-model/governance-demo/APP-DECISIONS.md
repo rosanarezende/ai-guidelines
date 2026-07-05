@@ -1716,6 +1716,74 @@ Copy obrigatoria:
 - `Grafo tecnico: exploracao avancada para auditoria e diagnostico; nao e necessario para operar o dia a dia.`
 - `Dashboards mostram resultados derivados; a acao governada sempre rele a fonte autoritativa.`
 
+## QRD-28 - Resultado dos spikes da stack visual
+
+**Q - Question**
+
+Os spikes obrigatorios do QRD-27 foram executados com o mesmo dataset, os mesmos
+filtros e o mesmo criterio visual. O que a evidencia sustenta cravar agora?
+
+**R - Reasoning/Research**
+
+Spike implementado em `frontend/app/spikes/visual-stack/` (rota interna
+`/spikes/visual-stack`, fora da navegacao de produto), com camada de view-model
+independente de renderer (`GovernanceMapViewModel`, `GovernanceDashboardViewModel`,
+`GovernanceTableViewModel`, `GovernanceGraphViewModel`), read-model REAL da acme
+(174 nos · 374 arestas · rev 03296990bfcd) e fixture sintetica tipada/seedada
+(~1k/~3k nos; 2k/10k linhas). Evidencia completa, medidas e fontes oficiais em
+[`../_reviews/2026-07-04-visual-stack-spike.md`](../_reviews/2026-07-04-visual-stack-spike.md).
+
+Resumo do que foi observado:
+
+- React Flow + ELK entregou nos ricos (copy, confianca, risco, evidencia, CTA)
+  com layout automatico estavel e sem hydration warning; ECharts no mesmo
+  view-model continuou parecendo grafo tecnico (sem no rico/CTA).
+- MUI X Charts (Community/MIT) cobriu linha/area/stacked/gauge/drill com tema
+  MUI nativo; ECharts cobriu o mesmo com tooltip/perf superiores, mas exige
+  wrapper/tema manual; heatmap/funnel/sankey/treemap do MUI X sao Pro (pagos).
+- MUI X Data Grid Community cobriu sorting/filtro/paginacao/colunas/densidade/
+  selecao/pills com 10k linhas; limite honesto: pagina maxima de 100 linhas no
+  Community. AG Grid Community tem virtualizacao melhor, mas columns tool panel/
+  row grouping/pivot/Excel sao Enterprise; TanStack Table e headless e caro de
+  manter para grid denso.
+- Sigma.js + Graphology segurou 3.000 nos/5.153 arestas (ForceAtlas2 405ms main
+  thread; acme real 17ms) com realce fino de vizinhanca/caminho; Reagraph exige
+  ssr:false + three.js no bundle e assenta mais lento; ECharts force congela a
+  main thread com 3k nos em layout sincrono e so fica usavel com layoutAnimation.
+  Achado de SSR: sigma tambem NAO sobrevive a SSR (WebGL2RenderingContext no
+  import) e entra via dynamic(ssr:false).
+- TanStack Query provou cache por [workspace, recurso, filtros], stale visivel,
+  invalidation pos-mutation e fail-closed real: dry-run com base-revision atual
+  retornou 200 ok; com revisao forjada retornou 422 `command-stale`.
+- Cytoscape nao foi instalado nem citado; AntV G6 nao foi acionado porque o
+  spike primario nao falhou.
+
+**D - Decision**
+
+Com base na evidencia do spike:
+
+| Superficie            | Decisao                                                                                                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mapas de governanca   | `@xyflow/react` (React Flow) + `elkjs` (ELK). ECharts descartado para esta superficie.                                                                                        |
+| Dashboards            | `@mui/x-charts` (Community) como PRIMARIO; `echarts` aprovado como complemento quando a necessidade cair no tier Pro do MUI (funil/heatmap/sankey) ou em series muito longas. |
+| Tabelas/data grids    | `@mui/x-data-grid` (Community). AG Grid e TanStack Table ficam como alternativas documentadas, nao padrao.                                                                    |
+| Grafo tecnico/console | `sigma` + `graphology`. ECharts fica restrito a dashboards/visualizacoes auxiliares; Reagraph descartado.                                                                     |
+| Server state          | `@tanstack/react-query` quando as telas sairem do read-only.                                                                                                                  |
+
+Regras que continuam valendo:
+
+- view-models independentes de renderer sao obrigatorios; lib visual nao le
+  YAML/event-log e nao vira SSOT; acao governada rele fonte/sourceRevision;
+- sigma e reagraph so entram via dynamic(ssr:false); ELK deve migrar para web
+  worker se os mapas crescerem;
+- se listas operacionais exigirem scroll infinito real (>100 linhas por pagina),
+  a decisao de tabela precisa ser revisitada em novo QRD (Pro ou AG Grid);
+- Cytoscape permanece banido (QRD-27).
+
+Ponto deliberadamente NAO cravado: exclusividade de uma unica lib de graficos
+para dashboards. A regra e Community-first (MUI X Charts) com ECharts aprovado
+como complemento; consolidar em uma so exige evidencia futura de uso real.
+
 ## Proximas acoes derivadas
 
 1. Atualizar o onboarding para refletir QRD-08/09/21: workspace pode existir sem host, mas onboarding real nao conclui sem host ou sandbox explicito; os tres formatos de host entram no primeiro release com fit-check.
@@ -1733,7 +1801,7 @@ Copy obrigatoria:
 13. Implementar GitHub como primeira cloud work-source/repo provider, separado de `github-oauth`, com sourceTrust e leitura de repos/PRs/checks/CODEOWNERS.
 14. Projetar o backlog de integracoes do `integration-catalog.yml` na UI, com status `disponivel`, `release 1`, `em breve` e `adiado`.
 15. Garantir que novas telas sigam QRD-12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27: app como superficie humana local-first, sem segundo SSOT, sem presumir SaaS pago, sem amarrar postura de workspace a vendor, sem expor banco/Docker como primeira pergunta do usuario comum, com Neo4j como read-model opcional suportado, Docker Compose como opcao oficial nao universal, Ollama externo por default, auth/membership/authority separados, providers externos GitHub/Google/OIDC sem authority automatica, governance host distribuido por fit-check, fontes sem Git com confianca explicita, politica explicavel, matcher/assistente multi-provider, planning progressivo com todos os campos disponiveis, backlog de integracoes visivel e stack visual definida.
-16. Executar os spikes da stack visual antes de cravar dependencias finais: mapas de governanca (React Flow + ELK x ECharts), dashboards (MUI X Charts x Apache ECharts), tabelas/data grids (MUI X Data Grid x TanStack Table x AG Grid Community), grafo tecnico/console (Sigma.js + Graphology x Reagraph x ECharts) e server state (TanStack Query com cache por workspace/sourceRevision). Cytoscape permanece banido.
+16. ~~Executar os spikes da stack visual antes de cravar dependencias finais~~ — FEITO em 2026-07-04: spikes executados em `frontend/app/spikes/visual-stack/` com read-model real + fixture sintetica; resultado e decisoes em QRD-28 e evidencia em `../_reviews/2026-07-04-visual-stack-spike.md`. Cytoscape permanece banido.
 17. Criar `governance-demo/mock-api/` com Hono + lowdb.
 18. Criar seeds iniciais: workspace vazio, onboarding parcial, acme demo, workspace sem host, workspace com host local, workspace com host embutido, workspace local, workspace shared, workspace controlled, workspace controlled+neo4j, workspace docker-compose, workspace docker-compose+ollama-profile, workspace com groups/teams, workspace shared com convites pendentes, workspace shared+github, workspace shared+google, workspace controlled+oidc, workspace com cloud-synced-folder, workspace com provider-versioned-source, workspace compact com policy examples, workspace com multiplos assistant providers, workspace com planning progressivo completo e workspace com GitHub work-source conectado.
 19. Adicionar scripts:
