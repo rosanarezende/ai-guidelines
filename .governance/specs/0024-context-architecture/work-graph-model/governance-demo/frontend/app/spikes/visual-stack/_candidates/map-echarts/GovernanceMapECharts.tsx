@@ -1,10 +1,10 @@
 "use client";
 
-// GovernanceMapECharts — comparativo LEVE do mapa de governança na série
-// `graph` do Apache ECharts, com camadas fixas (decisão→…→dashboard).
-// Objetivo do spike: medir se ECharts consegue parecer fluxo guiado de produto
-// ou se permanece com cara de grafo/chart (limite esperado: nó rico com CTA).
-import { useMemo } from "react";
+// GovernanceMapECharts — VISUALIZAÇÃO RELACIONAL OPCIONAL do mesmo view-model
+// do mapa (série `graph` do Apache ECharts, camadas fixas). Não concorre com o
+// mapa guiado: nó não tem card rico nem CTA; serve como leitura relacional
+// compacta. Recebe os mesmos filtros/seleção aplicados no view-model.
+import { useCallback, useMemo } from "react";
 import type { EChartsOption } from "echarts";
 import type { GovernanceMapViewModel, MapNodeKind } from "../../_model/view-models";
 import { EChartsPanel } from "../shared/EChartsPanel";
@@ -30,14 +30,26 @@ const CONFIDENCE_GLYPH: Record<string, string> = {
   stale: "≠",
 };
 
-export function GovernanceMapECharts({ map }: { map: GovernanceMapViewModel }) {
+export function GovernanceMapECharts({
+  map,
+  selectedId,
+  highlight,
+  onSelect,
+}: {
+  map: GovernanceMapViewModel;
+  selectedId: string | null;
+  highlight: ReadonlySet<string>;
+  onSelect: (id: string | null) => void;
+}) {
   const option = useMemo<EChartsOption>(() => {
     const perLayerCount = new Map<number, number>();
     const kinds = [...new Set(map.nodes.map((node) => node.kind))];
+    const focusActive = highlight.size > 0;
     const data = map.nodes.map((node) => {
       const layer = KIND_LAYER[node.kind];
       const indexInLayer = perLayerCount.get(layer) ?? 0;
       perLayerCount.set(layer, indexInLayer + 1);
+      const dimmed = focusActive && !highlight.has(node.id);
       return {
         id: node.id,
         name: `${node.title.slice(0, 34)}${node.title.length > 34 ? "…" : ""} ${
@@ -46,8 +58,15 @@ export function GovernanceMapECharts({ map }: { map: GovernanceMapViewModel }) {
         x: layer * 240,
         y: indexInLayer * 110 + layer * 18,
         category: kinds.indexOf(node.kind),
-        symbolSize: node.risk === "high" ? 34 : 24,
-        itemStyle: node.risk === "high" ? { borderColor: "#9f1239", borderWidth: 3 } : undefined,
+        symbolSize: node.id === selectedId ? 40 : node.risk === "high" ? 34 : 24,
+        itemStyle: dimmed
+          ? { color: "#e5e7eb" }
+          : node.id === selectedId
+            ? { borderColor: "#111827", borderWidth: 3 }
+            : node.risk === "high"
+              ? { borderColor: "#9f1239", borderWidth: 3 }
+              : undefined,
+        label: dimmed ? { color: "#d1d5db" } : undefined,
         tooltip: {
           formatter: [
             `<b>${node.title}</b>`,
@@ -78,6 +97,10 @@ export function GovernanceMapECharts({ map }: { map: GovernanceMapViewModel }) {
           edges: map.edges.map((edge) => ({
             source: edge.from,
             target: edge.to,
+            lineStyle:
+              focusActive && !(highlight.has(edge.from) && highlight.has(edge.to))
+                ? { color: "#f3f4f6" }
+                : undefined,
             label: edge.label
               ? { show: true, formatter: edge.label, fontSize: 9, color: "#6b7280" }
               : undefined,
@@ -90,7 +113,12 @@ export function GovernanceMapECharts({ map }: { map: GovernanceMapViewModel }) {
         },
       ],
     };
-  }, [map]);
+  }, [map, selectedId, highlight]);
 
-  return <EChartsPanel option={option} height={460} />;
+  const handleClick = useCallback(
+    (payload: { id?: string }) => onSelect(payload.id ?? null),
+    [onSelect]
+  );
+
+  return <EChartsPanel option={option} height={460} onNodeClick={handleClick} />;
 }

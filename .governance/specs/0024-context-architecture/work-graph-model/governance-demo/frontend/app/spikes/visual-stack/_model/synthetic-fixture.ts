@@ -181,6 +181,10 @@ export function buildSyntheticTable(rowCount: number): GovernanceTableViewModel 
       status: pick(random, STATUSES),
       confidence: pick(random, CONFIDENCES),
       risk: pick(random, RISKS),
+      evidence:
+        random() < 0.55
+          ? `check sintético #${1 + Math.floor(random() * 999)} · fonte warehouse-sintetico`
+          : "",
       nextStep: pick(random, [
         "publicar outcome",
         "decidir gate",

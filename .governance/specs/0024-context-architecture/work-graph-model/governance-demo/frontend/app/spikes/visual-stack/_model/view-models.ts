@@ -39,12 +39,33 @@ export type GovernanceMapNode = {
   kind: MapNodeKind;
   title: string;
   subtitle?: string;
+  owner?: string;
+  team?: string;
+  touchesContract?: boolean;
   confidence: ConfidenceState;
   risk: RiskLevel;
   riskNote?: string;
   nextStep?: string;
   evidence?: string;
   cta?: { label: string; href: string };
+};
+
+export type MapFilterState = {
+  kinds: MapNodeKind[];
+  confidence: string;
+  risk: string;
+  team: string;
+  onlyContract: boolean;
+  text: string;
+};
+
+export const EMPTY_MAP_FILTER: MapFilterState = {
+  kinds: [],
+  confidence: "",
+  risk: "",
+  team: "",
+  onlyContract: false,
+  text: "",
 };
 
 export type GovernanceMapEdge = {
@@ -136,6 +157,7 @@ export type GovernanceTableRow = {
   status: string;
   confidence: ConfidenceState;
   risk: RiskLevel;
+  evidence: string;
   nextStep: string;
   contract: string;
   source: string;
