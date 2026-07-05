@@ -2,7 +2,7 @@
 
 // DashboardSection — spike 2: dashboards. Scorecards/targets do read-model
 // REAL; séries densas por ciclo vêm da fixture (o real da acme é simbólico).
-import { Box, Chip, Paper, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Chip, MenuItem, Paper, Select, Tab, Tabs, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { Flex, ResponsiveGrid, SectionCard } from "@/app/_ui/shared";
 import { CandidatePanel } from "../../_candidates/shared/CandidatePanel";
@@ -27,9 +27,21 @@ const CONFIDENCE_CHIP: Record<string, "success" | "warning" | "error" | "default
 
 export function DashboardSection({ dashboard }: { dashboard: GovernanceDashboardViewModel }) {
   const [candidate, setCandidate] = useState(0);
-  const series = useMemo(
+  const [objectiveFilter, setObjectiveFilter] = useState("");
+  const allSeries = useMemo(
     () => [...dashboard.series, ...buildSyntheticSeries()],
     [dashboard.series]
+  );
+  const objectives = useMemo(
+    () => [...new Set(allSeries.map((entry) => entry.objectiveId))].sort(),
+    [allSeries]
+  );
+  const series = useMemo(
+    () =>
+      objectiveFilter
+        ? allSeries.filter((entry) => entry.objectiveId === objectiveFilter)
+        : allSeries,
+    [allSeries, objectiveFilter]
   );
 
   return (
@@ -63,6 +75,29 @@ export function DashboardSection({ dashboard }: { dashboard: GovernanceDashboard
           {m["spikes.dashboard.datanote"]} · revisão {dashboard.sourceRevision}
         </Typography>
       </Box>
+
+      <Flex align="center" gap={1} sx={{ mt: 1.5 }} wrap>
+        <Typography variant="caption" color="text.secondary">
+          Filtrar por objetivo (drill executivo — vale para os dois candidatos):
+        </Typography>
+        <Select
+          size="small"
+          displayEmpty
+          value={objectiveFilter}
+          onChange={(event) => setObjectiveFilter(event.target.value)}
+          sx={{ minWidth: 180, fontSize: 13 }}
+        >
+          <MenuItem value="">todos os objetivos</MenuItem>
+          {objectives.map((objective) => (
+            <MenuItem key={objective} value={objective}>
+              {objective}
+            </MenuItem>
+          ))}
+        </Select>
+        <Typography variant="caption" color="text.secondary">
+          {series.length} série(s)
+        </Typography>
+      </Flex>
 
       <Tabs
         value={candidate}

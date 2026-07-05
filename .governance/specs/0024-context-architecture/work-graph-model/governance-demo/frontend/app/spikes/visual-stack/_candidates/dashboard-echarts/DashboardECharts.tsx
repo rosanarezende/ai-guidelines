@@ -8,8 +8,10 @@ import type { EChartsOption } from "echarts";
 import { Flex } from "@/app/_ui/shared";
 import type { DashboardMetricSeries } from "../../_model/view-models";
 import {
+  attainmentByObjective,
   CONFIDENCE_COLORS,
   confidenceStackPerCycle,
+  outcomesPerCycle,
   SourcesList,
 } from "../shared/dashboard-shared";
 import { EChartsPanel } from "../shared/EChartsPanel";
@@ -22,6 +24,40 @@ export function DashboardECharts({ series }: { series: DashboardMetricSeries[] }
   const [drillCycle, setDrillCycle] = useState<string | null>(null);
   const selected = series.find((entry) => entry.id === selectedId) ?? series[0];
   const stack = useMemo(() => confidenceStackPerCycle(series), [series]);
+  const perCycle = useMemo(() => outcomesPerCycle(series), [series]);
+  const breakdown = useMemo(() => attainmentByObjective(series), [series]);
+
+  const perCycleOption = useMemo<EChartsOption>(
+    () => ({
+      tooltip: { trigger: "axis" },
+      legend: { bottom: 0 },
+      grid: { left: 40, right: 16, top: 24, bottom: 48 },
+      xAxis: { type: "category", data: perCycle.cycles },
+      yAxis: { type: "value" },
+      series: [
+        { name: "válido", type: "bar", stack: "outcomes", data: perCycle.valid, color: "#14532d" },
+        {
+          name: "inválido",
+          type: "bar",
+          stack: "outcomes",
+          data: perCycle.invalid,
+          color: "#9f1239",
+        },
+      ],
+    }),
+    [perCycle]
+  );
+
+  const breakdownOption = useMemo<EChartsOption>(
+    () => ({
+      tooltip: { trigger: "axis" },
+      grid: { left: 40, right: 16, top: 24, bottom: 48 },
+      xAxis: { type: "category", data: breakdown.labels, axisLabel: { fontSize: 10 } },
+      yAxis: { type: "value", name: "%" },
+      series: [{ name: "atingimento %", type: "bar", data: breakdown.values, color: "#1f4b99" }],
+    }),
+    [breakdown]
+  );
 
   const cycles = useMemo(() => selected?.points.map((point) => point.cycle) ?? [], [selected]);
 
@@ -146,6 +182,21 @@ export function DashboardECharts({ series }: { series: DashboardMetricSeries[] }
         </Typography>
         <EChartsPanel option={stackOption} height={240} />
       </Box>
+
+      <Flex gap={2} wrap align="flex-start">
+        <Box sx={{ flex: "1 1 360px", minWidth: 0 }}>
+          <Typography variant="caption" color="text.secondary">
+            Outcomes por ciclo (válido × inválido)
+          </Typography>
+          <EChartsPanel option={perCycleOption} height={220} />
+        </Box>
+        <Box sx={{ flex: "1 1 360px", minWidth: 0 }}>
+          <Typography variant="caption" color="text.secondary">
+            Atingimento médio por objetivo (%)
+          </Typography>
+          <EChartsPanel option={breakdownOption} height={220} />
+        </Box>
+      </Flex>
 
       <SourcesList
         title={`Fontes do ciclo ${drillCycle ?? ""} — ${selected.title}`}

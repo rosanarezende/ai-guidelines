@@ -33,6 +33,52 @@ export function confidenceStackPerCycle(series: DashboardMetricSeries[]): Confid
   return { cycles, byConfidence };
 }
 
+// Outcomes por ciclo (válido × inválido). points e sources são construídos a
+// partir dos MESMOS outcomes, na mesma ordem — o zip por índice é seguro.
+export function outcomesPerCycle(series: DashboardMetricSeries[]): {
+  cycles: string[];
+  valid: number[];
+  invalid: number[];
+} {
+  const cycles = [...new Set(series.flatMap((entry) => entry.points.map((p) => p.cycle)))].sort();
+  const valid = cycles.map(() => 0);
+  const invalid = cycles.map(() => 0);
+  for (const entry of series) {
+    entry.points.forEach((point, index) => {
+      const cycleIndex = cycles.indexOf(point.cycle);
+      if (cycleIndex < 0) return;
+      const source = entry.sources[index];
+      if (source?.valid) valid[cycleIndex] += 1;
+      else invalid[cycleIndex] += 1;
+    });
+  }
+  return { cycles, valid, invalid };
+}
+
+// Atingimento médio (actual/expected em %) por objetivo — breakdown executivo.
+export function attainmentByObjective(series: DashboardMetricSeries[]): {
+  labels: string[];
+  values: number[];
+} {
+  const byObjective = new Map<string, number[]>();
+  for (const entry of series) {
+    for (const point of entry.points) {
+      if (point.expected === null || point.expected === 0 || point.actual === null) continue;
+      const bucket = byObjective.get(entry.objectiveId) ?? [];
+      bucket.push((point.actual / point.expected) * 100);
+      byObjective.set(entry.objectiveId, bucket);
+    }
+  }
+  const labels = [...byObjective.keys()].sort();
+  return {
+    labels,
+    values: labels.map((label) => {
+      const values = byObjective.get(label) ?? [];
+      return Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1));
+    }),
+  };
+}
+
 export const CONFIDENCE_COLORS: Record<ConfidenceState, string> = {
   verified: "#14532d",
   pending: "#9a5b00",

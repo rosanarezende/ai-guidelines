@@ -11,8 +11,10 @@ import { useMemo, useState } from "react";
 import { Flex } from "@/app/_ui/shared";
 import type { DashboardMetricSeries } from "../../_model/view-models";
 import {
+  attainmentByObjective,
   CONFIDENCE_COLORS,
   confidenceStackPerCycle,
+  outcomesPerCycle,
   SourcesList,
 } from "../shared/dashboard-shared";
 
@@ -24,6 +26,8 @@ export function DashboardMuiXCharts({ series }: { series: DashboardMetricSeries[
   const [drillCycle, setDrillCycle] = useState<string | null>(null);
   const selected = series.find((entry) => entry.id === selectedId) ?? series[0];
   const stack = useMemo(() => confidenceStackPerCycle(series), [series]);
+  const perCycle = useMemo(() => outcomesPerCycle(series), [series]);
+  const breakdown = useMemo(() => attainmentByObjective(series), [series]);
 
   if (!selected) {
     return <Typography variant="body2">Sem séries no view-model.</Typography>;
@@ -117,6 +121,51 @@ export function DashboardMuiXCharts({ series }: { series: DashboardMetricSeries[
           }))}
         />
       </Box>
+
+      <Flex gap={2} wrap align="flex-start">
+        <Box sx={{ flex: "1 1 360px", minWidth: 0 }}>
+          <Typography variant="caption" color="text.secondary">
+            Outcomes por ciclo (válido × inválido)
+          </Typography>
+          <BarChart
+            height={220}
+            xAxis={[{ scaleType: "band", data: perCycle.cycles }]}
+            series={[
+              {
+                id: "valid",
+                label: "válido",
+                data: perCycle.valid,
+                stack: "outcomes",
+                color: "#14532d",
+              },
+              {
+                id: "invalid",
+                label: "inválido",
+                data: perCycle.invalid,
+                stack: "outcomes",
+                color: "#9f1239",
+              },
+            ]}
+          />
+        </Box>
+        <Box sx={{ flex: "1 1 360px", minWidth: 0 }}>
+          <Typography variant="caption" color="text.secondary">
+            Atingimento médio por objetivo (%)
+          </Typography>
+          <BarChart
+            height={220}
+            xAxis={[{ scaleType: "band", data: breakdown.labels }]}
+            series={[
+              {
+                id: "attainment",
+                label: "atingimento %",
+                data: breakdown.values,
+                color: "#1f4b99",
+              },
+            ]}
+          />
+        </Box>
+      </Flex>
 
       <SourcesList
         title={`Fontes do ciclo ${drillCycle ?? ""} — ${selected.title}`}
