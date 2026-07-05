@@ -626,6 +626,7 @@ contracts:
   - id: CUP-03
     title: Cup nao executa mutacao sem confirmacao humana
     status: fixme
+    deny: true
     spec: journeys/cup.spec.ts
     seed: workspace-host-local
     actors:
@@ -641,6 +642,7 @@ contracts:
   - id: CUP-04
     title: Cup respeita permissoes e nao vaza contexto bloqueado
     status: fixme
+    deny: true
     spec: journeys/cup.spec.ts
     seed: workspace-controlled
     actors:
@@ -657,6 +659,7 @@ contracts:
   - id: SEC-01
     title: Provider cloud nao ativa sem egress/authority
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-controlled
     actors:
@@ -673,6 +676,7 @@ contracts:
   - id: SEC-02
     title: Read-model derivado nao autoriza acao stale
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: acme-demo
     actors:
@@ -689,6 +693,7 @@ contracts:
   - id: SEC-03
     title: Authority nunca deriva apenas de login externo
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-shared-github
     actors:
@@ -749,6 +754,7 @@ contracts:
   - id: SEC-04
     title: Event-log nao pode ser apagado ou reescrito sem quarantine
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-host-local
     actors:
@@ -764,6 +770,7 @@ contracts:
   - id: SEC-05
     title: Bump de confianca/sourceTrust exige evidencia independente
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-cloud-synced-folder
     actors:
@@ -779,6 +786,7 @@ contracts:
   - id: SEC-06
     title: Downgrade de classificacao exige autoridade separada e trilha visivel
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-controlled
     actors:
@@ -795,6 +803,7 @@ contracts:
   - id: SEC-07
     title: Remover o ultimo admin/security-owner e bloqueado ou exige break-glass
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-shared-convites
     actors:
@@ -809,6 +818,7 @@ contracts:
   - id: SEC-08
     title: Outcome/rollup sem evidencia minima nao entra como resultado valido
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: acme-demo
     actors:
@@ -824,6 +834,7 @@ contracts:
   - id: SEC-09
     title: Integracao nao escreve estado autoritativo sem contrato explicito
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -839,6 +850,7 @@ contracts:
   - id: SEC-10
     title: Break-glass nao vira porta permanente
     status: fixme
+    deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-compact-policy
     actors:

@@ -37,22 +37,9 @@ const journeysRoot = path.join(demoRoot, "test", "journeys");
 // pela política de rota, como "shell"/"Cup".
 const knownNonRoutes = new Set(["shell", "Cup", "state"]);
 const infraSurfaceGates = new Set(["Cup"]);
-// Legado: deny declarados antes do campo `deny: true`. O contrato de deny agora
-// é estrutural (campo YAML); esta lista mantém compatibilidade e é unida ao
-// que vier do campo. Deny nunca pode ser expected-fail (false-green de bloqueio).
-const legacyDenyContractIds = new Set([
-  "SEC-02",
-  "SEC-03",
-  "SEC-05",
-  "SEC-07",
-  "SEC-08",
-  "SEC-10",
-  "CUP-03",
-  "CUP-04",
-]);
 
 function isDenyContract(contract: Contract): boolean {
-  return contract.deny === true || legacyDenyContractIds.has(contract.id);
+  return contract.deny === true;
 }
 const allowedStatuses = new Set<ContractStatus>([
   "active",
