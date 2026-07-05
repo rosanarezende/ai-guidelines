@@ -17,7 +17,7 @@ test.describe("Seguranca, authority e fail-closed", () => {
   });
 
   test("SEC-02 read-model derivado nao autoriza acao stale", async ({ page, request }) => {
-    pendingContract("SEC-02", "expected-fail");
+    pendingContract("SEC-02", "fixme");
 
     await openWorkspace(page, request, "acme-demo", "/map", "sandbox-demo");
     await page.getByTestId("map-node-outcome").click();
@@ -28,7 +28,7 @@ test.describe("Seguranca, authority e fail-closed", () => {
   });
 
   test("SEC-03 authority nunca deriva apenas de login externo", async ({ page, request }) => {
-    pendingContract("SEC-03", "expected-fail");
+    pendingContract("SEC-03", "fixme");
 
     await openWorkspace(page, request, "workspace-shared-github", "/settings");
     await expect(page.getByTestId("identity-provider-status")).toContainText(/GitHub/i);
@@ -55,7 +55,7 @@ test.describe("Seguranca, authority e fail-closed", () => {
   });
 
   test("SEC-05 bump de sourceTrust exige evidencia independente", async ({ page, request }) => {
-    pendingContract("SEC-05", "expected-fail");
+    pendingContract("SEC-05", "fixme");
 
     await openWorkspace(page, request, "workspace-cloud-synced-folder", "/sources");
     await page.getByTestId("source-src-drive").click();
@@ -81,7 +81,7 @@ test.describe("Seguranca, authority e fail-closed", () => {
     page,
     request,
   }) => {
-    pendingContract("SEC-07", "expected-fail");
+    pendingContract("SEC-07", "fixme");
 
     await openWorkspace(page, request, "workspace-shared-convites", "/settings");
     await page.getByTestId("person-local-ana").click();
@@ -92,7 +92,7 @@ test.describe("Seguranca, authority e fail-closed", () => {
   });
 
   test("SEC-08 outcome sem evidencia minima nao entra no rollup", async ({ page, request }) => {
-    pendingContract("SEC-08", "expected-fail");
+    pendingContract("SEC-08", "fixme");
 
     await openWorkspace(page, request, "acme-demo", "/results", "sandbox-demo");
     await page.getByTestId("outcome-without-evidence").click();
@@ -113,7 +113,7 @@ test.describe("Seguranca, authority e fail-closed", () => {
   });
 
   test("SEC-10 break-glass precisa de motivo TTL e revisao", async ({ page, request }) => {
-    pendingContract("SEC-10", "expected-fail");
+    pendingContract("SEC-10", "fixme");
 
     await openWorkspace(page, request, "workspace-compact-policy", "/settings");
     await page.getByTestId("break-glass-create").click();

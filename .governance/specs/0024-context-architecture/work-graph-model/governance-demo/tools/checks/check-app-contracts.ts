@@ -33,6 +33,17 @@ const contractsFile = path.join(demoRoot, "test", "contracts", "app-contracts.ym
 const journeysRoot = path.join(demoRoot, "test", "journeys");
 
 const knownNonRoutes = new Set(["shell", "Cup"]);
+const infraSurfaceGates = new Set(["Cup"]);
+const denyContractIds = new Set([
+  "SEC-02",
+  "SEC-03",
+  "SEC-05",
+  "SEC-07",
+  "SEC-08",
+  "SEC-10",
+  "CUP-03",
+  "CUP-04",
+]);
 const allowedStatuses = new Set<ContractStatus>([
   "active",
   "expected-fail",
@@ -84,6 +95,10 @@ function routeSurfaces(contract: Contract): string[] {
   );
 }
 
+function hasInfraSurfaceGate(contract: Contract): boolean {
+  return (contract.surfaces || []).some((surface) => infraSurfaceGates.has(surface));
+}
+
 function loadContracts(): ContractDoc {
   return parse(readText(contractsFile)) as ContractDoc;
 }
@@ -128,6 +143,11 @@ function assertSpecs(contracts: Contract[]): void {
     if (!text) fail(`${contract.id} aponta para spec inexistente: ${contract.spec}`);
     if (!text.includes(contract.id)) fail(`${contract.id} nao aparece no spec ${contract.spec}`);
 
+    const titleCall = new RegExp(`test\\(\\s*"[^"]*${contract.id}\\b`);
+    if (!titleCall.test(text)) {
+      fail(`${contract.id} precisa aparecer no titulo de um test() real`);
+    }
+
     const pendingCall = new RegExp(
       `pendingContract\\("${contract.id}",\\s*"${contract.status}"\\)`
     );
@@ -136,6 +156,17 @@ function assertSpecs(contracts: Contract[]): void {
         fail(
           `${contract.id} precisa chamar pendingContract("${contract.id}", "${contract.status}")`
         );
+      }
+      if (contract.status === "expected-fail") {
+        const pendingIndex = text.indexOf(`pendingContract("${contract.id}", "expected-fail")`);
+        const nextTestIndex = text.indexOf("\n  test(", pendingIndex + 1);
+        const testBlock = text.slice(
+          pendingIndex,
+          nextTestIndex === -1 ? text.length : nextTestIndex
+        );
+        if (!/openWorkspace\(|armExpectedFailAfterArrival\(/.test(testBlock)) {
+          fail(`${contract.id} expected-fail precisa de sentinela antes de test.fail`);
+        }
       }
     }
     if (contract.status === "active" && pendingCall.test(text)) {
@@ -158,15 +189,36 @@ function assertRoutePolicy(contracts: Contract[]): void {
   const routes = listAppRoutes();
   for (const contract of contracts) {
     const routeSurfs = routeSurfaces(contract);
+    const primaryRoute = routeSurfs[0];
     const existing = routeSurfs.filter((surface) => routes.has(surface));
     const missing = routeSurfs.filter((surface) => !routes.has(surface));
+    const infraGated = hasInfraSurfaceGate(contract);
+    const denyContract = denyContractIds.has(contract.id);
 
+    if (contract.status === "expected-fail" && denyContract) {
+      fail(`${contract.id} e contrato de bloqueio; nunca use expected-fail`);
+    }
+    if (contract.status === "expected-fail" && infraGated) {
+      fail(`${contract.id} depende de infra/overlay ausente; use fixme`);
+    }
+    if (contract.status === "expected-fail" && !primaryRoute) {
+      fail(`${contract.id} esta expected-fail mas nao declara rota primaria`);
+    }
+    if (contract.status === "expected-fail" && primaryRoute && !routes.has(primaryRoute)) {
+      fail(`${contract.id} esta expected-fail mas rota primaria nao existe: ${primaryRoute}`);
+    }
     if (contract.status === "expected-fail" && existing.length === 0) {
       fail(
         `${contract.id} esta expected-fail mas nenhuma superficie existe (${routeSurfs.join(", ")})`
       );
     }
-    if (contract.status === "fixme" && routeSurfs.length > 0 && missing.length === 0) {
+    if (
+      contract.status === "fixme" &&
+      routeSurfs.length > 0 &&
+      missing.length === 0 &&
+      !infraGated &&
+      !denyContract
+    ) {
       fail(`${contract.id} esta fixme mas todas as rotas existem; use expected-fail`);
     }
     if (contract.status === "active" && missing.length > 0) {

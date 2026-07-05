@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  armExpectedFailAfterArrival,
   expectNoAcmeDemoLeak,
   openWorkspace,
   pendingContract,
@@ -11,7 +12,8 @@ test.describe("Auth, workspace e shell", () => {
     pendingContract("APP-02", "expected-fail");
 
     await resetSeed(request, "blank");
-    await page.goto("/");
+    const response = await page.goto("/");
+    await armExpectedFailAfterArrival(page, "/", response?.status() ?? null);
     await page.getByTestId("signup-display-name").fill("Ana Admin");
     await page.getByTestId("signup-submit").click();
     await page.getByTestId("workspace-create-name").fill("Mundo da Mel");

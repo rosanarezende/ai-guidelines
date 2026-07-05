@@ -40,6 +40,7 @@ seed_matrix:
   workspace-docker-compose: workspace com stack compose
   workspace-docker-ollama-profile: workspace com profile Ollama local
   workspace-groups-teams: workspace com pessoas/times/grupos
+  workspace-authority-personas: workspace com principals distintos para personas/authority
   workspace-shared-convites: workspace com convites pendentes
   workspace-shared-github: workspace com GitHub identity provider
   workspace-shared-google: workspace com Google/OIDC
@@ -236,7 +237,7 @@ contracts:
       - Dispensar assistente deixa app funcional.
   - id: APP-11
     title: Onboarding mostra integracoes como opcionais e contextuais
-    status: expected-fail
+    status: fixme
     spec: journeys/integrations.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -325,7 +326,7 @@ contracts:
       - Fonte rebaixada nao vira evidencia forte em Results.
   - id: APP-19
     title: Settings de assistente mostra provider/defaults reais
-    status: expected-fail
+    status: fixme
     spec: journeys/settings.spec.ts
     seed: workspace-multi-assistant
     actors:
@@ -340,7 +341,7 @@ contracts:
       - Cup usa somente provider permitido pela policy.
   - id: APP-20
     title: Settings resume integracoes e aponta para hub
-    status: expected-fail
+    status: fixme
     spec: journeys/integrations.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -384,7 +385,7 @@ contracts:
       - Status cloud nao vira connected sem auth/probe.
   - id: INT-02
     title: Sugestoes contextuais de integracao aparecem no fluxo certo
-    status: expected-fail
+    status: fixme
     spec: journeys/integrations.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -401,7 +402,7 @@ contracts:
       - Triage sugere matcher/catalog/CODEOWNERS.
   - id: INT-03
     title: GitHub work-source nao se confunde com GitHub login
-    status: expected-fail
+    status: fixme
     spec: journeys/integrations.spec.ts
     seed: workspace-github-work-source
     actors:
@@ -593,7 +594,7 @@ contracts:
       - Acoes do console tambem respeitam baseRevision e authority.
   - id: CUP-01
     title: Cup abre como overlay contextual sem provider externo
-    status: expected-fail
+    status: fixme
     spec: journeys/cup.spec.ts
     seed: empty-workspace
     actors:
@@ -609,7 +610,7 @@ contracts:
       - Sem provider, Cup so usa explicacao deterministica/local.
   - id: CUP-02
     title: Cup explica policies versionadas
-    status: expected-fail
+    status: fixme
     spec: journeys/cup.spec.ts
     seed: workspace-controlled
     actors:
@@ -624,7 +625,7 @@ contracts:
       - Cup nao inventa policy fora do catalogo.
   - id: CUP-03
     title: Cup nao executa mutacao sem confirmacao humana
-    status: expected-fail
+    status: fixme
     spec: journeys/cup.spec.ts
     seed: workspace-host-local
     actors:
@@ -639,7 +640,7 @@ contracts:
       - Audit registra a decisao humana, nao Cup como authority.
   - id: CUP-04
     title: Cup respeita permissoes e nao vaza contexto bloqueado
-    status: expected-fail
+    status: fixme
     spec: journeys/cup.spec.ts
     seed: workspace-controlled
     actors:
@@ -671,7 +672,7 @@ contracts:
       - Explicacao mostra quem aprova e por que.
   - id: SEC-02
     title: Read-model derivado nao autoriza acao stale
-    status: expected-fail
+    status: fixme
     spec: journeys/security-authority.spec.ts
     seed: acme-demo
     actors:
@@ -687,7 +688,7 @@ contracts:
       - UI mostra refresh/retry, nao aplica estado antigo.
   - id: SEC-03
     title: Authority nunca deriva apenas de login externo
-    status: expected-fail
+    status: fixme
     spec: journeys/security-authority.spec.ts
     seed: workspace-shared-github
     actors:
@@ -732,7 +733,7 @@ contracts:
       - Scan/freshness aparece de forma consistente.
   - id: CONS-03
     title: Integracao conectada aparece igual no hub, Settings e sugestoes
-    status: expected-fail
+    status: fixme
     spec: journeys/cross-screen-consistency.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -762,7 +763,7 @@ contracts:
       - A UI mostra a quebra como integridade comprometida, nao como warning comum.
   - id: SEC-05
     title: Bump de confianca/sourceTrust exige evidencia independente
-    status: expected-fail
+    status: fixme
     spec: journeys/security-authority.spec.ts
     seed: workspace-cloud-synced-folder
     actors:
@@ -793,7 +794,7 @@ contracts:
       - Cup/assistente recebe apenas contexto permitido pelo resultado da policy.
   - id: SEC-07
     title: Remover o ultimo admin/security-owner e bloqueado ou exige break-glass
-    status: expected-fail
+    status: fixme
     spec: journeys/security-authority.spec.ts
     seed: workspace-shared-convites
     actors:
@@ -807,7 +808,7 @@ contracts:
       - Break-glass registra motivo, TTL e revisao posterior.
   - id: SEC-08
     title: Outcome/rollup sem evidencia minima nao entra como resultado valido
-    status: expected-fail
+    status: fixme
     spec: journeys/security-authority.spec.ts
     seed: acme-demo
     actors:
@@ -837,7 +838,7 @@ contracts:
       - Erro de segundo SSOT fica visivel antes da conexao.
   - id: SEC-10
     title: Break-glass nao vira porta permanente
-    status: expected-fail
+    status: fixme
     spec: journeys/security-authority.spec.ts
     seed: workspace-compact-policy
     actors:

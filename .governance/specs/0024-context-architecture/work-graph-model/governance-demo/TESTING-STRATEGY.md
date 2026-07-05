@@ -107,17 +107,29 @@ Opcional futuro para times maiores/self-hosted. Nao entra na suite alvo inicial.
 
 ## 5. Estados de contrato de teste
 
-| Estado          | Playwright/Vitest         | Quando usar                                                |
-| --------------- | ------------------------- | ---------------------------------------------------------- |
-| `active`        | `test(...)`               | comportamento existe e deve passar sempre                  |
-| `expected-fail` | `test.fail(...)`          | fluxo roda, mas deve falhar ate a implementacao chegar     |
-| `fixme`         | `test.fixme(...)`         | rota/infra ainda ausente ou teste travaria                 |
-| `skip`          | `test.skip(...)`          | nao aplicavel naquela configuracao                         |
-| `todo`          | `test.todo(...)` (Vitest) | contrato sem corpo ainda, apenas no nivel unitario         |
-| `manual`        | somente no YAML           | validacao humana temporaria, com criterio para automatizar |
+| Estado          | Playwright/Vitest         | Quando usar                                                   |
+| --------------- | ------------------------- | ------------------------------------------------------------- |
+| `active`        | `test(...)`               | comportamento existe e deve passar sempre                     |
+| `expected-fail` | `test.fail(...)`          | rota/seed/sessao chegaram; comportamento positivo ainda falha |
+| `fixme`         | `test.fixme(...)`         | rota/infra ainda ausente ou teste travaria                    |
+| `skip`          | `test.skip(...)`          | nao aplicavel naquela configuracao                            |
+| `todo`          | `test.todo(...)` (Vitest) | contrato sem corpo ainda, apenas no nivel unitario            |
+| `manual`        | somente no YAML           | validacao humana temporaria, com criterio para automatizar    |
 
-Regra: `skip` nao pode ser usado para esconder bug. Para bug conhecido, usar
-`expected-fail` ou `fixme` com ID.
+Regras obrigatorias:
+
+1. `skip` nao pode ser usado para esconder bug. Para bug conhecido, usar
+   `expected-fail` ou `fixme` com ID.
+2. `expected-fail` nunca e armado na primeira linha. O teste precisa provar uma
+   sentinela de chegada antes: seed carregada, sessao valida, rota primaria
+   responde sem 404/500 e DOM renderizado. Na suite Playwright isso acontece por
+   `openWorkspace(...)` ou `armExpectedFailAfterArrival(...)`.
+3. Contrato de bloqueio/deny nao usa `expected-fail`. Ele fica `fixme` enquanto
+   a superficie de bloqueio nao existe; quando existir, vira `active` e prova o
+   bloqueio observado. Exemplos: remover ultimo admin, elevar `sourceTrust`,
+   usar read-model stale, break-glass sem TTL, vazamento via Cup.
+4. Overlay/infra ausente, como Cup antes do shell existir, fica `fixme`, mesmo
+   que rotas secundarias do contrato ja existam.
 
 ## 6. Estrutura dos testes
 

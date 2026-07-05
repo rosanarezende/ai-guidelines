@@ -47,8 +47,12 @@ test/
 
 - `active`: roda e deve passar.
 - `fixme`: contrato existe, mas a tela/fluxo ainda nao esta pronto.
-- `expected-fail`: roda e deve falhar enquanto o bug/feature nao for corrigido.
+- `expected-fail`: rota/seed/sessao ja chegaram; o comportamento positivo ainda deve falhar.
 - `skip`: apenas para configuracao nao aplicavel.
+
+`expected-fail` precisa de sentinela antes de `test.fail`: use `openWorkspace(...)`
+ou `armExpectedFailAfterArrival(...)`. Contrato de bloqueio/deny nunca usa
+`expected-fail`; fica `fixme` ate a superficie existir e depois vira `active`.
 
 ## Regra de manutencao
 

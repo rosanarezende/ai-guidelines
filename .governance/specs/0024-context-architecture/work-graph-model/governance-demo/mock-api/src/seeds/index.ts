@@ -14,6 +14,9 @@ import {
 } from "../../../backend/src/domain/index.ts";
 
 const ANA: LocalAccount = { id: "local-ana", displayName: "Ana", preferredLocale: "pt-br" };
+const BIA: LocalAccount = { id: "local-bia", displayName: "Bia", preferredLocale: "pt-br" };
+const CAIO: LocalAccount = { id: "local-caio", displayName: "Caio", preferredLocale: "pt-br" };
+const EVA: LocalAccount = { id: "local-eva", displayName: "Eva", preferredLocale: "pt-br" };
 const NOW = "2027-01-10T12:00:00.000Z";
 const LATER = "2027-01-17T12:00:00.000Z";
 
@@ -240,6 +243,76 @@ export const SEEDS: Record<string, () => AdoptionState> = {
         },
       ],
     })),
+
+  "workspace-authority-personas": () => {
+    const state = base((ws) => ({
+      ...withPeople(ws),
+      people: [...withPeople(ws).people, { id: "person-eva", displayName: "Eva" }],
+      mode: "controlled",
+      profileDeclaration: {
+        profile: "full",
+        sensitiveAccumulationPolicy: "block",
+        reason: "seed de personas para contratos de authority",
+        savedAt: NOW,
+      },
+      roleAssignments: [
+        {
+          id: "role-bia-security",
+          subject: { kind: "person", id: "person-bia" },
+          roleId: "security-owner",
+          status: "accepted",
+          proposedBy: ANA.id,
+          proposedAt: NOW,
+          decidedAt: NOW,
+        },
+        {
+          id: "role-caio-sponsor",
+          subject: { kind: "person", id: "person-caio" },
+          roleId: "sponsor",
+          status: "accepted",
+          proposedBy: ANA.id,
+          proposedAt: NOW,
+          decidedAt: NOW,
+        },
+        {
+          id: "role-eva-source-owner",
+          subject: { kind: "person", id: "person-eva" },
+          roleId: "source-owner",
+          status: "proposed",
+          proposedBy: ANA.id,
+          proposedAt: NOW,
+        },
+      ],
+    }));
+    return {
+      ...state,
+      principals: [...state.principals, BIA, CAIO, EVA],
+      memberships: [
+        ...state.memberships,
+        {
+          principalId: BIA.id,
+          workspaceId: "acme-honey",
+          personId: "person-bia",
+          roles: [],
+          status: "active",
+        },
+        {
+          principalId: CAIO.id,
+          workspaceId: "acme-honey",
+          personId: "person-caio",
+          roles: [],
+          status: "active",
+        },
+        {
+          principalId: EVA.id,
+          workspaceId: "acme-honey",
+          personId: "person-eva",
+          roles: [],
+          status: "active",
+        },
+      ],
+    };
+  },
 
   "workspace-shared-convites": () =>
     base((ws) => ({

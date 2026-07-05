@@ -220,6 +220,30 @@ const CASES: SeedCase[] = [
     },
   },
   {
+    name: "workspace-authority-personas",
+    proves: "personas de teste usam principals distintos e authority derivada",
+    assert: (state) => {
+      const ws = workspace(state);
+      expect(state.principals.map((item) => item.id)).toEqual(
+        expect.arrayContaining(["local-ana", "local-bia", "local-caio", "local-eva"])
+      );
+      expect(state.memberships).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ principalId: "local-bia", personId: "person-bia" }),
+          expect.objectContaining({ principalId: "local-caio", personId: "person-caio" }),
+          expect.objectContaining({ principalId: "local-eva", personId: "person-eva" }),
+        ])
+      );
+      expect(ws.roleAssignments).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ roleId: "security-owner", status: "accepted" }),
+          expect.objectContaining({ roleId: "sponsor", status: "accepted" }),
+          expect.objectContaining({ roleId: "source-owner", status: "proposed" }),
+        ])
+      );
+    },
+  },
+  {
     name: "workspace-shared-convites",
     proves: "convites pendentes preservam token local",
     assert: (state) => {
