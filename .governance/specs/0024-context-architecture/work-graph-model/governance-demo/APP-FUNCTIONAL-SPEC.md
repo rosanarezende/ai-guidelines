@@ -9,6 +9,7 @@
 > **Decisoes de app:** ambientes, mock API, MSW e e2e ficam em [`APP-DECISIONS.md`](APP-DECISIONS.md).
 > **Mapa de iteracao visual:** o controle de telas iteradas/validadas fica em [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md). Este arquivo descreve o contrato funcional; o mapa registra a validacao real subindo o app.
 > **Politicas explicaveis:** decisoes de bloquear, avisar, rebaixar ou revisar ficam em [`POLICY-HANDBOOK.md`](POLICY-HANDBOOK.md), que tambem serve como fonte para assistentes.
+> **Cup/CWP:** o overlay contextual de coautoria fica em [`APP-DECISIONS.md#qrd-32---cupcwp-como-par-contextual-de-trabalho`](APP-DECISIONS.md#qrd-32---cupcwp-como-par-contextual-de-trabalho) e deve ser validado junto com cada tela no [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md).
 
 ## 1. Objetivo do documento
 
@@ -96,6 +97,7 @@ Rotas Next (`frontend/app/api/local/*`) sobre use cases + reducer puro
 6. **Assistente e matcher sao canais assistivos: sugerem, explicam e aceleram, mas nao decidem.**
 7. **Console tecnico e area avancada; nao e o caminho feliz do usuario.**
 8. **Mock API valida experiencia, nao governanca.** Jornadas podem nascer contra `mock-api`, mas so contam como governanca real quando passarem pelo backend real/command runtime/resolver.
+9. **Cup/CWP e par contextual, nao autoridade.** O overlay ajuda a operar a tela atual, mas usa contexto reduzido por policy e nunca grava mutacao autoritativa sem confirmacao humana.
 
 ## 3.1 Stack visual e spikes obrigatorios
 
@@ -133,6 +135,162 @@ Regras de produto:
   `GovernanceTableViewModel`). Trocar renderer nao pode alterar dominio,
   comandos, resolver ou fonte autoritativa.
 
+## 3.2 Cup / CWP — overlay contextual transversal
+
+Autoridade: [`APP-DECISIONS.md#qrd-32---cupcwp-como-par-contextual-de-trabalho`](APP-DECISIONS.md#qrd-32---cupcwp-como-par-contextual-de-trabalho).
+
+**Nome de produto:** Cup.
+**Nome tecnico:** CWP (`contextual-work-partner`).
+**Definicao:** um par de trabalho contextual que acompanha a pessoa usuaria nas
+telas do app, entende o contexto permitido e ajuda a explicar, rascunhar,
+comparar e preparar proximos passos sem decidir ou salvar estado sozinho.
+
+Cup existe para resolver uma tensao central do produto:
+
+- o modelo e poderoso e grafado;
+- a pessoa usuaria nao deve operar como se estivesse lendo YAML/event-log;
+- o app precisa explicar decisoes, fontes, roles, targets, outcomes,
+  integracoes e politicas sem esconder o que ainda e incerto;
+- IA ajuda muito, mas nao pode virar bypass de authority, policy, egress ou
+  sourceRevision.
+
+### 3.2.1 Superficies do Cup
+
+| Superficie             | Funcao                                                                                           | Estado inicial |
+| ---------------------- | ------------------------------------------------------------------------------------------------ | -------------- |
+| Launcher global        | botao discreto persistente para abrir/fechar o painel                                            | C0             |
+| Painel lateral         | conversa/contexto/acoes sugeridas sem cobrir a tela                                              | C0             |
+| Hints inline           | convites contextuais em pontos dificeis da tela                                                  | C0-C1          |
+| Context summary        | mostra o que Cup consegue ver nesta tela e por que outras coisas estao bloqueadas                | C1-C2          |
+| Specialist mode        | muda linguagem e checklist por superficie (`source-guide`, `setup-guide`, `results-guide`)       | C3             |
+| Provider-assisted mode | usa provider local/cloud aprovado para resumo, sugestao ou rascunho                              | C4             |
+| Draft action mode      | prepara payload/dry-run de comando, sempre com confirmacao humana antes de qualquer persistencia | C5-C6          |
+
+### 3.2.2 Pipeline obrigatorio
+
+```text
+Page CwpPageContext
+  -> CWP Context Resolver
+  -> Authority + Policy + Egress Resolver
+  -> Specialist Router
+  -> deterministic explainer OR assistant/matcher provider
+  -> answer / suggestion / draft
+  -> human confirmation if mutation
+  -> interaction audit
+```
+
+Cup nunca acessa o mundo por atalho. Ele recebe contexto resolvido pelo app.
+Quando a tela nao tem workspace, host, fonte ou permissao suficiente, Cup deve
+dizer isso de forma simples e sugerir o menor proximo passo seguro.
+
+### 3.2.3 Contrato minimo de contexto por pagina
+
+Cada rota de produto deve conseguir publicar um descritor semelhante a:
+
+```ts
+type CwpPageContext = {
+  route: string;
+  workspaceId?: string;
+  actorId?: string;
+  surface:
+    | "signup"
+    | "organizations"
+    | "onboarding"
+    | "home"
+    | "settings"
+    | "sources"
+    | "planning"
+    | "intake"
+    | "triage"
+    | "gates"
+    | "work"
+    | "contracts"
+    | "results"
+    | "operations"
+    | "audit"
+    | "integrations"
+    | "map"
+    | "console";
+  focusedRefs: string[];
+  visibleDataClasses: Array<"public" | "internal" | "restricted">;
+  allowedActions: string[];
+  blockedActions: Array<{ action: string; policyRef: string; reason: string }>;
+  sourceRevision?: string;
+  baseRevision?: string;
+};
+```
+
+O contexto publicado pela pagina e uma intencao; o backend ainda precisa
+recalcular authority, policy e egress. A UI nao pode autoafirmar que Cup tem
+permissao.
+
+### 3.2.4 Especialistas por rota
+
+| Rota/superficie          | Especialista CWP      | Oportunidade principal                                                                  |
+| ------------------------ | --------------------- | --------------------------------------------------------------------------------------- |
+| `/signup`                | `adoption-guide`      | explicar conta local, auth futura, demo e diferenca entre login e authority             |
+| `/organizations`         | `workspace-guide`     | escolher workspace, anexar demo, entender local/shared/controlled                       |
+| `/onboarding`            | `setup-guide`         | guiar perfil, responsabilidades, host, fontes, assistente e integracoes                 |
+| `/sources`               | `source-guide`        | escolher local/cloud/GitHub, explicar `sourceTrust`, `.governance` e `.governance-host` |
+| `/settings`              | `configuration-guide` | reconciliar configuracoes com onboarding e policy                                       |
+| `/planning`              | `planning-guide`      | transformar objetivos em metricas, targets, allocation e contexto progressivo           |
+| `/intake`                | `initiative-guide`    | rascunhar problema, hipotese, aposta, lacunas e fontes afetadas                         |
+| `/triage`                | `triage-guide`        | sugerir perguntas, repos, contratos, unknowns e comparar matcher providers              |
+| `/gates`                 | `decision-guide`      | explicar autoridade, risco, evidencia e consequencia da decisao                         |
+| `/work`                  | `execution-guide`     | interpretar repo-work, acks, bloqueios e pendencias                                     |
+| `/contracts`             | `contract-guide`      | explicar owner, consumers, compatibility-window, contention e migrations                |
+| `/results`               | `results-guide`       | explicar outcome, actual, rollup, stale, self-attested e confianca                      |
+| `/operations`            | `operations-guide`    | incidentes, follow-ups, SLO e trabalho operacional                                      |
+| `/audit`                 | `policy-guide`        | explicar bloqueio/aviso/rebaixamento citando policy                                     |
+| `/integrations`/settings | `integration-guide`   | configurar providers, egress, health, probe e backlog                                   |
+| `/map`                   | `graph-guide`         | explicar caminho, impacto, vizinhanca e risco no grafo                                  |
+| `/console`               | `technical-guide`     | orientar sem substituir console tecnico nem executar comando sozinho                    |
+
+### 3.2.5 Matriz de poderes
+
+Cup pode:
+
+- explicar a tela atual;
+- citar politica aplicavel;
+- resumir o que esta visivel para aquela pessoa;
+- sugerir proximo passo;
+- comparar opcoes;
+- rascunhar texto;
+- apontar lacunas;
+- preparar dry-run;
+- chamar matcher/assistant provider quando policy permitir;
+- registrar sugestao aceita/rejeitada/sobrescrita quando isso influenciar uma
+  decisao.
+
+Cup nao pode:
+
+- aprovar gate;
+- alterar authority;
+- aceitar papel por outra pessoa;
+- reduzir classificacao;
+- ignorar egress;
+- elevar `sourceTrust`;
+- marcar provider como conectado sem mecanismo;
+- publicar outcome;
+- alterar event-log;
+- executar mutacao autoritativa sem confirmacao humana.
+
+### 3.2.6 Fases de implementacao
+
+| Fase | Entrega                                                         | Dependencias                   | Bloqueia validacao das telas? |
+| ---- | --------------------------------------------------------------- | ------------------------------ | ----------------------------- |
+| C0   | launcher + painel lateral + mensagens estaticas por rota        | frontend shell                 | nao                           |
+| C1   | `CwpPageContext` por rota + resumo do contexto que Cup pode ver | rotas existentes               | nao                           |
+| C2   | policy explainer deterministico usando `POLICY-HANDBOOK.md`     | policy handbook                | nao                           |
+| C3   | specialist router deterministico por superficie                 | C1                             | nao                           |
+| C4   | provider assistivo local/cloud por policy                       | assistant provider + egress    | sim, para respostas com IA    |
+| C5   | draft action/dry-run                                            | command runtime + baseRevision | sim, para mutacoes            |
+| C6   | audit de coautoria: sugestao aceita/rejeitada/sobrescrita       | event/audit model              | sim, para uso governado pleno |
+
+**Decisao operacional:** C0-C3 podem comecar antes da validacao tela-a-tela,
+porque ajudam a identificar onde a UX ainda confunde. C4-C6 ficam para depois
+do pipeline de provider/policy/audit.
+
 ## 4. Perfis de usuario do app
 
 | Perfil de app     | O que precisa fazer                                                        | Observacao de seguranca                                                       |
@@ -149,27 +307,28 @@ Regras de produto:
 
 ## 5. Mapa de telas
 
-| Area          | Tela/rota desejada       | Estado atual                           | Papel principal                     |
-| ------------- | ------------------------ | -------------------------------------- | ----------------------------------- |
-| Entrada       | `/signup`                | `UI real` para identidade local minima | Criar usuario local                 |
-| Entrada       | `/organizations`         | `UI real/parcial`                      | Criar, escolher e anexar demo       |
-| Onboarding    | `/onboarding`            | `UI parcial`                           | Configurar workspace                |
-| Home          | `/`                      | `UI parcial`                           | Proximo passo e pendencias          |
-| Configuracoes | `/settings`              | `UI parcial`                           | Ajustar organizacao                 |
-| Mapa          | `/map`                   | `UI real/read-only` na demo            | Caminho objetivo → resultado        |
-| Console       | `/console`               | `Console tecnico`                      | Operacao avancada                   |
-| Planejamento  | `/planning`              | `Futuro`                               | Ciclo, objetivos, targets           |
-| Intake        | `/intake`                | `Futuro`, comando existe no console    | Registrar proposta/iniciativa       |
-| Triagem       | `/triage`                | `Futuro`, comando existe no console    | Perguntas, matcher, contratos       |
-| Gates         | `/gates`                 | `Futuro`, comando existe no console    | Aprovar/descartar/promover          |
-| Execucao      | `/work`                  | `UI real/read-only` na demo            | Lista operacional de trabalho       |
-| Fontes        | `/sources`               | `UI real/parcial`                      | Repos/pastas/contextos/capabilities |
-| Contratos     | `/contracts`             | `Futuro`, API/grafo existem            | Coordenar contratos cross-repo      |
-| Resultados    | `/results`               | `UI real/read-only` na demo            | Outcomes, actual, dashboards        |
-| Operacao      | `/operations`            | `Demo/read-only` no Console            | Incidentes, standalone, SLO         |
-| Auditoria     | `/audit`                 | `Console tecnico`                      | Event-log, decisoes, policy         |
-| Integracoes   | `/integrations`          | `UI parcial` em settings               | Conectar/testar adapters            |
-| Assistente    | `/assistant` ou settings | `UI parcial`                           | Ollama/cloud/modelos/policy         |
+| Area          | Tela/rota desejada       | Estado atual                                     | Papel principal                                 |
+| ------------- | ------------------------ | ------------------------------------------------ | ----------------------------------------------- |
+| Entrada       | `/signup`                | `UI real` para identidade local minima           | Criar usuario local                             |
+| Entrada       | `/organizations`         | `UI real/parcial`                                | Criar, escolher e anexar demo                   |
+| Onboarding    | `/onboarding`            | `UI parcial`                                     | Configurar workspace                            |
+| Home          | `/`                      | `UI parcial`                                     | Proximo passo e pendencias                      |
+| Configuracoes | `/settings`              | `UI parcial`                                     | Ajustar organizacao                             |
+| Mapa          | `/map`                   | `UI real/read-only` na demo                      | Caminho objetivo → resultado                    |
+| Console       | `/console`               | `Console tecnico`                                | Operacao avancada                               |
+| Planejamento  | `/planning`              | `Futuro`                                         | Ciclo, objetivos, targets                       |
+| Intake        | `/intake`                | `Futuro`, comando existe no console              | Registrar proposta/iniciativa                   |
+| Triagem       | `/triage`                | `Futuro`, comando existe no console              | Perguntas, matcher, contratos                   |
+| Gates         | `/gates`                 | `Futuro`, comando existe no console              | Aprovar/descartar/promover                      |
+| Execucao      | `/work`                  | `UI real/read-only` na demo                      | Lista operacional de trabalho                   |
+| Fontes        | `/sources`               | `UI real/parcial`                                | Repos/pastas/contextos/capabilities             |
+| Contratos     | `/contracts`             | `Futuro`, API/grafo existem                      | Coordenar contratos cross-repo                  |
+| Resultados    | `/results`               | `UI real/read-only` na demo                      | Outcomes, actual, dashboards                    |
+| Operacao      | `/operations`            | `Demo/read-only` no Console                      | Incidentes, standalone, SLO                     |
+| Auditoria     | `/audit`                 | `Console tecnico`                                | Event-log, decisoes, policy                     |
+| Integracoes   | `/integrations`          | `Futuro` como rota dedicada; parcial em settings | Descobrir, comparar, conectar e testar adapters |
+| Assistente    | `/assistant` ou settings | `UI parcial`                                     | Ollama/cloud/modelos/policy                     |
+| Cup/CWP       | overlay transversal      | `Futuro`                                         | Ajuda contextual por tela                       |
 
 ### 5.1 Mapa de governanca (`/map`)
 
@@ -727,9 +886,24 @@ Esta etapa responde: **como este workspace sera executado, persistido e projetad
 
 ### 7.9 Etapa: Integracoes
 
-**Objetivo:** mostrar integracoes como aceleradores opcionais, com status claro: disponivel, configuravel, catalogada, futura.
+**Objetivo:** apresentar integracoes como aceleradores opcionais, sem fazer a
+pessoa acreditar que o framework depende delas ou que uma ferramenta externa
+vira SSOT/authority automaticamente.
 
-**Decisao vigente:** seguir [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-26 e [`../integration-catalog.yml`](../integration-catalog.yml). A primeira integracao cloud real alem de auth e GitHub como work-source/repo provider. Login GitHub e conexao de repos sao fluxos separados.
+**Decisao vigente:** seguir [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-26 e
+QRD-33, alem de [`../integration-catalog.yml`](../integration-catalog.yml). A
+primeira integracao cloud real alem de auth e GitHub como work-source/repo
+provider. Login GitHub e conexao de repos sao fluxos separados.
+
+**Superficies de integracao:**
+
+| Superficie                     | Papel                                                                                  |
+| ------------------------------ | -------------------------------------------------------------------------------------- |
+| Onboarding                     | sugerir poucas integracoes iniciais, sem obrigar decisao tecnica                       |
+| `/integrations`                | hub dedicado para descobrir, comparar, conectar, testar, desativar e auditar providers |
+| Settings                       | resumo e manutencao das integracoes ja relevantes ao workspace                         |
+| Sugestoes contextuais por tela | mostrar a integracao certa no momento em que ela melhora o fluxo                       |
+| Cup/CWP                        | explicar valor, risco, permissao, egress e alternativa sem integracao                  |
 
 **Categorias iniciais:**
 
@@ -746,22 +920,77 @@ Esta etapa responde: **como este workspace sera executado, persistido e projetad
 - deploy/release evidence;
 - docs/knowledge.
 
-**Usuario ve:**
+**Usuario ve no onboarding:**
+
+- "Voce pode comecar sem integracoes externas";
+- 2-4 recomendacoes maximas de acordo com o caminho escolhido;
+- o que ficara manual/rebaixado se a pessoa pular;
+- link para `/integrations` como "ver todas as opcoes".
+
+**Usuario ve em `/integrations`:**
 
 - o que o framework ja entrega sem a integracao;
 - o que a integracao melhora;
 - se escreve estado autoritativo ou apenas evidencia/projecao;
-- riscos;
-- botao `Configurar`, `Testar`, `Ver em breve` ou `Nao usar`.
+- dados acessados;
+- permissoes exigidas;
+- quem pode solicitar;
+- quem aprova/ativa;
+- riscos e limitacoes;
+- como falha;
+- como testar conexao;
+- como desativar;
+- botao `Configurar`, `Testar`, `Solicitar aprovacao`, `Ver em breve`,
+  `Desativar` ou `Nao usar`.
+
+**Contrato de card de integracao:**
+
+| Campo                         | Obrigatorio | Exemplo de copy                                                               |
+| ----------------------------- | ----------- | ----------------------------------------------------------------------------- |
+| O que o framework ja entrega  | sim         | "Sem GitHub, voce pode cadastrar pasta local; a confianca fica limitada."     |
+| O que esta integracao melhora | sim         | "Le repos, branches, CODEOWNERS, PRs/checks e source revisions."              |
+| Dados acessados               | sim         | "Repos selecionados, metadata de PR/check e arquivos permitidos."             |
+| Permissoes exigidas           | sim         | "OAuth/App com leitura de repos selecionados."                                |
+| Quem pode solicitar           | sim         | "`workspace-admin`, `source-owner` ou `technical-owner`."                     |
+| Quem aprova/ativa             | sim         | "`source-owner`; `security-owner` quando houver cloud/controlled."            |
+| Riscos/limitacoes             | sim         | "Login GitHub nao concede authority governada nem conecta repos sozinho."     |
+| Como falha                    | sim         | "Sem permissao/revision/API, fica `limited` ou `blocked`, nunca `connected`." |
+| Como testar                   | sim         | "Health/probe + leitura de repos permitidos + sourceRevision."                |
+| Como desativar                | sim         | "Revogar provider e manter historico/auditoria da conexao anterior."          |
+| Escreve estado autoritativo?  | sim         | "Nao, exceto adapter-contract explicito com sponsor/security."                |
 
 **Status que a UI deve usar:**
 
-| Status       | Significado                                                        |
-| ------------ | ------------------------------------------------------------------ |
-| `disponivel` | mecanismo executavel existe no backend/local adapter               |
-| `release-1`  | compromisso de primeira release; ainda pode estar em implementacao |
-| `em-breve`   | backlog priorizado no catalogo, sem mecanismo ativo                |
-| `adiado`     | classe conhecida, mas risk-gated ou fora do caminho padrao         |
+| Status         | Significado                                                                   |
+| -------------- | ----------------------------------------------------------------------------- |
+| `disponivel`   | mecanismo executavel existe no backend/local adapter                          |
+| `configuravel` | pode ser configurada, mas ainda precisa de health/probe/permissao para ativar |
+| `limited`      | conectada, mas sem capability suficiente para uma funcao                      |
+| `release-1`    | compromisso de primeira release; ainda pode estar em implementacao            |
+| `em-breve`     | backlog priorizado no catalogo, sem mecanismo ativo                           |
+| `adiado`       | classe conhecida, mas risk-gated ou fora do caminho padrao                    |
+| `bloqueado`    | policy/egress/authority impede ativacao naquele workspace                     |
+| `desativado`   | ja foi configurada, mas esta desligada ou revogada                            |
+
+**Matriz de autoridade resumida:**
+
+| Tipo de integracao                         | Quem pode solicitar                                  | Quem aprova/ativa                                                      |
+| ------------------------------------------ | ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| Interesse/backlog futuro                   | qualquer `member`                                    | nao ativa mecanismo                                                    |
+| Local sem egress e baixo risco             | `workspace-admin`, `technical-owner`, `source-owner` | `workspace-admin` ou self-governed no solo                             |
+| Fonte de trabalho/repo                     | `workspace-admin`, `source-owner`, `technical-owner` | `source-owner`/`technical-owner`; `security-owner` se controlled       |
+| Assistente local loopback                  | `workspace-admin`                                    | `workspace-admin`; `security-owner` se policy exigir                   |
+| Assistente remoto/cloud                    | `workspace-admin`                                    | `security-owner` obrigatorio; sponsor se dado sensivel/controlled      |
+| Identity provider / SSO                    | `workspace-admin`, `sponsor`                         | `sponsor` + `security-owner`                                           |
+| Backlog importer                           | `workspace-admin`, `product-owner`, `sponsor`        | `sponsor` ou `workspace-admin` + contrato de sync                      |
+| Observabilidade/analytics/BI               | `technical-owner`, `metric-owner`, `attester`        | `metric-owner` + `security-owner` se cloud                             |
+| CI/code quality/security                   | `technical-owner`, `source-owner`                    | `technical-owner`; `security-owner` se codigo privado sair do ambiente |
+| Deploy/release/incident                    | `technical-owner`, `operations-owner`                | `operations-owner` + `security-owner` se cloud                         |
+| Presentation adapter Pro/BYOL              | `workspace-admin`, `technical-owner`                 | `workspace-admin`; `cost-owner` se houver custo                        |
+| Integracao que escreve estado autoritativo | `sponsor` ou `workspace-admin`                       | `sponsor` + `security-owner` + adapter-contract explicito              |
+
+No perfil `solo`, solicitacao e aprovacao podem colapsar, mas o app deve
+mostrar `self-governed`/`auto-declarado` quando isso afetar independencia.
 
 **Alerta de backlog visivel:**
 
@@ -782,17 +1011,23 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 - `integration.test`;
 - `integration.disable`;
 - status por workspace;
+- authority/egress decision por integracao;
+- capability probe quando aplicavel;
 - evidence provider feed.
 
 **Estado atual:**
 
 - catalogo versionado existe.
 - adapters executaveis existem para alguns itens.
-- UI de settings mostra catalogo, mas nao opera configuracao/teste real para todos.
+- APIs locais existem para backlog e status basico.
+- UI de settings mostra catalogo, mas nao existe rota `/integrations` dedicada.
+- sugestoes contextuais por tela ainda nao existem como produto.
 
 **Decisao pendente:**
 
-- nenhuma nesta etapa; a primeira cloud integration e GitHub work-source, e o restante segue o catalogo priorizado.
+- contrato exato de permissoes GitHub App/OAuth para work-source.
+- design da rota `/integrations`.
+- quais integracoes aparecem como recomendadas no onboarding guiado.
 
 **Recomendacao de corte inicial:**
 
@@ -1567,6 +1802,67 @@ A UI nao deve esconder integracoes futuras em uma pagina tecnica separada. Cada 
 | Intake e backlog          | Jira, Linear, Azure DevOps, GitHub Issues                                                                       | importador com contrato de SSOT e direcao de sync explicita                          |
 | Grafo de governanca       | Neo4j, Cypher export, Graph APIs                                                                                | read-model derivado, impacto e caminhos; nunca segunda fonte de verdade              |
 
+### 22.3.1 Hub dedicado `/integrations`
+
+O hub `/integrations` e a tela central para entender e operar providers. Ele
+nao substitui as sugestoes contextuais: ele consolida status, permissao, risco,
+health, owner e historico.
+
+**Deve permitir:**
+
+- filtrar por status (`disponivel`, `configuravel`, `limited`, `release-1`,
+  `em-breve`, `adiado`, `bloqueado`, `desativado`);
+- filtrar por risco (`local`, `cloud`, `egress`, `requer security-owner`,
+  `escreve estado`, `somente evidencia`);
+- ver cards com o contrato definido na secao 7.9;
+- abrir detalhe de permissao antes de conectar;
+- testar conexao/health/capability quando houver mecanismo;
+- solicitar aprovacao quando a pessoa nao tem authority;
+- desativar/revogar provider sem apagar historico;
+- explicar o que continua funcionando sem a integracao.
+
+**Nao deve permitir:**
+
+- marcar integracao como `connected` sem mecanismo real;
+- transformar login em authority;
+- transformar provider externo em SSOT sem adapter-contract;
+- esconder egress/classificacao;
+- permitir que uma integracao escreva YAML/event-log por default.
+
+### 22.3.2 Sugestoes contextuais
+
+Cada tela deve mostrar no maximo poucas integracoes relevantes. O objetivo nao
+e vender marketplace; e explicar como elevar confianca, reduzir trabalho manual
+ou automatizar evidencia naquele ponto do fluxo.
+
+| Tela/feature  | Integracao sugerida                 | Quando sugerir                                          | O que deve explicar                                       |
+| ------------- | ----------------------------------- | ------------------------------------------------------- | --------------------------------------------------------- |
+| Signup        | GitHub OAuth, Google, OIDC          | quando a pessoa quer identidade externa                 | login nao concede membership/authority automaticamente    |
+| Organizations | GitHub OAuth, OIDC                  | workspace shared/controlled                             | identidade ajuda convites, nao conecta repos sozinho      |
+| Onboarding    | GitHub work-source, assistant local | quando pessoa escolhe configurar fontes/assistente      | pode pular; o app mostra o que fica manual                |
+| Sources       | GitHub/GitLab/Bitbucket/Drive       | fonte local ficou `snapshot-only` ou cloud-sync sem API | provider eleva `sourceTrust` quando traz revision id      |
+| Planning      | analytics/BI/dbt                    | target sem fonte de actual                              | sem integracao, medicao fica manual/rebaixada             |
+| Intake        | Jira/Linear/GitHub Issues           | usuario ja tem backlog externo                          | importacao exige direcao de sync e SSOT explicito         |
+| Triage        | service catalog/CODEOWNERS/matcher  | matcher tem baixa confianca ou unknowns                 | sugestao nao decide; humano confirma                      |
+| Work          | CI/test reports/code quality        | repo-work precisa de evidencia independente             | testes viram evidence, nao aprovacao automatica           |
+| Contracts     | OpenAPI/GraphQL/protobuf catalog    | contrato sem schema ou drift manual                     | schema ajuda drift, contrato governado continua no modelo |
+| Results       | observability/analytics/BI          | outcome sem fonte ou attester fraco                     | numero sem fonte nao sobe como prova forte                |
+| Operations    | observability/incident/deploy       | incident ou rollout sem evento verificavel              | telemetria evita texto bem-formado                        |
+| Audit         | identity/directory/SIEM/export      | auditoria precisa fonte externa ou retencao             | event-log file-first continua canônico                    |
+| Map           | Neo4j/service catalog               | mapa denso ou impacto de contrato dificil de navegar    | read-model melhora exploracao, nao vira SSOT              |
+| Cup/CWP       | assistant/knowledge/matcher         | usuario pede ajuda contextual                           | provider segue policy; se bloqueado, Cup explica fallback |
+
+### 22.3.3 Permissao e ativacao
+
+O app deve separar tres atos:
+
+1. **Solicitar** uma integracao.
+2. **Aprovar/ativar** a integracao com authority adequada.
+3. **Usar** a integracao em um fluxo especifico.
+
+Uma mesma pessoa pode fazer os tres no perfil solo, mas o app deve marcar o
+colapso. Em shared/controlled, os atos devem respeitar authority e policy.
+
 **Copy obrigatoria para backlog visivel:**
 
 ```text
@@ -1773,3 +2069,51 @@ O app so deve ser considerado funcional quando uma pessoa conseguir, sem console
 16. auditar a trilha de decisoes.
 
 Enquanto qualquer uma dessas etapas depender de payload manual no console tecnico, o app ainda e uma demo tecnica, nao produto operacional.
+
+## 27. Desenvolvimento guiado por contratos de teste
+
+A partir da QRD-34, a especificacao funcional do app nao e considerada pronta
+para implementacao sem um contrato de teste correspondente.
+
+### Artefatos
+
+| Artefato                           | Papel                                                   |
+| ---------------------------------- | ------------------------------------------------------- |
+| `TESTING-STRATEGY.md`              | regras do paradigma de testes                           |
+| `test/contracts/app-contracts.yml` | contratos humanos versionados                           |
+| `test/journeys/*.spec.ts`          | contratos executaveis ou backlog `fixme`                |
+| `APP-ITERATION-MAP.md`             | status humano de iteracao, validacao visual e automacao |
+
+### Regra por tela
+
+Cada tela/fluxo deste documento deve ter, antes da implementacao incremental:
+
+1. contrato em `app-contracts.yml`;
+2. spec Playwright correspondente;
+3. seed declarada;
+4. criterio observavel de sucesso;
+5. status inicial `fixme` ou `expected-fail` quando ainda nao implementado.
+
+### Tipos de teste esperados
+
+| Tipo                      | Exemplo                                               |
+| ------------------------- | ----------------------------------------------------- |
+| Jornada                   | signup -> workspace -> onboarding -> Home             |
+| Consistencia entre telas  | fonte criada em `/sources` aparece em Settings e Home |
+| Persistencia/reload       | onboarding parcial retoma no passo salvo              |
+| Security/authority        | provider cloud nao ativa sem egress/approval          |
+| Policy explanation        | Cup explica bloqueio citando policy versionada        |
+| Derived/read-model safety | dashboard/mapa nao executa acao sem revision atual    |
+
+### Relatorios
+
+Playwright gera:
+
+- terminal `list`;
+- HTML em `test/reports/html`;
+- JSON em `test/reports/results.json`;
+- JUnit em `test/reports/results.xml`.
+
+Allure fica como proxima camada de gestao quando houver volume suficiente de
+contratos ativos. ReportPortal fica reservado para necessidade self-hosted de
+analise historica mais pesada.

@@ -1915,6 +1915,388 @@ decide gate, nenhum altera resolver. ECharts MCP e ferramentas similares podem
 inspirar ou alimentar preview/export assistivo, mas nao substituem `/results`
 deterministico nem os view-models tipados.
 
+## QRD-32 - Cup/CWP como par contextual de trabalho
+
+**Q - Question**
+
+O app deve ter um assistente transversal em overlay, disponivel em quase todas
+as telas, que ajude a pessoa usuaria a operar o framework, interpretar o grafo,
+configurar fontes/integracoes e rascunhar proximos passos sem virar autoridade
+ou segundo SSOT?
+
+**R - Reasoning/Research**
+
+O framework tem um modelo rico: workspace, governance host, fontes de trabalho,
+grafo de negocio, grafo de execucao, contratos, outcomes, policies, authority,
+egress e read-models derivados. Esse poder tambem cria uma barreira de
+adocao. Uma pessoa nova nao deve precisar entender `GlobalRef`, event-log,
+sourceRevision, matcher, trust policy ou rollup para dar o proximo passo
+correto.
+
+Ao mesmo tempo, um "chat que sabe tudo e faz tudo" quebraria os principios do
+framework:
+
+- assistente e matcher sao canais assistivos, nao decisores (QRD-24);
+- policy e egress limitam contexto e provider;
+- autoridade efetiva e resolvida, nao presumida pelo login;
+- read-model derivado nao autoriza mutacao sem base/source revision atual;
+- qualquer acao que altera governanca precisa passar por comando, resolver,
+  confirmacao humana e trilha auditavel.
+
+A solucao correta e um **Contextual Work Partner**: uma camada de coautoria e
+explicacao que entende a tela atual, o foco do usuario, o workspace ativo e as
+permissoes efetivas, mas recebe apenas um contexto reduzido por policy.
+
+Naming:
+
+- **Cup** e o nome de produto. Faz a brincadeira de "chamar um colega para uma
+  xicara de cafe/cha e trabalhar junto".
+- **CWP** (`contextual-work-partner`) e o nome tecnico de dominio/codigo.
+
+Cup nao e um novo provider de IA. Cup e a experiencia transversal que pode usar
+providers ja modelados (`assistant-ollama`, `assistant-openai-compatible`,
+`cloud-approved`, lexical baseline, matcher provider) conforme policy,
+classificacao e funcao.
+
+Modelo mental:
+
+```text
+pagina atual
++ usuario
++ workspace
++ foco atual
++ permissao efetiva
++ classificacao dos dados
+        ↓
+CWP Context Resolver
+        ↓
+Policy + Egress Resolver
+        ↓
+Specialist Router
+        ↓
+Assistant Provider / Matcher / Lexical fallback
+        ↓
+Resposta, explicacao, sugestao ou rascunho
+        ↓
+Confirmacao humana se virar mutacao
+        ↓
+Audit log da interacao
+```
+
+Cup deve aparecer em tres formas:
+
+1. **Launcher global:** botao discreto persistente que abre painel lateral.
+2. **Hints inline:** pontos da tela que dizem "Cup pode ajudar com isto".
+3. **Modo de coautoria:** em formularios longos, Cup ajuda a rascunhar,
+   revisar lacunas e preparar dry-run.
+
+Cup muda de especialista por contexto:
+
+| Superficie      | Especialista CWP      | Ajuda principal                                                                  |
+| --------------- | --------------------- | -------------------------------------------------------------------------------- |
+| Signup          | `adoption-guide`      | conta local, demo, workspace, diferenca entre login e authority                  |
+| Organizations   | `workspace-guide`     | criar workspace, anexar demo, entender local/shared/controlled                   |
+| Onboarding      | `setup-guide`         | perfil, papeis, governance host, fontes, assistente, integracoes                 |
+| Sources         | `source-guide`        | pasta local, Git, cloud sync, GitHub, `.governance`, `.governance-host`, trust   |
+| Settings        | `configuration-guide` | coerencia com onboarding, policy, defaults, roles, providers                     |
+| Planning        | `planning-guide`      | objetivos, metricas, targets, allocation e contexto progressivo                  |
+| Intake/Register | `initiative-guide`    | problema, hipotese, aposta, riscos, lacunas e possiveis fontes                   |
+| Triage          | `triage-guide`        | perguntas, matcher, repos, contratos, unknowns e sugestoes comparaveis           |
+| Gates           | `decision-guide`      | autoridade, evidencia, risco, aceitar/rejeitar/promover sem falsificar confianca |
+| Work/Contracts  | `execution-guide`     | repo-work, dependencias, contracts, compatibility window, contention             |
+| Results         | `results-guide`       | outcomes, rollup, self-attested, stale, fonte, unidade e dashboard               |
+| Operations      | `operations-guide`    | incidentes, follow-ups, SLO, toil e trabalho operacional                         |
+| Audit/Policy    | `policy-guide`        | por que bloqueou/avisou/rebaixou e qual regra se aplica                          |
+| Integrations    | `integration-guide`   | provider, egress, capabilities, health, probe, backlog                           |
+| Map/Graph       | `graph-guide`         | explicar relacoes, caminhos, impacto, vizinhanca e leitura do mapa               |
+
+Contrato minimo de contexto:
+
+```ts
+type CwpPageContext = {
+  route: string;
+  workspaceId: string;
+  actorId: string;
+  surface:
+    | "signup"
+    | "organizations"
+    | "onboarding"
+    | "home"
+    | "settings"
+    | "sources"
+    | "planning"
+    | "intake"
+    | "triage"
+    | "gates"
+    | "work"
+    | "contracts"
+    | "results"
+    | "operations"
+    | "audit"
+    | "integrations"
+    | "map"
+    | "console";
+  focusedRefs: string[];
+  visibleDataClasses: Array<"public" | "internal" | "restricted">;
+  allowedActions: string[];
+  blockedActions: Array<{ action: string; policyRef: string; reason: string }>;
+  sourceRevision?: string;
+  baseRevision?: string;
+};
+```
+
+Cup pode:
+
+- explicar a tela e a politica aplicavel;
+- resumir contexto visivel;
+- sugerir proximo passo;
+- comparar opcoes;
+- rascunhar texto;
+- apontar lacunas;
+- preparar dry-run de comando;
+- chamar matcher ou provider de assistente quando policy permitir;
+- registrar sugestao aceita/rejeitada/sobrescrita quando influenciar decisao.
+
+Cup nao pode:
+
+- aprovar gate;
+- alterar authority;
+- reduzir classificacao;
+- ignorar egress;
+- promover trust;
+- marcar provider/fonte como conectado sem mecanismo;
+- salvar mutacao autoritativa sem confirmacao humana;
+- enviar contexto `restricted` a provider nao autorizado;
+- usar read-model stale para executar acao.
+
+**D - Decision**
+
+Adotar **Cup** como nome de produto e **CWP** como nome tecnico do overlay
+contextual.
+
+Cup entra como feature estrutural do app, nao como widget posterior. Ele deve
+ser implementado em fases, para validar valor de produto sem abrir superficie
+de seguranca cedo demais:
+
+| Fase | Nome                   | O que entrega                                                                  | Pode comecar antes da validacao tela-a-tela? |
+| ---- | ---------------------- | ------------------------------------------------------------------------------ | -------------------------------------------- |
+| C0   | Overlay shell          | launcher global, painel lateral, estado aberto/fechado, copy estatica por rota | SIM                                          |
+| C1   | Context resolver local | cada rota publica `CwpPageContext`; painel mostra contexto visivel permitido   | SIM                                          |
+| C2   | Policy explainer       | explica bloqueio/aviso/rebaixamento citando `POLICY-HANDBOOK.md`               | SIM                                          |
+| C3   | Specialist router      | muda modo por superficie (`source-guide`, `setup-guide`, etc.)                 | SIM, em modo deterministico                  |
+| C4   | Provider assistivo     | usa Ollama/OpenAI-compatible/cloud-approved via policy/egress                  | DEPOIS de C0-C3 e configuracao de provider   |
+| C5   | Draft actions          | prepara rascunho/dry-run de comando; humano confirma                           | DEPOIS de resolver/baseRevision/audit        |
+| C6   | Audit de coautoria     | registra sugestao aceita/rejeitada/sobrescrita e impacto na decisao            | JUNTO de C5                                  |
+
+As fases C0-C3 podem iniciar **antes** da validacao visual completa das telas,
+porque ajudam justamente a mapear onde a pessoa se perde. Elas devem nascer sem
+provider externo obrigatorio e sem capacidade de mutacao. C4-C6 dependem de
+policy, egress, provider health/capability probe, baseRevision/sourceRevision e
+audit log.
+
+Regras de implementacao:
+
+- `cwp` deve ser bounded context proprio, nao misturado a `assistant` nem a
+  `matcher`;
+- `assistant` e `matcher` sao providers/capabilities que Cup pode chamar;
+- Cup sempre usa contexto reduzido por `context-resolver` + `policy-resolver`;
+- Cup nunca le YAML/event-log direto do frontend;
+- Cup nunca substitui uma tela; ele ajuda a operar a tela;
+- toda rota de produto deve declarar oportunidades de Cup no
+  `APP-ITERATION-MAP.md` durante a validacao visual.
+
+## QRD-33 - Hub de integracoes e sugestoes contextuais por fluxo
+
+**Q - Question**
+
+Como as integracoes entram no app de forma compreensivel e segura? Deve existir
+uma rota dedicada de integracoes, sugestoes por pagina/feature, explicacao de
+vantagens/desvantagens e uma matriz de quem pode solicitar, aprovar ou ativar
+cada tipo de integracao?
+
+**R - Reasoning/Research**
+
+O framework ja tem tres pecas importantes:
+
+- catalogo versionado (`integration-catalog.yml` + `integration-catalog.md`);
+- APIs locais parciais (`/api/local/integration-backlog` e
+  `/api/local/integrations/[id]`);
+- adapters executaveis locais para algumas classes (`assistant-ollama`,
+  `git-local`, `ci-local`, `code-quality`, `observability`).
+
+Mas isso ainda nao forma uma experiencia de produto. Hoje uma pessoa precisa
+inferir demais: quais integracoes ajudam em qual tela, quais sao reais, quais
+sao futuras, quem pode ativar, que permissao sera pedida, que dado sai da
+maquina, qual e o risco e o que o framework ja faz sem aquela ferramenta.
+
+Dois erros precisam ser evitados:
+
+1. **Esconder tudo em Settings.** Isso transforma integracoes em configuracao
+   tecnica tardia e perde o momento em que a pessoa entende o valor.
+2. **Espalhar integracoes sem hub.** Isso cria cards soltos por telas, sem
+   governanca, sem status central e sem explicacao de permissao/risco.
+
+A solucao e dupla:
+
+- uma rota central `/integrations`, como inventario governado de providers,
+  status, permissoes, riscos, valor e owner;
+- sugestoes contextuais por pagina/feature, mostrando a integracao certa no
+  momento em que ela melhora o fluxo.
+
+Exemplo:
+
+- em `/sources`, GitHub/GitLab/Bitbucket/Drive aparecem como formas de elevar
+  `sourceTrust`;
+- em `/results`, observabilidade, analytics, BI e feature flags aparecem como
+  fontes de actual/outcome;
+- em `/work`, CI/test reports/code quality aparecem como evidencia de execucao;
+- em `/triage`, service catalog, CODEOWNERS, Backstage e matcher/assistant
+  aparecem como contexto para roteamento;
+- em `/intake`, Jira/Linear/Azure DevOps/GitHub Issues aparecem como importers
+  com contrato de SSOT/direcao de sync.
+
+A UX precisa ensinar a regra central:
+
+```text
+O framework funciona sem integracoes externas.
+Integracoes aumentam evidencia, contexto, automacao e confianca.
+Nenhuma integracao substitui o SSOT file-first nem concede authority sozinha.
+```
+
+**D - Decision**
+
+Criar uma rota dedicada **`/integrations`** e manter sugestoes contextuais por
+pagina.
+
+### Estrutura da rota `/integrations`
+
+`/integrations` deve ter:
+
+1. **Resumo de postura do workspace**
+   - workspace-mode (`local`, `shared`, `controlled`);
+   - perfil de governanca;
+   - quem pode aprovar egress/security;
+   - quais providers ja estao conectados, limitados ou bloqueados.
+
+2. **Filtros humanos**
+   - `Todos`;
+   - `Disponivel agora`;
+   - `Release 1`;
+   - `Em breve`;
+   - `Adiado`;
+   - `Requer aprovacao`;
+   - `Local / sem egress`;
+   - `Cloud / egress`;
+   - `Escreve estado?`;
+   - `Somente evidencia/projecao`.
+
+3. **Agrupamento por ponto de valor**
+   - Fontes de trabalho;
+   - Identidade e membros;
+   - Assistente e matcher;
+   - Catalogo tecnico;
+   - Qualidade e CI;
+   - Resultados e metricas;
+   - Backlog/intake;
+   - Release/deploy;
+   - Export/visualizacao;
+   - Bancos/read-models.
+
+4. **Cards com contrato fixo**
+
+Cada card de integracao deve mostrar:
+
+| Campo                          | Obrigatorio | Por que importa                                              |
+| ------------------------------ | ----------- | ------------------------------------------------------------ |
+| `O que o framework ja entrega` | sim         | evita vender integracao como requisito                       |
+| `O que melhora`                | sim         | explica valor concreto                                       |
+| `Dados acessados`              | sim         | mostra superficie de privacidade                             |
+| `Permissoes exigidas`          | sim         | prepara OAuth/App/token/arquivo                              |
+| `Quem pode solicitar`          | sim         | separa uso comum de admin                                    |
+| `Quem aprova/ativa`            | sim         | explicita authority/security                                 |
+| `Riscos/limitacoes`            | sim         | evita "connected" enganoso                                   |
+| `Como falha`                   | sim         | fail-closed/fail-visible                                     |
+| `Como testar`                  | sim         | health/probe/smoke                                           |
+| `Como desativar`               | sim         | reversibilidade operacional                                  |
+| `Status`                       | sim         | `disponivel`, `release-1`, `em-breve`, `adiado`, `bloqueado` |
+| `Escreve estado autoritativo?` | sim         | por default deve ser `nao`; excecao exige contrato explicito |
+
+### Status de integracao
+
+| Status         | Significado para a pessoa usuaria                                                  |
+| -------------- | ---------------------------------------------------------------------------------- |
+| `disponivel`   | existe mecanismo executavel e testavel no app/backend                              |
+| `configuravel` | pode ser configurada, mas ainda precisa de health/probe/permissao para ficar ativa |
+| `limited`      | conectada, mas sem capability suficiente para uma funcao                           |
+| `release-1`    | compromisso de primeira release; ainda pode estar em implementacao                 |
+| `em-breve`     | backlog priorizado; nao ha mecanismo ativo                                         |
+| `adiado`       | conhecido, mas fora do caminho padrao ou risk-gated                                |
+| `bloqueado`    | policy/egress/authority impede ativacao naquele workspace                          |
+| `desativado`   | foi configurada antes, mas esta desligada ou revogada                              |
+
+### Sugestoes contextuais
+
+As telas nao devem empurrar todas as integracoes. Devem sugerir poucas, no
+momento certo, com copy curta:
+
+| Tela/feature     | Sugestoes principais                                                          | Copy esperada                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `/signup`        | GitHub OAuth, Google, OIDC                                                    | "Login identifica voce; authority ainda depende do workspace."                                  |
+| `/organizations` | GitHub OAuth, OIDC                                                            | "Conectar identidade ajuda convites, mas nao conecta repos automaticamente."                    |
+| `/onboarding`    | GitHub work-source, assistant local, identity provider, Neo4j, Docker Compose | "Escolha agora ou deixe para depois; o app mostra o que fica manual."                           |
+| `/sources`       | GitHub/GitLab/Bitbucket/Gitea, Drive/SharePoint, CODEOWNERS, service catalog  | "Conectar provider eleva confianca de fonte; pasta local continua valida com trust menor."      |
+| `/settings`      | todas relevantes ao workspace                                                 | "Gerencie o que esta conectado, limitado, bloqueado ou em breve."                               |
+| `/planning`      | analytics, BI, dbt, warehouse, product analytics                              | "Sem fonte automatica, target e actual podem ser definidos, mas medicao fica manual/rebaixada." |
+| `/intake`        | Jira, Linear, Azure DevOps, GitHub Issues, knowledge base                     | "Importar backlog nao torna backlog externo o SSOT sem contrato de sync."                       |
+| `/triage`        | matcher providers, CODEOWNERS, Backstage/OpsLevel/Cortex, embeddings          | "Sugestoes ajudam; decisao humana continua auditavel."                                          |
+| `/work`          | CI, test reports, code coverage, code quality, code security                  | "CI/testes viram evidencia independente para repo-work."                                        |
+| `/contracts`     | OpenAPI, GraphQL, protobuf/AsyncAPI, service catalog                          | "Schemas ajudam a detectar drift; contrato governado continua no modelo."                       |
+| `/results`       | observability, analytics, BI, feature flags, experiment platform              | "Sem fonte verificavel, resultado pode existir como declaracao, mas nao sobe como prova forte." |
+| `/operations`    | observability, incident management, deploy/release evidence, feature flags    | "Incidente e rollout precisam de eventos verificaveis para evitar texto bem-formado."           |
+| `/audit`         | identity/directory, SIEM/export, storage/audit log                            | "Auditoria melhora com identidade e logs externos, mas event-log file-first permanece."         |
+| `/map`           | Neo4j read-model, service catalog, graph export                               | "Read-model de grafo melhora exploracao; nao vira SSOT."                                        |
+| Cup/CWP          | assistant providers, knowledge assistant, policy handbook, matcher            | "Cup usa provider permitido pela policy; se egress bloquear, explica e cai para modo local."    |
+
+### Matriz de autoridade
+
+| Tipo de integracao                         | Quem pode solicitar                                  | Quem aprova/ativa                                                      | Observacao                                                   |
+| ------------------------------------------ | ---------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Interesse/backlog futuro                   | qualquer `member`                                    | nao ativa mecanismo                                                    | vira interesse/backlog, nao conexao                          |
+| Local sem egress e baixo risco             | `workspace-admin`, `technical-owner`, `source-owner` | `workspace-admin` ou self-governed no solo                             | deve falhar visivel se health/probe falhar                   |
+| Fonte de trabalho/repo                     | `workspace-admin`, `source-owner`, `technical-owner` | `source-owner`/`technical-owner`; `security-owner` se controlled/cloud | nao concede authority automaticamente                        |
+| Assistente local loopback                  | `workspace-admin`                                    | `workspace-admin`; `security-owner` se policy exigir                   | prompt inocuo no teste inicial; sem contexto por default     |
+| Assistente remoto/cloud                    | `workspace-admin`                                    | `security-owner` obrigatorio; sponsor se dado sensivel/controlled      | exige egress, allowlist, redaction e classificacao maxima    |
+| Identity provider / SSO                    | `workspace-admin`, `sponsor`                         | `sponsor` + `security-owner`                                           | login nao e membership nem authority                         |
+| Backlog importer                           | `workspace-admin`, `product-owner`, `sponsor`        | `sponsor` ou `workspace-admin` + contrato de sync                      | direcao de sync e campo autoritativo sao obrigatorios        |
+| Observabilidade/analytics/BI               | `technical-owner`, `metric-owner`, `attester`        | `metric-owner` + `security-owner` se cloud                             | define fonte de actual/outcome; attestation continua exigida |
+| CI/code quality/security                   | `technical-owner`, `source-owner`                    | `technical-owner`; `security-owner` se codigo privado sai do ambiente  | evidencia alimenta repo-work; nao decide gate sozinho        |
+| Deploy/release/incident                    | `technical-owner`, `operations-owner`                | `operations-owner` + `security-owner` se cloud                         | eventos de rollout/incident precisam ser verificaveis        |
+| Presentation adapter Pro/BYOL              | `workspace-admin`, `technical-owner`                 | `workspace-admin`; `cost-owner` se houver custo                        | troca renderer, nao view-model/dominio                       |
+| Integracao que escreve estado autoritativo | `sponsor` ou `workspace-admin`                       | `sponsor` + `security-owner` + contrato explicito                      | excecao; precisa adapter-contract, audit e rollback          |
+
+No perfil `solo`, a mesma pessoa pode acumular solicitacao e aprovacao, mas o
+app deve marcar como `self-governed`/`auto-declarado` quando isso afetar
+independencia.
+
+### Regras de produto
+
+- `/integrations` e o lugar central para conectar, testar, desativar e entender
+  integracoes.
+- Settings pode resumir integracoes, mas nao deve ser o unico lugar.
+- Cada tela relevante deve ter sugestoes contextuais curtas e nao invasivas.
+- Integracao cloud nunca fica `connected` sem mecanismo real de auth/permissao.
+- Login GitHub/Google/OIDC nao conecta repos, Drive nem authority
+  automaticamente.
+- Provider conectado pode ficar `limited` se nao passar capability probe para a
+  funcao desejada.
+- Cup pode explicar integracoes e sugerir a proxima acao, mas nao ativa
+  provider nem aprova egress sozinho.
+- "Em breve" significa backlog priorizado, nao promessa de mecanismo ativo.
+- Toda integracao deve declarar se le, escreve, exporta, importa, projeta ou
+  apenas sugere.
+- O app deve mostrar "o que funciona sem esta integracao" antes de pedir
+  permissao.
+
 ## Proximas acoes derivadas
 
 1. Atualizar o onboarding para refletir QRD-08/09/21: workspace pode existir sem host, mas onboarding real nao conclui sem host ou sandbox explicito; os tres formatos de host entram no primeiro release com fit-check.
@@ -1930,12 +2312,13 @@ deterministico nem os view-models tipados.
 11. Implementar matcher como orquestrador de sugestoes multi-provider: baseline lexical deterministico obrigatorio, providers de IA configuraveis por funcao, default alteravel e auditoria de sugestao aceita/rejeitada/sobrescrita.
 12. Implementar planning como contexto opcional progressivo: minimo obrigatorio objective+metric+target, com thesis/opportunity-area/allocation disponiveis desde a release 1.
 13. Implementar GitHub como primeira cloud work-source/repo provider, separado de `github-oauth`, com sourceTrust e leitura de repos/PRs/checks/CODEOWNERS.
-14. Projetar o backlog de integracoes do `integration-catalog.yml` na UI, com status `disponivel`, `release 1`, `em breve` e `adiado`.
-15. Garantir que novas telas sigam QRD-12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27: app como superficie humana local-first, sem segundo SSOT, sem presumir SaaS pago, sem amarrar postura de workspace a vendor, sem expor banco/Docker como primeira pergunta do usuario comum, com Neo4j como read-model opcional suportado, Docker Compose como opcao oficial nao universal, Ollama externo por default, auth/membership/authority separados, providers externos GitHub/Google/OIDC sem authority automatica, governance host distribuido por fit-check, fontes sem Git com confianca explicita, politica explicavel, matcher/assistente multi-provider, planning progressivo com todos os campos disponiveis, backlog de integracoes visivel e stack visual definida.
-16. ~~Executar os spikes da stack visual antes de cravar dependencias finais~~ — FEITO em 2026-07-04 (rodadas 1 e 2): spikes executados em `frontend/app/spikes/visual-stack/` com read-model real + fixture sintetica e validacao da owner; estado vigente em QRD-29 (QRD-28 e historico da rodada 1); evidencia em `../_reviews/2026-07-04-visual-stack-spike.md`. Pendencias honestas: confirmar ECharts em `/results` real, confirmar TanStack Table+virtualizacao em lista real e decidir Sigma x ECharts no console com a owner. Cytoscape permanece banido.
-17. Criar `governance-demo/mock-api/` com Hono + lowdb.
-18. Criar seeds iniciais: workspace vazio, onboarding parcial, acme demo, workspace sem host, workspace com host local, workspace com host embutido, workspace local, workspace shared, workspace controlled, workspace controlled+neo4j, workspace docker-compose, workspace docker-compose+ollama-profile, workspace com groups/teams, workspace shared com convites pendentes, workspace shared+github, workspace shared+google, workspace controlled+oidc, workspace com cloud-synced-folder, workspace com provider-versioned-source, workspace compact com policy examples, workspace com multiplos assistant providers, workspace com planning progressivo completo e workspace com GitHub work-source conectado.
-19. Adicionar scripts:
+14. Projetar o backlog de integracoes do `integration-catalog.yml` na UI, com status `disponivel`, `configuravel`, `limited`, `release 1`, `em breve`, `adiado`, `bloqueado` e `desativado`.
+15. Criar `/integrations` como hub dedicado e adicionar sugestoes contextuais por tela/feature, conforme QRD-33.
+16. Garantir que novas telas sigam QRD-12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/32/33: app como superficie humana local-first, sem segundo SSOT, sem presumir SaaS pago, sem amarrar postura de workspace a vendor, sem expor banco/Docker como primeira pergunta do usuario comum, com Neo4j como read-model opcional suportado, Docker Compose como opcao oficial nao universal, Ollama externo por default, auth/membership/authority separados, providers externos GitHub/Google/OIDC sem authority automatica, governance host distribuido por fit-check, fontes sem Git com confianca explicita, politica explicavel, matcher/assistente multi-provider, planning progressivo com todos os campos disponiveis, backlog de integracoes visivel, stack visual definida, Cup/CWP como overlay contextual governado e integracoes com hub dedicado + sugestoes contextuais.
+17. ~~Executar os spikes da stack visual antes de cravar dependencias finais~~ — FEITO em 2026-07-04 (rodadas 1 e 2): spikes executados em `frontend/app/spikes/visual-stack/` com read-model real + fixture sintetica e validacao da owner; estado vigente em QRD-29 (QRD-28 e historico da rodada 1); evidencia em `../_reviews/2026-07-04-visual-stack-spike.md`. Pendencias honestas: confirmar ECharts em `/results` real, confirmar TanStack Table+virtualizacao em lista real e decidir Sigma x ECharts no console com a owner. Cytoscape permanece banido.
+18. Criar `governance-demo/mock-api/` com Hono + lowdb.
+19. Criar seeds iniciais: workspace vazio, onboarding parcial, acme demo, workspace sem host, workspace com host local, workspace com host embutido, workspace local, workspace shared, workspace controlled, workspace controlled+neo4j, workspace docker-compose, workspace docker-compose+ollama-profile, workspace com groups/teams, workspace shared com convites pendentes, workspace shared+github, workspace shared+google, workspace controlled+oidc, workspace com cloud-synced-folder, workspace com provider-versioned-source, workspace compact com policy examples, workspace com multiplos assistant providers, workspace com planning progressivo completo e workspace com GitHub work-source conectado.
+20. Adicionar scripts:
 
 - `dev:real`;
 - `dev:mock`;
@@ -1943,5 +2326,119 @@ deterministico nem os view-models tipados.
 - `mock-api:dev`;
 - `mock-api:reset`.
 
-20. Adicionar Playwright e primeira jornada e2e.
-21. Adicionar MSW apenas quando houver primeiros testes de componente/hook.
+21. Adicionar Playwright e primeira jornada e2e.
+22. Adicionar MSW apenas quando houver primeiros testes de componente/hook.
+23. Implementar Cup/CWP em fases C0-C3 antes da validacao tela-a-tela completa: overlay shell, context resolver local, policy explainer e specialist router deterministico. C4-C6 ficam atras de provider/policy/audit.
+
+---
+
+# QRD-34 - Desenvolvimento orientado por contratos de teste
+
+**Q - Question**
+
+Como mudar o paradigma da `governance-demo` para que cada tela, fluxo e feature
+seja guiado por testes robustos antes da implementacao, inclusive quando o app
+ainda nao entrega o comportamento desejado?
+
+**R - Reasoning/Research**
+
+O app esta em uma fase em que navegacao manual revela problemas reais de UX, mas
+nao escala como mecanismo de governanca. Se cada iteracao depender da owner
+abrir a tela e perceber divergencias, o produto continuara vulneravel a drift:
+
+- onboarding salva parcialmente, mas pode reabrir no passo errado;
+- Settings e onboarding podem mostrar estados diferentes;
+- Sources pode cadastrar algo que Home nao reconhece;
+- Integrations pode mostrar provider como conectado sem permissao/probe;
+- Cup pode explicar uma coisa que a policy nao sustenta.
+
+O framework defende que trabalho governado precisa de evidencia independente. A
+propria aplicacao precisa seguir a mesma regra: funcionalidade nao deve ser
+considerada pronta porque "parece funcionar" na tela; ela precisa passar por
+contrato automatizado.
+
+A pratica adequada aqui e uma combinacao de:
+
+- **ATDD/BDD leve**: escrever comportamento esperado antes da implementacao;
+- **testing trophy**: investir bastante em testes de integracao e E2E de
+  comportamento, nao apenas unitarios;
+- **Playwright como motor de jornadas**: bom para fluxos entre telas, trace, UI
+  mode, reports e annotations;
+- **mock-api seedada**: permite testar estados que ainda seriam caros de montar
+  manualmente;
+- **contrato YAML versionado**: torna o backlog de testes legivel para humanos,
+  nao apenas para o runner;
+- **fixme/expected-fail governado**: permite registrar o produto-alvo antes de
+  implementar, sem esconder pendencias.
+
+Um teste pulado sem contrato e divida invisivel. Um teste `fixme` com ID,
+motivo, seed e criterio observavel e backlog executavel.
+
+**D - Decision**
+
+Adotar desenvolvimento orientado por contratos de teste para a `governance-demo`.
+
+### Artefatos canonicos
+
+1. [`TESTING-STRATEGY.md`](TESTING-STRATEGY.md)
+   - estrategia, camadas, ferramentas, estados de contrato, seeds, seletores e
+     relatorios;
+2. [`test/contracts/app-contracts.yml`](test/contracts/app-contracts.yml)
+   - inventario governado dos comportamentos esperados;
+3. specs Playwright em `test/journeys/*.spec.ts`
+   - prova executavel ou backlog `fixme`;
+4. [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md)
+   - status humano de iteracao, validacao visual e teste por tela.
+
+### Stack inicial
+
+| Necessidade                      | Escolha inicial                               |
+| -------------------------------- | --------------------------------------------- |
+| E2E e fluxos entre telas         | Playwright                                    |
+| Relatorio inicial                | Playwright HTML + JSON + JUnit                |
+| Backlog executavel               | `test.fixme` / `test.fail`                    |
+| Estado controlado de app         | `mock-api` seedada                            |
+| Dominio/use-cases                | Vitest futuro                                 |
+| Componentes/hooks                | Testing Library + MSW futuro                  |
+| Gestao visual/historico avancado | Allure futuro                                 |
+| Dashboard pesado/self-hosted     | ReportPortal futuro, somente se houver escala |
+
+### Regras
+
+- Toda nova tela/fluxo deve nascer com contrato em YAML e teste Playwright.
+- Se a implementacao ainda nao existe, o teste nasce `fixme`.
+- Se a tela existe mas esta errada, preferir `expected-fail` para provar o gap.
+- `skip` so pode representar configuracao nao aplicavel, nunca bug conhecido.
+- Fluxos entre telas sao obrigatorios para dados que aparecem em mais de um
+  lugar.
+- Textos e design podem mudar; testes devem mirar comportamento, persistencia e
+  efeitos observaveis.
+- Se uma mudanca funcional quebra contrato, primeiro atualizar a decisao/contrato
+  e so depois a implementacao.
+
+### Primeira leva
+
+A primeira leva fica registrada em
+[`test/contracts/app-contracts.yml`](test/contracts/app-contracts.yml) e
+[`test/journeys/first-wave-contracts.spec.ts`](test/journeys/first-wave-contracts.spec.ts):
+
+- conta local, workspace e logout;
+- onboarding parcial e retomada;
+- perfil/responsabilidades;
+- pessoas/times/papeis com aceite;
+- governance host;
+- sources;
+- integrations hub e sugestoes contextuais;
+- Cup/CWP shell/contexto;
+- provider cloud bloqueado sem egress/authority.
+
+### Criterio de pronto
+
+Uma tela/fluxo deixa de ser "demo" quando:
+
+1. tem contrato YAML;
+2. tem teste executavel ativo;
+3. passa em Playwright contra seed relevante;
+4. prova reload/persistencia quando aplicavel;
+5. prova consistencia com outras telas quando o dado cruza superficies;
+6. atualiza `APP-ITERATION-MAP.md`.

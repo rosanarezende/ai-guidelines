@@ -3,6 +3,11 @@
 > Autoridade: `../model.yml` é o SSOT do modelo. Este arquivo é roteiro operacional da sim v3.
 > Regra: toda fase precisa de mecanismo verificável, fixture adversarial e projeção no grafo/dashboard.
 
+> Regra adicional do app (QRD-34): toda tela/fluxo novo ou refatorado deve nascer
+> com contrato em `test/contracts/app-contracts.yml` e spec Playwright. Se ainda
+> nao estiver implementado, o teste nasce `fixme` ou `expected-fail`; nao se
+> implementa primeiro para testar depois.
+
 ## Estado atual
 
 A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem seus repos:
@@ -99,11 +104,13 @@ Fechado:
 8. **Stack visual do app — spikes FEITOS e primeiras telas reais iniciadas.** Bancada em `frontend/app/spikes/visual-stack/` com view-models independentes de renderer, read-model real + fixtures sinteticas e acao governada simulada por dry-run. Estado por superficie: React Flow+ELK = em validacao real na rota `/map` sobre `/api/map/governance`; ECharts graph = aba relacional OPCIONAL futura do mapa; Apache ECharts = em validacao real na rota `/results` sobre `/api/results/dashboard`; TanStack Table+MUI+`@tanstack/react-virtual` = em validacao real na rota `/work` sobre `/api/work/items`; Reagraph = rejeitado/removido; Sigma.js+Graphology x ECharts graph no console tecnico = PENDENTE DE DECISAO. Proximo passo: transformar linhas/nos em detalhe/acoes por tipo e levar a owner de volta a bancada do grafo para bater o martelo Sigma x ECharts. Cytoscape segue banido. Evidencia: `../_reviews/2026-07-04-visual-stack-spike.md`.
 9. **Fontes de trabalho — tela real iniciada.** `/sources` cadastra e escaneia fontes com APIs reais do shell local, explica caminho local vs servidor, mostra `sourceTrust`, hash, Git head/dirty e limitações. Pasta local/sincronizada/modulo tambem pode ser escolhida no Explorer como snapshot do navegador (`snapshot-only`). GitHub sai do campo de caminho e vai para integrações. Próximo: conectar essa fonte ao fluxo de publish de `context.json`/capability review e implementar GitHub como work-source cloud real.
 10. **Iteracao visual da owner:** percorrer no app Next/MUI v2 a cadeia `signup -> workspace -> onboarding -> settings -> sources -> home` antes de voltar ao mapa/resultado/console. O acompanhamento vivo fica em [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md); o walkthrough antigo foi arquivado.
-11. **Config persistence:** transformar a aba `Configuracoes` em comando governado quando a UX estiver validada: `profile-declaration`, authority/cost roles e assistant runtime policy precisam de resolver, nao de formulario solto.
-12. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
-13. **Portabilidade do legado v2 arquivado → v3:** completar matcher executável e authoring completo aproveitando `_archive/org-simulation-v2` como referência histórica, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
-14. **Adapters externos — spikes locais FEITOS:** `assistant-runtime` (Ollama health + advisory), `git-provider` (git-local), `ci-status` (ci-local), `code-quality` e `observability` têm adapter executável com egress fail-closed e evidência verificável. Próximo: ligar essa evidência ao resolver de outcome/repo-work (evidence provider alimentando o dashboard, não SSOT paralelo) e o primeiro adapter genuinamente cloud atrás de allowlist.
-15. **Revisão adversarial pós-iteração visual:** pedir ao Claude Code/Fable 5 uma nova revisão apenas depois de a owner percorrer o mapa visual e termos marcado o que foi iterado/validado.
+11. **Cup/CWP — iniciar C0-C3 em paralelo com a iteracao visual.** QRD-32 decidiu Cup como nome de produto e CWP como nome tecnico. C0-C3 podem comecar antes de validar todas as telas: overlay shell, contexto por pagina, policy explainer deterministico e specialist router. C4-C6 (provider assistivo, draft action e audit de coautoria) ficam atras de provider/policy/egress/baseRevision/audit.
+12. **Config persistence:** transformar a aba `Configuracoes` em comando governado quando a UX estiver validada: `profile-declaration`, authority/cost roles e assistant runtime policy precisam de resolver, nao de formulario solto.
+13. **Resolver de decisão humana:** transformar alertas remanescentes em decisões append-only quando a owner escolher colapso, exceção ou correção estrutural.
+14. **Portabilidade do legado v2 arquivado → v3:** completar matcher executável e authoring completo aproveitando `_archive/org-simulation-v2` como referência histórica, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
+15. **Integrações — hub dedicado e sugestões contextuais:** QRD-33 decidiu que Settings não basta. Criar `/integrations` como inventário governado de providers, status, permissões, riscos, health/probe, owner e alternativa manual; cada tela também deve sugerir poucas integrações relevantes no momento em que elas elevam confiança ou reduzem trabalho manual. GitHub work-source continua primeira integração cloud real.
+16. **Adapters externos — spikes locais FEITOS:** `assistant-runtime` (Ollama health + advisory), `git-provider` (git-local), `ci-status` (ci-local), `code-quality` e `observability` têm adapter executável com egress fail-closed e evidência verificável. Próximo: ligar essa evidência ao resolver de outcome/repo-work (evidence provider alimentando o dashboard, não SSOT paralelo) e o primeiro adapter genuinamente cloud atrás de allowlist.
+17. **Revisão adversarial pós-iteração visual:** pedir ao Claude Code/Fable 5 uma nova revisão apenas depois de a owner percorrer o mapa visual e termos marcado o que foi iterado/validado.
 
 ## Comandos de aceite
 

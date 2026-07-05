@@ -14,6 +14,11 @@ Este arquivo existe para separar tres coisas que estavam se misturando:
 
 Checks automatizados e typecheck nao mudam o status deste mapa por si so.
 
+A partir da QRD-34, cada linha que entrar em implementacao deve apontar para um
+contrato em [`test/contracts/app-contracts.yml`](test/contracts/app-contracts.yml)
+e para um spec Playwright. O contrato pode nascer `fixme`, mas nao deve nascer
+sem ID, seed e criterio observavel.
+
 ## 1. Estados permitidos
 
 ### Iteracao
@@ -57,41 +62,73 @@ Para marcar uma linha como `validado-local`, registrar na coluna de notas:
 
 ## 3. Mapa de telas e fluxos
 
-| Ordem | Tela/fluxo                         | Rota principal               | Objetivo da iteracao                                                                              | Backend esperado                              | Iteracao      | Validacao visual      | Persistencia/consistencia | Notas |
-| ----- | ---------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------- | --------------------- | ------------------------- | ----- |
-| 01    | Criacao de conta local             | `/signup`                    | Entrar sem confundir conta local com auth corporativa.                                            | local principal + sessao + logout             | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 02    | Selecionar/criar workspace         | `/organizations`             | Criar workspace novo, selecionar workspace existente e anexar demo sem vazar acme.                | create/select/list workspace                  | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 03    | Logout/troca de usuario            | shell/app header             | Encerrar sessao local sem apagar workspaces/event-log.                                            | `/api/local/logout`                           | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 04    | Onboarding - entrada               | `/onboarding`                | Explicar o que sera configurado e retomar passo parcial sem voltar ao inicio.                     | onboarding status + step                      | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 05    | Onboarding - perfil da organizacao | `/onboarding`                | Guiar escolha de perfil por perguntas, nao dropdown cru.                                          | profile save + sensitive accumulation policy  | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 06    | Onboarding - responsabilidades     | `/onboarding`                | Mostrar perguntas de responsabilidades apenas quando fizer sentido pelo perfil.                   | role/authority summary                        | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 07    | Onboarding - pessoas e papeis      | `/onboarding`                | Trabalhar por pessoas/times/grupos recebendo papeis, com aceite quando outro sujeito e atribuido. | members + roles + invites                     | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 08    | Onboarding - governance host       | `/onboarding` ou `/settings` | Explicar onde a governanca vive e criar/vincular host sem confundir com fonte de trabalho.        | governance-host fit-check/create/link/sandbox | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 09    | Onboarding - fontes de trabalho    | `/onboarding` + `/sources`   | Guiar projeto local vs nuvem; pasta vazia/em andamento; Git/sem Git; relacao com `.governance`.   | work-sources add/scan/browser-scan            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 10    | Onboarding - assistente/modelo     | `/onboarding`                | Configurar ou dispensar assistente; explicar local/cloud/egress sem jargao.                       | assistant config/test/dismiss                 | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 11    | Onboarding - integracoes           | `/onboarding`                | Mostrar integracoes como opcionais, com disponivel/release-1/em-breve.                            | integration backlog/list/test parcial         | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 12    | Onboarding - revisao final         | `/onboarding`                | Mostrar o que ja funciona, o que esta pendente e o que sera rebaixado.                            | onboarding complete + pending list            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 13    | Home - workspace novo              | `/`                          | Mostrar proximo passo real para workspace sem demo.                                               | home summary/config status                    | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 14    | Home - demo acme                   | `/`                          | Mostrar pendencias, atalhos e resultados derivados sem parecer console tecnico.                   | snapshot demo + resolver                      | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 15    | Configuracoes - organizacao/perfil | `/settings`                  | Editar/ver perfil, modo e stack sem divergir do onboarding.                                       | workspace/profile/mode/stack APIs             | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 16    | Configuracoes - pessoas/papeis     | `/settings`                  | Gerenciar pessoas, times, grupos, convites, papeis e autoridade herdada.                          | members/roles APIs                            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 17    | Configuracoes - governance host    | `/settings`                  | Criar/vincular host e mostrar fit-check/risco por distribuicao.                                   | governance-host APIs                          | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 18    | Configuracoes - fontes             | `/settings` + `/sources`     | Mostrar as mesmas fontes e estados da tela dedicada.                                              | work-sources APIs                             | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 19    | Configuracoes - assistente         | `/settings`                  | Alterar provider/defaults depois do onboarding.                                                   | assistant APIs                                | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 20    | Configuracoes - integracoes        | `/settings`                  | Configurar/testar adapters quando houver mecanismo real.                                          | integration APIs/catalog                      | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 21    | Fontes de trabalho dedicada        | `/sources`                   | Cadastrar fonte local/cloud/manual de modo simples e instrutivo.                                  | work-sources add/scan/browser-scan            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 22    | Planejamento de ciclo              | `/planning`                  | Criar ciclo, objetivo, metrica e target; contexto opcional progressivo.                           | future commands                               | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
-| 23    | Registro de iniciativa             | `/intake`                    | Registrar uma aposta/necessidade sem breakdown tecnico inicial.                                   | proposal/register command parcial             | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
-| 24    | Triagem/matcher                    | `/triage`                    | Transformar duvidas em itens e sugerir repos/fontes sem decidir sozinho.                          | triage + matcher multi-provider futuro        | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
-| 25    | Gate/ativacao                      | `/gates`                     | Aprovar/descartar/promover com autoridade e evidencia visiveis.                                   | gate commands existentes/parciais             | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
-| 26    | Execucao/trabalho                  | `/work`                      | Ver repo-work, status, acks e pendencias operacionais.                                            | demo/read-only + commands parciais            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 27    | Contratos                          | `/contracts`                 | Ver contrato, consumidores, janela, revisoes e contention.                                        | graph/contracts parcial                       | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
-| 28    | Resultados/dashboards              | `/results`                   | Acompanhar targets/outcomes/actual/confidence com ECharts.                                        | demo/read-only + resolver                     | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 29    | Mapa de governanca                 | `/map`                       | Explicar caminho entre objetivo, intent, contrato, evidencia e risco.                             | read-model/view-model                         | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 30    | Operacao/incidentes                | `/operations`                | Ver incidentes, follow-ups, SLO e trabalho operacional.                                           | demo/read-only parcial                        | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
-| 31    | Auditoria                          | `/audit`                     | Ver quem decidiu o que, quando, com qual evidencia.                                               | event-log/query parcial                       | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
-| 32    | Console tecnico                    | `/console`                   | Dar acesso tecnico a grafo/comandos/event-log sem substituir a UX principal.                      | console/read-model/runtime                    | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
-| 33    | Spikes visuais                     | `/spikes/visual-stack`       | Avaliar libs de visualizacao sem virar tela de produto.                                           | fixture/read-model                            | `nao-iterado` | `nao-validado-visual` | `nao-aplicavel`           |       |
+| Ordem | Tela/fluxo                         | Rota principal                | Objetivo da iteracao                                                                              | Backend esperado                              | Iteracao      | Validacao visual      | Persistencia/consistencia | Notas |
+| ----- | ---------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------- | --------------------- | ------------------------- | ----- |
+| 01    | Criacao de conta local             | `/signup`                     | Entrar sem confundir conta local com auth corporativa.                                            | local principal + sessao + logout             | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 02    | Selecionar/criar workspace         | `/organizations`              | Criar workspace novo, selecionar workspace existente e anexar demo sem vazar acme.                | create/select/list workspace                  | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 03    | Logout/troca de usuario            | shell/app header              | Encerrar sessao local sem apagar workspaces/event-log.                                            | `/api/local/logout`                           | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 04    | Onboarding - entrada               | `/onboarding`                 | Explicar o que sera configurado e retomar passo parcial sem voltar ao inicio.                     | onboarding status + step                      | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 05    | Onboarding - perfil da organizacao | `/onboarding`                 | Guiar escolha de perfil por perguntas, nao dropdown cru.                                          | profile save + sensitive accumulation policy  | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 06    | Onboarding - responsabilidades     | `/onboarding`                 | Mostrar perguntas de responsabilidades apenas quando fizer sentido pelo perfil.                   | role/authority summary                        | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 07    | Onboarding - pessoas e papeis      | `/onboarding`                 | Trabalhar por pessoas/times/grupos recebendo papeis, com aceite quando outro sujeito e atribuido. | members + roles + invites                     | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 08    | Onboarding - governance host       | `/onboarding` ou `/settings`  | Explicar onde a governanca vive e criar/vincular host sem confundir com fonte de trabalho.        | governance-host fit-check/create/link/sandbox | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 09    | Onboarding - fontes de trabalho    | `/onboarding` + `/sources`    | Guiar projeto local vs nuvem; pasta vazia/em andamento; Git/sem Git; relacao com `.governance`.   | work-sources add/scan/browser-scan            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 10    | Onboarding - assistente/modelo     | `/onboarding`                 | Configurar ou dispensar assistente; explicar local/cloud/egress sem jargao.                       | assistant config/test/dismiss                 | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 11    | Onboarding - integracoes           | `/onboarding`                 | Mostrar integracoes como opcionais, com disponivel/release-1/em-breve.                            | integration backlog/list/test parcial         | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 12    | Onboarding - revisao final         | `/onboarding`                 | Mostrar o que ja funciona, o que esta pendente e o que sera rebaixado.                            | onboarding complete + pending list            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 13    | Home - workspace novo              | `/`                           | Mostrar proximo passo real para workspace sem demo.                                               | home summary/config status                    | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 14    | Home - demo acme                   | `/`                           | Mostrar pendencias, atalhos e resultados derivados sem parecer console tecnico.                   | snapshot demo + resolver                      | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 15    | Configuracoes - organizacao/perfil | `/settings`                   | Editar/ver perfil, modo e stack sem divergir do onboarding.                                       | workspace/profile/mode/stack APIs             | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 16    | Configuracoes - pessoas/papeis     | `/settings`                   | Gerenciar pessoas, times, grupos, convites, papeis e autoridade herdada.                          | members/roles APIs                            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 17    | Configuracoes - governance host    | `/settings`                   | Criar/vincular host e mostrar fit-check/risco por distribuicao.                                   | governance-host APIs                          | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 18    | Configuracoes - fontes             | `/settings` + `/sources`      | Mostrar as mesmas fontes e estados da tela dedicada.                                              | work-sources APIs                             | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 19    | Configuracoes - assistente         | `/settings`                   | Alterar provider/defaults depois do onboarding.                                                   | assistant APIs                                | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 20    | Configuracoes - integracoes        | `/settings` + `/integrations` | Resumir providers conectados/limitados e apontar para o hub dedicado.                             | integration APIs/catalog                      | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 21    | Fontes de trabalho dedicada        | `/sources`                    | Cadastrar fonte local/cloud/manual de modo simples e instrutivo.                                  | work-sources add/scan/browser-scan            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 22    | Planejamento de ciclo              | `/planning`                   | Criar ciclo, objetivo, metrica e target; contexto opcional progressivo.                           | future commands                               | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 23    | Registro de iniciativa             | `/intake`                     | Registrar uma aposta/necessidade sem breakdown tecnico inicial.                                   | proposal/register command parcial             | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 24    | Triagem/matcher                    | `/triage`                     | Transformar duvidas em itens e sugerir repos/fontes sem decidir sozinho.                          | triage + matcher multi-provider futuro        | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 25    | Gate/ativacao                      | `/gates`                      | Aprovar/descartar/promover com autoridade e evidencia visiveis.                                   | gate commands existentes/parciais             | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 26    | Execucao/trabalho                  | `/work`                       | Ver repo-work, status, acks e pendencias operacionais.                                            | demo/read-only + commands parciais            | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 27    | Contratos                          | `/contracts`                  | Ver contrato, consumidores, janela, revisoes e contention.                                        | graph/contracts parcial                       | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 28    | Resultados/dashboards              | `/results`                    | Acompanhar targets/outcomes/actual/confidence com ECharts.                                        | demo/read-only + resolver                     | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 29    | Mapa de governanca                 | `/map`                        | Explicar caminho entre objetivo, intent, contrato, evidencia e risco.                             | read-model/view-model                         | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 30    | Operacao/incidentes                | `/operations`                 | Ver incidentes, follow-ups, SLO e trabalho operacional.                                           | demo/read-only parcial                        | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 31    | Auditoria                          | `/audit`                      | Ver quem decidiu o que, quando, com qual evidencia.                                               | event-log/query parcial                       | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 32    | Console tecnico                    | `/console`                    | Dar acesso tecnico a grafo/comandos/event-log sem substituir a UX principal.                      | console/read-model/runtime                    | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 33    | Spikes visuais                     | `/spikes/visual-stack`        | Avaliar libs de visualizacao sem virar tela de produto.                                           | fixture/read-model                            | `nao-iterado` | `nao-validado-visual` | `nao-aplicavel`           |       |
+| 34    | Cup/CWP - overlay shell            | overlay transversal           | Botao global, painel lateral e copy estatica por rota sem provider de IA.                         | frontend shell                                | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 35    | Cup/CWP - contexto da pagina       | overlay transversal           | Cada rota publica contexto minimo permitido para Cup explicar onde a pessoa esta.                 | CwpPageContext local                          | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 36    | Cup/CWP - policy explainer         | overlay transversal           | Explicar bloqueios, avisos e rebaixamentos citando `POLICY-HANDBOOK.md`.                          | policy handbook + resolver futuro             | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 37    | Cup/CWP - specialist router        | overlay transversal           | Mudar linguagem e checklist por tela: sources, onboarding, results, triage, audit etc.            | roteamento deterministico                     | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 38    | Cup/CWP - provider assistivo       | overlay transversal           | Usar Ollama/OpenAI-compatible/cloud-approved apenas depois de policy/egress.                      | assistant provider + egress                   | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 39    | Cup/CWP - draft action             | overlay transversal           | Preparar rascunho/dry-run de comando com confirmacao humana e audit.                              | command runtime + baseRevision + audit futuro | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+| 40    | Integracoes - hub dedicado         | `/integrations`               | Listar providers por valor/status/risco com cards de vantagens, limites e permissoes.             | integration backlog + status                  | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 41    | Integracoes - detalhe/permissao    | `/integrations/[id]` ou modal | Mostrar dados acessados, permissoes, quem aprova, riscos, teste e como desativar.                 | integration detail + authority                | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 42    | Integracoes - sugestao contextual  | varias rotas                  | Mostrar poucas sugestoes no ponto do fluxo em que elevam confianca ou reduzem trabalho manual.    | integration catalog por surface               | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 43    | Integracoes - autoridade/egress    | `/integrations`               | Separar solicitar, aprovar/ativar e usar; bloquear cloud sem authority/policy.                    | authority + egress decision                   | `nao-iterado` | `nao-validado-visual` | `nao-testado`             |       |
+| 44    | Integracoes - GitHub work-source   | `/integrations` + `/sources`  | Implementar primeira cloud work-source sem confundir login GitHub com repos/authority.            | GitHub adapter futuro                         | `nao-iterado` | `nao-validado-visual` | `bloqueado`               |       |
+
+## 3.1 Contratos automatizados
+
+Os contratos iniciais da primeira leva estao em
+[`test/contracts/app-contracts.yml`](test/contracts/app-contracts.yml). Eles
+nascem antes da implementacao e devem ser sincronizados com esta tabela.
+
+| Contrato | Cobre linhas do mapa | Estado inicial |
+| -------- | -------------------- | -------------- |
+| APP-01   | 01                   | active         |
+| APP-02   | 02, 13, 15           | fixme          |
+| APP-03   | 03                   | active         |
+| APP-04   | 04, 13               | active         |
+| APP-05   | 05, 06, 15           | fixme          |
+| APP-06   | 07, 16               | fixme          |
+| APP-07   | 08, 17               | fixme          |
+| APP-08   | 09, 18, 21           | fixme          |
+| INT-01   | 20, 40, 41, 43       | fixme          |
+| INT-02   | 42                   | fixme          |
+| CUP-01   | 34, 35, 36, 37       | fixme          |
+| SEC-01   | 10, 19, 43           | fixme          |
 
 ## 4. Matriz de consistencia entre telas
 
@@ -109,6 +146,13 @@ Para marcar uma linha como `validado-local`, registrar na coluna de notas:
 | Provider cloud nao fica ativo sem aprovacao de egress.                           | `/onboarding`, `/settings`                     | `nao-testado` |       |
 | Read-model derivado nunca permite acao sem sourceRevision/baseRevision atual.    | `/map`, `/results`, `/work`, `/console`        | `nao-testado` |       |
 | Demo acme e workspace real sao claramente distintos.                             | `/organizations`, `/`, `/settings`             | `nao-testado` |       |
+| Cup mostra contexto diferente por rota e nao vaza dados bloqueados.              | overlay Cup em todas as rotas                  | `nao-testado` |       |
+| Cup nao executa mutacao sem confirmacao humana e base/source revision atual.     | overlay Cup + rotas com comando                | `nao-testado` |       |
+| Cup explica bloqueios citando policy versionada, nao texto improvisado.          | overlay Cup + `POLICY-HANDBOOK.md`             | `nao-testado` |       |
+| Integracao cloud nao aparece como `connected` sem auth/permissao/probe real.     | `/integrations`, `/sources`, `/settings`       | `nao-testado` |       |
+| Login GitHub nao conecta repos nem concede authority automaticamente.            | `/signup`, `/integrations`, `/sources`         | `nao-testado` |       |
+| Settings e `/integrations` mostram o mesmo status efetivo do provider.           | `/settings`, `/integrations`                   | `nao-testado` |       |
+| Sugestao contextual de integracao explica o que funciona sem a ferramenta.       | varias rotas                                   | `nao-testado` |       |
 
 ## 5. Proxima ordem sugerida
 
@@ -116,6 +160,53 @@ Para marcar uma linha como `validado-local`, registrar na coluna de notas:
 2. Onboarding completo com estado limpo.
 3. Settings refletindo exatamente o que foi escolhido no onboarding.
 4. Fontes de trabalho e governance host.
-5. Assistente/integracoes.
+5. Assistente e hub de integracoes.
 6. Home operacional para workspace novo.
 7. Map/results/work usando dados reais do workspace.
+
+## 6. Oportunidades Cup/CWP por tela
+
+Todas as oportunidades abaixo nascem como `nao-iterado`. Durante a validacao de
+cada tela, registrar se Cup ajudaria com explicacao, rascunho, diagnostico,
+policy ou proximo passo. Isso evita implementar um chat generico e ajuda a
+descobrir onde o produto precisa de coautoria contextual.
+
+| Tela/fluxo                     | Especialista Cup      | Oportunidade concreta                                                                  | Status        | Notas |
+| ------------------------------ | --------------------- | -------------------------------------------------------------------------------------- | ------------- | ----- |
+| Criacao de conta local         | `adoption-guide`      | Explicar que conta local nao e authority governada e quando usar GitHub/Google/OIDC.   | `nao-iterado` |       |
+| Selecionar/criar workspace     | `workspace-guide`     | Ajudar a escolher workspace vazio, demo acme ou workspace existente.                   | `nao-iterado` |       |
+| Logout/troca de usuario        | `adoption-guide`      | Explicar que logout nao apaga workspace/event-log.                                     | `nao-iterado` |       |
+| Onboarding - entrada           | `setup-guide`         | Mostrar o que sera configurado e retomar exatamente o passo parcial.                   | `nao-iterado` |       |
+| Onboarding - perfil            | `setup-guide`         | Traduzir perguntas em perfil recomendado e consequencias de enforcement.               | `nao-iterado` |       |
+| Onboarding - pessoas/papeis    | `authority-guide`     | Explicar por que papel atribuido a outra pessoa fica `proposed`.                       | `nao-iterado` |       |
+| Onboarding - governance host   | `host-guide`          | Explicar onde a governanca vive: local, repo dedicado ou `.governance-host`.           | `nao-iterado` |       |
+| Onboarding - fontes            | `source-guide`        | Ajudar a escolher projeto local, pasta cloud, GitHub, pasta vazia ou fonte manual.     | `nao-iterado` |       |
+| Onboarding - assistente/modelo | `assistant-guide`     | Comparar Ollama/local/cloud-approved e explicar egress sem jargao.                     | `nao-iterado` |       |
+| Home                           | `next-step-guide`     | Explicar por que aquele e o proximo passo seguro.                                      | `nao-iterado` |       |
+| Settings                       | `configuration-guide` | Reconciliar diferenca entre onboarding e configuracao atual.                           | `nao-iterado` |       |
+| Sources                        | `source-guide`        | Diagnosticar por que uma fonte ficou `snapshot-only` ou `cloud-sync-unverified`.       | `nao-iterado` |       |
+| Planning                       | `planning-guide`      | Rascunhar objetivo, metrica, target e contexto opcional progressivo.                   | `nao-iterado` |       |
+| Intake                         | `initiative-guide`    | Rascunhar problema, hipotese, aposta, lacunas e fontes possivelmente afetadas.         | `nao-iterado` |       |
+| Triage                         | `triage-guide`        | Preparar perguntas, chamar matcher e comparar sugestoes sem decidir.                   | `nao-iterado` |       |
+| Gates                          | `decision-guide`      | Explicar autoridade, evidencia, risco e consequencia antes da decisao humana.          | `nao-iterado` |       |
+| Work                           | `execution-guide`     | Explicar status de repo-work, bloqueio, ack e evidencia pendente.                      | `nao-iterado` |       |
+| Contracts                      | `contract-guide`      | Explicar consumers, owner, janela de compatibilidade e contention.                     | `nao-iterado` |       |
+| Results                        | `results-guide`       | Explicar outcome, actual, stale, self-attested e por que algo entrou ou nao no rollup. | `nao-iterado` |       |
+| Map                            | `graph-guide`         | Explicar caminho, vizinhanca, impacto e risco sem expor console tecnico.               | `nao-iterado` |       |
+| Operations                     | `operations-guide`    | Explicar incidente, follow-up, SLO e trabalho operacional.                             | `nao-iterado` |       |
+| Audit                          | `policy-guide`        | Explicar event-log, break-glass e quem decidiu o que.                                  | `nao-iterado` |       |
+| Integrations                   | `integration-guide`   | Explicar provider, health, capability probe, egress e backlog.                         | `nao-iterado` |       |
+| Integrations hub               | `integration-guide`   | Comparar providers por valor, risco, permissao, status e alternativa sem integracao.   | `nao-iterado` |       |
+| Console tecnico                | `technical-guide`     | Ajudar a navegar grafo/comandos sem executar nada sozinho.                             | `nao-iterado` |       |
+
+## 7. Decisao operacional sobre Cup antes da validacao visual
+
+Pode iniciar C0-C3 antes de finalizar a validacao das telas:
+
+- C0: overlay shell;
+- C1: contexto por pagina;
+- C2: policy explainer deterministico;
+- C3: specialist router sem provider externo.
+
+Essas fases ajudam a descobrir lacunas de UX enquanto validamos tela a tela. C4
+em diante fica bloqueado ate haver provider/policy/egress/audit suficientes.

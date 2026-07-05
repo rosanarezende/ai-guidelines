@@ -12,7 +12,12 @@ export default defineConfig({
   timeout: 60_000,
   retries: 0,
   workers: 1, // estado compartilhado (lowdb): jornadas rodam em série
-  reporter: [["list"]],
+  reporter: [
+    ["list"],
+    ["html", { outputFolder: "reports/html", open: "never" }],
+    ["json", { outputFile: "reports/results.json" }],
+    ["junit", { outputFile: "reports/results.xml" }],
+  ],
   use: {
     baseURL: `http://127.0.0.1:${APP_PORT}`,
     trace: "retain-on-failure",

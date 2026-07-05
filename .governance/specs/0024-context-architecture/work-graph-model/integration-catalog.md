@@ -136,12 +136,21 @@ humano/local quando classificação ou egress bloquearem o provedor escolhido.
 
 ## Projeção no app
 
-`governance-demo/frontend/` projeta este catálogo na tela de Configurações.
-Essa tela é intencionalmente fluida: mostra o que o framework já entrega sem integração, permite
-simular a escolha de perfil da organização e prioriza o assistente inicial local/cloud (Ollama como
-primeiro caminho local). O que ainda não tem mecanismo aparece como `em breve`, não como controle
-efetivo.
+`governance-demo/frontend/` deve projetar este catálogo em duas camadas:
 
-Configuração real futura precisa virar comando governado: escolher perfil, payer, sponsor,
-authority, egress policy ou assistant runtime altera risco de governança e não pode ser apenas
-estado de UI.
+1. **Hub dedicado `/integrations`:** inventário central para comparar, conectar, testar, desativar
+   e explicar providers. Cada card deve mostrar o que o framework já entrega sem a integração, o que
+   melhora, dados acessados, permissões exigidas, quem pode solicitar, quem aprova, riscos,
+   limitações, health/probe, forma de desativar e se escreve estado autoritativo.
+2. **Sugestões contextuais por fluxo:** cada tela deve sugerir poucas integrações quando elas
+   elevam confiança ou reduzem trabalho manual naquele ponto. Exemplo: `/sources` sugere GitHub ou
+   Drive; `/results` sugere observabilidade/analytics; `/work` sugere CI/code quality.
+
+Settings pode resumir integrações, mas não deve ser o único lugar. O que ainda não tem mecanismo
+aparece como `em breve`, não como controle efetivo. `Em breve` significa backlog priorizado, não
+integração ativa.
+
+Configuração real futura precisa virar comando governado: escolher perfil, sponsor, authority,
+egress policy, source provider ou assistant runtime altera risco de governança e não pode ser apenas
+estado de UI. Login externo também não concede membership, authority nem acesso a repos
+automaticamente.

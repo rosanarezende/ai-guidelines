@@ -2,7 +2,7 @@
 
 > **Escopo:** regras explicaveis para usuarios e assistentes sobre o que o app bloqueia, avisa, rebaixa ou registra.
 > **Autoridade:** este handbook explica politicas do app. O modelo conceitual continua em [`../model.yml`](../model.yml), e as decisoes de produto ficam em [`APP-DECISIONS.md`](APP-DECISIONS.md).
-> **Uso por assistente:** respostas devem citar a politica aplicavel e explicar a consequencia sem inventar excecao. Assistente pode sugerir proximo passo, mas nao pode aprovar, reclassificar, promover trust ou executar mutacao.
+> **Uso por assistente:** respostas devem citar a politica aplicavel e explicar a consequencia sem inventar excecao. Assistente e Cup/CWP podem sugerir proximo passo, mas nao podem aprovar, reclassificar, promover trust ou executar mutacao.
 
 ## 1. Principio geral
 
@@ -94,9 +94,59 @@ Texto para assistente:
 
 > Esta fonte pode ser usada, mas com confianca limitada. Para elevar o nivel de prova, conecte o provider pela API, capture revision id/export hash, defina attester e janela, ou versiona a fonte em Git quando fizer sentido.
 
-## 5. Politica de assistente e egress
+## 5. Politica de integracoes e ativacao
 
 ### 5.1 Regras
+
+- Integracoes potencializam o framework; nao substituem o SSOT file-first.
+- Toda integracao deve declarar se le, escreve, exporta, importa, projeta ou
+  apenas sugere.
+- Por padrao, integracao externa nao escreve YAML/event-log autoritativo.
+- Integracao que escreve estado autoritativo exige adapter-contract explicito,
+  sponsor, security-owner, audit e rollback.
+- Login externo nao concede membership, role nem authority automaticamente.
+- Provider conectado pode ficar `limited` se nao provar capability para uma
+  funcao especifica.
+- Cloud/endpoint externo exige egress policy, classificacao maxima e allowlist.
+- O app deve mostrar o que continua funcionando sem a integracao antes de pedir
+  permissao.
+- `em-breve` significa backlog priorizado, nao mecanismo ativo.
+
+### 5.2 Exemplos
+
+| Caso                                        | O app faz                                   | Por que                                               |
+| ------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
+| GitHub login conectado                      | autentica pessoa                            | nao conecta repos nem concede authority               |
+| GitHub work-source solicitado               | pede permissao de repos selecionados        | fonte de trabalho e fluxo separado do login           |
+| Pasta local sem Git                         | aceita como `snapshot-only`                 | contexto util, mas sem autoria/historico independente |
+| Jira importer sem direcao de sync           | bloqueia ativacao                           | evita segundo SSOT e split-brain                      |
+| Observability cloud em workspace controlled | exige security-owner/egress                 | pode expor metricas operacionais sensiveis            |
+| SonarQube local com relatorio hashado       | aceita como evidencia limitada/configuravel | evidencia melhora repo-work, mas nao decide gate      |
+| MUI X Pro/AG Grid Enterprise                | entra como presentation adapter             | troca renderer, nao dominio/view-model                |
+| Provider marcado manualmente como connected | bloqueia ou rebaixa para declarado          | conexao precisa mecanismo/probe                       |
+
+Texto para assistente/Cup:
+
+> Esta integracao pode reduzir trabalho manual ou elevar a confianca, mas nao substitui a governanca autoritativa. Antes de conectar, veja quais dados ela acessa, quem pode aprovar, como falha e o que continua funcionando sem ela.
+
+### 5.3 Autoridade minima
+
+| Tipo de integracao                         | Solicitacao comum                              | Ativacao minima                                                  |
+| ------------------------------------------ | ---------------------------------------------- | ---------------------------------------------------------------- |
+| Local sem egress e baixo risco             | workspace-admin, technical-owner, source-owner | workspace-admin ou self-governed no solo                         |
+| Fonte de trabalho/repo                     | workspace-admin, source-owner, technical-owner | source-owner/technical-owner; security-owner se controlled/cloud |
+| Assistente remoto/cloud                    | workspace-admin                                | security-owner; sponsor se dado sensivel ou workspace controlled |
+| Identity provider / SSO                    | workspace-admin, sponsor                       | sponsor + security-owner                                         |
+| Backlog importer                           | workspace-admin, product-owner, sponsor        | sponsor ou workspace-admin + contrato de sync                    |
+| Observabilidade/analytics/BI               | technical-owner, metric-owner, attester        | metric-owner + security-owner se cloud                           |
+| Integracao que escreve estado autoritativo | sponsor ou workspace-admin                     | sponsor + security-owner + adapter-contract explicito            |
+
+No perfil solo, solicitacao e ativacao podem ser a mesma pessoa, mas isso deve
+ficar visivel como colapso/self-governed quando afetar independencia.
+
+## 6. Politica de assistente e egress
+
+### 6.1 Regras
 
 - Assistente sugere, explica e acelera; nao decide.
 - Workspace pode ter varios providers de assistente e matcher.
@@ -110,7 +160,7 @@ Texto para assistente:
 - Lexical deterministico e permitido como baseline local para matcher, mas nao transforma sugestao em decisao.
 - Sugestao de matcher precisa registrar provider, modelo, input classification, source revision, score, unknowns e decisao humana.
 
-### 5.2 Exemplos
+### 6.2 Exemplos
 
 | Caso                                        | O app faz                                                   | Por que                                                           |
 | ------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------- |
@@ -126,9 +176,30 @@ Texto para assistente:
 
 > O assistente esta limitado pela politica de egress e pela classificacao dos dados. Ele pode explicar a pendencia e sugerir como resolver, mas nao pode ignorar policy nem enviar contexto bloqueado.
 
-## 6. Politica de outcomes e dashboards
+### 6.3 Cup/CWP
 
-### 6.1 Regra de rollup
+Cup e a interface contextual de coautoria do app. Ele usa as mesmas politicas
+de assistente, egress, fonte, membership e outcome. Cup nao tem privilegio
+especial por estar dentro da UI.
+
+Regras especificas:
+
+- Cup so ve o contexto que a rota e o resolver de policy autorizarem.
+- Cup deve explicar quais dados nao consegue ver quando a policy bloquear.
+- Cup pode usar modo deterministico sem provider externo para explicar a tela.
+- Cup so pode chamar provider local/cloud depois de health, capability probe,
+  classificacao e egress.
+- Cup pode preparar rascunho ou dry-run; confirmacao humana continua obrigatoria.
+- Cup deve registrar provider/modelo/policy quando uma sugestao influenciar uma
+  decisao governada.
+
+Texto para Cup:
+
+> Posso ajudar com o que esta visivel nesta tela e com as politicas que se aplicam ao seu papel. Se algo estiver bloqueado por permissao, classificacao ou egress, eu explico o motivo e o proximo passo seguro em vez de contornar a regra.
+
+## 7. Politica de outcomes e dashboards
+
+### 7.1 Regra de rollup
 
 Dashboard nao soma declaracao como se fosse prova.
 
@@ -142,7 +213,7 @@ Para um outcome entrar em rollup, precisa no minimo:
 - unidade comparavel;
 - `sourceTrust` suficiente para o tipo de numero.
 
-### 6.2 Exemplos
+### 7.2 Exemplos
 
 | Caso                          | O app faz                                     | Por que                                  |
 | ----------------------------- | --------------------------------------------- | ---------------------------------------- |
@@ -155,9 +226,9 @@ Texto para assistente:
 
 > O resultado pode ser registrado, mas ainda nao pode subir para o dashboard como actual confiavel. Falta fonte, janela, attester, unidade comparavel ou nivel minimo de confianca.
 
-## 7. Politica de role, membership e authority
+## 8. Politica de role, membership e authority
 
-### 7.1 Regras
+### 8.1 Regras
 
 - Login nao e membership.
 - Membership nao e authority.
@@ -166,7 +237,7 @@ Texto para assistente:
 - Service account precisa owner humano, escopo e TTL.
 - IdP externo autentica; nao concede authority governada automaticamente.
 
-### 7.2 Exemplos
+### 8.2 Exemplos
 
 | Caso                                 | O app faz                       | Por que                              |
 | ------------------------------------ | ------------------------------- | ------------------------------------ |
@@ -179,7 +250,7 @@ Texto para assistente:
 
 > A pessoa esta autenticada, mas ainda nao tem autoridade efetiva para esta acao. Convite, membership e papel precisam estar aceitos ou resolvidos por policy.
 
-## 8. Como o app deve explicar decisoes
+## 9. Como o app deve explicar decisoes
 
 Toda explicacao deve seguir este formato:
 

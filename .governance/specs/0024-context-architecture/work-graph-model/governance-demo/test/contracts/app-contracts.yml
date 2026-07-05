@@ -1,0 +1,220 @@
+version: 1
+status: active
+updated: "2026-07-05"
+purpose: >
+  Contratos funcionais da governance-demo. Cada contrato descreve o
+  comportamento esperado antes da implementacao/refatoracao. Testes podem nascer
+  fixme/expected-fail, mas nao podem existir sem ID, seed e criterio observavel.
+
+conventions:
+  status:
+    active: "executa e deve passar"
+    expected-fail: "executa e deve falhar ate a implementacao corrigir"
+    fixme: "nao executa porque rota/infra ainda falta ou travaria"
+    skip: "nao aplicavel a uma configuracao especifica"
+    manual: "validacao humana temporaria com plano para automatizar"
+  selector_policy:
+    - "Preferir role/label quando copy for contrato."
+    - "Usar data-testid semantico quando copy/design puder mudar."
+    - "Nao usar classe MUI, estrutura DOM interna ou ordem visual."
+  evidence:
+    - "Todo contrato ativo deve produzir Playwright trace em falha."
+    - "Todo contrato entre telas deve provar persistencia ou consistencia apos reload."
+
+first_wave:
+  - id: APP-01
+    title: "Criar identidade local sem confundir com auth corporativa"
+    status: active
+    playwright: "../journeys/onboarding-journey.spec.ts"
+    seed: blank
+    actors: ["new-local-user"]
+    surfaces: ["/signup", "/organizations"]
+    given:
+      - "Nao ha principal local em sessao."
+    when:
+      - "A pessoa acessa /."
+      - "Cria identidade local com nome."
+    then:
+      - "A raiz redireciona para /signup."
+      - "A identidade local e criada."
+      - "O fluxo segue para /organizations."
+      - "A UI deixa claro que isto nao e SSO nem authority governada."
+
+  - id: APP-02
+    title: "Criar workspace novo sem vazar dados da demo acme"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: blank
+    actors: ["workspace-admin"]
+    surfaces: ["/organizations", "/", "/settings"]
+    given:
+      - "Existe principal local sem workspace selecionado."
+    when:
+      - "A pessoa cria um workspace novo."
+    then:
+      - "O workspace abre sem dados acme."
+      - "Home e Settings mostram estado vazio honesto."
+      - "O app oferece onboarding, nao console tecnico."
+
+  - id: APP-03
+    title: "Logout limpa sessao sem apagar workspaces ou event-log"
+    status: active
+    playwright: "../journeys/onboarding-journey.spec.ts"
+    seed: blank
+    actors: ["workspace-admin"]
+    surfaces: ["shell", "/signup", "/organizations"]
+    given:
+      - "Existe principal local e workspace criado."
+    when:
+      - "A pessoa clica em Sair."
+    then:
+      - "A sessao volta para /signup."
+      - "Ao entrar novamente, o workspace ainda existe."
+      - "Nenhum event-log e apagado."
+
+  - id: APP-04
+    title: "Onboarding parcial retoma no passo salvo"
+    status: active
+    playwright: "../journeys/onboarding-journey.spec.ts"
+    seed: blank
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/"]
+    given:
+      - "Workspace novo iniciou onboarding."
+    when:
+      - "A pessoa avanca um passo e volta para Home."
+      - "A pessoa abre Continuar onboarding."
+    then:
+      - "Home mostra card de onboarding em andamento."
+      - "Reload preserva estado parcial."
+      - "Onboarding retoma no passo salvo, nao na tela inicial."
+
+  - id: APP-05
+    title: "Perfil e responsabilidades geram recomendacao compreensivel"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: blank
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/settings", "/"]
+    given:
+      - "Workspace esta no passo de perfil."
+    when:
+      - "A pessoa responde perguntas de tamanho, separacao de papeis e regra de acumulo sensivel."
+    then:
+      - "O app recomenda um perfil com descricao humana."
+      - "A regra de acumulo sensivel altera a recomendacao/configuracao visivel."
+      - "Settings e Home refletem a mesma escolha."
+
+  - id: APP-06
+    title: "Pessoas, times e papeis usam aceite quando o papel e para outra pessoa"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: blank
+    actors: ["workspace-admin", "invited-member"]
+    surfaces: ["/onboarding", "/settings"]
+    given:
+      - "Workspace tem mais de uma pessoa."
+    when:
+      - "Admin atribui papel sensivel a outra pessoa."
+    then:
+      - "Assignment fica proposed/pending."
+      - "A pessoa convidada precisa aceitar."
+      - "Authority efetiva so considera papeis aceitos ou herdados conforme policy."
+
+  - id: APP-07
+    title: "Governance host e explicado antes de cadastrar fontes de trabalho"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: blank
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/settings"]
+    given:
+      - "Workspace novo ainda nao tem governance host."
+    when:
+      - "A pessoa escolhe local, repo dedicado ou .governance-host embutido."
+    then:
+      - "O app explica diferenca entre host e fonte de trabalho."
+      - "Fit-check mostra riscos e bloqueios."
+      - "Sandbox explicito nao e tratado como organizacao governada real."
+
+  - id: APP-08
+    title: "Sources guia projeto local vs nuvem e relaciona com governance host"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: workspace-local-host
+    actors: ["workspace-admin"]
+    surfaces: ["/sources", "/settings", "/"]
+    given:
+      - "Workspace tem governance host local."
+    when:
+      - "A pessoa adiciona projeto local com ou sem Git."
+    then:
+      - "A UI pede nome e selecao de pasta de forma guiada."
+      - "A fonte recebe sourceTrust correto."
+      - "A fonte aparece igual em Sources, Settings e Home."
+      - "Fonte sem Git nao aparece como evidencia auditavel forte."
+
+  - id: INT-01
+    title: "Integrations hub mostra valor, permissoes, risco e alternativa manual"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: workspace-with-integration-statuses
+    actors: ["workspace-admin"]
+    surfaces: ["/integrations", "/settings"]
+    given:
+      - "Workspace tem backlog de integracoes."
+    when:
+      - "A pessoa abre /integrations."
+    then:
+      - "Cada card mostra o que o framework ja entrega sem a integracao."
+      - "Status efetivo bate com Settings."
+      - "Cloud nao aparece connected sem auth/permissao/probe."
+      - "Quem solicita e quem aprova ficam visiveis."
+
+  - id: INT-02
+    title: "Sugestao contextual de integracao nao vende ferramenta como requisito"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: workspace-with-integration-statuses
+    actors: ["workspace-admin"]
+    surfaces: ["/sources", "/results", "/work"]
+    given:
+      - "Workspace tem integracoes disponiveis e futuras."
+    when:
+      - "A pessoa entra em telas que se beneficiam de integracoes."
+    then:
+      - "A sugestao contextual explica o valor da integracao."
+      - "Tambem explica o que funciona sem a ferramenta."
+      - "Nao ativa provider nem concede authority automaticamente."
+
+  - id: CUP-01
+    title: "Cup abre como overlay contextual sem provider externo"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: blank
+    actors: ["workspace-admin"]
+    surfaces: ["overlay", "/onboarding", "/sources", "/settings"]
+    given:
+      - "Workspace esta em modo local sem assistente configurado."
+    when:
+      - "A pessoa abre Cup em rotas diferentes."
+    then:
+      - "Cup mostra especialista/contexto diferente por rota."
+      - "Cup nao envia prompt nem contexto para provider externo."
+      - "Cup pode explicar a policy aplicavel de forma deterministica."
+
+  - id: SEC-01
+    title: "Provider cloud nao fica ativo sem egress/authority"
+    status: fixme
+    playwright: "../journeys/first-wave-contracts.spec.ts"
+    seed: workspace-controlled
+    actors: ["workspace-admin", "security-owner"]
+    surfaces: ["/onboarding", "/settings", "/integrations"]
+    given:
+      - "Workspace controlled tenta configurar assistente cloud."
+    when:
+      - "Admin sem security approval testa/salva provider cloud."
+    then:
+      - "O app bloqueia ativacao."
+      - "O status fica blocked ou pending-approval, nunca connected."
+      - "Cup/Settings explicam a politica e o proximo passo."

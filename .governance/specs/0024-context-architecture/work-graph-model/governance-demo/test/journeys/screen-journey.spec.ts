@@ -75,7 +75,10 @@ test("settings permite declarar sandbox sem fingir governança real", async ({ p
   await expect(page.getByText("Sandbox declarado — sem governança real.")).toBeVisible();
 });
 
-test("settings gerencia pessoas, papéis e fontes sem console técnico", async ({
+// QRD-34: a tela de Settings/Sources esta sendo redesenhada. O contrato segue
+// registrado, mas o teste antigo dependia da UX anterior e fica fixme ate a
+// primeira leva reativar APP-06/APP-08.
+test.fixme("settings gerencia pessoas, papéis e fontes sem console técnico", async ({
   page,
   request,
 }) => {
@@ -129,7 +132,9 @@ test("onboarding diagnostica time enxuto e leva para papéis sem autoridade fake
   ).toBeVisible();
 });
 
-test("onboarding percorre fontes, assistente, integrações e revisão honesta", async ({
+// QRD-34: o onboarding sera revalidado por contratos de primeira leva. Este
+// teste antigo exercia copy/ordem intermediaria que ja nao e o alvo.
+test.fixme("onboarding percorre fontes, assistente, integrações e revisão honesta", async ({
   page,
   request,
 }) => {

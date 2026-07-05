@@ -15,6 +15,8 @@ O app deve ser um **control plane de governanca de trabalho**:
 - cria e seleciona workspaces/organizacoes;
 - guia a adocao inicial do framework;
 - configura governance host, membros, papeis, fontes de trabalho, assistente e integracoes;
+- oferece um hub de integracoes para conectar ferramentas existentes com status, risco, permissao e alternativa manual claros;
+- oferece o Cup, um par contextual de trabalho que explica, orienta e rascunha proximos passos sem decidir pela pessoa;
 - ajuda a planejar ciclos, registrar iniciativas, triar, decidir gates, quebrar trabalho, acompanhar execucao e publicar outcomes;
 - mostra dashboards e pendencias em linguagem humana;
 - preserva a trilha de auditoria: quem decidiu, com qual autoridade, em qual revisao, com qual evidencia;
@@ -38,14 +40,16 @@ Se o app gravar algo que a CLI/runtime nao entende, o desenho esta errado.
 
 ## 4. Camadas do sistema
 
-| Camada              | Papel                                                                                   | Exemplo atual                             |
-| ------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------- |
-| Modelo/SSOT         | Define ontologia, fluxos, estados, edges, politicas e invariantes.                      | `../model.yml`                            |
-| Runtime/core        | Executa validacao, comandos, resolvers, event-log, read-models e adapters.              | `governance-demo/backend/src/`            |
-| CLI `ai-guidelines` | Superficie headless para terminal, CI, scripts e automacao repo-first.                  | `npm run flow -- ...`, `dist/cli/main.js` |
-| App                 | Superficie humana para onboarding, configuracao, decisao, dashboards e operacao diaria. | `governance-demo/frontend/`               |
-| Mock API/testes     | Simula persistencia mutavel para UX/e2e, sem contar como governanca real.               | `governance-demo/mock-api/` planejada     |
-| Integracoes         | Evidence providers, importers, assistants e projections opcionais.                      | `integration-catalog.yml` + adapters      |
+| Camada              | Papel                                                                                     | Exemplo atual                               |
+| ------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Modelo/SSOT         | Define ontologia, fluxos, estados, edges, politicas e invariantes.                        | `../model.yml`                              |
+| Runtime/core        | Executa validacao, comandos, resolvers, event-log, read-models e adapters.                | `governance-demo/backend/src/`              |
+| CLI `ai-guidelines` | Superficie headless para terminal, CI, scripts e automacao repo-first.                    | `npm run flow -- ...`, `dist/cli/main.js`   |
+| App                 | Superficie humana para onboarding, configuracao, decisao, dashboards e operacao diaria.   | `governance-demo/frontend/`                 |
+| Cup/CWP             | Camada contextual de coautoria dentro do app; explica, sugere e prepara rascunhos.        | overlay transversal planejado               |
+| Mock API/testes     | Simula persistencia mutavel para UX/e2e, sem contar como governanca real.                 | `governance-demo/mock-api/` planejada       |
+| Contratos de teste  | Define comportamento esperado antes da implementacao e evita drift funcional.             | `TESTING-STRATEGY.md` + `test/contracts/`   |
+| Integracoes         | Evidence providers, importers, assistants, projections e presentation adapters opcionais. | `/integrations` + `integration-catalog.yml` |
 
 Regra central:
 
@@ -53,6 +57,10 @@ Regra central:
 CLI e app sao superficies diferentes sobre o mesmo modelo/runtime.
 Nenhuma das duas pode inventar estado autoritativo que a outra nao consegue ler.
 ```
+
+O app deve ser desenvolvido com a propria disciplina que ele promove:
+funcionalidade nasce com contrato de teste, e mudanca funcional exige atualizar
+o contrato antes de alterar a implementacao.
 
 ## 5. Relacao com a CLI `ai-guidelines`
 
@@ -134,6 +142,11 @@ O app comeca a sair do papel quando uma pessoa consegue, sem console tecnico:
 
 Enquanto a maioria desses passos depender de payload manual no console tecnico, o app e uma sim tecnica com UX parcial, nao uma superficie operacional completa.
 
+Cup conta como sucesso quando reduz friccao nesses passos sem enfraquecer a
+governanca: ele pode explicar, sugerir e preparar rascunhos, mas a mutacao
+continua passando pelo mesmo backend, comando, policy, revisao e confirmacao
+humana.
+
 ## 9. Principio de integracao com ferramentas externas
 
 O app deve explicar sempre:
@@ -152,6 +165,11 @@ Exemplos:
 - Observabilidade ajuda a provar actual/outcome operacional.
 - Ollama/assistente ajuda a explicar, sugerir e acelerar matcher/triagem.
 - Backlog externo pode importar trabalho, mas nao vira SSOT sem adapter-contract explicito.
+
+As integracoes devem aparecer de duas formas: um hub central para comparar,
+conectar, testar e desativar providers; e sugestoes contextuais nas telas onde
+elas realmente aumentam confianca ou reduzem trabalho manual. A primeira frase
+de qualquer integracao deve deixar claro o que o framework ja faz sem ela.
 
 ## 10. Linguagem para usuarios
 
