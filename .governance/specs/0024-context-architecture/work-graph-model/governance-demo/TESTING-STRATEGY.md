@@ -84,6 +84,11 @@ rota do frontend (sessao via cookie, parse de JSON) fica em Playwright `request`
 porque depende de `next/headers` e do alias `@demo/backend`, que `node --test`
 nao resolve — por isso essa parte precisa do servidor booted (sem browser).
 
+Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
+dos testes do backend (`test:shell`), o typecheck strict + `test:api` da
+mock-api. Assim as camadas rapidas (dominio + API in-memory) nao dependem de
+alguem lembrar de invoca-las: entram no check governado da governance-demo.
+
 ## 4. Ferramentas escolhidas
 
 ### Playwright

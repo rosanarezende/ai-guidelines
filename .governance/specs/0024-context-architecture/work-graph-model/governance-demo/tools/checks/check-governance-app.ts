@@ -463,6 +463,23 @@ const backendShellTests = spawnSync(process.execPath, ["--test", "tests/**/*.tes
 });
 if (backendShellTests.status !== 0) fail("testes do shell de adoção falharam");
 
+// Camada de API in-memory (mock-api Hono via app.request) faz parte do caminho
+// oficial de verificação: typecheck strict + node:test, sem servidor/browser.
+const mockApiRoot = path.join(root, "mock-api");
+const mockApiTsc = spawnSync(
+  process.execPath,
+  [tscBin, "-p", path.join(mockApiRoot, "tsconfig.json")],
+  { cwd: mockApiRoot, stdio: "inherit", shell: false }
+);
+if (mockApiTsc.status !== 0) fail("typecheck strict da mock-api falhou");
+
+const mockApiTests = spawnSync(process.execPath, ["--test", "tests/**/*.test.ts"], {
+  cwd: mockApiRoot,
+  stdio: "inherit",
+  shell: false,
+});
+if (mockApiTests.status !== 0) fail("testes de API in-memory da mock-api falharam");
+
 const nextBin = path.join(repoRoot, "node_modules", "next", "dist", "bin", "next");
 const result = spawnSync(process.execPath, [nextBin, "build", "--webpack"], {
   cwd: appDir,
