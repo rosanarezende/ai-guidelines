@@ -6,6 +6,7 @@
     "app.nav.home": "Home",
     "app.nav.organizations": "Organizações",
     "app.nav.settings": "Configurações",
+    "app.nav.results": "Resultados",
     "app.nav.console": "Console técnico"
   }
 }

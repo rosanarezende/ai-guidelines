@@ -106,7 +106,7 @@ reconciliou com a validacao de produto da owner. Estado por superficie:
 | Superficie            | Uso principal                                                                               | Estado (QRD-29)                                                                                                          |
 | --------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | Mapas de governanca   | Explicar caminhos de decisao, evidencias, contratos, riscos, objetivos e proximos passos.   | DECIDIDO: React Flow (`@xyflow/react`) + ELK (`elkjs`); ECharts graph = aba relacional OPCIONAL.                         |
-| Dashboards            | Mostrar resultados derivados, comparativos de ciclo, targets, outcomes e confianca.         | PROVAVEL PRIMARIO: Apache ECharts (confirmar em `/results` real); MUI X Charts = alternativa.                            |
+| Dashboards            | Mostrar resultados derivados, comparativos de ciclo, targets, outcomes e confianca.         | PRIMARIO EM VALIDACAO REAL: Apache ECharts em `/results`; MUI X Charts = alternativa.                                    |
 | Tabelas/data grids    | Operar listas densas de iniciativas, contratos, pendencias, evidencias, auditoria e fontes. | PROVAVEL PRIMARIO: TanStack Table + MUI (confirmar virtualizacao em lista real); MUI X Data Grid/AG Grid = alternativas. |
 | Grafo tecnico/console | Explorar vizinhanca, shortest path, impacto de contrato, dependencias e densidade.          | PENDENTE DE DECISAO: Sigma.js+Graphology (console denso) x ECharts graph (visualizacao amigavel); Reagraph rejeitado.    |
 | Server state do app   | Cache, mutations, invalidacao e atualizacao das rotas do produto.                           | DECIDIDO: TanStack Query (= React Query atual; cache por workspace/sourceRevision).                                      |
@@ -118,6 +118,9 @@ Regras de produto:
   guiado (React Flow+ELK) e a experiencia principal para stakeholders.
 - TanStack Query e SERVER state: nao substitui banco, Context API,
   Zustand/Redux nem o SSOT file-first.
+- `/results` e a primeira tela real que aplica QRD-29: Apache ECharts +
+  TanStack Query sobre `/api/results/dashboard`. Ela confirma dashboards na
+  demo; workspace novo ainda precisa de host/outcomes antes de ter dados.
 - Se listas operacionais exigirem scroll infinito real (>100 linhas por pagina),
   a decisao de tabela volta para novo QRD.
 - Cytoscape esta banido do produto, do roadmap e dos spikes.
@@ -157,7 +160,7 @@ Regras de produto:
 | Execucao      | `/work`                  | `Futuro`, dados existem no grafo       | Acompanhar repo-work e execution-units |
 | Fontes        | `/sources`               | `Futuro`, parte em settings            | Repos/pastas/contextos/capabilities    |
 | Contratos     | `/contracts`             | `Futuro`, API/grafo existem            | Coordenar contratos cross-repo         |
-| Resultados    | `/results`               | `Demo/read-only` na Home/Console       | Outcomes, actual, dashboards           |
+| Resultados    | `/results`               | `UI real/read-only` na demo            | Outcomes, actual, dashboards           |
 | Operacao      | `/operations`            | `Demo/read-only` no Console            | Incidentes, standalone, SLO            |
 | Auditoria     | `/audit`                 | `Console tecnico`                      | Event-log, decisoes, policy            |
 | Integracoes   | `/integrations`          | `UI parcial` em settings               | Conectar/testar adapters               |
@@ -1318,12 +1321,16 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 **Estado atual:**
 
 - outcomes reais existem na demo.
-- Home/Console exibem parcialmente.
+- `/results` existe como tela de produto read-only para a demo: busca
+  `/api/results/dashboard` com TanStack Query, exibe sourceRevision/derived,
+  scorecards, targets e ECharts de target vs actual, confianca por ciclo,
+  outcomes validos/invalidos e atingimento por objetivo.
 - workspace novo nao tem fluxo para criar target/outcome.
 
 **Lacuna:**
 
-- falta tela de resultados como produto.
+- publicar outcomes para workspace novo e ligar verdict/decision-rule ao
+  dashboard ainda e trabalho de backend/fluxo.
 
 ## 19. Incidentes e operacao (`/operations`)
 

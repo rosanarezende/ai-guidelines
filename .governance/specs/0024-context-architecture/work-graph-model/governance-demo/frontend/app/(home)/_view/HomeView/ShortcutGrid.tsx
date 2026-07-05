@@ -46,7 +46,7 @@ export function ShortcutGrid({
         sub={copy.shortcuts.registerIntent.sub}
       />
       <ShortcutCard
-        href="/console?view=owner"
+        href="/results"
         icon={<MonitorHeartIcon fontSize="small" />}
         title={copy.shortcuts.results.title}
         sub={copy.shortcuts.results.sub}
