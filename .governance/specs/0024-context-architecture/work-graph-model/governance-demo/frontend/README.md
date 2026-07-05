@@ -33,7 +33,7 @@ Feito nesta fatia (R0/R1):
   (`_model/`), candidatos isolados (`_candidates/`), fixture sintetica seedada (ate ~6k nos/10k linhas) e tela
   comparativa interna com busca, filtros, foco, painel de detalhe e acao governada simulada (dry-run).
   Estado apos validacao da owner (QRD-29): React Flow+ELK DECIDIDO para o mapa (ECharts = aba relacional
-  opcional); Apache ECharts agora aplicado em `/results`; TanStack Table+MUI provavel primario de tabelas;
+  opcional); Apache ECharts agora aplicado em `/results`; TanStack Table+MUI+virtualizacao agora aplicado em `/work`;
   Sigma x ECharts no console tecnico pendente de decisao (Reagraph rejeitado/removido); TanStack Query
   (= React Query atual) decidido para server state. Evidencia: `../../_reviews/2026-07-04-visual-stack-spike.md`.
 
@@ -41,6 +41,7 @@ Ainda por vir:
 
 - Auth real (senha/SSO/identity-provider): o signup atual e identidade LOCAL, sem seguranca de conta; o cookie de sessao nao e assinado.
 - Telas dedicadas de membros/papeis/fontes (hoje: APIs de produto + secoes minimas; PeopleStep/SourcesStep do onboarding continuam parcialmente UX e estao marcados assim).
+- Detalhe acionavel por linha em `/work` (breakdown, repo-work ack, verdict); a rota atual e lista operacional derivada.
 - GitHub work-source cloud real (contrato/kind/backlog modelados; conexao OAuth/App e fatia seguinte — nunca aparece como `connected` sem mecanismo).
 - Health-check vivo do Neo4j como graph-read-model (config/status/sourceRevision persistem; verificacao ativa e fatia seguinte).
 - Assistente conversacional completo: hoje ha health-check local e advisory local (`/api/integrations/assistant/advisory`) com egress fail-closed + redacao minima; UI conversacional e fatia futura.
@@ -57,9 +58,11 @@ Ainda por vir:
 | `/onboarding`                                               | Fluxo guiado da ORGANIZACAO atual; progresso partial/finished persiste por organizacao.           |
 | `/settings`                                                 | Configuracoes da organizacao atual (demo: secoes completas; nova: identidade/governanca/troca).   |
 | `/results`                                                  | Dashboard de resultados da organizacao atual; demo usa ECharts + TanStack Query sobre API real.   |
+| `/work`                                                     | Lista operacional de trabalho; demo usa TanStack Table + MUI + virtualizacao sobre API real.      |
 | `/console`                                                  | Console tecnico da organizacao com host de governanca (hoje a demo).                              |
 | `/spikes/visual-stack`                                      | Bancada INTERNA do spike da stack visual (QRD-27/28); fora da navegacao de produto.               |
 | `/api/results/dashboard`                                    | View-model derivado para `/results`; workspace novo responde vazio honesto ate ter host/outcomes. |
+| `/api/work/items`                                           | View-model derivado para `/work`; workspace novo responde vazio honesto ate ter host/contextos.   |
 | `/api/local/signup`                                         | Cria local-principal + sessao (cookie httpOnly, nao assinado — nao e auth).                       |
 | `/api/local/organizations`                                  | Cria organizacao vazia ou anexa a demo; atualiza sessao.                                          |
 | `/api/local/organizations/select`                           | Troca a organizacao ativa da sessao.                                                              |
@@ -180,6 +183,11 @@ governance-next/
       _model/                        # view-model de resultados, independente de ECharts
       _view/
         ResultsView/                 # ECharts + TanStack Query sobre /api/results/dashboard
+    work/
+      page.tsx                       # rota /work, fina + gate
+      _model/                        # view-model da lista operacional
+      _view/
+        WorkView/                    # TanStack Table + MUI + virtualizacao
     console/
       page.tsx                       # rota /console, fina + gate (demo; senao estado honesto)
       _view/

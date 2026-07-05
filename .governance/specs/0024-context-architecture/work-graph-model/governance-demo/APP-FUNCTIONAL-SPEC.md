@@ -145,26 +145,26 @@ Regras de produto:
 
 ## 5. Mapa de telas
 
-| Area          | Tela/rota desejada       | Estado atual                           | Papel principal                        |
-| ------------- | ------------------------ | -------------------------------------- | -------------------------------------- |
-| Entrada       | `/signup`                | `UI real` para identidade local minima | Criar usuario local                    |
-| Entrada       | `/organizations`         | `UI real/parcial`                      | Criar, escolher e anexar demo          |
-| Onboarding    | `/onboarding`            | `UI parcial`                           | Configurar workspace                   |
-| Home          | `/`                      | `UI parcial`                           | Proximo passo e pendencias             |
-| Configuracoes | `/settings`              | `UI parcial`                           | Ajustar organizacao                    |
-| Console       | `/console`               | `Console tecnico`                      | Operacao avancada                      |
-| Planejamento  | `/planning`              | `Futuro`                               | Ciclo, objetivos, targets              |
-| Intake        | `/intake`                | `Futuro`, comando existe no console    | Registrar proposta/iniciativa          |
-| Triagem       | `/triage`                | `Futuro`, comando existe no console    | Perguntas, matcher, contratos          |
-| Gates         | `/gates`                 | `Futuro`, comando existe no console    | Aprovar/descartar/promover             |
-| Execucao      | `/work`                  | `Futuro`, dados existem no grafo       | Acompanhar repo-work e execution-units |
-| Fontes        | `/sources`               | `Futuro`, parte em settings            | Repos/pastas/contextos/capabilities    |
-| Contratos     | `/contracts`             | `Futuro`, API/grafo existem            | Coordenar contratos cross-repo         |
-| Resultados    | `/results`               | `UI real/read-only` na demo            | Outcomes, actual, dashboards           |
-| Operacao      | `/operations`            | `Demo/read-only` no Console            | Incidentes, standalone, SLO            |
-| Auditoria     | `/audit`                 | `Console tecnico`                      | Event-log, decisoes, policy            |
-| Integracoes   | `/integrations`          | `UI parcial` em settings               | Conectar/testar adapters               |
-| Assistente    | `/assistant` ou settings | `UI parcial`                           | Ollama/cloud/modelos/policy            |
+| Area          | Tela/rota desejada       | Estado atual                           | Papel principal                     |
+| ------------- | ------------------------ | -------------------------------------- | ----------------------------------- |
+| Entrada       | `/signup`                | `UI real` para identidade local minima | Criar usuario local                 |
+| Entrada       | `/organizations`         | `UI real/parcial`                      | Criar, escolher e anexar demo       |
+| Onboarding    | `/onboarding`            | `UI parcial`                           | Configurar workspace                |
+| Home          | `/`                      | `UI parcial`                           | Proximo passo e pendencias          |
+| Configuracoes | `/settings`              | `UI parcial`                           | Ajustar organizacao                 |
+| Console       | `/console`               | `Console tecnico`                      | Operacao avancada                   |
+| Planejamento  | `/planning`              | `Futuro`                               | Ciclo, objetivos, targets           |
+| Intake        | `/intake`                | `Futuro`, comando existe no console    | Registrar proposta/iniciativa       |
+| Triagem       | `/triage`                | `Futuro`, comando existe no console    | Perguntas, matcher, contratos       |
+| Gates         | `/gates`                 | `Futuro`, comando existe no console    | Aprovar/descartar/promover          |
+| Execucao      | `/work`                  | `UI real/read-only` na demo            | Lista operacional de trabalho       |
+| Fontes        | `/sources`               | `Futuro`, parte em settings            | Repos/pastas/contextos/capabilities |
+| Contratos     | `/contracts`             | `Futuro`, API/grafo existem            | Coordenar contratos cross-repo      |
+| Resultados    | `/results`               | `UI real/read-only` na demo            | Outcomes, actual, dashboards        |
+| Operacao      | `/operations`            | `Demo/read-only` no Console            | Incidentes, standalone, SLO         |
+| Auditoria     | `/audit`                 | `Console tecnico`                      | Event-log, decisoes, policy         |
+| Integracoes   | `/integrations`          | `UI parcial` em settings               | Conectar/testar adapters            |
+| Assistente    | `/assistant` ou settings | `UI parcial`                           | Ollama/cloud/modelos/policy         |
 
 ## 6. Fluxo 0: primeiro acesso e conta local
 
@@ -1213,11 +1213,16 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 **Estado atual:**
 
 - backend/comandos existem.
-- UI principal fica no console tecnico e dashboards demo.
+- `/work` existe como lista operacional read-only para a demo: busca
+  `/api/work/items` com TanStack Query e renderiza TanStack Table + MUI +
+  virtualizacao por `@tanstack/react-virtual`.
+- UI de detalhe, editor de breakdown e acoes governadas ainda ficam fora da
+  rota de produto.
 
 **Lacuna:**
 
-- falta tela de trabalho para times.
+- falta transformar linhas em detalhe acionavel por tipo e ligar
+  `breakdown.apply`, `repo-work.ack` e `verdict.accept` em fluxos humanos.
 
 ## 16. Fontes/repos/capabilities (`/sources`)
 

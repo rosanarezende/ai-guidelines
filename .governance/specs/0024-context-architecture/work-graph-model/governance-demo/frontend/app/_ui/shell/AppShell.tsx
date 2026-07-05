@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import TerminalIcon from "@mui/icons-material/Terminal";
+import ViewListIcon from "@mui/icons-material/ViewList";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
@@ -105,6 +106,15 @@ export default function AppShell({
               startIcon={<InsertChartOutlinedIcon fontSize="small" />}
             >
               {t("app.nav.results")}
+            </Button>
+            <Button
+              component={Link}
+              href="/work"
+              size="small"
+              color="inherit"
+              startIcon={<ViewListIcon fontSize="small" />}
+            >
+              {t("app.nav.work")}
             </Button>
             <Button
               component={Link}
