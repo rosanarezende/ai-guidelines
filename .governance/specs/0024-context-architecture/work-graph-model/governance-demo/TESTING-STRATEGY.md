@@ -221,6 +221,19 @@ O ID deve aparecer:
 Seeds sao estados iniciais nomeados da `mock-api`. Elas existem para testar
 fluxos sem precisar clicar tudo de novo.
 
+Há duas coberturas diferentes:
+
+- **Regressão de domínio da seed**: `backend/tests/seed-coverage.test.ts` constrói
+  todas as seeds por `buildSeed()` e valida o shape/estado esperado. Isso prova que
+  a seed existe, continua tipada e não quebrou seus invariantes básicos.
+- **Contrato funcional de produto**: `app-contracts.yml` usa uma seed em uma
+  jornada/tela/fluxo real. Isso prova que aquele estado inicial gera valor no app.
+
+O `contracts:check` falha quando uma seed exposta pela mock-api não existe no
+`seed_matrix`. Ele apenas avisa quando uma seed está coberta pela regressão de
+domínio, mas ainda não tem contrato funcional de produto. Esse aviso não significa
+falta de cobertura total; significa backlog de experiência/fluxo.
+
 Regras:
 
 - cada teste deve declarar a seed que usa;

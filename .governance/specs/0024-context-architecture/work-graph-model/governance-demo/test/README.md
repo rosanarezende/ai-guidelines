@@ -27,6 +27,11 @@ Regra de nivel: se uma regra pode ser provada por dominio + estado, ela NAO deve
 virar teste Playwright. O e2e fica para jornada humana, cross-screen e a casca de
 rota (sessao/gate) que so o handler real prova.
 
+Sobre seeds: toda seed exposta pela mock-api precisa estar no `seed_matrix` e na
+regressao de dominio. Uma seed pode ainda aparecer no aviso do `contracts:check`
+como "sem contrato funcional de produto"; isso quer dizer apenas que ela ainda nao
+guia uma jornada/tela/fluxo, nao que esteja sem cobertura tecnica.
+
 ## Comandos
 
 ```bash

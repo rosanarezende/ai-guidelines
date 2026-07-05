@@ -32,6 +32,7 @@ const demoRoot = path.resolve(here, "..", "..");
 const appRoot = path.join(demoRoot, "frontend", "app");
 const contractsFile = path.join(demoRoot, "test", "contracts", "app-contracts.yml");
 const journeysRoot = path.join(demoRoot, "test", "journeys");
+const seedCoverageRegressionFile = path.join(demoRoot, "backend", "tests", "seed-coverage.test.ts");
 
 // "state" marca contrato de mecanismo/estado derivado (sem tela); é ignorado
 // pela política de rota, como "shell"/"Cup".
@@ -142,13 +143,17 @@ function assertSeeds(doc: ContractDoc, contracts: Contract[]): void {
     }
   }
 
-  // Warn (não-fatal): seed declarada e coberta por seed-coverage, mas sem
-  // nenhum contrato funcional que exerça o estado. Sinaliza cobertura ilusória.
+  // Warn (não-fatal): seed declarada e coberta por regressão de domínio, mas sem
+  // contrato funcional de produto que exerça a experiência/tela/fluxo. Isso não
+  // sinaliza falta de cobertura total; sinaliza falta de contrato funcional.
   const usedByContract = new Set(contracts.map((contract) => contract.seed));
   const unusedSeeds = [...matrix].filter((seed) => !usedByContract.has(seed)).sort();
   if (unusedSeeds.length > 0) {
+    const domainCoverageNote = fs.existsSync(seedCoverageRegressionFile)
+      ? "cobertas por regressao de dominio em backend/tests/seed-coverage.test.ts"
+      : "sem regressao de dominio detectada";
     console.warn(
-      `⚠ app-contracts: ${unusedSeeds.length} seed(s) no matrix sem contrato funcional: ${unusedSeeds.join(", ")}`
+      `⚠ app-contracts: ${unusedSeeds.length} seed(s) no matrix sem contrato funcional de produto (${domainCoverageNote}): ${unusedSeeds.join(", ")}`
     );
   }
 }
