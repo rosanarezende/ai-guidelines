@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import Link from "next/link";
@@ -106,6 +107,15 @@ export default function AppShell({
               startIcon={<InsertChartOutlinedIcon fontSize="small" />}
             >
               {t("app.nav.results")}
+            </Button>
+            <Button
+              component={Link}
+              href="/map"
+              size="small"
+              color="inherit"
+              startIcon={<AccountTreeIcon fontSize="small" />}
+            >
+              {t("app.nav.map")}
             </Button>
             <Button
               component={Link}

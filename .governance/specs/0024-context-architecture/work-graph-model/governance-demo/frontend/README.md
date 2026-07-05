@@ -32,8 +32,8 @@ Feito nesta fatia (R0/R1):
 - Spike da stack visual (QRD-27/28/29) em `app/spikes/visual-stack/`: view-models independentes de renderer
   (`_model/`), candidatos isolados (`_candidates/`), fixture sintetica seedada (ate ~6k nos/10k linhas) e tela
   comparativa interna com busca, filtros, foco, painel de detalhe e acao governada simulada (dry-run).
-  Estado apos validacao da owner (QRD-29): React Flow+ELK DECIDIDO para o mapa (ECharts = aba relacional
-  opcional); Apache ECharts agora aplicado em `/results`; TanStack Table+MUI+virtualizacao agora aplicado em `/work`;
+  Estado apos validacao da owner (QRD-29): React Flow+ELK agora aplicado em `/map` (ECharts = aba relacional
+  opcional futura); Apache ECharts agora aplicado em `/results`; TanStack Table+MUI+virtualizacao agora aplicado em `/work`;
   Sigma x ECharts no console tecnico pendente de decisao (Reagraph rejeitado/removido); TanStack Query
   (= React Query atual) decidido para server state. Evidencia: `../../_reviews/2026-07-04-visual-stack-spike.md`.
 
@@ -57,10 +57,12 @@ Ainda por vir:
 | `/organizations`                                            | Criar/escolher organizacao (empresa/pessoal/cliente, perguntas guiadas) + anexar demo `acme-*`.   |
 | `/onboarding`                                               | Fluxo guiado da ORGANIZACAO atual; progresso partial/finished persiste por organizacao.           |
 | `/settings`                                                 | Configuracoes da organizacao atual (demo: secoes completas; nova: identidade/governanca/troca).   |
+| `/map`                                                      | Mapa de governanca por objetivo; demo usa React Flow + ELK sobre API real.                        |
 | `/results`                                                  | Dashboard de resultados da organizacao atual; demo usa ECharts + TanStack Query sobre API real.   |
 | `/work`                                                     | Lista operacional de trabalho; demo usa TanStack Table + MUI + virtualizacao sobre API real.      |
 | `/console`                                                  | Console tecnico da organizacao com host de governanca (hoje a demo).                              |
 | `/spikes/visual-stack`                                      | Bancada INTERNA do spike da stack visual (QRD-27/28); fora da navegacao de produto.               |
+| `/api/map/governance`                                       | View-model derivado para `/map`; workspace novo responde vazio honesto ate ter host/objetivos.    |
 | `/api/results/dashboard`                                    | View-model derivado para `/results`; workspace novo responde vazio honesto ate ter host/outcomes. |
 | `/api/work/items`                                           | View-model derivado para `/work`; workspace novo responde vazio honesto ate ter host/contextos.   |
 | `/api/local/signup`                                         | Cria local-principal + sessao (cookie httpOnly, nao assinado — nao e auth).                       |
@@ -183,6 +185,11 @@ governance-next/
       _model/                        # view-model de resultados, independente de ECharts
       _view/
         ResultsView/                 # ECharts + TanStack Query sobre /api/results/dashboard
+    map/
+      page.tsx                       # rota /map, fina + gate
+      _model/                        # view-model de mapa, independente de React Flow
+      _view/
+        MapView/                     # React Flow + ELK + filtros/painel de detalhe
     work/
       page.tsx                       # rota /work, fina + gate
       _model/                        # view-model da lista operacional

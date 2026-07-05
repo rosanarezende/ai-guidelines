@@ -103,13 +103,13 @@ Spikes executados em 2026-07-04 em duas rodadas (`frontend/app/spikes/visual-sta
 evidencia em `../_reviews/2026-07-04-visual-stack-spike.md`); a rodada 2
 reconciliou com a validacao de produto da owner. Estado por superficie:
 
-| Superficie            | Uso principal                                                                               | Estado (QRD-29)                                                                                                          |
-| --------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Mapas de governanca   | Explicar caminhos de decisao, evidencias, contratos, riscos, objetivos e proximos passos.   | DECIDIDO: React Flow (`@xyflow/react`) + ELK (`elkjs`); ECharts graph = aba relacional OPCIONAL.                         |
-| Dashboards            | Mostrar resultados derivados, comparativos de ciclo, targets, outcomes e confianca.         | PRIMARIO EM VALIDACAO REAL: Apache ECharts em `/results`; MUI X Charts = alternativa.                                    |
-| Tabelas/data grids    | Operar listas densas de iniciativas, contratos, pendencias, evidencias, auditoria e fontes. | PROVAVEL PRIMARIO: TanStack Table + MUI (confirmar virtualizacao em lista real); MUI X Data Grid/AG Grid = alternativas. |
-| Grafo tecnico/console | Explorar vizinhanca, shortest path, impacto de contrato, dependencias e densidade.          | PENDENTE DE DECISAO: Sigma.js+Graphology (console denso) x ECharts graph (visualizacao amigavel); Reagraph rejeitado.    |
-| Server state do app   | Cache, mutations, invalidacao e atualizacao das rotas do produto.                           | DECIDIDO: TanStack Query (= React Query atual; cache por workspace/sourceRevision).                                      |
+| Superficie            | Uso principal                                                                               | Estado (QRD-29)                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Mapas de governanca   | Explicar caminhos de decisao, evidencias, contratos, riscos, objetivos e proximos passos.   | PRIMARIO EM VALIDACAO REAL: `/map` com React Flow (`@xyflow/react`) + ELK (`elkjs`); ECharts graph = aba opcional futura. |
+| Dashboards            | Mostrar resultados derivados, comparativos de ciclo, targets, outcomes e confianca.         | PRIMARIO EM VALIDACAO REAL: Apache ECharts em `/results`; MUI X Charts = alternativa.                                     |
+| Tabelas/data grids    | Operar listas densas de iniciativas, contratos, pendencias, evidencias, auditoria e fontes. | PROVAVEL PRIMARIO: TanStack Table + MUI (confirmar virtualizacao em lista real); MUI X Data Grid/AG Grid = alternativas.  |
+| Grafo tecnico/console | Explorar vizinhanca, shortest path, impacto de contrato, dependencias e densidade.          | PENDENTE DE DECISAO: Sigma.js+Graphology (console denso) x ECharts graph (visualizacao amigavel); Reagraph rejeitado.     |
+| Server state do app   | Cache, mutations, invalidacao e atualizacao das rotas do produto.                           | DECIDIDO: TanStack Query (= React Query atual; cache por workspace/sourceRevision).                                       |
 
 Regras de produto:
 
@@ -152,6 +152,7 @@ Regras de produto:
 | Onboarding    | `/onboarding`            | `UI parcial`                           | Configurar workspace                |
 | Home          | `/`                      | `UI parcial`                           | Proximo passo e pendencias          |
 | Configuracoes | `/settings`              | `UI parcial`                           | Ajustar organizacao                 |
+| Mapa          | `/map`                   | `UI real/read-only` na demo            | Caminho objetivo → resultado        |
 | Console       | `/console`               | `Console tecnico`                      | Operacao avancada                   |
 | Planejamento  | `/planning`              | `Futuro`                               | Ciclo, objetivos, targets           |
 | Intake        | `/intake`                | `Futuro`, comando existe no console    | Registrar proposta/iniciativa       |
@@ -165,6 +166,16 @@ Regras de produto:
 | Auditoria     | `/audit`                 | `Console tecnico`                      | Event-log, decisoes, policy         |
 | Integracoes   | `/integrations`          | `UI parcial` em settings               | Conectar/testar adapters            |
 | Assistente    | `/assistant` ou settings | `UI parcial`                           | Ollama/cloud/modelos/policy         |
+
+### 5.1 Mapa de governanca (`/map`)
+
+**Estado atual:** tela read-only da demo com `/api/map/governance`, TanStack
+Query, React Flow + ELK, seletor de objetivo, busca, filtros por tipo/confianca/
+risco, filtro de contrato, foco de vizinhanca e painel de detalhe. Workspace
+novo responde vazio honesto ate existir governance host publicado.
+
+**Ainda falta:** visualizacao relacional opcional em ECharts graph, links de
+acao governada por tipo de no e mapa para workspace real fora da demo.
 
 ## 6. Fluxo 0: primeiro acesso e conta local
 

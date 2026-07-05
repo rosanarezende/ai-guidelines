@@ -1,0 +1,22 @@
+{
+  "locale": "pt-br",
+  "title": "Mapa de governança",
+  "subtitle": "Caminho visual de objetivo até metas, iniciativas, contratos, repo-work, outcomes e dashboard.",
+  "loading": "Carregando mapa derivado...",
+  "error": "Não foi possível carregar o mapa.",
+  "emptyTitle": "Ainda não há mapa governado neste workspace",
+  "emptyBody": "Conecte um host de governança e publique objetivos, metas ou iniciativas para gerar o mapa.",
+  "queryKey": "queryKey",
+  "sourceRevision": "revisão",
+  "derived": "derivado",
+  "scope": "Objetivo",
+  "search": "Buscar nó, dono, time ou evidência",
+  "kind": "Tipo",
+  "confidence": "Confiança",
+  "risk": "Risco",
+  "all": "Todos",
+  "onlyContract": "Somente nós ligados a contrato",
+  "selected": "Nó selecionado",
+  "selectHint": "Selecione um nó no mapa para ver detalhes e focar a vizinhança.",
+  "nodeCount": "{nodes} nós · {edges} arestas"
+}
