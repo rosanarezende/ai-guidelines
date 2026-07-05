@@ -53,14 +53,26 @@ deve entregar e adaptar a aplicacao incrementalmente ate os contratos passarem.
 
 ## 3. Camadas de teste
 
-| Camada                    | Ferramenta principal                      | Escopo                                                      | Status  |
-| ------------------------- | ----------------------------------------- | ----------------------------------------------------------- | ------- |
-| Static/typecheck          | TypeScript                                | contratos, dominio, view-models e APIs tipadas              | atual   |
-| Domain/use-case           | Vitest (proposto)                         | reducers, policies, commands, adapters sem browser          | futuro  |
-| Component/integration UI  | Testing Library + MSW (proposto)          | componentes/steps isolados com requests reais interceptados | futuro  |
-| E2E/journey               | Playwright                                | fluxos entre telas, persistencia, auth local, mock-api      | atual   |
-| Governance/backend checks | tools/checks + backend tests              | fail-closed, event-log, resolver, adapters                  | atual   |
-| Reporting/management      | Playwright HTML/JSON/JUnit; Allure depois | visualizacao e historico de testes                          | inicial |
+Pirâmide: o barato prova o invariante; o caro prova a jornada. Regra de nivel:
+se uma regra pode ser provada por funcao de dominio + estado (sem browser), ela
+NAO deve virar teste Playwright. E2E fica para o que so o browser prova (jornada
+humana, cross-screen, persistencia via UI, sentinela de rota).
+
+| Camada                    | Ferramenta principal                      | Escopo                                                                                                                             | Status                  |
+| ------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| Static/typecheck          | TypeScript                                | contratos, dominio, view-models e APIs tipadas                                                                                     | atual                   |
+| Domain/invariante         | `node --test` (backend/tests, ~200ms)     | authority (matriz papel x comando), role state-machine, sourceTrust, onboarding, isolamento demo, invariantes sobre TODAS as seeds | atual (primeira classe) |
+| API/route                 | HTTP direto / use-case (proposto)         | `/api/local/*` authority, fail-closed, idempotency/replay, stale base-revision                                                     | futuro                  |
+| Component/integration UI  | Testing Library + MSW (proposto)          | componentes/steps isolados com requests reais interceptados                                                                        | futuro                  |
+| E2E/journey               | Playwright                                | fluxos entre telas, persistencia, auth local, mock-api                                                                             | atual                   |
+| Governance/backend checks | tools/checks + backend tests              | fail-closed, event-log, resolver, adapters                                                                                         | atual                   |
+| Reporting/management      | Playwright HTML/JSON/JUnit; Allure depois | visualizacao e historico de testes                                                                                                 | inicial                 |
+
+Layer de dominio/invariante: `npm --workspace acme-governance-backend run
+test:shell` (`node --test tests/**/*.test.ts`). Usa o MESMO executor autorizado
+(`authorizeShellCommand`) que backend real e mock-api usam — isso e a prova de
+fidelidade do mock. Invariantes rodam sobre `SEEDS`/`buildSeed` diretamente,
+sem HTTP. Regra do produto que puder ser provada aqui NAO deve subir para e2e.
 
 ## 4. Ferramentas escolhidas
 
