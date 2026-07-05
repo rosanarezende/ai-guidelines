@@ -1,10 +1,12 @@
-version: 1
+version: 2
 status: active
 updated: "2026-07-05"
 purpose: >
-  Contratos funcionais da governance-demo. Cada contrato descreve o
-  comportamento esperado antes da implementacao/refatoracao. Testes podem nascer
-  fixme/expected-fail, mas nao podem existir sem ID, seed e criterio observavel.
+  Contratos funcionais da governance-demo. Este arquivo descreve o produto-alvo,
+  nao apenas o que o app entrega hoje. Cada tela/fluxo/feature deve ter teste
+  Playwright correspondente antes da implementacao ou refactor. Contratos podem
+  nascer fixme/expected-fail, mas nao podem nascer sem ID, seed, superficies e
+  criterios observaveis.
 
 conventions:
   status:
@@ -13,208 +15,594 @@ conventions:
     fixme: "nao executa porque rota/infra ainda falta ou travaria"
     skip: "nao aplicavel a uma configuracao especifica"
     manual: "validacao humana temporaria com plano para automatizar"
+  test_shape:
+    - "Todo contrato deve ter spec Playwright, mesmo que test.fixme."
+    - "O corpo do teste deve conter passos/assertions alvo, nao placeholder vazio."
+    - "Design/copy podem mudar; behavior, persistencia, authority e consistencia nao."
+    - "Fluxo que cruza telas precisa provar origem, destino e reload quando aplicavel."
   selector_policy:
-    - "Preferir role/label quando copy for contrato."
-    - "Usar data-testid semantico quando copy/design puder mudar."
-    - "Nao usar classe MUI, estrutura DOM interna ou ordem visual."
+    - "Preferir data-testid semantico para comportamento estavel."
+    - "Usar getByRole/getByLabel quando o texto e parte do contrato de entendimento."
+    - "Nao usar classes MUI, ordem visual, DOM interno ou seletores CSS frageis."
   evidence:
-    - "Todo contrato ativo deve produzir Playwright trace em falha."
-    - "Todo contrato entre telas deve provar persistencia ou consistencia apos reload."
+    - "Todo contrato ativo deve produzir trace em falha."
+    - "Todo contrato cross-screen deve provar que o mesmo dado aparece coerente nas telas declaradas."
+    - "Todo contrato de seguranca deve provar block/warn/fail-visible, nao apenas copy."
 
-first_wave:
+seed_matrix:
+  blank: "sem principal, sem workspace"
+  empty-workspace: "principal local + workspace novo sem onboarding"
+  onboarding-partial: "workspace com onboarding parcial"
+  workspace-sem-host: "workspace sem governance host"
+  workspace-host-local: "workspace com governance host local"
+  workspace-host-embutido: "workspace com .governance-host embutido"
+  workspace-local: "workspace solo/local"
+  workspace-shared: "workspace compartilhado"
+  workspace-controlled: "workspace controlado/security"
+  workspace-controlled-neo4j: "workspace controlado com Neo4j read-model"
+  workspace-docker-compose: "workspace com stack compose"
+  workspace-docker-ollama-profile: "workspace com profile Ollama local"
+  workspace-groups-teams: "workspace com pessoas/times/grupos"
+  workspace-shared-convites: "workspace com convites pendentes"
+  workspace-shared-github: "workspace com GitHub identity provider"
+  workspace-shared-google: "workspace com Google/OIDC"
+  workspace-controlled-oidc: "workspace controlled com OIDC generico"
+  workspace-cloud-synced-folder: "fonte local sincronizada em nuvem"
+  workspace-provider-versioned-source: "fonte versionada por provider"
+  workspace-compact-policy: "perfil compact com policy de acumulacao"
+  workspace-multi-assistant: "multiplos assistentes/defaults"
+  workspace-planning-progressivo: "planejamento progressivo"
+  workspace-github-work-source: "GitHub como work-source release-1"
+  demo-acme: "snapshot demo acme anexado explicitamente"
+
+contracts:
+  # Auth, workspace e shell
   - id: APP-01
     title: "Criar identidade local sem confundir com auth corporativa"
     status: active
-    playwright: "../journeys/onboarding-journey.spec.ts"
+    spec: "journeys/onboarding-journey.spec.ts"
     seed: blank
     actors: ["new-local-user"]
     surfaces: ["/signup", "/organizations"]
-    given:
-      - "Nao ha principal local em sessao."
-    when:
-      - "A pessoa acessa /."
-      - "Cria identidade local com nome."
-    then:
-      - "A raiz redireciona para /signup."
-      - "A identidade local e criada."
-      - "O fluxo segue para /organizations."
-      - "A UI deixa claro que isto nao e SSO nem authority governada."
+    assertions:
+      - "A raiz redireciona para /signup quando nao ha sessao."
+      - "Identidade local e criada sem prometer SSO, billing ou authority governada."
+      - "Fluxo segue para /organizations."
 
   - id: APP-02
-    title: "Criar workspace novo sem vazar dados da demo acme"
+    title: "Criar workspace novo sem vazar dados da demo"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
+    spec: "journeys/auth-workspace.spec.ts"
     seed: blank
     actors: ["workspace-admin"]
-    surfaces: ["/organizations", "/", "/settings"]
-    given:
-      - "Existe principal local sem workspace selecionado."
-    when:
-      - "A pessoa cria um workspace novo."
-    then:
-      - "O workspace abre sem dados acme."
-      - "Home e Settings mostram estado vazio honesto."
-      - "O app oferece onboarding, nao console tecnico."
+    surfaces: ["/organizations", "/", "/settings", "/console"]
+    assertions:
+      - "Workspace novo nasce vazio e honesto."
+      - "Home/Settings nao exibem dados acme por acidente."
+      - "Console tecnico fica indisponivel ou degradado enquanto nao ha host."
+      - "Demo so aparece quando anexada explicitamente."
 
   - id: APP-03
-    title: "Logout limpa sessao sem apagar workspaces ou event-log"
+    title: "Logout limpa sessao sem apagar workspace/event-log"
     status: active
-    playwright: "../journeys/onboarding-journey.spec.ts"
+    spec: "journeys/onboarding-journey.spec.ts"
     seed: blank
     actors: ["workspace-admin"]
     surfaces: ["shell", "/signup", "/organizations"]
-    given:
-      - "Existe principal local e workspace criado."
-    when:
-      - "A pessoa clica em Sair."
-    then:
-      - "A sessao volta para /signup."
-      - "Ao entrar novamente, o workspace ainda existe."
-      - "Nenhum event-log e apagado."
+    assertions:
+      - "Logout redireciona para /signup."
+      - "Reentrada preserva workspace e event-log."
+      - "Logout nao e delete."
 
   - id: APP-04
     title: "Onboarding parcial retoma no passo salvo"
     status: active
-    playwright: "../journeys/onboarding-journey.spec.ts"
+    spec: "journeys/onboarding-journey.spec.ts"
     seed: blank
     actors: ["workspace-admin"]
     surfaces: ["/onboarding", "/"]
-    given:
-      - "Workspace novo iniciou onboarding."
-    when:
-      - "A pessoa avanca um passo e volta para Home."
-      - "A pessoa abre Continuar onboarding."
-    then:
-      - "Home mostra card de onboarding em andamento."
-      - "Reload preserva estado parcial."
-      - "Onboarding retoma no passo salvo, nao na tela inicial."
+    assertions:
+      - "Home mostra card de continuar onboarding."
+      - "Reload preserva o passo salvo."
+      - "Abrir onboarding nao volta para tela inicial."
 
-  - id: APP-05
-    title: "Perfil e responsabilidades geram recomendacao compreensivel"
+  - id: APP-13
+    title: "Home de workspace novo mostra proximo passo real"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
-    seed: blank
+    spec: "journeys/auth-workspace.spec.ts"
+    seed: empty-workspace
     actors: ["workspace-admin"]
-    surfaces: ["/onboarding", "/settings", "/"]
-    given:
-      - "Workspace esta no passo de perfil."
-    when:
-      - "A pessoa responde perguntas de tamanho, separacao de papeis e regra de acumulo sensivel."
-    then:
-      - "O app recomenda um perfil com descricao humana."
-      - "A regra de acumulo sensivel altera a recomendacao/configuracao visivel."
-      - "Settings e Home refletem a mesma escolha."
+    surfaces: ["/"]
+    assertions:
+      - "Home nao parece dashboard completo antes de host/fontes."
+      - "Proximo passo aponta para onboarding/host/fontes conforme estado."
+      - "Pendencias sao acionaveis e nao tecnicas demais."
+
+  - id: APP-14
+    title: "Home demo acme permanece explicitamente demo"
+    status: fixme
+    spec: "journeys/auth-workspace.spec.ts"
+    seed: demo-acme
+    actors: ["workspace-admin"]
+    surfaces: ["/", "/organizations"]
+    assertions:
+      - "Chip/badge deixa claro que e demo/sandbox."
+      - "Demo nao altera workspace real selecionado."
+      - "Dados demo nao sao tratados como dados do usuario."
+
+  # Onboarding e configuracao inicial
+  - id: APP-05
+    title: "Perfil e responsabilidades guiam recomendacao compreensivel"
+    status: fixme
+    spec: "journeys/onboarding.spec.ts"
+    seed: empty-workspace
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/", "/settings"]
+    assertions:
+      - "Perguntas filtram perfis em vez de dropdown cru."
+      - "Solo nao mostra perguntas de separacao de papeis que nao fazem sentido."
+      - "Regra de acumulacao altera recomendacao/configuracao visivel."
+      - "Home e Settings refletem o mesmo perfil."
 
   - id: APP-06
-    title: "Pessoas, times e papeis usam aceite quando o papel e para outra pessoa"
+    title: "Responsabilidades aparecem somente quando fazem sentido"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
-    seed: blank
-    actors: ["workspace-admin", "invited-member"]
-    surfaces: ["/onboarding", "/settings"]
-    given:
-      - "Workspace tem mais de uma pessoa."
-    when:
-      - "Admin atribui papel sensivel a outra pessoa."
-    then:
-      - "Assignment fica proposed/pending."
-      - "A pessoa convidada precisa aceitar."
-      - "Authority efetiva so considera papeis aceitos ou herdados conforme policy."
+    spec: "journeys/onboarding.spec.ts"
+    seed: empty-workspace
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding"]
+    assertions:
+      - "Selecionar solo colapsa perguntas irrelevantes."
+      - "Selecionar time pequeno abre perguntas de acumulacao/revisao."
+      - "Selecionar organizacao maior abre separacao de papeis/SoD."
 
   - id: APP-07
-    title: "Governance host e explicado antes de cadastrar fontes de trabalho"
+    title: "Pessoas, times e papeis sao modelados por sujeito"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
-    seed: blank
-    actors: ["workspace-admin"]
+    spec: "journeys/settings.spec.ts"
+    seed: workspace-groups-teams
+    actors: ["workspace-admin", "invited-member"]
     surfaces: ["/onboarding", "/settings"]
-    given:
-      - "Workspace novo ainda nao tem governance host."
-    when:
-      - "A pessoa escolhe local, repo dedicado ou .governance-host embutido."
-    then:
-      - "O app explica diferenca entre host e fonte de trabalho."
-      - "Fit-check mostra riscos e bloqueios."
-      - "Sandbox explicito nao e tratado como organizacao governada real."
+    assertions:
+      - "A UI lista pessoas/times/grupos e seus papeis."
+      - "Papel atribuido a outra pessoa fica proposed ate aceite."
+      - "Authority efetiva e derivada de assignments aceitos e grupos."
+      - "Acumulo sensivel fica visivel conforme policy."
 
   - id: APP-08
-    title: "Sources guia projeto local vs nuvem e relaciona com governance host"
+    title: "Governance host e escolhido antes das fontes"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
-    seed: workspace-local-host
+    spec: "journeys/sources.spec.ts"
+    seed: workspace-sem-host
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/settings", "/sources"]
+    assertions:
+      - "UI diferencia governance host de fonte de trabalho."
+      - "Opcoes local, repo dedicado e .governance-host embutido sao explicadas."
+      - "Fit-check mostra riscos e bloqueios antes de scaffold/link."
+      - "Sandbox explicito e permitido, mas nao e vendido como governanca real."
+
+  - id: APP-09
+    title: "Onboarding de fontes guia local vs nuvem"
+    status: fixme
+    spec: "journeys/sources.spec.ts"
+    seed: workspace-host-local
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/sources", "/settings"]
+    assertions:
+      - "Pessoa escolhe projeto local ou projeto na nuvem."
+      - "Local pergunta pasta vazia/em andamento, Git/sem Git e relacao com .governance."
+      - "Nuvem direciona para provider; nao pede URL solta como caminho feliz."
+      - "Fonte cadastrada aparece igual em Sources, Settings e Home."
+
+  - id: APP-10
+    title: "Assistente/modelo e opcional, multi-provider e seguro"
+    status: fixme
+    spec: "journeys/settings.spec.ts"
+    seed: workspace-multi-assistant
+    actors: ["workspace-admin", "security-owner"]
+    surfaces: ["/onboarding", "/settings", "/integrations"]
+    assertions:
+      - "Ollama/local pode ser configurado sem egress externo."
+      - "Cloud provider exige approval/policy antes de ficar ativo."
+      - "Defaults por funcao ficam visiveis e alteraveis."
+      - "Dispensar assistente deixa app funcional."
+
+  - id: APP-11
+    title: "Onboarding mostra integracoes como opcionais e contextuais"
+    status: fixme
+    spec: "journeys/integrations.spec.ts"
+    seed: workspace-with-integration-statuses
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/integrations"]
+    assertions:
+      - "Integracoes aparecem com disponivel/release-1/em-breve/adiado."
+      - "Cada sugestao explica o que funciona sem a ferramenta."
+      - "Nada fica connected sem mecanismo real."
+
+  - id: APP-12
+    title: "Revisao final do onboarding e honesta"
+    status: fixme
+    spec: "journeys/onboarding.spec.ts"
+    seed: workspace-host-local
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/", "/settings"]
+    assertions:
+      - "Mostra o que esta configurado, pendente, rebaixado e bloqueado."
+      - "Nao permite finalizar sem host ou sandbox explicito."
+      - "Finalizar persiste e Home deixa de mostrar onboarding como pendente."
+
+  # Settings, fontes e integracoes
+  - id: APP-15
+    title: "Settings de organizacao espelha onboarding"
+    status: fixme
+    spec: "journeys/settings.spec.ts"
+    seed: workspace-compact-policy
+    actors: ["workspace-admin"]
+    surfaces: ["/settings", "/onboarding", "/"]
+    assertions:
+      - "Perfil, workspace-mode, stack e policy aparecem iguais ao onboarding."
+      - "Mudanca futura exige comando/approval quando policy pedir."
+      - "Nada e editado so no estado visual."
+
+  - id: APP-16
+    title: "Settings gerencia pessoas, grupos, convites e roles"
+    status: fixme
+    spec: "journeys/settings.spec.ts"
+    seed: workspace-shared-convites
+    actors: ["workspace-admin", "invited-member"]
+    surfaces: ["/settings", "/audit"]
+    assertions:
+      - "Convite tem token/status e pode expirar/revogar."
+      - "Aceite muda authority efetiva."
+      - "Revogar remove authority sem apagar historico."
+
+  - id: APP-17
+    title: "Settings gerencia governance host com fit-check"
+    status: fixme
+    spec: "journeys/sources.spec.ts"
+    seed: workspace-host-local
+    actors: ["workspace-admin"]
+    surfaces: ["/settings", "/console", "/"]
+    assertions:
+      - "Host vinculado aparece com sourceRevision."
+      - "Warnings de Git/CODEOWNERS/permissao ficam visiveis."
+      - "Console so abre quando host permite leitura segura."
+
+  - id: APP-18
+    title: "Settings e Sources mostram as mesmas fontes"
+    status: fixme
+    spec: "journeys/cross-screen-consistency.spec.ts"
+    seed: workspace-provider-versioned-source
     actors: ["workspace-admin"]
     surfaces: ["/sources", "/settings", "/"]
-    given:
-      - "Workspace tem governance host local."
-    when:
-      - "A pessoa adiciona projeto local com ou sem Git."
-    then:
-      - "A UI pede nome e selecao de pasta de forma guiada."
-      - "A fonte recebe sourceTrust correto."
-      - "A fonte aparece igual em Sources, Settings e Home."
-      - "Fonte sem Git nao aparece como evidencia auditavel forte."
+    assertions:
+      - "A mesma fonte tem mesmo status/trust nas tres telas."
+      - "Scan altera todas as superficies depois de reload."
+      - "Fonte rebaixada nao vira evidencia forte em Results."
+
+  - id: APP-19
+    title: "Settings de assistente mostra provider/defaults reais"
+    status: fixme
+    spec: "journeys/settings.spec.ts"
+    seed: workspace-multi-assistant
+    actors: ["workspace-admin"]
+    surfaces: ["/settings", "/integrations", "Cup"]
+    assertions:
+      - "Provider padrao por funcao fica visivel."
+      - "Health/probe falho deixa provider limited/unavailable."
+      - "Cup usa somente provider permitido pela policy."
+
+  - id: APP-20
+    title: "Settings resume integracoes e aponta para hub"
+    status: fixme
+    spec: "journeys/integrations.spec.ts"
+    seed: workspace-with-integration-statuses
+    actors: ["workspace-admin"]
+    surfaces: ["/settings", "/integrations"]
+    assertions:
+      - "Settings nao tenta substituir o hub."
+      - "Status em Settings bate com /integrations."
+      - "Acoes sensiveis levam para detalhe/approval."
+
+  - id: APP-21
+    title: "Sources dedicada cadastra fonte local/cloud/manual"
+    status: fixme
+    spec: "journeys/sources.spec.ts"
+    seed: workspace-host-local
+    actors: ["workspace-admin", "source-owner"]
+    surfaces: ["/sources", "/settings", "/"]
+    assertions:
+      - "Wizard pergunta local vs nuvem."
+      - "Local permite browser/select de pasta quando suportado; fallback manual e honesto."
+      - "GitHub redireciona para conectar provider, nao pede token bruto como caminho principal."
+      - "Trust/limitation fica visivel."
 
   - id: INT-01
-    title: "Integrations hub mostra valor, permissoes, risco e alternativa manual"
+    title: "Hub /integrations compara providers por valor, permissao e risco"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
+    spec: "journeys/integrations.spec.ts"
     seed: workspace-with-integration-statuses
     actors: ["workspace-admin"]
-    surfaces: ["/integrations", "/settings"]
-    given:
-      - "Workspace tem backlog de integracoes."
-    when:
-      - "A pessoa abre /integrations."
-    then:
+    surfaces: ["/integrations"]
+    assertions:
       - "Cada card mostra o que o framework ja entrega sem a integracao."
-      - "Status efetivo bate com Settings."
-      - "Cloud nao aparece connected sem auth/permissao/probe."
-      - "Quem solicita e quem aprova ficam visiveis."
+      - "Mostra dados acessados, permissoes, quem solicita, quem aprova e como desativar."
+      - "Status cloud nao vira connected sem auth/probe."
 
   - id: INT-02
-    title: "Sugestao contextual de integracao nao vende ferramenta como requisito"
+    title: "Sugestoes contextuais de integracao aparecem no fluxo certo"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
+    spec: "journeys/integrations.spec.ts"
     seed: workspace-with-integration-statuses
     actors: ["workspace-admin"]
-    surfaces: ["/sources", "/results", "/work"]
-    given:
-      - "Workspace tem integracoes disponiveis e futuras."
-    when:
-      - "A pessoa entra em telas que se beneficiam de integracoes."
-    then:
-      - "A sugestao contextual explica o valor da integracao."
-      - "Tambem explica o que funciona sem a ferramenta."
-      - "Nao ativa provider nem concede authority automaticamente."
+    surfaces: ["/sources", "/results", "/work", "/triage"]
+    assertions:
+      - "Sources sugere work-source/repo provider."
+      - "Results sugere observability/analytics/feature-flags."
+      - "Work sugere CI/code-quality."
+      - "Triage sugere matcher/catalog/CODEOWNERS."
 
+  - id: INT-03
+    title: "GitHub work-source nao se confunde com GitHub login"
+    status: fixme
+    spec: "journeys/integrations.spec.ts"
+    seed: workspace-github-work-source
+    actors: ["workspace-admin", "source-owner"]
+    surfaces: ["/signup", "/integrations", "/sources"]
+    assertions:
+      - "GitHub OAuth identifica usuario, mas nao conecta repos automaticamente."
+      - "GitHub work-source exige permissao e repos selecionados."
+      - "Conectar repo nao concede authority governada."
+
+  # Planejamento -> outcome
+  - id: APP-22
+    title: "Planejamento cria ciclo, objetivo, metrica e target"
+    status: fixme
+    spec: "journeys/planning-intake.spec.ts"
+    seed: workspace-planning-progressivo
+    actors: ["sponsor", "metric-owner"]
+    surfaces: ["/planning", "/", "/results"]
+    assertions:
+      - "Fluxo padrao pede minimo objective+metric+target."
+      - "Thesis, opportunity-area e allocation estao disponiveis como contexto opcional."
+      - "Target aparece no dashboard sem actual ate haver outcome."
+
+  - id: APP-23
+    title: "Intake registra iniciativa sem breakdown tecnico inicial"
+    status: fixme
+    spec: "journeys/planning-intake.spec.ts"
+    seed: workspace-planning-progressivo
+    actors: ["requester", "product-owner"]
+    surfaces: ["/intake", "/triage", "/"]
+    assertions:
+      - "Registro captura problema, aposta, contexto e duvidas."
+      - "Intake pode se ligar a objective/target sem exigir solucao tecnica."
+      - "Criar proposta gera item visivel para triagem."
+
+  - id: APP-24
+    title: "Triage transforma duvidas em itens e usa matcher advisory"
+    status: fixme
+    spec: "journeys/triage-gate.spec.ts"
+    seed: workspace-provider-versioned-source
+    actors: ["technical-owner", "triager"]
+    surfaces: ["/triage", "/sources", "/audit"]
+    assertions:
+      - "Cada duvida vira item com fate: exploration, direct-answer ou missing-info."
+      - "Matcher sugere fontes/repos com score e unknowns."
+      - "Humano confirma/sobrescreve e auditoria registra a decisao."
+
+  - id: APP-25
+    title: "Gate/ativacao exige autoridade e evidencia visivel"
+    status: fixme
+    spec: "journeys/triage-gate.spec.ts"
+    seed: workspace-shared
+    actors: ["approver", "requester"]
+    surfaces: ["/gates", "/intake", "/audit"]
+    assertions:
+      - "Requester e approver aparecem separados quando policy exige."
+      - "Aprovar, descartar ou pedir mais informacao deixa evento auditavel."
+      - "Ativacao cria intent sem mover refs de forma ambigua."
+
+  - id: APP-26
+    title: "Work mostra repo-work, status, ack e evidencia"
+    status: fixme
+    spec: "journeys/work-contracts.spec.ts"
+    seed: demo-acme
+    actors: ["technical-owner", "developer"]
+    surfaces: ["/work", "/sources", "/results"]
+    assertions:
+      - "Repo-work mostra lifecycle e owner."
+      - "Done exige evidencia de codigo/teste/verificacao."
+      - "Outcome nao soma se work necessario esta aberto/bloqueado/dropped."
+
+  - id: APP-27
+    title: "Contracts mostra owner, consumers, janela e contention"
+    status: fixme
+    spec: "journeys/work-contracts.spec.ts"
+    seed: demo-acme
+    actors: ["contract-owner", "consumer-owner"]
+    surfaces: ["/contracts", "/work", "/map", "/audit"]
+    assertions:
+      - "Contrato lista owner, consumers, revision e compatibility-window."
+      - "Duas intents mexendo no mesmo contrato geram contention/decision."
+      - "Outcome que cita revision fora da janela falha/rebaixa."
+
+  - id: APP-28
+    title: "Results mostra targets, outcomes, actual e confidence"
+    status: fixme
+    spec: "journeys/results-audit.spec.ts"
+    seed: demo-acme
+    actors: ["stakeholder", "metric-owner"]
+    surfaces: ["/results", "/planning", "/audit"]
+    assertions:
+      - "ECharts mostra actual vs target, outcome valido/invalido e confidence."
+      - "Self-attested aparece com badge, nao como independente."
+      - "Outcome sem evidencia verificavel nao soma como prova forte."
+
+  - id: APP-29
+    title: "Mapa de governanca explica caminho e impacto"
+    status: fixme
+    spec: "journeys/results-audit.spec.ts"
+    seed: demo-acme
+    actors: ["stakeholder", "technical-owner"]
+    surfaces: ["/map", "/results", "/contracts"]
+    assertions:
+      - "React Flow/ELK mostra caminho humano objetivo->intent->work->contract->outcome."
+      - "Filtros/search/foco reduzem ruido."
+      - "ECharts/Sigma ficam para grafo tecnico opcional."
+
+  - id: APP-30
+    title: "Operacoes mostra incidentes, follow-ups, SLO e trabalho operacional"
+    status: fixme
+    spec: "journeys/results-audit.spec.ts"
+    seed: demo-acme
+    actors: ["operations-owner", "technical-owner"]
+    surfaces: ["/operations", "/work", "/results", "/audit"]
+    assertions:
+      - "Incidente mostra declare->mitigate->resolve->postmortem."
+      - "Follow-up aparece como standalone/proposal resolvivel."
+      - "MTTR/SLO derivam de eventos, nao texto livre."
+
+  - id: APP-31
+    title: "Audit mostra trilha de decisoes e break-glass"
+    status: fixme
+    spec: "journeys/results-audit.spec.ts"
+    seed: demo-acme
+    actors: ["auditor", "sponsor"]
+    surfaces: ["/audit", "/settings", "/integrations"]
+    assertions:
+      - "Evento mostra actor, authority, base/source revision e idempotency."
+      - "Break-glass fica visivel com motivo, TTL e revisao."
+      - "Mutacao sensivel sem authority nao some do historico."
+
+  - id: APP-32
+    title: "Console tecnico existe, mas nao substitui UX principal"
+    status: fixme
+    spec: "journeys/results-audit.spec.ts"
+    seed: demo-acme
+    actors: ["technical-owner"]
+    surfaces: ["/console", "/"]
+    assertions:
+      - "Console mostra grafo/comandos/event-log para usuarios tecnicos."
+      - "Fluxos principais nao dependem de payload manual no console."
+      - "Acoes do console tambem respeitam baseRevision e authority."
+
+  # Cup/CWP
   - id: CUP-01
     title: "Cup abre como overlay contextual sem provider externo"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
-    seed: blank
+    spec: "journeys/cup.spec.ts"
+    seed: empty-workspace
     actors: ["workspace-admin"]
-    surfaces: ["overlay", "/onboarding", "/sources", "/settings"]
-    given:
-      - "Workspace esta em modo local sem assistente configurado."
-    when:
-      - "A pessoa abre Cup em rotas diferentes."
-    then:
-      - "Cup mostra especialista/contexto diferente por rota."
-      - "Cup nao envia prompt nem contexto para provider externo."
-      - "Cup pode explicar a policy aplicavel de forma deterministica."
+    surfaces: ["Cup", "/onboarding", "/sources", "/settings"]
+    assertions:
+      - "Botao global abre painel sem navegar para outra pagina."
+      - "Cup identifica rota e mostra especialista/contexto."
+      - "Sem provider, Cup so usa explicacao deterministica/local."
 
-  - id: SEC-01
-    title: "Provider cloud nao fica ativo sem egress/authority"
+  - id: CUP-02
+    title: "Cup explica policies versionadas"
     status: fixme
-    playwright: "../journeys/first-wave-contracts.spec.ts"
+    spec: "journeys/cup.spec.ts"
+    seed: workspace-controlled
+    actors: ["workspace-admin"]
+    surfaces: ["Cup", "/integrations", "/settings"]
+    assertions:
+      - "Bloqueio/warning aponta para POLICY-HANDBOOK."
+      - "Cup explica razao, impacto e proximo passo."
+      - "Cup nao inventa policy fora do catalogo."
+
+  - id: CUP-03
+    title: "Cup nao executa mutacao sem confirmacao humana"
+    status: fixme
+    spec: "journeys/cup.spec.ts"
+    seed: workspace-host-local
+    actors: ["workspace-admin"]
+    surfaces: ["Cup", "/sources", "/audit"]
+    assertions:
+      - "Cup pode preparar draft/dry-run."
+      - "Executar exige confirmacao humana e base/source revision atual."
+      - "Audit registra a decisao humana, nao Cup como authority."
+
+  - id: CUP-04
+    title: "Cup respeita permissoes e nao vaza contexto bloqueado"
+    status: fixme
+    spec: "journeys/cup.spec.ts"
+    seed: workspace-controlled
+    actors: ["member", "security-owner"]
+    surfaces: ["Cup", "/results", "/triage"]
+    assertions:
+      - "Contexto entregue ao Cup depende do papel do usuario."
+      - "Dados restricted nao saem para provider sem egress aprovado."
+      - "Fallback local explica limitacao sem bypass."
+
+  # Seguranca, authority e consistencia
+  - id: SEC-01
+    title: "Provider cloud nao ativa sem egress/authority"
+    status: fixme
+    spec: "journeys/security-authority.spec.ts"
     seed: workspace-controlled
     actors: ["workspace-admin", "security-owner"]
-    surfaces: ["/onboarding", "/settings", "/integrations"]
-    given:
-      - "Workspace controlled tenta configurar assistente cloud."
-    when:
-      - "Admin sem security approval testa/salva provider cloud."
-    then:
-      - "O app bloqueia ativacao."
-      - "O status fica blocked ou pending-approval, nunca connected."
-      - "Cup/Settings explicam a politica e o proximo passo."
+    surfaces: ["/integrations", "/settings", "Cup"]
+    assertions:
+      - "Admin sem security approval nao ativa cloud provider."
+      - "Status fica blocked/pending, nunca connected."
+      - "Explicacao mostra quem aprova e por que."
+
+  - id: SEC-02
+    title: "Read-model derivado nao autoriza acao stale"
+    status: fixme
+    spec: "journeys/security-authority.spec.ts"
+    seed: demo-acme
+    actors: ["technical-owner"]
+    surfaces: ["/map", "/results", "/work", "/console"]
+    assertions:
+      - "Acao iniciada a partir de read-model relê source/base revision."
+      - "Revision stale retorna erro fail-closed."
+      - "UI mostra refresh/retry, nao aplica estado antigo."
+
+  - id: SEC-03
+    title: "Authority nunca deriva apenas de login externo"
+    status: fixme
+    spec: "journeys/security-authority.spec.ts"
+    seed: workspace-shared-github
+    actors: ["workspace-admin", "member"]
+    surfaces: ["/signup", "/organizations", "/settings", "/integrations"]
+    assertions:
+      - "Login GitHub/Google/OIDC identifica principal."
+      - "Membership e role assignment continuam governados pelo workspace."
+      - "Provider externo nao concede sponsor/security/source-owner sozinho."
+
+  - id: CONS-01
+    title: "Perfil escolhido aparece igual em onboarding, Home e Settings"
+    status: fixme
+    spec: "journeys/cross-screen-consistency.spec.ts"
+    seed: workspace-compact-policy
+    actors: ["workspace-admin"]
+    surfaces: ["/onboarding", "/", "/settings"]
+    assertions:
+      - "Mesmo profile id e policy aparecem em todas as telas."
+      - "Reload nao altera recomendacao."
+
+  - id: CONS-02
+    title: "Fonte adicionada aparece igual em Sources, Settings e Home"
+    status: fixme
+    spec: "journeys/cross-screen-consistency.spec.ts"
+    seed: workspace-provider-versioned-source
+    actors: ["workspace-admin"]
+    surfaces: ["/sources", "/settings", "/"]
+    assertions:
+      - "Nome, provider, trust e limitations coincidem."
+      - "Scan/freshness aparece de forma consistente."
+
+  - id: CONS-03
+    title: "Integracao conectada aparece igual no hub, Settings e sugestoes"
+    status: fixme
+    spec: "journeys/cross-screen-consistency.spec.ts"
+    seed: workspace-with-integration-statuses
+    actors: ["workspace-admin"]
+    surfaces: ["/integrations", "/settings", "/sources", "/results"]
+    assertions:
+      - "Status efetivo do provider nao diverge."
+      - "Sugestao contextual nao contradiz o hub."

@@ -69,7 +69,7 @@ deve entregar e adaptar a aplicacao incrementalmente ate os contratos passarem.
 Motor principal de E2E e jornadas. Motivos:
 
 - UI Mode e Trace Viewer ajudam a depurar fluxos longos;
-- reports HTML/JSON/JUnit sao suficientes para a primeira leva;
+- reports HTML/JSON/JUnit sao suficientes para a suite alvo inicial;
 - annotations (`fixme`, `skip`, `fail`) permitem backlog executavel;
 - locators por role/test id suportam testes menos frageis;
 - ja existe configuracao com `mock-api` + Next.
@@ -98,12 +98,12 @@ subir `mock-api`. Nao substitui a `mock-api` dos E2E.
 ### Allure Report
 
 Recomendado como proxima camada de gestao quando houver volume de contratos.
-Entrar depois da primeira leva Playwright ativa, para evitar instalar reporting
+Entrar depois da suite Playwright alvo ter volume ativo suficiente, para evitar instalar reporting
 antes de haver sinal suficiente.
 
 ### ReportPortal
 
-Opcional futuro para times maiores/self-hosted. Nao entra na primeira leva.
+Opcional futuro para times maiores/self-hosted. Nao entra na suite alvo inicial.
 
 ## 5. Estados de contrato de teste
 
@@ -126,8 +126,18 @@ governance-demo/test/
   contracts/
     app-contracts.yml        # inventario governado de contratos
   journeys/
-    onboarding-journey.spec.ts
-    first-wave-contracts.spec.ts
+    auth-workspace.spec.ts
+    onboarding.spec.ts
+    settings.spec.ts
+    sources.spec.ts
+    integrations.spec.ts
+    cup.spec.ts
+    planning-intake.spec.ts
+    triage-gate.spec.ts
+    work-contracts.spec.ts
+    results-audit.spec.ts
+    cross-screen-consistency.spec.ts
+    security-authority.spec.ts
   reports/                  # gerado, nao versionado
 ```
 
@@ -165,7 +175,7 @@ Regras:
 - quando o objetivo e testar consistencia, seed pode criar o estado completo e
   o teste visita varias telas.
 
-Seeds prioritarias para a primeira leva:
+Seeds prioritarias para a suite alvo inicial:
 
 - `blank`;
 - `partial-onboarding`;
@@ -209,7 +219,7 @@ Exemplos:
 
 ## 11. Relatorios
 
-Primeira leva:
+Suite alvo inicial:
 
 - `list` no terminal para feedback rapido;
 - `html` para navegacao visual;
@@ -233,7 +243,7 @@ Antes de implementar/refatorar uma tela:
 5. ativar o teste;
 6. atualizar `APP-ITERATION-MAP.md`.
 
-## 13. Primeira leva recomendada
+## 13. Ordem recomendada para ativar contratos
 
 Ordem:
 

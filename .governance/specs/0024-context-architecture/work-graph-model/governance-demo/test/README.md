@@ -28,8 +28,18 @@ test/
   contracts/
     app-contracts.yml        # contrato humano governado
   journeys/
-    onboarding-journey.spec.ts
-    first-wave-contracts.spec.ts
+    auth-workspace.spec.ts
+    onboarding.spec.ts
+    settings.spec.ts
+    sources.spec.ts
+    integrations.spec.ts
+    cup.spec.ts
+    planning-intake.spec.ts
+    triage-gate.spec.ts
+    work-contracts.spec.ts
+    results-audit.spec.ts
+    cross-screen-consistency.spec.ts
+    security-authority.spec.ts
   playwright.config.ts
 ```
 

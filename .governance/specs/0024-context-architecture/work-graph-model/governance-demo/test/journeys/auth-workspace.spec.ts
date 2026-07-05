@@ -1,0 +1,52 @@
+import { expect, test } from "@playwright/test";
+import {
+  expectNoAcmeDemoLeak,
+  openWorkspace,
+  pendingContract,
+  resetSeed,
+} from "./support/contract-fixtures.ts";
+
+test.describe("Auth, workspace e shell", () => {
+  test("APP-02 cria workspace novo sem vazar dados da demo", async ({ page, request }) => {
+    pendingContract("APP-02");
+
+    await resetSeed(request, "blank");
+    await page.goto("/");
+    await page.getByTestId("signup-display-name").fill("Ana Admin");
+    await page.getByTestId("signup-submit").click();
+    await page.getByTestId("workspace-create-name").fill("Mundo da Mel");
+    await page.getByTestId("workspace-kind-company").click();
+    await page.getByTestId("workspace-create-submit").click();
+
+    await expect(page).toHaveURL(/\/onboarding$/);
+    await page.goto("/");
+    await expect(page.getByTestId("workspace-empty-home")).toBeVisible();
+    await expectNoAcmeDemoLeak(page);
+
+    await page.goto("/settings");
+    await expect(page.getByTestId("settings-workspace-name")).toContainText("Mundo da Mel");
+    await expectNoAcmeDemoLeak(page);
+  });
+
+  test("APP-13 Home de workspace novo mostra proximo passo real", async ({ page, request }) => {
+    pendingContract("APP-13");
+
+    await openWorkspace(page, request, "empty-workspace", "/");
+    await expect(page.getByTestId("home-next-safe-step")).toBeVisible();
+    await expect(page.getByTestId("home-next-safe-step")).toContainText(/onboarding|host|fonte/i);
+    await expect(page.getByTestId("home-technical-console-card")).toContainText(
+      /indisponivel|configure/i
+    );
+  });
+
+  test("APP-14 demo acme permanece explicitamente demo", async ({ page, request }) => {
+    pendingContract("APP-14");
+
+    await openWorkspace(page, request, "demo-acme", "/organizations", "sandbox-demo");
+    await expect(page.getByTestId("workspace-demo-badge")).toBeVisible();
+    await page.goto("/");
+    await expect(page.getByTestId("home-demo-banner")).toContainText(/demo|sandbox/i);
+    await page.getByTestId("workspace-switcher").click();
+    await expect(page.getByTestId("workspace-real-list")).toBeVisible();
+  });
+});

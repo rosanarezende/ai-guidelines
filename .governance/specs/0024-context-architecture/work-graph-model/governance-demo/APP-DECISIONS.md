@@ -2416,21 +2416,24 @@ Adotar desenvolvimento orientado por contratos de teste para a `governance-demo`
 - Se uma mudanca funcional quebra contrato, primeiro atualizar a decisao/contrato
   e so depois a implementacao.
 
-### Primeira leva
+### Suite alvo inicial
 
-A primeira leva fica registrada em
-[`test/contracts/app-contracts.yml`](test/contracts/app-contracts.yml) e
-[`test/journeys/first-wave-contracts.spec.ts`](test/journeys/first-wave-contracts.spec.ts):
+A suite alvo fica registrada em
+[`test/contracts/app-contracts.yml`](test/contracts/app-contracts.yml) e nos
+specs Playwright por dominio em `test/journeys/`:
 
-- conta local, workspace e logout;
-- onboarding parcial e retomada;
-- perfil/responsabilidades;
-- pessoas/times/papeis com aceite;
-- governance host;
-- sources;
-- integrations hub e sugestoes contextuais;
-- Cup/CWP shell/contexto;
-- provider cloud bloqueado sem egress/authority.
+- `auth-workspace.spec.ts`: conta, workspaces, logout, demo/sandbox e Home inicial;
+- `onboarding.spec.ts`: perfil, responsabilidades, retomada, revisao final;
+- `settings.spec.ts`: organizacao, pessoas, grupos, papeis e assistente;
+- `sources.spec.ts`: governance host e fontes de trabalho;
+- `integrations.spec.ts`: hub, detalhes, sugestoes contextuais e GitHub work-source;
+- `cup.spec.ts`: overlay, policy explainer, draft action e limites de contexto;
+- `planning-intake.spec.ts`: planejamento progressivo e registro de iniciativa;
+- `triage-gate.spec.ts`: triagem, matcher advisory, gate e ativacao;
+- `work-contracts.spec.ts`: repo-work, evidencia, contratos e contention;
+- `results-audit.spec.ts`: resultados, mapa, operacao, auditoria e console;
+- `cross-screen-consistency.spec.ts`: dados que precisam aparecer coerentes entre telas;
+- `security-authority.spec.ts`: egress, stale read-model e authority.
 
 ### Criterio de pronto
 
