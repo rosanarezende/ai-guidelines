@@ -46,6 +46,17 @@ test.describe("Governance host e fontes de trabalho", () => {
     await expect(page.getByTestId("home-source-summary")).toContainText(sourceName);
   });
 
+  test("APP-34 governance host embutido nao se confunde com sidecar", async ({ page, request }) => {
+    pendingContract("APP-34", "expected-fail");
+
+    await openWorkspace(page, request, "workspace-host-embutido", "/settings");
+    await expect(page.getByTestId("governance-host-kind")).toContainText(/\.governance-host/i);
+    await expect(page.getByTestId("governance-host-kind")).not.toContainText(/sidecar/i);
+    await expect(page.getByTestId("governance-host-warnings")).toContainText(/CODEOWNERS|permiss/i);
+    await page.goto("/console");
+    await expect(page.getByTestId("console-source-revision")).toBeVisible();
+  });
+
   test("APP-21 Sources dedicada cadastra fonte local/cloud/manual", async ({ page, request }) => {
     pendingContract("APP-21", "expected-fail");
 

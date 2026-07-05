@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
+import { openWorkspace, openWorkspaceAs, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Cup / Contextual Work Partner", () => {
   test("CUP-01 Cup abre como overlay contextual sem provider externo", async ({
@@ -45,7 +45,8 @@ test.describe("Cup / Contextual Work Partner", () => {
   }) => {
     pendingContract("CUP-04", "fixme");
 
-    await openWorkspace(page, request, "workspace-controlled", "/triage");
+    // persona member: contexto entregue ao Cup deve depender do papel
+    await openWorkspaceAs(page, request, "workspace-controlled", "member", "/triage");
     await page.getByTestId("cup-open-button").click();
     await expect(page.getByTestId("cup-context-boundary")).toContainText(
       /restricted|redacted|policy/i

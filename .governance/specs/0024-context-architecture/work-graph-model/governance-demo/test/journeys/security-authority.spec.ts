@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
+import { openWorkspace, openWorkspaceAs, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Seguranca, authority e fail-closed", () => {
   test("SEC-01 provider cloud nao ativa sem egress/authority", async ({ page, request }) => {
@@ -30,7 +30,8 @@ test.describe("Seguranca, authority e fail-closed", () => {
   test("SEC-03 authority nunca deriva apenas de login externo", async ({ page, request }) => {
     pendingContract("SEC-03", "fixme");
 
-    await openWorkspace(page, request, "workspace-shared-github", "/settings");
+    // persona member: login externo identifica, mas nao concede authority
+    await openWorkspaceAs(page, request, "workspace-shared-github", "member", "/settings");
     await expect(page.getByTestId("identity-provider-status")).toContainText(/GitHub/i);
     await expect(page.getByTestId("effective-authority-panel")).not.toContainText(
       /sponsor|security-owner/i

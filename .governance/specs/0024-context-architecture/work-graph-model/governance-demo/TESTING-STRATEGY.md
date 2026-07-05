@@ -130,6 +130,22 @@ Regras obrigatorias:
    usar read-model stale, break-glass sem TTL, vazamento via Cup.
 4. Overlay/infra ausente, como Cup antes do shell existir, fica `fixme`, mesmo
    que rotas secundarias do contrato ja existam.
+5. Contrato de bloqueio/deny declara `deny: true` no YAML. O lint deriva a regra
+   do campo (nao de lista hardcoded) e proibe `expected-fail` para esses. Um
+   contrato de deny pode ser `active` quando prova o bloqueio observado — inclusive
+   no nivel de mecanismo (ver abaixo).
+6. Contrato de mecanismo derivado (sem tela) usa `surface: state`. Ele testa uma
+   garantia do dominio via `/api/shell/state` + funcoes de `@demo/backend/domain`
+   (ex.: `resolveWorkspaceAuthority`), sem depender de UI. Pode ser `active` mesmo
+   antes da tela existir; a UI que expoe a mesma garantia continua `fixme` ate a
+   rota nascer. Exemplo: SEC-11/SEC-12 (papel proposto nunca gera authority)
+   ativos por mecanismo; APP-07 (mesma garantia na tela) segue `fixme`.
+
+Personas: contratos que dependem de papel usam `openWorkspaceAs(page, request,
+seed, persona, route)` e os helpers `asMember/asSecurityOwner/asSponsor/
+asProposedRole/asNoAuthority/asStakeholder`, nunca so `admin`. A seed
+`workspace-authority-personas` provê Bia (security-owner aceito), Caio (sponsor
+aceito) e Eva (source-owner apenas proposto).
 
 ## 6. Estrutura dos testes
 

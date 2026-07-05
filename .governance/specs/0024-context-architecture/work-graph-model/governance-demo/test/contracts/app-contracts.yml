@@ -852,3 +852,74 @@ contracts:
       - Toda excecao tem motivo, TTL e responsavel de revisao.
       - Excecao vencida aparece em Home/Settings como pendencia de seguranca.
       - Nova excecao nao apaga a anterior.
+  # Authority como mecanismo derivado (sem UI). surface `state` = estado
+  # derivado, nao tela. deny: true porque provam um bloqueio; ativos porque o
+  # mecanismo ja existe no dominio (resolveWorkspaceAuthority).
+  - id: SEC-11
+    title: Papel proposto nunca gera authority efetiva
+    status: active
+    deny: true
+    spec: journeys/authority-model.spec.ts
+    seed: workspace-authority-personas
+    actors:
+      - proposed-role
+    surfaces:
+      - state
+    assertions:
+      - Papel com status proposed nao aparece na authority efetiva da pessoa.
+      - Pessoa com apenas papel proposto tem zero grants.
+  - id: SEC-12
+    title: Papel aceito gera authority direta; sem aceite nao ha authority
+    status: active
+    deny: true
+    spec: journeys/authority-model.spec.ts
+    seed: workspace-authority-personas
+    actors:
+      - security-owner
+      - sponsor
+    surfaces:
+      - state
+    assertions:
+      - Papel accepted de outra pessoa gera grant com origin direct.
+      - Papel aceito nunca vira self-assigned indevidamente.
+  # Cadeia cross-feature: uma iniciativa rastreavel do planejamento ao audit.
+  # fixme porque as rotas /planning /intake /triage /gates /contracts /audit
+  # ainda nao existem; corpo escrito para orientar a implementacao.
+  - id: APP-33
+    title: Iniciativa rastreavel de planejamento ate audit
+    status: fixme
+    spec: journeys/lifecycle-chain.spec.ts
+    seed: workspace-planning-progressivo
+    actors:
+      - sponsor
+      - technical-owner
+      - auditor
+    surfaces:
+      - /planning
+      - /intake
+      - /triage
+      - /gates
+      - /work
+      - /contracts
+      - /results
+      - /audit
+    assertions:
+      - Objetivo/target criado em planning aparece em results sem actual ate haver outcome.
+      - Iniciativa de intake vira item de triage e decisao de gate.
+      - Outcome publicado em work/contracts aparece em results e tem evento correspondente em audit.
+      - O mesmo id de iniciativa/decisao e rastreavel ponta a ponta.
+  # Host embutido usa a seed workspace-host-embutido (antes ociosa).
+  - id: APP-34
+    title: Governance host embutido nao se confunde com sidecar do repo
+    status: expected-fail
+    spec: journeys/sources.spec.ts
+    seed: workspace-host-embutido
+    actors:
+      - workspace-admin
+    surfaces:
+      - /settings
+      - /console
+    assertions:
+      - Host embutido aparece como .governance-host, distinto do sidecar .governance.
+      - Warnings de CODEOWNERS/permissao do host embutido ficam visiveis.
+      - Console so abre quando o host embutido permite leitura segura.

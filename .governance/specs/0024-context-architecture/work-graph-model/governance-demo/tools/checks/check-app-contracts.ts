@@ -24,6 +24,7 @@ type Contract = {
   spec: string;
   seed: string;
   surfaces?: string[];
+  deny?: boolean;
 };
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -32,9 +33,14 @@ const appRoot = path.join(demoRoot, "frontend", "app");
 const contractsFile = path.join(demoRoot, "test", "contracts", "app-contracts.yml");
 const journeysRoot = path.join(demoRoot, "test", "journeys");
 
-const knownNonRoutes = new Set(["shell", "Cup"]);
+// "state" marca contrato de mecanismo/estado derivado (sem tela); é ignorado
+// pela política de rota, como "shell"/"Cup".
+const knownNonRoutes = new Set(["shell", "Cup", "state"]);
 const infraSurfaceGates = new Set(["Cup"]);
-const denyContractIds = new Set([
+// Legado: deny declarados antes do campo `deny: true`. O contrato de deny agora
+// é estrutural (campo YAML); esta lista mantém compatibilidade e é unida ao
+// que vier do campo. Deny nunca pode ser expected-fail (false-green de bloqueio).
+const legacyDenyContractIds = new Set([
   "SEC-02",
   "SEC-03",
   "SEC-05",
@@ -44,6 +50,10 @@ const denyContractIds = new Set([
   "CUP-03",
   "CUP-04",
 ]);
+
+function isDenyContract(contract: Contract): boolean {
+  return contract.deny === true || legacyDenyContractIds.has(contract.id);
+}
 const allowedStatuses = new Set<ContractStatus>([
   "active",
   "expected-fail",
@@ -89,6 +99,24 @@ function listAppRoutes(): Set<string> {
   );
 }
 
+// Casa uma superfície de contrato contra as rotas reais, tratando segmentos
+// dinâmicos do Next (`[id]`) como coringa: `/integrations/[id]` cobre
+// `/integrations/123`. Sem isso, uma rota dinâmica futura passaria como ausente.
+function routeExists(surface: string, routes: Set<string>): boolean {
+  if (routes.has(surface)) return true;
+  const surfaceSegments = surface.split("/").filter(Boolean);
+  for (const route of routes) {
+    const routeSegments = route.split("/").filter(Boolean);
+    if (routeSegments.length !== surfaceSegments.length) continue;
+    const matches = routeSegments.every((segment, index) => {
+      if (segment.startsWith("[") && segment.endsWith("]")) return true;
+      return segment === surfaceSegments[index];
+    });
+    if (matches) return true;
+  }
+  return false;
+}
+
 function routeSurfaces(contract: Contract): string[] {
   return (contract.surfaces || []).filter(
     (surface) => surface.startsWith("/") && !knownNonRoutes.has(surface)
@@ -125,6 +153,16 @@ function assertSeeds(doc: ContractDoc, contracts: Contract[]): void {
     if (!matrix.has(contract.seed)) {
       fail(`${contract.id} usa seed fora da seed_matrix: ${contract.seed}`);
     }
+  }
+
+  // Warn (não-fatal): seed declarada e coberta por seed-coverage, mas sem
+  // nenhum contrato funcional que exerça o estado. Sinaliza cobertura ilusória.
+  const usedByContract = new Set(contracts.map((contract) => contract.seed));
+  const unusedSeeds = [...matrix].filter((seed) => !usedByContract.has(seed)).sort();
+  if (unusedSeeds.length > 0) {
+    console.warn(
+      `⚠ app-contracts: ${unusedSeeds.length} seed(s) no matrix sem contrato funcional: ${unusedSeeds.join(", ")}`
+    );
   }
 }
 
@@ -190,10 +228,10 @@ function assertRoutePolicy(contracts: Contract[]): void {
   for (const contract of contracts) {
     const routeSurfs = routeSurfaces(contract);
     const primaryRoute = routeSurfs[0];
-    const existing = routeSurfs.filter((surface) => routes.has(surface));
-    const missing = routeSurfs.filter((surface) => !routes.has(surface));
+    const existing = routeSurfs.filter((surface) => routeExists(surface, routes));
+    const missing = routeSurfs.filter((surface) => !routeExists(surface, routes));
     const infraGated = hasInfraSurfaceGate(contract);
-    const denyContract = denyContractIds.has(contract.id);
+    const denyContract = isDenyContract(contract);
 
     if (contract.status === "expected-fail" && denyContract) {
       fail(`${contract.id} e contrato de bloqueio; nunca use expected-fail`);
@@ -204,7 +242,7 @@ function assertRoutePolicy(contracts: Contract[]): void {
     if (contract.status === "expected-fail" && !primaryRoute) {
       fail(`${contract.id} esta expected-fail mas nao declara rota primaria`);
     }
-    if (contract.status === "expected-fail" && primaryRoute && !routes.has(primaryRoute)) {
+    if (contract.status === "expected-fail" && primaryRoute && !routeExists(primaryRoute, routes)) {
       fail(`${contract.id} esta expected-fail mas rota primaria nao existe: ${primaryRoute}`);
     }
     if (contract.status === "expected-fail" && existing.length === 0) {
@@ -246,7 +284,8 @@ const statusCounts = contracts.reduce<Record<string, number>>((acc, contract) =>
   acc[contract.status] = (acc[contract.status] || 0) + 1;
   return acc;
 }, {});
+const denyCount = contracts.filter(isDenyContract).length;
 
 console.log(
-  `✓ app-contracts — ${contracts.length} contratos, ${seedNames().length} seeds, ${listAppRoutes().size} rotas, status ${JSON.stringify(statusCounts)}`
+  `✓ app-contracts — ${contracts.length} contratos (${denyCount} deny), ${seedNames().length} seeds, ${listAppRoutes().size} rotas, status ${JSON.stringify(statusCounts)}`
 );

@@ -120,6 +120,23 @@ export async function openWorkspace(
   await armExpectedFailAfterArrival(page, route, response?.status() ?? null);
 }
 
+// Igual a openWorkspace, mas autentica como uma persona não-admin declarada
+// pelo contrato. Mantém a sentinela: contrato de UI só arma test.fail depois de
+// a rota responder. Usar quando o contrato testa authority/permissão por papel.
+export async function openWorkspaceAs(
+  page: Page,
+  request: APIRequestContext,
+  seed: string,
+  persona: ContractPersona,
+  route = "/",
+  workspaceId = "acme-honey"
+): Promise<void> {
+  await resetSeed(request, seed);
+  await signInAsPersona(page, persona, workspaceId);
+  const response = await page.goto(route);
+  await armExpectedFailAfterArrival(page, route, response?.status() ?? null);
+}
+
 export async function expectVisibleTestIds(page: Page, ids: string[]): Promise<void> {
   for (const id of ids) {
     await expect(page.getByTestId(id), `expected test id ${id}`).toBeVisible();
