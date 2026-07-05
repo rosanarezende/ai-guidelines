@@ -1,0 +1,37 @@
+{
+  "subtitle": "Governança · fontes",
+  "title": "Conectar fontes de trabalho",
+  "lead": "Cadastre repos, pastas ou providers que mostram onde o trabalho realmente acontece. Esta tela é o caminho simples para começar localmente sem fingir que tudo já está integrado.",
+  "hostRelationTitle": "Antes: onde a governança vai morar?",
+  "hostMissingTitle": "Ainda não há pasta de governança vinculada",
+  "hostMissingBody": "Você pode cadastrar projetos para mapear o trabalho, mas decisões governadas, event-log e configuração real precisam de um host de governança.",
+  "hostSandboxBody": "Este workspace está como sandbox. Dá para explorar fontes, mas decisões reais ainda não têm uma pasta governada para morar.",
+  "hostConfiguredTitle": "Pasta de governança vinculada",
+  "hostConfiguredBody": "A governança deste workspace está em {path}. As fontes abaixo são os projetos observados por essa governança.",
+  "hostColumnTitle": "Pasta de governança",
+  "hostColumnBody": "Guarda decisões, configuração, histórico e event-log do framework. Pode ser repo dedicado, pasta local dedicada ou .governance-host/ dentro de um repo existente.",
+  "sourceColumnTitle": "Projeto/fonte de trabalho",
+  "sourceColumnBody": "É o repo, pasta, monorepo ou provider onde o trabalho acontece. Pode ter .governance/ sidecar próprio, mas não substitui o host do workspace.",
+  "hostCta": "Configurar pasta de governança",
+  "badges": [
+    "file-first",
+    "scan local real",
+    "confiança explícita",
+    "providers sem write autoritativo"
+  ],
+  "whatChangesTitle": "O que muda quando há fonte",
+  "whatChanges": [
+    {
+      "title": "Triagem melhor",
+      "body": "Matcher e revisão humana deixam de depender só de descrição; passam a enxergar contexto publicado e inventário."
+    },
+    {
+      "title": "Evidência mais forte",
+      "body": "Commits, hashes e providers versionados podem sustentar execução, contratos e outcomes."
+    },
+    {
+      "title": "Limitação visível",
+      "body": "Pasta sem Git ou sync de nuvem sem adapter continua útil, mas aparece como confiança rebaixada."
+    }
+  ]
+}

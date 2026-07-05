@@ -17,8 +17,8 @@ import membersCopy from "./MembersSection/_locales/pt-br.json";
 import RolesSection from "./RolesSection";
 import rolesCopy from "./RolesSection/_locales/pt-br.json";
 import SwitchSection from "./SwitchSection";
-import WorkSourcesSection from "./WorkSourcesSection";
-import sourcesCopy from "./WorkSourcesSection/_locales/pt-br.json";
+import WorkSourcesManager from "@/app/sources/_components/WorkSourcesManager";
+import sourcesCopy from "@/app/sources/_components/WorkSourcesManager/_locales/pt-br.json";
 import copy from "./_locales/pt-br.json";
 
 const m = copy.messages;
@@ -89,7 +89,7 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
         </SectionCard>
 
         <SectionCard title={sourcesCopy.title}>
-          <WorkSourcesSection />
+          <WorkSourcesManager embedded />
         </SectionCard>
 
         <SwitchSection />

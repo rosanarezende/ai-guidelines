@@ -1848,6 +1848,73 @@ Proxima recomendacao para as telas reais:
 3. Sessao curta da owner na bancada do grafo (filtros/busca/agrupamento) para
    bater o martelo Sigma x ECharts em QRD proprio.
 
+## QRD-30 - Fontes locais, caminhos e escopo de leitura
+
+**Q - Question**
+
+Como o app deve cadastrar repos, pastas locais e pastas sincronizadas sem
+confundir caminho do navegador, caminho da maquina local e caminho do servidor?
+
+**R - Reasoning/Research**
+
+O framework e file-first e precisa servir tanto um dev solo rodando o app na
+propria maquina quanto uma organizacao em modo compartilhado/controlled. Em um
+browser, o app nao pode simplesmente ler qualquer pasta da maquina da pessoa; a
+leitura real acontece no processo do app/backend. Portanto, um campo "caminho
+local" so e honesto se a UI explicar que o caminho precisa existir onde o app
+esta rodando. Em modo solo local isso normalmente coincide com a maquina da
+pessoa. Em modo servidor, o caminho precisa existir no servidor ou vir de um
+provider conectado.
+
+Pasta sem Git e pasta sincronizada em nuvem continuam sendo fontes reais, mas
+rebaixadas: elas ajudam a comecar e podem provar snapshot/hash, mas nao provam
+autoria, historico remoto nem revisao sem Git/provider versionado. GitHub e
+providers similares exigem adapter/OAuth/permissao e nunca devem aparecer como
+`connected` por mera declaracao.
+
+**D - Decision**
+
+Criar `/sources` como tela dedicada. Ela cadastra fontes com
+`/api/local/work-sources`, escaneia caminho de servidor com
+`/api/local/work-sources/[id]/scan` e registra snapshot escolhido no navegador
+com `/api/local/work-sources/[id]/browser-scan`. A tela mostra `sourceTrust`,
+hash, Git head/dirty, provider de sync e limitacoes. A UI deve dizer
+explicitamente que caminho local digitado e caminho da maquina/servidor onde o
+app roda. Pasta selecionada no Explorer e snapshot do navegador: entra como
+`snapshot-only`, sem Git/autoria/historico. GitHub nao e campo de texto; deve
+abrir o caminho de integracao/OAuth e nunca aparecer `connected` por declaracao.
+
+## QRD-31 - Adapters de apresentacao e libs Pro/BYOL
+
+**Q - Question**
+
+O framework deve permitir trocar bibliotecas visuais default por versoes Pro,
+Enterprise ou renderizadores externos sem transformar isso em SaaS nem criar um
+segundo SSOT?
+
+**R - Reasoning/Research**
+
+Os defaults open-source precisam ser bons o suficiente para a release 1:
+Apache ECharts para dashboards, TanStack Table + MUI para listas, React
+Flow+ELK para mapa guiado e Sigma/ECharts ainda em decisao para grafo tecnico.
+Ao mesmo tempo, organizacoes podem ja ter licencas MUI X Pro, AG Grid
+Enterprise, servicos de exportacao ou ferramentas MCP/cloud para render. Isso
+e extensibilidade de apresentacao, nao governanca.
+
+Se um renderer puder ler YAML/event-log direto ou escrever estado autoritativo,
+ele vira bypass do modelo. O contrato correto e sempre:
+`governance read-model -> view-model tipado -> presentation adapter`.
+
+**D - Decision**
+
+Modelar esses upgrades como `presentation adapters`, separados dos governance
+adapters. Exemplos: `chart-renderer`, `table-renderer`, `map-renderer`,
+`technical-graph-renderer`, `chart-export-provider` e
+`assistant-visualization-provider`. Nenhum deles escreve YAML/event-log, nenhum
+decide gate, nenhum altera resolver. ECharts MCP e ferramentas similares podem
+inspirar ou alimentar preview/export assistivo, mas nao substituem `/results`
+deterministico nem os view-models tipados.
+
 ## Proximas acoes derivadas
 
 1. Atualizar o onboarding para refletir QRD-08/09/21: workspace pode existir sem host, mas onboarding real nao conclui sem host ou sandbox explicito; os tres formatos de host entram no primeiro release com fit-check.

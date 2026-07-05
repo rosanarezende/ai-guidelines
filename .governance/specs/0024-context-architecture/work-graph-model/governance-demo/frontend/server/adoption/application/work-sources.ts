@@ -4,7 +4,7 @@
 // GitHub work-source: contrato modelado (kind "github" + provider fields);
 // a conexão cloud real é fatia seguinte — status fica draft, nunca "connected".
 import { randomUUID } from "node:crypto";
-import type { Workspace, WorkSource, WorkSourceKind } from "@demo/backend/domain";
+import type { Workspace, WorkSource, WorkSourceKind, WorkSourceScan } from "@demo/backend/domain";
 import { resolveDataSource } from "../data-source";
 import { scanLocalSource } from "../infrastructure/source-scan";
 import { dispatchForWorkspace, type UseCaseResult } from "./use-cases";
@@ -77,6 +77,33 @@ export async function scanWorkSource(input: {
   }
   if (!input.pathOrUrl) return { ok: false, error: "missing-path" };
   const scan = scanLocalSource(input.pathOrUrl);
+  return dispatchForWorkspace(
+    "local.work-source.record-scan",
+    input.principalId,
+    input.workspaceId,
+    { sourceId: input.sourceId, scan }
+  );
+}
+
+export async function recordBrowserWorkSourceScan(input: {
+  principalId: string;
+  workspaceId: string;
+  sourceId: string;
+  scan: unknown;
+}): Promise<UseCaseResult<Workspace>> {
+  const raw = input.scan as Partial<WorkSourceScan> | null;
+  if (!raw || typeof raw !== "object") return { ok: false, error: "missing-scan" };
+  if (typeof raw.fileCount !== "number" || raw.fileCount < 0)
+    return { ok: false, error: "invalid-file-count" };
+  if (typeof raw.contentHash !== "string" || !/^[a-z0-9+.-]{6,48}$/i.test(raw.contentHash)) {
+    return { ok: false, error: "invalid-content-hash" };
+  }
+  const scan: WorkSourceScan = {
+    scannedAt: new Date().toISOString(),
+    fileCount: Math.floor(raw.fileCount),
+    contentHash: raw.contentHash,
+    errors: [],
+  };
   return dispatchForWorkspace(
     "local.work-source.record-scan",
     input.principalId,

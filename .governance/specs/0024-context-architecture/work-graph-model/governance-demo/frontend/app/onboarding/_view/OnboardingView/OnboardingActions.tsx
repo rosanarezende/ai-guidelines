@@ -6,7 +6,7 @@ import { useOnboarding } from "../../_state/OnboardingContext";
 import copy from "./_locales/pt-br.json";
 
 export function OnboardingActions() {
-  const { step, canContinueProfileStep, setStep } = useOnboarding();
+  const { step, canContinueProfileStep, continueStep, setStep } = useOnboarding();
   if (step < 1 || step > 5) return null;
   return (
     <Flex
@@ -26,7 +26,7 @@ export function OnboardingActions() {
         variant="contained"
         endIcon={<ArrowForwardIcon />}
         disabled={step === 1 && !canContinueProfileStep}
-        onClick={() => setStep(step + 1)}
+        onClick={() => void continueStep()}
       >
         {copy.actions.next}
       </Button>

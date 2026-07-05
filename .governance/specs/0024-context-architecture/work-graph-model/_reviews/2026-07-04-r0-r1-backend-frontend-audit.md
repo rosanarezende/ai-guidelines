@@ -19,7 +19,7 @@ Postura: revisão técnica/adversarial. Foco em prontidão real do app, não em 
 
 - `governance-demo/APP-DECISIONS.md`
 - `governance-demo/APP-FUNCTIONAL-SPEC.md`
-- `governance-demo/BACKEND-R0-R1-FINDINGS.md`
+- `_archive/governance-demo-docs-2026-07-05/BACKEND-R0-R1-FINDINGS.md`
 - `governance-demo/backend/src/domain/adoption-shell.ts`
 - `governance-demo/backend/src/domain/adoption-commands.ts`
 - `governance-demo/frontend/server/adoption/**`

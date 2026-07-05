@@ -17,11 +17,12 @@ Pronto nesta fatia:
 - Home de adocao (demo) com tarefas, pendencias derivadas e proximo passo; Home de organizacao nova com checklist real (perfil/host/fontes).
 - Onboarding workspace-aware: diagnostico guiado, papeis (vazio honesto fora da demo), fontes, assistente Ollama-first, integracoes (catalogo neutro) e revisao; progresso partial/finished persiste por organizacao no servidor.
 - Configuracoes por organizacao: demo usa as secoes completas do snapshot; organizacao nova mostra identidade, governanca ausente e troca de organizacao.
+- Fontes de trabalho em `/sources`: fluxo guiado por situacao do projeto (local x nuvem; com Git, sem Git, pasta planejada, cloud-sync, monorepo, GitHub etc.), sempre mostrando a relacao com o governance host. Pasta local/sincronizada tambem pode ser escolhida no Explorer como snapshot do navegador (`snapshot-only`, sem Git/autoria); caminho manual fica como modo avancado para scan real pelo processo do app.
 - Console tecnico em `/console` apenas para organizacao com host de governanca (hoje a demo); caso contrario, estado honesto.
 - APIs locais para snapshot, comandos, health-check do Ollama e shell local (`/api/local/*`).
 - Estrutura route-first com `app/*/page.tsx` fino, gate server-side (`resolveAdoptionGate`) e implementacao colocalizada em pastas privadas.
 - Locales privados (`_locales/pt-br.json`) colocalizados.
-- Guards em `check-governance-app.mjs`: rotas do fluxo inicial obrigatorias, paginas com gate, snapshot da demo so com distincao `isDemo`, sem `localStorage`, dominio compartilhado puro, sem `app/features`/locale global/componente monolitico/JS novo.
+- Guards em `tools/checks/check-governance-app.ts`: rotas do fluxo inicial obrigatorias, paginas com gate, snapshot da demo so com distincao `isDemo`, sem `localStorage`, dominio compartilhado puro, sem `app/features`/locale global/componente monolitico/JS novo.
 
 Feito nesta fatia (R0/R1):
 
@@ -40,7 +41,7 @@ Feito nesta fatia (R0/R1):
 Ainda por vir:
 
 - Auth real (senha/SSO/identity-provider): o signup atual e identidade LOCAL, sem seguranca de conta; o cookie de sessao nao e assinado.
-- Telas dedicadas de membros/papeis/fontes (hoje: APIs de produto + secoes minimas; PeopleStep/SourcesStep do onboarding continuam parcialmente UX e estao marcados assim).
+- Telas dedicadas de membros/papeis (fontes ja tem `/sources` real; PeopleStep/SourcesStep do onboarding continuam parcialmente UX e estao marcados assim).
 - Detalhe acionavel por linha em `/work` (breakdown, repo-work ack, verdict); a rota atual e lista operacional derivada.
 - GitHub work-source cloud real (contrato/kind/backlog modelados; conexao OAuth/App e fatia seguinte — nunca aparece como `connected` sem mecanismo).
 - Health-check vivo do Neo4j como graph-read-model (config/status/sourceRevision persistem; verificacao ativa e fatia seguinte).
@@ -60,12 +61,14 @@ Ainda por vir:
 | `/map`                                                      | Mapa de governanca por objetivo; demo usa React Flow + ELK sobre API real.                        |
 | `/results`                                                  | Dashboard de resultados da organizacao atual; demo usa ECharts + TanStack Query sobre API real.   |
 | `/work`                                                     | Lista operacional de trabalho; demo usa TanStack Table + MUI + virtualizacao sobre API real.      |
+| `/sources`                                                  | Fluxo guiado para fontes de trabalho; host x fonte, Explorer snapshot e scan avancado.            |
 | `/console`                                                  | Console tecnico da organizacao com host de governanca (hoje a demo).                              |
 | `/spikes/visual-stack`                                      | Bancada INTERNA do spike da stack visual (QRD-27/28); fora da navegacao de produto.               |
 | `/api/map/governance`                                       | View-model derivado para `/map`; workspace novo responde vazio honesto ate ter host/objetivos.    |
 | `/api/results/dashboard`                                    | View-model derivado para `/results`; workspace novo responde vazio honesto ate ter host/outcomes. |
 | `/api/work/items`                                           | View-model derivado para `/work`; workspace novo responde vazio honesto ate ter host/contextos.   |
 | `/api/local/signup`                                         | Cria local-principal + sessao (cookie httpOnly, nao assinado — nao e auth).                       |
+| `/api/local/logout`                                         | Limpa a sessao local; nao apaga organizacoes, workspaces nem event-log.                           |
 | `/api/local/organizations`                                  | Cria organizacao vazia ou anexa a demo; atualiza sessao.                                          |
 | `/api/local/organizations/select`                           | Troca a organizacao ativa da sessao.                                                              |
 | `/api/local/onboarding/status`                              | Marca partial/finished por organizacao (nunca rebaixa finished).                                  |
@@ -73,7 +76,7 @@ Ainda por vir:
 | `/api/local/members` + `invites/[id]` + `groups`            | Pessoas, convites com token/aceite/expiracao e times/grupos locais.                               |
 | `/api/local/roles` + `roles/[id]`                           | Papeis por subject (proposed → accept/reject/revoke); authority sempre derivada.                  |
 | `/api/local/governance-host`                                | Fit-check, criar (scaffold real + sourceRevision), vincular ou declarar sandbox.                  |
-| `/api/local/work-sources` + `[id]/scan`                     | Fontes com sourceTrust explicito; scan local real (git head, hash, cloud-sync).                   |
+| `/api/local/work-sources` + `[id]/scan` + `browser-scan`    | Fontes com sourceTrust explicito; scan local real ou snapshot do navegador.                       |
 | `/api/local/assistant` + `test` + `defaults`                | Providers multi-assistente com teste real, egress fail-closed e default por funcao.               |
 | `/api/local/integration-backlog` + `integrations/[id]`      | Backlog honesto (disponivel/release-1/em-breve/adiado) + estado por workspace.                    |
 | `/api/snapshot`                                             | Snapshot derivado do runtime file-first (demo).                                                   |
@@ -95,7 +98,7 @@ Ainda por vir:
 ## Arvore de pastas
 
 ```text
-governance-next/
+frontend/
   server/                            # backend TS do shell local (sem React/MUI)
     adoption/
       application/use-cases.ts       # signup, criar/anexar/selecionar org, onboarding status
@@ -195,6 +198,12 @@ governance-next/
       _model/                        # view-model da lista operacional
       _view/
         WorkView/                    # TanStack Table + MUI + virtualizacao
+    sources/
+      page.tsx                       # rota /sources, fina + gate
+      _components/
+        WorkSourcesManager/          # cadastro, scan e lista reutilizados em Settings
+      _view/
+        SourcesView/                 # explicacao de host x fonte + caminho local/servidor
     console/
       page.tsx                       # rota /console, fina + gate (demo; senao estado honesto)
       _view/

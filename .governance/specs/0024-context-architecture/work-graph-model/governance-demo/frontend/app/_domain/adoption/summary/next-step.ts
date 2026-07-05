@@ -35,7 +35,7 @@ export function deriveNextStep(
         total: String(sourcesTotal),
       }),
       ctaLabel: copy.nextStep.sources.cta,
-      ctaHref: "/settings#fontes",
+      ctaHref: "/sources",
       meta: copy.nextStep.sources.meta,
     };
   }

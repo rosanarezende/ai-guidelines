@@ -8,7 +8,9 @@
     "app.nav.settings": "Configurações",
     "app.nav.results": "Resultados",
     "app.nav.map": "Mapa",
+    "app.nav.sources": "Fontes",
     "app.nav.work": "Trabalho",
-    "app.nav.console": "Console técnico"
+    "app.nav.console": "Console técnico",
+    "app.nav.logout": "Sair"
   }
 }

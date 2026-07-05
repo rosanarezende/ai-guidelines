@@ -41,4 +41,15 @@ test("signup → workspace → onboarding parcial → Home com continuar", async
   // reload preserva o estado (persistência real na fonte de dados)
   await page.reload();
   await expect(page.getByText("Onboarding em andamento")).toBeVisible();
+
+  // reabrir o onboarding não volta para a tela inicial: retoma do passo salvo
+  await page.getByRole("link", { name: "Continuar onboarding" }).click();
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await expect(page.getByRole("button", { name: "Voltar" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Começar" })).toHaveCount(0);
+
+  // logout limpa a sessão local, sem apagar o workspace/event-log
+  await page.goto("/");
+  await page.getByRole("button", { name: "Sair" }).click();
+  await expect(page).toHaveURL(/\/signup$/);
 });

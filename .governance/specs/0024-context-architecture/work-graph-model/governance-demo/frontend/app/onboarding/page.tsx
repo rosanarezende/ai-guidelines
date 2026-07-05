@@ -18,6 +18,12 @@ export default async function OnboardingPage() {
   const initialProfile: ProfileId =
     workspace.profileDeclaration?.profile ??
     (snapshot?.profileDeclaration.profile === "full" ? "full" : "compact");
+  const sourceKinds = workspace.workSources.map((source) => source.kind);
+  const assistantChoice = workspace.assistantConfig?.dismissed
+    ? "none"
+    : workspace.assistantConfig?.providers.some((provider) => provider.kind === "ollama")
+      ? "local"
+      : "local";
 
   return (
     <OnboardingView
@@ -26,7 +32,12 @@ export default async function OnboardingPage() {
         workspaceId: workspace.id,
         workspaceName: workspace.name,
         isDemo: gate.isDemo,
+        onboardingStatus: workspace.onboardingStatus,
+        persistedStep: workspace.onboardingStep,
         initialProfile,
+        profileSaved: Boolean(workspace.profileDeclaration),
+        persistedSourceKinds: sourceKinds,
+        persistedAssistant: assistantChoice,
         catalog: snapshot?.integrationCatalog ?? loadIntegrationCatalog(),
       }}
     />

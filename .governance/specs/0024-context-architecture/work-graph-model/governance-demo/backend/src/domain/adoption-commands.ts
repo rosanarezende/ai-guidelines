@@ -184,8 +184,11 @@ export function applyShellCommand(
     case "local.onboarding.set-status": {
       const workspaceId = text(payload, "workspaceId");
       const status = text(payload, "status");
+      const rawStep = payload["step"];
+      const step = typeof rawStep === "number" ? Math.floor(rawStep) : undefined;
       if (!workspaceId) return err("missing-workspace-id");
       if (!status || !["partial", "finished"].includes(status)) return err("invalid-status");
+      if (step !== undefined && (step < 0 || step > 6)) return err("invalid-onboarding-step");
       const membership = requireMember(state, command, workspaceId);
       if (membership) return err(membership);
       return updateWorkspace(state, workspaceId, (workspace) => {
@@ -196,7 +199,11 @@ export function applyShellCommand(
             return { error: `onboarding-incomplete:${completion.blockers[0]}` };
           }
         }
-        return { ...workspace, onboardingStatus: status as Workspace["onboardingStatus"] };
+        return {
+          ...workspace,
+          onboardingStatus: status as Workspace["onboardingStatus"],
+          ...(step !== undefined ? { onboardingStep: step } : {}),
+        };
       });
     }
 

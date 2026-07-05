@@ -15,11 +15,14 @@ import {
 } from "@mui/material";
 import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { logoutLocal } from "@/app/_domain/adoption/shellClient";
 import { t } from "@/lib/i18n";
 import { theme } from "../theme";
 
@@ -49,6 +52,11 @@ export default function AppShell({
     setMounted(true);
   }, []);
   if (!mounted) return <ShellSkeleton />;
+
+  async function logout() {
+    await logoutLocal();
+    window.location.href = "/signup";
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -119,6 +127,15 @@ export default function AppShell({
             </Button>
             <Button
               component={Link}
+              href="/sources"
+              size="small"
+              color="inherit"
+              startIcon={<FolderOutlinedIcon fontSize="small" />}
+            >
+              {t("app.nav.sources")}
+            </Button>
+            <Button
+              component={Link}
               href="/work"
               size="small"
               color="inherit"
@@ -134,6 +151,14 @@ export default function AppShell({
               startIcon={<TerminalIcon fontSize="small" />}
             >
               {t("app.nav.console")}
+            </Button>
+            <Button
+              size="small"
+              color="inherit"
+              startIcon={<LogoutIcon fontSize="small" />}
+              onClick={() => void logout()}
+            >
+              {t("app.nav.logout")}
             </Button>
           </Toolbar>
         </AppBar>

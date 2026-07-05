@@ -96,7 +96,7 @@ export function deriveAttention(snapshot: GovernanceSnapshot): AttentionItem[] {
         title: format(copy.attention.missingContext.title, { repo: repo.id }),
         hint: copy.attention.missingContext.hint,
         actionLabel: copy.attention.missingContext.action,
-        actionHref: "/settings#fontes",
+        actionHref: "/sources",
       });
     }
   }

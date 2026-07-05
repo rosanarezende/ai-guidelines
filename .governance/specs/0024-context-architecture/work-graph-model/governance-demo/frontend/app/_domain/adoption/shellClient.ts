@@ -60,9 +60,17 @@ export function selectOrganization(workspaceId: string) {
   });
 }
 
-export function reportOnboardingStatus(status: Extract<OnboardingStatus, "partial" | "finished">) {
+export function logoutLocal() {
+  return postJson<Record<string, never>>("/api/local/logout", {});
+}
+
+export function reportOnboardingStatus(
+  status: Extract<OnboardingStatus, "partial" | "finished">,
+  step?: number
+) {
   return postJson<{ onboardingStatus: OnboardingStatus }>("/api/local/onboarding/status", {
     status,
+    ...(typeof step === "number" ? { step } : {}),
   });
 }
 
@@ -178,6 +186,18 @@ export function addWorkspaceWorkSource(input: {
 
 export function scanWorkspaceWorkSource(sourceId: string) {
   return postJson<{ source: WorkSource }>(`/api/local/work-sources/${sourceId}/scan`, {});
+}
+
+export function recordBrowserWorkSourceScan(input: {
+  sourceId: string;
+  scan: { fileCount: number; contentHash: string };
+}) {
+  return postJson<{ source: WorkSource }>(
+    `/api/local/work-sources/${input.sourceId}/browser-scan`,
+    {
+      scan: input.scan,
+    }
+  );
 }
 
 export function saveAssistantProviderChoice(input: {

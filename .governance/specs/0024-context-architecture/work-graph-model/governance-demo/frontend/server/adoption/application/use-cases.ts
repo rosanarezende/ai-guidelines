@@ -142,11 +142,19 @@ export async function setOnboardingStatus(input: {
   principalId: string;
   workspaceId: string;
   status: OnboardingStatus;
+  step?: number;
 }): Promise<UseCaseResult<Workspace>> {
   if (!["partial", "finished"].includes(input.status)) {
     return { ok: false, error: "invalid-status" };
   }
+  if (
+    input.step !== undefined &&
+    (!Number.isInteger(input.step) || input.step < 0 || input.step > 6)
+  ) {
+    return { ok: false, error: "invalid-onboarding-step" };
+  }
   return dispatchForWorkspace("local.onboarding.set-status", input.principalId, input.workspaceId, {
     status: input.status,
+    ...(input.step !== undefined ? { step: input.step } : {}),
   });
 }

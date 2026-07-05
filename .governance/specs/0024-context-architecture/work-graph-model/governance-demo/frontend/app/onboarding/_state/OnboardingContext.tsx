@@ -20,6 +20,7 @@ import {
   listWorkSources,
   reportOnboardingStatus,
   saveAssistantProviderChoice,
+  saveOnboardingPath,
   saveProfileChoice,
 } from "@/app/_domain/adoption/shellClient";
 import {
@@ -41,7 +42,12 @@ export type OnboardingOrg = {
   workspaceId: string;
   workspaceName: string;
   isDemo: boolean;
+  onboardingStatus: "not-started" | "partial" | "finished";
+  persistedStep?: number;
   initialProfile: ProfileId;
+  profileSaved: boolean;
+  persistedSourceKinds: string[];
+  persistedAssistant: AssistantChoice;
   catalog: IntegrationCatalog;
 };
 
@@ -71,20 +77,16 @@ export function useOnboarding() {
 function useOnboardingState(snapshot: GovernanceSnapshot | null, org: OnboardingOrg) {
   const router = useRouter();
   const adoption = useMemo(() => (snapshot ? deriveAdoption(snapshot) : null), [snapshot]);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => initialStepForOrg(org));
   const [profile, setProfile] = useState<ProfileId>(org.initialProfile);
   const [diagnosis, setDiagnosis] = useState<DiagnosisAnswers>({});
   const [manualProfileOpen, setManualProfileOpen] = useState(false);
-  const [manualProfileSelected, setManualProfileSelected] = useState(false);
+  const [manualProfileSelected, setManualProfileSelected] = useState(org.profileSaved);
   const [assignments, setAssignments] = useState<RoleAssignments>(DEFAULT_ASSIGNMENTS);
-  const [sourceKinds, setSourceKinds] = useState<Record<SourceKindId, boolean>>({
-    git: true,
-    local: false,
-    mono: false,
-    svc: false,
-    ext: false,
-  });
-  const [assistant, setAssistant] = useState<AssistantChoice>("local");
+  const [sourceKinds, setSourceKinds] = useState<Record<SourceKindId, boolean>>(() =>
+    initialSourceKinds(org.persistedSourceKinds)
+  );
+  const [assistant, setAssistant] = useState<AssistantChoice>(org.persistedAssistant);
 
   const recommendedProfileId = recommendProfile(diagnosis);
   const recommendedProfile = profileOption(recommendedProfileId);
@@ -111,7 +113,7 @@ function useOnboardingState(snapshot: GovernanceSnapshot | null, org: Onboarding
   useEffect(() => {
     // Progresso é estado da organização, persistido file-first no servidor
     // (fire-and-forget: o servidor nunca rebaixa finished para partial).
-    if (step > 0) void reportOnboardingStatus("partial");
+    if (step > 0) void reportOnboardingStatus("partial", step);
   }, [step]);
 
   const catalogHighlights = useMemo(() => {
@@ -165,15 +167,13 @@ function useOnboardingState(snapshot: GovernanceSnapshot | null, org: Onboarding
     setSourceKinds((current) => ({ ...current, [source]: !current[source] }));
   }
 
-  // Persistência REAL das escolhas ao concluir (R1): perfil + regra de
-  // acúmulo, fontes declaradas e assistente viram comandos no shell.
-  // Papéis seguem como contrato declarado (aceite/convite via API de membros).
-  async function persistChoices() {
+  async function persistProfileStep() {
     if (org.isDemo) return; // demo é fixture: não grava configuração
     const policy =
       diagnosis.conflict === "warn"
         ? "warn-review"
         : (diagnosis.conflict ?? (profile === "solo" ? "record" : "warn-review"));
+    await saveOnboardingPath("guided");
     await saveProfileChoice({
       profile,
       sensitiveAccumulationPolicy: policy,
@@ -181,19 +181,29 @@ function useOnboardingState(snapshot: GovernanceSnapshot | null, org: Onboarding
         ? "escolha manual no onboarding"
         : "recomendado pelo diagnóstico guiado",
     });
+  }
+
+  async function persistSourceStep() {
+    if (org.isDemo) return;
     const existing = await listWorkSources();
-    if (existing.length === 0) {
-      const kindMap: Record<SourceKindId, { kind: string; label: string }> = {
-        git: { kind: "git-repo", label: "Fontes Git (declarado no onboarding)" },
-        local: { kind: "local-folder", label: "Pastas locais (declarado no onboarding)" },
-        mono: { kind: "monorepo-module", label: "Monorepo com módulos (declarado no onboarding)" },
-        svc: { kind: "external-link", label: "Serviços/URLs (declarado no onboarding)" },
-        ext: { kind: "manual-upload", label: "Evidência manual (declarado no onboarding)" },
-      };
-      for (const [source, selected] of Object.entries(sourceKinds)) {
-        if (selected) await addDeclaredWorkSource(kindMap[source as SourceKindId]);
+    const existingKinds = new Set(existing.map((source) => source.kind));
+    const kindMap: Record<SourceKindId, { kind: string; label: string }> = {
+      git: { kind: "git-repo", label: "Fontes Git (declarado no onboarding)" },
+      local: { kind: "local-folder", label: "Pastas locais (declarado no onboarding)" },
+      mono: { kind: "monorepo-module", label: "Monorepo com módulos (declarado no onboarding)" },
+      svc: { kind: "external-link", label: "Serviços/URLs (declarado no onboarding)" },
+      ext: { kind: "manual-upload", label: "Evidência manual (declarado no onboarding)" },
+    };
+    for (const [source, selected] of Object.entries(sourceKinds)) {
+      const mapped = kindMap[source as SourceKindId];
+      if (selected && !existingKinds.has(mapped.kind)) {
+        await addDeclaredWorkSource(mapped);
       }
     }
+  }
+
+  async function persistAssistantStep() {
+    if (org.isDemo) return;
     if (assistant === "local") {
       await saveAssistantProviderChoice({
         kind: "ollama",
@@ -206,9 +216,24 @@ function useOnboardingState(snapshot: GovernanceSnapshot | null, org: Onboarding
     // assistant === "cloud": nada é salvo — exige aprovação/egress explícitos
   }
 
+  // Persistência REAL das escolhas por etapa (R1): o usuário pode sair no meio
+  // e retomar sem perder o que já escolheu.
+  async function persistCurrentStep(currentStep: number) {
+    if (currentStep === 1) await persistProfileStep();
+    if (currentStep === 3) await persistSourceStep();
+    if (currentStep === 4) await persistAssistantStep();
+  }
+
+  async function continueStep() {
+    await persistCurrentStep(step);
+    setStep(step + 1);
+  }
+
   async function finishOnboarding() {
-    await persistChoices();
-    await reportOnboardingStatus("finished");
+    await persistProfileStep();
+    await persistSourceStep();
+    await persistAssistantStep();
+    await reportOnboardingStatus("finished", 6);
     router.push("/");
   }
 
@@ -245,11 +270,38 @@ function useOnboardingState(snapshot: GovernanceSnapshot | null, org: Onboarding
     setAssistant,
     setManualProfileOpen,
     setManualProfileSelected,
+    continueStep,
     updateDiagnosis,
     selectManualProfile,
     useRecommendedProfile,
     changeAssignment,
     toggleSource,
     finishOnboarding,
+  };
+}
+
+function initialStepForOrg(org: OnboardingOrg): number {
+  if (org.onboardingStatus === "not-started") return 0;
+  if (
+    typeof org.persistedStep === "number" &&
+    Number.isInteger(org.persistedStep) &&
+    org.persistedStep > 0 &&
+    org.persistedStep <= 6
+  ) {
+    return org.persistedStep;
+  }
+  if (!org.profileSaved) return 1;
+  if (org.persistedSourceKinds.length === 0) return 3;
+  return 4;
+}
+
+function initialSourceKinds(kinds: string[]): Record<SourceKindId, boolean> {
+  const set = new Set(kinds);
+  return {
+    git: set.has("git-repo") || set.has("github") || set.has("provider-versioned-source"),
+    local: set.has("local-folder") || set.has("cloud-synced-folder"),
+    mono: set.has("monorepo-module"),
+    svc: set.has("external-link"),
+    ext: set.has("manual-upload"),
   };
 }

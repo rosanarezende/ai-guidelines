@@ -25,7 +25,7 @@ físico, mas não apaga os aprendizados da v2.
 - runtime `governance-demo/backend/` com domínio/validador, adapter file, command dry-run/execute mínimo e
   read-model de grafo;
 - app operacional React/Next + Material UI em `governance-demo/frontend/`;
-- exemplos derivados file/SQLite/Neo4j/Mongo em `governance-demo/examples/backends/`;
+- exemplos derivados file/SQLite/Neo4j/Mongo em `governance-demo/backend/examples/read-models/`;
 - smoke operacional de file + Neo4j, com Neo4j ainda como read-model/projeção;
 - resolvers fail-closed para schema, outcome, repo-work, contrato, trust-policy, authority,
   break-glass, incident e verdict;
@@ -101,8 +101,9 @@ Status: 🚧 em andamento.
 - ✅ atualizar README/NEXT-STEPS para refletir F6/F7;
 - ✅ registrar que app, runtime file e exemplos multi-backend existem;
 - ✅ marcar que SQLite/Neo4j/Mongo transacionais ainda não existem;
-- 🚧 atualizar handoff Fable 5, `model.yml`, `features.md`, `app-requirements.md`;
-- 🚧 criar catálogo versionado de integrações externas.
+- ✅ arquivar handoffs/prompts Fable e documentos substituidos pela `governance-demo`;
+- ✅ criar catálogo versionado de integrações externas.
+- 🚧 iterar visualmente o app pelo mapa [`governance-demo/APP-ITERATION-MAP.md`](governance-demo/APP-ITERATION-MAP.md).
 
 ### R2 · Revisão adversarial pós-F7
 

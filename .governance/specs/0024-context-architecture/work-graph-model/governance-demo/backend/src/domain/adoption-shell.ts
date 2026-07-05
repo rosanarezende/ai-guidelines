@@ -449,6 +449,7 @@ export type Workspace = {
   mode?: WorkspaceMode;
   stack?: WorkspaceStack;
   onboardingPath?: OnboardingPath;
+  onboardingStep?: number;
   assistant?: AssistantPreference;
   assistantConfig?: WorkspaceAssistantConfig;
   integrations: WorkspaceIntegrationState[];

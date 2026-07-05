@@ -1,0 +1,189 @@
+{
+  "title": "Fontes de trabalho",
+  "lead": "Fontes conectam o que a organização já usa ao framework. Sem fonte, o app ainda registra decisões e intenções, mas execução, contratos e resultados ficam como evidência manual/declarada.",
+  "scopeTitle": "Antes de cadastrar: caminho local depende de onde o app está rodando",
+  "scopeBody": "O scan lê arquivos pela aplicação, não pelo navegador. Em uso solo local, o caminho é o caminho da sua máquina. Em uso compartilhado/servidor, o caminho precisa existir no servidor ou vir de um provider conectado.",
+  "scopeItems": [
+    "Repo Git local: melhor opção para provar revisão, sujeira local e hash de conteúdo.",
+    "Pasta local: útil para começar, mas não prova autoria nem histórico.",
+    "Pasta sincronizada em nuvem: pode ter histórico no provider, mas só vira confiança forte quando houver adapter do provider.",
+    "GitHub e outros providers entram como integração: não ficam conectados sem OAuth/permissão explícita."
+  ],
+  "listTitle": "Fontes cadastradas",
+  "empty": "Nenhuma fonte cadastrada neste workspace.",
+  "addTitle": "Adicionar projeto ou fonte",
+  "addLead": "Responda primeiro onde o projeto está. O app escolhe a forma técnica por baixo e mostra o que consegue provar hoje.",
+  "kindLabel": "Tipo de fonte",
+  "labelLabel": "Nome legível",
+  "pathLabel": "Caminho ou URL",
+  "pathRequired": "Informe um caminho acessível pela aplicação para escanear esta fonte.",
+  "pathOptional": "Opcional para fontes declaradas ou providers ainda não conectados.",
+  "pathScopeWarning": "Não cole segredos nem dados sensíveis aqui. O caminho fica registrado no estado local do workspace; conteúdo dos arquivos não é armazenado, apenas inventário/hash/estado de scan.",
+  "labelHelp": "Ex.: mundo-da-mel-site, checkout-api, design-system. Se você selecionar uma pasta, o app sugere um nome.",
+  "manualPathTitle": "Modo avançado: informar caminho que o app consegue ler",
+  "manualPathBody": "Use quando o app está rodando na mesma máquina ou em um servidor que tem acesso a essa pasta. Assim o backend consegue escanear Git, sujeira local e inventário de forma mais forte que o snapshot do navegador.",
+  "manualPathOpen": "Informar caminho manualmente",
+  "manualPathClose": "Esconder caminho manual",
+  "urlTitle": "Link externo ou fonte remota",
+  "urlBody": "Use para registrar uma fonte que ainda será conferida fora do app. Sem adapter, isso não prova histórico nem execução.",
+  "urlLabel": "URL da fonte",
+  "urlHelp": "Cole a URL pública/privada que representa a fonte. Permissões e egress entram na integração própria.",
+  "browserPickTitle": "Comece selecionando a pasta no Explorer",
+  "browserPickCta": "Selecionar pasta no Explorer",
+  "browserPickHelp": "O navegador não entrega o caminho absoluto da pasta. O app registra um snapshot com contagem de arquivos e hash de inventário. Para provar Git/autoria, conecte um provider ou use caminho manual acessível pelo app.",
+  "browserPickUnsupported": "Este navegador não permitiu ler a pasta selecionada.",
+  "browserSnapshotReady": "Snapshot pronto: {files} arquivo(s), hash {hash}.",
+  "browserSnapshotCta": "Adicionar snapshot",
+  "githubTitle": "GitHub precisa ser conectado como integração",
+  "githubBody": "GitHub não é caminho local. Para provar revisão remota, autoria e checks, o app precisa de OAuth/permissões e adapter do provider.",
+  "githubCta": "Ver integrações",
+  "addCta": "Adicionar",
+  "addAndScanCta": "Adicionar e escanear",
+  "scan": "Escanear agora",
+  "scanning": "Escaneando",
+  "status": "estado",
+  "trust": "confiança",
+  "scanHash": "hash",
+  "scanFiles": "arquivos",
+  "gitHead": "git",
+  "gitDirtyFiles": "alterados",
+  "cloudSync": "sync",
+  "lastScan": "Último scan",
+  "errorsTitle": "Erros do scan",
+  "limitationsTitle": "Limitações visíveis",
+  "successAdded": "Fonte {label} adicionada. Ela ainda precisa de evidência ou scan para ganhar confiança.",
+  "successScanned": "Fonte {label} cadastrada/escaneada com sucesso.",
+  "error": "Não foi possível concluir. Detalhe: {error}",
+  "kinds": {
+    "git-repo": "Repositório Git local",
+    "local-folder": "Pasta local",
+    "cloud-synced-folder": "Pasta sincronizada em nuvem",
+    "manual-upload": "Evidência manual",
+    "external-link": "Link externo",
+    "github": "GitHub",
+    "monorepo-module": "Módulo de monorepo"
+  },
+  "statusLabels": {
+    "draft": "rascunho",
+    "connected": "conectada",
+    "manual-evidence": "evidência manual"
+  },
+  "trustLabels": {
+    "snapshot-only": "snapshot local",
+    "cloud-sync-unverified": "nuvem não verificada",
+    "provider-versioned": "provider versionado",
+    "provider-audited": "provider auditado",
+    "declared": "declarada",
+    "untrusted": "não confiável"
+  },
+  "flow": {
+    "localTitle": "Projeto local",
+    "localBody": "Está na sua máquina, em um repo local, monorepo, pasta de trabalho ou pasta sincronizada.",
+    "cloudTitle": "Projeto na nuvem",
+    "cloudBody": "Está em GitHub, GitLab, Bitbucket, Drive, ferramenta externa ou outro provider.",
+    "localQuestion": "Qual situação descreve melhor esse projeto local?",
+    "cloudQuestion": "Qual fonte na nuvem você quer conectar?"
+  },
+  "scenarios": {
+    "local-git": {
+      "title": "Projeto local com Git",
+      "body": "Um repo que já existe na sua máquina.",
+      "guidance": "Selecione a pasta pelo Explorer para começar com um snapshot. Se o app estiver rodando localmente e puder ler o caminho, use o modo avançado para escanear Git de verdade.",
+      "proof": "Snapshot prova inventário; caminho manual acessível pelo app também prova commit local e arquivos alterados.",
+      "declaredHelp": ""
+    },
+    "local-folder": {
+      "title": "Pasta local sem Git",
+      "body": "Projeto em andamento, docs ou artefatos ainda sem repo.",
+      "guidance": "Selecione a pasta para registrar um snapshot. O app vai deixar visível que isso ainda não prova histórico/autoria.",
+      "proof": "Prova apenas inventário/hash do momento.",
+      "declaredHelp": ""
+    },
+    "local-empty": {
+      "title": "Ainda vou criar a pasta/projeto",
+      "body": "Você quer planejar antes de ter código ou arquivos.",
+      "guidance": "Dê um nome para reservar a fonte como declarada. Depois você conecta a pasta real ou um provider.",
+      "proof": "Não prova execução ainda; fica como intenção/declaração.",
+      "declaredHelp": "Essa fonte fica declarada até você anexar uma pasta, repo ou provider."
+    },
+    "cloud-sync": {
+      "title": "Pasta sincronizada em nuvem",
+      "body": "Drive, OneDrive, Dropbox ou equivalente.",
+      "guidance": "Selecione a pasta local sincronizada. Sem adapter do provider, o app não assume que o histórico da nuvem foi verificado.",
+      "proof": "Snapshot local com confiança rebaixada para nuvem não verificada.",
+      "declaredHelp": ""
+    },
+    "monorepo-module": {
+      "title": "Módulo dentro de monorepo",
+      "body": "Uma subpasta ou pacote dentro de um repo maior.",
+      "guidance": "Selecione a pasta do módulo. Se precisar provar o Git do repo inteiro, use caminho manual acessível pelo app.",
+      "proof": "Snapshot do módulo agora; scan forte depende do caminho e do Git detectável.",
+      "declaredHelp": ""
+    },
+    "github": {
+      "title": "GitHub",
+      "body": "Repo remoto com commits, PRs e checks.",
+      "guidance": "GitHub precisa de integração/OAuth. Não faz sentido colar um caminho local aqui.",
+      "proof": "Quando conectado, deve provar revisão remota, autoria, PRs e checks.",
+      "declaredHelp": ""
+    },
+    "external-link": {
+      "title": "Outro link ou ferramenta",
+      "body": "Jira, Linear, Notion, Figma, dashboard ou ferramenta externa.",
+      "guidance": "Registre a URL para manter rastreio. A prova forte depende de adapter específico.",
+      "proof": "Sem adapter, é referência declarada.",
+      "declaredHelp": ""
+    },
+    "manual-evidence": {
+      "title": "Ainda só tenho evidência manual",
+      "body": "Arquivos, prints, exports ou anexos sem integração.",
+      "guidance": "Use quando você sabe que a evidência virá manualmente por enquanto.",
+      "proof": "O app não chama isso de prova automática; fica explícito no dashboard.",
+      "declaredHelp": "Essa fonte fica marcada como evidência manual."
+    }
+  },
+  "kindHelp": {
+    "git-repo": {
+      "title": "Repo Git local",
+      "body": "Lê .git, commit atual, sujeira local e inventário.",
+      "pathHint": "Use um caminho absoluto ou relativo acessível pelo processo do app, por exemplo C:\\Users\\Rosana\\dev\\meu-repo.",
+      "proof": "Prova revisão local e hash do snapshot; não substitui GitHub/GitLab para autoria remota."
+    },
+    "local-folder": {
+      "title": "Pasta local",
+      "body": "Serve para começar mesmo sem Git.",
+      "pathHint": "Use uma pasta de trabalho real. O app vai contar arquivos e gerar hash de inventário.",
+      "proof": "Prova snapshot local por hash; não prova histórico, autor nem revisão."
+    },
+    "cloud-synced-folder": {
+      "title": "Pasta sincronizada em nuvem",
+      "body": "Útil para Drive/Dropbox/OneDrive, com rebaixamento explícito.",
+      "pathHint": "Use o caminho local da pasta sincronizada. O app tenta detectar o provider pelo caminho/markers.",
+      "proof": "Sem adapter do provider, a confiança fica cloud-sync-unverified."
+    },
+    "manual-upload": {
+      "title": "Evidência manual",
+      "body": "Registra que uma pessoa anexará evidência manualmente.",
+      "pathHint": "Caminho não é obrigatório nesta fase.",
+      "proof": "Não prova execução automaticamente; entra como declaração."
+    },
+    "external-link": {
+      "title": "Link externo",
+      "body": "Representa uma fonte que será conferida fora do app.",
+      "pathHint": "URL é opcional aqui; integrações futuras devem resolver permissões e egress.",
+      "proof": "Não prova conteúdo nem histórico sem adapter específico."
+    },
+    "github": {
+      "title": "GitHub",
+      "body": "Provider cloud de release 1, com OAuth/permissões em fatia própria.",
+      "pathHint": "Pode registrar a intenção agora, mas não fica connected sem adapter/autorização.",
+      "proof": "Quando conectado, deve provar revisão remota, autoria e contexto publicado."
+    },
+    "monorepo-module": {
+      "title": "Módulo de monorepo",
+      "body": "Use quando a governança precisa olhar uma subpasta de um repo maior.",
+      "pathHint": "Informe o caminho do módulo/subpasta acessível pela aplicação.",
+      "proof": "Se a subpasta estiver dentro de Git, o scan pode detectar revisão do repo."
+    }
+  }
+}

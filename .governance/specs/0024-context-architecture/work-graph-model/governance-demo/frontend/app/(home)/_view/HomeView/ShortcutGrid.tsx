@@ -28,7 +28,7 @@ export function ShortcutGrid({
         sub={format(copy.shortcuts.configureOrg.sub, { profile: profileOption(profile).label })}
       />
       <ShortcutCard
-        href="/onboarding"
+        href="/sources"
         icon={<LinkIcon fontSize="small" />}
         title={copy.shortcuts.connectSources.title}
         sub={copy.shortcuts.connectSources.sub}
