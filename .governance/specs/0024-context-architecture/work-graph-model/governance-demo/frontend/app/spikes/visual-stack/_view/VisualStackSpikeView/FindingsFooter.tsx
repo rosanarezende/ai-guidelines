@@ -6,9 +6,14 @@ import { Box, Chip, Typography } from "@mui/material";
 import { Flex } from "@/app/_ui/shared";
 import type { CandidateFinding } from "./findings";
 
-const VERDICT_COLOR: Record<CandidateFinding["verdict"], "success" | "warning" | "default"> = {
+const VERDICT_COLOR: Record<
+  CandidateFinding["verdict"],
+  "success" | "info" | "warning" | "default"
+> = {
   recomendado: "success",
+  "provável primário — pendente de confirmação": "info",
   alternativa: "warning",
+  "pendente de decisão": "default",
   "não recomendado para a superfície": "default",
 };
 

@@ -95,6 +95,11 @@ function ServerStatePanel({ initialRevision }: { initialRevision: string }) {
       <Flex align="center" gap={1} wrap>
         <Chip size="small" variant="outlined" label={`workspace: ${WORKSPACE}`} />
         <Chip size="small" variant="outlined" label={`sourceRevision: ${revision}`} />
+        <Chip
+          size="small"
+          variant="outlined"
+          label={`queryKey: ["${WORKSPACE}", "graph-overview", "${typeFilter || "todos"}"]`}
+        />
         <Chip size="small" color="default" variant="outlined" label="derivado — não é SSOT" />
         <Chip
           size="small"

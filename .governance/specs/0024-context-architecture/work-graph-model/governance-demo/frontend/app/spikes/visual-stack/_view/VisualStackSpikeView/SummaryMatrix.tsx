@@ -22,9 +22,14 @@ const SURFACE_LABEL: Record<CandidateFinding["surface"], string> = {
   "server-state": "Server state",
 };
 
-const VERDICT_COLOR: Record<CandidateFinding["verdict"], "success" | "warning" | "default"> = {
+const VERDICT_COLOR: Record<
+  CandidateFinding["verdict"],
+  "success" | "info" | "warning" | "default"
+> = {
   recomendado: "success",
+  "provável primário — pendente de confirmação": "info",
   alternativa: "warning",
+  "pendente de decisão": "default",
   "não recomendado para a superfície": "default",
 };
 
