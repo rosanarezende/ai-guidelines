@@ -19,7 +19,13 @@ const spikeTheme = themeQuartz.withParams({
   borderRadius: 8,
 });
 
-export function TableAgGrid({ table }: { table: GovernanceTableViewModel }) {
+export function TableAgGrid({
+  table,
+  onSelectionChange,
+}: {
+  table: GovernanceTableViewModel;
+  onSelectionChange?: (ids: string[]) => void;
+}) {
   const [hidden, setHidden] = useState<Record<string, boolean>>({});
   const [columnsAnchor, setColumnsAnchor] = useState<HTMLElement | null>(null);
   const [selectedCount, setSelectedCount] = useState(0);
@@ -80,7 +86,11 @@ export function TableAgGrid({ table }: { table: GovernanceTableViewModel }) {
           paginationPageSize={25}
           paginationPageSizeSelector={[25, 100, 500]}
           rowSelection={{ mode: "multiRow" }}
-          onSelectionChanged={(event) => setSelectedCount(event.api.getSelectedRows().length)}
+          onSelectionChanged={(event) => {
+            const picked = event.api.getSelectedRows().map((row) => row.id);
+            setSelectedCount(picked.length);
+            onSelectionChange?.(picked);
+          }}
         />
       </Box>
       <Typography variant="caption" color="text.secondary">

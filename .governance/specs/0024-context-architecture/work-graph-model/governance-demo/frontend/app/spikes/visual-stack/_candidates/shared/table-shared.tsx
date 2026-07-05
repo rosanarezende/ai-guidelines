@@ -22,6 +22,7 @@ export const TABLE_COLUMNS: Array<{
   { field: "status", label: "status", width: 130, pill: "status" },
   { field: "confidence", label: "confiança", width: 140, pill: "confidence" },
   { field: "risk", label: "risco", width: 110, pill: "risk" },
+  { field: "evidence", label: "evidência", width: 230 },
   { field: "nextStep", label: "próximo passo", width: 220 },
   { field: "contract", label: "contrato", width: 170 },
   { field: "source", label: "fonte", width: 190 },

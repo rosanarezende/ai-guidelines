@@ -9,6 +9,7 @@ import {
   Checkbox,
   Menu,
   MenuItem,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -28,7 +29,9 @@ import {
   getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type ColumnFiltersState,
   type SortingState,
+  type Updater,
   type VisibilityState,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
@@ -36,13 +39,39 @@ import { Flex } from "@/app/_ui/shared";
 import type { GovernanceTableRow, GovernanceTableViewModel } from "../../_model/view-models";
 import { TABLE_COLUMNS, TablePill, cellText } from "../shared/table-shared";
 
-export function TableTanStack({ table: vm }: { table: GovernanceTableViewModel }) {
+// colunas com filtro próprio de valor (select) — filtros REAIS por coluna
+const FILTERABLE = ["kind", "status", "confidence", "risk"] as const;
+
+export function TableTanStack({
+  table: vm,
+  onSelectionChange,
+}: {
+  table: GovernanceTableViewModel;
+  onSelectionChange?: (ids: string[]) => void;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [dense, setDense] = useState(true);
   const [columnsAnchor, setColumnsAnchor] = useState<HTMLElement | null>(null);
+
+  const filterOptions = useMemo(() => {
+    const options = new Map<string, string[]>();
+    for (const field of FILTERABLE) {
+      options.set(field, [...new Set(vm.rows.map((row) => String(row[field])))].sort());
+    }
+    return options;
+  }, [vm.rows]);
+
+  function handleSelection(updater: Updater<Record<string, boolean>>) {
+    setRowSelection((previous) => {
+      const next = typeof updater === "function" ? updater(previous) : updater;
+      onSelectionChange?.(Object.keys(next));
+      return next;
+    });
+  }
 
   const columns = useMemo<ColumnDef<GovernanceTableRow>[]>(() => {
     const select: ColumnDef<GovernanceTableRow> = {
@@ -82,11 +111,12 @@ export function TableTanStack({ table: vm }: { table: GovernanceTableViewModel }
   const table = useReactTable({
     data: vm.rows,
     columns,
-    state: { sorting, globalFilter, columnVisibility, rowSelection },
+    state: { sorting, globalFilter, columnFilters, columnVisibility, rowSelection },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: handleSelection,
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -107,6 +137,28 @@ export function TableTanStack({ table: vm }: { table: GovernanceTableViewModel }
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}
         />
+        {FILTERABLE.map((field) => {
+          const column = table.getColumn(field);
+          if (!column) return null;
+          return (
+            <Select
+              key={field}
+              size="small"
+              displayEmpty
+              value={(column.getFilterValue() as string) ?? ""}
+              onChange={(event) => column.setFilterValue(event.target.value || undefined)}
+              renderValue={(value) => (value ? `${field}: ${value}` : `${field}: todos`)}
+              sx={{ minWidth: 130, fontSize: 12 }}
+            >
+              <MenuItem value="">todos</MenuItem>
+              {(filterOptions.get(field) ?? []).map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+          );
+        })}
         <Button size="small" onClick={(event) => setColumnsAnchor(event.currentTarget)}>
           colunas
         </Button>

@@ -9,7 +9,13 @@ import { useMemo, useState } from "react";
 import type { GovernanceTableViewModel, GovernanceTableRow } from "../../_model/view-models";
 import { TABLE_COLUMNS, TablePill, cellText } from "../shared/table-shared";
 
-export function TableMuiDataGrid({ table }: { table: GovernanceTableViewModel }) {
+export function TableMuiDataGrid({
+  table,
+  onSelectionChange,
+}: {
+  table: GovernanceTableViewModel;
+  onSelectionChange?: (ids: string[]) => void;
+}) {
   const [selectedCount, setSelectedCount] = useState(0);
 
   const columns = useMemo<GridColDef<GovernanceTableRow>[]>(
@@ -44,7 +50,12 @@ export function TableMuiDataGrid({ table }: { table: GovernanceTableViewModel })
           }}
           pageSizeOptions={[25, 50, 100]}
           onRowSelectionModelChange={(model) => {
-            setSelectedCount(model.ids?.size ?? 0);
+            const picked =
+              model.type === "exclude"
+                ? table.rows.filter((row) => !model.ids.has(row.id)).map((row) => row.id)
+                : [...model.ids].map(String);
+            setSelectedCount(picked.length);
+            onSelectionChange?.(picked);
           }}
         />
       </Box>
