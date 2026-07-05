@@ -4,4 +4,5 @@
 
 # Artefatos de build
 .next/
+next-env.d.ts
 tsconfig.tsbuildinfo
