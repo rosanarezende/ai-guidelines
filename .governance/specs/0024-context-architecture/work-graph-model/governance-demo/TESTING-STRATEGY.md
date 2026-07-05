@@ -58,21 +58,31 @@ se uma regra pode ser provada por funcao de dominio + estado (sem browser), ela
 NAO deve virar teste Playwright. E2E fica para o que so o browser prova (jornada
 humana, cross-screen, persistencia via UI, sentinela de rota).
 
-| Camada                    | Ferramenta principal                      | Escopo                                                                                                                             | Status                  |
-| ------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| Static/typecheck          | TypeScript                                | contratos, dominio, view-models e APIs tipadas                                                                                     | atual                   |
-| Domain/invariante         | `node --test` (backend/tests, ~200ms)     | authority (matriz papel x comando), role state-machine, sourceTrust, onboarding, isolamento demo, invariantes sobre TODAS as seeds | atual (primeira classe) |
-| API/route                 | HTTP direto / use-case (proposto)         | `/api/local/*` authority, fail-closed, idempotency/replay, stale base-revision                                                     | futuro                  |
-| Component/integration UI  | Testing Library + MSW (proposto)          | componentes/steps isolados com requests reais interceptados                                                                        | futuro                  |
-| E2E/journey               | Playwright                                | fluxos entre telas, persistencia, auth local, mock-api                                                                             | atual                   |
-| Governance/backend checks | tools/checks + backend tests              | fail-closed, event-log, resolver, adapters                                                                                         | atual                   |
-| Reporting/management      | Playwright HTML/JSON/JUnit; Allure depois | visualizacao e historico de testes                                                                                                 | inicial                 |
+| Camada                    | Ferramenta principal                      | Escopo                                                                                                                                            | Status                  |
+| ------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| Static/typecheck          | TypeScript                                | contratos, dominio, view-models e APIs tipadas                                                                                                    | atual                   |
+| Domain/invariante         | `node --test` (backend/tests, ~200ms)     | authority (matriz papel x comando), role state-machine, sourceTrust, onboarding, isolamento demo, invariantes sobre TODAS as seeds                | atual (primeira classe) |
+| API in-memory             | `node --test` (mock-api/tests, ~300ms)    | handler `/api/shell/commands` via Hono `app.request()` sem servidor: schema 400, replay/idempotencia 422, authority 422, isolamento, seed unknown | atual (primeira classe) |
+| Rota real HTTP            | Playwright `request` (sem browser)        | casca da rota `/api/local/*`: sessao (401/400) e parse de JSON (400) que so o handler real prova                                                  | atual                   |
+| Component/integration UI  | Testing Library + MSW (proposto)          | componentes/steps isolados com requests reais interceptados                                                                                       | futuro                  |
+| E2E/journey               | Playwright                                | fluxos entre telas, persistencia, auth local, mock-api                                                                                            | atual                   |
+| Governance/backend checks | tools/checks + backend tests              | fail-closed, event-log, resolver, adapters                                                                                                        | atual                   |
+| Reporting/management      | Playwright HTML/JSON/JUnit; Allure depois | visualizacao e historico de testes                                                                                                                | inicial                 |
 
 Layer de dominio/invariante: `npm --workspace acme-governance-backend run
 test:shell` (`node --test tests/**/*.test.ts`). Usa o MESMO executor autorizado
 (`authorizeShellCommand`) que backend real e mock-api usam — isso e a prova de
 fidelidade do mock. Invariantes rodam sobre `SEEDS`/`buildSeed` diretamente,
 sem HTTP. Regra do produto que puder ser provada aqui NAO deve subir para e2e.
+
+Layer de API in-memory: `npm --workspace acme-governance-mock-api run test:api`
+(`node --test tests/**/*.test.ts`). Roda o app Hono da mock-api via
+`app.request()` — o MESMO handler `/api/shell/commands` do e2e — em processo,
+sem servidor nem browser. Prova o contrato de comando (schema, replay/
+idempotencia por command id, authority, isolamento de workspace). A casca de
+rota do frontend (sessao via cookie, parse de JSON) fica em Playwright `request`
+porque depende de `next/headers` e do alias `@demo/backend`, que `node --test`
+nao resolve — por isso essa parte precisa do servidor booted (sem browser).
 
 ## 4. Ferramentas escolhidas
 

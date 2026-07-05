@@ -83,3 +83,38 @@ test("onboarding finished bloqueia sem host ou sandbox explícito", async ({ req
   const body = (await finish.json()) as { error?: string };
   expect(body.error || "").toContain("onboarding-incomplete");
 });
+
+// Camada de rota real (HTTP, sem browser): a casca da rota — sessão e parse de
+// JSON — só é provada aqui. O contrato de comando (authority/replay/isolamento)
+// vive no layer in-memory da mock-api (mock-api/tests/api-commands.test.ts).
+test("rota /api/local sem sessão retorna 401 no-session (fail-closed)", async ({ request }) => {
+  const response = await request.post("/api/local/onboarding/profile", {
+    data: { profile: "solo", sensitiveAccumulationPolicy: "record" },
+  });
+  expect(response.status()).toBe(401);
+  const body = (await response.json()) as { error?: string };
+  expect(body.error).toBe("no-session");
+});
+
+test("rota /api/local com sessão mas JSON inválido retorna 400 invalid-json", async ({
+  request,
+}) => {
+  const signup = await request.post("/api/local/signup", {
+    data: { displayName: "Ana Admin" },
+  });
+  expect(signup.ok()).toBeTruthy();
+  const org = await request.post("/api/local/organizations", {
+    data: { name: "Acme Honey", kind: "company" },
+  });
+  expect(org.ok()).toBeTruthy();
+
+  // Buffer envia bytes crus: Playwright NAO re-serializa (uma string com
+  // content-type json viraria um JSON string valido e passaria do parse).
+  const response = await request.post("/api/local/onboarding/profile", {
+    headers: { "content-type": "application/json" },
+    data: Buffer.from("{ nao-e-json-valido"),
+  });
+  expect(response.status()).toBe(400);
+  const body = (await response.json()) as { error?: string };
+  expect(body.error).toBe("invalid-json");
+});
