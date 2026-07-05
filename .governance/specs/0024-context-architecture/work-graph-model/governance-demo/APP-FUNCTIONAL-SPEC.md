@@ -93,6 +93,35 @@ Rotas Next (`frontend/app/api/local/*`) sobre use cases + reducer puro
 7. **Console tecnico e area avancada; nao e o caminho feliz do usuario.**
 8. **Mock API valida experiencia, nao governanca.** Jornadas podem nascer contra `mock-api`, mas so contam como governanca real quando passarem pelo backend real/command runtime/resolver.
 
+## 3.1 Stack visual e spikes obrigatorios
+
+Autoridade: [`APP-DECISIONS.md#qrd-27---stack-de-visualizacao-do-app`](APP-DECISIONS.md#qrd-27---stack-de-visualizacao-do-app).
+
+O app deve separar quatro superficies visuais e validar cada uma com spike
+comparativo antes de cravar dependencia final:
+
+| Superficie            | Uso principal                                                                               | Stack decidida / em avaliacao                                  |
+| --------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Mapas de governanca   | Explicar caminhos de decisao, evidencias, contratos, riscos, objetivos e proximos passos.   | Spike: React Flow (`@xyflow/react`) + ELK (`elkjs`) x ECharts. |
+| Dashboards            | Mostrar resultados derivados, comparativos de ciclo, targets, outcomes e confianca.         | Spike: MUI X Charts x Apache ECharts.                          |
+| Tabelas/data grids    | Operar listas densas de iniciativas, contratos, pendencias, evidencias, auditoria e fontes. | Spike: MUI X Data Grid x TanStack Table x AG Grid Community.   |
+| Grafo tecnico/console | Explorar vizinhanca, shortest path, impacto de contrato, dependencias e densidade.          | Spike comparativo: Sigma.js + Graphology x Reagraph x ECharts. |
+| Server state do app   | Cache, mutations, invalidacao e atualizacao das rotas do produto.                           | TanStack Query.                                                |
+
+Regras de produto:
+
+- React Flow + ELK e o candidato principal para mapas de governanca, mas ainda
+  precisa ser validado com prototipo comparavel.
+- O grafo tecnico nunca substitui Home, onboarding, planejamento nem dashboards.
+- ECharts entra nos spikes de dashboard e grafo porque pode oferecer uma
+  visualizacao mais amigavel e coerente com dashboards, mas precisa provar que
+  suporta as interacoes e o volume do read-model real.
+- Cytoscape esta banido do produto, do roadmap e dos spikes.
+- A camada de dados deve expor view-models independentes de renderer
+  (`GovernanceMapViewModel`, `GovernanceDashboardViewModel`,
+  `GovernanceTableViewModel`). Trocar renderer nao pode alterar dominio,
+  comandos, resolver ou fonte autoritativa.
+
 ## 4. Perfis de usuario do app
 
 | Perfil de app     | O que precisa fazer                                                        | Observacao de seguranca                                                       |

@@ -1531,6 +1531,191 @@ Copy obrigatoria:
 - `Integracoes disponiveis em breve: GitLab, Bitbucket, OpenAPI/GraphQL, Jira/Linear, BigQuery/dbt, PostHog/Amplitude, PagerDuty, SonarQube/Semgrep e Backstage.`
 - `Em breve significa backlog priorizado, nao mecanismo ativo. O app deve dizer o que ja funciona sem cada integracao.`
 
+## QRD-27 - Stack de visualizacao do app
+
+**Q - Question**
+
+Quais bibliotecas de frontend devem sustentar mapas de governanca, grafo
+tecnico, dashboards, tabelas e server state sem criar uma UI tecnica demais
+para stakeholders nem escolher algo que sera trocado depois?
+
+**R - Reasoning/Research**
+
+O app tem duas superficies visuais diferentes.
+
+Para stakeholders, lideres e owners, o principal nao e "ver todos os nos". E
+entender o caminho de uma decisao ate evidencia, risco, contrato, resultado e
+proximo passo. Essa superficie precisa de nos ricos, copy de produto, estados de
+confianca, filtros por ciclo/objetivo/time e interacao guiada. React Flow e mais
+adequado para isso porque e um renderer React para node-based UIs; seus exemplos
+oficiais ja cobrem integracao com motores de layout como ELK e Dagre. ELK deve
+ser o layout principal para mapas mais complexos; Dagre fica como alternativa
+barata para fluxos hierarquicos simples.
+
+Para auditoria/admin/dev, existe uma segunda superficie: o grafo tecnico. Ali
+importa explorar vizinhanca, shortest path, impacto de contrato, dependencias e
+densidade com muitos nos. Sigma.js, Reagraph e Apache ECharts devem ser
+comparados em spike porque atacam esse espaco por caminhos diferentes:
+
+- Sigma.js tem vocacao mais graph-oriented/large-graph e combina bem com
+  Graphology.
+- Reagraph e mais React-first e visualmente proximo de uma experiencia de
+  produto para network graphs 2D/3D.
+- Apache ECharts tem uma serie `graph` amigavel e pode ser interessante quando
+  o console tecnico precisa ficar mais perto de dashboards e menos de uma tela
+  de engenharia.
+
+A decisao nao deve ser tomada por preferencia estetica isolada; deve ser tomada
+com o read-model real e um fixture sintetico maior. ECharts entra no spike, mas
+nao substitui automaticamente React Flow como superficie principal: mapas de
+governanca continuam sendo fluxos ricos guiados, nao apenas grafos renderizados.
+
+Dashboards e tabelas nao devem ser fechados por inercia do ecossistema MUI. MUI
+continua sendo o design system do app, mas a biblioteca de visualizacao precisa
+ser provada por superficie:
+
+- dashboards precisam comparar MUI X Charts e Apache ECharts;
+- tabelas precisam comparar MUI X Data Grid, TanStack Table e AG Grid Community;
+- grafo tecnico precisa comparar Sigma.js, Reagraph e Apache ECharts;
+- mapas de governanca continuam com React Flow + ELK como candidato principal,
+  mas o spike deve provar que ele entrega a experiencia guiada melhor que uma
+  visualizacao de grafo/chart generica.
+
+TanStack Query entra como candidato padrao para server state, cache, mutations e
+invalidacao quando as telas sairem do modo read-only. Ele nao e biblioteca de
+visualizacao, entao fica fora dos spikes de renderer, mas precisa ser validado
+na arquitetura de dados do app.
+
+Referencias publicas usadas nesta decisao:
+
+- React Flow / ELK layout: https://reactflow.dev/examples/layout/elkjs
+- React Flow / Dagre layout: https://reactflow.dev/examples/layout/dagre
+- Sigma.js: https://www.sigmajs.org/
+- Reagraph: https://reagraph.dev/
+- Apache ECharts graph example: https://echarts.apache.org/examples/en/editor.html?c=graph
+- Apache ECharts graph/data note: https://apache.github.io/echarts-handbook/en/concepts/dataset/
+- MUI X Charts: https://mui.com/x/react-charts/
+- MUI X Data Grid: https://mui.com/x/react-data-grid/
+- TanStack Query: https://tanstack.com/query/latest
+
+**D - Decision**
+
+Decisao estrutural:
+
+- o app tera uma camada de view-model independente de renderer:
+  `GovernanceMapViewModel`, `GovernanceDashboardViewModel` e
+  `GovernanceTableViewModel`;
+- nenhuma biblioteca visual pode ler YAML/event-log diretamente ou virar SSOT;
+- toda acao governada continua relendo fonte autoritativa e `sourceRevision`;
+- Cytoscape esta banido do produto e dos spikes. Ele nao deve entrar como
+  dependencia, fallback, prototipo ou sugestao de implementacao. So pode
+  reaparecer por nova decisao explicita da owner em QRD proprio.
+
+Spikes obrigatorios antes de cravar a stack final:
+
+### 1. Mapas de governanca
+
+- `@xyflow/react` (React Flow) + `elkjs`;
+- Apache ECharts `graph` como comparativo leve apenas se conseguir representar
+  fluxos guiados sem parecer grafo tecnico.
+
+Criterios especificos:
+
+1. representar decisao -> evidencia -> contrato -> outcome -> dashboard;
+2. suportar nos ricos com copy, status, risco, evidencia e CTA;
+3. suportar layout automatico estavel e legivel em desktop;
+4. permitir fallback textual/lista para acessibilidade;
+5. funcionar em Next/React sem hydration warning;
+6. manter linguagem visual de produto, nao de console tecnico.
+
+### 2. Dashboards
+
+- `@mui/x-charts`;
+- Apache ECharts.
+
+Criterios especificos:
+
+1. linhas, barras, area, stacked, gauge/scorecard, funil e comparativos de ciclo;
+2. drill-down de objective -> target -> outcome -> fonte;
+3. estados de confianca visiveis: valido, pendente, sem evidencia,
+   auto-declarado, break-glass, stale;
+4. tema compativel com MUI;
+5. boa responsividade;
+6. performance com series maiores;
+7. boa experiencia de tooltip/legenda/filtro;
+8. TypeScript aceitavel e sem adapter fragil;
+9. licenciamento compativel com open-source/self-hosted.
+
+### 3. Tabelas e data grids
+
+- `@mui/x-data-grid`;
+- `@tanstack/react-table`;
+- `ag-grid-community`.
+
+Criterios especificos:
+
+1. sorting, filtering, pagination, column visibility, density e row selection;
+2. linhas com status de confianca, risco e proximo passo;
+3. filtros persistiveis por usuario/workspace;
+4. acessibilidade minima;
+5. virtualizacao ou performance aceitavel em listas grandes;
+6. integracao visual com MUI sem CSS frágil;
+7. TypeScript forte para colunas e rows;
+8. licenciamento compativel com open-source/self-hosted, sem depender de feature
+   paga para o caminho principal.
+
+### 4. Grafo tecnico/console
+
+- `sigma` + `graphology`;
+- `reagraph`;
+- `echarts` ou wrapper React equivalente para Apache ECharts.
+
+Criterios especificos:
+
+1. renderizar o read-model real da acme e um fixture sintetico maior;
+2. suportar filtros por tipo, owner/time, ciclo, confianca, status, contrato e
+   fonte;
+3. suportar selecao de no, vizinhanca, shortest path, contract-impact e
+   intent-deps;
+4. manter performance aceitavel com milhares de nos/arestas;
+5. permitir tema compativel com MUI sem visual tecnico cru;
+6. funcionar em Next/React sem hydration warning;
+7. ter TypeScript aceitavel e sem adapter fragil;
+8. preservar acessibilidade minima e fallback textual/lista;
+9. nao virar SSOT: toda acao continua relendo YAML/event-log/sourceRevision;
+10. responder se ECharts e suficiente para grafo tecnico amigavel ou se deve
+    ficar restrito a dashboards/visualizacoes auxiliares;
+11. gerar recomendacao documentada: Sigma.js, Reagraph, ECharts ou nenhum deles.
+
+### 5. Server state
+
+- `@tanstack/react-query` como candidato padrao.
+
+Criterios especificos:
+
+1. cache por workspace/sourceRevision;
+2. invalidacao apos mutation;
+3. tratamento claro de stale/read-model derivado;
+4. suporte a optimistic UI apenas quando a mutacao tiver rollback honesto;
+5. bom encaixe com Next App Router e Server Components.
+
+Regras de produto:
+
+- React Flow e a experiencia principal. O grafo tecnico nunca substitui Home,
+  onboarding, planejamento nem dashboards.
+- Cytoscape nao entra no produto, no roadmap nem nos spikes.
+- AntV G6 fica como benchmark secundario: so entra se o spike
+  Sigma/Reagraph/ECharts falhar ou se surgir uma necessidade clara de engine de
+  graph-analysis mais completa.
+- As escolhas finais so podem ser registradas depois de prototipos comparaveis
+  com o mesmo dataset, os mesmos filtros e o mesmo criterio visual.
+
+Copy obrigatoria:
+
+- `Mapa de governanca: mostra o caminho de uma decisao ate resultado, com riscos e evidencias.`
+- `Grafo tecnico: exploracao avancada para auditoria e diagnostico; nao e necessario para operar o dia a dia.`
+- `Dashboards mostram resultados derivados; a acao governada sempre rele a fonte autoritativa.`
+
 ## Proximas acoes derivadas
 
 1. Atualizar o onboarding para refletir QRD-08/09/21: workspace pode existir sem host, mas onboarding real nao conclui sem host ou sandbox explicito; os tres formatos de host entram no primeiro release com fit-check.
@@ -1547,10 +1732,11 @@ Copy obrigatoria:
 12. Implementar planning como contexto opcional progressivo: minimo obrigatorio objective+metric+target, com thesis/opportunity-area/allocation disponiveis desde a release 1.
 13. Implementar GitHub como primeira cloud work-source/repo provider, separado de `github-oauth`, com sourceTrust e leitura de repos/PRs/checks/CODEOWNERS.
 14. Projetar o backlog de integracoes do `integration-catalog.yml` na UI, com status `disponivel`, `release 1`, `em breve` e `adiado`.
-15. Garantir que novas telas sigam QRD-12/13/14/15/16/17/18/19/20/21/22/23/24/25/26: app como superficie humana local-first, sem segundo SSOT, sem presumir SaaS pago, sem amarrar postura de workspace a vendor, sem expor banco/Docker como primeira pergunta do usuario comum, com Neo4j como read-model opcional suportado, Docker Compose como opcao oficial nao universal, Ollama externo por default, auth/membership/authority separados, providers externos GitHub/Google/OIDC sem authority automatica, governance host distribuido por fit-check, fontes sem Git com confianca explicita, politica explicavel, matcher/assistente multi-provider, planning progressivo com todos os campos disponiveis e backlog de integracoes visivel.
-16. Criar `governance-demo/mock-api/` com Hono + lowdb.
-17. Criar seeds iniciais: workspace vazio, onboarding parcial, acme demo, workspace sem host, workspace com host local, workspace com host embutido, workspace local, workspace shared, workspace controlled, workspace controlled+neo4j, workspace docker-compose, workspace docker-compose+ollama-profile, workspace com groups/teams, workspace shared com convites pendentes, workspace shared+github, workspace shared+google, workspace controlled+oidc, workspace com cloud-synced-folder, workspace com provider-versioned-source, workspace compact com policy examples, workspace com multiplos assistant providers, workspace com planning progressivo completo e workspace com GitHub work-source conectado.
-18. Adicionar scripts:
+15. Garantir que novas telas sigam QRD-12/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27: app como superficie humana local-first, sem segundo SSOT, sem presumir SaaS pago, sem amarrar postura de workspace a vendor, sem expor banco/Docker como primeira pergunta do usuario comum, com Neo4j como read-model opcional suportado, Docker Compose como opcao oficial nao universal, Ollama externo por default, auth/membership/authority separados, providers externos GitHub/Google/OIDC sem authority automatica, governance host distribuido por fit-check, fontes sem Git com confianca explicita, politica explicavel, matcher/assistente multi-provider, planning progressivo com todos os campos disponiveis, backlog de integracoes visivel e stack visual definida.
+16. Executar os spikes da stack visual antes de cravar dependencias finais: mapas de governanca (React Flow + ELK x ECharts), dashboards (MUI X Charts x Apache ECharts), tabelas/data grids (MUI X Data Grid x TanStack Table x AG Grid Community), grafo tecnico/console (Sigma.js + Graphology x Reagraph x ECharts) e server state (TanStack Query com cache por workspace/sourceRevision). Cytoscape permanece banido.
+17. Criar `governance-demo/mock-api/` com Hono + lowdb.
+18. Criar seeds iniciais: workspace vazio, onboarding parcial, acme demo, workspace sem host, workspace com host local, workspace com host embutido, workspace local, workspace shared, workspace controlled, workspace controlled+neo4j, workspace docker-compose, workspace docker-compose+ollama-profile, workspace com groups/teams, workspace shared com convites pendentes, workspace shared+github, workspace shared+google, workspace controlled+oidc, workspace com cloud-synced-folder, workspace com provider-versioned-source, workspace compact com policy examples, workspace com multiplos assistant providers, workspace com planning progressivo completo e workspace com GitHub work-source conectado.
+19. Adicionar scripts:
 
 - `dev:real`;
 - `dev:mock`;
@@ -1558,5 +1744,5 @@ Copy obrigatoria:
 - `mock-api:dev`;
 - `mock-api:reset`.
 
-19. Adicionar Playwright e primeira jornada e2e.
-20. Adicionar MSW apenas quando houver primeiros testes de componente/hook.
+20. Adicionar Playwright e primeira jornada e2e.
+21. Adicionar MSW apenas quando houver primeiros testes de componente/hook.
