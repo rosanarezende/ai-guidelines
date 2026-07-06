@@ -1,20 +1,17 @@
 // POST /api/local/members/invites/[id] — aceitar (com token), recusar ou
 // revogar convite. Aceite cria a pessoa no workspace; papel continua à parte.
 import { NextResponse } from "next/server";
+import { InviteDecisionRequestSchema } from "@demo/contracts";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { decideInvite } from "@/server/adoption/application/members";
 import { readSession } from "@/server/adoption/session";
-
-const ACTIONS = ["accept", "decline", "revoke"] as const;
+import { parseZodJson } from "../../../_shared/parse-zod-request";
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  const body = (await request.json().catch(() => null)) as {
-    action?: unknown;
-    token?: unknown;
-  } | null;
-  const action = ACTIONS.find((item) => item === body?.action);
-  if (!action) return NextResponse.json({ ok: false, error: "invalid-action" }, { status: 400 });
+  const parsed = await parseZodJson(request, InviteDecisionRequestSchema);
+  if (!parsed.ok) return parsed.response;
+  const { action } = parsed.data;
   const session =
     action === "revoke"
       ? await requireWorkspaceSession()
@@ -29,7 +26,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     ...(action === "revoke" ? { workspaceId: session.session.workspaceId } : {}),
     inviteId: id,
     action,
-    token: body?.token,
+    token: parsed.data.token,
   });
   if (!result.ok) return NextResponse.json(result, { status: 422 });
   return NextResponse.json({

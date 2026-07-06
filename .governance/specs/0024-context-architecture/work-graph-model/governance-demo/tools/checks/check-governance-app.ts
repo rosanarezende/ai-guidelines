@@ -476,9 +476,9 @@ for (const relativeFile of requiredApiRoutes) {
     fail(`rota da API local declarada no contrato ausente: ${relativeFile}`);
   }
 }
-// Rotas de onboarding ja migradas para contrato runtime Zod. O guard evita
-// regressao para validacao manual/ad hoc nos pontos que viraram schema.
-const zodOnboardingRoutes = [
+// Rotas ja migradas para contrato runtime Zod. O guard evita regressao para
+// validacao manual/ad hoc nos pontos que viraram schema compartilhado.
+const zodContractRoutes = [
   {
     file: "app/api/local/onboarding/status/route.ts",
     schema: "OnboardingStatusRequestSchema",
@@ -499,21 +499,41 @@ const zodOnboardingRoutes = [
     file: "app/api/local/onboarding/stack/route.ts",
     schema: "WorkspaceStackRequestSchema",
   },
+  {
+    file: "app/api/local/members/route.ts",
+    schema: "InvitePersonRequestSchema",
+  },
+  {
+    file: "app/api/local/members/groups/route.ts",
+    schema: "CreateGroupRequestSchema",
+  },
+  {
+    file: "app/api/local/members/invites/[id]/route.ts",
+    schema: "InviteDecisionRequestSchema",
+  },
+  {
+    file: "app/api/local/roles/route.ts",
+    schema: "AssignRoleRequestSchema",
+  },
+  {
+    file: "app/api/local/roles/[id]/route.ts",
+    schema: "RoleDecisionRequestSchema",
+  },
 ];
-for (const route of zodOnboardingRoutes) {
+for (const route of zodContractRoutes) {
   const file = path.join(appDir, ...route.file.split("/"));
   if (!fs.existsSync(file)) {
-    fail(`rota de onboarding com contrato Zod ausente: ${route.file}`);
+    fail(`rota com contrato Zod ausente: ${route.file}`);
   }
   const text = fs.readFileSync(file, "utf8");
   if (!text.includes(route.schema)) {
-    fail(`rota de onboarding sem schema Zod esperado (${route.schema}): ${route.file}`);
+    fail(`rota sem schema Zod esperado (${route.schema}): ${route.file}`);
   }
   if (!text.includes("parseZodJson")) {
-    fail(`rota de onboarding sem parser Zod compartilhado: ${route.file}`);
+    fail(`rota sem parser Zod compartilhado: ${route.file}`);
   }
   if (!text.includes("@demo/contracts")) {
-    fail(`rota de onboarding deve importar schemas de @demo/contracts: ${route.file}`);
+    fail(`rota deve importar schemas de @demo/contracts: ${route.file}`);
   }
 }
 // ── fluxo inicial signup → organizações → onboarding → home ────────────────

@@ -5,5 +5,6 @@
 export * from "./commands/types.ts";
 export * from "./api/result.ts";
 export * from "./errors/types.ts";
+export * from "./members/schemas.ts";
 export * from "./onboarding/schemas.ts";
 export * from "./schemas/constants.ts";

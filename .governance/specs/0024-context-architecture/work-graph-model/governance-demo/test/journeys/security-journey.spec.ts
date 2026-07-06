@@ -1,13 +1,25 @@
 // security-journey.spec.ts — fronteira HTTP do shell de adoção.
 // Prova que convite cria membership real e que membership comum não autoriza
 // configuração sensível do workspace.
-import { test, expect } from "@playwright/test";
+import { test, expect, type APIRequestContext } from "@playwright/test";
 import { MOCK_API_URL } from "../playwright.config.ts";
 
 test.beforeEach(async ({ request }) => {
   const reset = await request.post(`${MOCK_API_URL}/__reset`, { data: { seed: "blank" } });
   expect(reset.ok()).toBeTruthy();
 });
+
+async function createSignedWorkspace(request: APIRequestContext) {
+  const signup = await request.post("/api/local/signup", {
+    data: { displayName: "Ana Admin" },
+  });
+  expect(signup.ok()).toBeTruthy();
+  const org = await request.post("/api/local/organizations", {
+    data: { name: "Acme Honey", kind: "company" },
+  });
+  expect(org.ok()).toBeTruthy();
+  return org;
+}
 
 test("convite tokenizado cria membership e não concede authority sensível", async ({ browser }) => {
   const admin = await browser.newContext();
@@ -147,14 +159,7 @@ test("rota /api/local/onboarding/profile valida payload por Zod antes do use cas
 test("rota /api/local/onboarding/stack valida payload por Zod antes do use case", async ({
   request,
 }) => {
-  const signup = await request.post("/api/local/signup", {
-    data: { displayName: "Ana Admin" },
-  });
-  expect(signup.ok()).toBeTruthy();
-  const org = await request.post("/api/local/organizations", {
-    data: { name: "Acme Honey", kind: "company" },
-  });
-  expect(org.ok()).toBeTruthy();
+  await createSignedWorkspace(request);
 
   const response = await request.post("/api/local/onboarding/stack", {
     data: {
@@ -168,4 +173,66 @@ test("rota /api/local/onboarding/stack valida payload por Zod antes do use case"
   const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
   expect(body.error).toBe("schema-invalid");
   expect(body.issues?.some((issue) => issue.path === "stack.executionMode")).toBeTruthy();
+});
+
+test("rota /api/local/members valida convite por Zod antes do use case", async ({ request }) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/members", {
+    data: { personName: "Bia Member", email: "email-invalido" },
+  });
+  expect(response.status()).toBe(400);
+  const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
+  expect(body.error).toBe("schema-invalid");
+  expect(body.issues?.some((issue) => issue.path === "email")).toBeTruthy();
+});
+
+test("rota /api/local/members/groups valida grupo por Zod antes do use case", async ({
+  request,
+}) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/members/groups", {
+    data: { kind: "chapter", name: "Time Produto", memberPersonIds: ["person-1"] },
+  });
+  expect(response.status()).toBe(400);
+  const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
+  expect(body.error).toBe("schema-invalid");
+  expect(body.issues?.some((issue) => issue.path === "kind")).toBeTruthy();
+});
+
+test("rota /api/local/members/invites/[id] valida decisao por Zod antes do use case", async ({
+  request,
+}) => {
+  const response = await request.post("/api/local/members/invites/inv-test", {
+    data: { action: "approve", token: "12345678" },
+  });
+  expect(response.status()).toBe(400);
+  const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
+  expect(body.error).toBe("schema-invalid");
+  expect(body.issues?.some((issue) => issue.path === "action")).toBeTruthy();
+});
+
+test("rota /api/local/roles valida atribuicao por Zod antes do use case", async ({ request }) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/roles", {
+    data: { subject: { kind: "robot", id: "person-1" }, roleId: "workspace-admin" },
+  });
+  expect(response.status()).toBe(400);
+  const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
+  expect(body.error).toBe("schema-invalid");
+  expect(body.issues?.some((issue) => issue.path === "subject.kind")).toBeTruthy();
+});
+
+test("rota /api/local/roles/[id] valida decisao por Zod antes do use case", async ({ request }) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/roles/role-test", {
+    data: { action: "approve" },
+  });
+  expect(response.status()).toBe(400);
+  const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
+  expect(body.error).toBe("schema-invalid");
+  expect(body.issues?.some((issue) => issue.path === "action")).toBeTruthy();
 });
