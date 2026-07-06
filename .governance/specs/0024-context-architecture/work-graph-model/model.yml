@@ -1,43 +1,42 @@
-# model.yml — SSOT DA MODELAGEM (o grafo tipado do trabalho). v2 — modelo limpo aplicado.
+# model.yml — SSOT normativo do work graph
 #
-# FONTE DA VERDADE do modelo. O `tracker.md` é EMBASAMENTO (o porquê). O artefato navegável
-# (_map/model-map.html) reflete este arquivo. As provocações entram como mudanças aqui.
+# Este arquivo e a versao limpa do modelo conceitual. Ele contem apenas o
+# contrato normativo atual: camadas, nos, arestas, estados, gates, politicas,
+# perfis, regras de escala e exemplos minimos. O historico deliberativo da v2
+# foi arquivado em `_archive/model-v2-history-2026-07-05/model.yml`.
 #
-# Estrutura: intent (approach + signal) → execution-unit (forma derivada, cross-repo) → repo-work (propósito, por repo)
-#   + contract (coordenação/versionamento) + q/r/d (anexável a qualquer nó) + intake (funil pré-intent).
-# Perspectiva reconciliada: taxonomia antiga/famílias e enum strategy foram absorvidos.
-# Anonimizado (acme-*). Naming (P4): ids em EN, labels/descrição em PT.
+# Naming: ids em EN; labels/descricoes em PT; exemplos anonimizados acme-*.
 
 meta:
-  version: 2
-  status: applied-in-governance-demo # 3 camadas + business-tier + approach/signal + repo-first substrate + outcome/lifecycle/trust-policy aplicados; próximos passos em governance-demo/NEXT-STEPS.md
+  version: 3
+  status: normative
+  supersedes: _archive/model-v2-history-2026-07-05/model.yml
   grounded-by: tracker.md
-  artifact: _map/model-map.html # navegável; data.js é GERADO por _map/generate.mjs (node generate.mjs · --check verifica o sync do SUBCONJUNTO projetado — coverage impressa a cada run; --check FORA do validate por decisão da owner 2026-07-01)
+  artifact: _map/model-map.html
+  governance-demo: governance-demo/
+  note: "Modelo conceitual do framework; schemas executaveis de API/comandos vivem em governance-demo/packages/contracts."
 
-# ═════════════════════ ADOPTION SHELL (produto/app, não grafo de trabalho) ═════════════════════
 adoption-shell:
-  status: applied-in-app-v2
-  note: "Camada de adoção acima do grafo governado. Ela permite que uma pessoa use o app em múltiplas organizações/workspaces sem fazer `acme-*` virar identidade do produto. Não substitui o SSOT file-first de cada workspace."
+  status: applied-in-app
+  scope: "camada de produto acima do grafo governado; permite conta local, multi-workspace e onboarding"
   account:
-    is: "identidade local do usuário do app; pode ter várias memberships"
+    is: "identidade local do app; pode participar de varios workspaces"
     fields: [id, display-name, email, preferred-locale]
-    authority: "não aprova governança sozinha; authority continua resolvida dentro de cada workspace"
+    authority: "nunca concede governanca sozinha; authority e resolvida no workspace"
   workspace:
-    is: "organização/projeto governado selecionável pelo usuário"
+    is: "organizacao/projeto governado selecionavel"
     examples: [empresa, projeto-pessoal, cliente, sandbox-demo]
     fields: [id, name, kind, governance-host, work-sources, memberships, onboarding-status, locale]
     governance-host:
-      is: "onde mora o SSOT file-first da governança daquele workspace"
+      is: "local do SSOT file-first da governanca do workspace"
       options: [repo-dedicado, pasta-local, pasta-em-repo-existente]
-      note: "o host é obrigatório para governança real; sem host, o app só roda demo/rascunho local"
+      invariant: "host e obrigatorio para governanca real; sem host, a UI fica degradada ou sandbox"
     work-sources:
-      is: "fontes adotadas que publicam contexto, evidência ou importam propostas"
+      is: "fontes adotadas que publicam contexto, evidencia ou importam propostas"
       examples: [git-repo, pasta-local, monorepo-module, service-catalog, backlog-tool]
-      note: "não são 'opcionais' para provar execução; sem fonte, o framework ainda registra planejamento/intake, mas outcomes/contratos/execução ficam como evidência manual/declarada"
+      invariant: "sem fonte confiavel, execucao/outcomes/contratos ficam como evidencia manual ou declarada"
     memberships:
-      is: "pessoas do workspace com um ou mais papéis; os papéis são atribuição por pessoa, não uma lista solta de roles"
-      roles: [admin, payer, sponsor, security, technical-owner, actual-attester]
-      note: "uma pessoa pode acumular papéis; o profile/policy define se bloqueia, avisa ou só registra"
+      is: "pessoas/times/grupos com papeis; role atribuido a outro sujeito nasce proposed ate aceite"
   onboarding:
     order:
       [
@@ -51,42 +50,26 @@ adoption-shell:
         optional-integrations,
         honest-review,
       ]
-    local-state:
-      [
-        governance:account:v1,
-        governance:workspaces:v1,
-        governance:last-workspace-id,
-        governance:workspace:<id>:onboarding-status,
-      ]
-    demo-policy: "`governance-demo/acme/governance` é workspace demo/seed; não deve aparecer como conta real por padrão"
-  i18n:
-    rule: "strings de produto moram em locale files versionados; domínio/backend emite messageKey + params, não frase hardcoded"
-    default-locale: pt-br
-    layout: "governance-demo/frontend/app/**/_locales/pt-br.json"
-    note: "locale é colocalizado no menor dono estável da copy: view, step, section, componente compartilhado, subdomínio ou shell/shared; arquivo global `governance-demo/frontend/locales` e locale amplo por feature são legado proibido pelo check do app"
-  typed-runtime:
-    rule: "novos contratos de domínio/app nascem em TypeScript puro dentro de `governance-demo/backend/domain/*.ts`; scripts `.mjs` legados podem coexistir até migração incremental, mas novas telas não devem criar ontologia local ad hoc"
 
-# ═════════════════════ AS 3 CAMADAS ═════════════════════
 layers:
   intent:
-    is: "o objetivo de negócio durável (uma por objetivo); NÃO delibera — tem gate de ativação"
+    is: "objetivo de trabalho duravel, autorizado por negocio ou standalone; tem gate de ativacao"
     owns: [enquadramento, objetivo, target-outcome, decision-gate]
     approach: [validate-first, direct]
-    approach-note: "RESOLVIDO (P12, owner 2026-07-02): approach é a postura frente à incerteza de valor. validate-first = compromisso permanente depende da evidência; direct = mudança decidida. É declarado pelo humano no gate de ativação, com autoria assistida opcional; o observado vira approach-drift (alerta, não bloqueio)."
+    approach-note: "validate-first se a evidencia decide a mudanca permanente; direct se a mudanca ja esta decidida"
     signal: [none, touches-contract, operational-target]
-    signal-note: "Sinais são derivados/confirmados pelo breakdown e acordam mecanismos: touches-contract → review do owner do contrato + janela se houver quebra; operational-target → placar operacional + guardrails; none → caminho curto. Sinal não é menu de usuário nem taxonomia paralela."
-    breaks-into: [execution-unit, repo-work] # repo-work direto quando trivial (intent pode até ser nula em trabalho reativo)
+    signal-note: "signal e derivado/confirmado no breakdown; acorda mecanismos, mas nao e menu de usuario"
+    breaks-into: [execution-unit, repo-work]
 
   execution-unit:
-    is: "unidade CROSS-REPO com lifecycle próprio + unidade semântica (a coisa é UMA)"
-    optional: "COLAPSA no trivial (regra exata: collapse-rule) — aí intent liga direto no repo-work"
-    collapse-rule: "RESOLVIDO (Q-collapse, owner 2026-07-01; aplicado na v3) — a régua é a scaling-law: a unit EXISTE se pelo menos um vale: (1) mais de 1 repo envolvido · (2) o kind carrega lifecycle próprio (experiment-run/migration-wave/incident-response/release-rollout/discovery NUNCA colapsam — veredito/janela/severidade/fases/fate moram na unit) · (3) owner/cadência próprios ≠ intent. Senão COLAPSA. Colapso REVERSÍVEL: se o trabalho crescer, cria-se a unit e as peças se reparentam por mutação normal com envelope, histórico preservado."
+    is: "unidade coordenada cross-repo ou com lifecycle proprio"
+    optional: "colapsa no trivial; reversivel por mutacao governada"
+    collapse-rule: "existe se (>1 repo) OU kind com lifecycle proprio OU owner/cadencia propria; caso contrario intent liga direto a repo-work"
     kinds:
       experiment-run:
         owns: [hypothesis, flag, exposure, metrics, guardrails, decision-rule, verdict]
         verdict: [pending, won, lost, inconclusive]
-        fork: "won → graduation/delivery-slice · lost → cleanup · inconclusive → novo experiment/discovery"
+        fork: "won -> graduation/delivery-slice; lost -> cleanup; inconclusive -> novo experiment/discovery"
       migration-wave:
         owns: [from, to, compatibility-window]
       delivery-slice:
@@ -95,66 +78,54 @@ layers:
         owns: [severity, declare, mitigate, resolve, postmortem]
         source: reactive
       graduation:
-        owns: ["sistematização pós-veredito won (vira capacidade permanente)"]
+        owns: ["sistematizacao pos-veredito won"]
       cleanup:
-        owns: ["remoção pós-veredito lost / parcial"]
+        owns: ["remocao pos-veredito lost ou parcial"]
       release-rollout:
-        owns: ["fase de release/canary"]
+        owns: ["release, canary ou exposicao progressiva"]
       discovery:
-        owns:
-          [
-            "pergunta falsificável compartilhada · timebox · fate agregado (throwaway/promoted/parked)",
-          ]
+        owns: ["pergunta falsificavel compartilhada", timebox, fate]
+        fate: [throwaway, promoted, parked]
     breaks-into: [repo-work]
 
   repo-work:
-    is: "a peça executável num repo"
-    owns: [execução, status-próprio]
+    is: "peca executavel em um repo/fonte"
+    owns: [execucao, status-proprio]
     purpose:
-      create: "cria capacidade nova (shippa valor novo)"
-      sustain: "preserva/adapta a existente (fix · dep-bump · refactor · porte from→to)"
-      discover: "reduz incerteza — NÃO shippa (POC/spike; timebox + pergunta falsificável + fate)"
-      operate: "rollout · monitoramento · instrumentação · baseline (novo — do playbook de growth)"
+      create: "cria capacidade nova"
+      sustain: "preserva, corrige ou adapta capacidade existente"
+      discover: "reduz incerteza sem shippar capacidade permanente"
+      operate: "rollout, monitoramento, instrumentacao ou baseline"
 
-# ═════════════════════ NÓS DE APOIO (não são camadas) ═════════════════════
-contract:
-  is: "nó de coordenação/versionamento — DENTRO e ENTRE iniciativas"
-  fields: [owner, provider, consumers, revision, compatibility-window, migrations]
-  note: "coordenação entre iniciativas = via contrato compartilhado (derivada); a janela-de-compat NÃO é derivável — mora aqui"
+support-nodes:
+  contract:
+    is: "no de coordenacao/versionamento dentro e entre iniciativas"
+    fields: [owner, provider, consumers, revision, compatibility-window, migrations]
+    invariant: "compatibility-window mora no contrato; nao e derivavel de repo-work"
+  deliberation:
+    is: "q/r/d anexavel a qualquer no governado"
+    attaches-to: [intent, execution-unit, repo-work, contract, business-objective]
+    enforcement: "opcional por padrao; mutacao dangerous exige alerta, justificativa ou par conforme governance-profile"
+  intake:
+    is: "funil pre-intent"
+    members: [proposal, register]
+    invariant: "proposal/register declara authorized-by business-objective ativo ou standalone"
+  assisted-authoring:
+    is: "IA sugere preenchimento/diagnostico; humano aceita, edita ou rejeita"
+    laws: [optional, advisory-only, no-silent-write]
 
-deliberation:
-  is: "q/r/d (question → research → decision) — ANEXÁVEL a qualquer nó, não uma camada"
-  attaches-to: [intent, execution-unit, repo-work, contract]
-  enforcement: "OPCIONAL por decisão da owner (coração do framework, sem obrigatoriedade). Mutação DANGEROUS (ver envelope.mutation-types.dangerous) dispara ALERTA: ou anexa q/r/d, ou registra justificativa append-only de por que não usou (auditável) — gate G11/P10. CAMADA F11 (decisão owner 2026-07-01, opção C): no perfil FULL, o subconjunto ruler-authority é SOFT-MANDATORY — exige um PAR (four-eyes) OU break-glass logado + revisão retroativa obrigatória; NÃO exige q/r/d (pede uma segunda pessoa, não um processo). compact = detecção + revisão retroativa em cadência · solo = detecção/self-log"
-
-intake:
-  is: "funil PRÉ-intent (register → triagem → gate) — fora das 3 camadas"
-  members: [proposal, register]
-  business-link: "G2 (bloco B): todo register/proposal DECLARA authorized-by (um business-objective ativo) OU standalone — vínculo declarado, nunca inferido. No gate: com authorized-by, valida-se objective ativo + target + allocation; standalone entra como custo/risco operacional (ver G14), não some do dashboard"
-
-assisted-authoring:
-  is: "parceria humano+IA na CRIAÇÃO/edição de nós governados: o humano descreve a pretensão — texto livre e/ou documentos anexados (ex.: docs de modelagem) — e a IA SUGERE o preenchimento dos campos (approach · sinais prováveis · título · vínculos · esboço de breakdown); o humano itera e edita o que quiser"
-  laws:
-    - "OPCIONAL sempre — o caminho 100% manual existe em todo nó; a assistência nunca é pré-requisito"
-    - "SUGESTIVO sempre — a IA não preenche em silêncio nem decide; sugere e o humano aceita/edita (reusa o princípio 'advisory, não decide' do matcher)"
-    - "no MÁXIMO alerta — quando a proposta do humano se encaixa TOTALMENTE noutro espectro (ex.: approach declarada direct mas a descrição exige decisão por evidência), a IA alerta; não corrige nem bloqueia"
-  applies-to: "criação de intent (caso primário) e, pelo mesmo princípio, qualquer nó governado (proposal · register · objective)"
-  connects: "matcher advisory (triagem) · approach-drift/signal-drift (conferências derivadas em execução) · L9 (IA não fecha gate)"
-
-# ═════════════════════ DIMENSÕES (ortogonais; cortam repo-work/execution-unit) ═════════════════════
 dimensions:
   source: [planned, reactive]
   visibility: [user-visible, internal, operator-visible, security-visible]
-  maintenance-mode: [corrective, adaptive, perfective, preventive] # só sustain (ISO 14764)
-  change-class: [standard, normal, emergency] # ITIL
-  service-class: [expedite, fixed-date, standard, intangible] # Kanban
-enforcement: "cada dimensão precisa afetar workflow/lint/dashboard, senão é tag decorativa"
-presets: # UX: expandem p/ purpose + dimensões
-  fix: { purpose: sustain, maintenance-mode: corrective, visibility: user-visible }
-  security-patch: { purpose: sustain, maintenance-mode: corrective, visibility: security-visible }
-  dep-bump: { purpose: sustain, maintenance-mode: adaptive, visibility: internal }
+  maintenance-mode: [corrective, adaptive, perfective, preventive]
+  change-class: [standard, normal, emergency]
+  service-class: [expedite, fixed-date, standard, intangible]
+  enforcement: "dimensao que nao afeta workflow/lint/dashboard e tag decorativa"
+  presets:
+    fix: { purpose: sustain, maintenance-mode: corrective, visibility: user-visible }
+    security-patch: { purpose: sustain, maintenance-mode: corrective, visibility: security-visible }
+    dep-bump: { purpose: sustain, maintenance-mode: adaptive, visibility: internal }
 
-# ═════════════════════ ARESTAS (o grafo; anota-se 1 lado, o reverso deriva) ═════════════════════
 edges:
   - {
       id: breaks-into,
@@ -164,48 +135,44 @@ edges:
       category: estrutura,
     }
   - { id: contains, from: execution-unit, to: repo-work, cardinality: "1:N", category: estrutura }
-  - { id: coordinates-with, from: repo-work, to: contract, category: dependência }
-  - { id: blocked-by, from: repo-work, to: repo-work, inverse: blocks, category: dependência }
+  - { id: coordinates-with, from: repo-work, to: contract, category: dependencia }
+  - { id: blocked-by, from: repo-work, to: repo-work, inverse: blocks, category: dependencia }
+  - { id: delivery-after, from: repo-work, to: repo-work, category: dependencia }
   - {
       id: results-in,
       from: execution-unit,
       to: execution-unit,
       inverse: derives-from,
-      category: proveniência,
-      note: "won→graduation/delivery-slice · lost→cleanup",
+      category: proveniencia,
     }
-  - { id: raises, from: node, to: proposal, category: proveniência }
-  - { id: answers, from: "repo-work(discover)", to: "question", category: investigação }
-  - { id: supported-by, from: decision, to: "research|discover", category: investigação }
+  - { id: raises, from: node, to: proposal, category: proveniencia }
+  - { id: answers, from: "repo-work(discover)", to: question, category: investigacao }
+  - { id: supported-by, from: decision, to: "research|discover", category: investigacao }
   - { id: emits, from: [intent, execution-unit, repo-work], to: outcome, category: fecho }
   - { id: closed-by, from: node, to: "answer|outcome|postmortem", category: fecho }
-  - { id: supersedes, from: decision, to: decision, category: histórico }
+  - { id: supersedes, from: decision, to: decision, category: historico }
   - { id: occurred-during, from: incident-response, to: node, category: resposta }
   - { id: caused-by, from: incident-response, to: node, category: resposta }
-  - { id: publishes-context, from: repo, to: repo-context, category: projeção }
+  - { id: publishes-context, from: repo, to: repo-context, category: projecao }
   - { id: acknowledges-work, from: repo-work-ack, to: repo-work, category: reconhecimento }
   - { id: backs-contract, from: repo-contract, to: contract, category: reconhecimento }
   - {
       id: evidenced-by,
       from: "repo-context|repo-work-ack|repo-contract",
       to: code-touchpoint,
-      category: evidência,
+      category: evidencia,
     }
 
 states:
-  own: [draft, active, done] # active EXIGE assignee + início
-  repo-work-ack: [acknowledged, active, blocked, done, dropped] # v3: repo reconhece a peça e publica progresso local; outcome de intent só soma quando as peças necessárias estão done
-  derived: [blocked, paused]
-  business-tier: [proposed, active, closed, superseded, dropped] # G8 — lifecycle de objective/target sai da prosa e entra no catálogo
+  own: [draft, active, done]
+  repo-work-ack: [acknowledged, active, blocked, done, dropped]
+  business-tier: [proposed, active, closed, superseded, dropped]
+  derived: [blocked, paused, stale, invalid]
 
-# ═════════════════════ ENVELOPE (L8) + CONFIANÇA (L9) — inalterados do tracker ═════════════════════
 envelope:
-  quem: [actor, authority]
-  base: [base-revision, idempotency-key, nonce, issued-at, revision]
-  origem: [schema-version, source-commit, producer, ttl]
-  seguranca: [classification, visibility, access]
-  invalidacao: [invalidates]
-  mutation-types: # G9 + F3 — toda mutação DECLARA o tipo; catálogo por tier, FECHADO (fail-closed)
+  required: [actor, authority, base-revision, idempotency-key, nonce, issued-at, schema-version]
+  optional: [source-commit, producer, ttl, classification, visibility, access, invalidates]
+  mutation-types:
     business-tier:
       [
         objective-create,
@@ -220,8 +187,8 @@ envelope:
     work-tier: [intent-activate, unit-fork, verdict-set, verdict-override, work-state-change]
     intake: [business-link-change]
     coordination: [contract-revision, compat-window-change]
-    governance: [profile-change, break-glass] # F3 — agora são TIPOS reais (a law dos perfis já exigia)
-    dangerous: # F3 — lista ENUMERADA, não prosa; disparam o ALERTA q/r/d (deliberation.enforcement)
+    governance: [profile-change, break-glass]
+    dangerous:
       [
         target-change,
         rollup-change,
@@ -233,11 +200,12 @@ envelope:
         aggregation-change,
         business-link-change,
       ]
-    ruler-authority: # F11 (decisão owner 2026-07-01, opção C) — subconjunto de dangerous que muda a RÉGUA/AUTORIDADE; no perfil full é SOFT-MANDATORY
+    ruler-authority:
       [metric-definition-change, aggregation-change, profile-change, verdict-override, break-glass]
-    unknown-mutation: "fail-closed (F3): mutação sem tipo do catálogo, ou cujo DIFF não bate com o tipo declarado (ex.: mudar a fórmula da métrica rotulada de actual-publish), é REJEITADA — não existe 'normal por default'"
+    unknown-mutation: fail-closed
+
 trust:
-  boundary: "entidade de 1ª classe (matcher/agente/backend/API são fronteiras)"
+  boundary: "matcher/agente/backend/API/produtor externo sao fronteiras de confianca"
   policy-artifacts:
     [
       threat-model,
@@ -248,228 +216,229 @@ trust:
       red-team-corpus,
     ]
   laws:
-    - {
-        id: fallback-break-glass,
-        says: "todo controle que bloqueia precisa de saída segura e rastreável",
-      }
-    - {
-        id: independencia,
-        says: "enforça-se quem VERIFICA (SoD requester≠approver≠owner-attester), não a verdade de quem declara (X no fluxo + O1 no oráculo)",
-      }
+    - { id: fallback-break-glass, says: "todo bloqueio precisa de saida segura e rastreavel" }
+    - { id: independencia, says: "enforca-se quem verifica, nao a verdade de quem declara" }
     - {
         id: dependencia-verificavel,
-        says: "nenhuma ação derivada é aceita sem validar as revisões (dados/política/schema/projeção) que a sustentam",
+        says: "acao derivada exige validar revisoes de dados, politica, schema e projecao",
       }
 
-# ═════════════════════ FLUXO (L2) + FÍSICO (L7) ═════════════════════
 flow:
-  # tier de negócio (G1 · bloco B): fases LEVES de planejamento ANTES do registro — colapsáveis por perfil (scaling-law)
-  - {
-      phase: define-objective,
-      tier: business,
-      role: negocio,
-      does: ["cria/revisa os business-objectives do ciclo (cascades-to; envelope L8)"],
-    }
-  - {
-      phase: define-target,
-      tier: business,
-      role: "negocio + dados",
-      does: ["metric-definitions + targets por objective (SoD: definer ≠ attester)"],
-    }
-  - {
-      phase: authorize-intake,
-      tier: business,
-      role: "owner do objective",
-      does: ["abre a porta: quais objectives aceitam propostas + allocation disponível"],
-    }
+  - { phase: define-objective, tier: business, role: negocio }
+  - { phase: define-target, tier: business, role: "negocio + dados" }
+  - { phase: authorize-intake, tier: business, role: "owner do objective" }
   - { phase: registro, role: negocio }
   - { phase: triagem, role: eng, does: [itens, matcher-advisory, valida-contratos] }
   - { phase: investigacao, does: ["discover roda; viabilidade testada"] }
   - { phase: gate, role: humano, kind: append-only, note: "= decision-points.activate-intent" }
-  - { phase: ativacao, does: [consolida, "move p/ intents/"] }
-  - { phase: breakdown, role: dono, emits: ["execution-units + repo-works (heterogêneo)"] }
-decision-points: # G7 + F4 — gates NOMEADOS com requisitos VERIFICÁVEIS; todos append-only e colapsáveis por perfil
+  - { phase: ativacao, does: [consolida, "move para intents"] }
+  - { phase: breakdown, role: dono, emits: ["execution-units + repo-works"] }
+  - { phase: execucao }
+  - { phase: coordenacao }
+  - { phase: veredito }
+
+decision-points:
   approve-objective:
-    is: "aprova/encerra o business-objective do ciclo"
+    is: "aprova/encerra business-objective do ciclo"
     subject: business-objective
-    prerequisites: "target + metric-definition definidos · allocation com unidade/período/owner"
+    prerequisites: "target + metric-definition + allocation com unidade/periodo/owner"
     evidence: "objective draft + targets propostos"
-    approver: "owner do nível acima (no topo, o sponsor)"
-    on-block: "objective fica proposed; fallback = revisar e reapresentar"
+    approver: "owner do nivel acima; no topo, sponsor"
+    on-block: "objective fica proposed"
   activate-intent:
-    is: "o gate que já existia no fluxo (promove candidata → intent)"
+    is: "promove candidata/proposal para intent"
     subject: intent
-    prerequisites: "business-link validado (authorized-by ativo + target + allocation, OU standalone declarado)"
-    evidence: "register + triagem + investigação (quando houve)"
-    approver: "owner do objective autorizador (no solo: self, logado)"
-    on-block: "candidata permanece no funil; fallback = rework ou descarte"
+    prerequisites: "business-link validado ou standalone declarado"
+    evidence: "register + triagem + investigacao quando houver"
+    approver: "owner do objective autorizador; solo = self logado"
+    on-block: "candidata permanece no funil"
   release-rollout:
-    is: "autoriza exposição (release-rollout/canary)"
-    subject: "execution-unit (release-rollout)"
-    prerequisites: "guardrails declarados + plano de reversão (lei fallback/break-glass)"
-    evidence: "baseline das métricas de guardrail + flag/canary configurados"
-    approver: "dono da unit + owner do domínio exposto"
-    on-block: "sem exposição; change-class emergency passa por break-glass LOGADO"
+    is: "autoriza exposicao progressiva"
+    subject: "execution-unit(release-rollout)"
+    prerequisites: "guardrails + plano de reversao"
+    evidence: "baseline das metricas + flag/canary configurados"
+    approver: "dono da unit + owner do dominio exposto"
+    on-block: "sem exposicao; emergency passa por break-glass logado"
   accept-verdict:
-    is: "aceita o veredito do experiment-run + o fork (won → graduation · lost → cleanup)"
-    subject: "execution-unit (experiment-run)"
-    prerequisites: "outcome VÁLIDO pelo resolver (não invalid/stale; self-attested só com colapso logado)"
+    is: "aceita veredito do experiment-run e fork consequente"
+    subject: "execution-unit(experiment-run)"
+    prerequisites: "outcome valido pelo resolver"
     evidence: "outcome publicado + decision-rule aplicada"
     approver: "owner da intent + attester independente do actual"
-    on-block: "veredito segue pending; override = mutação verdict-override (dangerous, alerta q/r/d)"
-physical:
-  host-root: "governance-demo/acme/governance/ # host central da org simulada; representa o repo de governança"
-  repos-root: "governance-demo/acme/repos/<repo>/ # repos de produto já existentes/adotados, cada um com seu sidecar"
-  intake-proposals: "governance-demo/acme/governance/intake/proposals.yml # proposal/register pré-intent; substitui o layout v2 registers/candidates na sim v3"
-  intake-triage: "governance-demo/acme/governance/intake/triage/<proposal-id>.yml # triagem por proposta/candidata antes do gate"
-  ativada: "governance-demo/acme/governance/intents/<id>.yml"
-  decisions: "governance-demo/acme/governance/decisions/verdicts.yml # decision-point accept-verdict append-only; criado por comando quando houver verdict físico"
-  events: "governance-demo/acme/governance/events/events.jsonl # event-log append-only do runtime file-first; obrigatório quando a mutação passa por comando"
-  incidente: "governance-demo/acme/governance/incidents/incidents.yml # instrumento reativo central; gera follow-ups"
-  por-repo: "governance-demo/acme/repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml}"
-  por-repo-futuro: "governance-demo/acme/repos/<repo>/.governance/backend.yml # modelado para adapters futuros; sem executor v3 e não aceito como evidência"
-  historico-v2: "governance-demo/acme/governance/registers/candidates/<id>/{register,triage,gate}.yml pertence ao fluxo v2; não criar estrutura paralela na v3"
-  publications:
-    context-json: "repo publica capabilities/contratos/consumos derivados do manifest + package + código; host falha se divergir do inventário central"
-    repo-work-ack: "repo publica .governance/works/<intent>--<work>.yml com hash do breakdown central + touchpoint de código + lifecycle (acknowledged/active/blocked/done/dropped); host falha em repo-work-stale/missing e outcome-work-open/dropped"
-    standalone-work: "repo publica .governance/works/<id>.yml com schema acme.standalone-work/v1 para fix/dep-bump avulso; host agrega no bucket operacional e valida repo/source/routing"
-    repo-contract: "owner repo publica .governance/registry/contracts/<contract>.yml com hash de contracts.yml + interface versionada + touchpoint de código; host falha em repo-contract-stale/missing"
-    trust-policy: "host valida access-requests, authority-revocations, secret-quarantine, break-glass e oracle-independence; política sem resolver é rejeitada como cerimônia"
-  host: "governance-demo/acme/governance agrega projeções PUBLICADAS (context.json, repo-work-acks, repo-contracts), não abre banco nem confia só no YAML central"
-  identity: "GlobalRef family:namespace/id#anchor@revision + tombstone"
-  backend: [file, sqlite, neo4j, mongo]
-  backend-status: "governance-demo já porta runtime file-first transacional mínimo (backend/domain + adapter file + lock de comando + escrita atômica + event-log + recovery marker), app Next/MUI em frontend/ e exemplos derivados file/sqlite/neo4j/mongo; Neo4j tem export/smoke/loader dry-run como read-model. Ainda NÃO há adapters transacionais SQLite/Neo4j/Mongo write-capable."
+    on-block: "veredito segue pending; override = dangerous"
 
-# ═════════════════════ EXEMPLOS (validam o modelo; o _map desenha estes) ═════════════════════
+physical:
+  host-root: "governance-demo/acme/governance/"
+  repos-root: "governance-demo/acme/repos/<repo>/"
+  intake-proposals: "governance-demo/acme/governance/intake/proposals.yml"
+  intake-triage: "governance-demo/acme/governance/intake/triage/<proposal-id>.yml"
+  intents: "governance-demo/acme/governance/intents/<id>.yml"
+  decisions: "governance-demo/acme/governance/decisions/verdicts.yml"
+  events: "governance-demo/acme/governance/events/events.jsonl"
+  incidents: "governance-demo/acme/governance/incidents/incidents.yml"
+  por-repo: "governance-demo/acme/repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml}"
+  backend: [file, sqlite, neo4j, mongo]
+  backend-status: "file runtime transacional aplicado; sqlite/neo4j/mongo sao read-models derivados no primeiro release, nao SSOT de escrita"
+
+business-tier:
+  status: normative
+  core-idea: "business-objective recursivo; strategy/driver/priority sao niveis configuraveis do mesmo tipo"
+  nodes:
+    business-objective: "compromisso de negocio com level, period, owner, parent, status"
+    thesis: "hipotese causal de negocio"
+    opportunity-area: "espaco de ataque opcional"
+    intent: "primeira unidade governada de trabalho; ganha primary-target quando autorizada"
+    metric-definition: "definicao estavel da metrica: unidade, source, aggregation, owner"
+    target: "binding metrica + no + periodo + valor esperado; actual e derivado"
+    outcome: "resultado governado append-only; unico insumo de target.actual"
+    allocation: "budget/capacidade/limite; campo ou no conforme scaling-law"
+  edges:
+    - { id: cascades-to, from: business-objective, to: business-objective, cardinality: "N:N" }
+    - { id: continues-from, from: [business-objective, target], to: [business-objective, target] }
+    - { id: split-from, from: business-objective, to: business-objective }
+    - { id: merged-into, from: business-objective, to: business-objective }
+    - { id: framed-by, from: business-objective, to: thesis }
+    - { id: explores, from: thesis, to: opportunity-area }
+    - { id: authorizes, from: business-objective, to: intent }
+    - { id: measured-by, from: business-objective, to: target }
+    - { id: uses, from: target, to: metric-definition }
+    - { id: emits, from: [intent, execution-unit, repo-work], to: outcome }
+    - { id: contributes-to, from: outcome, to: target }
+    - { id: aligns-with, from: node, to: business-objective }
+  measurement-roles:
+    target-definer: "define target"
+    metric-owner: "dono da metric-definition"
+    actual-attester: "atesta outcome e fonte/revision"
+    dashboard-consumer: "le rollup"
+    sod: "target-definer nao pode ser o unico actual-attester"
+  rollup-mechanics:
+    primary-rollup: "cada outcome contribui para um target primario"
+    aligns-with: "narrativo; nunca soma"
+    valid-outcome-required: "actual so soma outcome valido pelo resolver"
+    target-closed: "target fechado nao recebe actual novo"
+    contract-revision-required: "outcome que depende de contrato cita revision valida"
+  example:
+    objective:
+      {
+        id: obj-revenue,
+        label: "crescer receita recorrente",
+        level: company-strategy,
+        period: 2027H1,
+      }
+    thesis: { id: thesis-upgrade, label: "experiencias contextuais aumentam upgrade" }
+    opportunities:
+      - { id: opp-checkout, label: "checkout e billing" }
+      - { id: opp-onboarding, label: "onboarding inicial" }
+    intent: { id: intent-cta-upgrade, approach: validate-first, primary-target: tgt-billing-conv }
+    unit: { id: unit-cta-upgrade-v1, kind: experiment-run, verdict: won }
+    works:
+      - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atras da flag" }
+      - { repo: acme-api-billing, purpose: create, desc: "elegibilidade + endpoint" }
+      - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline" }
+    outcome:
+      { id: out-cta-upgrade-2027q1, metric: billing-conversion, value: "+2.4pp", valid: true }
+    measurement: { definer: growth-owner, attester: acme-analytics, unit: percentage-point }
+    rollup: "outcome valido contribui para tgt-billing-conv; aligns-with nao soma"
+
+scaling-law:
+  says: "crie no separado so quando mudar owner, cadencia, target, allocation, lifecycle ou audiencia"
+  applies-to: [business-tier, execution-unit, deliberation, governance-profile, role]
+
+governance-profiles:
+  law: "cerimonia proporcional ao tamanho do trabalho e da organizacao"
+  profiles:
+    full:
+      for: "empresa/time completo"
+      nodes: "business-tier completo e SoD explicito"
+      gates: [approve-objective, activate-intent, release-rollout, accept-verdict]
+      sod: "requester != approver != owner-attester quando aplicavel"
+      required-fields: [sponsor, approver, attester, sourceRevision]
+      enforcement: "ruler-authority exige par ou break-glass logado"
+    compact:
+      for: "time pequeno com papeis acumulados"
+      nodes: "business-tier colapsavel"
+      gates: "detectar + revisar em cadencia; nao travar por falta de estrutura"
+      sod: "acumulos ficam visiveis"
+      required-fields: [owner, sourceRevision]
+      enforcement: "warning + revisao retroativa"
+    solo:
+      for: "uma pessoa ou projeto individual"
+      nodes: "minimo necessario"
+      gates: "self-log"
+      sod: "impossivel; dispensa explicita e visivel"
+      required-fields: [actor]
+      enforcement: "registro honesto, nao teatro"
+
 examples:
   - id: experiment-cross-repo
-    label: "experimento cross-repo (growth)"
-    intent: { title: "aumentar conversão trial → paid", approach: validate-first, signal: none }
+    label: "experimento cross-repo"
+    intent: { title: "aumentar conversao trial -> paid", approach: validate-first, signal: none }
     execution-unit:
       {
         kind: experiment-run,
         title: "CTA contextual v1",
-        owns: "hipótese (CTA ↑ 5%) · flag · métricas (conversion, activation) · guardrails (churn) · veredito: pending",
+        owns: "hipotese, flag, metricas, guardrails, veredito",
       }
     repo-works:
-      - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atrás da flag" }
+      - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atras da flag" }
       - { repo: acme-api-billing, purpose: create, desc: "elegibilidade + endpoint" }
       - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline" }
       - { repo: acme-web-host, purpose: sustain, desc: "adaptar contexto/contrato" }
-      - { repo: acme-growth-ops, purpose: operate, desc: "monitoramento pós-release" }
     contract: "acme-user-context@v3"
-    note: "veredito na unit (não por repo); won→graduation · lost→cleanup · inconclusive→novo"
-
+    note: "veredito mora na unit, nao por repo"
   - id: redesign-misto
-    label: "redesign misto (migração)"
+    label: "redesign misto"
     intent: { title: "redesign do checkout", approach: direct, signal: touches-contract }
     execution-unit:
-      {
-        kind: migration-wave,
-        title: "checkout-ui v2",
-        owns: "from legacy-stack → to new-stack · janela de compat: v1 + v2",
-      }
+      { kind: migration-wave, title: "checkout-ui v2", owns: "from legacy-stack -> to new-stack" }
     repo-works:
-      - { repo: acme-checkout, purpose: sustain, desc: "portar fluxo existente (from→to)" }
+      - { repo: acme-checkout, purpose: sustain, desc: "portar fluxo existente" }
       - { repo: acme-design-system, purpose: create, desc: "novos componentes" }
-      - { repo: "(spike)", purpose: discover, desc: "viabilidade da migração" }
+      - { repo: "(spike)", purpose: discover, desc: "viabilidade da migracao" }
       - { repo: acme-platform, purpose: sustain, desc: "adapta contrato compartilhado" }
-      - { repo: acme-checkout, purpose: operate, desc: "rollout + monitor" }
     contract: "acme-user-context@v3"
-    note: "peças MISTAS sob a mesma wave — a família é da PEÇA, não da iniciativa"
-
+    note: "pecas mistas sob a mesma wave"
   - id: contrato-compartilhado
-    label: "contrato compartilhado (entre iniciativas)"
+    label: "contrato compartilhado"
     contract:
       id: "acme-user-context@v3"
       owner: acme-platform
       consumers: "acme-mfe-billing, acme-mfe-support"
-      compatibility-window: "v2, v3 até 2026-08-15"
+      compatibility-window: "v2, v3 ate 2026-08-15"
     migrations:
       - {
           intent: redesign-checkout,
           approach: direct,
           signal: touches-contract,
-          does: "direct + touches-contract — adapta o contrato",
+          does: "adapta contrato",
         }
-      - {
-          intent: growth-upgrade,
-          approach: validate-first,
-          signal: none,
-          does: "validate-first — consome o contrato sem revisão",
-        }
-    note: "coordenação entre iniciativas = via o contrato (derivada); a janela mora nele (não é derivável)"
-
-  # ── 5 situações novas (casos-limite que estressam o modelo) ──
+      - { intent: growth-upgrade, approach: validate-first, signal: none, does: "consome contrato" }
+    note: "coordenacao entre iniciativas via contrato compartilhado"
   - id: bug
-    label: "um bug"
-    intent: null # standalone (ou disparado por um incident-response)
-    execution-unit: null # colapsa
-    repo-works:
-      [
-        {
-          repo: acme-checkout,
-          purpose: sustain,
-          desc: "corrige cálculo do total · preset fix (corrective + user-visible)",
-        },
-      ]
-    note: "bug simples = 1 repo-work sustain, SEM intent nem execution-unit (as camadas colapsam)"
-
-  - id: dep-bump
-    label: "atualização de biblioteca"
+    label: "bug simples"
     intent: null
     execution-unit: null
     repo-works:
-      [
-        {
-          repo: acme-web-host,
-          purpose: sustain,
-          desc: "atualiza lib X 3.x → 4.x · preset dep-bump (adaptive + internal)",
-        },
-      ]
-    note: "era a P2: NÃO 'entrega valor de produto' — preserva/adapta. sustain standalone."
-
+      - { repo: acme-checkout, purpose: sustain, desc: "corrige calculo do total" }
+    note: "standalone sustain; camadas colapsam"
   - id: exploration-sem-intent
-    label: "exploration sem intent"
-    intent: null # descoberta independente, não amarrada a um objetivo durável
-    execution-unit: null # (viraria uma discovery-unit só se fosse cross-repo)
+    label: "discovery sem intent"
+    intent: null
+    execution-unit: null
     repo-works:
-      [
-        {
-          repo: acme-platform,
-          purpose: discover,
-          desc: "spike: viável trocar o motor de busca? · timebox + pergunta falsificável → answer + fate",
-        },
-      ]
-    note: "discover standalone, sem intent; não shippa; fate = throwaway/promoted/parked"
-
-  - id: experiment-lost
-    label: "experimento que termina em lost"
-    intent: { title: "aumentar ativação via onboarding", approach: validate-first, signal: none }
-    execution-unit:
-      {
-        kind: experiment-run,
-        title: "onboarding guiado v1",
-        owns: "veredito: LOST (não bateu a métrica)",
-      }
-    repo-works:
-      - { repo: acme-mfe-onboarding, purpose: create, desc: "fluxo guiado atrás da flag" }
-      - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline" }
-    fork:
-      { kind: cleanup, desc: "execution-unit cleanup → repo-works sustain removem flag/variante" }
-    note: "lost → gera uma execution-unit CLEANUP; o valor durável foi só APRENDIZADO (nenhuma capacidade permanente)"
-
+      - { repo: acme-platform, purpose: discover, desc: "spike timebox com pergunta falsificavel" }
+    note: "discover standalone; nao shippa"
   - id: delivery-tradicional
     label: "delivery tradicional"
-    intent: { title: "exportar relatório em PDF", approach: direct, signal: none }
-    execution-unit: null # colapsa (1 repo); seria delivery-slice se cross-repo
-    repo-works: [{ repo: acme-reports, purpose: create, desc: "botão + geração do PDF" }]
-    note: "feature comum = intent direct → repo-work create (execution-unit colapsa)"
+    intent: { title: "exportar relatorio em PDF", approach: direct, signal: none }
+    execution-unit: null
+    repo-works:
+      - { repo: acme-reports, purpose: create, desc: "botao + geracao do PDF" }
+    note: "feature comum; unit colapsa"
 
-# ═════════════════════ SIMULAÇÃO (fluxo ponta-a-ponta × forma de org) ═════════════════════
 simulation:
-  purpose: "quem faz o quê no fluxo de governança, em 3 formas de org — estressa SoD/independência e a cerimônia"
-  phases: # F10 — inclui as fases business (bloco B)
+  purpose: "estressa SoD/independencia e colapso de cerimonia"
+  phases:
     [
       define-objective,
       define-target,
@@ -487,901 +456,95 @@ simulation:
   orgs:
     - id: full-team
       label: "empresa com time completo"
-      roles: [PM, Design, "Team Lead", Principal, "Tech Lead", "devs Sr/Pl", "devs Jr"]
+      roles: [PM, Design, Team-Lead, Principal, Tech-Lead, Devs]
       participation:
-        define-objective: "sponsor/liderança define company/area; PM traduz p/ team-priority (approve-objective no nível acima)"
-        define-target: "PM (target-definer) + time de dados (metric-owner); attester ≠ definer (SoD da medição)"
-        authorize-intake: "PM (owner do objective): quais objectives aceitam propostas + allocation disponível"
-        registro: "PM (registered-by + owner accountable); Design + Team Lead como stakeholders"
-        triagem: "Tech Lead (dispositions · matcher · valida contratos) + Principal (arquitetura/cross-repo)"
-        investigacao: "devs Sr / Tech Lead rodam discover (spikes); Principal avalia viabilidade"
-        gate: "PM (owner) decide promover×descartar; append-only"
-        ativacao: "Team Lead / PM consolidam + movem p/ intents/"
-        breakdown: "Tech Lead materializa execution-units + repo-works; Principal p/ contratos cross-repo"
-        execucao: "devs Sr/Pl (create/sustain/discover); Jr (peças menores + pair)"
-        coordenacao: "Principal / contract-owners; devs = consumers"
-        veredito: "PM + dados (experiment-run); Tech Lead conduz graduation/cleanup"
-      sod: "HOLDS — requester (PM/dev) ≠ approver (TL/Principal) ≠ owner-attester (dono do domínio)"
-      gaps:
-        - "quem é dono do `operate`/monitoramento (risco de SRE-gap — cai no Principal/dev por omissão)"
-        - "sobrecarga do Tech Lead (triagem + breakdown + coordenação num papel só)"
-        - "dono da matcher-accountability (quem assina seguir/contrariar a sugestão)"
-        - "Design como owner de contrato de design-system (fica implícito)"
-    - id: trio
-      label: "trio: negócio · design · engenharia"
-      roles: [Negócio, Design, Engenharia]
+        define-objective: "sponsor/lideranca"
+        define-target: "PM + dados"
+        authorize-intake: "PM owner do objective"
+        registro: "PM/negocio"
+        triagem: "Tech Lead + Principal"
+        investigacao: "devs Sr/Tech Lead"
+        gate: "PM owner decide"
+        ativacao: "Team Lead + PM"
+        breakdown: "Tech Lead + Principal"
+        execucao: "devs"
+        coordenacao: "Principal / contract-owners"
+        veredito: "PM + dados"
+      sod: "HOLDS"
+      gaps: ["sobrecarga de Tech Lead", "owner de operate precisa ser explicito"]
+    - id: compact
+      label: "time pequeno"
+      roles: [Negocio, Produto-Design, Engenharia]
       participation:
-        define-objective: "Negócio (1-2 níveis no máximo — scaling-law)"
-        define-target: "Negócio define; a FONTE de dados atesta — com a ressalva F6: fonte construída pela própria Eng = self-attested"
-        authorize-intake: "Negócio"
-        registro: "Negócio (registered-by + owner); Design stakeholder"
-        triagem: "Engenharia (tudo: dispositions · matcher · contratos)"
-        investigacao: "Engenharia (discover)"
-        gate: "Negócio (owner) decide — dá a independência do lado de NEGÓCIO"
-        ativacao: "Negócio + Engenharia"
+        define-objective: "Negocio"
+        define-target: "Negocio + fonte"
+        authorize-intake: "Negocio"
+        registro: "Negocio"
+        triagem: "Engenharia"
+        investigacao: "Engenharia"
+        gate: "Negocio"
+        ativacao: "Negocio + Engenharia"
         breakdown: "Engenharia"
-        execucao: "Engenharia (todas as peças: create/sustain/discover/operate)"
-        coordenacao: "Engenharia é owner E consumer do contrato (auto-coordenação)"
-        veredito: "Negócio + Engenharia"
-      sod: "PARCIAL — Negócio dá independência no gate; mas o lado TÉCNICO é auto-certificado (Eng = requester + approver + owner-attester)"
-      gaps:
-        - "autocertificação técnica: owner-attested-by sem verificador independente (o risco central da L9, agora ESTRUTURAL por falta de gente)"
-        - "contrato sem revisão independente (mesma pessoa provê e consome)"
-        - "q/r/d sem par que conteste"
-        - "`operate`/monitoramento recai sobre a única pessoa de Eng"
+        execucao: "Engenharia"
+        coordenacao: "Engenharia"
+        veredito: "Negocio + Engenharia"
+      sod: "PARCIAL"
+      gaps: ["autocertificacao tecnica", "contrato sem revisao independente"]
     - id: solo
       label: "dev solo"
-      roles: ["a mesma pessoa em tudo"]
+      roles: [self]
       participation:
-        define-objective: "self (objective opcional — perfil solo)"
-        define-target: "self (target self-attested, badge no dashboard)"
-        authorize-intake: "self"
-        registro: "self"
-        triagem: "self (quase sempre implícito)"
-        investigacao: "self"
-        gate: "self — 'o humano confirma' é o mesmo humano que propôs"
-        ativacao: "self"
-        breakdown: "self"
-        execucao: "self"
-        coordenacao: "self (contratos internos)"
-        veredito: "self"
-      sod: "IMPOSSÍVEL — todas as arestas de independência (X) e o oráculo (O1) colapsam no self"
-      gaps:
-        - "colapso TOTAL de independência: não há requester≠approver≠owner-attester"
-        - "gate/oráculo = self → nenhuma verificação externa possível"
-      degenerate-mode: "a cerimônia COLAPSA (como a execution-unit no trivial); o grafo ainda registra append-only (self-log), e a independência é EXPLICITAMENTE dispensada com trade-off LOGADO (break-glass) — não se bloqueia o solo"
+        define-objective: self
+        define-target: self
+        authorize-intake: self
+        registro: self
+        triagem: self
+        investigacao: self
+        gate: self
+        ativacao: self
+        breakdown: self
+        execucao: self
+        coordenacao: self
+        veredito: self
+      sod: "IMPOSSIVEL"
+      gaps: ["independencia colapsada; dashboard deve mostrar self-attested"]
+      degenerate-mode: "self-governed + trade-off logado"
   finding:
     id: F-governance-scaling
-    says: "o fluxo e a Lei da Independência (X/O1) assumem TIME COMPLETO. Precisam ESCALAR PARA BAIXO por role-collapse — espelho do execution-unit-collapse (cerimônia proporcional ao tamanho da org E do trabalho). full-team: SoD holds. trio: independência TÉCNICA fica com gaps de autocertificação (mitigar com revisão cruzada / trusted-source externo). solo: SoD impossível → self-governed + trade-off logado (break-glass). Conecta as leis fallback/break-glass + independência."
-    mechanized-by: "governance-profiles (G6 · bloco C)"
+    says: "governanca escala para baixo por role-collapse; nao deve virar teatro"
+    mechanized-by: "governance-profiles"
 
-# ═════════════════════ BUSINESS TIER (P9 · consolidado c/ Codex) — nós de negócio ACIMA da intent ═════════════════════
-# Core PEQUENO + RECURSIVO (não a árvore fixa strategy/driver/priority). Input (planejamento) + output (dashboards). Anonimizado.
-business-tier:
-  status: applied # gate owner 2026-07-01 — aceito junto com a scaling-law; mecanização = bloco A da P10
-  provocation: P9
-  source: "codex + reconciliação claude (substitui a proposta anterior de tier fixo de 5 nós)"
-  core-idea: "strategy / driver / priority são o MESMO tipo (business-objective) em nível/horizonte diferente → nó RECURSIVO. Não uma árvore de 5 tipos."
-  nodes:
-    business-objective: "compromisso de negócio, RECURSIVO (cascades-to si mesmo). Campos: level · period · owner · parent · status. Ex. level: company-strategy | area-driver | team-priority. É o que dá a flexibilidade anual (ver annual-flexibility)."
-    thesis: "hipótese CAUSAL de negócio (por que ações X devem mover a métrica Z). NÃO é objetivo — nó separado."
-    opportunity-area: "espaço de ataque/opção (era 'thematic'). OPCIONAL."
-    intent: "1ª unidade governada de trabalho (já existe; entra nas 3 camadas). Ganha primary-target (F2): o target primário herdado do authorizes — o rollup da intent é por ELE, e os outcomes das units sob ela devem ser compatíveis."
-    metric-definition: "definição ESTÁVEL da métrica: unidade · source · aggregation · owner."
-    target: "binding métrica + nó + período + valor esperado. ≠ metric-definition. actual = DERIVADO dos outcomes. Período IMUTÁVEL (F9): no fechamento do ciclo o target é FROZEN (closed) — actuals novos não entram; continuidade via continues-from (vale p/ target, não só objective)."
-    outcome: "resultado GOVERNADO (G3 · bloco A): evento append-only emitido no veredito/fecho de uma execution-unit; quando a unit ainda não é materializada fisicamente, a intent agregadora emite; repo-work standalone também emite. Usa envelope L8. Campos: source · window (janela de medição) · metric-definition · value · aggregation · attested-by · revision (a fonte/dados que sustentam o número) · contract-revision (quando o resultado depende de um contrato — G10). É o ÚNICO insumo de target.actual — número sem outcome válido NÃO entra no dashboard. Schema tipado + resolver: ver outcome-schema (F1)."
-    allocation: "budget/capacidade/limite — começa como CAMPO do objective/priority com unidade · período · owner OBRIGATÓRIOS (G12); vira nó quando ganha lifecycle/owner/consumo PRÓPRIOS (o critério é a scaling-law)."
-  edges:
-    - {
-        id: cascades-to,
-        from: business-objective,
-        to: business-objective,
-        note: "N:N — um nível de baixo pode servir a MAIS de um objetivo de cima (o mundo real é grafo, não árvore; constatado no dogfood da sim v3: áreas com 2 objetivos)",
-      }
-    - {
-        id: continues-from,
-        from: [business-objective, target],
-        to: [business-objective, target],
-        note: "novo ciclo (G8; tipo-a-tipo — objective→objective · target→target, F9)",
-      }
-    - { id: split-from, from: business-objective, to: business-objective, note: "1 vira N (G8)" }
-    - { id: merged-into, from: business-objective, to: business-objective, note: "N viram 1 (G8)" }
-    - { id: framed-by, from: business-objective, to: thesis }
-    - { id: explores, from: thesis, to: opportunity-area }
-    - { id: authorizes, from: business-objective, to: intent }
-    - { id: measured-by, from: business-objective, to: target }
-    - { id: uses, from: target, to: metric-definition }
-    - {
-        id: emits,
-        from: [intent, execution-unit, repo-work],
-        to: outcome,
-        note: "no veredito/fecho da unit; intent emite quando a unit física está colapsada/não materializada; repo-work STANDALONE também emite (G14)",
-      }
-    - {
-        id: contributes-to,
-        from: outcome,
-        to: target,
-        note: "ENTRA no rollup/dashboard; exige regra de agregação declarada (lint em rollup-mechanics)",
-      }
-    - {
-        id: aligns-with,
-        from: node,
-        to: business-objective,
-        note: "alinhamento NARRATIVO; NÃO entra em rollup (evita contabilidade falsa)",
-      }
-  rollup-rule: "cada intent/outcome tem UM objetivo PRIMÁRIO de rollup (contributes-to); secundários = aligns-with (contexto, não soma) — senão uma iniciativa que 'apoia' 3 prioridades vira resultado TRIPLICADO."
-  measurement-roles: # G4 (bloco A) — o SoD da medição vira papel NOMEADO
-    target-definer: "define o target (binding métrica × nó × período × valor)"
-    metric-owner: "dono da metric-definition (unidade · source · aggregation)"
-    actual-attester: "atesta o outcome — o número E a fonte/revision que o sustenta. É uma AUTHORITY resolvível (pessoa OU trust-boundary com owner — F6); MÁQUINA só atesta se o producer/owner da fonte for INDEPENDENTE de quem define o target — senão a atestação é marcada collapsed/self-attested"
-    dashboard-consumer: "audiência que lê o rollup (só lê, não muda)"
-    sod: "target-definer NÃO pode ser o ÚNICO actual-attester (fonte/analytics independente — a lei da independência aplicada à medição; era o new-sod da scaling-law)"
-    role-collapse: "pela scaling-law: trio → o attester tende a colapsar na mesma eng (gap LOGADO); solo → colapso total, dispensa EXPLÍCITA logada (break-glass) e o dashboard marca self-attested"
-  rollup-mechanics: # G5 (bloco A) — regras VERIFICÁVEIS (lint), não prosa
-    lint:
-      - "exatamente 1 contributes-to (rollup primário) por outcome/intent — 2+ = ERRO (contabilidade dupla)"
-      - "contributes-to sem aggregation declarada = ERRO (o outcome não entra no dashboard)"
-      - "aligns-with NUNCA soma — o dashboard ignora (contexto narrativo)"
-      - "outcome sem attested-by OU com revision stale/incompatível → número marcado unverified/stale no dashboard (falha VISÍVEL, não silenciosa — lei dependencia-verificavel)"
-      - "outcome que depende de contrato CITA a contract-revision; revision fora da compatibility-window → dashboard marca blocked/stale (G10 — a lei dependencia-verificavel mecanizada p/ o rollup)"
-      - "coerência intent × outcome (F2): outcome de unit sob uma intent só soma no primary-target DELA; somar noutro target exige decision explícita registrada — senão INVALID"
-      - "target FROZEN/closed não recebe actual novo (F9) — outcome com window fora do período do target vai p/ o target continuador (continues-from) ou fica unassigned VISÍVEL"
-      - "mutação dangerous com justificativa mas SEM q/r/d anexado → o nó/número afetado carrega a marca dangerous-unreviewed no dashboard até reviewer/decision fechar (F11 — detecção; no perfil FULL o subconjunto ruler-authority é soft-mandatory: ver deliberation.enforcement)"
-    standalone: "G14 — trabalho sem objective TAMBÉM emite outcome: ou contributes-to um target (quando fizer sentido) ou cai no bucket OPERACIONAL do dashboard (custo/risco) — visível, fora do rollup de objectives; nada some"
-  outcome-schema: # F1+F8 (bloco D) — o outcome deixa de ser prosa: campos TIPADOS + refs resolvíveis + resolver fail-closed
-    fields:
-      source: "GlobalRef RESOLVÍVEL da fonte (ex.: metric-source:acme-analytics/conversion@rev) — não string livre"
-      window: "período de medição (start · end), fechado e imutável"
-      metric-definition: "GlobalRef da metric-definition usada (a unidade do value DEVE bater com ela)"
-      value: "número + unidade"
-      emitted-by: "intent|execution-unit|repo-work resolvível; intent é aceito quando a unit física ainda não foi materializada na sim/file layout"
-      aggregation: "regra declarada (sum · avg · last · custom com owner)"
-      attested-by: "AUTHORITY resolvível (pessoa OU trust-boundary com owner) — ver measurement-roles"
-      revision: "revisão dos DADOS que sustentam o número (dataset/query@rev)"
-      contract-revisions: "F8: DERIVADAS do grafo — toda repo-work da unit com coordinates-with → contract entra na lista; NÃO é autodeclarada (omissão não passa despercebida)"
-      envelope: "actor · authority · issued-at · idempotency-key · nonce; replay/authority revogada falha fechado"
-    resolver:
-      is: "verificação OBRIGATÓRIA em actual-publish E na leitura do dashboard — a peça que PROVA que número, fonte, revisão e autoridade são válidos (barra do red-team)"
-      checks:
-        - "toda ref RESOLVE (source · metric-definition · attested-by · revision · contract-revisions) — ref quebrada = INVALID"
-        - "attested-by é authority AUTORIZADA p/ a metric-definition e ≠ target-definer — senão marcado self-attested"
-        - "revision dentro de ttl/janela — senão STALE"
-        - "contract-revisions COBREM as derivadas do grafo e estão na compatibility-window — senão BLOCKED/STALE"
-        - "repo-work-acks necessários da intent emissora estão done; active/blocked/acknowledged/dropped bloqueiam o rollup"
-        - "idempotency-key/nonce únicos e authority não revogada no issued-at"
-      fail-mode: "fail-CLOSED p/ SOMAR (invalid/stale/blocked/self-attested-sem-colapso-logado não entram no actual) · fail-VISIBLE p/ EXIBIR (tudo aparece no dashboard, com a marca)"
-  input-vs-output:
-    input: "business-objective → thesis → opportunity-area → intent"
-    output: "outcome → target.actual → dashboard do objective (sobe SÓ por contributes-to, com agregação declarada)"
-  annual-flexibility: "objetivos versionados POR CICLO: novo ciclo = novos business-objective (status closed/active · continues-from/supersedes/split/merge — desde o G8, no catálogo de states/edges), NÃO mudança de schema. level/nomes = LABEL configurável. Usa o envelope L8 (append-only/supersedes) → mudança anual vira DADO, preserva histórico/comparação; não é migração ontológica."
-  fork-resolvido: "core FIXO + níveis CONFIGURÁVEIS (nem 5 nós fixos, nem grafo plugável livre). Core = business-objective · thesis · opportunity-area · metric-definition/target · intent. Domínio configura business-objective.level. Tipo NOVO só com CONTRATO (owner · lifecycle · arestas · rollup · regra-de-colapso · impacto-no-dashboard)."
-  two-hypotheses: "não conflar: thesis = hipótese de NEGÓCIO (estratégica) ≠ experiment-run.hypothesis = hipótese TÁTICA (da execution-unit). Níveis diferentes."
-  connects: "features.md P2 (portfólio: RICE/ICE, roadmap, priorização)"
-  example: # instância ILUSTRATIVA do grafo completo (o _map desenha esta cadeia; data.js é gerado daqui)
-    objective:
-      - { level: company-strategy, title: "crescer receita via plataforma", period: "2027" }
-      - { level: area-driver, title: "cross-sell entre produtos", period: "2027-H1" }
-      - {
-          level: team-priority,
-          title: "P1 · +X% de conversão de cross-sell",
-          period: "2027-H1",
-          meta: "target: conversion-rate · budget: orçamento H1",
-        }
-    thesis: "ofertar o produto B à base do produto A, evidenciando o uso conjunto, move a conversão"
-    opportunities: ["jornada de cross-sell unificada", "personalização da oferta"]
-    intent: { title: "testar CTA contextual de upgrade", approach: validate-first, signal: none }
-    unit: { kind: experiment-run, title: "CTA contextual v1", verdict: won }
-    works:
-      - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atrás da flag" }
-      - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline (mede a métrica)" }
-      - { repo: acme-web-host, purpose: sustain, desc: "adapta o contrato compartilhado" }
-    outcome:
-      title: "resultado do experimento (won)"
-      fields: "source: acme-analytics · janela: H1 · valor: +X% · attested-by: acme-data (≠ quem definiu o target) · revision: dados@rev"
-      note: "único insumo do target.actual — sem attester independente ou com revision stale, o dashboard marca unverified/stale (falha visível, não silenciosa)"
-    measurement:
-      metric: "conversion-rate · source: acme-analytics · owner: acme-data"
-      target: "H1: +X% · actual = DERIVADO dos outcomes (não à mão)"
-      roles: "papéis: target-definer · metric-owner · actual-attester · dashboard-consumer — quem define o target NÃO é o único a atestar o actual"
-    rollup:
-      contributes: "o outcome CONTRIBUI (mensurável) p/ a priority P1 → entra no dashboard (rollup primário)"
-      aligns: "e ALINHA (narrativo) com a company-strategy → contexto, NÃO soma no dashboard"
-      lint: "lint: exatamente 1 rollup primário por outcome/intent · aggregation obrigatória · aligns-with nunca soma"
-
-# ═════════════════════ LEI ÚNICA DE ESCALA (Codex — generaliza F-governance-scaling) ═════════════════════
-scaling-law:
-  status: applied # gate owner 2026-07-01
-  says: "crie um NÓ separado só quando muda pelo menos um: owner · cadência · target próprio · allocation própria · lifecycle próprio · audiência de dashboard. Se nada muda, COLAPSE."
-  applies-to: [business-tier, execution-unit, "roles/SoD"]
-  generalizes: "F-governance-scaling + execution-unit-collapse — um princípio só p/ camadas de trabalho + tier de negócio + papéis"
-  new-sod: "quem DEFINE o target não deve ser o único a ATESTAR o actual (fonte/analytics independente)"
-  executed-by: governance-profiles # G6 (bloco C)
-
-# ═════════════════════ PERFIS DE GOVERNANÇA (G6+G13 · bloco C) — a scaling-law EXECUTÁVEL ═════════════════════
-governance-profiles:
-  is: "perfis operacionais mínimos por forma de org (G6): cada perfil diz que NÓS existem, que GATES colapsam e que CAMPOS são obrigatórios — colapso LIMPO, não princípio abstrato"
-  law: "a org declara UM perfil + desvios EXPLÍCITOS; mudar de perfil = mutação profile-change (dangerous). Perfis derivam por role-collapse parametrizado (G13) — o compact cobre o small-team (PM+TL+eng) sem um 4º arquétipo fixo"
-  declaration: # F5 (bloco E) — declarar perfil deixa de ser autoatribuição livre (perfil como bypass)
-    fields: [scope, profile, eligibility, approved-by, ttl, review-at]
-    eligibility: "compact/solo exigem elegibilidade DECLARÁVEL e verificável (nº de pessoas/papéis no escopo); org com papéis separados NÃO é elegível a solo — o dev solo REAL nunca é bloqueado"
-    approver: "declaração de compact/solo por um GRUPO exige approver FORA do escopo (SoD aplicado ao próprio perfil); solo individual = self, com badge"
-    ttl: "toda declaração tem ttl/review-at; vencida → dashboard marca profile-stale"
-    badge: "o perfil (e os desvios) aparece como BADGE nos dashboards/rollups do escopo — self-attested/collapsed é VISÍVEL, nunca implícito"
-  profiles:
-    full:
-      for: "org com papéis separados (a full-team da simulação)"
-      nodes: "business-tier completo + 3 camadas + contract + intake + outcome"
-      gates: [approve-objective, activate-intent, release-rollout, accept-verdict]
-      sod: "completo — requester ≠ approver ≠ owner-attester · target-definer ≠ actual-attester"
-      required-fields: "envelope L8 inteiro · outcome com attester independente · aggregation declarada"
-      enforcement: "F11 (opção C): mutação ruler-authority SEM par = BLOQUEADA (soft-mandatory; break-glass logado + revisão retroativa é a saída); demais dangerous = detecção (dangerous-unreviewed)"
-    compact:
-      for: "time pequeno (o trio da simulação; o small-team deriva daqui por role-collapse)"
-      nodes: "business-objective (1-2 níveis) + intent + execution-unit (colapsa no trivial) + repo-work + outcome"
-      gates: "activate-intent + accept-verdict; os demais colapsam no MESMO humano, com colapso LOGADO"
-      sod: "independência de negócio no gate; autocertificação técnica DECLARADA como gap + mitigação (revisão cruzada / trusted-source externo)"
-      required-fields: "outcome ainda exige attester (pode ser a FONTE de dados, não uma pessoa) · aggregation declarada"
-      enforcement: "F11: tudo detecção (dangerous-unreviewed) + revisão retroativa em CADÊNCIA (não trava)"
-    solo:
-      for: "dev solo"
-      nodes: "repo-work + outcome self-attested; intent/objective opcionais (colapsam)"
-      gates: "nenhum — self-log append-only substitui (break-glass permanente, logado)"
-      sod: "dispensado EXPLICITAMENTE com trade-off logado; dashboard marca self-attested"
-      required-fields: "registro append-only (o grafo continua contando a história)"
-      enforcement: "F11: detecção/self-log — não se bloqueia o solo"
-
-# ═════════════════════ VALIDAÇÃO DE FLUXO (P10 · rodada Codex big-company → solo) ═════════════════════
-# Gaps RECONCILIADOS contra este arquivo (repo vence): aceito · parcial (o modelo já cobre parte — a
-# correção diz o quê) · tensão (choca com decisão anterior da owner). Severidade = do Codex
-# (P0 crítico · P1 importante · P2 menor — NÃO confundir com ids de provocação).
-flow-validation:
-  status: applied # todos os 14 gaps têm resolution (G11 = decision); resta o hardening via revisão adversarial
-  gate: "owner 2026-07-01 (1º) — bloco A (G3+G4+G5) AUTORIZADO e APLICADO · G11 DECIDIDO (alerta + justificativa logada; não obrigatório) · business-tier + scaling-law ACEITOS (proposed → applied). owner 2026-07-01 (2º) — TODAS as frentes: blocos B (G1+G2) e C (G6+G13), fila P1 (G7·G8·G9·G10·G12) e G14 APLICADOS (ver resolution por gap) + gerador model.yml → _map. Próximo: revisão adversarial técnica/arquitetural (Codex)"
-  provocation: P10
-  source: "codex (validação ponta-a-ponta + caça a gaps, big → solo) + reconciliação claude 2026-07-01"
-  verdict-codex: "coerente como mapa conceitual do big-company ao solo; NÃO pronto como framework ponta-a-ponta — falta mecanizar business-tier + rollup (ecoa o achado-mestre do red-team: o modelo é SUB-mecanizado, não over-engineered)"
-  master-gap: "outcome → target.actual → dashboard: o modelo diz que actual é DERIVADO e que só contributes-to soma, mas NÃO define o que é um outcome GOVERNADO, quem atesta o actual, que revisão/fonte sustenta o número, nem como o dashboard falha com evidência stale. Sem isso o business-tier vira painel narrativo, não governança. (= G3 + G4 + G5)"
-  gaps:
-    - id: G1
-      about: "business-tier existe como grafo, mas não como FLUXO operacional"
-      where: "antes de registro — criação/aprovação de objective · thesis · target · allocation"
-      severity: P0
-      scale: [big, mid]
-      reconciliation: "aceito — FATO: flow (L2) começa em registro; nenhuma fase cobre o planejamento; business-tier tem input-vs-output mas não diz QUEM cria/aprova QUANDO"
-      suggestion: "fases leves de planejamento (define-objective · define-target · authorize-intake), colapsáveis em org menor"
-      resolution: "APLICADO (bloco B) — flow ganha as 3 fases de tier business (define-objective · define-target · authorize-intake), colapsáveis por perfil"
-    - id: G2
-      about: "intake não está ligado ao business-tier"
-      where: "registro → gate → ativação"
-      severity: P0
-      scale: [big, mid, trio]
-      reconciliation: "aceito — FATO: a aresta authorizes (objective → intent) existe, mas proposal/register não declaram vínculo; o gate não valida objective/target/allocation. Os exemplos com intent nula mostram que 'standalone' precisa ser DECLARÁVEL (não inferido)"
-      suggestion: "register/proposal declara authorized-by OU standalone; gate valida objective primário + target + allocation"
-      resolution: "APLICADO (bloco B) — intake.business-link (authorized-by OU standalone, declarado; gate valida objective ativo + target + allocation)"
-    - id: G3
-      about: "target.actual é 'derivado', mas falta a entidade/processo de OUTCOME"
-      where: "veredito → dashboard"
-      severity: P0
-      scale: [big, mid, trio]
-      reconciliation: "aceito (o master-gap) — FATO que REFORÇA: outcome já é citado 2× no modelo (closed-by → 'answer|outcome|postmortem' · contributes-to parte de 'outcome (execution-unit)') e definido em lugar NENHUM"
-      suggestion: "outcome como evento/nó governado: source · janela · métrica · agregação · attester · revision"
-      resolution: "APLICADO (bloco A) — business-tier.nodes.outcome + aresta emits (execution-unit → outcome)"
-    - id: G4
-      about: "o SoD novo do target está só DECLARADO"
-      where: "planejamento + dashboard"
-      severity: P0
-      scale: [big, mid, trio, solo]
-      reconciliation: "aceito — FATO: scaling-law.new-sod declara sem mapear papéis; a barra do red-team r2 já disse 'P0 nomeado sem mecanismo = cerimônia'"
-      suggestion: "papéis: target-definer · metric-owner · actual-attester · dashboard-consumer; no solo, colapso EXPLÍCITO logado"
-      resolution: "APLICADO (bloco A) — business-tier.measurement-roles (4 papéis + sod + role-collapse)"
-    - id: G5
-      about: "contributes-to × aligns-with não está mecanizado"
-      where: "breakdown · veredito · rollup"
-      severity: P0
-      scale: [big, mid]
-      reconciliation: "aceito — FATO: rollup-rule é textual; o próprio modelo exige enforcement p/ dimensões ('senão é tag decorativa') — o mesmo princípio vale p/ o rollup"
-      suggestion: "lint: exatamente 1 rollup primário por outcome/intent; dashboard ignora aligns-with; agregação obrigatória"
-      resolution: "APLICADO (bloco A) — business-tier.rollup-mechanics (4 regras de lint)"
-    - id: G6
-      about: "scaling-law é princípio, não perfil executável"
-      where: "todas as fases"
-      severity: P0
-      scale: [mid, trio, solo]
-      reconciliation: "aceito — governance-profile é a materialização EXECUTÁVEL da scaling-law (conecta F-governance-scaling + degenerate-mode do solo)"
-      suggestion: "governance-profile (full · compact · solo): nós mínimos, gates colapsados e campos obrigatórios por perfil"
-      resolution: "APLICADO (bloco C) — seção governance-profiles (full · compact · solo): nodes/gates/sod/required-fields por perfil + lei do desvio explícito"
-    - id: G7
-      about: "gate único não cobre decisões por tier"
-      where: "objective approval · activation · rollout · verdict"
-      severity: P1
-      scale: [big, mid]
-      reconciliation: "aceito — FATO: o fluxo tem UM gate (pré-ativação); verdict/rollout/aprovação-de-objective não têm decision-point governado"
-      suggestion: "decision-points separados (approve-objective · activate-intent · release/rollout · accept-verdict), todos colapsáveis"
-      resolution: "APLICADO (fila P1) — seção decision-points (4 gates nomeados, append-only, colapsáveis por perfil); o gate do fluxo = activate-intent"
-    - id: G8
-      about: "states genéricos demais p/ o business-tier"
-      where: "objective anual · target · reopen/supersede"
-      severity: P1
-      scale: [big, mid]
-      reconciliation: "parcial — o annual-flexibility JÁ nomeia closed/active + continues-from/supersedes/split/merge; o gap REAL é esse lifecycle viver só em prosa (fora do catálogo states e das edges)"
-      suggestion: "lifecycle próprio de objective/target (proposed · active · closed · superseded · dropped) + as arestas continues-from/split-from/merged-into no catálogo"
-      resolution: "APLICADO (fila P1) — states.business-tier (5 estados) + arestas continues-from/split-from/merged-into no business-tier.edges"
-    - id: G9
-      about: "envelope L8 sem catálogo de mutações por tier"
-      where: "toda mutação — em especial target/objective"
-      severity: P1
-      scale: [big, mid, trio]
-      reconciliation: "aceito — FATO: o envelope define grupos de CAMPOS, não TIPOS de mutação"
-      suggestion: "mutation types declarados: objective-create · target-change · actual-publish · rollup-change · allocation-change"
-      resolution: "APLICADO (fila P1) — envelope.mutation-types (business-tier · work-tier · coordination + a lista dangerous ligada ao alerta q/r/d)"
-    - id: G10
-      about: "contratos coordenam repo-work, mas não bloqueiam rollup"
-      where: "coordenação → veredito"
-      severity: P1
-      scale: [big, mid]
-      reconciliation: "parcial — a lei dependencia-verificavel (L9) JÁ cobre em princípio (rollup É ação derivada); o gap REAL é a mecanização: nada liga outcome a contract-revision nem marca o dashboard como stale"
-      suggestion: "outcome que depende de contrato cita a contract revision; dashboard marca blocked/stale se incompatível"
-      resolution: "APLICADO (fila P1) — campo contract-revision no outcome + lint blocked/stale em rollup-mechanics"
-    - id: G11
-      about: "q/r/d anexável, mas sem gatilhos obrigatórios"
-      where: "triagem · target change · verdict override"
-      severity: P1
-      scale: [big, mid, trio]
-      reconciliation: "TENSÃO — decisão anterior da owner: q/r/d é o coração, porém OPCIONAL (pular = abrir mão dos benefícios, com trade-off explícito). Caminho compatível: gatilho obrigatório SÓ p/ mutações de alto risco torna o trade-off explícito sem enforçar q/r/d geral. Owner decide"
-      suggestion: "exigir decision p/ mudança de target, rollup primário, compat-window, verdict override e break-glass"
-      decision: "owner 2026-07-01: NÃO obrigatória — mutação perigosa dispara ALERTA e, se q/r/d não for usado, exige justificativa LOGADA (append-only) do porquê, p/ auditabilidade. Registrado em deliberation.enforcement"
-    - id: G12
-      about: "allocation indefinido como campo/nó"
-      where: "planejamento/priorização"
-      severity: P1
-      scale: [big, mid]
-      reconciliation: "parcial — o modelo JÁ define o default (campo do objective; 'vira nó só se precisar') e a scaling-law dá o critério de promoção; o gap REAL são os campos mínimos e a promoção não estar amarrada EXPLICITAMENTE à scaling-law"
-      suggestion: "campo por default com unidade · período · owner obrigatórios; vira nó quando ganha lifecycle/owner/consumo próprio"
-      resolution: "APLICADO (fila P1) — nodes.allocation: unidade · período · owner obrigatórios; promoção a nó amarrada à scaling-law"
-    - id: G13
-      about: "média empresa não tem perfil próprio"
-      where: "escala"
-      severity: P1
-      scale: [mid]
-      reconciliation: "aceito — a sim tem full-team/trio/solo; nota: 'role-collapse parametrizado' CONVERGE com a scaling-law aplicada a papéis — o perfil mid talvez DERIVE do G6 (governance-profile) em vez de ser um 4º arquétipo fixo"
-      suggestion: "arquétipo small-team (PM + TL + Eng) OU role-collapse parametrizado via governance-profile"
-      resolution: "APLICADO (bloco C) — via role-collapse parametrizado: o perfil compact cobre o small-team (sem 4º arquétipo fixo)"
-    - id: G14
-      about: "trabalho standalone some do dashboard"
-      where: "bug · dep-bump · incident · trabalho solo"
-      severity: P2
-      scale: [big, mid, trio, solo]
-      reconciliation: "aceito — FATO: bug/dep-bump (intent nula) não têm caminho até dashboard algum; compatível com 'não se bloqueia o solo' — visível como custo/risco operacional, não forçado a um objective"
-      suggestion: "permitir repo-work outcome contributes-to target OU classificar como custo/risco operacional fora de objective"
-      resolution: "APLICADO — repo-work standalone também emite outcome (aresta emits) + rollup-mechanics.standalone (bucket operacional do dashboard; nada some)"
-
-# ═════════════════════ REVISÃO ADVERSARIAL (P11 · rodada Codex técnica/arquitetural, pós-P10) ═════════════════════
-# Findings RECONCILIADOS contra este arquivo (repo vence). NADA aplicado — aguarda priorização/gate da owner.
-adversarial-review:
-  status: applied # 13/13 com resolution (F13 = adiamento deliberado)
-  gate: "owner 2026-07-01 — TODOS os blocos autorizados e APLICADOS: D (F1+F8) · E (F3+F5) · F (F2+F9) · G (F4+F6+F10) · H parcial (F12 — --check fora do validate por decisão) · F11 DECIDIDO (opção C do research: soft-mandatory p/ ruler-authority no full). F13 foi fechado depois pela P12 aplicada: collapse/discovery/names resolvidos no modelo limpo."
-  provocation: P11
-  source: "codex (revisão adversarial do modelo v2, HEAD 9a60e288) + reconciliação claude 2026-07-01"
-  verdict-codex: "coerente como arquitetura conceitual; NÃO pronto ponta-a-ponta na barra do red-team ('mecanismo pega' = resolver + fail-closed + evidência independente). Maior fragilidade: o dashboard ainda pode virar 'verdade por texto bem-formado' — falta o resolver independente que prova que número, fonte, revisão e autoridade são válidos"
-  reconciliation-note: "12 aceitos · 1 parcial (F9). F11 toca a decisão do G11: marcar dangerous-unreviewed é COMPATÍVEL com a decisão da owner (auditabilidade); BLOQUEAR sem reviewer no perfil full = NOVA decisão dela"
-  findings:
-    - id: F1
-      about: "outcome sem schema/resolver fail-closed — attested-by/revision/source/contract-revision são TEXTO"
-      severity: P0
-      reconciliation: "aceito — follow-up direto da barra do red-team; o físico JÁ tem GlobalRef (family:namespace/id#anchor@revision + tombstone) p/ ancorar as refs"
-      suggestion: "schema do outcome com refs RESOLVÍVEIS (GlobalRef) · attested-by como authority · resolver obrigatório que marca invalid/stale"
-      resolution: "APLICADO (bloco D) — business-tier.outcome-schema (fields tipados + resolver com 4 checks + fail-mode: fail-closed p/ somar, fail-visible p/ exibir)"
-    - id: F2
-      about: "rollup primário da INTENT conflado com contributes-to do OUTCOME (outcome pode somar num target que não é o da intent)"
-      severity: P0
-      reconciliation: "aceito — FATO: a aresta contributes-to é outcome → target, mas o rollup-rule fala 'por outcome/intent'; a intent não tem campo primary-target"
-      suggestion: "separar intent.primary-target (vem do authorizes) do contributes-to do outcome; outcome só soma se compatível com o primary-target OU com decision explícita"
-      resolution: "APLICADO (bloco F) — intent.primary-target (herdado do authorizes) + lint de coerência intent × outcome em rollup-mechanics"
-    - id: F3
-      about: "mutation-types burlável: dangerous é string e faltam tipos (profile-change · metric-definition-change · business-link-change · aggregation-change · break-glass como tipo real)"
-      severity: P0
-      reconciliation: "aceito — inconsistência interna CONFIRMADA: governance-profiles.law exige 'mudar de perfil = mutação L8' mas profile-change não existe no catálogo"
-      suggestion: "dangerous como lista ENUMERADA · adicionar os tipos ausentes · fail-closed p/ mutação desconhecida ou incompatível com o diff"
-      resolution: "APLICADO (bloco E) — mutation-types: +metric-definition-change/aggregation-change/business-link-change + grupo governance (profile-change · break-glass); dangerous enumerado; unknown-mutation fail-closed"
-    - id: F4
-      about: "decision-points são nome + descrição, sem requisitos verificáveis por gate"
-      severity: P1
-      reconciliation: "aceito — accept-verdict sem outcome verificável, release-rollout sem evidência de guardrail, approve-objective sem target/metric-definition"
-      suggestion: "por decision-point: subject-ref · prerequisites · required-evidence · authorized-approver · block/fallback"
-      resolution: "APLICADO (bloco G) — os 4 decision-points viraram mapas com subject/prerequisites/evidence/approver/on-block"
-    - id: F5
-      about: "perfil autodeclarado vira bypass: org grande se declara compact/solo e escapa do SoD"
-      severity: P0
-      reconciliation: "aceito — a law atual só pede 'declarar perfil + desvios'; sem escopo/elegibilidade/approver/TTL. Compatível com 'não se bloqueia o solo': a elegibilidade restringe org GRANDE, não o dev solo"
-      suggestion: "profile-declaration com escopo · elegibilidade · approver externo · TTL/revisão periódica · badge visível nos dashboards"
-      resolution: "APLICADO (bloco E) — governance-profiles.declaration (scope/eligibility/approved-by/ttl/review-at + badge); profile-change virou mutação dangerous"
-    - id: F6
-      about: "attester como 'fonte de dados' (compact) pode ser autocertificação disfarçada (o time constrói a fonte, define o target e a usa como attester)"
-      severity: P1
-      reconciliation: "aceito — refina o measurement-roles: máquina só atesta se o producer/owner da fonte for INDEPENDENTE de quem define o target"
-      suggestion: "actual-attester = authority/trust-boundary com owner; machine-attestation só vale com producer independente, senão marcada collapsed/self-attested"
-      resolution: "APLICADO (bloco G) — measurement-roles.actual-attester refinado (authority resolvível; máquina só com producer independente) + ressalva na sim do trio"
-    - id: F7
-      about: "emissão de outcome por repo-work standalone vive em NOTA, não na aresta formal (emits parte só de execution-unit)"
-      severity: P1
-      reconciliation: "aceito — FATO: a resolution do G14 diz 'repo-work standalone também emite' mas a aresta formal não tem repo-work no from"
-      suggestion: "formalizar emits: from [execution-unit, repo-work] → outcome (ou aresta própria reports-outcome)"
-    - id: F8
-      about: "dependência de contrato AUTODECLARADA no outcome ('quando depende') — omitir contract-revision passa despercebido"
-      severity: P1
-      reconciliation: "aceito — mecanização boa: as revisões requeridas são DERIVÁVEIS da ancestralidade (repo-work coordinates-with contract)"
-      suggestion: "resolver deriva required-contract-revisions do grafo; se o outcome omitir, fail-closed/stale"
-      resolution: "APLICADO (bloco D) — outcome-schema.fields.contract-revisions derivadas do grafo + check do resolver (cobertura + compatibility-window)"
-    - id: F9
-      about: "virada de ciclo pode misturar target antigo e novo (actual em dois dashboards)"
-      severity: P1
-      reconciliation: "PARCIAL — states.business-tier JÁ cobre target (fechamento existe); o que falta é CONTINUIDADE (continues-from/supersedes p/ target) + freeze do target ao fechar o ciclo"
-      suggestion: "target com período imutável + freeze no fechamento do ciclo + arestas de continuidade também p/ target"
-      resolution: "APLICADO (bloco F) — nodes.target: período imutável + freeze no fechamento; continues-from vale tipo-a-tipo p/ target; lint de window fora do período em rollup-mechanics"
-    - id: F10
-      about: "simulação de papéis não cobre as fases business (define-objective/define-target/authorize-intake sem accountable por escala)"
-      severity: P1
-      reconciliation: "aceito — FATO: simulation.phases ainda é registro→veredito; o flow ganhou as fases business no bloco B e a matriz não acompanhou"
-      suggestion: "estender simulation/profiles com as business phases (quem define objective/target/allocation em full/trio/solo)"
-      resolution: "APLICADO (bloco G) — simulation.phases + participation das 3 orgs ganham define-objective/define-target/authorize-intake"
-    - id: F11
-      about: "alerta de mutação perigosa só DETECTA, não bloqueia — e precisa ser rotulado como tal"
-      severity: P1
-      reconciliation: "aceito com NUANCE — marcar dangerous-unreviewed no dashboard/linter é COMPATÍVEL com a decisão do G11 (auditabilidade); BLOQUEAR sem reviewer no perfil full AMPLIA a decisão → gate da owner"
-      suggestion: "dashboard/linter marcam dangerous-unreviewed; opcional (decisão owner): no perfil full, bloquear sem reviewer/decision"
-      resolution: "APLICADO (bloco G + decisão owner 2026-07-01, opção C do research/2026-07-01-benchmark-f11-dangerous-mutation-enforcement.md) — marca dangerous-unreviewed + SOFT-MANDATORY p/ o subconjunto ruler-authority no perfil full (par OU break-glass logado + revisão retroativa); compact = detecção + cadência; solo = self-log"
-    - id: F12
-      about: "loop do mapa garante sync só do SUBCONJUNTO projetado, e o --check não roda no validate/CI"
-      severity: P1
-      reconciliation: "aceito — FATO conferido: o validate do package.json não chama generate.mjs --check; o gerador não projeta mutation-types/rollup-mechanics/envelope/trust. Mexer no contrato de scripts = gate da owner"
-      suggestion: "adicionar o --check ao contrato de validação + coverage manifest (o gerador declara o que projeta e o que omite; seção crítica mudou sem projeção → falha)"
-      resolution: "PARCIAL (bloco H) — coverage manifest no gerador (omissões impressas a cada run); --check FORA do validate/CI por DECISÃO da owner (2026-07-01) — reavaliar quando o modelo estabilizar"
-    - id: F13
-      about: "Q-collapse e Q-discover-level deixavam 2 jornadas ambíguas (feature trivial · discovery cross-repo)"
-      severity: P2
-      reconciliation: "aceito — eram open-questions na revisão; a mecanização adicional deveria esperar essas regras mínimas"
-      suggestion: "fechar regra mínima de collapse + discovery-unit antes de mecanizar mais"
-      resolution: "FECHADO (P12 aplicada) — collapse-rule finalizada; discovery adicionada como execution-unit quando pergunta/fate é compartilhada; feature trivial colapsa em repo-work"
-
-# ═════════════════════ MODELO DE APPROACH (P12 aplicado · enum strategy removido) ═════════════════════
-# Este bloco alimenta flow-explorer/flow-generic e detalha a regra aplicada em layers.intent.
 approach-model:
   status: applied
-  provocation: P12
-  source: "owner (fricção de adoção + 'por que migração/confiabilidade são apostas?') + claude (matriz 2 eixos) + codex (adotar-com-ajustes: regra de ouro · natureza como retrato · aplicabilidade)"
-  replaces: "layers.intent.strategy (enum experiment-led/direct-delivery/migration-led/reliability-led)"
+  decision: approach-and-signal-model
   approach:
-    id: approach
-    label: abordagem
-    values:
-      validate-first: "validar antes — o compromisso permanente DEPENDE da evidência"
-      direct: "entregar direto — a mudança já está decidida; métricas só protegem qualidade/rollout"
-    golden-rule: "é validate-first SÓ se a evidência decide a mudança permanente; canary, guardrail e spike NÃO tornam nada validate-first"
-    lint: "validate-first exige hipótese + decision-rule na unit líder; sem isso, alerta (dá dente à regra de ouro)"
-    applicability: "só intent PLANEJADA que pretende mudança governada; bug, reativo, descoberta avulsa e operação não têm o campo — a camada colapsa (não existe 'não se aplica' em dropdown)"
-    drift: "unidades divergindo da abordagem declarada → alerta approach-drift (não bloqueia; substitui o strategy-drift)"
-    naming-note: "nomes decididos pela owner: approach · graduation · direct (bet, commit-direct e deliver-direct REJEITADOS — conotação de jogo/git)"
-  culture-note: "GROWTH COMO CULTURA (owner, 2026-07-02): validate-first é abordagem de QUALQUER time — não propriedade de uma área. Áreas de growth podem ter times dedicados, mas a cultura incentiva todos a experimentar: um time de plataforma pode carregar target de receita e rodar experimento (ex.: checkout-1click na sim v3, time-checkout → obj-revenue). O dashboard MEDE a cultura: % de intents validate-first por área (derivado do grafo, não declarado)"
+    validate-first: "a mudanca permanente depende da evidencia"
+    direct: "a mudanca ja esta decidida"
   signals:
-    is: "SINAIS concretos do trabalho descrito ligam os mecanismos — SEM conceito intermediário. A 'natureza' foi REMOVIDA (decisão owner 2026-07-02: dois vocabulários p/ a mesma coisa = fricção; os sinais bastam). O portfólio agrega POR SINAL (quanto do trabalho toca contrato × meta operacional × caminho curto); divergência entre o sugerido na autoria e o observado nas peças = alerta signal-drift"
-    list:
-      - {
-          id: touches-contract,
-          signal: "as peças MUDAM um contrato (qualquer revisão) ou portam algo de → para. CONSUMIR um contrato sem revisão NÃO é sinal",
-          wakes: "revisão → review do OWNER do contrato (externo ao time da intent); revisão com QUEBRA → além do review, abre a janela de compatibilidade (que mora no CONTRATO) + consumidores migram + dashboard de onda (blocked/stale se incompatível)",
-          form-if-multi-repo: migration-wave,
-        }
-      - {
-          id: operational-target,
-          signal: "a meta é SLO / risco / custo operacional (não métrica de produto)",
-          wakes: "o placar vira OPERACIONAL + guardrails; peças sustain (preventivo) e operate",
-          form-if-multi-repo: "quase nunca vira unit — colapsa em peças",
-        }
-      - {
-          id: none,
-          signal: "nenhum dos sinais acima",
-          wakes: "caminho CURTO — nenhuma cerimônia extra; release gradual opcional (release-rollout)",
-          form-if-multi-repo: delivery-slice,
-        }
-  review-rule: "review EXTERNO nunca se escolhe — DERIVA: (a) peça em repo de OUTRO time → review do dono do repo · (a2) repo GRANDE DEMAIS p/ um time (monolito) tem donos por MÓDULO (padrão CODEOWNERS): a peça declara o módulo e o review é do dono do MÓDULO; o repo mantém um CUSTODIÃO p/ o que não é de módulo nenhum (build/CI) — a accountability é sempre do nó MAIS ESPECÍFICO declarado, nunca some · (b) mudança de contrato → review do owner do contrato + consumidores avisados · (c) revisão com quebra → além do review, abre a janela. Impacta PRAZO: os reviews externos aparecem no plano da intent DESDE o breakdown (combinados com os stakeholders, não descobertos no meio)"
-  deps-rule: "DOIS tipos de dependência entre peças: blocked-by = NÃO COMEÇA (falta decisão/insumo — não dá p/ paralelizar; ex.: o fate do spike decide o que construir) · delivery-after = PARALELIZA o trabalho, mas a ENTREGA/ativação espera (integração, baseline, janela; ex.: a UI constrói com mock e integra quando o endpoint sai). O dashboard mostra os dois estados: bloqueada × em paralelo aguardando entrega. Usa a aresta blocked-by do modelo (estado blocked DERIVADO); delivery-after é a variante fraca"
-  derivation: # abordagem × sinal × escopo → a forma (NUNCA menu)
-    - {
-        approach: validate-first,
-        signal: any,
-        form: experiment-run,
-        note: "o sinal diz O QUE se valida: none = experimento de produto · touches-contract = migração com canary DECISÓRIO · operational-target = experimento de performance",
-      }
-    - { approach: direct, signal: none, multi-repo: true, form: delivery-slice }
-    - { approach: direct, signal: none, multi-repo: false, form: "colapsa — repo-work create" }
-    - { approach: direct, signal: touches-contract, multi-repo: true, form: migration-wave }
-    - {
-        approach: direct,
-        signal: touches-contract,
-        multi-repo: false,
-        form: "colapsa — repo-work sustain (porte simples)",
-      }
-    - {
-        approach: direct,
-        signal: operational-target,
-        multi-repo: any,
-        form: "quase sempre colapsa — sustain/operate; unit só com coordenação real",
-      }
-  consequences: "veredito ganhou → graduation (efetivação) · perdeu → cleanup (limpeza) · release gradual → release-rollout · alerta/evento → incident-response (reativo, fora da abordagem)"
-  no-approach-paths:
-    - "bug/reativo → resposta a incidente OU peça sustain direto"
-    - "descoberta avulsa (1 repo) → peça discover (timebox + pergunta falsificável + fate)"
-    - "pergunta compartilhada cross-repo → discovery (unit derivada; fecha a Q-discover-level)"
-    - "operação avulsa → peça operate (outcome no bucket operacional)"
-  renames: # tabela final de nomes (approach · graduation decididos pela owner)
-    - { from: strategy, to: approach, label: abordagem, note: "campo da intent; 4 valores → 2" }
-    - {
-        from: feature-slice,
-        to: delivery-slice,
-        label: "fatia de entrega",
-        note: "nem toda entrega é feature",
-      }
-    - {
-        from: shape-up,
-        to: graduation,
-        label: efetivação,
-        note: "termo do mundo de feature flags; o antigo era jargão de outro método",
-      }
-    - {
-        from: rollout-slice,
-        to: release-rollout,
-        label: "rollout de release",
-        note: "fase; só vira unit com vida própria",
-      }
-    - {
-        from: null,
-        to: discovery,
-        label: descoberta,
-        note: "NOVO — pergunta compartilhada cross-repo",
-      }
-  example-org: # org-base p/ validação camada a camada (owner): 2 objetivos de empresa · 2 áreas · 5 times · 1 intent por abordagem
-    company: acme
-    objectives:
-      - { id: obj-revenue, level: company, title: "crescer receita via cross-sell", period: "2027" }
-      - { id: obj-efficiency, level: company, title: "reduzir o custo de servir", period: "2027" }
+    none: "sem mecanismo extra"
+    touches-contract: "review do owner do contrato"
+    operational-target: "placar operacional + guardrails"
+  review-rule: "approach e declarado pelo humano; signal e derivado/confirmado; drift vira alerta"
+  deps-rule: "blocked-by impede inicio; delivery-after permite paralelizar mas bloqueia entrega/ativacao"
+  example-org:
     areas:
-      - {
-          id: area-growth,
-          title: "área de growth",
-          cascades-from: obj-revenue,
-          driver: "cross-sell entre os produtos",
-        }
-      - {
-          id: area-platform,
-          title: "área de plataforma",
-          cascades-from: obj-efficiency,
-          driver: "eficiência e confiabilidade da plataforma",
-        }
-    teams:
-      - { id: time-billing, area: area-growth, priority: "P1 · +X% de conversão de cross-sell" }
-      - { id: time-onboarding, area: area-growth, priority: "P2 · +Y% de ativação no onboarding" }
-      - {
-          id: time-checkout,
-          area: area-platform,
-          priority: "P1 · checkout no stack novo até o fim do H2",
-        }
-      - { id: time-data, area: area-platform, priority: "P2 · -Z% no custo da infra de dados" }
-      - {
-          id: time-sre,
-          area: area-platform,
-          priority: "P1 · p99 abaixo de N ms · -30% de incidentes",
-        }
-    repos: # o terreno: repos existentes (owner = time; caps = capabilities declaradas no manifesto — alimentam o matcher)
-      - { id: acme-mfe-billing, owner: time-billing, caps: "billing-ui · planos · upgrade" }
-      - {
-          id: acme-api-billing,
-          owner: time-billing,
-          caps: "cobrança · elegibilidade · assinaturas",
-        }
-      - { id: acme-mfe-onboarding, owner: time-onboarding, caps: "onboarding · ativação · tours" }
-      - { id: acme-checkout, owner: time-checkout, caps: "checkout-ui · carrinho · cupom · frete" }
-      - { id: acme-checkout-api, owner: time-checkout, caps: "pedidos · pagamento · frete-api" }
-      - { id: acme-analytics, owner: time-data, caps: "eventos · métricas · experimentos (fonte)" }
-      - { id: acme-data-pipeline, owner: time-data, caps: "ETL · warehouse" }
-      - { id: acme-obs-stack, owner: time-sre, caps: "alertas · SLO · tracing (atesta outcomes)" }
-      - {
-          id: acme-web-host,
-          owner: area-platform,
-          caps: "shell dos MFEs · contexto de usuário · roteamento",
-          note: compartilhado,
-        }
-      - {
-          id: acme-design-system,
-          owner: area-platform,
-          caps: "componentes · tokens",
-          note: compartilhado,
-        }
-    matcher-note: "as capabilities alimentam o MATCHER (advisory): na triagem/breakdown ele SUGERE o repo de cada peça (score + porquê + unknown quando não sabe); o HUMANO confirma, e a sugestão fica registrada (followed/overrode). Capability sem evidência independente vira unknown — não entra com peso igual (lei do red-team B1)"
-    contracts-note: "um contrato NASCE quando um repo publica uma interface que outros consomem (o owner o declara; consumidores se registram). MUDA por revisão — toda revisão passa pelo review do owner; revisão com QUEBRA abre a janela (versões convivem até os consumidores migrarem). CONSUMIR sem revisão não é mudança"
-    contracts: # contratos vivos entre os repos (a janela de compatibilidade mora AQUI)
-      - {
-          id: "acme-user-context@v3",
-          owner: acme-web-host,
-          consumers: "mfe-billing · mfe-onboarding · checkout",
-          note: "a migração do checkout abre a v4 → janela: v3 + v4 convivem",
-        }
-      - { id: "acme-design-tokens@v2", owner: acme-design-system, consumers: "todos os MFEs" }
-      - {
-          id: "acme-events-schema@v1",
-          owner: acme-analytics,
-          consumers: "mfes · checkout",
-          note: "extensão COMPATÍVEL não acorda janela — touches-contract é sobre quebra/porte, não uso",
-        }
-    intents:
-      - id: intent-cta-upgrade
-        team: time-billing
-        authorized-by: obj-revenue
-        title: "CTA contextual de upgrade no billing"
-        approach: validate-first
-        signal: none
-        contracts-consumed: ["acme-events-schema@v1"] # consome SEM revisão — não é sinal
-        derived: "experiment-run — hipótese (CTA ↑ conversão em X%) + flag + métricas + guardrails; veredito: ganhou → graduation · perdeu → cleanup"
-        works: # o desdobramento interno — as peças por repo (id · blocked-by · review DERIVADO)
-          - {
-              id: spike-elegibilidade,
-              repo: acme-api-billing,
-              purpose: discover,
-              desc: "EXPLORATION — spike: dá p/ reusar o motor de elegibilidade que já existe? timebox 3 dias · pergunta falsificável · fate",
-              review: "interno (repo do próprio time)",
-            }
-          - {
-              id: api-elegibilidade,
-              repo: acme-api-billing,
-              purpose: create,
-              desc: "elegibilidade + endpoint (o fate do spike decide: reusar × construir)",
-              blocked-by: [spike-elegibilidade],
-              review: "interno (repo do próprio time)",
-            }
-          - {
-              id: ui-cta,
-              repo: acme-mfe-billing,
-              purpose: create,
-              desc: "UI do CTA atrás da flag — constrói em PARALELO com mock; a INTEGRAÇÃO espera o endpoint",
-              delivery-after: [api-elegibilidade],
-              review: "interno (repo do próprio time)",
-            }
-          - {
-              id: baseline-eventos,
-              repo: acme-analytics,
-              purpose: operate,
-              desc: "instrumenta com o schema de eventos EXISTENTE — consome acme-events-schema@v1 SEM revisão (por isso o sinal da intent segue none); precisa estar pronto ANTES de ligar a flag (baseline)",
-              review: "EXTERNO — time-data (peça roda no repo de outro time)",
-            }
-        next: # a ramificação da próxima etapa (o veredito decide; o humano só aceita)
-          - {
-              when: "veredito: ganhou",
-              then: "graduation — efetiva a variante (a flag sai, o código fica); o outcome soma no placar do time-billing",
-              gate: accept-verdict,
-            }
-          - {
-              when: "veredito: perdeu",
-              then: "cleanup — remove flag/variante; o aprendizado fica registrado no outcome (não soma capacidade)",
-              gate: accept-verdict,
-            }
-          - {
-              when: "veredito: inconclusivo",
-              then: "novo experimento com hipótese refinada OU vira descoberta (a pergunta ficou maior que o teste)",
-              gate: accept-verdict,
-            }
-      - id: intent-checkout-stack
-        team: time-checkout
-        authorized-by: obj-efficiency
-        title: "migrar o checkout para o stack novo"
-        approach: direct
-        signal: touches-contract
-        contracts-changed: ["acme-user-context@v3"] # muda COM quebra — abre a janela
-        derived: "migration-wave — porta de → para em 3 repos; janela de compatibilidade do contrato acme-user-context; consumidores avisados; corte gradual → release-rollout"
-        works: # o desdobramento interno — peças MISTAS sob a mesma onda (id · blocked-by · review DERIVADO)
-          - {
-              id: spike-carrinho,
-              repo: acme-checkout,
-              purpose: discover,
-              desc: "EXPLORATION — spike: como migrar o estado do carrinho sem downtime? timebox · fate (informa a onda 1)",
-              review: "interno (repo do próprio time)",
-            }
-          - {
-              id: componentes-ds,
-              repo: acme-design-system,
-              purpose: create,
-              desc: "componentes do checkout no stack novo (consome acme-design-tokens@v2 sem revisão)",
-              review: "EXTERNO — area-platform (dona do design-system); combinar prazo com stakeholders",
-            }
-          - {
-              id: porta-fluxo,
-              repo: acme-checkout,
-              purpose: sustain,
-              desc: "porta o fluxo principal (de → para) usando os componentes novos",
-              blocked-by: [spike-carrinho],
-              delivery-after: [componentes-ds],
-              review: "interno (repo do próprio time)",
-            }
-          - {
-              id: adapta-api,
-              repo: acme-checkout-api,
-              purpose: sustain,
-              desc: "adapta os endpoints ao stack novo",
-              review: "interno (repo do próprio time)",
-            }
-          - {
-              id: revisao-contrato,
-              repo: acme-web-host,
-              purpose: sustain,
-              desc: "acme-user-context v3 → v4 COM QUEBRA — é AQUI que a janela abre; mutação compat-window-change (dangerous → alerta q/r/d)",
-              review: "EXTERNO — owner do contrato (acme-web-host/area-platform) + consumidores avisados (mfe-billing · mfe-onboarding)",
-            }
-          - {
-              id: monitor-canary,
-              repo: acme-obs-stack,
-              purpose: operate,
-              desc: "monitor do canary (guardrails do corte)",
-              delivery-after: [porta-fluxo, adapta-api],
-              review: "EXTERNO — time-sre (peça roda no repo de outro time)",
-            }
-        next: # a ramificação da próxima etapa (a onda avança por marcos)
-          - {
-              when: "onda 1 concluída — fluxo principal portado",
-              then: "janela de compatibilidade ABERTA: v1 e v2 convivem; os consumidores do contrato migram no seu ritmo",
-            }
-          - {
-              when: "consumidores migrados",
-              then: "corte gradual — release-rollout (canary) com plano de reversão",
-              gate: release-rollout,
-            }
-          - {
-              when: "corte completo",
-              then: "fecha a janela, desliga o legado; o outcome sobe no placar 'reduzir o custo de servir'",
-            }
-      - id: intent-p99-hardening
-        team: time-sre
-        authorized-by: obj-efficiency
-        title: "derrubar o p99 da plataforma (timeouts, retries, cache)"
-        approach: direct
-        signal: operational-target
-        derived: "quase sempre COLAPSA — peças sustain (preventivo) e operate direto nos repos; o placar é OPERACIONAL (SLO p99, incidentes), não métrica de produto; guardrails no dashboard"
-        works: # o desdobramento interno — sem unit: as peças penduram direto na intent (id · blocked-by · review)
-          - {
-              id: guardrails-p99,
-              repo: acme-obs-stack,
-              purpose: operate,
-              desc: "guardrails de p99 + alertas — MEDIR ANTES de mexer (baseline); é a fonte que ATESTA os outcomes",
-              review: "interno (repo do próprio time)",
-            }
-          - {
-              id: timeouts-api,
-              repo: acme-checkout-api,
-              purpose: sustain,
-              desc: "timeouts + retries (preventivo)",
-              delivery-after: [guardrails-p99],
-              review: "EXTERNO — time-checkout (o SRE mexe no repo de outro time)",
-            }
-          - {
-              id: cache-contexto,
-              repo: acme-web-host,
-              purpose: sustain,
-              desc: "cache do contexto de usuário (sem mudar o contrato — só a implementação)",
-              delivery-after: [guardrails-p99],
-              review: "EXTERNO — area-platform (dona do web-host)",
-            }
-        next: # a ramificação da próxima etapa (o placar operacional decide o rumo)
-          - {
-              when: "peças concluídas em cada repo",
-              then: "outcomes sobem no placar OPERACIONAL — attester é a fonte de observabilidade (independente do time)",
-            }
-          - {
-              when: "p99 cedeu",
-              then: "guardrails viram monitoramento permanente (peças operate); a intent fecha",
-            }
-          - {
-              when: "p99 NÃO cedeu",
-              then: "escala: vira descoberta (investigar a causa) OU experimento de performance (validate-first — 'cache resolve?')",
-            }
-    standalone: # os caminhos SEM intent (reativo/avulso) — concretos na mesma acme
-      - id: bug-frete
-        origin: "suporte reporta: cupom duplo zera o frete"
-        path: "matcher sugere acme-checkout (caps: cupom · frete) → peça sustain direto, preset fix (corrective + user-visible) — sem intent, sem abordagem: as camadas colapsam"
-        review: "interno (time-checkout)"
-        placar: "bucket operacional — visível, fora do rollup dos objetivos"
-      - id: incidente-checkout
-        origin: "alerta do acme-obs-stack às 22:14 — checkout fora do ar (severidade alta; telemetria verificável é PRÉ-CONDIÇÃO p/ declarar)"
-        path: "incident-response nasce do ALERTA (reativo — nunca de abordagem): mitigar → resolver → postmortem blameless"
-        review: "o postmortem gera follow-ups PLANEJADOS: fix (peça sustain) + proposta de hardening → entra no intake (com authorized-by ou standalone)"
-        placar: "bucket operacional + MTTR — o custo do incidente aparece p/ os stakeholders"
-      - id: dep-bump-host
-        origin: "rotina: lib X 3.x → 4.x no acme-web-host"
-        path: "peça sustain, preset dep-bump (adaptive + internal) — 1 nome só, zero cerimônia"
-        review: "interno (area-platform)"
-        placar: "bucket operacional (custo de manutenção visível)"
-    dashboards: # o fim da cadeia — DERIVADOS do grafo (ninguém preenche à mão)
-      execution: # acompanhamento dos times (peças · bloqueios · reviews · gates · alertas)
-        - "intent-cta-upgrade: peças repo-local concluídas com evidência · outcome out-cta-upgrade-2027q1 publicado · resolver fecha fonte/revisão/janela/attester/envelope antes do dashboard somar"
-        - "intent-checkout-stack: caminho crítico = componentes-ds (review externo area-platform) → porta-fluxo → monitor-canary · janela v3+v4 ABERTA (2 consumidores pendentes) · alerta q/r/d ativo na revisao-contrato (compat-window-change)"
-        - "intent-p99-hardening: baseline PRIMEIRO (guardrails); 2 peças codificando em paralelo (não ligam antes do baseline); 2 reviews externos no caminho"
-      stakeholders: # visão de negócio, por objetivo — só outcome VÁLIDO soma (resolver fail-closed)
-        - "crescer receita via cross-sell: target +X% de conversão — actual +2.4% DERIVADO de outcome validado (fonte acme-analytics@warehouse-rev42; nada entra sem resolver)"
-        - "reduzir o custo de servir: migração onda 1 em curso (janela aberta; progresso por consumidor) · p99 com baseline estabelecido — actuals DERIVADOS, attester independente (acme-obs-stack)"
-        - "bucket operacional: 1 bug (frete) · 1 incidente (MTTR 43min; postmortem gerou 2 follow-ups) · 1 dep-bump — custo visível, fora do rollup dos objetivos"
-        - "higiene: 0 dangerous-unreviewed em aberto · perfil full declarado (badge) · 0 números self-attested"
-  artifact: "_map/flow-explorer.html (a JORNADA da org-exemplo, navegável em 5 etapas) + _map/flow-generic.html (as regras genéricas abordagem × sinais) — ambos gerados desta seção por _map/generate.mjs"
+      - { id: area-growth, objectives: [obj-revenue, obj-activation] }
+      - { id: area-platform, objectives: [obj-reliability, obj-cost] }
+  derivation:
+    execution-unit: "kind deriva de approach + signal + collapse-rule + lifecycle"
+  consequences:
+    validate-first: [experiment-run, verdict, graduation, cleanup]
+    direct: [delivery-slice, migration-wave, release-rollout]
+  no-approach-paths: [incident-response, standalone-fix, dep-bump]
+  renames:
+    strategy: approach
+    commit-direct: direct
+    feature-slice: delivery-slice
+    rollout-slice: release-rollout
 
-# ═════════════════════ DECISÕES FECHADAS E ABERTOS REAIS ═════════════════════
-decisions:
-  - {
-      id: P1,
-      about: "família do experiment",
-      status: resolved,
-      by: "3-layer: experiment = execution-unit (experiment-run)",
-    }
-  - {
-      id: P2,
-      about: "teste 'entrega valor?' ambíguo p/ maintenance",
-      status: resolved,
-      by: "3-layer: repo-work.purpose (create/sustain/discover/operate); dep-bump = sustain",
-    }
-  - {
-      id: P3,
-      about: "delivery ~ experiment > maintenance",
-      status: resolved,
-      by: "3-layer: delivery=create/direct; experiment=execution-unit; sustain à parte",
-    }
-  - { id: P4, about: "nomes EN/PT", status: decided, by: "ids EN + labels PT" }
-  - {
-      id: P5,
-      about: "breakdown estreito",
-      status: resolved,
-      by: "3-layer: intent → execution-units → repo-works (heterogêneo)",
-    }
-  - {
-      id: P6,
-      about: "experimento é UM, cross-repo",
-      status: resolved,
-      by: "3-layer: a execution-unit é a unidade; peças por repo subordinadas",
-    }
-  - {
-      id: P7,
-      about: "redesign misto + contratos entre iniciativas",
-      status: resolved,
-      by: "3-layer: migration-wave com peças mistas; contrato compartilhado coordena",
-    }
-  - {
-      id: Q-strategy,
-      about: "intent.strategy é guardado ou DERIVADO das execution-units?",
-      status: resolved,
-      by: "P12 aplicado: strategy de 4 valores foi substituída por approach binário declarado (validate-first/direct) + signal derivado/confirmado; drift vira approach-drift/signal-drift",
-    }
-  - {
-      id: Q-collapse,
-      about: "regra exata de quando a execution-unit colapsa (trivial)",
-      status: resolved,
-      by: "owner 2026-07-01: a régua é a scaling-law — unit existe se >1 repo OU kind com lifecycle próprio (nunca colapsam) OU owner/cadência próprios; senão colapsa, REVERSÍVEL (reparent com envelope). Ver layers.execution-unit.collapse-rule",
-    }
-  - {
-      id: Q-discover-level,
-      about: "exploration grande (cross-repo) = discover repo-work × discovery execution-unit?",
-      status: resolved,
-      by: "discovery virou execution-unit quando a pergunta/fate é compartilhada cross-repo ou tem lifecycle/owner/cadência próprios; descoberta simples colapsa em repo-work purpose=discover",
-    }
-  - {
-      id: Q-names,
-      about: "nomes finais dos kinds/purposes (feature-slice? rollout-slice puxa peso?)",
-      status: resolved,
-      by: "feature-slice→delivery-slice · shape-up→graduation · rollout-slice→release-rollout · discovery adicionado; ids EN, labels/descrições PT",
-    }
-  - {
-      id: P13,
-      about: "adoção por empresa existente e fidelidade repo-first",
-      status: applied,
-      by: "org-simulation-v3: repos com código MVP + sidecars .governance + context.json + repo-work lifecycle + repo-contract registry com interface; host valida stale/missing/open/dropped com red-team fixtures R/RW/RC",
-    }
-  - {
-      id: P14,
-      about: "primeiro outcome real + controles físicos de confiança",
-      status: applied,
-      by: "org-simulation-v3: intent-cta-upgrade publica outcome governado; repo-work done exige evidência; trust-policy valida ACL local, fallback matcher/egress, revogação, nonce/idempotência, secret quarantine e independência do oráculo",
-    }
+schema-policy:
+  runtime: "schemas executaveis ficam em governance-demo/packages/contracts"
+  desired-library: zod
+  rule: "tipo TS apagado nao basta para fronteira de governanca; request/response publico deve ter validacao runtime compartilhada"
 
 open-questions: []

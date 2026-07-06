@@ -16,6 +16,9 @@ const packagesRoot = path.join(root, "packages");
 const domainPackageRoot = path.join(packagesRoot, "domain");
 const contractsPackageRoot = path.join(packagesRoot, "contracts");
 const testFixturesPackageRoot = path.join(packagesRoot, "test-fixtures");
+const acmeRoot = path.join(root, "acme");
+const acmeGovernanceRoot = path.join(acmeRoot, "governance");
+const acmeReposRoot = path.join(acmeRoot, "repos");
 const workGraphRoot = path.resolve(root, "..");
 const appDir = path.join(root, "frontend");
 const repoRoot = path.resolve(root, "../../../../..");
@@ -144,6 +147,26 @@ const legacyActiveArtifacts = [
   path.join(backendRoot, "runtime.mjs"),
   path.join(backendRoot, "ports.mjs"),
 ];
+const requiredAcmeGovernanceDirs = [
+  "business",
+  "contracts",
+  "decisions",
+  "events",
+  "incidents",
+  "intake",
+  "intents",
+  "outcomes",
+];
+const requiredAcmeGovernanceFiles = ["authorities.yml", "org.yml", "repos.yml", "trust-policy.yml"];
+const forbiddenAcmeGovernanceDirs = [
+  "standalone",
+  "registers",
+  "repos",
+  "works",
+  "_apps",
+  "_lib",
+  "_tools",
+];
 
 function fail(message) {
   console.error(`✗ governance app — ${message}`);
@@ -197,6 +220,78 @@ function importedPackages(files: string[]) {
   return [...packages].sort();
 }
 
+function assertAcmeFixtureLayout() {
+  if (!fs.existsSync(acmeGovernanceRoot)) {
+    fail("fixture acme sem host central: acme/governance");
+  }
+  if (!fs.existsSync(acmeReposRoot)) {
+    fail("fixture acme sem repos adotados: acme/repos");
+  }
+
+  const acmeTopLevelDirs = fs
+    .readdirSync(acmeRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  const unexpectedTopLevel = acmeTopLevelDirs.filter(
+    (name) => !["governance", "repos"].includes(name)
+  );
+  if (unexpectedTopLevel.length > 0) {
+    fail(`fixture acme com diretorio de topo inesperado: ${unexpectedTopLevel.join(", ")}`);
+  }
+
+  for (const dir of requiredAcmeGovernanceDirs) {
+    if (!fs.existsSync(path.join(acmeGovernanceRoot, dir))) {
+      fail(`host acme/governance sem diretorio obrigatorio: ${dir}`);
+    }
+  }
+  for (const file of requiredAcmeGovernanceFiles) {
+    if (!fs.existsSync(path.join(acmeGovernanceRoot, file))) {
+      fail(`host acme/governance sem arquivo obrigatorio: ${file}`);
+    }
+  }
+  for (const dir of forbiddenAcmeGovernanceDirs) {
+    if (fs.existsSync(path.join(acmeGovernanceRoot, dir))) {
+      fail(`diretorio legado/proibido dentro do host acme/governance: ${dir}`);
+    }
+  }
+
+  const reposDoc = parse(fs.readFileSync(path.join(acmeGovernanceRoot, "repos.yml"), "utf8"));
+  const expectedRepoIds = (reposDoc.repos || []).map((repo) => repo.id).sort();
+  const repoDirs = fs
+    .readdirSync(acmeReposRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  const missingRepoDirs = expectedRepoIds.filter((id) => !repoDirs.includes(id));
+  const extraRepoDirs = repoDirs.filter((id) => !expectedRepoIds.includes(id));
+  if (missingRepoDirs.length > 0) {
+    fail(`repos.yml referencia repo sem pasta em acme/repos: ${missingRepoDirs.join(", ")}`);
+  }
+  if (extraRepoDirs.length > 0) {
+    fail(`acme/repos tem pasta nao declarada em repos.yml: ${extraRepoDirs.join(", ")}`);
+  }
+
+  for (const repoId of expectedRepoIds) {
+    const repoRoot = path.join(acmeReposRoot, repoId);
+    const sidecar = path.join(repoRoot, ".governance");
+    if (!fs.existsSync(sidecar)) {
+      fail(`repo adotado sem sidecar .governance: acme/repos/${repoId}`);
+    }
+    for (const file of ["manifest.yml", "context.json"]) {
+      if (!fs.existsSync(path.join(sidecar, file))) {
+        fail(`repo adotado sem ${file}: acme/repos/${repoId}/.governance`);
+      }
+    }
+    if (!fs.existsSync(path.join(sidecar, "works"))) {
+      fail(`repo adotado sem diretorio works: acme/repos/${repoId}/.governance`);
+    }
+    if (fs.existsSync(path.join(repoRoot, ".governance-host"))) {
+      fail(`fixture acme usa host central; .governance-host embutido inesperado em ${repoId}`);
+    }
+  }
+}
+
 function assertWorkspaceDependencyContract(files: string[]) {
   const rootPackage = JSON.parse(fs.readFileSync(rootPackageFile, "utf8"));
   const appPackage = JSON.parse(fs.readFileSync(appPackageFile, "utf8"));
@@ -232,6 +327,7 @@ function assertWorkspaceDependencyContract(files: string[]) {
 
 const sourceFiles = readRelativeFiles();
 assertWorkspaceDependencyContract(sourceFiles);
+assertAcmeFixtureLayout();
 for (const artifact of legacyActiveArtifacts) {
   if (fs.existsSync(artifact)) {
     fail(
@@ -378,6 +474,42 @@ const requiredApiRoutes = [
 for (const relativeFile of requiredApiRoutes) {
   if (!fs.existsSync(path.join(appDir, ...relativeFile.split("/")))) {
     fail(`rota da API local declarada no contrato ausente: ${relativeFile}`);
+  }
+}
+// Rotas de onboarding ja migradas para contrato runtime Zod. O guard evita
+// regressao para validacao manual/ad hoc nos pontos que viraram schema.
+const zodOnboardingRoutes = [
+  {
+    file: "app/api/local/onboarding/status/route.ts",
+    schema: "OnboardingStatusRequestSchema",
+  },
+  {
+    file: "app/api/local/onboarding/path/route.ts",
+    schema: "OnboardingPathRequestSchema",
+  },
+  {
+    file: "app/api/local/onboarding/profile/route.ts",
+    schema: "ProfileDeclarationRequestSchema",
+  },
+  {
+    file: "app/api/local/onboarding/workspace-mode/route.ts",
+    schema: "WorkspaceModeRequestSchema",
+  },
+];
+for (const route of zodOnboardingRoutes) {
+  const file = path.join(appDir, ...route.file.split("/"));
+  if (!fs.existsSync(file)) {
+    fail(`rota de onboarding com contrato Zod ausente: ${route.file}`);
+  }
+  const text = fs.readFileSync(file, "utf8");
+  if (!text.includes(route.schema)) {
+    fail(`rota de onboarding sem schema Zod esperado (${route.schema}): ${route.file}`);
+  }
+  if (!text.includes("parseZodJson")) {
+    fail(`rota de onboarding sem parser Zod compartilhado: ${route.file}`);
+  }
+  if (!text.includes("@demo/contracts")) {
+    fail(`rota de onboarding deve importar schemas de @demo/contracts: ${route.file}`);
   }
 }
 // ── fluxo inicial signup → organizações → onboarding → home ────────────────

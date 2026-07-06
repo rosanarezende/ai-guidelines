@@ -3,6 +3,7 @@
 > **Status:** mapa operacional para iterar e validar o app tela a tela.
 > **Criado em:** 2026-07-05.
 > **Autoridade funcional:** [`APP-FUNCTIONAL-SPEC.md`](APP-FUNCTIONAL-SPEC.md).
+> **Matriz de cobertura automatizada:** [`APP-COVERAGE-MATRIX.md`](APP-COVERAGE-MATRIX.md).
 > **Regra inicial:** toda tela nasce como `nao-iterado` e `nao-validado-visual`.
 > **Uso:** marcar aqui apenas o que foi conferido com o app rodando, por uma pessoa, em um workspace limpo ou em um cenario explicitamente descrito.
 

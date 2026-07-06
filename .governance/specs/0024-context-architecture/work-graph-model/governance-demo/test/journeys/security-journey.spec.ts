@@ -118,3 +118,28 @@ test("rota /api/local com sessão mas JSON inválido retorna 400 invalid-json", 
   const body = (await response.json()) as { error?: string };
   expect(body.error).toBe("invalid-json");
 });
+
+test("rota /api/local/onboarding/profile valida payload por Zod antes do use case", async ({
+  request,
+}) => {
+  const signup = await request.post("/api/local/signup", {
+    data: { displayName: "Ana Admin" },
+  });
+  expect(signup.ok()).toBeTruthy();
+  const org = await request.post("/api/local/organizations", {
+    data: { name: "Acme Honey", kind: "company" },
+  });
+  expect(org.ok()).toBeTruthy();
+
+  const response = await request.post("/api/local/onboarding/profile", {
+    data: {
+      profile: "enterprise",
+      sensitiveAccumulationPolicy: "record",
+      extra: "campo nao previsto",
+    },
+  });
+  expect(response.status()).toBe(400);
+  const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
+  expect(body.error).toBe("schema-invalid");
+  expect(body.issues?.some((issue) => issue.path === "profile")).toBeTruthy();
+});

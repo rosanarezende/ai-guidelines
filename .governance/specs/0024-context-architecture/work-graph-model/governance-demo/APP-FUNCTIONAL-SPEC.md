@@ -8,6 +8,7 @@
 > **Produto:** o que o app se propoe a ser e sua relacao com a CLI `ai-guidelines` ficam em [`APP-PRODUCT-STATEMENT.md`](APP-PRODUCT-STATEMENT.md).
 > **Decisoes de app:** ambientes, mock API, MSW e e2e ficam em [`APP-DECISIONS.md`](APP-DECISIONS.md).
 > **Mapa de iteracao visual:** o controle de telas iteradas/validadas fica em [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md). Este arquivo descreve o contrato funcional; o mapa registra a validacao real subindo o app.
+> **Matriz de cobertura:** a relacao entre promessa de produto, contratos automatizados, seeds e lacunas fica em [`APP-COVERAGE-MATRIX.md`](APP-COVERAGE-MATRIX.md).
 > **Politicas explicaveis:** decisoes de bloquear, avisar, rebaixar ou revisar ficam em [`POLICY-HANDBOOK.md`](POLICY-HANDBOOK.md), que tambem serve como fonte para assistentes.
 > **Cup/CWP:** o overlay contextual de coautoria fica em [`APP-DECISIONS.md#qrd-32---cupcwp-como-par-contextual-de-trabalho`](APP-DECISIONS.md#qrd-32---cupcwp-como-par-contextual-de-trabalho) e deve ser validado junto com cada tela no [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md).
 

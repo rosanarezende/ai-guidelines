@@ -19,6 +19,10 @@ decisao de produto -> contrato de teste -> teste fixme/failing -> implementacao 
 O objetivo nao e testar o que a UI entrega hoje. E escrever o que o produto
 deve entregar e adaptar a aplicacao incrementalmente ate os contratos passarem.
 
+A visao consolidada entre produto, contratos, seeds, camadas de prova e lacunas
+fica em [`APP-COVERAGE-MATRIX.md`](APP-COVERAGE-MATRIX.md). Use essa matriz
+para escolher a proxima fatia antes de ativar contratos ou criar telas novas.
+
 ## 2. Principios
 
 1. **Teste e contrato governado.**
@@ -63,7 +67,7 @@ humana, cross-screen, persistencia via UI, sentinela de rota).
 | Static/typecheck          | TypeScript                                | contratos, dominio, view-models e APIs tipadas                                                                                                                                                        | atual                   |
 | Domain/invariante         | `node --test` (backend/tests, ~1.5s)      | authority (matriz papel x comando), role state-machine, sourceTrust, onboarding, isolamento demo, invariantes sobre TODAS as seeds, read-model/rollup/grafo derivado (`/api/results,work,map,graph*`) | atual (primeira classe) |
 | API in-memory             | `node --test` (mock-api/tests, ~300ms)    | handler `/api/shell/commands` via Hono `app.request()` sem servidor: schema 400, replay/idempotencia 422, authority 422, isolamento, seed unknown                                                     | atual (primeira classe) |
-| Rota real HTTP            | Playwright `request` (sem browser)        | casca das rotas: `/api/local/*` sessao (401/400) + JSON (400); gate de `/api/results,work,map` (401 signup / 404 workspace / 200 governance-host-not-linked) sem vazar demo                           | atual                   |
+| Rota real HTTP            | Playwright `request` (sem browser)        | casca das rotas: `/api/local/*` sessao (401/400), JSON (400) e Zod schema-invalid (400); gate de `/api/results,work,map` (401 signup / 404 workspace / 200 governance-host-not-linked) sem vazar demo | atual                   |
 | Component/integration UI  | Testing Library + MSW (proposto)          | componentes/steps isolados com requests reais interceptados                                                                                                                                           | futuro                  |
 | E2E/journey               | Playwright                                | fluxos entre telas, persistencia, auth local, mock-api                                                                                                                                                | atual                   |
 | Governance/backend checks | tools/checks + backend tests              | fail-closed, event-log, resolver, adapters                                                                                                                                                            | atual                   |
@@ -85,6 +89,11 @@ rota do frontend (sessao via cookie, parse de JSON) fica em Playwright `request`
 porque depende de APIs de runtime do Next (`next/headers`). Mesmo com
 `@demo/domain`, `@demo/contracts` e `@demo/test-fixtures` resolvendo em
 `node --test`, essa casca precisa do servidor booted (sem browser).
+
+Rotas HTTP que usam Zod devem ter pelo menos um caso negativo de schema na
+camada `Rota real HTTP` ou `API in-memory`, conforme o handler exercitado. O
+erro esperado e `400 schema-invalid`, com issues rastreaveis por `path`, `code`
+e `message`. Isso protege contra regressao para validacao manual silenciosa.
 
 Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
 dos testes do backend (`test:shell`), o typecheck strict + `test:api` da

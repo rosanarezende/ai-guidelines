@@ -155,13 +155,20 @@ Contem contratos de fronteira:
 
 - command contracts (`local.workspace.create`, `local.role.assign`, etc.);
 - DTOs de API;
-- schemas de validacao runtime;
+- schemas Zod de validacao runtime;
 - `messageKey` e erros tipados;
 - JSON Schema quando necessario;
 - versoes de contrato.
 
 Regra: se frontend, backend, mock-api e testes precisam concordar no shape, o
 shape mora aqui, nao duplicado em cada camada.
+
+Regra de schema runtime: request/response que atravessa fronteira HTTP deve ter
+schema Zod em `@demo/contracts` quando a rota for ativada ou mexida. Tipos
+TypeScript derivados de `z.infer` sao conveniencia; o contrato de runtime e o
+schema. Handlers podem manter validacao de dominio/use-case como segunda linha
+de defesa, mas a primeira rejeicao de payload invalido deve ser fail-closed
+(`400 schema-invalid`) na fronteira.
 
 ### 4.3 `packages/test-fixtures`
 

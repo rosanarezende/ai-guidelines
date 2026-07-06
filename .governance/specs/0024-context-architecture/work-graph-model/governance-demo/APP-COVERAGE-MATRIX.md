@@ -1,0 +1,197 @@
+# Matriz de cobertura do app de governanca
+
+> **Status:** active.
+> **Criado em:** 2026-07-05.
+> **Autoridade funcional:** [`APP-FUNCTIONAL-SPEC.md`](APP-FUNCTIONAL-SPEC.md).
+> **Autoridade de iteracao visual:** [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md).
+> **Fonte de contratos automatizados:** [`test/contracts/app-contracts.yml`](test/contracts/app-contracts.yml).
+> **Estrategia de testes:** [`TESTING-STRATEGY.md`](TESTING-STRATEGY.md).
+
+Este arquivo e o painel de cobertura da `governance-demo`. Ele responde:
+
+- o que o produto promete;
+- qual contrato automatizado cobre a promessa;
+- em que camada a promessa ja e provada;
+- o que ainda e demo, esperado-falhar, fixme ou lacuna real;
+- qual e a proxima ativacao que transforma contrato em comportamento usado.
+
+Ele nao substitui o mapa de iteracao visual. O mapa diz o que foi visto no
+navegador por uma pessoa. Esta matriz diz se existe contrato automatizado e em
+que camada ele protege o fluxo.
+
+## 1. Como ler
+
+### Estados de contrato
+
+| Estado          | Significado                                                                  |
+| --------------- | ---------------------------------------------------------------------------- |
+| `active`        | O contrato executa e deve passar.                                            |
+| `expected-fail` | O contrato executa, chega ao ponto minimo e falha ate o produto ser fechado. |
+| `fixme`         | O contrato existe, mas rota/infra/feature ainda nao tem condicao minima.     |
+| `mixed`         | O fluxo combina contratos em mais de um estado.                              |
+| `absent`        | Ainda nao ha contrato de produto suficiente.                                 |
+
+### Camadas de prova
+
+| Camada              | Prova                                                                                       |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `domain`            | Invariante puro em `backend/tests`, sem browser/servidor.                                   |
+| `api-in-memory`     | Handler da mock-api via Hono `app.request()`, sem servidor/browser.                         |
+| `real-route`        | Casca real Next via Playwright `request`, sem browser.                                      |
+| `ui-e2e`            | Jornada humana em Playwright com browser.                                                   |
+| `read-model`        | Snapshot/graph/rollup derivado provado em teste de dominio ou rota de leitura.              |
+| `visual-validation` | Validacao humana no navegador registrada em [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md). |
+
+Regra: uma linha so vira "coberta de ponta a ponta" quando existe `ui-e2e`
+ativo quando o comportamento e visual, ou `domain/api/read-model` ativo quando
+o comportamento e puramente mecanico.
+
+## 2. Resumo atual
+
+Fonte: `test/contracts/app-contracts.yml`.
+
+| Indicador                               | Valor atual                                  |
+| --------------------------------------- | -------------------------------------------- |
+| Contratos declarados                    | 56                                           |
+| Contratos `active`                      | 5                                            |
+| Contratos `expected-fail`               | 22                                           |
+| Contratos `fixme`                       | 29                                           |
+| Contratos `deny`                        | 14                                           |
+| Seeds declaradas                        | 26                                           |
+| Seeds sem contrato funcional de produto | 7, cobertas por regressao de dominio de seed |
+
+Observacao: o fechamento de `@demo/domain` como fronteira browser/server ja foi
+aplicado. O pacote `@demo/domain` deve expor apenas `.`, `./browser` e
+`./server`; qualquer subpath interno volta a ser risco arquitetural.
+
+## 3. Matriz produto x teste
+
+| Fluxo / feature                     | Planejado em                           | Contratos                                                 | Seeds / personas principais                                                                    | Cobertura atual                                                                                                             | Gap real                                                                                                   | Proxima ativacao                                                                                  |
+| ----------------------------------- | -------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Signup e sessao local               | `APP-FUNCTIONAL-SPEC` §2.2; mapa 01/03 | APP-01, APP-03                                            | `blank`                                                                                        | `active` em `ui-e2e`; rotas locais exercitadas                                                                              | Auth real ainda e futuro; conta local nao e identity provider                                              | Manter; nao bloquear proximas fatias                                                              |
+| Criar/selecionar workspace          | mapa 02/13/15                          | APP-02, APP-13, APP-14                                    | `blank`, `empty-workspace`, `acme-demo`                                                        | `expected-fail` em UI                                                                                                       | Workspace virgem ainda nao sustenta Home/Settings/Console de forma suficiente; demo precisa seguir isolada | Fechar APP-02 primeiro: workspace vazio, Home limpa, Settings limpa, Console degradado            |
+| Onboarding parcial e retomada       | mapa 04                                | APP-04                                                    | `blank`                                                                                        | `active` em `ui-e2e`                                                                                                        | Cobertura limitada ao fluxo parcial; nao cobre todas as escolhas                                           | Manter como sentinela; ampliar com perfil/host/fontes                                             |
+| Onboarding perfil/responsabilidades | mapa 05/06                             | APP-05, APP-06, CONS-01                                   | `empty-workspace`, `workspace-compact-policy`                                                  | `expected-fail`                                                                                                             | Perfil, regra de acumulo e Settings ainda podem divergir; recomendacao precisa refletir politica efetiva   | Ativar perfil + regra de acumulo com persistencia e reflexo em Home/Settings                      |
+| Onboarding pessoas/papeis           | mapa 07                                | APP-07; SEC-11, SEC-12                                    | `workspace-groups-teams`, `workspace-authority-personas`                                       | UI `expected-fail`; authority `active` em `domain`                                                                          | Motor de authority prova proposed/accepted, mas UI de convite/aceite ainda nao prova fluxo humano          | Ligar tela de pessoas a assignments, groups e accept/reject                                       |
+| Governance host                     | mapa 08/17                             | APP-08, APP-17, APP-34                                    | `workspace-sem-host`, `workspace-host-local`, `workspace-host-embutido`                        | `expected-fail`                                                                                                             | A UI ainda nao fecha escolha, fit-check, scaffold/link e consequencia no console                           | Prioridade estrutural junto de APP-02; sem host o workspace real fica degradado                   |
+| Fontes de trabalho                  | mapa 09/18/21                          | APP-09, APP-18, APP-21, CONS-02, SEC-05                   | `workspace-host-local`, `workspace-provider-versioned-source`, `workspace-cloud-synced-folder` | `expected-fail`/`fixme`                                                                                                     | UX de fonte local/nuvem ainda confusa; sourceTrust e relacao com governance host precisam aparecer         | Reformular `/sources`: projeto local x nuvem, pasta vazia/em andamento, Git/sem Git, scan e trust |
+| Assistente/modelo                   | mapa 10/19                             | APP-10, APP-19, SEC-01                                    | `workspace-multi-assistant`, `workspace-controlled`                                            | APP-10 `expected-fail`; APP-19/SEC-01 `fixme`; API local existe parcialmente                                                | Ollama/local/cloud e egress ainda nao viraram UX confiavel fim-a-fim                                       | Implementar configuracao honesta em onboarding/settings antes de Cup provider-assisted            |
+| Integracoes hub/status              | mapa 20/40/41/42/43/44                 | APP-11, APP-20, INT-01, INT-02, INT-03, CONS-03, SEC-09   | `workspace-with-integration-statuses`, `workspace-github-work-source`                          | `fixme`                                                                                                                     | Hub dedicado `/integrations` ainda ausente; status contextual e autoridade nao sao operaveis               | Comecar read-only: catalogo, valor, risco, quem solicita/aprova, status efetivo                   |
+| Settings como espelho do onboarding | mapa 15/18/19/20                       | APP-15, APP-18, APP-19, APP-20, CONS-01, CONS-02, CONS-03 | `workspace-compact-policy`, `workspace-provider-versioned-source`                              | `expected-fail`/`fixme`                                                                                                     | Settings pode divergir do onboarding; precisa ser fonte humana de reconciliacao                            | Depois de APP-02/host: garantir sincronia perfil/host/fontes/assistant/integracoes                |
+| Planejamento de ciclo               | mapa 22                                | APP-22, APP-33                                            | `workspace-planning-progressivo`                                                               | `fixme`                                                                                                                     | Rota/UX de planning ainda nao existe como superficie de produto                                            | So ativar depois de workspace+host+fontes; criar fluxo progressivo minimo                         |
+| Intake e registro de iniciativa     | mapa 23                                | APP-23                                                    | `workspace-planning-progressivo`                                                               | `fixme`                                                                                                                     | Registro ainda nao nasceu como UI orientada por pessoa                                                     | Criar primeiro comando/tela de register/proposal com Cup deterministic opcional                   |
+| Triagem/matcher                     | mapa 24                                | APP-24                                                    | `workspace-provider-versioned-source`                                                          | `fixme`                                                                                                                     | Matcher nao tem UX nem contrato assistivo de confianca                                                     | Depende de sources + register; manter bloqueado ate haver dados reais                             |
+| Gate/ativacao                       | mapa 25/31                             | APP-25                                                    | `workspace-shared`                                                                             | `fixme`                                                                                                                     | Gate existe conceitualmente, mas nao como experiencia humana                                               | Ativar so apos intake/triage; provar authority e audit trail                                      |
+| Work/execucao                       | mapa 26                                | APP-26                                                    | `acme-demo`                                                                                    | `expected-fail` + read-model                                                                                                | Demo/read-only existe, mas workflow operacional ainda nao e humano                                         | Primeira lista operacional com TanStack Table + MUI e actions dry-run                             |
+| Contratos                           | mapa 27/29/31                          | APP-27                                                    | `acme-demo`                                                                                    | `fixme`                                                                                                                     | Contract graph existe em read-model, mas tela de contrato ainda nao                                        | Tela read-only de contrato, consumers, revision, contention e linked intents                      |
+| Resultados/dashboards               | mapa 28                                | APP-28, SEC-02, SEC-08                                    | `acme-demo`                                                                                    | APP-28 `expected-fail`; read-model/rollup `active`; security UI `fixme`                                                     | Rollup e valido no dominio, mas dashboard humano ainda nao esta fechado                                    | Implementar `/results` com ECharts + TanStack Query e badges de confianca                         |
+| Mapa de governanca                  | mapa 29                                | APP-29, SEC-02                                            | `acme-demo`                                                                                    | APP-29 `expected-fail`; graph read-model `active`                                                                           | Mapa ainda precisa de interacoes estabilizadas e explicacao para stakeholders                              | React Flow+ELK como mapa principal; ECharts graph opcional depois                                 |
+| Operacoes/incidentes                | mapa 30                                | APP-30                                                    | `acme-demo`                                                                                    | `fixme`                                                                                                                     | Incidentes existem na demo, mas nao como fluxo humano                                                      | Criar painel read-only basico antes de mutacoes                                                   |
+| Auditoria                           | mapa 31                                | APP-31, APP-33, SEC-08                                    | `acme-demo`, `workspace-planning-progressivo`                                                  | `fixme`                                                                                                                     | Event-log/audit ainda ficam no console ou dominio, nao numa UX dedicada                                    | Criar tabela basica de eventos/decisoes com links para origem                                     |
+| Console tecnico                     | mapa 32                                | APP-32                                                    | `acme-demo`                                                                                    | `expected-fail`                                                                                                             | Console existe, mas contrato de uso tecnico ainda falha                                                    | Manter como avancado; nao deixar substituir UX principal                                          |
+| Cup/CWP overlay                     | mapa 34-39                             | CUP-01, CUP-02, CUP-03, CUP-04                            | `empty-workspace`, `workspace-controlled`, `workspace-host-local`                              | `fixme`                                                                                                                     | Sem launcher/context resolver/specialist router; provider assistivo bloqueado por policy                   | Comecar C0/C1 deterministic sem provider e sem mutacao                                            |
+| Seguranca e authority               | `POLICY-HANDBOOK`; mapa transversal    | SEC-01..SEC-12                                            | `workspace-controlled`, `workspace-authority-personas`, outras                                 | SEC-11/12 `active`; varios deny `fixme`; API in-memory cobre replay/authority basico                                        | Bloqueios de UI e explicacao de policy ainda nao estao provados                                            | Transformar deny de UI em active quando as telas existirem; nunca usar `expected-fail` para deny  |
+| Schema e contratos runtime          | `ARCHITECTURE`; `TESTING-STRATEGY`     | Sem contrato APP dedicado                                 | n/a                                                                                            | Parcial: `@demo/contracts` ja usa Zod para payloads de onboarding; demais familias ainda usam combinadores/validacao ad hoc | Zod ainda nao cobre todas as rotas publicas nem gera JSON Schema                                           | Expandir Zod por familia de API, com teste fail-closed por rota                                   |
+
+## 4. Matriz de lacunas por camada
+
+| Camada            | Ja prova                                                                         | Ainda nao prova                                                  | Acao recomendada                                                   |
+| ----------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Domain/invariante | Authority, proposed vs accepted, seed invariants, rollup/read-model, sourceTrust | UX humana, explicacao de policy, persistencia visual entre telas | Manter barato e ampliar so para regras puras                       |
+| API in-memory     | Schema basico, replay/idempotencia, authority, isolamento                        | Todas as rotas locais e casos por persona                        | Adicionar casos quando a rota for ativada, sem duplicar Playwright |
+| Real route HTTP   | Sessao/JSON/gate de read-model                                                   | Autorizacao detalhada por rota de produto                        | Cobrir novas rotas antes de ligar UI mutavel                       |
+| UI/e2e            | Signup/logout/onboarding parcial e sentinelas de expected-fail                   | A maior parte da experiencia de produto                          | Ativar contrato por contrato, seguindo a ordem abaixo              |
+| Visual validation | Ainda nao e fonte automatizada                                                   | Usabilidade, copy, entendimento, fluxo real no browser           | Registrar no `APP-ITERATION-MAP.md` a cada rodada humana           |
+
+## 5. Ordem de ativacao recomendada
+
+1. **APP-02** — workspace virgem sem vazamento de demo.
+2. **APP-08 / APP-17 / APP-34** — governance host escolhido, fit-check, scaffold/link e console degradado/habilitado.
+3. **APP-09 / APP-18 / APP-21 / CONS-02** — fontes de trabalho com sourceTrust compreensivel.
+4. **APP-05 / APP-06 / APP-15 / CONS-01** — perfil, regra de acumulo e Settings coerentes.
+5. **APP-07 / APP-16 / SEC-11 / SEC-12** — pessoas, grupos, convites, papeis e authority efetiva na UI.
+6. **APP-28 / APP-29** — `/results` e `/map` sobre demo/read-model com visualizacao real.
+7. **INT-01..03** — hub de integracoes read-only, depois GitHub work-source.
+8. **CUP-01 / CUP-02** — Cup deterministic C0/C1 sem provider externo.
+
+## 6. Zod como governanca de schema
+
+Decisao de direcao: **usar Zod e desejavel para a governance-demo**. Um app de
+governanca nao deve depender apenas de tipos TypeScript apagados em runtime nem
+de combinadores ad hoc quando o contrato cruza frontend, backend, mock-api,
+testes e possiveis adapters externos.
+
+### Estado atual
+
+Hoje a demo ja tem:
+
+- TypeScript strict;
+- package `@demo/contracts`;
+- validacao runtime por combinadores proprios em partes legadas;
+- primeira familia Zod em `@demo/contracts/src/onboarding/schemas.ts`;
+- JSON Schema projetado para algumas rotas;
+- testes de schema/400 em API in-memory.
+
+Isso e funcional, mas ainda deixa parte da governanca de schema fragmentada:
+tipos TS, validadores runtime e JSON Schema podem evoluir em ritmos diferentes
+nas familias que ainda nao usam Zod.
+
+### Direcao recomendada
+
+Migrar `@demo/contracts` para ser a SSOT de schemas Zod:
+
+```text
+@demo/contracts
+  src/
+    commands/
+      schemas.ts      # z.object(...) por comando/payload
+      types.ts        # z.infer<typeof ...>
+    api/
+      schemas.ts      # request/response envelopes
+      result.ts
+    errors/
+      schemas.ts
+    index.ts
+```
+
+Regras:
+
+- Todo request externo tem schema Zod.
+- Todo response publico tem schema Zod ou tipo derivado de schema.
+- `z.infer` gera o tipo TS compartilhado.
+- JSON Schema, quando necessario, e derivado do Zod por ferramenta explicita.
+- Backend, mock-api e testes importam o mesmo schema.
+- Frontend pode importar schemas browser-safe para formularios, mas nunca
+  validadores server-only.
+- Erros de schema continuam fail-closed (`400`) e rastreaveis.
+
+### Criterio de aceite das proximas fatias Zod
+
+- `@demo/contracts` declara `zod` como dependencia propria. **Feito.**
+- Pelo menos uma familia de rotas (`/api/local/onboarding/*`) usa Zod na
+  fronteira HTTP. **Feito para status/path/profile/workspace-mode.**
+- Os combinadores proprios deixam de ser a fonte principal para essa familia.
+  **Parcial:** `stack` ainda deve entrar numa fatia propria.
+- Teste de rota prova payload invalido e mensagem de erro governada. **Feito
+  para `/api/local/onboarding/profile` (`schema-invalid`).**
+- `check-governance-app.ts` falha se rota nova em `frontend/app/api/local/**`
+  nao apontar para schema compartilhado.
+
+Nao fazer junto com UX: as proximas migracoes para Zod devem ser fatias tecnicas
+pequenas, antes ou imediatamente junto da proxima rota mutavel que for ativada.
+
+## 7. Como manter esta matriz
+
+Atualizar este arquivo quando:
+
+- um contrato mudar de `fixme` para `expected-fail`;
+- um contrato virar `active`;
+- uma seed nova entrar;
+- uma rota de produto nascer;
+- uma feature sair do escopo;
+- Zod substituir uma familia de schemas;
+- uma validacao visual em `APP-ITERATION-MAP.md` revelar gap de produto que
+  ainda nao tem contrato.
+
+Regra: se a pessoa mantenedora precisa perguntar "isso esta coberto?", a
+resposta deve estar aqui ou em `test/contracts/app-contracts.yml`.
