@@ -24,6 +24,7 @@
     "@xyflow/react": "^12.11.1",
     "ag-grid-community": "^36.0.0",
     "ag-grid-react": "^36.0.0",
+    "better-auth": "^1.6.23",
     "echarts": "^6.1.0",
     "elkjs": "^0.11.1",
     "graphology": "^0.26.0",

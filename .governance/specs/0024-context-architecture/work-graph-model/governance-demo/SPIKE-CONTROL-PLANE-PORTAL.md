@@ -1,6 +1,7 @@
 # Spike S1 - Portal/control plane sobre governance host Git-backed
 
-> Status: planejado, nao implementado.  
+> Status: implementado como bancada interna inicial em
+> `/spikes/control-plane-portal`.
 > Data: 2026-07-06.  
 > Decisoes relacionadas: `APP-DECISIONS.md` QRD-36, QRD-41; APP-38..41; SEC-13.  
 > Objetivo: validar se o app pode oferecer uma experiencia humana multiusuario
@@ -197,6 +198,17 @@ Minimo aceitavel:
 - testes APP-40, APP-41, SEC-13 e ARCH-CP;
 - review em `_reviews/` com fato vs interpretacao;
 - decisao recomendada: Better Auth aprovado, rejeitado ou pendente.
+
+Implementado nesta primeira fatia:
+
+- `@demo/domain` ganhou um kernel puro de spike para topologias, conta,
+  workspace, convite, membership, provider link, proposta e sanitizacao.
+- `backend/tests/control-plane-portal-spike.test.ts` prova APP-40, APP-41,
+  SEC-13, sourceRevision fail-closed e as quatro topologias da QRD-41.
+- `frontend/app/spikes/control-plane-portal/` renderiza a bancada interna.
+- Better Auth foi instalado no workspace do app e instanciado server-side com o
+  plugin `organization`, provando que os endpoints necessarios existem.
+- O GitHub bridge ainda e dry-run/modelado, nao usa credenciais reais.
 
 Nao aceitavel:
 

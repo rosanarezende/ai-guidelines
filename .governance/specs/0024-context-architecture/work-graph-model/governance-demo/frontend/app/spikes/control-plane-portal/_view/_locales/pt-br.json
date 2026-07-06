@@ -1,0 +1,26 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "title": "Spike S1 - Portal e control plane",
+    "lead": "Bancada interna para provar que conta, convite e portal podem existir sem virar fonte de autoridade governada.",
+    "honesty": "Isto nao e tela de produto. E uma falsificacao arquitetural: Better Auth e candidato, Git-backed host e o cofre, e o portal so pode propor mudancas governadas.",
+    "controlPlane": "Control plane",
+    "governancePlane": "Governance plane",
+    "security": "Seguranca",
+    "betterAuthTitle": "Candidato Better Auth",
+    "betterAuthSubtitle": "Instancia server-side com plugin de organizacao carregado. Esta bancada ainda nao escolhe a stack final.",
+    "flowTitle": "Fluxo alvo",
+    "flowSubtitle": "O caminho que precisa funcionar para uma pessoa nao tecnica usar o app sem operar Git diretamente.",
+    "flowCreator": "Criadora abre o portal, cria workspace e aponta para um governance host Git-backed.",
+    "flowInvite": "Criadora convida uma pessoa de negocio/design/investimento pelo portal.",
+    "flowAccept": "Pessoa convidada cria conta e aceita o convite sem precisar mexer em PR manualmente.",
+    "flowProposal": "A acao vira proposta governada com sourceRevision, nao mutacao silenciosa.",
+    "flowNoAuthority": "Login e membership no portal nao concedem authority efetiva.",
+    "proofTitle": "Falsificacoes",
+    "proofSubtitle": "Cada linha representa uma propriedade que precisa falhar fechado antes de qualquer produto real.",
+    "proofApp40": "A projecao publica tem metadados de workspace/provider, nao conteudo governado.",
+    "proofApp41": "Aceite de convite cria membership de portal, mas zero authority governada.",
+    "proofSec13": "Segredo de provider simulado nao aparece na projecao publica.",
+    "proofArch": "Proposta exige sourceRevision e stale revision falha fechado."
+  }
+}
