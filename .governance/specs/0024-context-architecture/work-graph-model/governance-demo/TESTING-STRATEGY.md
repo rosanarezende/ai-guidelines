@@ -72,8 +72,9 @@ humana, cross-screen, persistencia via UI, sentinela de rota).
 Layer de dominio/invariante: `npm --workspace acme-governance-backend run
 test:shell` (`node --test tests/**/*.test.ts`). Usa o MESMO executor autorizado
 (`authorizeShellCommand`) que backend real e mock-api usam — isso e a prova de
-fidelidade do mock. Invariantes rodam sobre `SEEDS`/`buildSeed` diretamente,
-sem HTTP. Regra do produto que puder ser provada aqui NAO deve subir para e2e.
+fidelidade do mock. Invariantes rodam sobre `SEEDS`/`buildSeed` de
+`@demo/test-fixtures` diretamente, sem HTTP. Regra do produto que puder ser
+provada aqui NAO deve subir para e2e.
 
 Layer de API in-memory: `npm --workspace acme-governance-mock-api run test:api`
 (`node --test tests/**/*.test.ts`). Roda o app Hono da mock-api via
@@ -81,8 +82,9 @@ Layer de API in-memory: `npm --workspace acme-governance-mock-api run test:api`
 sem servidor nem browser. Prova o contrato de comando (schema, replay/
 idempotencia por command id, authority, isolamento de workspace). A casca de
 rota do frontend (sessao via cookie, parse de JSON) fica em Playwright `request`
-porque depende de `next/headers` e do alias `@demo/backend`, que `node --test`
-nao resolve — por isso essa parte precisa do servidor booted (sem browser).
+porque depende de APIs de runtime do Next (`next/headers`). Mesmo com
+`@demo/domain`, `@demo/contracts` e `@demo/test-fixtures` resolvendo em
+`node --test`, essa casca precisa do servidor booted (sem browser).
 
 Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
 dos testes do backend (`test:shell`), o typecheck strict + `test:api` da
@@ -162,7 +164,7 @@ Regras obrigatorias:
    contrato de deny pode ser `active` quando prova o bloqueio observado — inclusive
    no nivel de mecanismo (ver abaixo).
 6. Contrato de mecanismo derivado (sem tela) usa `surface: state`. Ele testa uma
-   garantia do dominio via `/api/shell/state` + funcoes de `@demo/backend/domain`
+   garantia do dominio via `/api/shell/state` + funcoes de `@demo/domain`
    (ex.: `resolveWorkspaceAuthority`), sem depender de UI. Pode ser `active` mesmo
    antes da tela existir; a UI que expoe a mesma garantia continua `fixme` ate a
    rota nascer. Exemplo: SEC-11/SEC-12 (papel proposto nunca gera authority)
@@ -218,8 +220,8 @@ O ID deve aparecer:
 
 ## 8. Seeds
 
-Seeds sao estados iniciais nomeados da `mock-api`. Elas existem para testar
-fluxos sem precisar clicar tudo de novo.
+Seeds sao estados iniciais nomeados em `@demo/test-fixtures` e carregados pela
+`mock-api`. Elas existem para testar fluxos sem precisar clicar tudo de novo.
 
 Há duas coberturas diferentes:
 

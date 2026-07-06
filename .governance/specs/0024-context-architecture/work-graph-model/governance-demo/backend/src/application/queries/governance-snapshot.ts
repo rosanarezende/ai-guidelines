@@ -12,7 +12,7 @@ import {
   validateRepoContexts,
 } from "../../adapters/repo-first/repo-contexts.ts";
 import { loadPublishedRepoWorks, validateRepoWorks } from "../../adapters/repo-first/repo-works.ts";
-import { buildGraphReadModel } from "../../domain/graph/build.ts";
+import { buildGraphReadModel } from "@demo/domain/server";
 import type {
   DashboardTarget,
   GovernanceIssue,
@@ -27,9 +27,9 @@ import type {
   RepoStatus,
   RepoWorkClaim,
   Triage,
-} from "../../domain/index.ts";
-import type { DryRunResult } from "../../domain/commands.ts";
-import { INTEGRATION_CATALOG_FILE } from "../../shared/paths.ts";
+} from "@demo/domain/server";
+import type { DryRunResult } from "@demo/domain/server";
+import { INTEGRATION_CATALOG_FILE } from "../../adapters/fs/paths.ts";
 import { openFileGovernanceRuntime } from "../runtime.ts";
 
 function sortById<T extends { id: string }>(items: T[] = []): T[] {

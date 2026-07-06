@@ -3,7 +3,7 @@
 // dispensa o assistente ({action:"dismiss"}). Endpoint não-loopback sem egress
 // aprovado é rejeitado fail-closed (QRD-18/24).
 import { NextResponse } from "next/server";
-import { normalizeWorkspace } from "@demo/backend/domain";
+import { normalizeWorkspace } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { dismissAssistant, saveAssistantProvider } from "@/server/adoption/application/assistant";
 import { readShellState } from "@/server/adoption/application/use-cases";

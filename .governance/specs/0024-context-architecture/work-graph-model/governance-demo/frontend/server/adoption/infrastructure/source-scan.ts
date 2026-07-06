@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
-import type { WorkSourceScan } from "@demo/backend/domain";
+import type { WorkSourceScan } from "@demo/contracts";
 
 const MAX_FILES = 2000;
 const CLOUD_MARKERS: Array<{ pattern: RegExp; provider: string }> = [

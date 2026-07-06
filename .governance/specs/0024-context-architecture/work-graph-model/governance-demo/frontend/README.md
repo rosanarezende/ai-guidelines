@@ -10,8 +10,8 @@ Pronto nesta fatia:
 
 - App Next em TypeScript, isolado no workspace `acme/governance-next-app`.
 - Fluxo inicial real: `/signup` (identidade local honesta, `local-principal`) -> `/organizations` (criar/escolher organizacao; multi-organizacao com contexto separado) -> `/onboarding` por organizacao -> `/` Home da organizacao atual.
-- Backend TypeScript do shell local em `server/adoption/` com boundaries claros: dominio puro em `backend/src/domain/adoption-shell.ts`, use-cases em `application/`, persistencia file-first em `infrastructure/` (estado JSON + event-log JSONL + lock + escrita atomica + idempotencia por comando) e interface em `app/api/local/*` + cookie de sessao httpOnly.
-- Fronteira backend por SDK: o app consome apenas `@demo/backend` (use cases/handlers server-side) e `@demo/backend/domain` (contrato browser-safe). Import de modulo interno (`backend/src/...`, `tools/...`, qualquer `.mjs`) e barrado pelo guard — a fronteira ja nasce pronta para clientes web/native separados.
+- Backend TypeScript do shell local em `server/adoption/` com boundaries claros: shared kernel em `../packages/domain`, contratos em `../packages/contracts`, use-cases em `application/`, persistencia file-first em `infrastructure/` (estado JSON + event-log JSONL + lock + escrita atomica + idempotencia por comando) e interface em `app/api/local/*` + cookie de sessao httpOnly.
+- Fronteira backend por SDK: o app consome apenas `@demo/backend` (use cases/handlers server-side), `@demo/contracts` (tipos/DTOs compartilhados) e `@demo/domain` (funcoes/constantes puras browser-safe). `@demo/domain/server` e proibido no frontend. Import de modulo interno (`backend/src/...`, `tools/...`, qualquer `.mjs`) e barrado pelo guard — a fronteira ja nasce pronta para clientes web/native separados.
 - API local tipada: rotas de graph queries (`/api/graph*`), integracoes (`/api/integrations*`), advisory do assistente e contrato verificavel em `/api/contract`; requests validadas por schema (400 fail-closed) na camada `backend/src/api`.
 - Demo `acme-*` anexavel como organizacao `sandbox-demo` (badge demo); organizacao nova/vazia tem Home, Settings e Console honestos, sem dados da acme.
 - Home de adocao (demo) com tarefas, pendencias derivadas e proximo passo; Home de organizacao nova com checklist real (perfil/host/fontes).
@@ -263,9 +263,7 @@ frontend/
       commands/
       integrations/
   lib/
-    governance-server.ts
     i18n.ts
-    types.ts
   next.config.ts
   package.json
   tsconfig.json
@@ -283,7 +281,8 @@ frontend/
 - Cada componente em `app/_ui/shared` deve viver em arquivo proprio; `index.ts` e apenas o barrel de exports.
 - Pastas e arquivos de codigo usam nomes em ingles. Portugues fica em labels, copy e `_locales/pt-br.json`.
 - Texto visivel de usuario deve morar em `_locales/pt-br.json` colocalizado com a view, step, section, componente ou subdominio que o consome.
-- Nao recriar ontologia do modelo no frontend; prefira tipos reexportados por `@/lib/types` e derivacoes em `app/_domain/adoption/*`.
+- Nao recriar ontologia do modelo no frontend; prefira tipos de `@demo/contracts` e derivacoes em `app/_domain/adoption/*`.
+- Paginas e rotas server-side importam o SDK publico diretamente de `@demo/backend`; nao crie facade decorativo em `lib/`.
 - Evitar `Date.now()`, `Math.random()` e formatacao dependente do cliente durante render para nao reabrir mismatch de hydration.
 - Evitar componentes que vazem props invalidas para DOM; o app ja abandonou o uso problematico de `Grid`/`Stack` nessa superficie.
 

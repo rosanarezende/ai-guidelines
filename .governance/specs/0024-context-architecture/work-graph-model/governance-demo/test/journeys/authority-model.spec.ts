@@ -1,14 +1,10 @@
 // authority-model.spec.ts — contratos de MECANISMO (sem UI) sobre a resolução
 // de authority do domínio. Provam a garantia de segurança "proposed/revoked
 // nunca geram autoridade; só accepted/self-assigned (direto ou herdado)".
-// São `active` porque o mecanismo já existe em backend/src/domain; a UI que
+// São `active` porque o mecanismo já existe em @demo/domain; a UI que
 // expõe isso (APP-07) segue fixme até a tela de pessoas/papéis existir.
 import { expect, test, type APIRequestContext } from "@playwright/test";
-import {
-  personAuthority,
-  type AdoptionState,
-  type Workspace,
-} from "../../backend/src/domain/index.ts";
+import { personAuthority, type AdoptionState, type Workspace } from "@demo/domain";
 import { MOCK_API_URL } from "../playwright.config.ts";
 
 async function loadSeed(request: APIRequestContext, name: string): Promise<AdoptionState> {

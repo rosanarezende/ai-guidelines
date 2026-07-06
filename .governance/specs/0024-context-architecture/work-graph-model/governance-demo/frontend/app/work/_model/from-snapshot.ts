@@ -3,7 +3,7 @@ import type {
   DashboardTarget,
   GovernanceIssue,
   GovernanceSnapshot,
-} from "@demo/backend/domain";
+} from "@demo/contracts";
 import type {
   WorkConfidenceState,
   WorkItemsViewModel,

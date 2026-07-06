@@ -18,7 +18,7 @@ import {
   emptyAdoptionState,
   type AdoptionState,
   type LocalShellCommand,
-} from "@demo/backend/domain";
+} from "@demo/domain";
 import { eventsFile, lockDir, localStateDir, stateFile } from "./paths";
 
 const LOCK_RETRIES = 40;

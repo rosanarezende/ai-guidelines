@@ -1,4 +1,4 @@
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 
 export const issuedAt = "2027-04-15";
 

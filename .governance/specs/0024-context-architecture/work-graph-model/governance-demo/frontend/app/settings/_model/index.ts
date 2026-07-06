@@ -1,4 +1,4 @@
-import type { IntegrationItem } from "@/lib/types";
+import type { IntegrationItem } from "@demo/contracts";
 import copy from "./_locales/pt-br.json";
 
 export const SECTIONS = copy.sections;

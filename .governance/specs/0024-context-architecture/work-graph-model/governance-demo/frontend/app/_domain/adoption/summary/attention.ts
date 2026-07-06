@@ -1,4 +1,4 @@
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import type { AttentionItem } from "./types";
 import { format } from "./format";
 import copy from "./_locales/pt-br.json";

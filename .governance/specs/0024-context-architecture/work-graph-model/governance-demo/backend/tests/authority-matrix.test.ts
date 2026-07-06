@@ -4,13 +4,9 @@
 // tentacao de gastar Playwright para provar "quem pode o quê".
 import test from "node:test";
 import assert from "node:assert/strict";
-import { authorizeShellCommand } from "../src/domain/index.ts";
-import type {
-  AdoptionState,
-  LocalShellCommand,
-  LocalShellCommandType,
-} from "../src/domain/index.ts";
-import { buildSeed } from "../../mock-api/src/seeds/index.ts";
+import { authorizeShellCommand } from "@demo/domain/server";
+import type { AdoptionState, LocalShellCommand, LocalShellCommandType } from "@demo/domain/server";
+import { buildSeed } from "@demo/test-fixtures";
 
 const WORKSPACE_ID = "acme-honey";
 

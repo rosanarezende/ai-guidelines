@@ -6,9 +6,9 @@ import {
   validateGovernedCommand,
   type CommandValidationOptions,
   type DryRunResult,
-} from "../domain/commands.ts";
-import type { GovernanceIssue, GovernedCommand, OrgSnapshot } from "../domain/index.ts";
-import { deriveIntent, validateOrg } from "../domain/org-domain.ts";
+} from "@demo/domain/server";
+import type { GovernanceIssue, GovernedCommand, OrgSnapshot } from "@demo/domain/server";
+import { deriveIntent, validateOrg } from "@demo/domain/server";
 import type { GovernanceEvent } from "../ports/GovernanceRepository.ts";
 
 function eventId(command: GovernedCommand, revision: string): string {

@@ -7,7 +7,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import type { EvidenceProvider, IntegrationResult } from "../../../ports/IntegrationAdapter.ts";
 import { resolveEgress } from "../../../application/integrations/egress-policy.ts";
-import { REPOS_ROOT } from "../../../shared/paths.ts";
+import { REPOS_ROOT } from "../../fs/paths.ts";
 import { readVerifiedReport } from "../shared/verified-report.ts";
 
 export const CODE_QUALITY_REPORT_SCHEMA = "acme.code-quality-report/v1";

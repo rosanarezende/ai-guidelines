@@ -2,7 +2,7 @@
 // graph-read-model/identity-provider (parcial). Incompatibilidades voltam como
 // warnings visíveis (QRD-15); neo4j sem sourceRevision nunca é silencioso.
 import { NextResponse } from "next/server";
-import type { WorkspaceStack } from "@demo/backend/domain";
+import type { WorkspaceStack } from "@demo/contracts";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { saveWorkspaceStack } from "@/server/adoption/application/configuration";
 

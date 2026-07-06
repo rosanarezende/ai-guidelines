@@ -11,6 +11,8 @@
     "test:shell": "node --test \"tests/**/*.test.ts\""
   },
   "dependencies": {
+    "@demo/contracts": "*",
+    "@demo/domain": "*",
     "yaml": "^2.8.4"
   },
   "devDependencies": {

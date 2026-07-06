@@ -11,6 +11,9 @@
     "test:e2e:report": "playwright show-report reports/html"
   },
   "devDependencies": {
+    "@demo/contracts": "*",
+    "@demo/domain": "*",
+    "@demo/test-fixtures": "*",
     "@playwright/test": "^1.49.1",
     "@types/node": "^25.6.2",
     "typescript": "^6.0.3"

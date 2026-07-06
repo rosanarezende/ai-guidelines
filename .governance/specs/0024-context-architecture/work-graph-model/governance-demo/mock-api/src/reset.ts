@@ -2,7 +2,7 @@
 // Uso: npm --workspace acme-governance-mock-api run reset [-- <seed>]
 import { writeFileSync, mkdirSync } from "node:fs";
 import { DATA_DIR, DB_FILE, emptyDb } from "./db.ts";
-import { buildSeed, seedNames } from "./seeds/index.ts";
+import { buildSeed, seedNames } from "@demo/test-fixtures";
 
 const seedName = process.argv[2] || "blank";
 const state = buildSeed(seedName);

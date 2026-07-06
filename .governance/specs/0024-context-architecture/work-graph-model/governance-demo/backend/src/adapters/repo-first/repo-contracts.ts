@@ -4,13 +4,10 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse, stringify } from "yaml";
-import type { GovernanceIssue, OrgSnapshot, RepoContract } from "../../domain/index.ts";
-import {
-  deriveExpectedRepoContracts,
-  type ExpectedRepoContract,
-} from "../../domain/repo-projections.ts";
-import { stableSorted } from "../../shared/stable-digest.ts";
-import { REPOS_ROOT, SIM_ROOT } from "../../shared/paths.ts";
+import type { GovernanceIssue, OrgSnapshot, RepoContract } from "@demo/domain/server";
+import { deriveExpectedRepoContracts, type ExpectedRepoContract } from "@demo/domain/server";
+import { stableSorted } from "@demo/domain/server";
+import { REPOS_ROOT, SIM_ROOT } from "../fs/paths.ts";
 
 const REPOS_DIR = REPOS_ROOT;
 const GOVERNANCE_DIR = ".governance";

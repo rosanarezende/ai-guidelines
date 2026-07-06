@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import SourceOutlinedIcon from "@mui/icons-material/SourceOutlined";
-import type { WorkSource } from "@demo/backend/domain";
+import type { WorkSource } from "@demo/contracts";
 import { Flex } from "@/app/_ui/shared";
 import { canScanSource, shortHash, statusColor, trustColor } from "./helpers";
 import type { SourcesCopy } from "./types";

@@ -5,7 +5,7 @@
 // nunca telemetria em tempo real fingida.
 import path from "node:path";
 import type { EvidenceProvider, IntegrationResult } from "../../../ports/IntegrationAdapter.ts";
-import { REPOS_ROOT } from "../../../shared/paths.ts";
+import { REPOS_ROOT } from "../../fs/paths.ts";
 import { readVerifiedReport } from "../shared/verified-report.ts";
 
 export const OBSERVABILITY_REPORT_SCHEMA = "acme.operational-metrics/v1";

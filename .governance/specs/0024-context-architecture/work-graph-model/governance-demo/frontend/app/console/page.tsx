@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { loadGovernanceSnapshot } from "@/lib/governance-server";
+import { loadGovernanceSnapshot } from "@demo/backend";
 import { resolveAdoptionGate } from "@/server/adoption/gate";
 import ConsoleUnavailable from "./_view/ConsoleUnavailable";
 import GovernanceConsole from "./_view/GovernanceConsole";

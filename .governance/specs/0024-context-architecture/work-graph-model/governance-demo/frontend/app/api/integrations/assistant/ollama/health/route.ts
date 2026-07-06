@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { AssistantConnectionResult } from "@demo/backend/domain";
+import type { AssistantConnectionResult } from "@demo/contracts";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

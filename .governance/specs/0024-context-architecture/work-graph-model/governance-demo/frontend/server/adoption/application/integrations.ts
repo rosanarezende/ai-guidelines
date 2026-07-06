@@ -8,7 +8,7 @@ import {
   projectIntegrationBacklog,
   type CatalogIntegrationItem,
   type IntegrationBacklogEntry,
-} from "@demo/backend/domain";
+} from "@demo/domain";
 import { readShellState } from "./use-cases";
 
 export type IntegrationBacklog = {

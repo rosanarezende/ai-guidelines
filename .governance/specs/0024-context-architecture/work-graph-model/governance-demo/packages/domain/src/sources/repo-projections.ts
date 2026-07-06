@@ -1,5 +1,5 @@
 // repo-projections.ts — derivações puras compartilhadas entre runtime e scripts.
-import { digest12 } from "../shared/stable-digest.ts";
+import { digest12 } from "../policy/stable-digest.ts";
 import type {
   Contract,
   ContractRevisionProposal,
@@ -7,7 +7,7 @@ import type {
   IntentWork,
   OrgSnapshot,
   RepoWorkClaim,
-} from "./governance.ts";
+} from "../workspace/governance.ts";
 
 export const REPO_WORK_SCHEMA = "acme.repo-work/v1";
 export const REPO_WORK_STATUSES = ["acknowledged", "active", "blocked", "done", "dropped"];

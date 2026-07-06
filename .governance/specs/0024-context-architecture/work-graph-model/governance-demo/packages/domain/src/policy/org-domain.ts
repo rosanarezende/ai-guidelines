@@ -11,7 +11,7 @@ import type {
   RepoDef,
   Target,
   Team,
-} from "./governance.ts";
+} from "../workspace/governance.ts";
 
 // ═════════ SCHEMAS FAIL-CLOSED (bloco I da F5) — chave desconhecida = ERRO ═════════
 const APPROACHES = ["validate-first", "direct"];

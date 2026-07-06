@@ -2,7 +2,7 @@
 // Página fina: monta os view-models no SERVIDOR a partir do read-model
 // derivado da demo acme e delega para a view. Não entra na navegação de
 // produto e não grava nada; fixtures sintéticas são geradas no cliente.
-import { loadGovernanceSnapshot } from "@/lib/governance-server";
+import { loadGovernanceSnapshot } from "@demo/backend";
 import { queryGraphOverview } from "@demo/backend";
 import {
   buildDashboardViewModel,

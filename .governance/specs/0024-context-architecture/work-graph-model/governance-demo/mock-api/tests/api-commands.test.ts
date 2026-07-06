@@ -6,7 +6,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createMockApp } from "../src/app.ts";
-import type { AdoptionState, LocalShellCommand } from "../../backend/src/domain/index.ts";
+import type { AdoptionState, LocalShellCommand } from "@demo/domain";
 
 const app = createMockApp();
 

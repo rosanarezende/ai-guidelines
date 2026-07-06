@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadGovernanceSnapshot } from "@/lib/governance-server";
+import { loadGovernanceSnapshot } from "@demo/backend";
 import { resolveAdoptionGate } from "@/server/adoption/gate";
 import { buildResultsDashboard } from "@/app/results/_model/from-snapshot";
 import type { ResultsDashboardResponse } from "@/app/results/_model/view-models";

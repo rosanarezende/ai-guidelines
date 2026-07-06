@@ -9,7 +9,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
-import { seedNames } from "../../mock-api/src/seeds/index.ts";
+import { seedNames } from "@demo/test-fixtures";
 
 type ContractStatus = "active" | "expected-fail" | "fixme" | "skip" | "manual";
 

@@ -1,0 +1,25 @@
+{
+  "name": "@demo/test-fixtures",
+  "private": true,
+  "type": "module",
+  "description": "Seeds e builders compartilhados por mock-api e testes da governance-demo.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./seeds": "./src/seeds/index.ts",
+    "./builders": "./src/builders/seeds.ts",
+    "./personas": "./src/personas/authority.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@demo/domain": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.2",
+    "typescript": "^6.0.3"
+  }
+}

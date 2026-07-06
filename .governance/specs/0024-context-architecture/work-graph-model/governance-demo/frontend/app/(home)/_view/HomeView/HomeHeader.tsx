@@ -1,6 +1,6 @@
 import { Alert, Box, Typography } from "@mui/material";
 import type { AdoptionSummary } from "@/app/_domain/adoption/model";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { format } from "./format";
 import copy from "./_locales/pt-br.json";
 

@@ -12,7 +12,7 @@ import {
   workspaceHasEvidenceSource,
   workspaceHasGovernanceHost,
   type Workspace,
-} from "@demo/backend/domain";
+} from "@demo/domain";
 import copy from "./_locales/pt-br.json";
 
 const m = copy.messages;

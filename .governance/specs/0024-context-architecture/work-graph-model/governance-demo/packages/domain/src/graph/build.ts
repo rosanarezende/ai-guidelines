@@ -7,8 +7,8 @@ import type {
   OrgSnapshot,
   RepoContract,
   RepoWorkClaim,
-} from "../governance.ts";
-import { deriveIntent } from "../org-domain.ts";
+} from "../workspace/governance.ts";
+import { deriveIntent } from "../policy/org-domain.ts";
 
 const GLOBAL_REF_KINDS = [
   "authority",

@@ -4,7 +4,7 @@
 // Nada aqui persiste governança. A declaração real ainda depende de comandos governados.
 import { Box, Button, Paper } from "@mui/material";
 import Link from "next/link";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { profileChipLabel } from "@/app/_domain/adoption/model";
 import AppShell from "@/app/_ui/shell/AppShell";
 import {

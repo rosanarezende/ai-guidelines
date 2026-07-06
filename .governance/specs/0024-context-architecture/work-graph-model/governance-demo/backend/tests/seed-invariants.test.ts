@@ -9,9 +9,9 @@ import {
   DEMO_WORKSPACE_ID,
   normalizeWorkspace,
   resolveWorkspaceAuthority,
-} from "../src/domain/index.ts";
-import type { AdoptionState, Workspace } from "../src/domain/index.ts";
-import { seedNames, buildSeed } from "../../mock-api/src/seeds/index.ts";
+} from "@demo/domain/server";
+import type { AdoptionState, Workspace } from "@demo/domain/server";
+import { seedNames, buildSeed } from "@demo/test-fixtures";
 
 function eachWorkspace(
   callback: (seed: string, workspace: Workspace, state: AdoptionState) => void

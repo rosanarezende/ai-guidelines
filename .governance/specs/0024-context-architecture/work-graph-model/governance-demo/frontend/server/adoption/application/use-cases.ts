@@ -18,7 +18,7 @@ import {
   type OnboardingStatus,
   type Workspace,
   type WorkspaceKind,
-} from "@demo/backend/domain";
+} from "@demo/domain";
 import { shellStore, type DispatchResult } from "../infrastructure/store";
 
 export type UseCaseResult<T> = { ok: true; value: T } | { ok: false; error: string };

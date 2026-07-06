@@ -1,7 +1,7 @@
 // redaction.ts — redação mínima antes de qualquer conteúdo sair do processo
 // (assistente local/cloud) ou entrar em log. Não substitui classificação de
 // dados; remove padrões óbvios de segredo/identificador sensível.
-import { SECRET_PATTERNS } from "../../domain/org-domain.ts";
+import { SECRET_PATTERNS } from "@demo/domain/server";
 
 const EXTRA_PATTERNS: RegExp[] = [
   // bearer/authorization tokens colados

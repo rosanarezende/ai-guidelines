@@ -10,7 +10,7 @@ import {
   type AdoptionState,
   type LocalAccount,
   type Workspace,
-} from "@demo/backend/domain";
+} from "@demo/domain";
 import { readShellState } from "./application/use-cases";
 import { readSession } from "./session";
 

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { loadGovernanceSnapshot } from "@/lib/governance-server";
+import { loadGovernanceSnapshot } from "@demo/backend";
 import { resolveAdoptionGate } from "@/server/adoption/gate";
 import SettingsView from "./_view/SettingsView";
 import WorkspaceSettingsView from "./_view/WorkspaceSettingsView";

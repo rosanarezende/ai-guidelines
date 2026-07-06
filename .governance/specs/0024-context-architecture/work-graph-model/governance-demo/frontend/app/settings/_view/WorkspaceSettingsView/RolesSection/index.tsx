@@ -7,7 +7,7 @@ import type {
   SubjectKind,
   SubjectRef,
   WorkspaceRoleId,
-} from "@demo/backend/domain";
+} from "@demo/contracts";
 import { Flex, ResponsiveGrid } from "@/app/_ui/shared";
 import {
   assignWorkspaceRole,

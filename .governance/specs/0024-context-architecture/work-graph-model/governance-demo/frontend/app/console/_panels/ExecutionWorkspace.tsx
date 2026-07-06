@@ -8,7 +8,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { DataPill, EntityCard, Flex, ResponsiveGrid, SectionCard } from "@/app/_ui/shared";
 
 export default function ExecutionWorkspace({ snapshot }: { snapshot: GovernanceSnapshot }) {

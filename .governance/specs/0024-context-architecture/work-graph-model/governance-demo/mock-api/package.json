@@ -13,6 +13,9 @@
     "test:api": "node --test \"tests/**/*.test.ts\""
   },
   "dependencies": {
+    "@demo/contracts": "*",
+    "@demo/domain": "*",
+    "@demo/test-fixtures": "*",
     "@hono/node-server": "^1.13.7",
     "hono": "^4.6.14",
     "lowdb": "^7.0.1"

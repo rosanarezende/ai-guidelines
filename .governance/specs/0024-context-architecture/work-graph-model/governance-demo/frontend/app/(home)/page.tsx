@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { loadGovernanceSnapshot } from "@/lib/governance-server";
+import { loadGovernanceSnapshot } from "@demo/backend";
 import { entryRedirect, resolveAdoptionGate } from "@/server/adoption/gate";
 import HomeView from "./_view/HomeView";
 import WorkspaceHome from "./_view/WorkspaceHome";

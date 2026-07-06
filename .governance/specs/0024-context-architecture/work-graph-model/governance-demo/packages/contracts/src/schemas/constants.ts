@@ -1,0 +1,1 @@
+export { ASSISTANT_FUNCTIONS, DEMO_WORKSPACE_ID, WORKSPACE_ROLE_IDS } from "@demo/domain";

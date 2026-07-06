@@ -1,4 +1,4 @@
-import type { WorkSourceKind } from "@demo/backend/domain";
+import type { WorkSourceKind } from "@demo/contracts";
 import type { SourceScenarioId } from "./sourceFlow";
 
 export type SourcesCopy = {

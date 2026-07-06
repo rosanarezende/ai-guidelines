@@ -9,7 +9,7 @@ import type {
   AssistantProviderKindId,
   DataClassification,
   Workspace,
-} from "@demo/backend/domain";
+} from "@demo/contracts";
 import { dispatchForWorkspace, type UseCaseResult } from "./use-cases";
 
 const PROVIDER_KINDS: AssistantProviderKindId[] = [

@@ -3,7 +3,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useMemo, useState } from "react";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { Flex } from "@/app/_ui/shared";
 import {
   DEFAULT_ASSIGNMENTS,

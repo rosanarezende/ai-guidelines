@@ -2,7 +2,7 @@
 
 `tools/` e a bancada operacional da `governance-demo`.
 
-Ela existe para provar, publicar e manter a simulacao `acme-*`. Ela nao e o backend de produto, nao e API do app e nao deve receber feature nova de governanca. O backend ativo fica em `../backend/src`; o app chama esse backend por `@demo/backend` e `@demo/backend/domain`.
+Ela existe para provar, publicar e manter a simulacao `acme-*`. Ela nao e o backend de produto, nao e API do app e nao deve receber feature nova de governanca. O backend ativo fica em `../backend/src`; o shared kernel fica em `../packages/domain`; o app chama essas fronteiras por `@demo/backend`, `@demo/contracts` e `@demo/domain` (browser-safe). Ferramentas Node que precisam de validadores/digest/projecoes usam `@demo/domain/server`.
 
 ## Para que serve
 

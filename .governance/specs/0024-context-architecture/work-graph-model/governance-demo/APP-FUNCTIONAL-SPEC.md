@@ -60,7 +60,8 @@ Quando uma funcionalidade ainda nao tem backend real, isso fica explicitamente m
 ## 2.2 APIs de produto do shell (R1 entregue)
 
 Rotas Next (`frontend/app/api/local/*`) sobre use cases + reducer puro
-(`backend/src/domain/adoption-commands.ts`); toda mutação vira comando + evento:
+(`@demo/domain`, fisicamente em `packages/domain/src/onboarding`); toda mutação
+vira comando + evento:
 
 | Rota                                        | Método   | Função                                                                         |
 | ------------------------------------------- | -------- | ------------------------------------------------------------------------------ |

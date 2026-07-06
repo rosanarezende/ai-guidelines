@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Box } from "@mui/material";
-import type { Authority } from "@/lib/types";
+import type { Authority } from "@demo/contracts";
 import { SectionCard } from "@/app/_ui/shared";
 import { RoleContractList } from "@/app/_ui/adoption";
 import {

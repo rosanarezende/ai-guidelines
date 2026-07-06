@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { setOnboardingStatus } from "@/server/adoption/application/use-cases";
 import { readSession } from "@/server/adoption/session";
-import type { OnboardingStatus } from "@demo/backend/domain";
+import type { OnboardingStatus } from "@demo/contracts";
 
 export async function POST(request: Request) {
   const session = await readSession();

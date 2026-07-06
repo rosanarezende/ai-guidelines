@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadGovernanceSnapshot } from "@/lib/governance-server";
+import { loadGovernanceSnapshot } from "@demo/backend";
 
 export const dynamic = "force-dynamic";
 

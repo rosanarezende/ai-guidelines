@@ -1,4 +1,4 @@
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { profileChipLabel } from "../profiles";
 import type { ChecklistItem } from "./types";
 import { format } from "./format";

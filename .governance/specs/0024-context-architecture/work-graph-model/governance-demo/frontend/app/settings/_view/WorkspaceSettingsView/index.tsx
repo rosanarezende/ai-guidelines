@@ -10,7 +10,7 @@ import {
   workspaceSlugId,
   type GovernanceHostKind,
   type Workspace,
-} from "@demo/backend/domain";
+} from "@demo/domain";
 import GovernanceHostSection from "./GovernanceHostSection";
 import MembersSection from "./MembersSection";
 import membersCopy from "./MembersSection/_locales/pt-br.json";

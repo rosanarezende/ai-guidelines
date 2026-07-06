@@ -1,4 +1,4 @@
-import type { GovernanceIssue, GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceIssue, GovernanceSnapshot } from "@demo/contracts";
 import { ResponsiveGrid, StatCard } from "@/app/_ui/shared";
 
 export function ConsoleStats({

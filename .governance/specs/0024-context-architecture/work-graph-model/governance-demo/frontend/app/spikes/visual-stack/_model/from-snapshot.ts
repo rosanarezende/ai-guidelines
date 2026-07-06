@@ -1,7 +1,7 @@
 // from-snapshot.ts — constrói os view-models a partir do read-model REAL da
 // demo acme (GovernanceSnapshot). Roda no servidor; entrega dados serializáveis
 // e independentes de renderer. Nada aqui escreve estado.
-import type { GovernanceSnapshot, Intent } from "@demo/backend/domain";
+import type { GovernanceSnapshot, Intent } from "@demo/contracts";
 import { cycleFromWindow, targetConfidence, targetRisk, issueRisk } from "./confidence";
 import type {
   ConfidenceState,

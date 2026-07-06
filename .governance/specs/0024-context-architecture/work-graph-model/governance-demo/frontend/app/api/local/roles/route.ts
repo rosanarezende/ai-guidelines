@@ -2,7 +2,7 @@
 // POST /api/local/roles — propõe papel para subject (pessoa/time/grupo/...).
 // Papel para outra pessoa nasce proposed; authority só após aceite (QRD-10).
 import { NextResponse } from "next/server";
-import { WORKSPACE_ROLE_IDS, type SubjectRef } from "@demo/backend/domain";
+import { WORKSPACE_ROLE_IDS, type SubjectRef } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { assignRole, membersOverview } from "@/server/adoption/application/members";
 

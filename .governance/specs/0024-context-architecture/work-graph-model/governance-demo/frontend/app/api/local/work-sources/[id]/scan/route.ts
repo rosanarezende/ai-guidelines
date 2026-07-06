@@ -2,7 +2,7 @@
 // git head/dirty, hash de inventário, detecção de pasta sincronizada; o trust
 // é derivado no domínio (fail-closed: erro de scan => untrusted).
 import { NextResponse } from "next/server";
-import { normalizeWorkspace } from "@demo/backend/domain";
+import { normalizeWorkspace } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { readShellState } from "@/server/adoption/application/use-cases";
 import { scanWorkSource } from "@/server/adoption/application/work-sources";

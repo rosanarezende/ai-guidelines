@@ -3,7 +3,7 @@
 import { Box, Button, Chip } from "@mui/material";
 import TerminalIcon from "@mui/icons-material/Terminal";
 import Link from "next/link";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import copy from "./_locales/pt-br.json";
 

@@ -9,7 +9,7 @@ import {
   type AdoptionState,
   type LocalShellCommand,
   type LocalShellCommandType,
-} from "@demo/backend/domain";
+} from "@demo/domain";
 import { mockApiBaseUrl, resolveDataSource } from "../data-source";
 import { applyLocalShellCommand, loadAdoptionState } from "./file-state-store";
 

@@ -2,7 +2,7 @@
 // no GovernanceGraphViewModel. Roda no servidor. Atributos de filtro
 // (owner/team/ciclo/confiança/status/contrato/fonte) são derivados do payload
 // de cada nó sem recriar ontologia no frontend.
-import type { GraphEdge, GraphNode } from "@demo/backend/domain";
+import type { GraphEdge, GraphNode } from "@demo/contracts";
 import type { ConfidenceState, GovernanceGraphViewModel } from "./view-models";
 
 type LooseData = Record<string, unknown>;

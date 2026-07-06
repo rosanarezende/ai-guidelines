@@ -1,4 +1,4 @@
-import type { BreakGlass, DashboardTarget, GovernanceSnapshot } from "@demo/backend/domain";
+import type { BreakGlass, DashboardTarget, GovernanceSnapshot } from "@demo/contracts";
 import type { ResultConfidenceState, ResultsDashboardViewModel } from "./view-models";
 
 export function buildResultsDashboard(snapshot: GovernanceSnapshot): ResultsDashboardViewModel {

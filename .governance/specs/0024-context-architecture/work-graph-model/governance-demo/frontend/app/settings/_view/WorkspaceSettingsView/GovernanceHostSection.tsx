@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import type { GovernanceHostKind, HostFitCheck } from "@demo/backend/domain";
+import type { GovernanceHostKind, HostFitCheck } from "@demo/contracts";
 import { Flex } from "@/app/_ui/shared";
 import copy from "./_locales/pt-br.json";
 

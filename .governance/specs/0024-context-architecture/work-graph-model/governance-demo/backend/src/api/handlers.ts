@@ -20,7 +20,7 @@ import {
   queryIntentDependencies,
 } from "../application/queries/graph.ts";
 import { dryRunCommand, executeCommand } from "../application/queries/governance-snapshot.ts";
-import type { GovernedCommand } from "../domain/index.ts";
+import type { GovernedCommand } from "@demo/domain/server";
 import {
   assistantAdvisoryRequestSchema,
   buildApiContractDocument,

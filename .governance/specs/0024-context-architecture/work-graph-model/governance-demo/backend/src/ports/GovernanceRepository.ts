@@ -1,7 +1,7 @@
 // GovernanceRepository.ts — porta autoritativa da runtime v3.
 // O adapter file é a implementação de referência; qualquer backend write-capable
 // futuro (sqlite/neo4j/mongo) precisa honrar exatamente este contrato.
-import type { GovernedCommand, GovernanceIssue, OrgSnapshot } from "../domain/index.ts";
+import type { GovernedCommand, GovernanceIssue, OrgSnapshot } from "@demo/domain/server";
 
 export type CommandLockOptions = {
   lockTtlMs?: number;

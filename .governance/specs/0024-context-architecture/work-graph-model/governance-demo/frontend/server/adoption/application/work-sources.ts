@@ -4,7 +4,7 @@
 // GitHub work-source: contrato modelado (kind "github" + provider fields);
 // a conexão cloud real é fatia seguinte — status fica draft, nunca "connected".
 import { randomUUID } from "node:crypto";
-import type { Workspace, WorkSource, WorkSourceKind, WorkSourceScan } from "@demo/backend/domain";
+import type { Workspace, WorkSource, WorkSourceKind, WorkSourceScan } from "@demo/contracts";
 import { resolveDataSource } from "../data-source";
 import { scanLocalSource } from "../infrastructure/source-scan";
 import { dispatchForWorkspace, type UseCaseResult } from "./use-cases";

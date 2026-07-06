@@ -1,4 +1,4 @@
-import type { IntegrationCatalog } from "@/lib/types";
+import type { IntegrationCatalog } from "@demo/contracts";
 import assistantPtBr from "./_locales/pt-br.json";
 import type { ProfileId } from "../profiles";
 

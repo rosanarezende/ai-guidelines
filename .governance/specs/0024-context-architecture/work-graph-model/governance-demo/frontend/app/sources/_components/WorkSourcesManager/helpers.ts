@@ -1,4 +1,4 @@
-import type { WorkSource, WorkSourceKind } from "@demo/backend/domain";
+import type { WorkSource, WorkSourceKind } from "@demo/contracts";
 
 export const ADDABLE_SOURCE_KINDS: WorkSourceKind[] = [
   "git-repo",

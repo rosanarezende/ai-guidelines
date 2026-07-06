@@ -16,7 +16,7 @@ import type {
   WorkspaceRoleId,
   WorkSource,
   WorkSourceKind,
-} from "@demo/backend/domain";
+} from "@demo/contracts";
 
 export type ShellWorkspaceSummary = {
   id: string;

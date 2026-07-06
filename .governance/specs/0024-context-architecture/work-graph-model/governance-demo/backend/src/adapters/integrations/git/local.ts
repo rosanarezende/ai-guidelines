@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import type { EvidenceProvider, IntegrationResult } from "../../../ports/IntegrationAdapter.ts";
-import { REPOS_ROOT } from "../../../shared/paths.ts";
+import { REPOS_ROOT } from "../../fs/paths.ts";
 
 function git(cwd: string, args: string[]): { ok: boolean; stdout: string; error?: string } {
   const result = spawnSync("git", args, { cwd, encoding: "utf8", shell: false, timeout: 15_000 });

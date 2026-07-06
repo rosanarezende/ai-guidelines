@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { DEMO_WORKSPACE_ID, isDemoWorkspace } from "@demo/backend/domain";
+import { DEMO_WORKSPACE_ID, isDemoWorkspace } from "@demo/domain";
 import { resolveAdoptionGate } from "@/server/adoption/gate";
 import OrganizationsView from "./_view/OrganizationsView";
 

@@ -12,6 +12,10 @@ import { parse } from "yaml";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, "..", "..");
 const backendRoot = path.join(root, "backend");
+const packagesRoot = path.join(root, "packages");
+const domainPackageRoot = path.join(packagesRoot, "domain");
+const contractsPackageRoot = path.join(packagesRoot, "contracts");
+const testFixturesPackageRoot = path.join(packagesRoot, "test-fixtures");
 const workGraphRoot = path.resolve(root, "..");
 const appDir = path.join(root, "frontend");
 const repoRoot = path.resolve(root, "../../../../..");
@@ -197,6 +201,20 @@ function assertWorkspaceDependencyContract(files: string[]) {
   const rootPackage = JSON.parse(fs.readFileSync(rootPackageFile, "utf8"));
   const appPackage = JSON.parse(fs.readFileSync(appPackageFile, "utf8"));
   const appWorkspacePath = path.relative(repoRoot, appDir).replaceAll("\\", "/");
+  const requiredWorkspaces = [
+    domainPackageRoot,
+    contractsPackageRoot,
+    testFixturesPackageRoot,
+    backendRoot,
+    appDir,
+    path.join(root, "mock-api"),
+    path.join(root, "test"),
+  ].map((item) => path.relative(repoRoot, item).replaceAll("\\", "/"));
+  for (const workspacePath of requiredWorkspaces) {
+    if (!rootPackage.workspaces?.includes(workspacePath)) {
+      fail(`workspace da governance-demo ausente no package.json raiz: ${workspacePath}`);
+    }
+  }
   if (!rootPackage.workspaces?.includes(appWorkspacePath)) {
     fail(`governance-next nao esta declarado como npm workspace: ${appWorkspacePath}`);
   }
@@ -282,16 +300,54 @@ for (const { file, key } of requiredLocaleFiles) {
     );
   }
 }
-// ── fronteira backend: app consome apenas o SDK (@demo/backend[/domain]) ────
+// ── fronteira de pacotes: app consome SDK de aplicação + contratos compartilhados ─
 // Import solto de módulo interno (.mjs, backend/src/..., tools/...)
 // quebra o contrato de gateway estável para web/native futuros.
+const legacyTypeBarrel = path.join(appDir, "lib", "types.ts");
+if (fs.existsSync(legacyTypeBarrel)) {
+  fail("frontend/lib/types.ts e barrel decorativo; use @demo/contracts para tipos compartilhados");
+}
+const legacyBackendFacade = path.join(appDir, "lib", "governance-server.ts");
+if (fs.existsSync(legacyBackendFacade)) {
+  fail(
+    "frontend/lib/governance-server.ts e facade decorativo; importe @demo/backend diretamente em server routes/pages"
+  );
+}
 for (const file of sourceFiles.filter((item) => /\.(ts|tsx)$/.test(item))) {
   const text = fs.readFileSync(file, "utf8");
   const relative = path.relative(appDir, file).replaceAll("\\", "/");
   const importRegex = /(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?["']([^"']+)["']/g;
   for (const match of text.matchAll(importRegex)) {
     const specifier = match[1] || "";
-    const isSdkEntry = specifier === "@demo/backend" || specifier === "@demo/backend/domain";
+    if (specifier === "@/lib/types") {
+      fail(`import legado de tipos no frontend; use @demo/contracts: ${relative}`);
+    }
+    if (specifier === "@/lib/governance-server") {
+      fail(`facade server-side decorativo no frontend; use @demo/backend: ${relative}`);
+    }
+    const isSdkEntry =
+      specifier === "@demo/backend" ||
+      specifier === "@demo/domain" ||
+      specifier === "@demo/domain/browser" ||
+      specifier === "@demo/contracts";
+    if (specifier === "@demo/domain/server") {
+      fail(
+        `entrypoint server-only do dominio proibido no app; use @demo/domain ou @demo/contracts: ${relative} -> ${specifier}`
+      );
+    }
+    // Qualquer subpath do dominio alem de @demo/domain/browser expoe modulo
+    // server-only (node:crypto/validadores) no bundle do app; so o entry raiz
+    // (browser-safe) e o alias ./browser sao permitidos.
+    if (specifier.startsWith("@demo/domain/") && specifier !== "@demo/domain/browser") {
+      fail(
+        `subpath do dominio proibido no app (server-only fora do SDK); use @demo/domain ou @demo/contracts: ${relative} -> ${specifier}`
+      );
+    }
+    if (specifier === "@demo/backend/domain") {
+      fail(
+        `contrato de dominio nao deve sair do backend; use @demo/domain: ${relative} -> ${specifier}`
+      );
+    }
     if (!isSdkEntry && /backend\//.test(specifier)) {
       fail(`import interno do backend fora do SDK (@demo/backend): ${relative} -> ${specifier}`);
     }
@@ -371,12 +427,35 @@ for (const file of readRelativeFiles()) {
     fail(`localStorage proibido (use o shell local via /api/local/*): ${relative}`);
   }
 }
-const domainDir = path.join(backendRoot, "src", "domain");
+if (fs.existsSync(path.join(backendRoot, "src", "domain"))) {
+  fail("shared kernel nao deve morar em backend/src/domain; use packages/domain/src");
+}
+if (fs.existsSync(path.join(backendRoot, "src", "shared"))) {
+  fail("backend/src/shared cria caixa generica; use application, ports, adapters ou api");
+}
+const domainDir = path.join(domainPackageRoot, "src");
 for (const file of walk(domainDir).filter((item) => /\.ts$/.test(item))) {
   const text = fs.readFileSync(file, "utf8");
   const relative = path.relative(root, file).replaceAll("\\", "/");
-  if (/from "(next|react|@mui|node:fs|node:path|node:child_process|yaml)/.test(text)) {
+  if (
+    /from "(next|react|@mui|hono|lowdb|@playwright|node:fs|node:path|node:child_process|yaml)/.test(
+      text
+    )
+  ) {
     fail(`dominio compartilhado deve ser puro (sem framework/fs/yaml): ${relative}`);
+  }
+  if (/(backend\/|frontend\/|mock-api\/|test\/|tools\/)/.test(text)) {
+    fail(`dominio compartilhado nao pode importar camadas da demo: ${relative}`);
+  }
+}
+for (const packageRoot of [contractsPackageRoot, testFixturesPackageRoot]) {
+  const packageName = path.basename(packageRoot);
+  for (const file of walk(path.join(packageRoot, "src")).filter((item) => /\.ts$/.test(item))) {
+    const text = fs.readFileSync(file, "utf8");
+    const relative = path.relative(root, file).replaceAll("\\", "/");
+    if (/(backend\/src|frontend\/|mock-api\/src|test\/journeys|tools\/)/.test(text)) {
+      fail(`package ${packageName} nao pode importar camada concreta da demo: ${relative}`);
+    }
   }
 }
 // backend ativo é TypeScript: .mjs só sobrevive como shim técnico ou fixture fora de src
@@ -449,6 +528,22 @@ if (!assistantRuntime?.systems?.includes("ollama"))
   fail("catalogo sem assistant runtime local Ollama");
 
 const tscBin = path.join(repoRoot, "node_modules", "typescript", "bin", "tsc");
+for (const [label, packageRoot] of [
+  ["@demo/domain", domainPackageRoot],
+  ["@demo/contracts", contractsPackageRoot],
+  ["@demo/test-fixtures", testFixturesPackageRoot],
+] as const) {
+  const packageTsc = spawnSync(
+    process.execPath,
+    [tscBin, "-p", path.join(packageRoot, "tsconfig.json")],
+    {
+      cwd: packageRoot,
+      stdio: "inherit",
+      shell: false,
+    }
+  );
+  if (packageTsc.status !== 0) fail(`typecheck strict de ${label} falhou`);
+}
 const backendTsc = spawnSync(process.execPath, [tscBin, "-p", backendTsconfigFile], {
   cwd: backendRoot,
   stdio: "inherit",

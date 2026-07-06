@@ -18,8 +18,8 @@ import {
   type LocalShellCommandType,
   type RoleAssignment,
   type WorkspaceRoleId,
-} from "./adoption-shell.ts";
-import { applyShellCommand, type ShellReduceResult } from "./adoption-commands.ts";
+} from "../workspace/adoption-shell.ts";
+import { applyShellCommand, type ShellReduceResult } from "../onboarding/adoption-commands.ts";
 
 export type AuthorizationDecision = { ok: true } | { ok: false; error: string };
 

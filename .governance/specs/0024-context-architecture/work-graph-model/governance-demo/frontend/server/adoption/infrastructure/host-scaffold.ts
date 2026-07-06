@@ -14,7 +14,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
-import type { GovernanceHostKind, HostFitCheck } from "@demo/backend/domain";
+import type { GovernanceHostKind, HostFitCheck } from "@demo/contracts";
 
 const HOST_DIRS = ["members", "sources", "business", "intents", "decisions", "outcomes", "events"];
 

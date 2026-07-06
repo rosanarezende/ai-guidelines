@@ -1,4 +1,4 @@
-import type { WorkSourceKind } from "@demo/backend/domain";
+import type { WorkSourceKind } from "@demo/contracts";
 
 export type SourceLocation = "local" | "cloud";
 

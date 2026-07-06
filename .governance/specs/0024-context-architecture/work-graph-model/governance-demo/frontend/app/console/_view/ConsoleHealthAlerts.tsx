@@ -1,5 +1,5 @@
 import { Alert } from "@mui/material";
-import type { GovernanceIssue } from "@/lib/types";
+import type { GovernanceIssue } from "@demo/contracts";
 
 export function ConsoleHealthAlerts({
   loadError,

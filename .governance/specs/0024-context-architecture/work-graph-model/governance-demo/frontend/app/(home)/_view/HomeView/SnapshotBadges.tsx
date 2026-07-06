@@ -1,5 +1,5 @@
 import { Chip } from "@mui/material";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { Flex } from "@/app/_ui/shared";
 import { format } from "./format";
 import copy from "./_locales/pt-br.json";

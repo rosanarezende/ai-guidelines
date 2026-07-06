@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { GovernanceSnapshot, IntegrationCatalog } from "@/lib/types";
+import type { GovernanceSnapshot, IntegrationCatalog } from "@demo/contracts";
 import {
   DEFAULT_ASSIGNMENTS,
   assistantSystems,

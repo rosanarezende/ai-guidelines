@@ -1,6 +1,6 @@
 import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
-import type { DashboardTarget, GovernanceSnapshot } from "@/lib/types";
+import type { DashboardTarget, GovernanceSnapshot } from "@demo/contracts";
 import {
   DataPill,
   EntityCard,

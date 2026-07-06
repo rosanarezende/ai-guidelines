@@ -3,7 +3,7 @@
 import { Box, Button, Chip, Paper, Typography } from "@mui/material";
 import CorporateFareIcon from "@mui/icons-material/CorporateFare";
 import { Flex } from "@/app/_ui/shared";
-import type { OnboardingStatus, WorkspaceKind } from "@demo/backend/domain";
+import type { OnboardingStatus, WorkspaceKind } from "@demo/contracts";
 import copy from "./_locales/pt-br.json";
 
 const m = copy.messages;

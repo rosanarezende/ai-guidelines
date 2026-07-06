@@ -1,5 +1,5 @@
 import { Alert, Box, Typography } from "@mui/material";
-import type { GovernanceIssue } from "@/lib/types";
+import type { GovernanceIssue } from "@demo/contracts";
 import copy from "./_locales/pt-br.json";
 
 export function IssueList({ issues, limit = 8 }: { issues: GovernanceIssue[]; limit?: number }) {

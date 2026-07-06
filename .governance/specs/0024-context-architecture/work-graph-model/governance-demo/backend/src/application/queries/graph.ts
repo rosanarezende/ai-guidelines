@@ -13,7 +13,7 @@ import {
 import { loadPublishedRepoWorks, validateRepoWorks } from "../../adapters/repo-first/repo-works.ts";
 import { FileReadModelSource } from "../../adapters/file/FileReadModelSource.ts";
 import { InMemoryGraphSource } from "../../adapters/graph-memory/InMemoryGraphSource.ts";
-import { buildGraphReadModel } from "../../domain/graph/build.ts";
+import { buildGraphReadModel } from "@demo/domain/server";
 import {
   contractImpact,
   detectGraphConflicts,
@@ -27,8 +27,8 @@ import {
   type GraphNodeDetail,
   type IntentDependencies,
   intentDependencies,
-} from "../../domain/graph/query.ts";
-import type { GovernanceIssue, GraphEdge, GraphNode } from "../../domain/index.ts";
+} from "@demo/domain/server";
+import type { GovernanceIssue, GraphEdge, GraphNode } from "@demo/domain/server";
 import type { GraphReadModelSource, GraphSnapshot } from "../../ports/GraphReadModelSource.ts";
 import { openFileGovernanceRuntime } from "../runtime.ts";
 

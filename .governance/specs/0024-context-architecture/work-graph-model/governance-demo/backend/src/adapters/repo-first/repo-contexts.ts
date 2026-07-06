@@ -4,9 +4,9 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { parse } from "yaml";
-import type { GovernanceIssue, OrgSnapshot } from "../../domain/index.ts";
-import { digestText12, stableSorted } from "../../shared/stable-digest.ts";
-import { REPOS_ROOT } from "../../shared/paths.ts";
+import type { GovernanceIssue, OrgSnapshot } from "@demo/domain/server";
+import { digestText12, stableSorted } from "@demo/domain/server";
+import { REPOS_ROOT } from "../fs/paths.ts";
 
 const REPOS_DIR = REPOS_ROOT;
 const GOVERNANCE_DIR = ".governance";

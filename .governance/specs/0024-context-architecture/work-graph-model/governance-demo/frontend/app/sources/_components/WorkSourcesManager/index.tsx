@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Box, Divider, Typography } from "@mui/material";
-import type { WorkSource } from "@demo/backend/domain";
+import type { WorkSource } from "@demo/contracts";
 import { useEffect, useState } from "react";
 import {
   addWorkspaceWorkSource,

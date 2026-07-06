@@ -15,9 +15,9 @@ import type {
   StandaloneWork,
   Triage,
   Verdict,
-} from "./governance.ts";
+} from "../workspace/governance.ts";
 import { validateOrg } from "./org-domain.ts";
-import { REPO_WORK_STATUSES } from "./repo-projections.ts";
+import { REPO_WORK_STATUSES } from "../sources/repo-projections.ts";
 
 export type CommandSpec = { mutates: boolean; payloadKey?: string };
 

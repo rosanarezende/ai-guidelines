@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { IssueList, ResponsiveGrid, SectionCard, StatCard } from "@/app/_ui/shared";
 import { JsonBlock } from "@/app/_ui/shared/JsonBlock";
 

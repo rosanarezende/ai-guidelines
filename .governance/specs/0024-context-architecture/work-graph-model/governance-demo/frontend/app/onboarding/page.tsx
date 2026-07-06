@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { loadGovernanceSnapshot, loadIntegrationCatalog } from "@/lib/governance-server";
+import { loadGovernanceSnapshot, loadIntegrationCatalog } from "@demo/backend";
 import { resolveAdoptionGate } from "@/server/adoption/gate";
 import type { ProfileId } from "@/app/_domain/adoption/model";
 import OnboardingView from "./_view/OnboardingView";

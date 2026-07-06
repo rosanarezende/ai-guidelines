@@ -1,4 +1,4 @@
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import type { AdoptionSummary, WorkSource } from "./types";
 import { deriveAttention } from "./attention";
 import { deriveChecklist } from "./checklist";

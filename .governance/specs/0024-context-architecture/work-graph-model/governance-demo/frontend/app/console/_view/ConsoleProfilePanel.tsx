@@ -1,5 +1,5 @@
 import { Chip, Paper } from "@mui/material";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { Flex, IssueList } from "@/app/_ui/shared";
 
 export function ConsoleProfilePanel({ snapshot }: { snapshot: GovernanceSnapshot }) {

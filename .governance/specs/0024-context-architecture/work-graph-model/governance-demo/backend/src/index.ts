@@ -1,14 +1,8 @@
 // index.ts — superfície pública do backend (SDK tipado).
 // O frontend e os tools consomem DAQUI (alias @demo/backend); importar módulo
 // interno por caminho solto é violação de fronteira (guardado no check do app).
-export * from "./domain/index.ts";
-// domínio server-side (usa node:crypto; fora do barrel browser-safe)
-export * from "./domain/org-domain.ts";
-export * from "./domain/commands.ts";
-export * from "./domain/repo-projections.ts";
-export * from "./domain/graph/build.ts";
-export * from "./shared/paths.ts";
-export { digest12, digestPublic12, digestText12 } from "./shared/stable-digest.ts";
+export * from "@demo/domain/server";
+export * from "./adapters/fs/paths.ts";
 
 export { FileGovernanceRepository } from "./adapters/file/FileGovernanceRepository.ts";
 export { FileReadModelSource } from "./adapters/file/FileReadModelSource.ts";

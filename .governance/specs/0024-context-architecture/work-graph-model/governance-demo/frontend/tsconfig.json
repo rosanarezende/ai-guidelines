@@ -17,7 +17,8 @@
     "paths": {
       "@/*": ["./*"],
       "@demo/backend": ["../backend/src/index.ts"],
-      "@demo/backend/domain": ["../backend/src/domain/index.ts"]
+      "@demo/domain": ["../packages/domain/src/index.ts"],
+      "@demo/contracts": ["../packages/contracts/src/index.ts"]
     },
     "plugins": [
       {

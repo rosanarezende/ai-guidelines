@@ -1,4 +1,4 @@
-// paths.mjs — shim de compatibilidade; fonte ativa em src/shared/paths.ts.
+// paths.mjs — shim de compatibilidade; fonte ativa em src/adapters/fs/paths.ts.
 export {
   SIM_ROOT,
   GOVERNANCE_ROOT,
@@ -6,4 +6,4 @@ export {
   WORK_GRAPH_ROOT,
   READ_MODEL_EXAMPLES_ROOT,
   INTEGRATION_CATALOG_FILE,
-} from "./src/shared/paths.ts";
+} from "./src/adapters/fs/paths.ts";

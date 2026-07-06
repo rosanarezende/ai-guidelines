@@ -4,8 +4,8 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type { GraphReadModel } from "../../domain/index.ts";
-import { READ_MODEL_EXAMPLES_ROOT } from "../../shared/paths.ts";
+import type { GraphReadModel } from "@demo/domain/server";
+import { READ_MODEL_EXAMPLES_ROOT } from "../fs/paths.ts";
 import type { GraphReadModelSource, GraphSnapshot } from "../../ports/GraphReadModelSource.ts";
 
 type ExportedReadModel = GraphReadModel & {

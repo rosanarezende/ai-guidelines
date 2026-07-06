@@ -1,7 +1,7 @@
 // GET  /api/local/work-sources — fontes com sourceTrust/limitações visíveis.
 // POST /api/local/work-sources — adiciona fonte (entra como "declared").
 import { NextResponse } from "next/server";
-import { normalizeWorkspace } from "@demo/backend/domain";
+import { normalizeWorkspace } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { readShellState } from "@/server/adoption/application/use-cases";
 import { addWorkSource } from "@/server/adoption/application/work-sources";

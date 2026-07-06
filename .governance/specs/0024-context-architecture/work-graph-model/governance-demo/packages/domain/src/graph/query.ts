@@ -1,7 +1,6 @@
 // query.ts — consultas puras sobre o read-model de grafo derivado.
-// O grafo é projeção: nenhuma query aqui autoriza ação; ação governada
-// relê o SSOT via runtime (ver backend/examples/read-models/ACTION-CONTRACT.md).
-import type { GraphEdge, GraphNode, GraphReadModel } from "../governance.ts";
+// O grafo é projeção: nenhuma query aqui autoriza ação; ação governada relê o SSOT.
+import type { GraphEdge, GraphNode, GraphReadModel } from "../workspace/governance.ts";
 
 export type GraphNeighbor = {
   node: GraphNode;

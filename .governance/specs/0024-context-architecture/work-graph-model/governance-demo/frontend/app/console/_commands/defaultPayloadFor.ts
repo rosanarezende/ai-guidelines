@@ -1,4 +1,4 @@
-import type { CommandType, GovernanceSnapshot } from "@/lib/types";
+import type { CommandType, GovernanceSnapshot } from "@demo/contracts";
 import {
   authorityForRepo,
   firstIntent,

@@ -2,7 +2,7 @@
 
 import { Box, Container, CssBaseline, ThemeProvider } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { theme } from "@/app/_ui/theme";
 import CommandWorkspace from "../_commands/CommandWorkspace";
 import AuditConsole from "../_panels/AuditConsole";

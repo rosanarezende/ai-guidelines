@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Chip, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
-import type { IntegrationItem } from "@/lib/types";
+import type { IntegrationItem } from "@demo/contracts";
 import { DataPill, EntityCard, Flex, ResponsiveGrid, SectionCard } from "@/app/_ui/shared";
 import { integrationStatus } from "../../_model";
 import copy from "./_locales/pt-br.json";

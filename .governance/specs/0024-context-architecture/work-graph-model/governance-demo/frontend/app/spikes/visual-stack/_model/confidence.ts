@@ -1,7 +1,7 @@
 // confidence.ts — derivação pura de estado de confiança e risco por nó.
 // Regras espelham o modelo: outcome válido = verified; attestation-collapse =
 // self-declared; break-glass visível; sem outcome = pending/no-evidence.
-import type { BreakGlass, DashboardTarget, GovernanceIssue } from "@demo/backend/domain";
+import type { BreakGlass, DashboardTarget, GovernanceIssue } from "@demo/contracts";
 import type { ConfidenceState, RiskLevel } from "./view-models";
 
 export function targetConfidence(

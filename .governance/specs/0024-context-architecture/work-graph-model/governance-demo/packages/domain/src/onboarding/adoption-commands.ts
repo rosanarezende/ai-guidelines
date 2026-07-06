@@ -34,7 +34,7 @@ import {
   type WorkspaceRoleId,
   type WorkSource,
   type WorkSourceScan,
-} from "./adoption-shell.ts";
+} from "../workspace/adoption-shell.ts";
 
 export type ShellReduceResult = { ok: true; state: AdoptionState } | { ok: false; error: string };
 

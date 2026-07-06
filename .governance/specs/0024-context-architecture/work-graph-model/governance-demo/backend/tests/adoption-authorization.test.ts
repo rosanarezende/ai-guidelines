@@ -9,13 +9,13 @@ import {
   principalCanAccessWorkspace,
   principalPersonId,
   resolveWorkspaceAuthority,
-} from "../src/domain/index.ts";
+} from "@demo/domain/server";
 import type {
   AdoptionState,
   LocalShellCommand,
   LocalShellCommandType,
   Workspace,
-} from "../src/domain/index.ts";
+} from "@demo/domain/server";
 
 function command(
   type: LocalShellCommandType,

@@ -2,7 +2,7 @@
 
 import { Alert, Box, Button, Chip, Typography } from "@mui/material";
 import Link from "next/link";
-import type { GovernanceHostKind } from "@demo/backend/domain";
+import type { GovernanceHostKind } from "@demo/contracts";
 import AppShell from "@/app/_ui/shell/AppShell";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import WorkSourcesManager from "../../_components/WorkSourcesManager";

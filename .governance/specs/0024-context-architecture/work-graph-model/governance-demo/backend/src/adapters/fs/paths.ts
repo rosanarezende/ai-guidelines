@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
-export const BACKEND_ROOT = path.join(here, "..", "..");
+export const BACKEND_ROOT = path.join(here, "..", "..", "..");
 export const SIM_ROOT = path.join(BACKEND_ROOT, "..");
 export const WORK_GRAPH_ROOT = path.join(SIM_ROOT, "..");
 export const GOVERNANCE_ROOT = path.join(SIM_ROOT, "acme", "governance");

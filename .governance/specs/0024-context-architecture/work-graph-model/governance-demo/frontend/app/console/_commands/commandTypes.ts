@@ -1,4 +1,4 @@
-import type { CommandType } from "@/lib/types";
+import type { CommandType } from "@demo/contracts";
 
 export const commandTypes: CommandType[] = [
   "proposal.create",

@@ -6,11 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
-import {
-  emptyAdoptionState,
-  type AdoptionState,
-  type LocalShellCommand,
-} from "../../backend/src/domain/index.ts";
+import { emptyAdoptionState, type AdoptionState, type LocalShellCommand } from "@demo/domain";
 
 export type MockDbShape = {
   schema: "governance.mock-api-db/v1";

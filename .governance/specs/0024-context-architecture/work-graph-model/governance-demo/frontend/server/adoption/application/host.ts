@@ -1,8 +1,8 @@
 // host.ts — use cases do governance host (R1): fit-check, criar/linkar,
 // sandbox explícito. Workspace pode existir sem host; onboarding real não
 // conclui sem host OU sandbox declarado (QRD-08).
-import type { GovernanceHostKind, HostFitCheck, Workspace } from "@demo/backend/domain";
-import { governanceHostDirName, workspaceSlugId } from "@demo/backend/domain";
+import type { GovernanceHostKind, HostFitCheck, Workspace } from "@demo/contracts";
+import { governanceHostDirName, workspaceSlugId } from "@demo/domain";
 import { resolveDataSource } from "../data-source";
 import { runHostFitCheck, scaffoldHost } from "../infrastructure/host-scaffold";
 import { dispatchForWorkspace, readShellState, type UseCaseResult } from "./use-cases";

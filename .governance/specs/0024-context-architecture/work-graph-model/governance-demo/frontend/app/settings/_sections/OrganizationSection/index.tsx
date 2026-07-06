@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Chip, Tooltip, Typography } from "@mui/material";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import type { ProfileOption } from "@/app/_domain/adoption/model";
 import copy from "./_locales/pt-br.json";

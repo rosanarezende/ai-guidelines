@@ -1,7 +1,7 @@
 // table-from-snapshot.ts — view-model de tabela operacional a partir do
 // read-model REAL da demo acme (intents, proposals, standalone e targets).
 // Separado de from-snapshot.ts para respeitar o limite de tamanho por arquivo.
-import type { GovernanceSnapshot } from "@demo/backend/domain";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { issueRisk, targetConfidence, targetRisk } from "./confidence";
 import type { GovernanceTableRow, GovernanceTableViewModel } from "./view-models";
 

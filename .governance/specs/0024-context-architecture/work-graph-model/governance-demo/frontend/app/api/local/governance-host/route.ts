@@ -3,7 +3,7 @@
 // Três distribuições físicas + sandbox explícito (QRD-08/09/21); create faz
 // scaffold real (host.yml, members/, events/events.jsonl, sourceRevision).
 import { NextResponse } from "next/server";
-import { normalizeWorkspace } from "@demo/backend/domain";
+import { normalizeWorkspace } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import {
   createOrLinkHost,

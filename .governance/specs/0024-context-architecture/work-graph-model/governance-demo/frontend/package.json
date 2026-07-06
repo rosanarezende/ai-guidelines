@@ -10,6 +10,8 @@
     "start": "next start --hostname 127.0.0.1 --port 3024"
   },
   "dependencies": {
+    "@demo/contracts": "*",
+    "@demo/domain": "*",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.1.1",

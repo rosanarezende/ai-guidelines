@@ -5,7 +5,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { useState } from "react";
 import { Flex, ResponsiveGrid } from "@/app/_ui/shared";
-import type { WorkspaceKind } from "@demo/backend/domain";
+import type { WorkspaceKind } from "@demo/contracts";
 import copy from "./_locales/pt-br.json";
 
 const m = copy.messages;

@@ -6,12 +6,9 @@
 //   POST /__reset             — { seed? } recarrega a seed (default: blank)
 // A mock API valida EXPERIÊNCIA (UX/e2e); nunca conta como governança real.
 import { Hono } from "hono";
-import {
-  applyAuthorizedShellCommand,
-  type LocalShellCommand,
-} from "../../backend/src/domain/index.ts";
+import { applyAuthorizedShellCommand, type LocalShellCommand } from "@demo/domain";
 import { emptyDb, openDb, writeDb } from "./db.ts";
-import { buildSeed, seedNames } from "./seeds/index.ts";
+import { buildSeed, seedNames } from "@demo/test-fixtures";
 
 export function createMockApp(): Hono {
   const app = new Hono();

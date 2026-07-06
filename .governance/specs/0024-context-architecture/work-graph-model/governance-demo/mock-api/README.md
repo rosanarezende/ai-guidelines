@@ -11,8 +11,9 @@ persiste o estado do shell de adoção em JSON mutável (`.data/db.json`, gitign
 iterar UX e rodar e2e sem depender do runtime governado.
 
 **Fidelidade por construção:** as mutações passam pelo MESMO reducer puro do domínio
-(`backend/src/domain/adoption-commands.ts`) que o backend real usa. A mock API não tem
-regra própria — ela só troca a persistência (lowdb em vez de file-first + lock).
+(`@demo/domain`, arquivo físico `packages/domain/src/onboarding/adoption-commands.ts`) que o
+backend real usa. As seeds vêm de `@demo/test-fixtures`. A mock API não tem regra
+própria — ela só troca a persistência (lowdb em vez de file-first + lock).
 
 ## Contrato de API
 
@@ -32,18 +33,19 @@ comandos para cá — as rotas de produto `/api/local/*` do Next continuam as me
 > usa o contrato de COMANDOS compartilhado com o backend real — desvio deliberado que
 > elimina drift de regra entre mock e real (uma única transição de estado no domínio).
 
-## Seeds (24)
+## Seeds (26)
 
 `blank` (default e2e) · `empty-workspace` · `onboarding-partial` · `acme-demo` ·
 `workspace-sem-host` · `workspace-host-local` · `workspace-host-embutido` ·
 `workspace-local` · `workspace-shared` · `workspace-controlled` ·
 `workspace-controlled-neo4j` · `workspace-docker-compose` ·
 `workspace-docker-ollama-profile` · `workspace-groups-teams` ·
-`workspace-shared-convites` · `workspace-shared-github` · `workspace-shared-google` ·
+`workspace-authority-personas` · `workspace-shared-convites` ·
+`workspace-shared-github` · `workspace-shared-google` ·
 `workspace-controlled-oidc` · `workspace-cloud-synced-folder` ·
 `workspace-provider-versioned-source` · `workspace-compact-policy` ·
-`workspace-multi-assistant` · `workspace-planning-progressivo` ·
-`workspace-github-work-source`
+`workspace-multi-assistant` · `workspace-with-integration-statuses` ·
+`workspace-planning-progressivo` · `workspace-github-work-source`
 
 Todas construídas com os builders/tipos do domínio real (type-checked) e nomes `acme-*`.
 

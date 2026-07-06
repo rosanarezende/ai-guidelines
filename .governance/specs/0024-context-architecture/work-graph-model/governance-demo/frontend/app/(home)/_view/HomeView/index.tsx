@@ -6,7 +6,7 @@
 import { Box, Button, Chip, Paper } from "@mui/material";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { GovernanceSnapshot } from "@/lib/types";
+import type { GovernanceSnapshot } from "@demo/contracts";
 import { SectionCard } from "@/app/_ui/shared";
 import {
   AttentionList,

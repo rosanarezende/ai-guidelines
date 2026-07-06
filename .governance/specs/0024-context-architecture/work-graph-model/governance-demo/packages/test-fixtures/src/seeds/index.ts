@@ -11,7 +11,7 @@ import {
   type AdoptionState,
   type LocalAccount,
   type Workspace,
-} from "../../../backend/src/domain/index.ts";
+} from "@demo/domain";
 
 const ANA: LocalAccount = { id: "local-ana", displayName: "Ana", preferredLocale: "pt-br" };
 const BIA: LocalAccount = { id: "local-bia", displayName: "Bia", preferredLocale: "pt-br" };

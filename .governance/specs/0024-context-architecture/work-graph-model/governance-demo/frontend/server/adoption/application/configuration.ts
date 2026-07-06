@@ -1,11 +1,7 @@
 // configuration.ts — use cases de configuração persistida do onboarding (R1).
 // Perfil, regra de acúmulo sensível, caminho do onboarding, workspace-mode,
 // stack (execution/store/graph-read-model/identity) e status de integração.
-import {
-  stackCompatibilityWarnings,
-  type Workspace,
-  type WorkspaceStack,
-} from "@demo/backend/domain";
+import { stackCompatibilityWarnings, type Workspace, type WorkspaceStack } from "@demo/domain";
 import { dispatchForWorkspace, type UseCaseResult } from "./use-cases";
 
 export async function saveProfileDeclaration(input: {

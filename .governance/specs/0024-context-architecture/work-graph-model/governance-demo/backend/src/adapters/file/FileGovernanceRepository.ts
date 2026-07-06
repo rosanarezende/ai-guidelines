@@ -24,13 +24,13 @@ import type {
   RepoWorkClaim,
   StandaloneWork,
   Triage,
-} from "../../domain/index.ts";
+} from "@demo/domain/server";
 import {
   expectedRepoContract,
   expectedRepoWorkClaim,
   REPO_WORK_LIFECYCLE_KEYS,
   REPO_WORK_SCHEMA,
-} from "../../domain/repo-projections.ts";
+} from "@demo/domain/server";
 import type {
   CommandLockOptions,
   GovernanceEvent,
@@ -38,8 +38,8 @@ import type {
   TransactionHandle,
   WriteReceipt,
 } from "../../ports/GovernanceRepository.ts";
-import { digestPublic12 } from "../../shared/stable-digest.ts";
-import { GOVERNANCE_ROOT, REPOS_ROOT } from "../../shared/paths.ts";
+import { digestPublic12 } from "@demo/domain/server";
+import { GOVERNANCE_ROOT, REPOS_ROOT } from "../fs/paths.ts";
 
 type YamlDoc = Record<string, unknown>;
 

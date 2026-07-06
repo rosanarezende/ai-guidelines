@@ -3,7 +3,7 @@ import type {
   CommandType,
   GovernedCommand,
   GovernanceSnapshot,
-} from "@/lib/types";
+} from "@demo/contracts";
 import { issuedAt, sanitize } from "./commandSelectors";
 
 function commandIdSource(type: CommandType, payload: Record<string, any>): string {

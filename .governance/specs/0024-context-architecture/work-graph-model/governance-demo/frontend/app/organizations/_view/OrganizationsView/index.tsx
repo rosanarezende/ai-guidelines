@@ -14,7 +14,7 @@ import {
 } from "@/app/_domain/adoption/shellClient";
 import { SectionCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
-import type { WorkspaceKind } from "@demo/backend/domain";
+import type { WorkspaceKind } from "@demo/contracts";
 import { CreateOrganizationForm } from "./CreateOrganizationForm";
 import { OrganizationList, type OrganizationListItem } from "./OrganizationList";
 import copy from "./_locales/pt-br.json";

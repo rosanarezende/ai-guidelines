@@ -1,4 +1,4 @@
-import { translate, type LocaleDictionary, type MessageDescriptor } from "@demo/backend/domain";
+import { translate, type LocaleDictionary, type MessageDescriptor } from "@demo/domain";
 import assistantPtBr from "../app/_domain/adoption/assistant/_locales/pt-br.json";
 import homePtBr from "../app/(home)/_view/HomeView/_locales/pt-br.json";
 import onboardingPtBr from "../app/onboarding/_view/OnboardingView/_locales/pt-br.json";

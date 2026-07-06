@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import type { EvidenceProvider, IntegrationResult } from "../../../ports/IntegrationAdapter.ts";
-import { REPOS_ROOT } from "../../../shared/paths.ts";
+import { REPOS_ROOT } from "../../fs/paths.ts";
 
 const EVIDENCE_ENTRYPOINT = "test.mjs";
 

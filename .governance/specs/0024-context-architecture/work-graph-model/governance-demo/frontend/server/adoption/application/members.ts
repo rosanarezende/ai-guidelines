@@ -12,7 +12,7 @@ import {
   type Workspace,
   type WorkspaceInvite,
   type WorkspaceRoleId,
-} from "@demo/backend/domain";
+} from "@demo/domain";
 import {
   dispatchForWorkspace,
   dispatchShellCommand,

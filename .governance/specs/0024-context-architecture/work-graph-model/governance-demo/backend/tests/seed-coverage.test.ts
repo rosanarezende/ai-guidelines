@@ -13,7 +13,7 @@ import {
   type AdoptionState,
   type Workspace,
 } from "../src/index.ts";
-import { buildSeed, seedNames } from "../../mock-api/src/seeds/index.ts";
+import { buildSeed, seedNames } from "@demo/test-fixtures";
 import { arrayContainsExact, arrayContainsMatch, matchObject } from "./support/assert-match.ts";
 
 type SeedCase = {

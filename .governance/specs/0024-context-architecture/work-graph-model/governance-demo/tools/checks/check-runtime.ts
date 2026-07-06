@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { parse } from "yaml";
 import { buildGraphReadModel, openFileGovernanceRuntime } from "../../backend/src/index.ts";
-import { GOVERNANCE_ROOT, REPOS_ROOT } from "../../backend/src/shared/paths.ts";
+import { GOVERNANCE_ROOT, REPOS_ROOT } from "../../backend/src/adapters/fs/paths.ts";
 import { loadPublishedRepoContracts } from "../repo-first/repo-contracts.ts";
 import { loadPublishedContexts } from "../repo-first/repo-contexts.ts";
 import { loadPublishedRepoWorks } from "../repo-first/repo-works.ts";
