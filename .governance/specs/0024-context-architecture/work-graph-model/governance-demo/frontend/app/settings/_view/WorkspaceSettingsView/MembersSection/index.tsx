@@ -5,6 +5,7 @@ import { Alert, Box, Button, Chip, Divider, MenuItem, TextField, Typography } fr
 import { Flex, ResponsiveGrid } from "@/app/_ui/shared";
 import {
   createWorkspaceGroup,
+  decideWorkspaceInvite,
   getMembersOverview,
   inviteWorkspacePerson,
   type MembersOverview,
@@ -22,6 +23,7 @@ export default function MembersSection() {
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteToken, setInviteToken] = useState<string | null>(null);
+  const [createdInviteId, setCreatedInviteId] = useState<string | null>(null);
   const [groupKind, setGroupKind] = useState<"team" | "group">("team");
   const [groupName, setGroupName] = useState("");
   const [groupMembers, setGroupMembers] = useState("");
@@ -58,6 +60,7 @@ export default function MembersSection() {
       setError(result.error);
     } else {
       setInviteToken(result.invite.token);
+      setCreatedInviteId(result.invite.id);
       setInviteName("");
       setInviteEmail("");
       await refresh();
@@ -87,6 +90,15 @@ export default function MembersSection() {
     setBusy(false);
   }
 
+  async function revokeInvite(inviteId: string) {
+    setBusy(true);
+    setError(null);
+    const result = await decideWorkspaceInvite(inviteId, { action: "revoke" });
+    if (!result.ok) setError(result.error);
+    await refresh();
+    setBusy(false);
+  }
+
   if (state === "loading" || state === "idle") {
     return <Typography variant="body2">{m.lead}</Typography>;
   }
@@ -98,7 +110,7 @@ export default function MembersSection() {
       </Typography>
       {error ? <Alert severity="error">{m.error.replace("{error}", error)}</Alert> : null}
       {inviteToken ? (
-        <Alert severity="success">
+        <Alert data-testid="invite-token" severity="success">
           <strong>{m.inviteToken.replace("{token}", inviteToken)}</strong>
           <br />
           {m.inviteTokenHelp}
@@ -111,16 +123,18 @@ export default function MembersSection() {
             {m.people}
           </Typography>
           {overview?.people.length ? (
-            overview.people.map((person) => (
-              <Flex key={person.id} gap={1} align="center" wrap>
-                <Chip size="small" label={person.displayName} />
-                <Typography variant="caption" color="text.secondary">
-                  {person.id}
-                </Typography>
-              </Flex>
-            ))
+            <Box data-testid="people-list" sx={{ display: "grid", gap: 0.75 }}>
+              {overview.people.map((person) => (
+                <Flex key={person.id} gap={1} align="center" wrap>
+                  <Chip size="small" label={person.displayName} />
+                  <Typography variant="caption" color="text.secondary">
+                    {person.id}
+                  </Typography>
+                </Flex>
+              ))}
+            </Box>
           ) : (
-            <Typography variant="caption" color="text.secondary">
+            <Typography data-testid="people-list" variant="caption" color="text.secondary">
               {m.noPeople}
             </Typography>
           )}
@@ -131,22 +145,24 @@ export default function MembersSection() {
             {m.groups}
           </Typography>
           {overview?.groups.length ? (
-            overview.groups.map((group) => (
-              <Box key={group.id} sx={{ display: "grid", gap: 0.5 }}>
-                <Flex gap={1} align="center" wrap>
-                  <Chip size="small" variant="outlined" label={group.kind} />
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {group.name}
+            <Box data-testid="groups-list" sx={{ display: "grid", gap: 1 }}>
+              {overview.groups.map((group) => (
+                <Box key={group.id} sx={{ display: "grid", gap: 0.5 }}>
+                  <Flex gap={1} align="center" wrap>
+                    <Chip size="small" variant="outlined" label={group.kind} />
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {group.name}
+                    </Typography>
+                  </Flex>
+                  <Typography variant="caption" color="text.secondary">
+                    {group.memberPersonIds.join(", ") || m.noGroupMembers} · {m.managedBy}:{" "}
+                    {group.managedBy ?? "local"}
                   </Typography>
-                </Flex>
-                <Typography variant="caption" color="text.secondary">
-                  {group.memberPersonIds.join(", ") || m.noGroupMembers} · {m.managedBy}:{" "}
-                  {group.managedBy ?? "local"}
-                </Typography>
-              </Box>
-            ))
+                </Box>
+              ))}
+            </Box>
           ) : (
-            <Typography variant="caption" color="text.secondary">
+            <Typography data-testid="groups-list" variant="caption" color="text.secondary">
               {m.noGroups}
             </Typography>
           )}
@@ -157,20 +173,38 @@ export default function MembersSection() {
             {m.invites}
           </Typography>
           {overview?.invites.length ? (
-            overview.invites.map((invite) => (
+            overview.invites.map((invite) => {
+              const isCreatedInvite = invite.id === createdInviteId;
+              return (
               <Box key={invite.id} sx={{ display: "grid", gap: 0.5 }}>
                 <Flex gap={1} align="center" wrap>
                   <Typography variant="body2" sx={{ fontWeight: 700 }}>
                     {invite.personName}
                   </Typography>
-                  <Chip size="small" label={`${m.status}: ${invite.status}`} />
+                  <Chip
+                    data-testid={isCreatedInvite ? "invite-status" : undefined}
+                    size="small"
+                    label={`${m.status}: ${invite.status}`}
+                  />
+                  {isCreatedInvite && invite.status === "pending" ? (
+                    <Button
+                      data-testid="invite-revoke"
+                      size="small"
+                      color="warning"
+                      disabled={busy}
+                      onClick={() => void revokeInvite(invite.id)}
+                    >
+                      {m.revokeCta}
+                    </Button>
+                  ) : null}
                 </Flex>
                 <Typography variant="caption" color="text.secondary">
                   {invite.email ? `${invite.email} · ` : ""}
                   {m.expires}: {invite.expiresAt.slice(0, 10)}
                 </Typography>
               </Box>
-            ))
+              );
+            })
           ) : (
             <Typography variant="caption" color="text.secondary">
               {m.noInvites}
@@ -191,14 +225,17 @@ export default function MembersSection() {
             label={m.nameLabel}
             value={inviteName}
             onChange={(event) => setInviteName(event.target.value)}
+            slotProps={{ htmlInput: { "data-testid": "invite-create-name" } }}
           />
           <TextField
             size="small"
             label={m.emailLabel}
             value={inviteEmail}
             onChange={(event) => setInviteEmail(event.target.value)}
+            slotProps={{ htmlInput: { "data-testid": "invite-create-email" } }}
           />
           <Button
+            data-testid="invite-create-submit"
             variant="contained"
             disabled={busy || inviteName.trim().length < 2}
             onClick={() => void invite()}

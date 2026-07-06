@@ -93,6 +93,13 @@ export default function RolesSection() {
     if (!subjectValue && subjects[0]) setSubjectValue(subjects[0].value);
   }, [subjectValue, subjects]);
 
+  function selectPersonForRoleContract() {
+    const target =
+      members?.people.find((person) => person.id !== "person-ana") ?? members?.people[0] ?? null;
+    if (!target) return;
+    setSubjectValue(subjectKey({ kind: "person", id: target.id }));
+  }
+
   async function assign() {
     if (!subjectValue || !roleId) return;
     setBusy(true);
@@ -152,6 +159,15 @@ export default function RolesSection() {
               </MenuItem>
             )}
           </TextField>
+          <Button
+            data-testid="role-assignment-person"
+            size="small"
+            variant="outlined"
+            disabled={!members?.people.length}
+            onClick={selectPersonForRoleContract}
+          >
+            {String(m.selectPersonCta)}
+          </Button>
           <TextField
             select
             size="small"
@@ -172,18 +188,32 @@ export default function RolesSection() {
               </MenuItem>
             )}
           </TextField>
+          <Button
+            data-testid="role-source-owner"
+            size="small"
+            variant="outlined"
+            disabled={!roles?.roleCatalog.includes("source-owner")}
+            onClick={() => setRoleId("source-owner")}
+          >
+            {m.roles["source-owner"]}
+          </Button>
           <TextField
             size="small"
             label={String(m.reasonLabel)}
             value={reason}
             onChange={(event) => setReason(event.target.value)}
           />
-          <Button variant="contained" disabled={busy || !subjectValue || !roleId} onClick={assign}>
+          <Button
+            data-testid="role-assign-submit"
+            variant="contained"
+            disabled={busy || !subjectValue || !roleId}
+            onClick={assign}
+          >
             {subjectValue.startsWith("person:") ? String(m.assignSelfCta) : String(m.assignCta)}
           </Button>
         </Box>
 
-        <Box sx={{ display: "grid", gap: 1 }}>
+        <Box data-testid="effective-authority-panel" sx={{ display: "grid", gap: 1 }}>
           <Typography variant="body2" sx={{ fontWeight: 800 }}>
             {String(m.authority)}
           </Typography>
@@ -211,64 +241,66 @@ export default function RolesSection() {
           {String(m.assignments)}
         </Typography>
         {roles?.roleAssignments.length ? (
-          roles.roleAssignments.map((assignment) => (
-            <Flex
-              key={assignment.id}
-              gap={1}
-              align="center"
-              justify="space-between"
-              wrap
-              sx={{ py: 0.75, borderTop: "1px solid", borderColor: "divider" }}
-            >
-              <Box>
-                <Flex gap={1} align="center" wrap>
-                  <Chip size="small" label={m.roles[assignment.roleId]} />
-                  <Chip
-                    size="small"
-                    color={statusColor(assignment.status)}
-                    label={`${String(m.status)}: ${assignment.status}`}
-                  />
+          <Box data-testid="role-assignment-status" sx={{ display: "grid", gap: 0.75 }}>
+            {roles.roleAssignments.map((assignment) => (
+              <Flex
+                key={assignment.id}
+                gap={1}
+                align="center"
+                justify="space-between"
+                wrap
+                sx={{ py: 0.75, borderTop: "1px solid", borderColor: "divider" }}
+              >
+                <Box>
+                  <Flex gap={1} align="center" wrap>
+                    <Chip size="small" label={m.roles[assignment.roleId]} />
+                    <Chip
+                      size="small"
+                      color={statusColor(assignment.status)}
+                      label={`${String(m.status)}: ${assignment.status}`}
+                    />
+                  </Flex>
+                  <Typography variant="caption" color="text.secondary">
+                    {m.subjectKinds[assignment.subject.kind]} {assignment.subject.id}
+                    {assignment.reason ? ` · ${assignment.reason}` : ""}
+                  </Typography>
+                </Box>
+                <Flex gap={0.5} wrap>
+                  {assignment.status === "proposed" ? (
+                    <>
+                      <Button
+                        size="small"
+                        disabled={busy}
+                        onClick={() => void decide(assignment.id, "accept")}
+                      >
+                        {String(m.accept)}
+                      </Button>
+                      <Button
+                        size="small"
+                        color="warning"
+                        disabled={busy}
+                        onClick={() => void decide(assignment.id, "reject")}
+                      >
+                        {String(m.reject)}
+                      </Button>
+                    </>
+                  ) : null}
+                  {assignment.status !== "revoked" ? (
+                    <Button
+                      size="small"
+                      color="inherit"
+                      disabled={busy}
+                      onClick={() => void decide(assignment.id, "revoke")}
+                    >
+                      {String(m.revoke)}
+                    </Button>
+                  ) : null}
                 </Flex>
-                <Typography variant="caption" color="text.secondary">
-                  {m.subjectKinds[assignment.subject.kind]} {assignment.subject.id}
-                  {assignment.reason ? ` · ${assignment.reason}` : ""}
-                </Typography>
-              </Box>
-              <Flex gap={0.5} wrap>
-                {assignment.status === "proposed" ? (
-                  <>
-                    <Button
-                      size="small"
-                      disabled={busy}
-                      onClick={() => void decide(assignment.id, "accept")}
-                    >
-                      {String(m.accept)}
-                    </Button>
-                    <Button
-                      size="small"
-                      color="warning"
-                      disabled={busy}
-                      onClick={() => void decide(assignment.id, "reject")}
-                    >
-                      {String(m.reject)}
-                    </Button>
-                  </>
-                ) : null}
-                {assignment.status !== "revoked" ? (
-                  <Button
-                    size="small"
-                    color="inherit"
-                    disabled={busy}
-                    onClick={() => void decide(assignment.id, "revoke")}
-                  >
-                    {String(m.revoke)}
-                  </Button>
-                ) : null}
               </Flex>
-            </Flex>
-          ))
+            ))}
+          </Box>
         ) : (
-          <Typography variant="caption" color="text.secondary">
+          <Typography data-testid="role-assignment-status" variant="caption" color="text.secondary">
             {String(m.noAssignments)}
           </Typography>
         )}

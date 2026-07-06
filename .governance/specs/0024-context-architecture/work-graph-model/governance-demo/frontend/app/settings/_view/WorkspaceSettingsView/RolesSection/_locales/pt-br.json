@@ -3,6 +3,7 @@
   "lead": "Papéis não são login. Uma atribuição proposta só vira autoridade quando a pessoa ou grupo aceita; autoridade efetiva é sempre derivada.",
   "assignTitle": "Atribuir papel",
   "subjectLabel": "Pessoa, time ou grupo",
+  "selectPersonCta": "Selecionar pessoa convidada",
   "roleLabel": "Papel",
   "reasonLabel": "Motivo opcional",
   "assignCta": "Propor papel",

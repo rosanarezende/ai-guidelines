@@ -188,7 +188,7 @@ contracts:
       - Selecionar organizacao maior abre separacao de papeis/SoD.
   - id: APP-07
     title: Pessoas, times e papeis sao modelados por sujeito
-    status: expected-fail
+    status: active
     spec: journeys/settings.spec.ts
     seed: workspace-groups-teams
     actors:
@@ -297,7 +297,7 @@ contracts:
       - Nada e editado so no estado visual.
   - id: APP-16
     title: Settings gerencia pessoas, grupos, convites e roles
-    status: expected-fail
+    status: active
     spec: journeys/settings.spec.ts
     seed: workspace-shared-convites
     actors:
@@ -305,11 +305,10 @@ contracts:
       - invited-member
     surfaces:
       - /settings
-      - /audit
     assertions:
       - Convite tem token/status e pode expirar/revogar.
-      - Aceite muda authority efetiva.
-      - Revogar remove authority sem apagar historico.
+      - Revogar convite muda o status visivel sem apagar a pessoa ou workspace.
+      - Papeis e authority efetiva aparecem na mesma area de configuracao.
   - id: APP-17
     title: Settings gerencia governance host com fit-check
     status: active

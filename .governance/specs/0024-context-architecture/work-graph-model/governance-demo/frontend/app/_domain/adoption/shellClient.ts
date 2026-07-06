@@ -128,6 +128,16 @@ export function inviteWorkspacePerson(input: { personName: string; email?: strin
   return postJson<{ invite: WorkspaceInvite }>("/api/local/members", input);
 }
 
+export function decideWorkspaceInvite(
+  inviteId: string,
+  input: { action: "accept" | "decline" | "revoke"; token?: string }
+) {
+  return postJson<{
+    invites: Array<Omit<WorkspaceInvite, "token">>;
+    people: WorkspacePerson[];
+  }>(`/api/local/members/invites/${inviteId}`, input);
+}
+
 export function createWorkspaceGroup(input: {
   kind: "team" | "group";
   name: string;

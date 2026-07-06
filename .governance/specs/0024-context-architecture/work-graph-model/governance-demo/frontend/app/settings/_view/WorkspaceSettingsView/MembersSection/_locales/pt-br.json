@@ -12,6 +12,7 @@
   "nameLabel": "Nome da pessoa",
   "emailLabel": "E-mail opcional",
   "inviteCta": "Criar convite",
+  "revokeCta": "Revogar convite",
   "inviteToken": "Token do convite criado: {token}",
   "inviteTokenHelp": "Copie agora. A listagem não mostra o token de novo.",
   "groupTitle": "Criar time ou grupo",

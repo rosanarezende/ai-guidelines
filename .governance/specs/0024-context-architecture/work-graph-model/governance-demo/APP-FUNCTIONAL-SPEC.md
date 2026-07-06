@@ -1173,8 +1173,10 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 
 - backend real existe para convite local, aceite tokenizado, revogacao, status de membro,
   membership `principal -> person`, atribuicao de papeis por subject e authority derivada;
-- a UI ainda e parcial: falta uma tela humana dedicada para gerenciar pessoas, grupos, convites,
-  aceite/rejeicao e explicacao de autoridade herdada.
+- Settings ja lista pessoas/times/grupos, cria e revoga convite, atribui papel proposto e mostra
+  authority efetiva derivada;
+- ainda falta uma tela/fluxo humano dedicado para aceite de convite por outra conta, aceite de
+  membership/papel pela pessoa convidada e explicacao visual completa de autoridade herdada.
 
 **Backend pendente:**
 

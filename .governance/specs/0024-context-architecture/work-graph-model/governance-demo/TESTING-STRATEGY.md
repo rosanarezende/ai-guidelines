@@ -175,9 +175,10 @@ Regras obrigatorias:
 6. Contrato de mecanismo derivado (sem tela) usa `surface: state`. Ele testa uma
    garantia do dominio via `/api/shell/state` + funcoes de `@demo/domain`
    (ex.: `resolveWorkspaceAuthority`), sem depender de UI. Pode ser `active` mesmo
-   antes da tela existir; a UI que expoe a mesma garantia continua `fixme` ate a
-   rota nascer. Exemplo: SEC-11/SEC-12 (papel proposto nunca gera authority)
-   ativos por mecanismo; APP-07 (mesma garantia na tela) segue `fixme`.
+   antes da tela existir; a UI que expoe a mesma garantia so vira `active` quando
+   um contrato de browser chega na tela e observa o comportamento. Exemplo:
+   SEC-11/SEC-12 provam o mecanismo de authority derivada; APP-07/APP-16 agora
+   provam a UI de Settings para pessoas, grupos, convites e papeis propostos.
 
 Personas: contratos que dependem de papel usam `openWorkspaceAs(page, request,
 seed, persona, route)` e os helpers `asMember/asSecurityOwner/asSponsor/
