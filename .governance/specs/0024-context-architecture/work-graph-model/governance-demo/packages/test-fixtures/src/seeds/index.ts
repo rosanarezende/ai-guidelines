@@ -88,6 +88,7 @@ export const SEEDS: Record<string, () => AdoptionState> = {
   "workspace-host-local": () =>
     base((ws) => ({
       ...ws,
+      onboardingStatus: "finished",
       governanceHost: {
         kind: "local-folder",
         pathOrUrl: "acme-honey-governance",
@@ -393,6 +394,8 @@ export const SEEDS: Record<string, () => AdoptionState> = {
   "workspace-provider-versioned-source": () =>
     base((ws) => ({
       ...ws,
+      onboardingStatus: "finished",
+      sandboxDeclared: true,
       workSources: [
         {
           id: "src-figma",

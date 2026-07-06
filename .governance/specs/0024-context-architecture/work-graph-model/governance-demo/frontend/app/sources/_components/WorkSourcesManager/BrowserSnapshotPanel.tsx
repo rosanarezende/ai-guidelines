@@ -34,6 +34,7 @@ export function BrowserSnapshotPanel({
         severity="success"
         action={
           <Button
+            data-testid="source-local-browser-picker"
             variant="contained"
             color="success"
             size="small"

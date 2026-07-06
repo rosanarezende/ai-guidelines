@@ -20,8 +20,6 @@ test.describe("Consistencia entre telas", () => {
     page,
     request,
   }) => {
-    pendingContract("CONS-02", "expected-fail");
-
     await openWorkspace(page, request, "workspace-provider-versioned-source", "/sources");
     const sourceName = await page.getByTestId("source-card-primary-name").innerText();
     await expectConsistentText(page, ["/sources", "/settings", "/"], sourceName);

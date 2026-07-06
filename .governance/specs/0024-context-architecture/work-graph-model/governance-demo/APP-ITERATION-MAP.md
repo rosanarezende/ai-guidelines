@@ -74,7 +74,7 @@ Para marcar uma linha como `validado-local`, registrar na coluna de notas:
 | 06    | Onboarding - responsabilidades     | `/onboarding`                 | Mostrar perguntas de responsabilidades apenas quando fizer sentido pelo perfil.                   | role/authority summary                        | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
 | 07    | Onboarding - pessoas e papeis      | `/onboarding`                 | Trabalhar por pessoas/times/grupos recebendo papeis, com aceite quando outro sujeito e atribuido. | members + roles + invites                     | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
 | 08    | Onboarding - governance host       | `/onboarding` ou `/settings`  | Explicar onde a governanca vive e criar/vincular host sem confundir com fonte de trabalho.        | governance-host fit-check/create/link/sandbox | `iterado`     | `testado-automatizado` | `testado-automatizado`    | APP-08/34 ativos: gate em Sources, fit-check, sandbox explicito e host embutido distinto de sidecar. |
-| 09    | Onboarding - fontes de trabalho    | `/onboarding` + `/sources`    | Guiar projeto local vs nuvem; pasta vazia/em andamento; Git/sem Git; relacao com `.governance`.   | work-sources add/scan/browser-scan            | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
+| 09    | Onboarding - fontes de trabalho    | `/onboarding` + `/sources`    | Guiar projeto local vs nuvem; pasta vazia/em andamento; Git/sem Git; relacao com `.governance`.   | work-sources add/scan/browser-scan            | `iterado`     | `testado-automatizado` | `testado-automatizado`    | APP-09 ativo: onboarding guia local/nuvem e diferencia governance host de fonte.                     |
 | 10    | Onboarding - assistente/modelo     | `/onboarding`                 | Configurar ou dispensar assistente; explicar local/cloud/egress sem jargao.                       | assistant config/test/dismiss                 | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
 | 11    | Onboarding - integracoes           | `/onboarding`                 | Mostrar integracoes como opcionais, com disponivel/release-1/em-breve.                            | integration backlog/list/test parcial         | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
 | 12    | Onboarding - revisao final         | `/onboarding`                 | Mostrar o que ja funciona, o que esta pendente e o que sera rebaixado.                            | onboarding complete + pending list            | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
@@ -83,10 +83,10 @@ Para marcar uma linha como `validado-local`, registrar na coluna de notas:
 | 15    | Configuracoes - organizacao/perfil | `/settings`                   | Editar/ver perfil, modo e stack sem divergir do onboarding.                                       | workspace/profile/mode/stack APIs             | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
 | 16    | Configuracoes - pessoas/papeis     | `/settings`                   | Gerenciar pessoas, times, grupos, convites, papeis e autoridade herdada.                          | members/roles APIs                            | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
 | 17    | Configuracoes - governance host    | `/settings`                   | Criar/vincular host e mostrar fit-check/risco por distribuicao.                                   | governance-host APIs                          | `iterado`     | `testado-automatizado` | `testado-automatizado`    | APP-17 ativo: host vinculado mostra sourceRevision/warnings e console degradado mostra revisao.      |
-| 18    | Configuracoes - fontes             | `/settings` + `/sources`      | Mostrar as mesmas fontes e estados da tela dedicada.                                              | work-sources APIs                             | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
+| 18    | Configuracoes - fontes             | `/settings` + `/sources`      | Mostrar as mesmas fontes e estados da tela dedicada.                                              | work-sources APIs                             | `iterado`     | `testado-automatizado` | `testado-automatizado`    | APP-18/CONS-02 ativos: Sources, Settings e Home mostram a mesma fonte.                               |
 | 19    | Configuracoes - assistente         | `/settings`                   | Alterar provider/defaults depois do onboarding.                                                   | assistant APIs                                | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
 | 20    | Configuracoes - integracoes        | `/settings` + `/integrations` | Resumir providers conectados/limitados e apontar para o hub dedicado.                             | integration APIs/catalog                      | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
-| 21    | Fontes de trabalho dedicada        | `/sources`                    | Cadastrar fonte local/cloud/manual de modo simples e instrutivo.                                  | work-sources add/scan/browser-scan            | `nao-iterado` | `nao-validado-visual`  | `nao-testado`             |                                                                                                      |
+| 21    | Fontes de trabalho dedicada        | `/sources`                    | Cadastrar fonte local/cloud/manual de modo simples e instrutivo.                                  | work-sources add/scan/browser-scan            | `iterado`     | `testado-automatizado` | `testado-automatizado`    | APP-21 ativo: wizard diferencia local/cloud, fallback manual e GitHub como provider.                 |
 | 22    | Planejamento de ciclo              | `/planning`                   | Criar ciclo, objetivo, metrica e target; contexto opcional progressivo.                           | future commands                               | `nao-iterado` | `nao-validado-visual`  | `bloqueado`               |                                                                                                      |
 | 23    | Registro de iniciativa             | `/intake`                     | Registrar uma aposta/necessidade sem breakdown tecnico inicial.                                   | proposal/register command parcial             | `nao-iterado` | `nao-validado-visual`  | `bloqueado`               |                                                                                                      |
 | 24    | Triagem/matcher                    | `/triage`                     | Transformar duvidas em itens e sugerir repos/fontes sem decidir sozinho.                          | triage + matcher multi-provider futuro        | `nao-iterado` | `nao-validado-visual`  | `bloqueado`               |                                                                                                      |
@@ -128,7 +128,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | APP-06   | 07, 16               | expected-fail        |
 | APP-07   | 08, 17               | expected-fail        |
 | APP-08   | 08, 09, 18, 21       | active               |
-| APP-09   | 09, 21               | expected-fail        |
+| APP-09   | 09, 21               | active               |
 | APP-10   | 10, 19               | expected-fail        |
 | APP-11   | 11, 40               | fixme                |
 | APP-12   | 12, 13, 15           | expected-fail        |
@@ -137,10 +137,10 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | APP-15   | 15                   | expected-fail        |
 | APP-16   | 16                   | expected-fail        |
 | APP-17   | 17, 32               | active               |
-| APP-18   | 18, 21               | expected-fail        |
+| APP-18   | 18, 21               | active               |
 | APP-19   | 19                   | fixme                |
 | APP-20   | 20, 40               | fixme                |
-| APP-21   | 21                   | expected-fail        |
+| APP-21   | 21                   | active               |
 | APP-22   | 22, 28               | fixme                |
 | APP-23   | 23, 24               | fixme                |
 | APP-24   | 24                   | fixme                |
@@ -174,32 +174,32 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | SEC-11   | 07, 16               | active               |
 | SEC-12   | 07, 16               | active               |
 | CONS-01  | 05, 13, 15           | expected-fail        |
-| CONS-02  | 18, 21, 13           | expected-fail        |
+| CONS-02  | 18, 21, 13           | active               |
 | CONS-03  | 20, 40, 42           | fixme                |
 
 ## 4. Matriz de consistencia entre telas
 
-| Consistencia a provar                                                            | Telas envolvidas                               | Status        | Notas |
-| -------------------------------------------------------------------------------- | ---------------------------------------------- | ------------- | ----- |
-| Perfil escolhido aparece igual em onboarding, Home e Settings.                   | `/onboarding`, `/`, `/settings`                | `nao-testado` |       |
-| Regra de acumulo sensivel altera copy/recomendacao e configuracao efetiva.       | `/onboarding`, `/settings`                     | `nao-testado` |       |
-| Onboarding parcial retoma no passo certo e Home mostra card de continuar.        | `/onboarding`, `/`                             | `nao-testado` |       |
-| Logout limpa sessao, mas nao apaga workspace nem event-log.                      | shell, `/signup`, `/organizations`             | `nao-testado` |       |
-| Workspace novo nao mostra dados da demo acme.                                    | `/organizations`, `/`, `/settings`, `/console` | `nao-testado` |       |
-| Governance host criado/vinculado destrava console e aparece em Settings.         | `/settings`, `/console`, `/`                   | `nao-testado` |       |
-| Fonte adicionada em `/sources` aparece igual em Settings e Home.                 | `/sources`, `/settings`, `/`                   | `nao-testado` |       |
-| Fonte sem Git fica rebaixada como snapshot/manual, nao como evidencia auditavel. | `/sources`, `/settings`, `/results`            | `nao-testado` |       |
-| Assistente local salvo no onboarding aparece em Settings.                        | `/onboarding`, `/settings`                     | `nao-testado` |       |
-| Provider cloud nao fica ativo sem aprovacao de egress.                           | `/onboarding`, `/settings`                     | `nao-testado` |       |
-| Read-model derivado nunca permite acao sem sourceRevision/baseRevision atual.    | `/map`, `/results`, `/work`, `/console`        | `nao-testado` |       |
-| Demo acme e workspace real sao claramente distintos.                             | `/organizations`, `/`, `/settings`             | `nao-testado` |       |
-| Cup mostra contexto diferente por rota e nao vaza dados bloqueados.              | overlay Cup em todas as rotas                  | `nao-testado` |       |
-| Cup nao executa mutacao sem confirmacao humana e base/source revision atual.     | overlay Cup + rotas com comando                | `nao-testado` |       |
-| Cup explica bloqueios citando policy versionada, nao texto improvisado.          | overlay Cup + `POLICY-HANDBOOK.md`             | `nao-testado` |       |
-| Integracao cloud nao aparece como `connected` sem auth/permissao/probe real.     | `/integrations`, `/sources`, `/settings`       | `nao-testado` |       |
-| Login GitHub nao conecta repos nem concede authority automaticamente.            | `/signup`, `/integrations`, `/sources`         | `nao-testado` |       |
-| Settings e `/integrations` mostram o mesmo status efetivo do provider.           | `/settings`, `/integrations`                   | `nao-testado` |       |
-| Sugestao contextual de integracao explica o que funciona sem a ferramenta.       | varias rotas                                   | `nao-testado` |       |
+| Consistencia a provar                                                            | Telas envolvidas                               | Status        | Notas         |
+| -------------------------------------------------------------------------------- | ---------------------------------------------- | ------------- | ------------- |
+| Perfil escolhido aparece igual em onboarding, Home e Settings.                   | `/onboarding`, `/`, `/settings`                | `nao-testado` |               |
+| Regra de acumulo sensivel altera copy/recomendacao e configuracao efetiva.       | `/onboarding`, `/settings`                     | `nao-testado` |               |
+| Onboarding parcial retoma no passo certo e Home mostra card de continuar.        | `/onboarding`, `/`                             | `nao-testado` |               |
+| Logout limpa sessao, mas nao apaga workspace nem event-log.                      | shell, `/signup`, `/organizations`             | `nao-testado` |               |
+| Workspace novo nao mostra dados da demo acme.                                    | `/organizations`, `/`, `/settings`, `/console` | `nao-testado` |               |
+| Governance host criado/vinculado destrava console e aparece em Settings.         | `/settings`, `/console`, `/`                   | `nao-testado` |               |
+| Fonte adicionada em `/sources` aparece igual em Settings e Home.                 | `/sources`, `/settings`, `/`                   | `testado`     | CONS-02 ativo |
+| Fonte sem Git fica rebaixada como snapshot/manual, nao como evidencia auditavel. | `/sources`, `/settings`, `/results`            | `nao-testado` |               |
+| Assistente local salvo no onboarding aparece em Settings.                        | `/onboarding`, `/settings`                     | `nao-testado` |               |
+| Provider cloud nao fica ativo sem aprovacao de egress.                           | `/onboarding`, `/settings`                     | `nao-testado` |               |
+| Read-model derivado nunca permite acao sem sourceRevision/baseRevision atual.    | `/map`, `/results`, `/work`, `/console`        | `nao-testado` |               |
+| Demo acme e workspace real sao claramente distintos.                             | `/organizations`, `/`, `/settings`             | `nao-testado` |               |
+| Cup mostra contexto diferente por rota e nao vaza dados bloqueados.              | overlay Cup em todas as rotas                  | `nao-testado` |               |
+| Cup nao executa mutacao sem confirmacao humana e base/source revision atual.     | overlay Cup + rotas com comando                | `nao-testado` |               |
+| Cup explica bloqueios citando policy versionada, nao texto improvisado.          | overlay Cup + `POLICY-HANDBOOK.md`             | `nao-testado` |               |
+| Integracao cloud nao aparece como `connected` sem auth/permissao/probe real.     | `/integrations`, `/sources`, `/settings`       | `nao-testado` |               |
+| Login GitHub nao conecta repos nem concede authority automaticamente.            | `/signup`, `/integrations`, `/sources`         | `nao-testado` |               |
+| Settings e `/integrations` mostram o mesmo status efetivo do provider.           | `/settings`, `/integrations`                   | `nao-testado` |               |
+| Sugestao contextual de integracao explica o que funciona sem a ferramenta.       | varias rotas                                   | `nao-testado` |               |
 
 ## 5. Proxima ordem sugerida
 

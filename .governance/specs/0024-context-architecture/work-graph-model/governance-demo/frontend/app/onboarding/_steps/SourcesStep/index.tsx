@@ -1,6 +1,7 @@
 import { Alert, Box, Chip, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import { useState } from "react";
 import { Flex, ResponsiveGrid } from "@/app/_ui/shared";
 import { NO_SOURCE_DOWNGRADE, SOURCE_KINDS } from "@/app/_domain/adoption/model";
 import { OptionCard, StepHeading } from "../../_components";
@@ -9,9 +10,57 @@ import copy from "./_locales/pt-br.json";
 
 export function SourcesStep() {
   const { adoption, selectedSourceCount, sourceKinds, toggleSource } = useOnboarding();
+  const [location, setLocation] = useState<"local" | "cloud" | null>(null);
   return (
     <>
       <StepHeading step={3} title={copy.heading.title} lead={copy.heading.lead} />
+      <ResponsiveGrid min={280} gap={1.5}>
+        <OptionCard selected={location === "local"} onClick={() => setLocation("local")}>
+          <Box data-testid="source-kind-local">
+            <Typography variant="body2" sx={{ fontWeight: 750 }}>
+              {copy.flow.local.title}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {copy.flow.local.body}
+            </Typography>
+          </Box>
+        </OptionCard>
+        <OptionCard selected={location === "cloud"} onClick={() => setLocation("cloud")}>
+          <Box data-testid="source-kind-cloud">
+            <Typography variant="body2" sx={{ fontWeight: 750 }}>
+              {copy.flow.cloud.title}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {copy.flow.cloud.body}
+            </Typography>
+          </Box>
+        </OptionCard>
+      </ResponsiveGrid>
+
+      {location === "local" ? (
+        <Alert data-testid="local-source-project-state" severity="info">
+          <Typography variant="subtitle2">{copy.flow.localQuestion}</Typography>
+          <Box component="ul" sx={{ m: 0.75, pl: 2.5 }}>
+            <li data-testid="local-source-git-state">
+              <Typography variant="body2">{copy.flow.localGit}</Typography>
+            </li>
+            <li>
+              <Typography variant="body2">{copy.flow.localFolder}</Typography>
+            </li>
+            <li>
+              <Typography variant="body2">{copy.flow.localGovernance}</Typography>
+            </li>
+          </Box>
+        </Alert>
+      ) : null}
+
+      {location === "cloud" ? (
+        <Alert data-testid="cloud-provider-github" severity="warning">
+          <Typography variant="subtitle2">{copy.flow.cloudQuestion}</Typography>
+          <Typography variant="body2">{copy.flow.cloudGithub}</Typography>
+        </Alert>
+      ) : null}
+
       <ResponsiveGrid min={280} gap={1.5}>
         {SOURCE_KINDS.map((kind) => {
           const selected = !kind.disabled && sourceKinds[kind.id];

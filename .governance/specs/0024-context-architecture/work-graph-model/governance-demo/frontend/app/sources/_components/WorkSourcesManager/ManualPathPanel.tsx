@@ -20,7 +20,7 @@ export function ManualPathPanel({
 }) {
   const isUrl = mode === "url";
   return (
-    <Box sx={{ display: "grid", gap: 1 }}>
+    <Box data-testid="source-local-fallback-path" sx={{ display: "grid", gap: 1 }}>
       <Alert severity={isUrl ? "info" : "warning"}>
         <Typography variant="subtitle2">{isUrl ? copy.urlTitle : copy.manualPathTitle}</Typography>
         <Typography variant="body2">{isUrl ? copy.urlBody : copy.manualPathBody}</Typography>

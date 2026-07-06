@@ -91,7 +91,9 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
         </SectionCard>
 
         <SectionCard title={sourcesCopy.title}>
-          <WorkSourcesManager embedded />
+          <Box data-testid="settings-source-list">
+            <WorkSourcesManager embedded />
+          </Box>
         </SectionCard>
 
         <SwitchSection />

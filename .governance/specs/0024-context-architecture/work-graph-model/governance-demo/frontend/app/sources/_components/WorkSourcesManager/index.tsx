@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Box, Divider, Typography } from "@mui/material";
+import { Alert, Box, Button, Divider, Typography } from "@mui/material";
 import type { WorkSource } from "@demo/contracts";
 import { useEffect, useState } from "react";
 import {
@@ -94,6 +94,11 @@ export default function WorkSourcesManager({ embedded = false }: { embedded?: bo
       <Typography variant="body2" color="text.secondary">
         {m.lead}
       </Typography>
+      <Box>
+        <Button data-testid="source-add" href="#source-form" size="small" variant="outlined">
+          {m.addTitle}
+        </Button>
+      </Box>
       <Alert severity="info">
         <Typography variant="subtitle2">{m.scopeTitle}</Typography>
         <Typography variant="body2">{m.scopeBody}</Typography>
@@ -116,7 +121,9 @@ export default function WorkSourcesManager({ embedded = false }: { embedded?: bo
       </Box>
 
       <Divider />
-      <SourceForm copy={m} busy={Boolean(busy)} onSubmit={(input) => void addSource(input)} />
+      <Box id="source-form">
+        <SourceForm copy={m} busy={Boolean(busy)} onSubmit={(input) => void addSource(input)} />
+      </Box>
     </Box>
   );
 

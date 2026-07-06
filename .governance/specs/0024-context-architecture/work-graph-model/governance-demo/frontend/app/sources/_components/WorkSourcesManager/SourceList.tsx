@@ -31,7 +31,14 @@ export function SourceList({
   return (
     <Box sx={{ display: "grid", gap: 1.5 }}>
       {sources.map((source) => (
-        <SourceCard key={source.id} copy={copy} source={source} busy={busy} onScan={onScan} />
+        <SourceCard
+          key={source.id}
+          copy={copy}
+          source={source}
+          busy={busy}
+          primary={source.id === sources[0]?.id}
+          onScan={onScan}
+        />
       ))}
     </Box>
   );
@@ -41,11 +48,13 @@ function SourceCard({
   copy,
   source,
   busy,
+  primary,
   onScan,
 }: {
   copy: SourcesCopy;
   source: WorkSource;
   busy: string | null;
+  primary: boolean;
   onScan: (source: WorkSource) => void;
 }) {
   const scanEnabled = canScanSource(source);
@@ -54,6 +63,7 @@ function SourceCard({
 
   return (
     <Box
+      data-testid={primary ? "source-card-primary" : undefined}
       sx={{
         p: 2,
         border: "1px solid",
@@ -85,7 +95,11 @@ function SourceCard({
             )}
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 850 }}>
+            <Typography
+              data-testid={primary ? "source-card-primary-name" : undefined}
+              variant="subtitle2"
+              sx={{ fontWeight: 850 }}
+            >
               {source.label}
             </Typography>
             <Typography variant="body2" color="text.secondary">

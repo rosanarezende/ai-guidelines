@@ -141,12 +141,18 @@ export function SourceForm({
             body={item.body}
             selected={location === item.id}
             onClick={() => chooseLocation(item.id)}
+            testId={item.id === "local" ? "source-kind-local" : "source-kind-cloud"}
           />
         ))}
       </ResponsiveGrid>
 
       {location ? (
-        <Box sx={{ display: "grid", gap: 1 }}>
+        <Box
+          data-testid={
+            location === "local" ? "local-source-project-state" : "cloud-source-provider-state"
+          }
+          sx={{ display: "grid", gap: 1 }}
+        >
           <Typography variant="subtitle2" sx={{ fontWeight: 850 }}>
             {location === "local" ? copy.flow.localQuestion : copy.flow.cloudQuestion}
           </Typography>
@@ -160,6 +166,15 @@ export function SourceForm({
                   body={itemCopy.body}
                   selected={scenarioId === item.id}
                   onClick={() => chooseScenario(item)}
+                  testId={
+                    item.id === "local-git"
+                      ? "local-source-git-state"
+                      : item.id === "local-empty"
+                        ? "local-source-empty-state"
+                      : item.id === "github"
+                        ? "cloud-provider-github"
+                        : undefined
+                  }
                 />
               );
             })}
@@ -188,7 +203,7 @@ export function SourceForm({
               severity="warning"
               action={
                 <Button component={Link} href="/settings#integracoes" size="small" color="inherit">
-                  {copy.githubCta}
+                  <span data-testid="source-cloud-connect-github">{copy.githubCta}</span>
                 </Button>
               }
             >
@@ -211,6 +226,7 @@ export function SourceForm({
 
           {mode === "browser-or-path" ? (
             <Button
+              data-testid="source-local-browse"
               variant="text"
               size="small"
               sx={{ justifySelf: "start" }}
@@ -235,6 +251,7 @@ export function SourceForm({
           {mode === "declared" ? (
             <Flex gap={1} align="center" wrap>
               <Button
+                data-testid="source-declared-add"
                 variant="contained"
                 disabled={busy || !canSubmitDeclared}
                 onClick={submitDeclared}

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
+import { openWorkspace } from "./support/contract-fixtures.ts";
 
 test.describe("Governance host e fontes de trabalho", () => {
   test("APP-08 governance host e escolhido antes das fontes", async ({ page, request }) => {
@@ -12,9 +12,9 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-09 onboarding de fontes guia local vs nuvem", async ({ page, request }) => {
-    pendingContract("APP-09", "expected-fail");
-
     await openWorkspace(page, request, "workspace-host-local", "/onboarding");
+    const start = page.getByRole("button", { name: "Começar" });
+    if ((await start.count()) > 0) await start.click();
     await page.getByTestId("onboarding-step-sources").click();
     await page.getByTestId("source-kind-local").click();
     await expect(page.getByTestId("local-source-project-state")).toBeVisible();
@@ -32,8 +32,6 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-18 Settings e Sources mostram as mesmas fontes", async ({ page, request }) => {
-    pendingContract("APP-18", "expected-fail");
-
     await openWorkspace(page, request, "workspace-provider-versioned-source", "/sources");
     const sourceName = await page.getByTestId("source-card-primary-name").innerText();
     await page.goto("/settings");
@@ -52,14 +50,18 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-21 Sources dedicada cadastra fonte local/cloud/manual", async ({ page, request }) => {
-    pendingContract("APP-21", "expected-fail");
-
     await openWorkspace(page, request, "workspace-host-local", "/sources");
     await page.getByTestId("source-add").click();
-    await page.getByTestId("source-project-local").click();
+    await page.getByTestId("source-kind-local").click();
     await page.getByTestId("source-local-browse").click();
     await expect(page.getByTestId("source-local-fallback-path")).toBeVisible();
-    await page.getByTestId("source-project-cloud").click();
+    await page.getByTestId("local-source-empty-state").click();
+    await page.getByLabel("Nome legível").fill("Projeto em planejamento");
+    await page.getByTestId("source-declared-add").click();
+    await expect(page.getByTestId("source-card-primary-name")).toContainText(
+      "Projeto em planejamento"
+    );
+    await page.getByTestId("source-kind-cloud").click();
     await expect(page.getByTestId("source-cloud-connect-github")).toBeVisible();
   });
 });

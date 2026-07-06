@@ -220,7 +220,7 @@ contracts:
       - Sandbox explicito e permitido, mas nao e vendido como governanca real.
   - id: APP-09
     title: Onboarding de fontes guia local vs nuvem
-    status: expected-fail
+    status: active
     spec: journeys/sources.spec.ts
     seed: workspace-host-local
     actors:
@@ -327,7 +327,7 @@ contracts:
       - Console so abre quando host permite leitura segura.
   - id: APP-18
     title: Settings e Sources mostram as mesmas fontes
-    status: expected-fail
+    status: active
     spec: journeys/sources.spec.ts
     seed: workspace-provider-versioned-source
     actors:
@@ -371,7 +371,7 @@ contracts:
       - Acoes sensiveis levam para detalhe/approval.
   - id: APP-21
     title: Sources dedicada cadastra fonte local/cloud/manual
-    status: expected-fail
+    status: active
     spec: journeys/sources.spec.ts
     seed: workspace-host-local
     actors:
@@ -740,7 +740,7 @@ contracts:
       - Reload nao altera recomendacao.
   - id: CONS-02
     title: Fonte adicionada aparece igual em Sources, Settings e Home
-    status: expected-fail
+    status: active
     spec: journeys/cross-screen-consistency.spec.ts
     seed: workspace-provider-versioned-source
     actors:

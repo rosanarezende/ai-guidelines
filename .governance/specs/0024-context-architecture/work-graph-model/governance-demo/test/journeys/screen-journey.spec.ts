@@ -62,7 +62,7 @@ test("settings lê host vinculado e expõe warnings do fit-check", async ({ page
   await expect(page.getByText("Configurações — Acme Honey")).toBeVisible();
   await expect(page.getByText("Host vinculado: acme-honey-governance")).toBeVisible();
   await expect(page.getByText(/pasta local sem Git/)).toBeVisible();
-  await expect(page.getByText("revisão: seed00000001")).toBeVisible();
+  await expect(page.getByText("sourceRevision: seed00000001")).toBeVisible();
 });
 
 test("settings permite declarar sandbox sem fingir governança real", async ({ page, request }) => {

@@ -14,6 +14,8 @@
     "workspaceHome.checklist.sources": "Fontes de trabalho",
     "workspaceHome.checklist.sources.missing": "nenhuma conectada — execução/contratos/resultados só com evidência manual/declarada",
     "workspaceHome.checklist.done": "configurado",
+    "workspaceHome.sources.title": "Fontes de trabalho",
+    "workspaceHome.sources.empty": "Nenhuma fonte cadastrada. O app ainda pode planejar, mas execução e resultados ficam como declaração.",
     "workspaceHome.next.title": "Próximo passo",
     "workspaceHome.next.onboarding": "Completar o onboarding define perfil, papéis e fontes — em arquivos seus.",
     "workspaceHome.next.cta": "Abrir onboarding",

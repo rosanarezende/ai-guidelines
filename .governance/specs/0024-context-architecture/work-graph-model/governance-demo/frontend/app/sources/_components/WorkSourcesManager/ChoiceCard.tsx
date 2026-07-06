@@ -5,11 +5,13 @@ export function ChoiceCard({
   body,
   selected,
   onClick,
+  testId,
 }: {
   title: string;
   body: string;
   selected: boolean;
   onClick: () => void;
+  testId?: string;
 }) {
   return (
     <Card
@@ -19,7 +21,7 @@ export function ChoiceCard({
         bgcolor: selected ? "rgba(27, 94, 51, 0.08)" : "background.paper",
       }}
     >
-      <CardActionArea onClick={onClick} sx={{ height: "100%", p: 1.5 }}>
+      <CardActionArea data-testid={testId} onClick={onClick} sx={{ height: "100%", p: 1.5 }}>
         <Typography variant="subtitle2" sx={{ fontWeight: 850 }}>
           {title}
         </Typography>

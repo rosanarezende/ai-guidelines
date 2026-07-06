@@ -95,6 +95,43 @@ export default function WorkspaceHome({ workspace }: { workspace: Workspace }) {
           </Box>
         </SectionCard>
 
+        <SectionCard title={m["workspaceHome.sources.title"]}>
+          <Box data-testid="home-source-summary" sx={{ display: "grid", gap: 1 }}>
+            {workspace.workSources.length ? (
+              workspace.workSources.map((source) => (
+                <Flex
+                  key={source.id}
+                  align="center"
+                  justify="space-between"
+                  gap={1}
+                  wrap
+                  sx={{ py: 1, borderTop: "1px solid", borderColor: "divider" }}
+                >
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {source.label}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {source.kind}
+                      {source.pathOrUrl ? ` · ${source.pathOrUrl}` : ""}
+                    </Typography>
+                  </Box>
+                  <Flex gap={0.75} wrap>
+                    <Chip size="small" variant="outlined" label={source.status} />
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      label={source.sourceTrust ?? "declared"}
+                    />
+                  </Flex>
+                </Flex>
+              ))
+            ) : (
+              <Alert severity="warning">{m["workspaceHome.sources.empty"]}</Alert>
+            )}
+          </Box>
+        </SectionCard>
+
         <Paper
           data-testid="home-next-safe-step"
           variant="outlined"
