@@ -2533,3 +2533,381 @@ Contrato minimo APP-35:
 - workspace sem host mostra itens degradados e nao dados da demo;
 - Cup/CWP e console tecnico aparecem como entradas distintas;
 - authority altera CTA/estado, nao vira decoracao visual.
+
+## QRD-36 - Control plane opcional para contas, workspaces e convites
+
+**Status:** research-open; nao ha plataforma escolhida.
+
+**Q - Question**
+
+Podemos ter uma casca central, hospedada por nos ou pela propria comunidade, onde
+pessoas criam conta, aceitam convites e encontram workspaces, sem que o projeto
+passe a armazenar o conteudo governado dos usuarios? Se sim, qual arquitetura
+preserva melhor o espirito open-source e evita lock-in prematuro?
+
+**R - Reasoning/Research**
+
+A decisao QRD-12 definiu o app como superficie humana local-first e
+self-hostable, nao SaaS pago por default. Ao mesmo tempo, fluxos com mais de uma
+pessoa precisam de algum mecanismo compartilhado para conta, convite,
+membership e workspace discovery. Se cada maquina mantiver apenas
+`.local-state`, um convite real nao converge.
+
+Separar tres planos continua sendo o limite correto:
+
+```text
+identity/control plane
+  conta, sessao, workspace registry, memberships, convites, provider links
+
+governance plane
+  roles, authority efetiva, decisoes, fontes, intents, outcomes, event-log
+
+content plane
+  repos, arquivos, metricas, evidencias, documentos, codigo, dados de produto
+```
+
+O control plane pode saber que um workspace existe e quem foi convidado. Ele nao
+deve ler nem armazenar por default o governance host, os repos ou evidencias do
+usuario. GitHub, Google/OIDC, Cloudflare, Supabase, Appwrite, PocketBase,
+Keycloak e alternativas similares devem ser avaliados como candidatos e/ou
+adapters, nao como decisao ja fechada.
+
+Fontes iniciais a aprofundar:
+
+- Google Open Source programs and services:
+  <https://opensource.google/programs-and-services>
+- GitHub Apps/OAuth e GitHub como provider:
+  <https://docs.github.com/en/apps>
+- Cloudflare Pages/Workers/D1:
+  <https://developers.cloudflare.com/pages/>,
+  <https://developers.cloudflare.com/workers/>,
+  <https://developers.cloudflare.com/d1/>
+- Supabase self-hosting:
+  <https://supabase.com/docs/guides/self-hosting>
+- Appwrite self-hosting:
+  <https://appwrite.io/docs/advanced/self-hosting>
+- PocketBase:
+  <https://pocketbase.io/>
+- Keycloak:
+  <https://www.keycloak.org/>
+
+**D - Current boundary**
+
+Decidido por enquanto:
+
+- existe o conceito de **control plane opcional**;
+- o modo `local` nao pode depender dele;
+- `shared` e `controlled` precisam de algum control plane compartilhado ou
+  identity provider equivalente para convites reais;
+- login nunca concede membership, role ou authority automaticamente;
+- roles e authority efetiva continuam resolvidas no governance plane;
+- nenhuma plataforma (`cloudflare`, `supabase`, `appwrite`, `github`,
+  `keycloak`, etc.) esta escolhida como default.
+
+Ainda aberto:
+
+- se teremos um control plane operado por nos, apenas self-hosted, ou ambos;
+- onde hospedar esse control plane;
+- qual auth/session stack usar;
+- se o site publico `ai-guidelines.pages.dev` deve ser apenas docs/landing ou
+  tambem entrada para conta;
+- como nomear esse produto sem prender tudo ao nome `ai-guidelines`.
+
+Contratos futuros, ainda pendentes de pesquisa:
+
+- APP-38: conta/control plane opcional nao e requisito para workspace local.
+- APP-39: shared workspace exige registry compartilhado ou self-hosted para
+  convite real.
+- APP-40: control plane armazena metadados de workspace, mas nao le conteudo
+  governado por default.
+- APP-41: login GitHub/Google/OIDC autentica conta, mas nao concede membership,
+  role ou authority automaticamente.
+- SEC-13: token/secret de provider nao aparece em payload publico, event-log ou
+  read-model.
+
+## QRD-37 - Produto, nome e relacao com `ai-guidelines`
+
+**Status:** research-open.
+
+**Q - Question**
+
+O app que nasceu como `governance-demo` deve continuar sendo parte direta de
+`ai-guidelines`, virar um produto open-source separado, ou existir como app
+complementar que usa `ai-guidelines` como pacote/CLI nativo?
+
+**R - Reasoning/Research**
+
+`ai-guidelines` nasceu como framework/CLI de governanca repo-first e integracao
+com agentes. A `governance-demo` esta virando um produto humano: onboarding,
+workspaces, fontes, planejamento, resultados, grafo, auditoria, Cup/CWP e
+integracoes. Esses dois corpos se complementam, mas podem ter publicos, docs,
+instalacao e roadmap diferentes.
+
+Benchmarks open-source costumam separar:
+
+- core/library/CLI;
+- app ou servidor;
+- hosted opcional;
+- docs/site/comunidade;
+- adapters/integrations.
+
+Essa separacao aumenta clareza de manutencao e reduz risco de a Spec 0024 ficar
+presa indefinidamente a um produto que cresceu alem do escopo inicial.
+
+**D - Current boundary**
+
+Ainda nao decidir nome nem packaging. A pesquisa deve comparar:
+
+- manter tudo sob `ai-guidelines`;
+- manter no monorepo, mas promover para app de primeira classe na raiz;
+- criar repo separado para o app/produto;
+- criar organizacao/repo separado no futuro, preservando `ai-guidelines` como
+  pacote nativo.
+
+O nome `governance-demo` e apenas nome de fase. Ele nao deve ser tratado como
+nome publico do produto.
+
+## QRD-38 - Extracao ou promocao do `work-graph-model`
+
+**Status:** research-open.
+
+**Q - Question**
+
+O trabalho que hoje vive em
+`.governance/specs/0024-context-architecture/work-graph-model/` deve continuar
+dentro da Spec 0024, ser promovido para uma area de produto na raiz de
+`ai-guidelines`, ou virar repo separado?
+
+**R - Reasoning/Research**
+
+O `work-graph-model` deixou de ser apenas artefato de pesquisa da Spec 0024. Ele
+agora contem:
+
+- modelo de grafo e SSOT v2/v3;
+- `governance-demo` com frontend, backend, mock-api, testes e packages;
+- acme/dogfood data;
+- reviews, research e decisoes de produto.
+
+Isso cria dois riscos:
+
+- bloquear a continuidade da Spec 0024 porque o produto nunca "termina";
+- esconder uma aplicacao relevante dentro de uma pasta de spec, dificultando
+  contribuicao open-source e manutencao humana/IA.
+
+**D - Current boundary**
+
+Nao decidir extracao antes de pesquisa. A pesquisa deve propor uma estrategia em
+fases, com criterios objetivos:
+
+- o que precisa ficar na Spec 0024 como evidencia historica;
+- o que deve ser promovido para raiz do repo atual;
+- o que deve virar pacote/app independente;
+- quando vale abrir repo separado;
+- como preservar historico, testes, docs e governanca;
+- como evitar que `work-graph-model` continue bloqueando o encerramento da Spec 0024.
+
+## QRD-39 - Grafos, Neo4j e oportunidades open-source
+
+**Status:** research-open; QRD-16 continua valendo como requisito minimo:
+Neo4j deve existir como opcao real de `graph-read-model` no primeiro release
+funcional, sem virar requisito universal nem SSOT.
+
+**Q - Question**
+
+Que oportunidades de produto, comunidade e arquitetura existem no ecossistema
+open-source de grafos, especialmente em torno de Neo4j e alternativas, que ainda
+nao foram mapeadas para este projeto?
+
+**R - Reasoning/Research**
+
+O foco em grafos e central para as solucoes pretendidas. A decisao atual trata
+Neo4j como read-model derivado, mas isso pode ser pouco ambicioso se o projeto
+puder se posicionar como uma camada open-source de governanca baseada em grafos.
+
+Linhas a pesquisar:
+
+- Neo4j Community/Aura, Neo4j GraphQL, APOC e Graph Data Science.
+- Limites de licenca, Community vs Enterprise, plugins e deployment.
+- GraphRAG, knowledge graphs, policy graphs e grafos de trabalho.
+- Alternativas open-source/embedded: Apache AGE, Kuzu, ArcadeDB, Memgraph,
+  FalkorDB/RedisGraph, ArangoDB e outras candidatas relevantes.
+- Visualizacao: React Flow, ECharts, Sigma e outras ferramentas adequadas para
+  stakeholders versus usuarios tecnicos.
+- Oportunidades de contribuicao OSS: adapters, exporters, schema validators,
+  Cypher templates, graph algorithms para governanca.
+
+Fontes iniciais:
+
+- Neo4j GraphQL Library: <https://neo4j.com/docs/graphql/current/>
+- Neo4j Graph Data Science: <https://neo4j.com/docs/graph-data-science/current/>
+- Apache AGE: <https://age.apache.org/>
+- Kuzu docs: <https://kuzudb.github.io/docs>
+- ArcadeDB embedded: <https://arcadedb.com/embedded.html>
+
+**D - Current boundary**
+
+Nao escolher novo banco nem substituir o file-first. A pesquisa deve responder:
+
+- quais capacidades de grafo entram no primeiro release;
+- quais ficam como adapters opcionais;
+- quais oportunidades open-source merecem issues/roadmap;
+- quais riscos de lock-in/licenca existem;
+- como Neo4j pode ser valorizado sem virar dependencia obrigatoria.
+
+## QRD-40 - Ecossistema Google e programas para open source
+
+**Status:** research-open.
+
+**Q - Question**
+
+Quais ferramentas, programas e recursos do Google podem ajudar uma mantenedora
+open-source a construir comunidade, melhorar seguranca e ampliar contribuicao
+sem prender o projeto a uma stack proprietaria?
+
+**R - Reasoning/Research**
+
+A pesquisa precisa separar:
+
+- programas de contribuicao/comunidade;
+- ferramentas de seguranca e supply chain;
+- plataformas de cloud/dev;
+- identidade/login provider;
+- recursos educacionais e rede de desenvolvedores.
+
+Fontes iniciais:
+
+- Google Open Source: <https://opensource.google/>
+- Google programs and services:
+  <https://opensource.google/programs-and-services>
+- Google Summer of Code:
+  <https://summerofcode.withgoogle.com/>
+- Season of Docs, hoje encerrado como programa, mas ainda util como referencia
+  historica de documentacao OSS:
+  <https://developers.google.com/season-of-docs>
+- deps.dev/Open Source Insights: <https://deps.dev/> e
+  <https://docs.deps.dev/>
+- OSV: <https://osv.dev/>
+- OSV-Scanner: <https://google.github.io/osv-scanner/>
+- Google Developer Program: <https://developers.google.com/program>
+
+**D - Current boundary**
+
+Nao escolher Google Cloud nem Cloudflare como destino por default. A pesquisa
+deve mapear o que ajuda a comunidade open-source e o que e apenas opcao de
+infra. Ferramentas de seguranca como deps.dev/OSV podem virar adapters ou checks
+mesmo que a aplicacao nao use Google Cloud.
+
+## QRD-41 - Portal humano sobre governance host Git-backed
+
+**Status:** proposed; decidido como direcao de spike, nao como implementacao
+final.
+
+**Q - Question**
+
+Para uma release usavel por pessoas de negocio, design, investidores e outros
+perfis nao tecnicos, o app deve exigir que todos tenham conta no GitHub e
+operem PRs, ou deve oferecer um portal humano com contas/convites proprios,
+mantendo o governance host versionado em Git como SSOT?
+
+**R - Reasoning/Research**
+
+O stress test da owner mostrou um caso central:
+
+- uma mantenedora trabalha sozinha hoje;
+- quer versionar a governanca no GitHub em um repo dedicado, para nao depender
+  de estado local;
+- no futuro quer convidar pessoas de negocio, design e investimento;
+- essas pessoas precisam usar o app, mas nao deveriam precisar entender Git,
+  PR, branch protection ou CODEOWNERS para contribuir com governanca.
+
+Portanto, "GitHub como lugar seguro" e "GitHub como experiencia de usuario"
+nao sao a mesma decisao.
+
+Git/GitHub pode ser o cofre e a trilha auditavel:
+
+- repo dedicado `workspace-governance`, ou host embutido `.governance-host/`;
+- branch protection, CODEOWNERS, checks e historico;
+- GitHub App com acesso minimo ao repo de governanca;
+- commits/branches/PRs como mecanismo de proposta/alteracao.
+
+O portal/app deve ser a superficie humana:
+
+- conta e sessao;
+- workspace discovery;
+- convite e aceite;
+- visoes por papel/persona;
+- propostas de mudanca sem exigir que a pessoa opere Git diretamente.
+
+Essa separacao preserva os tres planos:
+
+```text
+identity/control plane
+  conta, sessao, workspace registry, convites, provider links
+
+governance plane
+  governance host Git-backed, roles governados, authority efetiva, decisoes,
+  iniciativas, outcomes, event-log
+
+content/work plane
+  repos de produto, design, docs, metricas, evidencias e codigo
+```
+
+O control plane pode saber que um workspace existe, quem foi convidado e qual
+provider/repo esta ligado ao workspace. Ele nao deve virar fonte de autoridade
+governada, nem armazenar por default o conteudo do governance host. Login,
+membership no portal ou acesso GitHub autenticam uma pessoa, mas nao concedem
+role/authority efetiva.
+
+**D - Decision**
+
+Modelar quatro topologias desde ja:
+
+1. `local-solo`
+   - app local;
+   - governance host em pasta local;
+   - sem conta compartilhada obrigatoria;
+   - bom para sandbox e uso individual.
+
+2. `git-backed`
+   - governance host versionado em Git;
+   - GitHub como primeiro provider real;
+   - app pode rodar localmente ou em portal;
+   - colaboracao usa provider Git como cofre/auditoria, mas authority continua
+     nos arquivos governados.
+
+3. `self-hosted-portal`
+   - portal compartilhado operado pela propria organizacao;
+   - contas, convites e workspace registry em banco proprio;
+   - governance host continua em Git ou filesystem compartilhado;
+   - adequado para times que querem UI central sem SaaS da mantenedora.
+
+4. `hosted-portal`
+   - portal operado pela mantenedora ou comunidade;
+   - opcional e futuro;
+   - nao deve ser requisito para usar o framework;
+   - precisa de decisao posterior de nome, licenca, seguranca e politica de
+     dados.
+
+Para a proxima fatia, autorizar um spike de portal/control plane:
+
+- provar conta -> workspace -> convite -> aceite;
+- provar que usuario sem GitHub pode entrar no portal e receber uma visao
+  permitida;
+- provar ponte com GitHub governance host por adapter/contrato;
+- provar que login/membership do portal nao concede authority efetiva;
+- provar que segredo/token nao aparece em payload publico, event-log ou
+  read-model;
+- provar que o control plane nao armazena conteudo governado como SSOT.
+
+**Implications**
+
+- QRD-36 continua valida, mas precisa ser lida junto desta QRD: control plane
+  nao e obrigatorio para `local-solo`, mas e necessario para uma experiencia
+  boa de portal multiusuario.
+- QRD-20 continua valida: GitHub OAuth, Google/OIDC e outros providers
+  autenticam pessoa, nao conectam repos automaticamente e nao concedem
+  authority.
+- QRD-21 continua valida: a distribuicao fisica do governance host e decidida
+  por ownership/permissoes/lifecycle/blast radius, nao pelo tamanho da empresa.
+- O primeiro release pode ser parcial, mas deve explicitar qual topologia esta
+  entregue e qual esta apenas modelada.
