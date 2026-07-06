@@ -34,14 +34,16 @@ export default function OnboardingView({
 
 function OnboardingScreen() {
   const { snapshot, org, step } = useOnboarding();
+  const chip =
+    snapshot && org.isDemo
+      ? `${profileChipLabel(snapshot.profileDeclaration.profile)} · demo`
+      : org.profileSaved
+        ? `${profileChipLabel(org.initialProfile)} · ${org.workspaceName}`
+        : org.workspaceName;
   return (
     <AppShell
       subtitle={copy.shell.subtitle}
-      chip={
-        snapshot && org.isDemo
-          ? `${profileChipLabel(snapshot.profileDeclaration.profile)} · demo`
-          : org.workspaceName
-      }
+      chip={chip}
       headerAction={
         <Button component={Link} href="/" size="small" color="inherit">
           {copy.shell.saveForLater}

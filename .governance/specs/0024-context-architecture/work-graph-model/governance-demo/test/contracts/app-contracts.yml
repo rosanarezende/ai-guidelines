@@ -159,7 +159,7 @@ contracts:
       - Dados demo nao sao tratados como dados do usuario.
   - id: APP-05
     title: Perfil e responsabilidades guiam recomendacao compreensivel
-    status: expected-fail
+    status: active
     spec: journeys/onboarding.spec.ts
     seed: empty-workspace
     actors:
@@ -175,7 +175,7 @@ contracts:
       - Home e Settings refletem o mesmo perfil.
   - id: APP-06
     title: Responsabilidades aparecem somente quando fazem sentido
-    status: expected-fail
+    status: active
     spec: journeys/onboarding.spec.ts
     seed: empty-workspace
     actors:
@@ -282,7 +282,7 @@ contracts:
       - Finalizar persiste e Home deixa de mostrar onboarding como pendente.
   - id: APP-15
     title: Settings de organizacao espelha onboarding
-    status: expected-fail
+    status: active
     spec: journeys/settings.spec.ts
     seed: workspace-compact-policy
     actors:
@@ -726,7 +726,7 @@ contracts:
       - Provider externo nao concede sponsor/security/source-owner sozinho.
   - id: CONS-01
     title: Perfil escolhido aparece igual em onboarding, Home e Settings
-    status: expected-fail
+    status: active
     spec: journeys/cross-screen-consistency.spec.ts
     seed: workspace-compact-policy
     actors:

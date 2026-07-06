@@ -415,6 +415,7 @@ export const SEEDS: Record<string, () => AdoptionState> = {
   "workspace-compact-policy": () =>
     base((ws) => ({
       ...withPeople(ws),
+      onboardingStatus: "partial",
       profileDeclaration: {
         profile: "compact",
         sensitiveAccumulationPolicy: "warn-review",

@@ -24,6 +24,7 @@ export function RecommendationCard() {
 
   return (
     <Paper
+      data-testid="profile-recommendation-card"
       variant="outlined"
       sx={{ p: 2.25, display: "grid", gap: 1.75, bgcolor: "#f8fbf8", borderColor: "#d9e8dd" }}
     >
@@ -113,7 +114,7 @@ export function RecommendationCard() {
         ))}
       </Flex>
 
-      <Alert severity={effectiveProfile.enforcement.severity}>
+      <Alert data-testid="profile-policy-impact" severity={effectiveProfile.enforcement.severity}>
         <strong>{effectiveProfile.enforcement.verb}:</strong> {effectiveProfile.enforcement.text}
       </Alert>
     </Paper>

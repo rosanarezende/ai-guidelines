@@ -40,7 +40,7 @@ export function WelcomeStep() {
         ))}
       </Box>
       <Flex align="center" gap={2} sx={{ mt: 1 }}>
-        <Button variant="contained" onClick={() => setStep(1)}>
+        <Button data-testid="onboarding-start" variant="contained" onClick={() => setStep(1)}>
           {copy.cta}
         </Button>
         <Typography variant="body2" color="text.secondary">

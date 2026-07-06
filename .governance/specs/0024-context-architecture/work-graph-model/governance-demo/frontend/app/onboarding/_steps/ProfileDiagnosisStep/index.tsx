@@ -34,14 +34,33 @@ export function ProfileDiagnosisStep() {
           helper={copy.questions.size.helper}
           value={diagnosis.size}
           options={SIZE_CHOICES}
+          optionTestIds={{
+            one: "org-size-solo",
+            small: "org-size-up-to-5",
+            large: "org-size-more-than-20",
+          }}
           onChange={(value) => updateDiagnosis({ size: value as OrgSizeChoice })}
         />
+        {diagnosis.size === "one" ? (
+          <Alert data-testid="solo-profile-explanation" severity="info">
+            {copy.explanations.solo}
+          </Alert>
+        ) : null}
+        {diagnosis.size === "large" ? (
+          <Alert data-testid="sod-explanation" severity="info">
+            {copy.explanations.sod}
+          </Alert>
+        ) : null}
         {shouldAskResponsibility ? (
           <DiagnosisQuestion
+            containerTestId="role-separation-question"
             title={copy.questions.responsibility.title}
             helper={copy.questions.responsibility.helper}
             value={diagnosis.responsibility}
             options={RESPONSIBILITY_CHOICES}
+            optionTestIds={{
+              collapsed: "responsibility-collapsed",
+            }}
             onChange={(value) => updateDiagnosis({ responsibility: value as ResponsibilityChoice })}
           />
         ) : null}
@@ -51,8 +70,22 @@ export function ProfileDiagnosisStep() {
             helper={copy.questions.conflict.helper}
             value={diagnosis.conflict}
             options={CONFLICT_CHOICES}
+            optionTestIds={{
+              warn: "sensitive-policy-review",
+            }}
             onChange={(value) => updateDiagnosis({ conflict: value as ConflictChoice })}
           />
+        ) : null}
+        {diagnosis.size ? (
+          <Button
+            data-testid="change-profile-answers"
+            color="inherit"
+            size="small"
+            sx={{ justifySelf: "start" }}
+            onClick={() => setManualProfileOpen(false)}
+          >
+            {copy.questions.changeAnswers}
+          </Button>
         ) : null}
       </Box>
 

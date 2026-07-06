@@ -15,7 +15,12 @@
     "conflict": {
       "title": "Quando a mesma pessoa acumula papéis sensíveis, o app deve...",
       "helper": "Essa resposta define se a governança bloqueia, avisa ou registra com transparência."
-    }
+    },
+    "changeAnswers": "Alterar respostas"
+  },
+  "explanations": {
+    "solo": "No perfil solo, a separação de responsabilidades não existe de verdade. O app reduz bloqueios, registra auto-declarações e deixa essa limitação visível.",
+    "sod": "Em uma organização maior, há espaço para separar quem define, executa, aprova risco e confirma resultado. O app tende a aplicar SoD mais forte."
   },
   "recommendation": {
     "manualLabel": "Escolha manual",

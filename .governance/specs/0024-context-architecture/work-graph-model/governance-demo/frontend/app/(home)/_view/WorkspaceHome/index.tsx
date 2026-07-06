@@ -13,6 +13,7 @@ import {
   workspaceHasGovernanceHost,
   type Workspace,
 } from "@demo/domain";
+import { profileOption } from "@/app/_domain/adoption/model";
 import copy from "./_locales/pt-br.json";
 
 const m = copy.messages;
@@ -46,6 +47,9 @@ export default function WorkspaceHome({ workspace }: { workspace: Workspace }) {
   const hasHost = workspaceHasGovernanceHost(workspace);
   const hasSources = workspaceHasEvidenceSource(workspace);
   const partial = workspace.onboardingStatus === "partial";
+  const profile = workspace.profileDeclaration
+    ? profileOption(workspace.profileDeclaration.profile)
+    : null;
 
   return (
     <AppShell chip={workspace.name} hasGovernanceHost={Boolean(workspace.governanceHost)}>
@@ -92,6 +96,24 @@ export default function WorkspaceHome({ workspace }: { workspace: Workspace }) {
               done={hasSources}
               missing={m["workspaceHome.checklist.sources.missing"]}
             />
+          </Box>
+        </SectionCard>
+
+        <SectionCard title={m["workspaceHome.profile.title"]}>
+          <Box data-testid="home-governance-profile" sx={{ display: "grid", gap: 0.75 }}>
+            {profile ? (
+              <>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  {profile.label} · {profile.shortLabel}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {m["workspaceHome.profile.policy"]}:{" "}
+                  {workspace.profileDeclaration?.sensitiveAccumulationPolicy}
+                </Typography>
+              </>
+            ) : (
+              <Alert severity="warning">{m["workspaceHome.profile.missing"]}</Alert>
+            )}
           </Box>
         </SectionCard>
 

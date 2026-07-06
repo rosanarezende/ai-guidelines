@@ -11,6 +11,7 @@ import {
   type GovernanceHostKind,
   type Workspace,
 } from "@demo/domain";
+import { profileOption } from "@/app/_domain/adoption/model";
 import GovernanceHostSection from "./GovernanceHostSection";
 import MembersSection from "./MembersSection";
 import membersCopy from "./MembersSection/_locales/pt-br.json";
@@ -25,6 +26,9 @@ const m = copy.messages;
 
 export default function WorkspaceSettingsView({ workspace }: { workspace: Workspace }) {
   const slug = workspaceSlugId(workspace.name, []);
+  const profile = workspace.profileDeclaration
+    ? profileOption(workspace.profileDeclaration.profile)
+    : null;
   const suggestions = {
     "dedicated-repo": governanceHostDirName("dedicated-repo", slug),
     "local-folder": governanceHostDirName("local-folder", slug),
@@ -61,6 +65,29 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
             <Typography variant="caption" color="text.secondary">
               {m["workspaceSettings.identity.rename.note"]}
             </Typography>
+          </Box>
+        </SectionCard>
+
+        <SectionCard title={m["workspaceSettings.profile.title"]}>
+          <Box sx={{ display: "grid", gap: 1 }}>
+            {profile ? (
+              <>
+                <Typography data-testid="settings-governance-profile" variant="body2">
+                  <strong>{profile.label}</strong> · {profile.shortLabel}
+                </Typography>
+                <Typography data-testid="settings-sensitive-policy" variant="body2">
+                  {m["workspaceSettings.profile.policy"]}:{" "}
+                  {workspace.profileDeclaration?.sensitiveAccumulationPolicy}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {workspace.profileDeclaration?.reason}
+                </Typography>
+              </>
+            ) : (
+              <Typography data-testid="settings-governance-profile" variant="body2">
+                {m["workspaceSettings.profile.missing"]}
+              </Typography>
+            )}
           </Box>
         </SectionCard>
 

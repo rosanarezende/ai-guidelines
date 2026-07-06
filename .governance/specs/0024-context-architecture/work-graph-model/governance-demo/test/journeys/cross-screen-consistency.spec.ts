@@ -10,8 +10,6 @@ test.describe("Consistencia entre telas", () => {
     page,
     request,
   }) => {
-    pendingContract("CONS-01", "expected-fail");
-
     await openWorkspace(page, request, "workspace-compact-policy", "/");
     await expectConsistentText(page, ["/", "/settings", "/onboarding"], /compact|time enxuto/i);
   });

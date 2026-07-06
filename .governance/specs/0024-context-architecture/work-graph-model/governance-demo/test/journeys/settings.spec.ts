@@ -35,8 +35,6 @@ test.describe("Settings, membros, papeis e assistentes", () => {
   });
 
   test("APP-15 Settings de organizacao espelha onboarding", async ({ page, request }) => {
-    pendingContract("APP-15", "expected-fail");
-
     await openWorkspace(page, request, "workspace-compact-policy", "/settings");
     const profile = page.getByTestId("settings-governance-profile");
     await expect(profile).toContainText(/compact|time enxuto/i);

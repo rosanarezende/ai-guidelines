@@ -124,8 +124,8 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | APP-03   | 03                   | active               |
 | APP-35   | 03A                  | active               |
 | APP-04   | 04, 13               | active               |
-| APP-05   | 05, 06, 15           | expected-fail        |
-| APP-06   | 07, 16               | expected-fail        |
+| APP-05   | 05, 06, 15           | active               |
+| APP-06   | 07, 16               | active               |
 | APP-07   | 08, 17               | expected-fail        |
 | APP-08   | 08, 09, 18, 21       | active               |
 | APP-09   | 09, 21               | active               |
@@ -134,7 +134,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | APP-12   | 12, 13, 15           | expected-fail        |
 | APP-13   | 13                   | active               |
 | APP-14   | 14                   | active               |
-| APP-15   | 15                   | expected-fail        |
+| APP-15   | 15                   | active               |
 | APP-16   | 16                   | expected-fail        |
 | APP-17   | 17, 32               | active               |
 | APP-18   | 18, 21               | active               |
@@ -173,7 +173,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | SEC-10   | 25, 31               | fixme                |
 | SEC-11   | 07, 16               | active               |
 | SEC-12   | 07, 16               | active               |
-| CONS-01  | 05, 13, 15           | expected-fail        |
+| CONS-01  | 05, 13, 15           | active               |
 | CONS-02  | 18, 21, 13           | active               |
 | CONS-03  | 20, 40, 42           | fixme                |
 

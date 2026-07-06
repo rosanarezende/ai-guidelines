@@ -6,8 +6,6 @@ test.describe("Onboarding como contrato funcional", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-05", "expected-fail");
-
     await openWorkspace(page, request, "empty-workspace", "/onboarding");
     await page.getByTestId("onboarding-start").click();
     await page.getByTestId("org-size-up-to-5").click();
@@ -16,7 +14,14 @@ test.describe("Onboarding como contrato funcional", () => {
     await expect(page.getByTestId("profile-recommendation-card")).toContainText(/time enxuto/i);
     await expect(page.getByTestId("profile-policy-impact")).toContainText(/revisao|avisa/i);
 
+    const profileSave = page.waitForResponse((response) =>
+      response.url().includes("/api/local/onboarding/profile")
+    );
     await page.getByTestId("onboarding-save-profile").click();
+    const profileSaveResponse = await profileSave;
+    expect(profileSaveResponse.ok()).toBeTruthy();
+    await expect(profileSaveResponse.json()).resolves.toMatchObject({ ok: true });
+    await expect(page.getByText("Papéis e responsáveis")).toBeVisible();
     await page.goto("/settings");
     await expect(page.getByTestId("settings-governance-profile")).toContainText(
       /time enxuto|compact/i
@@ -29,8 +34,6 @@ test.describe("Onboarding como contrato funcional", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-06", "expected-fail");
-
     await openWorkspace(page, request, "empty-workspace", "/onboarding");
     await page.getByTestId("onboarding-start").click();
     await page.getByTestId("org-size-solo").click();

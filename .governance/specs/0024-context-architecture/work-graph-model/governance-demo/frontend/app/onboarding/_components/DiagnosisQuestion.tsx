@@ -10,16 +10,20 @@ export function DiagnosisQuestion({
   helper,
   value,
   options,
+  containerTestId,
+  optionTestIds,
   onChange,
 }: {
   title: string;
   helper: string;
   value?: string;
   options: DiagnosisChoice[];
+  containerTestId?: string;
+  optionTestIds?: Record<string, string>;
   onChange: (value: string) => void;
 }) {
   return (
-    <Box sx={{ display: "grid", gap: 1.25 }}>
+    <Box data-testid={containerTestId} sx={{ display: "grid", gap: 1.25 }}>
       <Box>
         <Typography variant="body2" sx={{ fontWeight: 800 }}>
           {title}
@@ -33,7 +37,7 @@ export function DiagnosisQuestion({
           const selected = option.id === value;
           return (
             <OptionCard key={option.id} selected={selected} onClick={() => onChange(option.id)}>
-              <Box sx={{ display: "grid", gap: 0.75 }}>
+              <Box data-testid={optionTestIds?.[option.id]} sx={{ display: "grid", gap: 0.75 }}>
                 <Flex align="center" justify="space-between" gap={1}>
                   <Typography variant="body2" sx={{ fontWeight: 700 }}>
                     {option.label}

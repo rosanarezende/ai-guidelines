@@ -23,6 +23,7 @@ export function OnboardingActions() {
         {copy.actions.back}
       </Button>
       <Button
+        data-testid={step === 1 ? "onboarding-save-profile" : undefined}
         variant="contained"
         endIcon={<ArrowForwardIcon />}
         disabled={step === 1 && !canContinueProfileStep}
