@@ -3,14 +3,21 @@ import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Settings, membros, papeis e assistentes", () => {
   test("APP-07 pessoas, times e papeis sao modelados por sujeito", async ({ page, request }) => {
-    await openWorkspace(page, request, "workspace-groups-teams", "/settings");
+    await openWorkspace(page, request, "workspace-groups-teams", "/onboarding");
+    await page.getByTestId("onboarding-start").click();
+    await page.getByTestId("onboarding-step-02").click();
+    await expect(page.getByTestId("onboarding-people-manager")).toBeVisible();
     await expect(page.getByTestId("people-list")).toContainText("Ana");
     await expect(page.getByTestId("groups-list")).toContainText(/time|grupo/i);
+    await expect(page.getByTestId("onboarding-role-manager")).toBeVisible();
     await page.getByTestId("role-assignment-person").click();
     await page.getByTestId("role-source-owner").click();
     await page.getByTestId("role-assign-submit").click();
     await expect(page.getByTestId("role-assignment-status")).toContainText(/proposed|pendente/i);
     await expect(page.getByTestId("effective-authority-panel")).not.toContainText("source-owner");
+
+    await page.goto("/settings");
+    await expect(page.getByTestId("role-assignment-status")).toContainText(/proposed|pendente/i);
   });
 
   test("APP-10 assistente/modelo e opcional, multi-provider e seguro", async ({

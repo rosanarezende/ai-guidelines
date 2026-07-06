@@ -13,10 +13,10 @@ import {
 } from "@demo/domain";
 import { profileOption } from "@/app/_domain/adoption/model";
 import GovernanceHostSection from "./GovernanceHostSection";
-import MembersSection from "./MembersSection";
-import membersCopy from "./MembersSection/_locales/pt-br.json";
-import RolesSection from "./RolesSection";
-import rolesCopy from "./RolesSection/_locales/pt-br.json";
+import MembersSection from "@/app/_features/workspace-authority/MembersSection";
+import membersCopy from "@/app/_features/workspace-authority/MembersSection/_locales/pt-br.json";
+import RolesSection from "@/app/_features/workspace-authority/RolesSection";
+import rolesCopy from "@/app/_features/workspace-authority/RolesSection/_locales/pt-br.json";
 import AssistantWorkspaceSection from "./AssistantWorkspaceSection";
 import SwitchSection from "./SwitchSection";
 import WorkSourcesManager from "@/app/sources/_components/WorkSourcesManager";
