@@ -50,19 +50,25 @@ o comportamento e puramente mecanico.
 
 Fonte: `test/contracts/app-contracts.yml`.
 
-| Indicador                               | Valor atual                                  |
-| --------------------------------------- | -------------------------------------------- |
-| Contratos declarados                    | 57                                           |
-| Contratos `active`                      | 5                                            |
-| Contratos `expected-fail`               | 22                                           |
-| Contratos `fixme`                       | 30                                           |
-| Contratos `deny`                        | 14                                           |
-| Seeds declaradas                        | 26                                           |
-| Seeds sem contrato funcional de produto | 7, cobertas por regressao de dominio de seed |
+| Indicador                               | Valor atual |
+| --------------------------------------- | ----------- |
+| Contratos declarados                    | 57          |
+| Contratos `active`                      | 5           |
+| Contratos `expected-fail`               | 22          |
+| Contratos `fixme`                       | 30          |
+| Contratos `deny`                        | 14          |
+| Seeds declaradas                        | 26          |
+| Seeds sem contrato funcional de produto | 7           |
 
 Observacao: o fechamento de `@demo/domain` como fronteira browser/server ja foi
 aplicado. O pacote `@demo/domain` deve expor apenas `.`, `./browser` e
 `./server`; qualquer subpath interno volta a ser risco arquitetural.
+
+Observacao sobre seeds sem contrato funcional: este warning e deliberado. Ele
+mantem visiveis cenarios ricos de regressao/dominio que ainda nao foram
+promovidos a contrato de produto. Nao criar `expected-fail` apenas para silenciar
+warning; `expected-fail` e reservado para produto-alvo explicito com rota
+alcancavel e sentinela.
 
 ## 3. Matriz produto x teste
 
