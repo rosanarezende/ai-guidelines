@@ -195,7 +195,7 @@ function assertSpecs(contracts: Contract[]): void {
           pendingIndex,
           nextTestIndex === -1 ? text.length : nextTestIndex
         );
-        if (!/openWorkspace\(|armExpectedFailAfterArrival\(/.test(testBlock)) {
+        if (!/openWorkspace(?:As)?\(|armExpectedFailAfterArrival\(/.test(testBlock)) {
           fail(`${contract.id} expected-fail precisa de sentinela antes de test.fail`);
         }
       }

@@ -1,7 +1,39 @@
 import { expect, test } from "@playwright/test";
-import { openWorkspace } from "./support/contract-fixtures.ts";
+import { openWorkspace, openWorkspaceAs, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Onboarding como contrato funcional", () => {
+  test("APP-36 criador entra na trilha de setup do workspace", async ({ page, request }) => {
+    pendingContract("APP-36", "expected-fail");
+
+    await openWorkspace(page, request, "empty-workspace", "/onboarding");
+    await expect(page.getByTestId("onboarding-track-workspace-setup")).toBeVisible();
+    await expect(page.getByTestId("workspace-setup-diagnosis-step")).toBeVisible();
+    await expect(page.getByTestId("workspace-setup-profile-step")).toBeVisible();
+    await expect(page.getByTestId("workspace-setup-host-step")).toBeVisible();
+    await expect(page.getByTestId("workspace-setup-sources-step")).toBeVisible();
+    await expect(page.getByTestId("entry-context-summary")).toContainText(/criador|configur/i);
+  });
+
+  test("APP-37 convidado entra na trilha de participacao", async ({ page, request }) => {
+    pendingContract("APP-37", "expected-fail");
+
+    await openWorkspaceAs(
+      page,
+      request,
+      "workspace-authority-personas",
+      "proposed-role",
+      "/onboarding"
+    );
+    await expect(page.getByTestId("onboarding-track-member-join")).toBeVisible();
+    await expect(page.getByTestId("member-join-invite-summary")).toBeVisible();
+    await expect(page.getByTestId("member-join-proposed-roles")).toBeVisible();
+    await expect(page.getByTestId("member-join-accept-role")).toBeVisible();
+    await expect(page.getByTestId("member-join-decline-role")).toBeVisible();
+    await expect(page.getByTestId("workspace-setup-diagnosis-step")).toHaveCount(0);
+    await expect(page.getByTestId("workspace-setup-host-step")).toHaveCount(0);
+    await expect(page.getByTestId("workspace-setup-sources-step")).toHaveCount(0);
+  });
+
   test("APP-05 perfil e responsabilidades guiam recomendacao compreensivel", async ({
     page,
     request,

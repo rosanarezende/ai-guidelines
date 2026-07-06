@@ -101,7 +101,57 @@ vira comando + evento:
 8. **Mock API valida experiencia, nao governanca.** Jornadas podem nascer contra `mock-api`, mas so contam como governanca real quando passarem pelo backend real/command runtime/resolver.
 9. **Cup/CWP e par contextual, nao autoridade.** O overlay ajuda a operar a tela atual, mas usa contexto reduzido por policy e nunca grava mutacao autoritativa sem confirmacao humana.
 
-## 3.1 Stack visual e spikes obrigatorios
+## 3.1 Contexto de entrada e trilhas de onboarding
+
+O onboarding nao e uma tela unica. Ele e uma experiencia condicional que depende
+de **como a pessoa chegou ao app** e de **qual autoridade ela ja tem**.
+
+O fluxo humano sempre comeca em `/signup`. Mesmo quem recebeu convite precisa
+ter uma conta/principal local antes de aceitar membership ou papel. Criar conta,
+entrar em um workspace e receber autoridade sao eventos distintos.
+
+### 3.1.1 Contextos de entrada
+
+| Contexto            | Quem e                                                               | O que o app deve fazer                                                                                                                        | O que o app nao deve mostrar como caminho feliz                                                                        |
+| ------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `workspace-creator` | Pessoa que criou ou esta configurando o workspace pela primeira vez. | Rodar setup do workspace: diagnostico, perfil, responsabilidades, pessoas/papeis, governance host, fontes, assistente, integracoes e revisao. | Nao tratar todos os passos como tecnicos; guiar por perguntas e explicar consequencias.                                |
+| `invited-member`    | Pessoa que chegou por convite ou papel proposto.                     | Rodar entrada de participante: explicar quem convidou, workspace, papeis propostos, permissoes, limites e aceitar/recusar/pedir ajuste.       | Nao mostrar diagnostico da organizacao, perfil de governanca, host ou fontes como se ela fosse responsavel pelo setup. |
+| `returning-member`  | Pessoa que ja pertence ao workspace e voltou ao app.                 | Levar para Home ou pendencias pessoais reais; mostrar onboarding apenas se houver tarefa individual pendente.                                 | Nao reiniciar setup do workspace nem pedir escolhas ja registradas.                                                    |
+| `solo-creator`      | Criador em workspace de uma pessoa ou time muito pequeno.            | Colapsar perguntas de separacao de papeis e mostrar que tudo fica auto-declarado/visivel por padrao.                                          | Nao perguntar sobre SoD ou acumulacao sensivel como se houvesse separacao possivel.                                    |
+| `demo-tour`         | Pessoa explorando sandbox/acme demo.                                 | Deixar claro que e demo/sandbox e oferecer tour; permitir sair para workspace real.                                                           | Nao gravar demo como configuracao real nem misturar dados demo com workspace da pessoa.                                |
+
+### 3.1.2 Trilhas de onboarding
+
+| Trilha            | Entrada comum                         | Passos permitidos                                                                                                  |
+| ----------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `workspace-setup` | `workspace-creator` ou `solo-creator` | diagnostico/perfil, responsabilidades condicionais, pessoas/papeis, host, fontes, assistente, integracoes, revisao |
+| `member-join`     | `invited-member`                      | convite, papeis propostos, permissoes, aceite/recusa/pedir ajuste, proximas acoes pessoais                         |
+| `returning`       | `returning-member`                    | pendencias pessoais e explicacao do estado atual                                                                   |
+| `demo-tour`       | `demo-tour`                           | tour seguro, dados ficticios, sair para criar workspace real                                                       |
+
+Regras de produto:
+
+- A etapa "Diagnostico da organizacao" so aparece na trilha
+  `workspace-setup`.
+- Perguntas sobre responsabilidades, separacao de papeis, governance host e
+  fontes de trabalho so aparecem para quem tem autoridade ou responsabilidade
+  de configurar o workspace.
+- Pessoa convidada ve papeis como proposta/pendencia ate aceitar; papel para
+  outra pessoa nunca vira autoridade efetiva automaticamente.
+- A mesma pessoa pode viver trilhas diferentes em workspaces diferentes. Ex.:
+  Rosana como dev solo em projetos pessoais usa `solo-creator`; Rosana como
+  contratada convidada por uma empresa usa `member-join`.
+- Cup/CWP deve usar o especialista correto por trilha:
+  `setup-guide` para `workspace-setup`, `member-guide` para `member-join`,
+  `workspace-guide` para `returning` e `demo-guide` para `demo-tour`.
+
+Contratos automatizados:
+
+- APP-36 prova que o criador entra na trilha `workspace-setup`.
+- APP-37 prova que a pessoa convidada entra em `member-join` e nao recebe
+  passos de setup da organizacao.
+
+## 3.2 Stack visual e spikes obrigatorios
 
 Autoridade: [`APP-DECISIONS.md#qrd-27---stack-de-visualizacao-do-app`](APP-DECISIONS.md#qrd-27---stack-de-visualizacao-do-app)
 e [`APP-DECISIONS.md#qrd-29---reconciliacao-pos-validacao-da-owner`](APP-DECISIONS.md#qrd-29---reconciliacao-pos-validacao-da-owner)
@@ -137,7 +187,7 @@ Regras de produto:
   `GovernanceTableViewModel`). Trocar renderer nao pode alterar dominio,
   comandos, resolver ou fonte autoritativa.
 
-## 3.2 Cup / CWP — overlay contextual transversal
+## 3.3 Cup / CWP — overlay contextual transversal
 
 Autoridade: [`APP-DECISIONS.md#qrd-32---cupcwp-como-par-contextual-de-trabalho`](APP-DECISIONS.md#qrd-32---cupcwp-como-par-contextual-de-trabalho).
 
@@ -156,7 +206,7 @@ Cup existe para resolver uma tensao central do produto:
 - IA ajuda muito, mas nao pode virar bypass de authority, policy, egress ou
   sourceRevision.
 
-### 3.2.1 Superficies do Cup
+### 3.3.1 Superficies do Cup
 
 | Superficie             | Funcao                                                                                           | Estado inicial |
 | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------- |
@@ -168,7 +218,7 @@ Cup existe para resolver uma tensao central do produto:
 | Provider-assisted mode | usa provider local/cloud aprovado para resumo, sugestao ou rascunho                              | C4             |
 | Draft action mode      | prepara payload/dry-run de comando, sempre com confirmacao humana antes de qualquer persistencia | C5-C6          |
 
-### 3.2.2 Pipeline obrigatorio
+### 3.3.2 Pipeline obrigatorio
 
 ```text
 Page CwpPageContext
@@ -185,7 +235,7 @@ Cup nunca acessa o mundo por atalho. Ele recebe contexto resolvido pelo app.
 Quando a tela nao tem workspace, host, fonte ou permissao suficiente, Cup deve
 dizer isso de forma simples e sugerir o menor proximo passo seguro.
 
-### 3.2.3 Contrato minimo de contexto por pagina
+### 3.3.3 Contrato minimo de contexto por pagina
 
 Cada rota de produto deve conseguir publicar um descritor semelhante a:
 
@@ -226,29 +276,29 @@ O contexto publicado pela pagina e uma intencao; o backend ainda precisa
 recalcular authority, policy e egress. A UI nao pode autoafirmar que Cup tem
 permissao.
 
-### 3.2.4 Especialistas por rota
+### 3.3.4 Especialistas por rota
 
-| Rota/superficie          | Especialista CWP      | Oportunidade principal                                                                  |
-| ------------------------ | --------------------- | --------------------------------------------------------------------------------------- |
-| `/signup`                | `adoption-guide`      | explicar conta local, auth futura, demo e diferenca entre login e authority             |
-| `/organizations`         | `workspace-guide`     | escolher workspace, anexar demo, entender local/shared/controlled                       |
-| `/onboarding`            | `setup-guide`         | guiar perfil, responsabilidades, host, fontes, assistente e integracoes                 |
-| `/sources`               | `source-guide`        | escolher local/cloud/GitHub, explicar `sourceTrust`, `.governance` e `.governance-host` |
-| `/settings`              | `configuration-guide` | reconciliar configuracoes com onboarding e policy                                       |
-| `/planning`              | `planning-guide`      | transformar objetivos em metricas, targets, allocation e contexto progressivo           |
-| `/intake`                | `initiative-guide`    | rascunhar problema, hipotese, aposta, lacunas e fontes afetadas                         |
-| `/triage`                | `triage-guide`        | sugerir perguntas, repos, contratos, unknowns e comparar matcher providers              |
-| `/gates`                 | `decision-guide`      | explicar autoridade, risco, evidencia e consequencia da decisao                         |
-| `/work`                  | `execution-guide`     | interpretar repo-work, acks, bloqueios e pendencias                                     |
-| `/contracts`             | `contract-guide`      | explicar owner, consumers, compatibility-window, contention e migrations                |
-| `/results`               | `results-guide`       | explicar outcome, actual, rollup, stale, self-attested e confianca                      |
-| `/operations`            | `operations-guide`    | incidentes, follow-ups, SLO e trabalho operacional                                      |
-| `/audit`                 | `policy-guide`        | explicar bloqueio/aviso/rebaixamento citando policy                                     |
-| `/integrations`/settings | `integration-guide`   | configurar providers, egress, health, probe e backlog                                   |
-| `/map`                   | `graph-guide`         | explicar caminho, impacto, vizinhanca e risco no grafo                                  |
-| `/console`               | `technical-guide`     | orientar sem substituir console tecnico nem executar comando sozinho                    |
+| Rota/superficie          | Especialista CWP                          | Oportunidade principal                                                                  |
+| ------------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------- |
+| `/signup`                | `adoption-guide`                          | explicar conta local, auth futura, demo e diferenca entre login e authority             |
+| `/organizations`         | `workspace-guide`                         | escolher workspace, anexar demo, entender local/shared/controlled                       |
+| `/onboarding`            | `setup-guide`/`member-guide`/`demo-guide` | escolher trilha por contexto; guiar setup, entrada de participante ou tour demo         |
+| `/sources`               | `source-guide`                            | escolher local/cloud/GitHub, explicar `sourceTrust`, `.governance` e `.governance-host` |
+| `/settings`              | `configuration-guide`                     | reconciliar configuracoes com onboarding e policy                                       |
+| `/planning`              | `planning-guide`                          | transformar objetivos em metricas, targets, allocation e contexto progressivo           |
+| `/intake`                | `initiative-guide`                        | rascunhar problema, hipotese, aposta, lacunas e fontes afetadas                         |
+| `/triage`                | `triage-guide`                            | sugerir perguntas, repos, contratos, unknowns e comparar matcher providers              |
+| `/gates`                 | `decision-guide`                          | explicar autoridade, risco, evidencia e consequencia da decisao                         |
+| `/work`                  | `execution-guide`                         | interpretar repo-work, acks, bloqueios e pendencias                                     |
+| `/contracts`             | `contract-guide`                          | explicar owner, consumers, compatibility-window, contention e migrations                |
+| `/results`               | `results-guide`                           | explicar outcome, actual, rollup, stale, self-attested e confianca                      |
+| `/operations`            | `operations-guide`                        | incidentes, follow-ups, SLO e trabalho operacional                                      |
+| `/audit`                 | `policy-guide`                            | explicar bloqueio/aviso/rebaixamento citando policy                                     |
+| `/integrations`/settings | `integration-guide`                       | configurar providers, egress, health, probe e backlog                                   |
+| `/map`                   | `graph-guide`                             | explicar caminho, impacto, vizinhanca e risco no grafo                                  |
+| `/console`               | `technical-guide`                         | orientar sem substituir console tecnico nem executar comando sozinho                    |
 
-### 3.2.5 Matriz de poderes
+### 3.3.5 Matriz de poderes
 
 Cup pode:
 
@@ -277,7 +327,7 @@ Cup nao pode:
 - alterar event-log;
 - executar mutacao autoritativa sem confirmacao humana.
 
-### 3.2.6 Fases de implementacao
+### 3.3.6 Fases de implementacao
 
 | Fase | Entrega                                                         | Dependencias                   | Bloqueia validacao das telas? |
 | ---- | --------------------------------------------------------------- | ------------------------------ | ----------------------------- |
@@ -427,18 +477,32 @@ acao governada por tipo de no e mapa para workspace real fora da demo.
 - nao ha importacao de workspace existente.
 - nao ha exclusao/arquivamento de workspace.
 
-## 7. Fluxo 1: onboarding da organizacao
+## 7. Fluxo 1: onboarding por contexto de entrada
 
 O onboarding precisa ser um fluxo funcional, nao apenas informativo. Ao final, ele deve gravar uma configuracao minima governada ou uma configuracao local explicitamente marcada como rascunho.
 
-O onboarding tem dois caminhos:
+O onboarding tem quatro trilhas. A trilha vem do contexto de entrada definido
+em [§3.1](#31-contexto-de-entrada-e-trilhas-de-onboarding), nao de uma escolha
+decorativa em dropdown:
+
+- **Setup do workspace (`workspace-setup`):** para quem criou ou esta
+  configurando o workspace. Pode conter caminho padrao guiado e modo avancado.
+- **Entrada de participante (`member-join`):** para quem recebeu convite ou
+  papel proposto. Explica workspace, convite, papeis, permissoes e aceite.
+- **Retorno (`returning`):** para quem ja e membro e so precisa continuar uma
+  pendencia pessoal.
+- **Tour demo (`demo-tour`):** para sandbox/acme demo, sempre marcado como
+  ficticio.
+
+Na trilha `workspace-setup`, existem dois caminhos:
 
 - **Padrao guiado:** a pessoa responde perguntas de contexto; o app recomenda perfil, modo do workspace, execucao e adapters minimos. Nao pergunta banco/Docker/Neo4j como primeira camada.
 - **Avancado:** a pessoa tecnica pode ajustar `execution-mode`, `operational-store`, `graph-read-model`, auth, fontes, assistente e integracoes. O app valida compatibilidade e mostra requisitos/riscos.
 
 ### 7.1 Etapa: Boas-vindas
 
-**Objetivo:** estabelecer o contrato do framework.
+**Objetivo:** estabelecer o contrato do framework e mostrar por que a pessoa
+esta neste onboarding.
 
 **Usuario ve:**
 
@@ -446,14 +510,28 @@ O onboarding tem dois caminhos:
 - "Integracoes ajudam, mas nao substituem o estado autoritativo";
 - "Assistente sugere, voce decide";
 - "Quando faltar independencia, o app mostra a limitacao em vez de esconder".
+- um resumo do contexto de entrada:
+  - configurando workspace;
+  - entrando por convite;
+  - retomando pendencia pessoal;
+  - explorando demo.
 
 **Backend necessario:**
 
-- nenhum backend alem de leitura de workspace.
+- leitura de workspace;
+- leitura de membership/convite/papeis propostos quando existirem;
+- derivacao de trilha de onboarding.
 
 **Estado atual:**
 
 - existe UI.
+- APP-36/37 definem o comportamento esperado, ainda em `expected-fail`.
+
+**Lacuna critica:**
+
+- a UI ainda nao separa claramente criador, convidado, retorno e demo. Sem
+  isso, passos como diagnostico da organizacao, responsabilidades, host e
+  fontes aparecem em contexto errado.
 
 ### 7.2 Etapa: Diagnostico do perfil de governanca
 
@@ -627,6 +705,18 @@ propostos, mas so vira membership efetiva depois que um principal local
 autenticado aceita o convite. Login externo futuro (GitHub, Google, OIDC) pode
 autenticar a pessoa; nao concede authority governada automaticamente.
 
+**Varia por trilha:**
+
+- em `workspace-setup`, a tela pergunta primeiro quais responsabilidades a
+  pessoa criadora quer assumir pessoalmente, quais lacunas aceita deixar
+  visiveis e quem pretende convidar depois;
+- em `member-join`, a tela nao pede para configurar a organizacao. Ela explica
+  o convite, os papeis propostos, as permissoes efetivas, o que fica pendente
+  de aceite e como recusar ou pedir ajuste;
+- em `solo-creator`, a tela pode colapsar times/grupos e focar em
+  auto-declaracao visivel;
+- em `demo-tour`, a tela so explica exemplos ficticios.
+
 **Usuario ve:**
 
 - lista de pessoas do workspace;
@@ -646,15 +736,17 @@ autenticar a pessoa; nao concede authority governada automaticamente.
 
 **Papeis iniciais:**
 
-- administrador do workspace;
-- sponsor/aprovador de governanca;
-- responsavel financeiro;
-- responsavel de seguranca/egress;
-- responsavel tecnico;
-- owner de fonte/repo;
-- definidor de meta;
-- atestador de actual/outcome;
-- auditor/leitor.
+| Papel                           | Responsabilidade no framework                                                                               | Observacao de produto                                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| administrador do workspace      | configura workspace, convida pessoas, gerencia preferencias locais e integracoes permitidas                 | nao e automaticamente sponsor, financeiro, security ou attester                                       |
+| sponsor/aprovador de governanca | assume decisoes de governanca quando o workspace exige aprovacao humana                                     | em workspace pequeno pode colapsar com admin, mas o app marca o acumulo                               |
+| responsavel financeiro/custos   | aprova escolhas que geram custo operacional ou contrato externo, como ferramenta paga, cloud ou adapter Pro | nao implica que o app seja SaaS pago; cobre custo da propria organizacao e das ferramentas integradas |
+| responsavel de seguranca/egress | aprova saida de dados, assistente cloud, identity provider e integracoes que leem informacao sensivel       | deve ser separado quando o workspace escolhe modo controlado                                          |
+| responsavel tecnico             | responde por requisitos tecnicos, runtime, adapter, health e trade-offs de arquitetura                      | pode ser tech lead, plataforma ou pessoa solo                                                         |
+| owner de fonte/repo             | responde por uma fonte de trabalho, repo, pasta ou provider e por permitir seu uso como evidencia           | nao equivale a ser dono de todo workspace                                                             |
+| definidor de meta               | define metricas, targets e criterio de sucesso de um objetivo/ciclo                                         | pode ser negocio/produto/leadership, nao necessariamente engenharia                                   |
+| atestador de actual/outcome     | confirma evidencias/resultados e deve ser independente quando possivel                                      | se for a mesma pessoa que definiu a meta, o app marca auto-declarado/colapso conforme policy          |
+| auditor/leitor                  | pode ler historico, decisoes, evidencias e limites sem necessariamente poder alterar configuracao           | util para stakeholder, auditoria interna ou acompanhamento                                            |
 
 **Backend necessario:**
 

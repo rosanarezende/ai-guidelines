@@ -202,6 +202,38 @@ contracts:
       - Papel atribuido a outra pessoa fica proposed ate aceite.
       - Authority efetiva e derivada de assignments aceitos e grupos.
       - Acumulo sensivel fica visivel conforme policy.
+  - id: APP-36
+    title: Criador entra na trilha de setup do workspace
+    status: expected-fail
+    spec: journeys/onboarding.spec.ts
+    seed: empty-workspace
+    actors:
+      - workspace-admin
+    surfaces:
+      - /signup
+      - /organizations
+      - /onboarding
+    assertions:
+      - Criar workspace leva a trilha workspace-setup, nao a um onboarding generico.
+      - A trilha mostra diagnostico/perfil, host e fontes como passos de configuracao do workspace.
+      - A tela deixa claro que a pessoa esta configurando a organizacao/workspace, nao apenas entrando como participante.
+  - id: APP-37
+    title: Pessoa convidada entra na trilha de participacao
+    status: expected-fail
+    spec: journeys/onboarding.spec.ts
+    seed: workspace-authority-personas
+    actors:
+      - invited-member
+      - proposed-role
+    surfaces:
+      - /signup
+      - /onboarding
+      - /settings
+    assertions:
+      - Pessoa convidada faz signup/entrada antes de aceitar membership ou papel.
+      - A trilha member-join mostra quem convidou, workspace, papeis propostos e permissoes.
+      - Pessoa convidada pode aceitar, recusar ou pedir ajuste sem ganhar authority automaticamente.
+      - Diagnostico da organizacao, perfil, host e fontes nao aparecem como caminho principal para convidado sem authority.
   - id: APP-08
     title: Governance host e escolhido antes das fontes
     status: active
