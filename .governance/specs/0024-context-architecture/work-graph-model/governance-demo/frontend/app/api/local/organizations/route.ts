@@ -1,26 +1,24 @@
 // POST /api/local/organizations — cria organização vazia OU anexa a demo acme.
 // A sessão passa a apontar para a organização criada/anexada.
 import { NextResponse } from "next/server";
+import { OrganizationRequestSchema } from "@demo/contracts";
 import { attachDemoWorkspace, createWorkspace } from "@/server/adoption/application/use-cases";
 import { readSession, writeSession } from "@/server/adoption/session";
+import { parseZodJson } from "../_shared/parse-zod-request";
 
 export async function POST(request: Request) {
   const session = await readSession();
   if (!session) return NextResponse.json({ ok: false, error: "no-session" }, { status: 401 });
-  const body = (await request.json().catch(() => null)) as {
-    mode?: unknown;
-    name?: unknown;
-    kind?: unknown;
-  } | null;
-  if (!body) return NextResponse.json({ ok: false, error: "invalid-json" }, { status: 400 });
+  const parsed = await parseZodJson(request, OrganizationRequestSchema);
+  if (!parsed.ok) return parsed.response;
 
   const result =
-    body.mode === "demo"
+    "mode" in parsed.data
       ? await attachDemoWorkspace({ principalId: session.principalId, companyName: "Acme" })
       : await createWorkspace({
           principalId: session.principalId,
-          name: body.name,
-          kind: body.kind,
+          name: parsed.data.name,
+          kind: parsed.data.kind,
         });
   if (!result.ok) return NextResponse.json(result, { status: 422 });
   await writeSession({ principalId: session.principalId, workspaceId: result.value.id });

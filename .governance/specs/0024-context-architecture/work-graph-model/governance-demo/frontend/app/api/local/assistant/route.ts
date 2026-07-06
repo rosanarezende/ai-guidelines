@@ -3,10 +3,12 @@
 // dispensa o assistente ({action:"dismiss"}). Endpoint não-loopback sem egress
 // aprovado é rejeitado fail-closed (QRD-18/24).
 import { NextResponse } from "next/server";
+import { SaveAssistantProviderRequestSchema } from "@demo/contracts";
 import { normalizeWorkspace } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { dismissAssistant, saveAssistantProvider } from "@/server/adoption/application/assistant";
 import { readShellState } from "@/server/adoption/application/use-cases";
+import { parseZodJson } from "../_shared/parse-zod-request";
 
 export async function GET() {
   const check = await requireWorkspaceSession();
@@ -30,23 +32,24 @@ export async function POST(request: Request) {
   const check = await requireWorkspaceSession();
   if (!check.ok)
     return NextResponse.json({ ok: false, error: check.error }, { status: check.status });
-  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!body) return NextResponse.json({ ok: false, error: "invalid-json" }, { status: 400 });
-  if (body.action === "dismiss") {
+  const parsed = await parseZodJson(request, SaveAssistantProviderRequestSchema);
+  if (!parsed.ok) return parsed.response;
+  const data = parsed.data;
+  if ("action" in data) {
     const result = await dismissAssistant(check.session);
     if (!result.ok) return NextResponse.json(result, { status: 422 });
     return NextResponse.json({ ok: true, dismissed: true });
   }
   const result = await saveAssistantProvider({
     ...check.session,
-    kind: body.kind,
-    label: body.label,
-    preset: body.preset,
-    endpoint: body.endpoint,
-    model: body.model,
-    maxClassification: body.maxClassification,
-    egressApproved: body.egressApproved,
-    ...(body.runTest === false ? { runTest: false } : {}),
+    kind: data.kind,
+    label: data.label,
+    preset: data.preset,
+    endpoint: data.endpoint,
+    model: data.model,
+    maxClassification: data.maxClassification,
+    egressApproved: data.egressApproved,
+    ...(data.runTest === false ? { runTest: false } : {}),
   });
   if (!result.ok) return NextResponse.json(result, { status: 422 });
   return NextResponse.json({ ok: true, provider: result.value.provider });

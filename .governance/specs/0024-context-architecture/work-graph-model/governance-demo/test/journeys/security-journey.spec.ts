@@ -1,7 +1,7 @@
 // security-journey.spec.ts — fronteira HTTP do shell de adoção.
 // Prova que convite cria membership real e que membership comum não autoriza
 // configuração sensível do workspace.
-import { test, expect, type APIRequestContext } from "@playwright/test";
+import { test, expect, type APIRequestContext, type APIResponse } from "@playwright/test";
 import { MOCK_API_URL } from "../playwright.config.ts";
 
 test.beforeEach(async ({ request }) => {
@@ -19,6 +19,17 @@ async function createSignedWorkspace(request: APIRequestContext) {
   });
   expect(org.ok()).toBeTruthy();
   return org;
+}
+
+async function expectSchemaInvalid(response: APIResponse, path?: string) {
+  expect(response.status()).toBe(400);
+  const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
+  expect(body.error).toBe("schema-invalid");
+  if (path) {
+    expect(body.issues?.some((issue) => issue.path === path)).toBeTruthy();
+  } else {
+    expect(body.issues?.length || 0).toBeGreaterThan(0);
+  }
 }
 
 test("convite tokenizado cria membership e não concede authority sensível", async ({ browser }) => {
@@ -235,4 +246,121 @@ test("rota /api/local/roles/[id] valida decisao por Zod antes do use case", asyn
   const body = (await response.json()) as { error?: string; issues?: Array<{ path?: string }> };
   expect(body.error).toBe("schema-invalid");
   expect(body.issues?.some((issue) => issue.path === "action")).toBeTruthy();
+});
+
+test("rota /api/local/signup valida conta por Zod antes do use case", async ({ request }) => {
+  const response = await request.post("/api/local/signup", {
+    data: { displayName: "A", email: "email-invalido" },
+  });
+  await expectSchemaInvalid(response, "displayName");
+});
+
+test("rota /api/local/organizations valida criacao por Zod antes do use case", async ({
+  request,
+}) => {
+  const signup = await request.post("/api/local/signup", {
+    data: { displayName: "Ana Admin" },
+  });
+  expect(signup.ok()).toBeTruthy();
+
+  const response = await request.post("/api/local/organizations", {
+    data: { name: "Acme Honey", kind: "sandbox-demo" },
+  });
+  await expectSchemaInvalid(response);
+});
+
+test("rota /api/local/organizations/select valida workspace por Zod antes do use case", async ({
+  request,
+}) => {
+  const signup = await request.post("/api/local/signup", {
+    data: { displayName: "Ana Admin" },
+  });
+  expect(signup.ok()).toBeTruthy();
+
+  const response = await request.post("/api/local/organizations/select", {
+    data: { workspaceId: "" },
+  });
+  await expectSchemaInvalid(response, "workspaceId");
+});
+
+test("rota /api/local/governance-host valida action/kind por Zod antes do use case", async ({
+  request,
+}) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/governance-host", {
+    data: { action: "create", kind: "workspace-folder", pathOrUrl: "C:/tmp/acme" },
+  });
+  await expectSchemaInvalid(response, "kind");
+});
+
+test("rota /api/local/work-sources valida fonte por Zod antes do use case", async ({ request }) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/work-sources", {
+    data: { kind: "jira", label: "Fonte externa" },
+  });
+  await expectSchemaInvalid(response, "kind");
+});
+
+test("rota /api/local/work-sources/[id]/scan valida corpo vazio por Zod", async ({ request }) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/work-sources/src-test/scan", {
+    data: { unexpected: true },
+  });
+  await expectSchemaInvalid(response, "");
+});
+
+test("rota /api/local/work-sources/[id]/browser-scan valida snapshot por Zod", async ({
+  request,
+}) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/work-sources/src-test/browser-scan", {
+    data: { scan: { fileCount: -1, contentHash: "bad" } },
+  });
+  await expectSchemaInvalid(response, "scan.fileCount");
+});
+
+test("rota /api/local/assistant valida provider por Zod antes do use case", async ({ request }) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/assistant", {
+    data: { kind: "agent-cloud", endpoint: "http://127.0.0.1:11434" },
+  });
+  await expectSchemaInvalid(response);
+});
+
+test("rota /api/local/assistant/defaults valida funcao por Zod antes do use case", async ({
+  request,
+}) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/assistant/defaults", {
+    data: { function: "rewrite-policy", providerId: "prov-1" },
+  });
+  await expectSchemaInvalid(response, "function");
+});
+
+test("rota /api/local/assistant/test valida endpoint por Zod antes do use case", async ({
+  request,
+}) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/assistant/test", {
+    data: { kind: "ollama", endpoint: "not a url" },
+  });
+  await expectSchemaInvalid(response, "endpoint");
+});
+
+test("rota /api/local/integrations/[id] valida status por Zod antes do use case", async ({
+  request,
+}) => {
+  await createSignedWorkspace(request);
+
+  const response = await request.post("/api/local/integrations/git-provider", {
+    data: { status: "enabled" },
+  });
+  await expectSchemaInvalid(response, "status");
 });

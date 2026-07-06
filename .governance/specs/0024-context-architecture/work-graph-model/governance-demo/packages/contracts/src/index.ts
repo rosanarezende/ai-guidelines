@@ -4,7 +4,12 @@
 // app/backend/mock-api/test code that should not import concrete adapters.
 export * from "./commands/types.ts";
 export * from "./api/result.ts";
+export * from "./assistant/schemas.ts";
 export * from "./errors/types.ts";
+export * from "./host/schemas.ts";
+export * from "./integrations/schemas.ts";
 export * from "./members/schemas.ts";
 export * from "./onboarding/schemas.ts";
 export * from "./schemas/constants.ts";
+export * from "./work-sources/schemas.ts";
+export * from "./workspace/schemas.ts";

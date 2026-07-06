@@ -1,10 +1,12 @@
 // GET  /api/local/work-sources — fontes com sourceTrust/limitações visíveis.
 // POST /api/local/work-sources — adiciona fonte (entra como "declared").
 import { NextResponse } from "next/server";
+import { AddWorkSourceRequestSchema } from "@demo/contracts";
 import { normalizeWorkspace } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { readShellState } from "@/server/adoption/application/use-cases";
 import { addWorkSource } from "@/server/adoption/application/work-sources";
+import { parseZodJson } from "../_shared/parse-zod-request";
 
 export async function GET() {
   const check = await requireWorkspaceSession();
@@ -21,17 +23,13 @@ export async function POST(request: Request) {
   const check = await requireWorkspaceSession();
   if (!check.ok)
     return NextResponse.json({ ok: false, error: check.error }, { status: check.status });
-  const body = (await request.json().catch(() => null)) as {
-    kind?: unknown;
-    label?: unknown;
-    pathOrUrl?: unknown;
-  } | null;
-  if (!body) return NextResponse.json({ ok: false, error: "invalid-json" }, { status: 400 });
+  const parsed = await parseZodJson(request, AddWorkSourceRequestSchema);
+  if (!parsed.ok) return parsed.response;
   const result = await addWorkSource({
     ...check.session,
-    kind: body.kind,
-    label: body.label,
-    pathOrUrl: body.pathOrUrl,
+    kind: parsed.data.kind,
+    label: parsed.data.label,
+    pathOrUrl: parsed.data.pathOrUrl,
   });
   if (!result.ok) return NextResponse.json(result, { status: 422 });
   return NextResponse.json({ ok: true, source: result.value.source });

@@ -2,15 +2,19 @@
 // git head/dirty, hash de inventário, detecção de pasta sincronizada; o trust
 // é derivado no domínio (fail-closed: erro de scan => untrusted).
 import { NextResponse } from "next/server";
+import { WorkSourceScanRequestSchema } from "@demo/contracts";
 import { normalizeWorkspace } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import { readShellState } from "@/server/adoption/application/use-cases";
 import { scanWorkSource } from "@/server/adoption/application/work-sources";
+import { parseZodJson } from "../../../_shared/parse-zod-request";
 
-export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
+export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const check = await requireWorkspaceSession();
   if (!check.ok)
     return NextResponse.json({ ok: false, error: check.error }, { status: check.status });
+  const parsed = await parseZodJson(request, WorkSourceScanRequestSchema);
+  if (!parsed.ok) return parsed.response;
   const { id } = await context.params;
   const state = await readShellState();
   const workspace = state.workspaces.find((item) => item.id === check.session.workspaceId);

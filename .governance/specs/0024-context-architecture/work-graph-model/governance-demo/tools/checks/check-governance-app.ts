@@ -480,6 +480,18 @@ for (const relativeFile of requiredApiRoutes) {
 // validacao manual/ad hoc nos pontos que viraram schema compartilhado.
 const zodContractRoutes = [
   {
+    file: "app/api/local/signup/route.ts",
+    schema: "SignupRequestSchema",
+  },
+  {
+    file: "app/api/local/organizations/route.ts",
+    schema: "OrganizationRequestSchema",
+  },
+  {
+    file: "app/api/local/organizations/select/route.ts",
+    schema: "SelectOrganizationRequestSchema",
+  },
+  {
     file: "app/api/local/onboarding/status/route.ts",
     schema: "OnboardingStatusRequestSchema",
   },
@@ -519,6 +531,38 @@ const zodContractRoutes = [
     file: "app/api/local/roles/[id]/route.ts",
     schema: "RoleDecisionRequestSchema",
   },
+  {
+    file: "app/api/local/governance-host/route.ts",
+    schema: "GovernanceHostRequestSchema",
+  },
+  {
+    file: "app/api/local/work-sources/route.ts",
+    schema: "AddWorkSourceRequestSchema",
+  },
+  {
+    file: "app/api/local/work-sources/[id]/scan/route.ts",
+    schema: "WorkSourceScanRequestSchema",
+  },
+  {
+    file: "app/api/local/work-sources/[id]/browser-scan/route.ts",
+    schema: "BrowserWorkSourceScanRequestSchema",
+  },
+  {
+    file: "app/api/local/assistant/route.ts",
+    schema: "SaveAssistantProviderRequestSchema",
+  },
+  {
+    file: "app/api/local/assistant/defaults/route.ts",
+    schema: "AssistantDefaultRequestSchema",
+  },
+  {
+    file: "app/api/local/assistant/test/route.ts",
+    schema: "AssistantProviderTestRequestSchema",
+  },
+  {
+    file: "app/api/local/integrations/[id]/route.ts",
+    schema: "IntegrationStatusRequestSchema",
+  },
 ];
 for (const route of zodContractRoutes) {
   const file = path.join(appDir, ...route.file.split("/"));
@@ -534,6 +578,16 @@ for (const route of zodContractRoutes) {
   }
   if (!text.includes("@demo/contracts")) {
     fail(`rota deve importar schemas de @demo/contracts: ${route.file}`);
+  }
+}
+for (const relativeFile of walk(path.join(appDir, "app", "api", "local")).filter((file) =>
+  file.endsWith("route.ts")
+)) {
+  const normalized = path.relative(appDir, relativeFile).replace(/\\/g, "/");
+  if (normalized === "app/api/local/_shared/parse-zod-request.ts") continue;
+  const text = fs.readFileSync(relativeFile, "utf8");
+  if (text.includes("request.json(")) {
+    fail(`rota /api/local com parsing JSON manual em vez de parseZodJson: ${normalized}`);
   }
 }
 // ── fluxo inicial signup → organizações → onboarding → home ────────────────

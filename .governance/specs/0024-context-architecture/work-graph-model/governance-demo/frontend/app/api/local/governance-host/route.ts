@@ -3,6 +3,7 @@
 // Três distribuições físicas + sandbox explícito (QRD-08/09/21); create faz
 // scaffold real (host.yml, members/, events/events.jsonl, sourceRevision).
 import { NextResponse } from "next/server";
+import { GovernanceHostRequestSchema } from "@demo/contracts";
 import { normalizeWorkspace } from "@demo/domain";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
 import {
@@ -12,6 +13,7 @@ import {
   suggestHostPath,
 } from "@/server/adoption/application/host";
 import { readShellState } from "@/server/adoption/application/use-cases";
+import { parseZodJson } from "../_shared/parse-zod-request";
 
 export async function GET() {
   const check = await requireWorkspaceSession();
@@ -38,13 +40,9 @@ export async function POST(request: Request) {
   const check = await requireWorkspaceSession();
   if (!check.ok)
     return NextResponse.json({ ok: false, error: check.error }, { status: check.status });
-  const body = (await request.json().catch(() => null)) as {
-    action?: unknown;
-    kind?: unknown;
-    pathOrUrl?: unknown;
-    fitReason?: unknown;
-  } | null;
-  if (!body) return NextResponse.json({ ok: false, error: "invalid-json" }, { status: 400 });
+  const parsed = await parseZodJson(request, GovernanceHostRequestSchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.data;
 
   if (body.action === "fit-check") {
     const result = await hostFitCheck({ kind: body.kind, pathOrUrl: body.pathOrUrl });
@@ -71,5 +69,4 @@ export async function POST(request: Request) {
     if (!result.ok) return NextResponse.json(result, { status: 422 });
     return NextResponse.json({ ok: true, sandboxDeclared: true });
   }
-  return NextResponse.json({ ok: false, error: "invalid-action" }, { status: 400 });
 }
