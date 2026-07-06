@@ -1,8 +1,8 @@
 "use client";
 
 import { Alert, Box, Chip, CircularProgress, Typography } from "@mui/material";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { workspaceQueryKeys } from "@/app/_domain/queryKeys";
 import { Flex } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
 import type { WorkItemsResponse } from "../../_model/view-models";
@@ -17,22 +17,7 @@ type WorkspaceSummary = {
 };
 
 export default function WorkView({ workspace }: { workspace: WorkspaceSummary }) {
-  const [client] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
-      })
-  );
-
-  return (
-    <QueryClientProvider client={client}>
-      <WorkContent workspace={workspace} />
-    </QueryClientProvider>
-  );
-}
-
-function WorkContent({ workspace }: { workspace: WorkspaceSummary }) {
-  const queryKey = ["work-items", workspace.id] as const;
+  const queryKey = workspaceQueryKeys.workItems(workspace.id);
   const query = useQuery({ queryKey, queryFn: fetchWorkItems });
 
   return (

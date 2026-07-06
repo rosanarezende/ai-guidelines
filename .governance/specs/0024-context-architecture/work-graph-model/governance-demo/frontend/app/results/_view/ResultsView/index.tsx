@@ -1,8 +1,8 @@
 "use client";
 
 import { Alert, Box, Chip, CircularProgress, Typography } from "@mui/material";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { workspaceQueryKeys } from "@/app/_domain/queryKeys";
 import { Flex, ResponsiveGrid, StatCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
 import type { ResultsDashboardResponse } from "../../_model/view-models";
@@ -18,22 +18,7 @@ type WorkspaceSummary = {
 };
 
 export default function ResultsView({ workspace }: { workspace: WorkspaceSummary }) {
-  const [client] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
-      })
-  );
-
-  return (
-    <QueryClientProvider client={client}>
-      <ResultsContent workspace={workspace} />
-    </QueryClientProvider>
-  );
-}
-
-function ResultsContent({ workspace }: { workspace: WorkspaceSummary }) {
-  const queryKey = ["results-dashboard", workspace.id] as const;
+  const queryKey = workspaceQueryKeys.resultsDashboard(workspace.id);
   const query = useQuery({
     queryKey,
     queryFn: fetchResultsDashboard,
@@ -77,7 +62,11 @@ function ResultsContent({ workspace }: { workspace: WorkspaceSummary }) {
   );
 }
 
-function DashboardState({ response }: { response: Extract<ResultsDashboardResponse, { ok: true }> }) {
+function DashboardState({
+  response,
+}: {
+  response: Extract<ResultsDashboardResponse, { ok: true }>;
+}) {
   if (!response.dashboard) {
     return (
       <Alert severity="info">

@@ -1,8 +1,9 @@
 "use client";
 
 import { Alert, Box, Chip, CircularProgress, Typography } from "@mui/material";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { workspaceQueryKeys } from "@/app/_domain/queryKeys";
 import { Flex } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
 import { applyMapFilter, mapNeighborhood } from "../../_model/map-ops";
@@ -28,22 +29,7 @@ type WorkspaceSummary = {
 };
 
 export default function MapView({ workspace }: { workspace: WorkspaceSummary }) {
-  const [client] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
-      })
-  );
-
-  return (
-    <QueryClientProvider client={client}>
-      <MapContent workspace={workspace} />
-    </QueryClientProvider>
-  );
-}
-
-function MapContent({ workspace }: { workspace: WorkspaceSummary }) {
-  const queryKey = ["governance-map", workspace.id] as const;
+  const queryKey = workspaceQueryKeys.governanceMap(workspace.id);
   const query = useQuery({ queryKey, queryFn: fetchGovernanceMaps });
 
   return (
@@ -90,7 +76,8 @@ function MapState({ response }: { response: Extract<GovernanceMapsResponse, { ok
   const filteredMap = useMemo(() => (map ? applyMapFilter(map, filter) : null), [map, filter]);
   const selectedNode = filteredMap?.nodes.find((node) => node.id === selectedId) ?? null;
   const highlight = useMemo(
-    () => (filteredMap && selectedId ? mapNeighborhood(filteredMap, selectedId, 2) : new Set<string>()),
+    () =>
+      filteredMap && selectedId ? mapNeighborhood(filteredMap, selectedId, 2) : new Set<string>(),
     [filteredMap, selectedId]
   );
 

@@ -636,6 +636,13 @@ for (const file of readRelativeFiles()) {
   if (/localStorage/.test(text)) {
     fail(`localStorage proibido (use o shell local via /api/local/*): ${relative}`);
   }
+  const isQueryProvider = relative === "app/_providers/QueryProvider.tsx";
+  const isVisualSpike = relative.startsWith("app/spikes/visual-stack/");
+  if (!isQueryProvider && !isVisualSpike && /QueryClientProvider|new QueryClient/.test(text)) {
+    fail(
+      `QueryClient local proibido em tela de produto; use app/_providers/QueryProvider.tsx: ${relative}`
+    );
+  }
 }
 if (fs.existsSync(path.join(backendRoot, "src", "domain"))) {
   fail("shared kernel nao deve morar em backend/src/domain; use packages/domain/src");

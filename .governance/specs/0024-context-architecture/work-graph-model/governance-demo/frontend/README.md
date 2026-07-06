@@ -276,6 +276,10 @@ frontend/
 - Pastas privadas do App Router usam `_nome` quando nao devem virar rota.
 - Experiencia de tela mora perto da propria rota: `/onboarding` usa `app/onboarding/_view`, `_steps`, `_components` e `_model`.
 - Estado de fluxo local pode viver em `_state` da rota; evite prop drilling quando uma mesma tela coordena varios passos.
+- Server-state usa TanStack Query pelo provider global `app/_providers/QueryProvider.tsx`; telas de produto nao criam `QueryClientProvider` proprio.
+- Query keys compartilhadas ficam em `app/_domain/queryKeys.ts`, sempre escopadas por workspace e recurso.
+- Context API fica reservado para fluxo local complexo (`onboarding`, `Cup/CWP`, shell se crescer). Nao use Context como fonte autoritativa.
+- Redux/Zustand/Jotai nao entram sem novo QRD: o SSOT autoritativo continua no backend file-first/event-log.
 - Codigo compartilhado de dominio de produto fica em `app/_domain/<domain>`.
 - UI compartilhada fica em `app/_ui`. Ela nao deve conhecer detalhes de rota, comando ou arquivo YAML.
 - Cada componente em `app/_ui/shared` deve viver em arquivo proprio; `index.ts` e apenas o barrel de exports.
