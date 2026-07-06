@@ -48,7 +48,7 @@ export default function WorkspaceHome({ workspace }: { workspace: Workspace }) {
   const partial = workspace.onboardingStatus === "partial";
 
   return (
-    <AppShell chip={workspace.name}>
+    <AppShell chip={workspace.name} hasGovernanceHost={Boolean(workspace.governanceHost)}>
       <Box sx={{ maxWidth: 720, mx: "auto", display: "grid", gap: 2.5 }}>
         <Box sx={{ display: "grid", gap: 0.75 }}>
           <Flex align="center" gap={1} wrap>

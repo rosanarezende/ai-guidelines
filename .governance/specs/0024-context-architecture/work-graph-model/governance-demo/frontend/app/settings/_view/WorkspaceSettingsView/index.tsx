@@ -31,7 +31,7 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
     "existing-repo-folder": "",
   } as Record<GovernanceHostKind, string>;
   return (
-    <AppShell chip={workspace.name}>
+    <AppShell chip={workspace.name} hasGovernanceHost={Boolean(workspace.governanceHost)}>
       <Box sx={{ maxWidth: 720, mx: "auto", display: "grid", gap: 2.5 }}>
         <Box sx={{ display: "grid", gap: 0.75 }}>
           <Typography sx={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.4px" }}>

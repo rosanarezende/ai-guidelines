@@ -24,6 +24,7 @@ export default function SourcesView({ workspace }: { workspace: WorkspaceSummary
       subtitle={copy.subtitle}
       headerAction={<Chip size="small" color="info" label={workspace.name} />}
       maxWidth="lg"
+      hasGovernanceHost={Boolean(workspace.governanceHost)}
     >
       <Box sx={{ display: "grid", gap: 3 }}>
         <Box sx={{ display: "grid", gap: 1 }}>

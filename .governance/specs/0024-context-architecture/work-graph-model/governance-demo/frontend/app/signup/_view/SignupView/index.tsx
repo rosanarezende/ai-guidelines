@@ -39,7 +39,7 @@ export default function SignupView() {
   }
 
   return (
-    <AppShell chip="local-principal">
+    <AppShell chip="local-principal" navigationMode="public">
       <Box sx={{ maxWidth: 560, mx: "auto", display: "grid", gap: 2 }}>
         <Flex align="center" gap={1.5}>
           <PersonOutlineIcon color="primary" fontSize="large" />

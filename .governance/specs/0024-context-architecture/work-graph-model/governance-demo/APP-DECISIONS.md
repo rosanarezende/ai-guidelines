@@ -2448,7 +2448,7 @@ Uma tela/fluxo deixa de ser "demo" quando:
 
 # QRD-35 - Navegacao global, menu e subitens
 
-> **Status:** PENDENTE.
+> **Status:** DECIDIDO em 2026-07-06.
 
 **Q - Question**
 
@@ -2479,12 +2479,57 @@ o menu precisa respeitar authority sem usar permissao como mera decoracao visual
 
 **D - Decision**
 
-Pendente. Antes de fechar APP-02 como experiencia final, decidir pelo menos:
+A governance-demo usa navegacao global com **topbar + sidebar esquerda** no
+desktop e **topbar + drawer** no mobile. Abas nao sao navegacao primaria; podem
+existir apenas dentro de uma superficie especifica.
 
-1. padrao de navegacao primario: topbar, sidebar, ambos ou outra composicao;
-2. lista inicial de itens de primeiro nivel;
-3. regra para subitens e agrupamentos;
-4. comportamento por perfil/authority e workspace sem host;
-5. diferenca entre item indisponivel, `em breve`, rebaixado e oculto;
-6. entrada do Cup/CWP e do console tecnico na estrutura;
-7. contratos de teste minimos para provar navegacao e consistencia entre telas.
+Topbar:
+
+- workspace switcher;
+- busca/command palette futura;
+- launcher persistente do Cup/CWP;
+- menu do usuario com logout;
+- acesso ao console tecnico como entrada avancada, separada do fluxo principal.
+
+Sidebar de primeiro nivel:
+
+1. `Inicio`;
+2. `Configurar`;
+3. `Planejar`;
+4. `Executar`;
+5. `Acompanhar`;
+6. `Auditar`;
+7. `Avancado`.
+
+Subitens iniciais:
+
+- `Configurar`: onboarding, configuracoes, fontes de trabalho, integracoes;
+- `Planejar`: ciclo, iniciativas, triagem, gates;
+- `Executar`: trabalho, contratos;
+- `Acompanhar`: resultados, mapa, operacoes;
+- `Auditar`: auditoria;
+- `Avancado`: console tecnico.
+
+Regras:
+
+- permissao muda a acao, nao apaga a compreensao do fluxo;
+- um item pode estar `ativo`, `pendente`, `sem-host`, `sem-authority`,
+  `em-breve`, `degradado` ou `oculto`;
+- `oculto` e reservado para superficies sensiveis que o usuario nao deve nem
+  descobrir;
+- `sem-authority` bloqueia ou transforma a acao em solicitacao, mas pode manter
+  leitura quando isso ajuda transparencia;
+- workspace sem governance host nao vaza demo e mostra itens degradados com
+  CTA para configurar/vincular host;
+- Cup/CWP e overlay transversal, nao pagina primaria; ele muda o contexto por
+  rota e pode explicar bloqueios, avisos e rebaixamentos;
+- console tecnico e area avancada, nunca caminho obrigatorio para concluir a
+  experiencia comum.
+
+Contrato minimo APP-35:
+
+- navegacao global existe depois de workspace selecionado;
+- itens principais aparecem agrupados;
+- workspace sem host mostra itens degradados e nao dados da demo;
+- Cup/CWP e console tecnico aparecem como entradas distintas;
+- authority altera CTA/estado, nao vira decoracao visual.

@@ -71,7 +71,7 @@ export default function OrganizationsView({
   }
 
   return (
-    <AppShell chip="local-principal">
+    <AppShell chip="local-principal" navigationMode="public">
       <Box sx={{ maxWidth: 720, mx: "auto", display: "grid", gap: 2.5 }}>
         <Box sx={{ display: "grid", gap: 0.75 }}>
           <Typography sx={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.5px" }}>

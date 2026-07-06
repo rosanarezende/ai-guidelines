@@ -102,7 +102,7 @@ contracts:
       - Logout nao e delete.
   - id: APP-35
     title: Navegacao global organiza fluxo sem virar console tecnico
-    status: fixme
+    status: active
     spec: journeys/navigation-shell.spec.ts
     seed: empty-workspace
     actors:

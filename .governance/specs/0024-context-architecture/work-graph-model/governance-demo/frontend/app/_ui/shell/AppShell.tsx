@@ -1,7 +1,6 @@
 "use client";
 
 // AppShell.tsx — casca das telas humanas (Home/Onboarding/Configurações).
-// O console técnico mantém a própria casca em GovernanceConsole.
 import {
   AppBar,
   Box,
@@ -9,21 +8,22 @@ import {
   Chip,
   Container,
   CssBaseline,
+  Drawer,
+  IconButton,
   ThemeProvider,
   Toolbar,
   Typography,
 } from "@mui/material";
-import InsertChartOutlinedIcon from "@mui/icons-material/InsertChartOutlined";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
-import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
-import TerminalIcon from "@mui/icons-material/Terminal";
-import ViewListIcon from "@mui/icons-material/ViewList";
+import MenuIcon from "@mui/icons-material/Menu";
+import SearchIcon from "@mui/icons-material/Search";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { logoutLocal } from "@/app/_domain/adoption/shellClient";
 import { t } from "@/lib/i18n";
+import GlobalNavigation from "./GlobalNavigation";
 import { theme } from "../theme";
 
 function ShellSkeleton() {
@@ -40,14 +40,20 @@ export default function AppShell({
   subtitle = t("app.brand.product"),
   headerAction,
   maxWidth = "lg",
+  navigationMode = "workspace",
+  hasGovernanceHost = false,
 }: {
   children: ReactNode;
   chip?: string;
   subtitle?: string;
   headerAction?: ReactNode;
   maxWidth?: "md" | "lg" | "xl";
+  navigationMode?: "public" | "workspace";
+  hasGovernanceHost?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [cupOpen, setCupOpen] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -69,6 +75,15 @@ export default function AppShell({
           sx={{ borderBottom: "1px solid", borderColor: "divider" }}
         >
           <Toolbar sx={{ gap: 1.5, alignItems: "center" }}>
+            {navigationMode === "workspace" ? (
+              <IconButton
+                aria-label={t("app.nav.openMenu")}
+                onClick={() => setDrawerOpen(true)}
+                sx={{ display: { xs: "inline-flex", md: "none" } }}
+              >
+                <MenuIcon />
+              </IconButton>
+            ) : null}
             <Box
               sx={{
                 width: 28,
@@ -101,56 +116,26 @@ export default function AppShell({
             {chip ? <Chip size="small" variant="outlined" label={chip} /> : null}
             <Box sx={{ flex: 1 }} />
             {headerAction}
+            <Button
+              size="small"
+              color="inherit"
+              startIcon={<SearchIcon fontSize="small" />}
+              disabled
+              sx={{ display: { xs: "none", lg: "inline-flex" } }}
+            >
+              {t("app.nav.search")}
+            </Button>
+            <Button
+              data-testid="cup-launcher"
+              size="small"
+              color="inherit"
+              startIcon={<ChatOutlinedIcon fontSize="small" />}
+              onClick={() => setCupOpen(true)}
+            >
+              {t("app.nav.cup")}
+            </Button>
             <Button component={Link} href="/organizations" size="small" color="inherit">
               {t("app.nav.organizations")}
-            </Button>
-            <Button component={Link} href="/settings" size="small" color="inherit">
-              {t("app.nav.settings")}
-            </Button>
-            <Button
-              component={Link}
-              href="/results"
-              size="small"
-              color="inherit"
-              startIcon={<InsertChartOutlinedIcon fontSize="small" />}
-            >
-              {t("app.nav.results")}
-            </Button>
-            <Button
-              component={Link}
-              href="/map"
-              size="small"
-              color="inherit"
-              startIcon={<AccountTreeIcon fontSize="small" />}
-            >
-              {t("app.nav.map")}
-            </Button>
-            <Button
-              component={Link}
-              href="/sources"
-              size="small"
-              color="inherit"
-              startIcon={<FolderOutlinedIcon fontSize="small" />}
-            >
-              {t("app.nav.sources")}
-            </Button>
-            <Button
-              component={Link}
-              href="/work"
-              size="small"
-              color="inherit"
-              startIcon={<ViewListIcon fontSize="small" />}
-            >
-              {t("app.nav.work")}
-            </Button>
-            <Button
-              component={Link}
-              href="/console"
-              size="small"
-              color="inherit"
-              startIcon={<TerminalIcon fontSize="small" />}
-            >
-              {t("app.nav.console")}
             </Button>
             <Button
               size="small"
@@ -162,9 +147,45 @@ export default function AppShell({
             </Button>
           </Toolbar>
         </AppBar>
-        <Container maxWidth={maxWidth} sx={{ py: 4 }}>
-          {children}
-        </Container>
+        <Box sx={{ display: "flex" }}>
+          {navigationMode === "workspace" ? (
+            <>
+              <Box
+                component="aside"
+                sx={{
+                  display: { xs: "none", md: "block" },
+                  width: 280,
+                  borderRight: "1px solid",
+                  borderColor: "divider",
+                  bgcolor: "background.paper",
+                  minHeight: "calc(100vh - 65px)",
+                  position: "sticky",
+                  top: 65,
+                  alignSelf: "flex-start",
+                }}
+              >
+                <GlobalNavigation hasGovernanceHost={hasGovernanceHost} />
+              </Box>
+              <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+                <GlobalNavigation hasGovernanceHost={hasGovernanceHost} />
+              </Drawer>
+            </>
+          ) : null}
+          <Container maxWidth={maxWidth} sx={{ py: 4 }}>
+            {children}
+          </Container>
+        </Box>
+        <Drawer anchor="right" open={cupOpen} onClose={() => setCupOpen(false)}>
+          <Box data-testid="cup-panel" sx={{ width: { xs: 320, sm: 380 }, p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              {t("app.cup.title")}
+            </Typography>
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              {t("app.cup.body")}
+            </Typography>
+            <Chip size="small" label={t("app.cup.state")} />
+          </Box>
+        </Drawer>
       </Box>
     </ThemeProvider>
   );
