@@ -10,12 +10,18 @@ import {
   createGovernanceProposal,
   createPortalControlPlaneSpikeFixture,
   dryRunGitHubBridgeProposal,
+  assertNeo4jIsReadModelOnly,
   portalAccountHasGovernanceAuthority,
   projectPublicControlPlaneState,
   PORTAL_TOPOLOGIES,
   runPortalSpikeFlow,
+  selectPortalStoreCandidate,
 } from "@demo/domain/server";
-import { FilePortalControlPlaneStore, buildPortalSpikeEvents } from "../src/index.ts";
+import {
+  FilePortalControlPlaneStore,
+  buildPortalSpikeEvents,
+  evaluateBetterAuthPortalStoreProfiles,
+} from "../src/index.ts";
 
 test("APP-40: public control-plane projection exposes workspace metadata without governed content", () => {
   const state = createPortalControlPlaneSpikeFixture();
@@ -162,4 +168,60 @@ test("QRD-41: all four delivery topologies are modeled", () => {
     [...PORTAL_TOPOLOGIES],
     ["local-solo", "git-backed", "self-hosted-portal", "hosted-portal"]
   );
+});
+
+test("S1c: SQLite and PostgreSQL are viable Better Auth portal-store profiles", async () => {
+  const report = await evaluateBetterAuthPortalStoreProfiles();
+  const sqlite = report.profiles.find((profile) => profile.id === "sqlite");
+  const postgres = report.profiles.find((profile) => profile.id === "postgres");
+
+  assert.equal(report.generatedFor, "control-plane-portal-spike");
+  assert.equal(report.summary.sqliteReady, true);
+  assert.equal(report.summary.postgresReady, true);
+  assert.equal(report.summary.postgresLiveConnectionRequiredForThisSpike, false);
+  assert.equal(sqlite?.readyForSpike, true);
+  assert.equal(sqlite?.liveCheck.status, "not-required");
+  assert.equal(postgres?.readyForSpike, true);
+  assert.equal(postgres?.liveCheck.status, "skipped-without-database-url");
+  assert.deepEqual(
+    sqlite?.driverStatus.map((driver) => [driver.packageName, driver.available]),
+    [
+      ["better-auth", true],
+      ["@better-auth/kysely-adapter", true],
+      ["kysely", true],
+      ["better-sqlite3", true],
+    ]
+  );
+  assert.deepEqual(
+    postgres?.driverStatus.map((driver) => [driver.packageName, driver.available]),
+    [
+      ["better-auth", true],
+      ["@better-auth/kysely-adapter", true],
+      ["kysely", true],
+      ["pg", true],
+    ]
+  );
+});
+
+test("S1c: portal-store selection keeps local and shared recommendations distinct", () => {
+  assert.equal(selectPortalStoreCandidate({ accessPattern: "solo-local" }).id, "sqlite");
+  assert.equal(selectPortalStoreCandidate({ accessPattern: "solo-git-backed" }).id, "sqlite");
+  assert.equal(selectPortalStoreCandidate({ accessPattern: "small-team-shared" }).id, "postgres");
+  assert.equal(
+    selectPortalStoreCandidate({ accessPattern: "controlled-organization" }).id,
+    "postgres"
+  );
+  assert.equal(selectPortalStoreCandidate({ accessPattern: "hosted-portal" }).id, "postgres");
+});
+
+test("S1c: Neo4j remains a graph read-model, not a portal account store", async () => {
+  const report = await evaluateBetterAuthPortalStoreProfiles();
+  const neo4j = report.profiles.find((profile) => profile.id === "neo4j");
+
+  assert.equal(assertNeo4jIsReadModelOnly(), true);
+  assert.equal(report.summary.neo4jRejectedAsPortalStore, true);
+  assert.equal(neo4j?.betterAuthSupported, false);
+  assert.equal(neo4j?.decision, "not-portal-store");
+  assert.equal(neo4j?.role, "governance-graph-read-model");
+  assert.equal(neo4j?.liveCheck.status, "not-portal-store");
 });

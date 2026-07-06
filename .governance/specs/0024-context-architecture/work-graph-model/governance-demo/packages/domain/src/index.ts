@@ -8,3 +8,4 @@ export * from "./workspace/governance.ts";
 export * from "./policy/i18n.ts";
 export * from "./graph/query.ts";
 export * from "./control-plane/portal-spike.ts";
+export * from "./control-plane/portal-store-comparison.ts";

@@ -9,7 +9,8 @@
 
 - Branch: `feat/spec-0024-artifact-taxonomy-and-model-review-contract`.
 - HEAD de implementacao da fatia: posterior ao commit de reconciliacao `be52043a`.
-- Better Auth foi instalado apenas no workspace `acme-governance-next-app`.
+- Better Auth foi instalado no app Next e, na fatia S1c, os drivers/perfis de
+  store foram declarados tambem no backend para o avaliador server-side.
 - A bancada interna foi criada em `/spikes/control-plane-portal`, fora da navegacao principal de produto.
 - O spike adicionou um kernel puro em `@demo/domain` para contas, workspaces, convites, memberships de portal, provider link, proposta e sanitizacao.
 - O spike adicionou teste de dominio em `backend/tests/control-plane-portal-spike.test.ts`.
@@ -66,6 +67,21 @@ conteudo governado.
 mas nao escreve no remoto. A ponte exige proposta e sourceRevision previamente
 validada.
 
+### F7 - SQLite/PostgreSQL sao stores de portal; Neo4j e read-model de grafo
+
+`portal-store-comparison.ts` separa tres candidatos:
+
+- SQLite: `portal-transaction-store`, default local/single-server.
+- PostgreSQL: `portal-transaction-store`, default compartilhado/self-hosted.
+- Neo4j: `governance-graph-read-model`, rejeitado como store de
+  conta/sessao/convite.
+
+`evaluateBetterAuthPortalStoreProfiles(...)` verifica que os drivers do spike
+estao presentes para SQLite e PostgreSQL (`better-auth`,
+`@better-auth/kysely-adapter`, `kysely`, `better-sqlite3`, `pg`). A conexao live
+com PostgreSQL nao e exigida nesta fatia; sem URL de banco, o status fica
+`skipped-without-database-url`.
+
 ## 3. Interpretacao
 
 O spike sustenta a direcao arquitetural da QRD-41: um portal humano pode existir sem substituir o governance host file-first/Git-backed. A separacao de planos fica mecanizavel:
@@ -78,6 +94,12 @@ content/work plane     -> repos, codigo, docs, metricas, evidencias
 
 Better Auth continua um candidato forte porque fornece os blocos de conta, sessao, organizacao e convite dentro do app. Mas a decisao final ainda precisa de uma fatia S1b com store real e fluxo end-to-end mais proximo do produto.
 
+A fatia S1c reduz a incerteza da stack do portal: Better Auth pode operar nos
+dois perfis necessarios (SQLite local e PostgreSQL compartilhado), enquanto
+Neo4j permanece no plano de grafo derivado. Isto evita uma escolha falsa entre
+"usar grafo" e "ter conta/convite seguros": os dois planos existem, mas com
+responsabilidades diferentes.
+
 ## 4. Cobertura
 
 O teste de dominio cobre:
@@ -88,6 +110,8 @@ O teste de dominio cobre:
 - ARCH-CP: proposta exige `sourceRevision` e falha fechado se stale;
 - QRD-41: quatro topologias modeladas (`local-solo`, `git-backed`, `self-hosted-portal`, `hosted-portal`).
 - S1b: store file-first persiste snapshot/event-log sem segredo e sem escrita remota.
+- S1c: SQLite/PostgreSQL viaveis como stores Better Auth; Neo4j rejeitado como
+  store de portal.
 
 ## 5. Limites do spike
 
@@ -96,7 +120,8 @@ O teste de dominio cobre:
 - Nao ha email delivery de convite.
 - Nao ha integracao com sessao real do app.
 - Nao ha rota de produto navegavel para negocio/design/investidor.
-- Nao ha teste de Postgres ou SQLite persistido para Better Auth.
+- Nao ha conexao live com PostgreSQL nem migracao Better Auth aplicada em banco
+  real.
 - Nao ha prova de branch/PR real no governance host.
 
 ## 6. Riscos
@@ -115,15 +140,20 @@ O spike prova endpoint surface, nao custo operacional, email, migracoes, deploy,
 
 ## 7. Recomendacao
 
-Avancar para **S1c - decisao de stack do portal** antes de decidir Better Auth como stack final.
+Avancar para **S1d - fluxo HTTP real do portal** antes de decidir Better Auth
+como stack final.
 
 Escopo recomendado:
 
-1. Comparar duas opcoes para release inicial: Better Auth com SQLite/Postgres vs portal file-first control plane.
-2. Provar signup -> workspace -> invite -> accept em rota interna com persistencia real escolhida.
+1. Provar signup -> workspace -> invite -> accept em rota interna com Better
+   Auth persistido em SQLite.
+2. Provar que a mesma configuracao troca para PostgreSQL por ambiente, sem
+   mudar contratos de dominio.
 3. Usuario convidado nao precisa operar GitHub.
 4. GitHub App bridge segue dry-run ate haver credencial/instalacao real isolada.
 5. Teste de que o store do portal nao contem conteudo governado nem secrets.
 6. Teste de que membership de portal nao concede authority.
+7. Manter Neo4j fora do store do portal e cobri-lo em spike separado de
+   graph-read-model.
 
 Nao avancar ainda para hosted SaaS, nome publico ou decisao de licenca final do app.

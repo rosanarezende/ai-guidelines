@@ -48,6 +48,11 @@ read-model, fixture ou UI.
 H6. O mesmo contrato funciona com SQLite local e Postgres/shared, mesmo que o
 spike implemente primeiro apenas SQLite.
 
+H7. Neo4j pode ser opcao real de `graph-read-model`, mas nao deve ser adotado
+como store transacional do portal. Conta, sessao e convite precisam de store
+relacional/transacional; grafo continua read-model derivado com
+`sourceRevision`.
+
 ## 3. Fora de escopo
 
 - Escolher nome publico do produto.
@@ -226,6 +231,25 @@ Implementado na fatia S1b:
 - Better Auth continua como candidato de conta/organizacao; seu banco nativo
   ainda nao foi configurado nesta fatia.
 
+Implementado na fatia S1c:
+
+- `@demo/domain` ganhou `portal-store-comparison.ts`, comparando SQLite,
+  PostgreSQL e Neo4j como escolhas distintas.
+- SQLite e PostgreSQL foram modelados como `portal-transaction-store`
+  suportados por Better Auth.
+- Neo4j foi modelado como `governance-graph-read-model`, explicitamente
+  rejeitado como store de conta/sessao/convite.
+- `backend/src/adapters/control-plane/BetterAuthPortalStoreProfiles.ts` avalia
+  se os drivers necessarios para o spike estao presentes:
+  `better-auth`, `@better-auth/kysely-adapter`, `kysely`, `better-sqlite3` e
+  `pg`.
+- O teste S1c prova que SQLite e PostgreSQL estao viaveis no ambiente do
+  spike. A conexao live com PostgreSQL fica fora do default e requer ambiente
+  proprio (`GOVERNANCE_PORTAL_POSTGRES_URL` em fatia futura).
+- A bancada `/spikes/control-plane-portal` mostra a matriz de decisao:
+  SQLite como default local, PostgreSQL como default compartilhado e Neo4j como
+  grafo derivado.
+
 Nao aceitavel:
 
 - UI bonita sem provas de separacao dos planos;
@@ -240,8 +264,10 @@ O spike deve alimentar estas decisoes:
 
 1. Better Auth vira stack escolhida para portal/control plane ou apenas
    alternativa?
-2. Git-backed governance host entra como topologia suportada na release inicial?
-3. Portal self-hosted entra na release inicial ou fica como beta?
-4. Hosted portal operado pela mantenedora continua futuro?
-5. Quais fluxos precisam GitHub App real no primeiro release e quais podem
+2. SQLite deve ser o store default para modo local/single-server?
+3. PostgreSQL deve ser o store default para portal compartilhado/self-hosted?
+4. Git-backed governance host entra como topologia suportada na release inicial?
+5. Portal self-hosted entra na release inicial ou fica como beta?
+6. Hosted portal operado pela mantenedora continua futuro?
+7. Quais fluxos precisam GitHub App real no primeiro release e quais podem
    ficar dry-run/manual?

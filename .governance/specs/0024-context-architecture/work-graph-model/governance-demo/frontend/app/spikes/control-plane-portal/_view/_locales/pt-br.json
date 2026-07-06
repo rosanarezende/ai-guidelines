@@ -9,6 +9,16 @@
     "security": "Seguranca",
     "betterAuthTitle": "Candidato Better Auth",
     "betterAuthSubtitle": "Instancia server-side com plugin de organizacao carregado. Esta bancada ainda nao escolhe a stack final nem configura o banco nativo do Better Auth.",
+    "storeTitle": "SQLite x PostgreSQL x Neo4j",
+    "storeSubtitle": "S1c compara onde conta, convite e sessao do portal devem morar. A escolha do store do portal nao muda o governance host nem o grafo derivado.",
+    "storeReady": "drivers presentes para o spike",
+    "storeNeedsLiveDb": "driver presente; conexao live fica por ambiente",
+    "storeNotPortal": "nao e store de portal",
+    "storeLocalDefault": "default local",
+    "storeSharedDefault": "default compartilhado",
+    "storeGraphOnly": "apenas grafo derivado",
+    "storeProofOk": "S1c passou: SQLite e PostgreSQL estao viaveis para Better Auth; Neo4j permanece somente como read-model de grafo.",
+    "storeProofRisk": "S1c apontou risco: revise drivers ou fronteira entre portal store e grafo derivado.",
     "persistenceTitle": "Persistencia e bridge dry-run",
     "persistenceSubtitle": "S1b prova um snapshot de portal sanitizado, event-log deterministico e uma proposta de PR sem escrita remota.",
     "snapshotTitle": "Snapshot do portal",
@@ -27,6 +37,7 @@
     "proofApp41": "Aceite de convite cria membership de portal, mas zero authority governada.",
     "proofSec13": "Segredo de provider simulado nao aparece na projecao publica.",
     "proofArch": "Proposta exige sourceRevision e stale revision falha fechado.",
-    "proofS1b": "Snapshot persistivel e GitHub bridge dry-run existem sem escrever remoto nem vazar segredo."
+    "proofS1b": "Snapshot persistivel e GitHub bridge dry-run existem sem escrever remoto nem vazar segredo.",
+    "proofS1c": "SQLite cobre o modo local; PostgreSQL cobre portal compartilhado; Neo4j fica fora do store de conta/convite."
   }
 }

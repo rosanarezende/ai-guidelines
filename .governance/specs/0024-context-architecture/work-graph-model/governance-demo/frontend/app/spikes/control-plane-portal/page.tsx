@@ -1,14 +1,20 @@
 // /spikes/control-plane-portal — bancada interna do spike S1 (QRD-36/41).
 // Prova a separacao: portal/control plane para conta/convite; governance host
 // Git-backed como SSOT/auditoria; authority sempre fora do control plane.
-import { createGovernanceProposal, runPortalSpikeFlow } from "@demo/domain";
+import {
+  comparePortalStoreCandidates,
+  createGovernanceProposal,
+  runPortalSpikeFlow,
+} from "@demo/domain";
+import { evaluateBetterAuthPortalStoreProfiles } from "@demo/backend";
 import { describeBetterAuthCandidate } from "./_model/better-auth-candidate";
 import ControlPlanePortalSpikeView from "./_view/ControlPlanePortalSpikeView";
 
 export const dynamic = "force-dynamic";
 
-export default function ControlPlanePortalSpikePage() {
+export default async function ControlPlanePortalSpikePage() {
   const flow = runPortalSpikeFlow();
+  const storeReport = await evaluateBetterAuthPortalStoreProfiles();
   const staleProposal = createGovernanceProposal(flow.acceptedState, {
     workspaceId: "ws-mundo-da-mel",
     actorAccountId: "acct-business",
@@ -25,6 +31,8 @@ export default function ControlPlanePortalSpikePage() {
       persistedSnapshot={flow.persistedSnapshot}
       staleProposal={staleProposal}
       secretLeakCount={flow.secretLeaks.length}
+      storeCandidates={comparePortalStoreCandidates()}
+      storeReport={storeReport}
     />
   );
 }

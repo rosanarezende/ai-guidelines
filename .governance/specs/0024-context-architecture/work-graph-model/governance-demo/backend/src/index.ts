@@ -12,6 +12,11 @@ export {
   type PortalControlPlaneEvent,
   type PortalPersistenceReceipt,
 } from "./adapters/control-plane/FilePortalControlPlaneStore.ts";
+export {
+  evaluateBetterAuthPortalStoreProfiles,
+  type BetterAuthPortalStoreReport,
+  type PortalStoreProfileStatus,
+} from "./adapters/control-plane/BetterAuthPortalStoreProfiles.ts";
 export { InMemoryGraphSource } from "./adapters/graph-memory/InMemoryGraphSource.ts";
 export {
   loadManifest,

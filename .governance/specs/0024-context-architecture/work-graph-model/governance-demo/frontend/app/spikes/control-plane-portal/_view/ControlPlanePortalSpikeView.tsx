@@ -11,6 +11,7 @@ import AppShell from "@/app/_ui/shell/AppShell";
 import type {
   GitHubBridgeDryRunResult,
   PortalPersistedSnapshot,
+  PortalStoreCandidate,
   ProposalResult,
   PublicControlPlaneProjection,
 } from "@demo/domain";
@@ -24,6 +25,25 @@ type AuthSummary = {
   boundary: string[];
 };
 
+type StoreProfileStatus = {
+  id: PortalStoreCandidate["id"];
+  betterAuthSupported: boolean;
+  readyForSpike: boolean;
+  liveCheck: {
+    status: "not-required" | "skipped-without-database-url" | "not-portal-store";
+  };
+};
+
+type StoreReport = {
+  summary: {
+    sqliteReady: boolean;
+    postgresReady: boolean;
+    neo4jRejectedAsPortalStore: boolean;
+    postgresLiveConnectionRequiredForThisSpike: false;
+  };
+  profiles: StoreProfileStatus[];
+};
+
 const m = copy.messages;
 
 export default function ControlPlanePortalSpikeView({
@@ -34,6 +54,8 @@ export default function ControlPlanePortalSpikeView({
   persistedSnapshot,
   staleProposal,
   secretLeakCount,
+  storeCandidates,
+  storeReport,
 }: {
   auth: AuthSummary;
   projection: PublicControlPlaneProjection;
@@ -42,6 +64,8 @@ export default function ControlPlanePortalSpikeView({
   persistedSnapshot: PortalPersistedSnapshot;
   staleProposal: ProposalResult;
   secretLeakCount: number;
+  storeCandidates: PortalStoreCandidate[];
+  storeReport: StoreReport;
 }) {
   const workspace = projection.workspaces[0];
   const provider = projection.providerLinks[0];
@@ -111,6 +135,44 @@ export default function ControlPlanePortalSpikeView({
           </Flex>
         </SectionCard>
 
+        <SectionCard title={m.storeTitle} subtitle={m.storeSubtitle}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr 1fr" }, gap: 2 }}>
+            {storeCandidates.map((candidate) => {
+              const profile = storeReport.profiles.find((item) => item.id === candidate.id);
+              return (
+                <BoundaryCard
+                  key={candidate.id}
+                  icon={
+                    profile?.readyForSpike ? (
+                      <CheckCircleIcon color="success" />
+                    ) : (
+                      <LockIcon color="primary" />
+                    )
+                  }
+                  title={candidate.label}
+                  items={[
+                    storeDecisionLabel(candidate.decision),
+                    profile?.readyForSpike
+                      ? m.storeReady
+                      : candidate.betterAuthSupported
+                        ? m.storeNeedsLiveDb
+                        : m.storeNotPortal,
+                    candidate.summary,
+                    ...candidate.constraints.slice(0, 2),
+                  ]}
+                />
+              );
+            })}
+          </Box>
+          <Alert severity="info" variant="outlined" sx={{ mt: 2 }}>
+            {storeReport.summary.sqliteReady &&
+            storeReport.summary.postgresReady &&
+            storeReport.summary.neo4jRejectedAsPortalStore
+              ? m.storeProofOk
+              : m.storeProofRisk}
+          </Alert>
+        </SectionCard>
+
         <SectionCard title={m.persistenceTitle} subtitle={m.persistenceSubtitle}>
           <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr 1fr" }, gap: 2 }}>
             <BoundaryCard
@@ -173,11 +235,27 @@ export default function ControlPlanePortalSpikeView({
             <ProofRow label="S1b" ok={bridgeDryRun.ok && persistedSnapshot.proposals.length === 1}>
               {m.proofS1b}
             </ProofRow>
+            <ProofRow
+              label="S1c"
+              ok={
+                storeReport.summary.sqliteReady &&
+                storeReport.summary.postgresReady &&
+                storeReport.summary.neo4jRejectedAsPortalStore
+              }
+            >
+              {m.proofS1c}
+            </ProofRow>
           </Box>
         </SectionCard>
       </Box>
     </AppShell>
   );
+}
+
+function storeDecisionLabel(decision: PortalStoreCandidate["decision"]): string {
+  if (decision === "local-default") return m.storeLocalDefault;
+  if (decision === "shared-default") return m.storeSharedDefault;
+  return m.storeGraphOnly;
 }
 
 function BoundaryCard({ icon, title, items }: { icon: ReactNode; title: string; items: string[] }) {

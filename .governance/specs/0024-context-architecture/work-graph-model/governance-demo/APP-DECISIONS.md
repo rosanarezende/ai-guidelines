@@ -2899,7 +2899,7 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   read-model;
 - provar que o control plane nao armazena conteudo governado como SSOT.
 
-**Evidence after spike S1/S1b**
+**Evidence after spike S1/S1b/S1c**
 
 - `SPIKE-CONTROL-PLANE-PORTAL.md` documenta o spike e seus limites.
 - `/spikes/control-plane-portal` mostra a bancada interna.
@@ -2911,9 +2911,15 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   - bridge GitHub e dry-run, com `writesToRemote: false`;
   - snapshot/event-log do portal sao persistiveis e sanitizados.
 - Better Auth foi validado como candidato de superficie para conta,
-  organizacao e convite, mas seu banco nativo ainda nao foi configurado.
-- A decisao final da stack do portal segue aberta: Better Auth com
-  SQLite/Postgres vs control plane file-first para release inicial.
+  organizacao e convite.
+- S1c validou a viabilidade dos dois perfis de store do portal:
+  - SQLite: default local/single-server para reduzir friccao.
+  - PostgreSQL: default compartilhado/self-hosted/hosted para portal multiusuario.
+- S1c tambem registrou que Neo4j permanece como `graph-read-model`, nao como
+  store de conta/sessao/convite.
+- A decisao final da stack do portal ainda exige fluxo HTTP real com Better Auth
+  persistido, mas a comparacao deixou de ser "Better Auth vs file-first" e virou
+  "Better Auth SQLite para local; Better Auth PostgreSQL para compartilhado".
 
 **Implications**
 
@@ -2927,3 +2933,5 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   por ownership/permissoes/lifecycle/blast radius, nao pelo tamanho da empresa.
 - O primeiro release pode ser parcial, mas deve explicitar qual topologia esta
   entregue e qual esta apenas modelada.
+- QRD-16 continua valida: Neo4j deve existir como opcao real de read-model no
+  primeiro release funcional, mas nao participa do store transacional do portal.

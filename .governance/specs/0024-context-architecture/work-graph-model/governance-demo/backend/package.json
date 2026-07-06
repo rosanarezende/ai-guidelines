@@ -11,12 +11,19 @@
     "test:shell": "node --test \"tests/**/*.test.ts\""
   },
   "dependencies": {
+    "@better-auth/kysely-adapter": "^1.6.23",
     "@demo/contracts": "*",
     "@demo/domain": "*",
+    "better-auth": "^1.6.23",
+    "better-sqlite3": "^12.11.1",
+    "kysely": "^0.29.3",
+    "pg": "^8.22.0",
     "yaml": "^2.8.4"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.6.2",
+    "@types/pg": "^8.20.0",
     "typescript": "^6.0.3"
   }
 }
