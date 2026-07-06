@@ -16,6 +16,8 @@ export type InviteAcceptReport = {
     inviteMemberStatus: number;
     inviteeSignUpStatus: number;
     acceptInvitationStatus: number;
+    creatorListOrganizationsStatus: number;
+    inviteeListOrganizationsStatus: number;
     creatorCookieIssued: boolean;
     inviteeCookieIssued: boolean;
   };
@@ -30,6 +32,13 @@ export type InviteAcceptReport = {
     invitedMemberCount: number;
     organizationSlug: string | null;
   };
+  sharedAccess: {
+    creatorOrganizationCount: number;
+    inviteeOrganizationCount: number;
+    creatorSeesWorkspace: boolean;
+    inviteeSeesWorkspace: boolean;
+    sameWorkspaceVisibleToBoth: boolean;
+  };
   boundary: {
     invitedUserOperatedGitHub: false;
     governanceAuthorityGrantedByPortal: false;
@@ -38,16 +47,13 @@ export type InviteAcceptReport = {
 };
 
 export type PostgresLiveReport = {
-  status:
-    | "skipped-without-database-url"
-    | "skipped-without-explicit-apply"
-    | "passed"
-    | "failed";
+  status: "skipped-without-database-url" | "skipped-without-explicit-apply" | "passed" | "failed";
   ok: boolean;
   env: {
     databaseUrlProvided: boolean;
     explicitApply: boolean;
   };
+  sharedAccess?: InviteAcceptReport["sharedAccess"];
 };
 
 export function InviteAcceptSection({
@@ -63,15 +69,16 @@ export function InviteAcceptSection({
     <SectionCard title={messages.inviteAcceptTitle} subtitle={messages.inviteAcceptSubtitle}>
       <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr 1fr" }, gap: 2 }}>
         <BoundaryCard
-          icon={
-            inviteAccept.ok ? <CheckCircleIcon color="success" /> : <LockIcon color="error" />
-          }
+          icon={inviteAccept.ok ? <CheckCircleIcon color="success" /> : <LockIcon color="error" />}
           title={messages.inviteAcceptFlow}
           items={[
             `creator signup: ${inviteAccept.http.creatorSignUpStatus}`,
             `invite-member: ${inviteAccept.http.inviteMemberStatus}`,
             `guest signup: ${inviteAccept.http.inviteeSignUpStatus}`,
             `accept-invitation: ${inviteAccept.http.acceptInvitationStatus}`,
+            inviteAccept.sharedAccess.sameWorkspaceVisibleToBoth
+              ? "mesmo workspace visivel para ambas"
+              : "workspace compartilhado nao provado",
           ]}
         />
         <BoundaryCard
@@ -94,6 +101,9 @@ export function InviteAcceptSection({
             postgresStatusLabel(postgres.status, messages),
             postgres.env.databaseUrlProvided ? "URL configurada" : "sem URL",
             postgres.env.explicitApply ? "apply explicito" : "sem apply explicito",
+            postgres.sharedAccess?.sameWorkspaceVisibleToBoth
+              ? "workspace compartilhado provado"
+              : "workspace compartilhado pendente",
           ]}
         />
       </Box>
@@ -104,7 +114,10 @@ export function InviteAcceptSection({
   );
 }
 
-function postgresStatusLabel(status: PostgresLiveReport["status"], messages: Record<string, string>) {
+function postgresStatusLabel(
+  status: PostgresLiveReport["status"],
+  messages: Record<string, string>
+) {
   if (status === "passed") return messages.postgresLivePassed;
   if (status === "failed") return messages.postgresLiveFailed;
   if (status === "skipped-without-explicit-apply") return messages.postgresLiveNeedsApply;

@@ -51,15 +51,17 @@ nao exige que a pessoa convidada opere GitHub.
 
 ### PostgreSQL
 
-O runner live existe, mas ainda nao foi executado contra um PostgreSQL real
-da fatia:
+O runner live agora foi executado contra um PostgreSQL real em container Docker
+efemero (`postgres:16-alpine`):
 
 ```text
 GOVERNANCE_PORTAL_POSTGRES_URL=...
 GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY=1
 ```
 
-Sem essas variaveis, o runner retorna `skipped-*`, de forma visivel.
+Com essas variaveis, S1f provou signup, workspace, invite, signup da pessoa
+convidada, accept e leitura do mesmo workspace por duas contas. Sem essas
+variaveis, o runner retorna `skipped-*`, de forma visivel.
 
 ## 3. Proxima prova obrigatoria
 
@@ -101,8 +103,9 @@ a experiencia real de time pequeno e a fronteira de seguranca.
 Nao decidir provedor de hospedagem antes destas evidencias:
 
 1. **Portal compartilhado funciona em store compartilhado real.**
-   - Provar Better Auth + PostgreSQL live.
-   - Provar convite/aceite em ambiente que nao e so memoria/local temporario.
+   - Feito em S1f: Better Auth + PostgreSQL live.
+   - Feito em S1f: convite/aceite em ambiente que nao e so memoria/local
+     temporario, com leitura por duas contas.
 
 2. **Governanca versionada funciona sem virar segundo SSOT.**
    - Provar Git-backed bridge real ou sandbox de GitHub App.
@@ -147,9 +150,9 @@ O que ja pode guiar implementacao:
 
 ## 7. Ordem recomendada das proximas fatias
 
-### S1f - Portal compartilhado real
+### S1f - Portal compartilhado real (feito)
 
-Executar o mesmo fluxo S1e contra PostgreSQL live em ambiente controlado:
+O mesmo fluxo S1e foi executado contra PostgreSQL live em ambiente controlado:
 
 - signup criadora;
 - workspace/organizacao;
@@ -159,7 +162,7 @@ Executar o mesmo fluxo S1e contra PostgreSQL live em ambiente controlado:
 - leitura por ambas;
 - prova de que membership nao concede authority.
 
-### S1g - Governance host Git-backed real
+### S1g - Governance host Git-backed real (proxima)
 
 Provar a ponte com Git/GitHub em sandbox:
 

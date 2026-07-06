@@ -2899,7 +2899,7 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   read-model;
 - provar que o control plane nao armazena conteudo governado como SSOT.
 
-**Evidence after spike S1/S1b/S1c/S1d/S1e**
+**Evidence after spike S1/S1b/S1c/S1d/S1e/S1f**
 
 - `SPIKE-CONTROL-PLANE-PORTAL.md` documenta o spike e seus limites.
 - `/spikes/control-plane-portal` mostra a bancada interna.
@@ -2925,13 +2925,19 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   criadora convida, pessoa convidada cria conta, aceita convite e vira
   membership de portal; isto nao concede authority governada e nao exige que a
   pessoa convidada opere GitHub.
-- S1e tambem adicionou o runner live de PostgreSQL por ambiente, protegido por
-  opt-in explicito (`GOVERNANCE_PORTAL_POSTGRES_URL` +
-  `GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY=1|true`).
+- S1e tambem passou a provar leitura compartilhada em SQLite: apos o aceite,
+  criadora e pessoa convidada listam organizacoes e enxergam o mesmo workspace.
+- S1f executou a mesma prova contra PostgreSQL live em container Docker
+  efemero (`postgres:16-alpine`), protegida por opt-in explicito
+  (`GOVERNANCE_PORTAL_POSTGRES_URL` +
+  `GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY=1|true`): signup, workspace, invite,
+  signup da pessoa convidada, accept, leitura por duas contas e zero authority
+  governada concedida pelo portal.
 - A comparacao deixou de ser "Better Auth vs file-first" e virou
   "Better Auth SQLite para local; Better Auth PostgreSQL para compartilhado".
-  A execucao live de PostgreSQL por ambiente ainda fica pendente antes de
-  cravar o modo compartilhado/self-hosted.
+  A prova live de PostgreSQL ja existe; o que ainda falta antes de discutir
+  hospedagem/custo e o governance host Git-backed real/sandbox e a matriz de
+  operacao.
 
 **Implications**
 
@@ -2972,10 +2978,9 @@ Escolher hospedagem antes de provar esse fluxo cria um risco alto: podemos
 otimizar para Cloud/PaaS/Docker antes de saber se o produto resolve o problema
 humano principal.
 
-As evidencias S1d/S1e ja reduziram a incerteza de conta/convite em SQLite, mas
-nao respondem ainda:
+As evidencias S1d/S1e reduziram a incerteza de conta/convite em SQLite. S1f
+prova o mesmo fluxo em PostgreSQL live, mas ainda nao responde:
 
-- se o mesmo fluxo funciona em store compartilhado real;
 - se o governance host Git-backed funciona como cofre/auditoria;
 - qual e o custo minimo operacional de app + banco + email + dominio + backup;
 - o que acontece se o portal sair do ar.
@@ -3012,6 +3017,8 @@ VPS ou qualquer outro vendor.
 - `PORTAL-DELIVERY-ROADMAP.md` passa a ser o roteiro didatico da prova de uso
   compartilhado e da decisao futura de custo.
 - S1f deve ser "portal compartilhado real", nao "escolher hosting".
+- S1f foi provado em PostgreSQL live; S1g passa a ser a proxima prova
+  bloqueante.
 - S1g deve provar governance host Git-backed real ou sandbox com semantica
   equivalente.
 - S1h pode entao comparar custos e modos de entrega.

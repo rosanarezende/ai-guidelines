@@ -53,6 +53,8 @@ export type BetterAuthSQLiteInviteAcceptHttpSpikeReport = {
     inviteMemberStatus: number;
     inviteeSignUpStatus: number;
     acceptInvitationStatus: number;
+    creatorListOrganizationsStatus: number;
+    inviteeListOrganizationsStatus: number;
     creatorCookieIssued: boolean;
     inviteeCookieIssued: boolean;
   };
@@ -67,6 +69,13 @@ export type BetterAuthSQLiteInviteAcceptHttpSpikeReport = {
     invitedMemberCount: number;
     organizationSlug: string | null;
   };
+  sharedAccess: {
+    creatorOrganizationCount: number;
+    inviteeOrganizationCount: number;
+    creatorSeesWorkspace: boolean;
+    inviteeSeesWorkspace: boolean;
+    sameWorkspaceVisibleToBoth: boolean;
+  };
   boundary: {
     invitedUserOperatedGitHub: false;
     governanceAuthorityGrantedByPortal: false;
@@ -77,7 +86,7 @@ export type BetterAuthSQLiteInviteAcceptHttpSpikeReport = {
 
 export type BetterAuthPostgresPortalLiveSpikeReport = {
   generatedFor: "control-plane-portal-spike";
-  id: "S1e-postgres";
+  id: "S1f";
   store: "postgres";
   status: "skipped-without-database-url" | "skipped-without-explicit-apply" | "passed" | "failed";
   ok: boolean;
@@ -87,6 +96,7 @@ export type BetterAuthPostgresPortalLiveSpikeReport = {
   };
   http?: BetterAuthSQLiteInviteAcceptHttpSpikeReport["http"];
   persisted?: BetterAuthSQLiteInviteAcceptHttpSpikeReport["persisted"];
+  sharedAccess?: BetterAuthSQLiteInviteAcceptHttpSpikeReport["sharedAccess"];
   boundary: {
     governanceAuthorityGrantedByPortal: false;
     contentPlaneRead: false;
@@ -264,6 +274,7 @@ export async function runBetterAuthSQLiteInviteAcceptHttpSpike(options?: {
       databasePath: options?.keepDatabase ? databasePath : null,
       http: flow.http,
       persisted,
+      sharedAccess: flow.sharedAccess,
       boundary: {
         invitedUserOperatedGitHub: false,
         governanceAuthorityGrantedByPortal: false,
@@ -289,6 +300,7 @@ export async function runBetterAuthSQLiteInviteAcceptHttpSpike(options?: {
         invitedMemberCount: safeMemberRoleCount(sqlite, "member"),
         organizationSlug: null,
       },
+      sharedAccess: emptySharedAccess(),
       boundary: {
         invitedUserOperatedGitHub: false,
         governanceAuthorityGrantedByPortal: false,
@@ -318,7 +330,7 @@ export async function runBetterAuthPostgresPortalLiveSpike(
   }
 
   const pool = new Pool({ connectionString: databaseUrl });
-  const namespace = `s1e-${randomUUID().slice(0, 8)}`;
+  const namespace = `s1f-${randomUUID().slice(0, 8)}`;
 
   try {
     const auth = betterAuth({
@@ -351,7 +363,7 @@ export async function runBetterAuthPostgresPortalLiveSpike(
 
     return {
       generatedFor: "control-plane-portal-spike",
-      id: "S1e-postgres",
+      id: "S1f",
       store: "postgres",
       status: ok ? "passed" : "failed",
       ok,
@@ -361,6 +373,7 @@ export async function runBetterAuthPostgresPortalLiveSpike(
       },
       http: flow.http,
       persisted,
+      sharedAccess: flow.sharedAccess,
       boundary: {
         governanceAuthorityGrantedByPortal: false,
         contentPlaneRead: false,
@@ -369,7 +382,7 @@ export async function runBetterAuthPostgresPortalLiveSpike(
   } catch (error) {
     return {
       generatedFor: "control-plane-portal-spike",
-      id: "S1e-postgres",
+      id: "S1f",
       store: "postgres",
       status: "failed",
       ok: false,
@@ -503,6 +516,7 @@ async function runInviteAcceptHttpFlow({
   organizationSlug: string | null;
   invitationId: string | null;
   http: BetterAuthSQLiteInviteAcceptHttpSpikeReport["http"];
+  sharedAccess: BetterAuthSQLiteInviteAcceptHttpSpikeReport["sharedAccess"];
 }> {
   const creatorSignUp = await postAuth(auth, "/sign-up/email", {
     email: creatorEmail,
@@ -544,14 +558,35 @@ async function runInviteAcceptHttpFlow({
     { invitationId },
     inviteeCookie
   );
+  const creatorListOrganizations = await getAuth(auth, "/organization/list", creatorCookie);
+  const inviteeListOrganizations = await getAuth(auth, "/organization/list", inviteeCookie);
+  const creatorOrganizations = readOrganizationRefs(creatorListOrganizations.body);
+  const inviteeOrganizations = readOrganizationRefs(inviteeListOrganizations.body);
+  const creatorSeesWorkspace = hasOrganizationRef(creatorOrganizations, {
+    id: organizationId,
+    slug: createdSlug,
+  });
+  const inviteeSeesWorkspace = hasOrganizationRef(inviteeOrganizations, {
+    id: organizationId,
+    slug: createdSlug,
+  });
   const http = {
     creatorSignUpStatus: creatorSignUp.status,
     createOrganizationStatus: createOrganization.status,
     inviteMemberStatus: inviteMember.status,
     inviteeSignUpStatus: inviteeSignUp.status,
     acceptInvitationStatus: acceptInvitation.status,
+    creatorListOrganizationsStatus: creatorListOrganizations.status,
+    inviteeListOrganizationsStatus: inviteeListOrganizations.status,
     creatorCookieIssued: Boolean(creatorCookie),
     inviteeCookieIssued: Boolean(inviteeCookie),
+  };
+  const sharedAccess = {
+    creatorOrganizationCount: creatorOrganizations.length,
+    inviteeOrganizationCount: inviteeOrganizations.length,
+    creatorSeesWorkspace,
+    inviteeSeesWorkspace,
+    sameWorkspaceVisibleToBoth: creatorSeesWorkspace && inviteeSeesWorkspace,
   };
 
   return {
@@ -561,14 +596,18 @@ async function runInviteAcceptHttpFlow({
       http.inviteMemberStatus === 200 &&
       http.inviteeSignUpStatus === 200 &&
       http.acceptInvitationStatus === 200 &&
+      http.creatorListOrganizationsStatus === 200 &&
+      http.inviteeListOrganizationsStatus === 200 &&
       http.creatorCookieIssued &&
       http.inviteeCookieIssued &&
       Boolean(organizationId) &&
-      Boolean(invitationId),
+      Boolean(invitationId) &&
+      sharedAccess.sameWorkspaceVisibleToBoth,
     organizationId,
     organizationSlug: createdSlug,
     invitationId,
     http,
+    sharedAccess,
   };
 }
 
@@ -579,6 +618,8 @@ function emptyInviteAcceptHttp(): BetterAuthSQLiteInviteAcceptHttpSpikeReport["h
     inviteMemberStatus: 0,
     inviteeSignUpStatus: 0,
     acceptInvitationStatus: 0,
+    creatorListOrganizationsStatus: 0,
+    inviteeListOrganizationsStatus: 0,
     creatorCookieIssued: false,
     inviteeCookieIssued: false,
   };
@@ -598,6 +639,16 @@ function readInviteAcceptSqliteState(
     ownerMemberCount: safeMemberRoleCount(sqlite, "owner"),
     invitedMemberCount: safeMemberRoleCount(sqlite, "member"),
     organizationSlug,
+  };
+}
+
+function emptySharedAccess(): BetterAuthSQLiteInviteAcceptHttpSpikeReport["sharedAccess"] {
+  return {
+    creatorOrganizationCount: 0,
+    inviteeOrganizationCount: 0,
+    creatorSeesWorkspace: false,
+    inviteeSeesWorkspace: false,
+    sameWorkspaceVisibleToBoth: false,
   };
 }
 
@@ -684,6 +735,40 @@ function extractJsonString(body: string, key: string): string | null {
   }
 }
 
+function readOrganizationRefs(body: string): Array<{ id: string | null; slug: string | null }> {
+  try {
+    const parsed = JSON.parse(body) as unknown;
+    const values = Array.isArray(parsed)
+      ? parsed
+      : typeof parsed === "object" &&
+          parsed !== null &&
+          Array.isArray((parsed as { data?: unknown }).data)
+        ? (parsed as { data: unknown[] }).data
+        : [];
+    return values
+      .filter(
+        (value): value is Record<string, unknown> => typeof value === "object" && value !== null
+      )
+      .map((value) => ({
+        id: typeof value.id === "string" ? value.id : null,
+        slug: typeof value.slug === "string" ? value.slug : null,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function hasOrganizationRef(
+  refs: Array<{ id: string | null; slug: string | null }>,
+  expected: { id: string | null; slug: string | null }
+): boolean {
+  return refs.some(
+    (ref) =>
+      (Boolean(expected.id) && ref.id === expected.id) ||
+      (Boolean(expected.slug) && ref.slug === expected.slug)
+  );
+}
+
 function skippedPostgres(
   status: "skipped-without-database-url" | "skipped-without-explicit-apply",
   databaseUrlProvided: boolean,
@@ -691,7 +776,7 @@ function skippedPostgres(
 ): BetterAuthPostgresPortalLiveSpikeReport {
   return {
     generatedFor: "control-plane-portal-spike",
-    id: "S1e-postgres",
+    id: "S1f",
     store: "postgres",
     status,
     ok: false,

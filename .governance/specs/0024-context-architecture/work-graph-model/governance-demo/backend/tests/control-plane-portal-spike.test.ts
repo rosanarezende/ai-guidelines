@@ -162,7 +162,7 @@ test("S1b: portal store persists sanitized snapshot and deterministic event-log"
       []
     );
   } finally {
-    await rm(rootDir, { recursive: true, force: true });
+    await rm(rootDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 });
   }
 });
 
@@ -267,6 +267,8 @@ test("S1e: Better Auth HTTP invite and accept flow persists portal membership in
   assert.equal(report.http.inviteMemberStatus, 200);
   assert.equal(report.http.inviteeSignUpStatus, 200);
   assert.equal(report.http.acceptInvitationStatus, 200);
+  assert.equal(report.http.creatorListOrganizationsStatus, 200);
+  assert.equal(report.http.inviteeListOrganizationsStatus, 200);
   assert.equal(report.http.creatorCookieIssued, true);
   assert.equal(report.http.inviteeCookieIssued, true);
   assert.equal(report.persisted.userCount, 2);
@@ -278,6 +280,13 @@ test("S1e: Better Auth HTTP invite and accept flow persists portal membership in
   assert.equal(report.persisted.ownerMemberCount, 1);
   assert.equal(report.persisted.invitedMemberCount, 1);
   assert.equal(report.persisted.organizationSlug, "mundo-da-mel-invite");
+  assert.deepEqual(report.sharedAccess, {
+    creatorOrganizationCount: 1,
+    inviteeOrganizationCount: 1,
+    creatorSeesWorkspace: true,
+    inviteeSeesWorkspace: true,
+    sameWorkspaceVisibleToBoth: true,
+  });
   assert.deepEqual(report.boundary, {
     invitedUserOperatedGitHub: false,
     governanceAuthorityGrantedByPortal: false,
@@ -285,10 +294,10 @@ test("S1e: Better Auth HTTP invite and accept flow persists portal membership in
   });
 });
 
-test("S1e: PostgreSQL live spike is opt-in and skipped without explicit environment", async () => {
+test("S1f: PostgreSQL shared portal proof is opt-in and skipped without explicit environment", async () => {
   assert.deepEqual(await runBetterAuthPostgresPortalLiveSpike({}), {
     generatedFor: "control-plane-portal-spike",
-    id: "S1e-postgres",
+    id: "S1f",
     store: "postgres",
     status: "skipped-without-database-url",
     ok: false,
@@ -307,7 +316,7 @@ test("S1e: PostgreSQL live spike is opt-in and skipped without explicit environm
     }),
     {
       generatedFor: "control-plane-portal-spike",
-      id: "S1e-postgres",
+      id: "S1f",
       store: "postgres",
       status: "skipped-without-explicit-apply",
       ok: false,
@@ -321,4 +330,42 @@ test("S1e: PostgreSQL live spike is opt-in and skipped without explicit environm
       },
     }
   );
+});
+
+test("S1f: PostgreSQL live shared portal proof runs when explicitly configured", async () => {
+  const hasUrl = Boolean(process.env.GOVERNANCE_PORTAL_POSTGRES_URL);
+  const hasApply =
+    process.env.GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY === "1" ||
+    process.env.GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY === "true";
+
+  const report = await runBetterAuthPostgresPortalLiveSpike();
+
+  if (!hasUrl) {
+    assert.equal(report.status, "skipped-without-database-url");
+    return;
+  }
+  if (!hasApply) {
+    assert.equal(report.status, "skipped-without-explicit-apply");
+    return;
+  }
+
+  assert.equal(report.status, "passed", report.error);
+  assert.equal(report.ok, true, report.error);
+  assert.equal(report.http?.creatorSignUpStatus, 200);
+  assert.equal(report.http?.createOrganizationStatus, 200);
+  assert.equal(report.http?.inviteMemberStatus, 200);
+  assert.equal(report.http?.inviteeSignUpStatus, 200);
+  assert.equal(report.http?.acceptInvitationStatus, 200);
+  assert.equal(report.http?.creatorListOrganizationsStatus, 200);
+  assert.equal(report.http?.inviteeListOrganizationsStatus, 200);
+  assert.equal(report.persisted?.organizationCount, 1);
+  assert.equal(report.persisted?.memberCount, 2);
+  assert.equal(report.persisted?.acceptedInvitationCount, 1);
+  assert.equal(report.sharedAccess?.creatorSeesWorkspace, true);
+  assert.equal(report.sharedAccess?.inviteeSeesWorkspace, true);
+  assert.equal(report.sharedAccess?.sameWorkspaceVisibleToBoth, true);
+  assert.deepEqual(report.boundary, {
+    governanceAuthorityGrantedByPortal: false,
+    contentPlaneRead: false,
+  });
 });
