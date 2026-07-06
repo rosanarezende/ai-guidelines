@@ -310,6 +310,12 @@ GOVERNANCE_DATA_SOURCE=real-runtime | mock-api | demo-acme
 GOVERNANCE_API_BASE_URL=http://127.0.0.1:3025   # quando mock-api
 ```
 
+Contrato completo de ambientes, scripts, Docker Compose e guardrails de
+producao: [`../ENVIRONMENTS.md`](../ENVIRONMENTS.md).
+
+Regra de seguranca: mock proibida em produção; `GOVERNANCE_DATA_SOURCE=mock-api`
+falha fechado quando o app resolve `GOVERNANCE_APP_ENV=production`.
+
 Checar TypeScript do app:
 
 ```bash
@@ -326,13 +332,13 @@ node tools/checks/check-governance-app.ts
 
 ## Shell local de adocao — o que e real e o que nao e
 
-| Camada                                                 | Estado                                                                                                      |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| local-principal, organizacoes, memberships, onboarding | REAL e persistido file-first em `.local-state/` (JSON + event-log JSONL + lock + escrita atomica).          |
-| Sessao                                                 | Cookie httpOnly NAO assinado. Lembra principal/organizacao nesta maquina. NAO e autenticacao.               |
-| Demo `acme-*`                                          | FIXTURE: organizacao `sandbox-demo` que aponta para o host governado da sim. Nunca e "a realidade" do user. |
-| Escolhas do onboarding (perfil/papeis/fontes)          | UX/projecao; viram comandos governados em fatia futura. So o status partial/finished persiste.              |
-| Auth/SSO/convites/aceite de papeis                     | Futuro (adapter identity-provider); a modelagem (principals[], memberships explicitas) nao fecha a porta.   |
+| Camada                                                 | Estado                                                                                                                                                           |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| local-principal, organizacoes, memberships, onboarding | REAL e persistido file-first em `.local-state/` (JSON + event-log JSONL + lock + escrita atomica).                                                               |
+| Sessao                                                 | Cookie httpOnly NAO assinado. Lembra principal/organizacao nesta maquina. NAO e autenticacao.                                                                    |
+| Demo `acme-*`                                          | FIXTURE: organizacao `sandbox-demo` que aponta para o host governado da sim. Nunca e "a realidade" do user.                                                      |
+| Escolhas do onboarding (perfil/papeis/fontes)          | Parcialmente reais: perfil/regra, pessoas/grupos/papeis, host, fontes e assistente ja passam por `/api/local/*`; fluxos sem tela dedicada ficam marcados no app. |
+| Auth/SSO/convites/aceite de papeis                     | Futuro (adapter identity-provider); a modelagem (principals[], memberships explicitas) nao fecha a porta.                                                        |
 
 ## Limite importante
 

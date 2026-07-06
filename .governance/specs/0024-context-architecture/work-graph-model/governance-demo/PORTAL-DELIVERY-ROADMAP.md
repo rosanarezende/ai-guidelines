@@ -63,6 +63,20 @@ Com essas variaveis, S1f provou signup, workspace, invite, signup da pessoa
 convidada, accept e leitura do mesmo workspace por duas contas. Sem essas
 variaveis, o runner retorna `skipped-*`, de forma visivel.
 
+### Docker Compose oficial para o modo compartilhado
+
+QRD-43 decidiu um meio termo operacional:
+
+- `local-solo` continua sem Docker; SQLite e arquivo/processo local;
+- `self-hosted portal simples` ganha um compose oficial para PostgreSQL em
+  [`deploy/shared-portal/`](deploy/shared-portal/);
+- o compose sobe somente o banco do portal, nao o app e nao o read-model Neo4j;
+- o check `tools/checks/check-shared-portal-compose.ts` mantem o compose dentro
+  do caminho de verificacao governado.
+
+Isto permite testar a experiencia compartilhada com custo baixo e sem escolher
+Cloud/VPS/PaaS agora.
+
 ## 3. Proxima prova obrigatoria
 
 Antes de escolher hospedagem, custo ou provedor, a proxima prova deve responder:
@@ -122,7 +136,8 @@ Nao decidir provedor de hospedagem antes destas evidencias:
 Somente depois disso escolher entre:
 
 - container unico self-hosted;
-- Docker Compose oficial;
+- Docker Compose oficial para Postgres compartilhado (ja disponivel para
+  dogfood);
 - PaaS portavel;
 - VPS;
 - hosted futuro;
@@ -170,6 +185,16 @@ Provar a ponte com Git/GitHub em sandbox:
 - proposta de mudanca com `sourceRevision`;
 - nenhum commit direto silencioso;
 - segredo/token fora de payload/event-log/read-model.
+
+### S1g.1 - Compose operacional do portal compartilhado (feito)
+
+Fatia operacional pequena, sem alterar a prova de governanca:
+
+- `deploy/shared-portal/docker-compose.yml` sobe PostgreSQL persistente local;
+- `.env.example` documenta porta, banco, usuario e senha local;
+- `README.md` explica quando usar compose e quando SQLite basta;
+- `check-shared-portal-compose.ts` falha se o contrato operacional driftar;
+- dogfood com `docker compose up -d postgres` roda S1f contra esse banco.
 
 ### S1h - Modo de entrega e custo
 

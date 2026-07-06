@@ -3025,3 +3025,62 @@ VPS ou qualquer outro vendor.
 - O app deve continuar explicando quatro modos: `local-solo`,
   `git-backed local app`, `self-hosted portal simples` e `hosted portal
 opcional`.
+
+## QRD-43 - Docker Compose para portal compartilhado e SQLite sem Docker
+
+**Status:** decided.
+
+**Q - Question**
+
+Para testar o portal compartilhado com PostgreSQL, devemos oferecer um
+`docker-compose.yml` oficial? E o modo SQLite/local tambem precisa de Docker?
+
+**R - Reasoning/Research**
+
+O stress test da owner separou dois problemas diferentes:
+
+- uma pessoa sozinha precisa conseguir experimentar o app com friccao minima;
+- um time pequeno precisa de um lugar compartilhado para contas, convites e
+  workspace registry, sem montar uma infra manual do zero.
+
+SQLite resolve bem o primeiro caso. Ele roda como arquivo/processo local, nao
+precisa de container, nao exige porta, credencial, volume nem servico extra.
+Obrigar Docker nesse modo aumentaria a friccao de entrada.
+
+PostgreSQL resolve melhor o segundo caso. Quando duas ou mais pessoas acessam
+o mesmo portal, o store de contas/convites precisa ser compartilhado,
+backupavel e mais parecido com a operacao real. Nesse caso Docker Compose e um
+meio termo util: nao decide provedor de hospedagem, mas entrega um ambiente
+reprodutivel e barato para dogfood local/self-hosted.
+
+Neo4j nao entra nesse compose porque continua sendo read-model de grafo, nao
+store transacional de conta, sessao, convite ou workspace registry.
+
+**D - Decision**
+
+Oferecer um compose oficial em
+`deploy/shared-portal/docker-compose.yml`, com **PostgreSQL apenas**:
+
+- imagem `postgres:16-alpine`;
+- variaveis em `.env.example`;
+- volume nomeado para persistencia;
+- healthcheck com `pg_isready`;
+- porta local configuravel;
+- check TypeScript versionado para impedir drift.
+
+SQLite continua sendo o caminho sem Docker para `local-solo` e sandbox local.
+
+O compose oficial nao decide hospedagem final, nao empacota o app Next, nao
+substitui o governance host/Git e nao transforma o portal em SSOT da
+governanca. Ele e uma etapa de dogfood operacional para o modo
+`self-hosted portal simples`.
+
+**Implications**
+
+- `deploy/shared-portal/README.md` passa a ser o guia operacional para subir o
+  banco compartilhado em desenvolvimento.
+- `check-governance-app.ts` deve executar
+  `tools/checks/check-shared-portal-compose.ts`.
+- A proxima prova continua sendo S1g: governance host Git-backed real/sandbox
+  com `sourceRevision`. O compose ajuda a operar o portal, mas nao prova a
+  fronteira Git-backed sozinho.

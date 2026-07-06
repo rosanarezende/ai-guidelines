@@ -792,6 +792,32 @@ const mockApiTests = spawnSync(process.execPath, ["--test", "tests/**/*.test.ts"
 });
 if (mockApiTests.status !== 0) fail("testes de API in-memory da mock-api falharam");
 
+const sharedPortalComposeCheck = spawnSync(
+  process.execPath,
+  [path.join(root, "tools", "checks", "check-shared-portal-compose.ts")],
+  {
+    cwd: root,
+    stdio: "inherit",
+    shell: false,
+  }
+);
+if (sharedPortalComposeCheck.status !== 0) {
+  fail("check do Docker Compose do portal compartilhado falhou");
+}
+
+const environmentContractCheck = spawnSync(
+  process.execPath,
+  [path.join(root, "tools", "checks", "check-environment-contract.ts")],
+  {
+    cwd: root,
+    stdio: "inherit",
+    shell: false,
+  }
+);
+if (environmentContractCheck.status !== 0) {
+  fail("check do contrato de ambientes dev/test/prod falhou");
+}
+
 const nextBin = path.join(repoRoot, "node_modules", "next", "dist", "bin", "next");
 const result = spawnSync(process.execPath, [nextBin, "build", "--webpack"], {
   cwd: appDir,
