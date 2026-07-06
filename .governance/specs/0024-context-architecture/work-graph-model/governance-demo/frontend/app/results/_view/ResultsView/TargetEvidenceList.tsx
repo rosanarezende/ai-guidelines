@@ -13,8 +13,9 @@ export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardV
         <Typography variant="h2">{copy.targets}</Typography>
         <Box sx={{ display: "grid", gap: 1.25, mt: 1.5 }}>
           {dashboard.targetCards.map((target) => {
-            const sources = dashboard.series.find((entry) => entry.targetId === target.targetId)
-              ?.sources;
+            const sources = dashboard.series.find(
+              (entry) => entry.targetId === target.targetId
+            )?.sources;
             return (
               <Box
                 key={target.targetId}
@@ -34,7 +35,11 @@ export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardV
                 <Flex gap={1} wrap sx={{ mt: 1 }}>
                   <Chip size="small" label={`${target.outcomeCount} outcome(s)`} />
                   {target.invalidCount > 0 ? (
-                    <Chip size="small" color="warning" label={`${target.invalidCount} inválido(s)`} />
+                    <Chip
+                      size="small"
+                      color="warning"
+                      label={`${target.invalidCount} inválido(s)`}
+                    />
                   ) : null}
                   {(sources ?? []).slice(0, 2).map((source) => (
                     <Chip

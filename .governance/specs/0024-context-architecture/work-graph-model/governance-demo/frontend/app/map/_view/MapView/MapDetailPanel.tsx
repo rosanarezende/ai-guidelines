@@ -20,7 +20,11 @@ export function MapDetailPanel({ node }: { node: GovernanceMapNode | null }) {
             <Flex gap={0.75} wrap>
               <Chip size="small" label={node.kind} />
               <Chip size="small" variant="outlined" label={node.confidence} />
-              <Chip size="small" color={node.risk === "high" ? "error" : "warning"} label={node.risk} />
+              <Chip
+                size="small"
+                color={node.risk === "high" ? "error" : "warning"}
+                label={node.risk}
+              />
             </Flex>
             <Typography variant="h3">{node.title}</Typography>
             {node.subtitle ? (
@@ -30,12 +34,19 @@ export function MapDetailPanel({ node }: { node: GovernanceMapNode | null }) {
             ) : null}
             {node.owner ? <Typography variant="body2">Dono: {node.owner}</Typography> : null}
             {node.team ? <Typography variant="body2">Time: {node.team}</Typography> : null}
-            {node.evidence ? <Typography variant="body2">Evidência: {node.evidence}</Typography> : null}
+            {node.evidence ? (
+              <Typography variant="body2">Evidência: {node.evidence}</Typography>
+            ) : null}
             {node.nextStep ? (
               <Typography variant="body2">Próximo passo: {node.nextStep}</Typography>
             ) : null}
             {node.cta ? (
-              <Button component={Link} href={node.cta.href} variant="outlined" sx={{ justifySelf: "start" }}>
+              <Button
+                component={Link}
+                href={node.cta.href}
+                variant="outlined"
+                sx={{ justifySelf: "start" }}
+              >
                 {node.cta.label}
               </Button>
             ) : null}

@@ -70,7 +70,7 @@ contracts:
       - Fluxo segue para /organizations.
   - id: APP-02
     title: Criar workspace novo sem vazar dados da demo
-    status: expected-fail
+    status: active
     spec: journeys/auth-workspace.spec.ts
     seed: blank
     actors:

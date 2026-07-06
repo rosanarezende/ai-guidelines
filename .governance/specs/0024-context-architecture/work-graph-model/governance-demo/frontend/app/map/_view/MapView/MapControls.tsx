@@ -76,9 +76,7 @@ export function MapControls({
         label={copy.confidence}
         value={filter.confidence}
         values={MAP_CONFIDENCE_STATES}
-        onChange={(value) =>
-          setFilter({ ...filter, confidence: value as MapConfidenceState | "" })
-        }
+        onChange={(value) => setFilter({ ...filter, confidence: value as MapConfidenceState | "" })}
       />
       <FilterSelect
         label={copy.risk}

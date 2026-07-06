@@ -45,6 +45,7 @@ export function CreateOrganizationForm({
         value={name}
         onChange={(event) => setName(event.target.value)}
         size="small"
+        slotProps={{ htmlInput: { "data-testid": "workspace-create-name" } }}
       />
       <Typography variant="body2" sx={{ fontWeight: 600 }}>
         {m["organizations.create.kind.question"]}
@@ -62,7 +63,11 @@ export function CreateOrganizationForm({
                 bgcolor: selected ? "#f4f9f5" : "background.paper",
               }}
             >
-              <CardActionArea onClick={() => setKind(option.kind)} sx={{ p: 1.75, height: "100%" }}>
+              <CardActionArea
+                data-testid={`workspace-kind-${option.kind}`}
+                onClick={() => setKind(option.kind)}
+                sx={{ p: 1.75, height: "100%" }}
+              >
                 <Flex align="center" gap={1}>
                   {selected ? (
                     <CheckCircleIcon color="primary" fontSize="small" />
@@ -86,6 +91,7 @@ export function CreateOrganizationForm({
           variant="contained"
           disabled={busy || name.trim().length < 2}
           onClick={() => onCreate({ name: name.trim(), kind })}
+          data-testid="workspace-create-submit"
         >
           {busy ? m["organizations.create.submitting"] : m["organizations.create.submit"]}
         </Button>

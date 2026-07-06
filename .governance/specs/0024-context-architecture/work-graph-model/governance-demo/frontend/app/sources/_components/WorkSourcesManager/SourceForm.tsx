@@ -234,7 +234,11 @@ export function SourceForm({
 
           {mode === "declared" ? (
             <Flex gap={1} align="center" wrap>
-              <Button variant="contained" disabled={busy || !canSubmitDeclared} onClick={submitDeclared}>
+              <Button
+                variant="contained"
+                disabled={busy || !canSubmitDeclared}
+                onClick={submitDeclared}
+              >
                 {copy.addCta}
               </Button>
               <Typography variant="caption" color="text.secondary">

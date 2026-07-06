@@ -13,7 +13,10 @@ const m = copy.messages;
 export default function ConsoleUnavailable({ workspaceName }: { workspaceName: string }) {
   return (
     <AppShell chip={workspaceName}>
-      <Box sx={{ maxWidth: 640, mx: "auto", display: "grid", gap: 2 }}>
+      <Box
+        data-testid="console-unavailable"
+        sx={{ maxWidth: 640, mx: "auto", display: "grid", gap: 2 }}
+      >
         <Typography sx={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.4px" }}>
           {m["consoleUnavailable.title"].replace("{name}", workspaceName)}
         </Typography>

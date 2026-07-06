@@ -57,6 +57,7 @@ export default function SignupView() {
             value={displayName}
             onChange={(event) => setDisplayName(event.target.value)}
             autoFocus
+            slotProps={{ htmlInput: { "data-testid": "signup-display-name" } }}
           />
           <TextField
             label={m["signup.email.label"]}
@@ -70,6 +71,7 @@ export default function SignupView() {
               variant="contained"
               disabled={busy || displayName.trim().length < 2}
               onClick={submit}
+              data-testid="signup-submit"
             >
               {busy ? m["signup.submitting"] : m["signup.submit"]}
             </Button>

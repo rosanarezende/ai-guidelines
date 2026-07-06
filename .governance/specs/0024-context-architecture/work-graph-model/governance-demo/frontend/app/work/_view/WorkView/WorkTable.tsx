@@ -187,7 +187,9 @@ function Toolbar({
         <Select
           value={kind}
           label={copy.columns.kind}
-          onChange={(event: SelectChangeEvent) => setKind(event.target.value as WorkItemKind | "all")}
+          onChange={(event: SelectChangeEvent) =>
+            setKind(event.target.value as WorkItemKind | "all")
+          }
         >
           <MenuItem value="all">{copy.allKinds}</MenuItem>
           {(["intent", "proposal", "standalone", "target"] as const).map((value) => (
@@ -207,13 +209,13 @@ function Toolbar({
           }
         >
           <MenuItem value="all">{copy.allConfidence}</MenuItem>
-          {(["verified", "pending", "no-evidence", "self-declared", "break-glass", "stale"] as const).map(
-            (value) => (
-              <MenuItem key={value} value={value}>
-                {copy.confidence[value]}
-              </MenuItem>
-            )
-          )}
+          {(
+            ["verified", "pending", "no-evidence", "self-declared", "break-glass", "stale"] as const
+          ).map((value) => (
+            <MenuItem key={value} value={value}>
+              {copy.confidence[value]}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
       <Chip size="small" variant="outlined" label={`${count} ${copy.rows}`} />

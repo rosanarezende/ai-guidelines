@@ -22,7 +22,9 @@ export default async function Page() {
           ? {
               kind: workspace.governanceHost.kind,
               pathOrUrl: workspace.governanceHost.pathOrUrl,
-              ...(workspace.governanceHost.status ? { status: workspace.governanceHost.status } : {}),
+              ...(workspace.governanceHost.status
+                ? { status: workspace.governanceHost.status }
+                : {}),
             }
           : null,
         sandboxDeclared: Boolean(workspace.sandboxDeclared),

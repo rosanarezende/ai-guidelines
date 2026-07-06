@@ -22,9 +22,7 @@ export function ManualPathPanel({
   return (
     <Box sx={{ display: "grid", gap: 1 }}>
       <Alert severity={isUrl ? "info" : "warning"}>
-        <Typography variant="subtitle2">
-          {isUrl ? copy.urlTitle : copy.manualPathTitle}
-        </Typography>
+        <Typography variant="subtitle2">{isUrl ? copy.urlTitle : copy.manualPathTitle}</Typography>
         <Typography variant="body2">{isUrl ? copy.urlBody : copy.manualPathBody}</Typography>
       </Alert>
       <TextField

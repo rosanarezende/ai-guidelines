@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Typography } from "@mui/material";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import SourceOutlinedIcon from "@mui/icons-material/SourceOutlined";
 import type { WorkSource } from "@demo/contracts";
@@ -85,7 +78,11 @@ function SourceCard({
               flexShrink: 0,
             }}
           >
-            {scanEnabled ? <FolderOutlinedIcon fontSize="small" /> : <SourceOutlinedIcon fontSize="small" />}
+            {scanEnabled ? (
+              <FolderOutlinedIcon fontSize="small" />
+            ) : (
+              <SourceOutlinedIcon fontSize="small" />
+            )}
           </Box>
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 850 }}>

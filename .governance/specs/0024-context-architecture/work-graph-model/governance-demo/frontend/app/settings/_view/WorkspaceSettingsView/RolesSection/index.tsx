@@ -2,12 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Box, Button, Chip, Divider, MenuItem, TextField, Typography } from "@mui/material";
-import type {
-  RoleAssignment,
-  SubjectKind,
-  SubjectRef,
-  WorkspaceRoleId,
-} from "@demo/contracts";
+import type { RoleAssignment, SubjectKind, SubjectRef, WorkspaceRoleId } from "@demo/contracts";
 import { Flex, ResponsiveGrid } from "@/app/_ui/shared";
 import {
   assignWorkspaceRole,

@@ -35,7 +35,9 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
       <Box sx={{ maxWidth: 720, mx: "auto", display: "grid", gap: 2.5 }}>
         <Box sx={{ display: "grid", gap: 0.75 }}>
           <Typography sx={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.4px" }}>
-            {m["workspaceSettings.title"].replace("{name}", workspace.name)}
+            <span data-testid="settings-workspace-name">
+              {m["workspaceSettings.title"].replace("{name}", workspace.name)}
+            </span>
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {m["workspaceSettings.lead"]}
