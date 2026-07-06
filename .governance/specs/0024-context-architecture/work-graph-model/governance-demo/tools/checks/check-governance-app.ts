@@ -495,6 +495,10 @@ const zodOnboardingRoutes = [
     file: "app/api/local/onboarding/workspace-mode/route.ts",
     schema: "WorkspaceModeRequestSchema",
   },
+  {
+    file: "app/api/local/onboarding/stack/route.ts",
+    schema: "WorkspaceStackRequestSchema",
+  },
 ];
 for (const route of zodOnboardingRoutes) {
   const file = path.join(appDir, ...route.file.split("/"));
