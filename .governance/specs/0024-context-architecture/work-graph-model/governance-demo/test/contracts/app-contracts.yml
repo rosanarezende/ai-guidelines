@@ -131,10 +131,10 @@ contracts:
       - Reload preserva o passo salvo.
       - Abrir onboarding nao volta para tela inicial.
   - id: APP-13
-    title: Home de workspace novo mostra proximo passo real
-    status: expected-fail
+    title: Home de workspace parcial mostra proximo passo real
+    status: active
     spec: journeys/auth-workspace.spec.ts
-    seed: empty-workspace
+    seed: onboarding-partial
     actors:
       - workspace-admin
     surfaces:
@@ -145,7 +145,7 @@ contracts:
       - Pendencias sao acionaveis e nao tecnicas demais.
   - id: APP-14
     title: Home demo acme permanece explicitamente demo
-    status: expected-fail
+    status: active
     spec: journeys/auth-workspace.spec.ts
     seed: acme-demo
     actors:

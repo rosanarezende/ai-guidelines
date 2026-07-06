@@ -16,6 +16,7 @@
     "trio": "Onde a mesma pessoa define e confirma, o app registra o selo Auto-declarado — visível para todos e para auditoria futura.",
     "solo": "Você ocupa todos os papéis. O app não bloqueia — registra. Uma auditoria futura vê exatamente o que aconteceu."
   },
+  "demoBanner": "Você está vendo a organização demo/sandbox acme. Estes dados são fictícios e não serão tratados como dados da sua organização real.",
   "onboarding": {
     "partialLabel": "Onboarding em andamento",
     "partialTitle": "Termine a configuração inicial",

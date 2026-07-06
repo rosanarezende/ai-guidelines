@@ -17,7 +17,7 @@
     "workspaceHome.next.title": "Próximo passo",
     "workspaceHome.next.onboarding": "Completar o onboarding define perfil, papéis e fontes — em arquivos seus.",
     "workspaceHome.next.cta": "Abrir onboarding",
-    "workspaceHome.console.note": "O console técnico mostra o grafo governado de uma organização. Esta organização ainda não tem repositório de governança vinculado, então não há grafo para mostrar — isso é honesto, não um erro.",
+    "workspaceHome.console.note": "Console técnico indisponível até configurar uma pasta ou repositório de governança. Sem esse host, ainda não há grafo para mostrar — isso é honesto, não um erro.",
     "workspaceHome.demo.hint": "Quer ver o produto cheio de dados? Abra a organização demo acme em Organizações."
   }
 }

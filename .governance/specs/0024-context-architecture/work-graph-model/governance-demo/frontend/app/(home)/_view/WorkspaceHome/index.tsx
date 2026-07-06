@@ -96,6 +96,7 @@ export default function WorkspaceHome({ workspace }: { workspace: Workspace }) {
         </SectionCard>
 
         <Paper
+          data-testid="home-next-safe-step"
           variant="outlined"
           sx={{
             p: 2.5,
@@ -123,7 +124,9 @@ export default function WorkspaceHome({ workspace }: { workspace: Workspace }) {
           </Box>
         </Paper>
 
-        <Alert severity="info">{m["workspaceHome.console.note"]}</Alert>
+        <Alert data-testid="home-technical-console-card" severity="info">
+          {m["workspaceHome.console.note"]}
+        </Alert>
         <Typography variant="caption" color="text.secondary">
           {m["workspaceHome.demo.hint"]}
         </Typography>

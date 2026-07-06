@@ -85,6 +85,11 @@ export default function OrganizationsView({
         {error ? <Alert severity="warning">{error}</Alert> : null}
 
         <SectionCard title={m["organizations.list.title"]}>
+          <Box sx={{ mb: 1.5 }}>
+            <Button data-testid="workspace-switcher" size="small" href="#workspace-real-list">
+              {m["organizations.list.switcher"]}
+            </Button>
+          </Box>
           <OrganizationList organizations={organizations} busyId={busyId} onOpen={open} />
         </SectionCard>
 

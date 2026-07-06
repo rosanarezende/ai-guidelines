@@ -8,6 +8,7 @@
     "organizations.list.empty": "Você ainda não tem organizações. Crie uma nova ou comece com a demo.",
     "organizations.list.open": "Abrir",
     "organizations.list.current": "atual",
+    "organizations.list.switcher": "Ver organizações reais",
     "organizations.badge.demo": "demo",
     "organizations.status.not-started": "onboarding pendente",
     "organizations.status.partial": "onboarding parcial",

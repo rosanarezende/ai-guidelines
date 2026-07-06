@@ -579,7 +579,7 @@ export function buildDemoWorkspace(companyName: string): Workspace {
     roleAssignments: [],
     workSources: [],
     integrations: [],
-    onboardingStatus: "not-started",
+    onboardingStatus: "finished",
   };
 }
 

@@ -34,7 +34,11 @@ export function OrganizationList({
     );
   }
   return (
-    <Box sx={{ display: "grid", gap: 1.25 }}>
+    <Box
+      id="workspace-real-list"
+      data-testid="workspace-real-list"
+      sx={{ display: "grid", gap: 1.25 }}
+    >
       {organizations.map((organization) => (
         <Paper key={organization.id} variant="outlined" sx={{ p: 2 }}>
           <Flex align="center" gap={1.5} wrap>
@@ -43,7 +47,12 @@ export function OrganizationList({
               <Flex align="center" gap={1} wrap>
                 <Typography sx={{ fontWeight: 700 }}>{organization.name}</Typography>
                 {organization.isDemo ? (
-                  <Chip size="small" color="info" label={m["organizations.badge.demo"]} />
+                  <Chip
+                    data-testid="workspace-demo-badge"
+                    size="small"
+                    color="info"
+                    label={m["organizations.badge.demo"]}
+                  />
                 ) : null}
                 {organization.isCurrent ? (
                   <Chip size="small" variant="outlined" label={m["organizations.list.current"]} />

@@ -3,7 +3,7 @@
 // HomeView.tsx — Home da organização DEMO acme-*: deriva tudo do snapshot
 // governado da sim. O gate de fluxo (signup/organização/onboarding) roda no
 // servidor, em app/(home)/page.tsx; aqui só se renderiza.
-import { Box, Button, Chip, Paper } from "@mui/material";
+import { Alert, Box, Button, Chip, Paper } from "@mui/material";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { GovernanceSnapshot } from "@demo/contracts";
@@ -47,6 +47,10 @@ export default function HomeView({
     >
       <Box sx={{ display: "grid", gap: 3 }}>
         <HomeHeader adoption={adoption} profile={profile} />
+
+        <Alert data-testid="home-demo-banner" severity="info">
+          {copy.demoBanner}
+        </Alert>
 
         {onboardingStatus === "partial" ? <OnboardingPartialCard /> : null}
 

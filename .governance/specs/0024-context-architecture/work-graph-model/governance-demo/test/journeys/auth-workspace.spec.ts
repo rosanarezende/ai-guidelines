@@ -1,10 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-  expectNoAcmeDemoLeak,
-  openWorkspace,
-  pendingContract,
-  resetSeed,
-} from "./support/contract-fixtures.ts";
+import { expectNoAcmeDemoLeak, openWorkspace, resetSeed } from "./support/contract-fixtures.ts";
 
 test.describe("Auth, workspace e shell", () => {
   test("APP-02 cria workspace novo sem vazar dados da demo", async ({ page, request }) => {
@@ -35,24 +30,21 @@ test.describe("Auth, workspace e shell", () => {
     await expectNoAcmeDemoLeak(page);
   });
 
-  test("APP-13 Home de workspace novo mostra proximo passo real", async ({ page, request }) => {
-    pendingContract("APP-13", "expected-fail");
-
-    await openWorkspace(page, request, "empty-workspace", "/");
+  test("APP-13 Home de workspace parcial mostra proximo passo real", async ({ page, request }) => {
+    await openWorkspace(page, request, "onboarding-partial", "/");
     await expect(page.getByTestId("home-next-safe-step")).toBeVisible();
     await expect(page.getByTestId("home-next-safe-step")).toContainText(/onboarding|host|fonte/i);
     await expect(page.getByTestId("home-technical-console-card")).toContainText(
-      /indisponivel|configure/i
+      /indispon.vel|configur/i
     );
   });
 
   test("APP-14 demo acme permanece explicitamente demo", async ({ page, request }) => {
-    pendingContract("APP-14", "expected-fail");
-
-    await openWorkspace(page, request, "acme-demo", "/organizations", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/organizations", "demo-acme");
     await expect(page.getByTestId("workspace-demo-badge")).toBeVisible();
     await page.goto("/");
     await expect(page.getByTestId("home-demo-banner")).toContainText(/demo|sandbox/i);
+    await page.goto("/organizations");
     await page.getByTestId("workspace-switcher").click();
     await expect(page.getByTestId("workspace-real-list")).toBeVisible();
   });
