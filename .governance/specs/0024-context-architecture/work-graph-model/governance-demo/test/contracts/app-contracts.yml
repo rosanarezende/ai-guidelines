@@ -236,7 +236,7 @@ contracts:
       - Fonte cadastrada aparece igual em Sources, Settings e Home.
   - id: APP-10
     title: Assistente/modelo e opcional, multi-provider e seguro
-    status: expected-fail
+    status: active
     spec: journeys/settings.spec.ts
     seed: workspace-multi-assistant
     actors:
@@ -245,7 +245,6 @@ contracts:
     surfaces:
       - /onboarding
       - /settings
-      - /integrations
     assertions:
       - Ollama/local pode ser configurado sem egress externo.
       - Cloud provider exige approval/policy antes de ficar ativo.
@@ -267,7 +266,7 @@ contracts:
       - Nada fica connected sem mecanismo real.
   - id: APP-12
     title: Revisao final do onboarding e honesta
-    status: expected-fail
+    status: active
     spec: journeys/onboarding.spec.ts
     seed: workspace-host-local
     actors:

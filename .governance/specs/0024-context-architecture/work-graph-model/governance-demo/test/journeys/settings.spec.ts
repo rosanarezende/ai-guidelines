@@ -17,8 +17,6 @@ test.describe("Settings, membros, papeis e assistentes", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-10", "expected-fail");
-
     await openWorkspace(page, request, "workspace-multi-assistant", "/settings");
     await expect(page.getByTestId("assistant-provider-list")).toBeVisible();
     await page.getByTestId("assistant-provider-ollama").click();

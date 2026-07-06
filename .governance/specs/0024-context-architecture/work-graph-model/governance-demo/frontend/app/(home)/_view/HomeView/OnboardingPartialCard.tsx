@@ -6,6 +6,7 @@ import copy from "./_locales/pt-br.json";
 export function OnboardingPartialCard() {
   return (
     <Paper
+      data-testid="home-continue-onboarding"
       variant="outlined"
       sx={{ p: 2.25, display: "grid", gap: 1.25, borderColor: "#d9e8dd", bgcolor: "#f8fbf8" }}
     >

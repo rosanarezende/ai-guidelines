@@ -1921,25 +1921,25 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 
 ## 23. Matriz de backend necessario por fluxo
 
-| Fluxo            | Backend minimo para ser funcional                                               | Estado                                                                |
-| ---------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Signup           | principal local + sessao                                                        | existe                                                                |
-| Multi-workspace  | create/select/list workspace                                                    | existe parcialmente                                                   |
-| Governance host  | create/link/validate/scaffold                                                   | backend + UI parcial existem; falta validacao visual fim-a-fim        |
-| Membros/convites | invite/accept/assign/revoke                                                     | backend existe; falta UI completa                                     |
-| Perfil           | recommend/save/change/approve                                                   | save persiste; change/approve falta                                   |
-| Fontes           | add/scan/publish context                                                        | add/scan/snapshot UI existe; publish/capability/provider faltam       |
-| Assistente       | providers/defaults/health/probe/test/advisory/audit                             | provider local/dismiss persiste; probe/defaults/audit faltam          |
-| Integracoes      | list/configure/test/evidence feed                                               | backend parcial; UI parcial                                           |
-| Planning         | objectives/metrics/targets/cycle + thesis/opportunity-area/allocation opcionais | falta UI/comandos completos                                           |
-| Intake           | proposal/register create                                                        | backend existe para proposal; falta UI                                |
-| Triage           | triage save + matcher multi-provider                                            | comando parcial; matcher falta                                        |
-| Gate             | decide/activate                                                                 | backend existe; falta UI                                              |
-| Breakdown        | apply + repo ack                                                                | backend existe; falta UI                                              |
-| Contracts        | propose/review/impact                                                           | backend parcial; falta UI                                             |
-| Outcomes         | publish/resolve/dashboard                                                       | dashboard read-only existe; publish/verdict para workspace novo falta |
-| Incidents        | declare/lifecycle/follow-up                                                     | backend parcial; falta UI                                             |
-| Audit            | event-log/query/diff                                                            | backend parcial; falta UI                                             |
+| Fluxo            | Backend minimo para ser funcional                                               | Estado                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Signup           | principal local + sessao                                                        | existe                                                                                 |
+| Multi-workspace  | create/select/list workspace                                                    | existe parcialmente                                                                    |
+| Governance host  | create/link/validate/scaffold                                                   | backend + UI parcial existem; falta validacao visual fim-a-fim                         |
+| Membros/convites | invite/accept/assign/revoke                                                     | backend existe; falta UI completa                                                      |
+| Perfil           | recommend/save/change/approve                                                   | save persiste; change/approve falta                                                    |
+| Fontes           | add/scan/publish context                                                        | add/scan/snapshot UI existe; publish/capability/provider faltam                        |
+| Assistente       | providers/defaults/health/probe/test/advisory/audit                             | provider/defaults/health/egress basicos existem em Settings; Cup/advisory/audit faltam |
+| Integracoes      | list/configure/test/evidence feed                                               | backend parcial; UI parcial                                                            |
+| Planning         | objectives/metrics/targets/cycle + thesis/opportunity-area/allocation opcionais | falta UI/comandos completos                                                            |
+| Intake           | proposal/register create                                                        | backend existe para proposal; falta UI                                                 |
+| Triage           | triage save + matcher multi-provider                                            | comando parcial; matcher falta                                                         |
+| Gate             | decide/activate                                                                 | backend existe; falta UI                                                               |
+| Breakdown        | apply + repo ack                                                                | backend existe; falta UI                                                               |
+| Contracts        | propose/review/impact                                                           | backend parcial; falta UI                                                              |
+| Outcomes         | publish/resolve/dashboard                                                       | dashboard read-only existe; publish/verdict para workspace novo falta                  |
+| Incidents        | declare/lifecycle/follow-up                                                     | backend parcial; falta UI                                                              |
+| Audit            | event-log/query/diff                                                            | backend parcial; falta UI                                                              |
 
 ## 24. Sequencia recomendada de implementacao
 

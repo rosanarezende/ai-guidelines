@@ -60,6 +60,14 @@ export default function WorkspaceHome({ workspace }: { workspace: Workspace }) {
               {m["workspaceHome.title"].replace("{name}", workspace.name)}
             </Typography>
             <Chip size="small" variant="outlined" label={workspace.kind} />
+            {!partial ? (
+              <Chip
+                data-testid="home-onboarding-complete"
+                size="small"
+                color="success"
+                label={m["workspaceHome.complete"]}
+              />
+            ) : null}
           </Flex>
           <Typography variant="body2" color="text.secondary">
             {m["workspaceHome.lead"]}
@@ -68,6 +76,7 @@ export default function WorkspaceHome({ workspace }: { workspace: Workspace }) {
 
         {partial ? (
           <Alert
+            data-testid="home-continue-onboarding"
             severity="info"
             action={
               <Button component={Link} href="/onboarding" size="small">

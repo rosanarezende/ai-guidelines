@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
+import { openWorkspace } from "./support/contract-fixtures.ts";
 
 test.describe("Onboarding como contrato funcional", () => {
   test("APP-05 perfil e responsabilidades guiam recomendacao compreensivel", async ({
@@ -47,11 +47,11 @@ test.describe("Onboarding como contrato funcional", () => {
   });
 
   test("APP-12 revisao final do onboarding e honesta", async ({ page, request }) => {
-    pendingContract("APP-12", "expected-fail");
-
     await openWorkspace(page, request, "workspace-host-local", "/onboarding");
     await page.getByTestId("onboarding-review-step").click();
-    await expect(page.getByTestId("onboarding-review-ready")).toContainText(/ja funciona/i);
+    await expect(page.getByTestId("onboarding-review-ready")).toContainText(
+      /já funciona|ja funciona/i
+    );
     await expect(page.getByTestId("onboarding-review-warnings")).toContainText(
       /pendente|rebaixado/i
     );

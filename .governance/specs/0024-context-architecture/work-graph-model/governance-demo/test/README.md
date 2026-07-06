@@ -41,6 +41,11 @@ npm --workspace acme-governance-e2e run test:e2e:ui
 npm --workspace acme-governance-e2e run test:e2e:report
 ```
 
+Por padrao, o Playwright sobe seus proprios servidores em modo mock. Reusar
+servidores ja abertos e opt-in: `PLAYWRIGHT_REUSE_EXISTING_SERVER=1`, e so deve
+ser usado quando o app em `3024` estiver explicitamente em
+`GOVERNANCE_DATA_SOURCE=mock-api`.
+
 ## Estrutura
 
 ```text

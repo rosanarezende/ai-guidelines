@@ -3,6 +3,7 @@
   "messages": {
     "workspaceHome.title": "{name}",
     "workspaceHome.lead": "Organização recém-criada. O retrato abaixo é honesto: nada aqui é inventado — o que não foi configurado aparece como pendente.",
+    "workspaceHome.complete": "Onboarding concluído",
     "workspaceHome.partial.title": "Onboarding em andamento",
     "workspaceHome.partial.body": "Você começou a configurar esta organização. Dá para continuar de onde parou.",
     "workspaceHome.partial.cta": "Continuar onboarding",

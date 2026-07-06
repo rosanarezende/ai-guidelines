@@ -17,9 +17,11 @@ export function OnboardingStepper() {
         const current = number === step;
         const done = number < step;
         const testId =
-          number === 3
-            ? "onboarding-step-sources"
-            : `onboarding-step-${String(number).padStart(2, "0")}`;
+          number === 6
+            ? "onboarding-review-step"
+            : number === 3
+              ? "onboarding-step-sources"
+              : `onboarding-step-${String(number).padStart(2, "0")}`;
         return (
           <ButtonBase
             key={label}

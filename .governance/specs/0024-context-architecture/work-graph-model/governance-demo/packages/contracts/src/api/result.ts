@@ -1,8 +1,10 @@
 export type {
   AdoptionState,
   AssistantConnectionResult,
+  AssistantFunction,
   AssistantProviderConfig,
   AssistantProviderKindId,
+  WorkspaceAssistantConfig,
   Authority,
   AuthorityGrant,
   BreakGlass,

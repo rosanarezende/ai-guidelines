@@ -5,10 +5,14 @@
 // cookie httpOnly e o estado vive em arquivo no servidor local.
 import type {
   AuthorityGrant,
+  AssistantFunction,
+  AssistantProviderKindId,
+  DataClassification,
   OnboardingStatus,
   RoleAssignment,
   SubjectRef,
   Workspace,
+  WorkspaceAssistantConfig,
   WorkspaceGroup,
   WorkspaceInvite,
   WorkspaceKind,
@@ -26,6 +30,15 @@ export type ShellWorkspaceSummary = {
 };
 
 type ShellResponse<T> = ({ ok: true } & T) | { ok: false; error: string };
+
+async function getJson<T>(url: string): Promise<ShellResponse<T>> {
+  try {
+    const response = await fetch(url);
+    return (await response.json()) as ShellResponse<T>;
+  } catch {
+    return { ok: false, error: "network" };
+  }
+}
 
 async function postJson<T>(url: string, body: unknown): Promise<ShellResponse<T>> {
   try {
@@ -211,12 +224,63 @@ export function recordBrowserWorkSourceScan(input: {
 }
 
 export function saveAssistantProviderChoice(input: {
-  kind: string;
+  kind: AssistantProviderKindId;
   label?: string;
   endpoint?: string;
+  model?: string;
+  preset?: string;
+  maxClassification?: DataClassification;
+  egressApproved?: boolean;
   runTest?: boolean;
 }) {
   return postJson<{ provider: unknown }>("/api/local/assistant", input);
+}
+
+export function getAssistantConfig() {
+  return getJson<{ assistantConfig: WorkspaceAssistantConfig }>("/api/local/assistant");
+}
+
+export type AssistantHealthResponse =
+  | {
+      ok: true;
+      status: "ok";
+      checkedAt: string;
+      models?: string[];
+      detail?: string;
+    }
+  | {
+      ok: false;
+      status?: "unreachable" | "egress-blocked";
+      checkedAt?: string;
+      models?: string[];
+      detail?: string;
+      error?: string;
+    };
+
+export async function testAssistantProviderChoice(input: {
+  kind: AssistantProviderKindId;
+  endpoint?: string;
+}): Promise<AssistantHealthResponse> {
+  try {
+    const response = await fetch("/api/local/assistant/test", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    return (await response.json()) as AssistantHealthResponse;
+  } catch {
+    return { ok: false, error: "network" };
+  }
+}
+
+export function setAssistantDefaultChoice(input: {
+  function: AssistantFunction;
+  providerId: string;
+}) {
+  return postJson<{ defaults: WorkspaceAssistantConfig["defaults"] }>(
+    "/api/local/assistant/defaults",
+    input
+  );
 }
 
 export function dismissAssistantChoice() {

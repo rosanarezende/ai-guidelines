@@ -4,6 +4,7 @@ import { defineConfig } from "@playwright/test";
 
 const MOCK_API_PORT = 3025;
 const APP_PORT = 3024;
+const REUSE_EXISTING_SERVER = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
 
 export const MOCK_API_URL = `http://127.0.0.1:${MOCK_API_PORT}`;
 
@@ -32,14 +33,14 @@ export default defineConfig({
       command: "npm --workspace acme-governance-mock-api run dev",
       cwd: "../../../../../..",
       url: `${MOCK_API_URL}/health`,
-      reuseExistingServer: true,
+      reuseExistingServer: REUSE_EXISTING_SERVER,
       timeout: 30_000,
     },
     {
       command: "npm --workspace acme-governance-next-app run dev",
       cwd: "../../../../../..",
       url: `http://127.0.0.1:${APP_PORT}`,
-      reuseExistingServer: true,
+      reuseExistingServer: REUSE_EXISTING_SERVER,
       timeout: 120_000,
       env: {
         GOVERNANCE_DATA_SOURCE: "mock-api",

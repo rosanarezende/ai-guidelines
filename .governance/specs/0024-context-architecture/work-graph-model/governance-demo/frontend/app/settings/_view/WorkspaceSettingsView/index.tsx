@@ -17,6 +17,7 @@ import MembersSection from "./MembersSection";
 import membersCopy from "./MembersSection/_locales/pt-br.json";
 import RolesSection from "./RolesSection";
 import rolesCopy from "./RolesSection/_locales/pt-br.json";
+import AssistantWorkspaceSection from "./AssistantWorkspaceSection";
 import SwitchSection from "./SwitchSection";
 import WorkSourcesManager from "@/app/sources/_components/WorkSourcesManager";
 import sourcesCopy from "@/app/sources/_components/WorkSourcesManager/_locales/pt-br.json";
@@ -121,6 +122,10 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
           <Box data-testid="settings-source-list">
             <WorkSourcesManager embedded />
           </Box>
+        </SectionCard>
+
+        <SectionCard title={m["workspaceSettings.assistant.title"]}>
+          <AssistantWorkspaceSection />
         </SectionCard>
 
         <SwitchSection />

@@ -13,6 +13,7 @@
     "workspaceSettings.governance.title": "Governança",
     "workspaceSettings.governance.missing": "Sem repositório/pasta de governança vinculado. Vincular um host é o que permite decisões governadas, resolver e console técnico para esta organização.",
     "workspaceSettings.governance.cta": "Definir no onboarding",
+    "workspaceSettings.assistant.title": "Assistente e modelos",
     "workspaceSettings.host.lead": "Escolha onde a governança vai morar. É uma pasta onde decisões, configurações e histórico serão gravados — separada das fontes de trabalho.",
     "workspaceSettings.host.kind.dedicated-repo": "Repo dedicado de governança",
     "workspaceSettings.host.kind.dedicated-repo.desc": "Vários repos/times, revisão e ciclo próprios.",

@@ -13,7 +13,11 @@ export function ReviewStep() {
     <>
       <StepHeading step={6} title={copy.heading.title} lead={copy.heading.lead} />
       <Alert severity="info">{copy.projectionNotice}</Alert>
-      <Paper variant="outlined" sx={{ p: 2, bgcolor: "#f4f9f5", borderColor: "#d9e8dd" }}>
+      <Paper
+        data-testid="onboarding-review-ready"
+        variant="outlined"
+        sx={{ p: 2, bgcolor: "#f4f9f5", borderColor: "#d9e8dd" }}
+      >
         <Flex align="center" gap={1} sx={{ color: "#1a5632", mb: 1 }}>
           <CheckCircleIcon fontSize="small" />
           <Typography variant="body2" sx={{ fontWeight: 700 }}>
@@ -28,7 +32,11 @@ export function ReviewStep() {
           ))}
         </Box>
       </Paper>
-      <Paper variant="outlined" sx={{ p: 2, bgcolor: "#fdf8ec", borderColor: "#f0e4c8" }}>
+      <Paper
+        data-testid="onboarding-review-warnings"
+        variant="outlined"
+        sx={{ p: 2, bgcolor: "#fdf8ec", borderColor: "#f0e4c8" }}
+      >
         <Flex align="center" gap={1} sx={{ color: "#7a4a00", mb: 1 }}>
           <VisibilityIcon fontSize="small" />
           <Typography variant="body2" sx={{ fontWeight: 700 }}>
@@ -59,7 +67,7 @@ export function ReviewStep() {
         </Box>
       </Paper>
       <Flex align="center" gap={2}>
-        <Button variant="contained" onClick={finishOnboarding}>
+        <Button data-testid="onboarding-finish" variant="contained" onClick={finishOnboarding}>
           {copy.actions.finish}
         </Button>
         <Button component={Link} href="/console" size="small" color="inherit">
