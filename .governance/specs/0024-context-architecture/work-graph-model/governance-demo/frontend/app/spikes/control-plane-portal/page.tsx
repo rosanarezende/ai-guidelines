@@ -8,6 +8,8 @@ import {
 } from "@demo/domain";
 import {
   evaluateBetterAuthPortalStoreProfiles,
+  runBetterAuthPostgresPortalLiveSpike,
+  runBetterAuthSQLiteInviteAcceptHttpSpike,
   runBetterAuthSQLitePortalHttpSpike,
 } from "@demo/backend";
 import { describeBetterAuthCandidate } from "./_model/better-auth-candidate";
@@ -19,6 +21,8 @@ export default async function ControlPlanePortalSpikePage() {
   const flow = runPortalSpikeFlow();
   const storeReport = await evaluateBetterAuthPortalStoreProfiles();
   const sqliteHttpReport = await runBetterAuthSQLitePortalHttpSpike();
+  const inviteAcceptReport = await runBetterAuthSQLiteInviteAcceptHttpSpike();
+  const postgresLiveReport = await runBetterAuthPostgresPortalLiveSpike();
   const staleProposal = createGovernanceProposal(flow.acceptedState, {
     workspaceId: "ws-mundo-da-mel",
     actorAccountId: "acct-business",
@@ -38,6 +42,8 @@ export default async function ControlPlanePortalSpikePage() {
       storeCandidates={comparePortalStoreCandidates()}
       storeReport={storeReport}
       sqliteHttpReport={sqliteHttpReport}
+      inviteAcceptReport={inviteAcceptReport}
+      postgresLiveReport={postgresLiveReport}
     />
   );
 }

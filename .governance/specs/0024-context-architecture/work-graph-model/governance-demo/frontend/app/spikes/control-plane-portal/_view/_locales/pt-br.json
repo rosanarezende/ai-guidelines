@@ -26,6 +26,17 @@
     "sqliteHttpBoundary": "Fronteira de governanca",
     "sqliteHttpProofOk": "S1d passou: SQLite ja suporta o fluxo local real de conta, sessao e organizacao. Isso nao concede authority governada e nao toca conteudo do usuario.",
     "sqliteHttpProofRisk": "S1d falhou: nao promover SQLite como store local ate corrigir migrations, sessoes ou fronteira de governanca.",
+    "inviteAcceptTitle": "Convite e aceite",
+    "inviteAcceptSubtitle": "S1e executa criadora -> convite -> signup da pessoa convidada -> aceite. A pessoa convidada entra pelo portal sem operar GitHub.",
+    "inviteAcceptFlow": "Fluxo multiusuario",
+    "inviteAcceptBoundary": "Fronteira do convidado",
+    "inviteAcceptProofOk": "S1e passou: convite/aceite cria membership de portal em SQLite, mas nao authority governada.",
+    "inviteAcceptProofRisk": "S1e falhou: nao promover portal multiusuario ate corrigir convite, aceite ou fronteira de authority.",
+    "postgresLiveTitle": "PostgreSQL live",
+    "postgresLivePassed": "PostgreSQL passou",
+    "postgresLiveFailed": "PostgreSQL falhou",
+    "postgresLiveNeedsApply": "URL presente; falta apply",
+    "postgresLiveNoUrl": "sem URL no ambiente",
     "persistenceTitle": "Persistencia e bridge dry-run",
     "persistenceSubtitle": "S1b prova um snapshot de portal sanitizado, event-log deterministico e uma proposta de PR sem escrita remota.",
     "snapshotTitle": "Snapshot do portal",
@@ -46,6 +57,7 @@
     "proofArch": "Proposta exige sourceRevision e stale revision falha fechado.",
     "proofS1b": "Snapshot persistivel e GitHub bridge dry-run existem sem escrever remoto nem vazar segredo.",
     "proofS1c": "SQLite cobre o modo local; PostgreSQL cobre portal compartilhado; Neo4j fica fora do store de conta/convite.",
-    "proofS1d": "Handler HTTP real do Better Auth persiste signup, sessao, organizacao e membership owner em SQLite."
+    "proofS1d": "Handler HTTP real do Better Auth persiste signup, sessao, organizacao e membership owner em SQLite.",
+    "proofS1e": "Convite/aceite HTTP cria membership de portal para pessoa convidada, sem conceder authority governada."
   }
 }

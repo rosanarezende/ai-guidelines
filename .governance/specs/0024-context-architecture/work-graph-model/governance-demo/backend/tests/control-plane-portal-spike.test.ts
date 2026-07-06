@@ -21,6 +21,8 @@ import {
   FilePortalControlPlaneStore,
   buildPortalSpikeEvents,
   evaluateBetterAuthPortalStoreProfiles,
+  runBetterAuthPostgresPortalLiveSpike,
+  runBetterAuthSQLiteInviteAcceptHttpSpike,
   runBetterAuthSQLitePortalHttpSpike,
 } from "../src/index.ts";
 
@@ -254,4 +256,69 @@ test("S1d: Better Auth HTTP flow persists signup, session and organization in SQ
     neo4jUsedAsAccountStore: false,
     contentPlaneRead: false,
   });
+});
+
+test("S1e: Better Auth HTTP invite and accept flow persists portal membership in SQLite", async () => {
+  const report = await runBetterAuthSQLiteInviteAcceptHttpSpike();
+
+  assert.equal(report.ok, true, report.error);
+  assert.equal(report.http.creatorSignUpStatus, 200);
+  assert.equal(report.http.createOrganizationStatus, 200);
+  assert.equal(report.http.inviteMemberStatus, 200);
+  assert.equal(report.http.inviteeSignUpStatus, 200);
+  assert.equal(report.http.acceptInvitationStatus, 200);
+  assert.equal(report.http.creatorCookieIssued, true);
+  assert.equal(report.http.inviteeCookieIssued, true);
+  assert.equal(report.persisted.userCount, 2);
+  assert.equal(report.persisted.sessionCount, 2);
+  assert.equal(report.persisted.organizationCount, 1);
+  assert.equal(report.persisted.memberCount, 2);
+  assert.equal(report.persisted.invitationCount, 1);
+  assert.equal(report.persisted.acceptedInvitationCount, 1);
+  assert.equal(report.persisted.ownerMemberCount, 1);
+  assert.equal(report.persisted.invitedMemberCount, 1);
+  assert.equal(report.persisted.organizationSlug, "mundo-da-mel-invite");
+  assert.deepEqual(report.boundary, {
+    invitedUserOperatedGitHub: false,
+    governanceAuthorityGrantedByPortal: false,
+    contentPlaneRead: false,
+  });
+});
+
+test("S1e: PostgreSQL live spike is opt-in and skipped without explicit environment", async () => {
+  assert.deepEqual(await runBetterAuthPostgresPortalLiveSpike({}), {
+    generatedFor: "control-plane-portal-spike",
+    id: "S1e-postgres",
+    store: "postgres",
+    status: "skipped-without-database-url",
+    ok: false,
+    env: {
+      databaseUrlProvided: false,
+      explicitApply: false,
+    },
+    boundary: {
+      governanceAuthorityGrantedByPortal: false,
+      contentPlaneRead: false,
+    },
+  });
+  assert.deepEqual(
+    await runBetterAuthPostgresPortalLiveSpike({
+      GOVERNANCE_PORTAL_POSTGRES_URL: "postgres://example.invalid/demo",
+    }),
+    {
+      generatedFor: "control-plane-portal-spike",
+      id: "S1e-postgres",
+      store: "postgres",
+      status: "skipped-without-explicit-apply",
+      ok: false,
+      env: {
+        databaseUrlProvided: true,
+        explicitApply: false,
+      },
+      boundary: {
+        governanceAuthorityGrantedByPortal: false,
+        contentPlaneRead: false,
+      },
+    }
+  );
 });

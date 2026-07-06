@@ -105,6 +105,27 @@ O resultado persistido no SQLite contem 1 usuario, 1 sessao, 1 organizacao e
 1 membership `owner`. O teste tambem fixa que o fluxo nao concede authority
 governada, nao usa Neo4j como store de conta e nao le content plane.
 
+### F9 - Convite/aceite HTTP real foi provado em SQLite; PostgreSQL ficou opt-in
+
+`BetterAuthSQLitePortalHttpSpike` tambem inclui a prova S1e:
+
+```text
+criadora: POST /sign-up/email
+criadora: POST /organization/create
+criadora: POST /organization/invite-member
+convidada: POST /sign-up/email
+convidada: POST /organization/accept-invitation
+```
+
+O SQLite persiste 2 usuarios, 2 sessoes, 1 organizacao, 2 memberships e
+1 convite com `status=accepted`. A pessoa convidada nao opera GitHub, e o
+portal continua sem authority governada.
+
+`runBetterAuthPostgresPortalLiveSpike(...)` implementa a mesma prova para
+PostgreSQL, mas e opt-in: exige `GOVERNANCE_PORTAL_POSTGRES_URL` e
+`GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY=1|true`. Sem URL ou sem apply explicito,
+o runner retorna `skipped-*` e nao toca banco.
+
 ## 3. Interpretacao
 
 O spike sustenta a direcao arquitetural da QRD-41: um portal humano pode existir sem substituir o governance host file-first/Git-backed. A separacao de planos fica mecanizavel:
@@ -118,8 +139,8 @@ content/work plane     -> repos, codigo, docs, metricas, evidencias
 Better Auth continua um candidato forte porque fornece os blocos de conta,
 sessao, organizacao e convite dentro do app. A fatia S1d reduziu a incerteza
 mais importante do modo local: SQLite ja rodou migrations e fluxo HTTP real.
-Ainda falta prova live equivalente para PostgreSQL antes de cravar o modo
-compartilhado/self-hosted.
+Ainda falta executar a prova live equivalente em PostgreSQL antes de cravar o
+modo compartilhado/self-hosted.
 
 A fatia S1c reduz a incerteza da stack do portal: Better Auth pode operar nos
 dois perfis necessarios (SQLite local e PostgreSQL compartilhado), enquanto
@@ -141,6 +162,8 @@ O teste de dominio cobre:
   store de portal.
 - S1d: Better Auth HTTP real persiste signup, sessao, organizacao e membership
   `owner` em SQLite.
+- S1e: Better Auth HTTP real persiste convite/aceite e membership da pessoa
+  convidada em SQLite; PostgreSQL live esta implementado como opt-in seguro.
 
 ## 5. Limites do spike
 
@@ -149,8 +172,8 @@ O teste de dominio cobre:
 - Nao ha email delivery de convite.
 - Nao ha integracao com sessao real do app.
 - Nao ha rota de produto navegavel para negocio/design/investidor.
-- Nao ha conexao live com PostgreSQL nem migracao Better Auth aplicada em banco
-  real.
+- Nao houve conexao live com PostgreSQL nesta rodada; o runner existe, mas so
+  executa com URL e apply explicito.
 - Nao ha prova de branch/PR real no governance host.
 
 ## 6. Riscos
@@ -172,19 +195,19 @@ SQLite como default local.
 
 ## 7. Recomendacao
 
-Avancar para **S1e - PostgreSQL live por ambiente + convite/aceite** antes de
+Avancar para **S1f - PostgreSQL live real ou GitHub App bridge real** antes de
 decidir Better Auth como stack final compartilhada.
 
 Escopo recomendado:
 
-1. Provar que a mesma configuracao troca para PostgreSQL por ambiente, sem
-   mudar contratos de dominio.
-2. Estender o fluxo HTTP para convite -> signup/signin convidado -> accept.
-3. Usuario convidado nao precisa operar GitHub.
-4. GitHub App bridge segue dry-run ate haver credencial/instalacao real isolada.
-5. Teste de que o store do portal nao contem conteudo governado nem secrets.
-6. Teste de que membership de portal nao concede authority.
-7. Manter Neo4j fora do store do portal e cobri-lo em spike separado de
+1. Executar a mesma configuracao em PostgreSQL por ambiente, sem mudar
+   contratos de dominio.
+2. Ou, se a prioridade for experiencia Git-backed, substituir o bridge dry-run
+   por GitHub App real em sandbox isolado.
+3. Manter usuario convidado sem necessidade de operar GitHub.
+4. Testar que o store do portal nao contem conteudo governado nem secrets.
+5. Testar que membership de portal nao concede authority.
+6. Manter Neo4j fora do store do portal e cobri-lo em spike separado de
    graph-read-model.
 
 Nao avancar ainda para hosted SaaS, nome publico ou decisao de licenca final do app.

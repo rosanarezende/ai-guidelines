@@ -8,6 +8,11 @@ import NoEncryptionGmailerrorredIcon from "@mui/icons-material/NoEncryptionGmail
 import ScienceIcon from "@mui/icons-material/Science";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
+import {
+  InviteAcceptSection,
+  type InviteAcceptReport,
+  type PostgresLiveReport,
+} from "./InviteAcceptSection";
 import { BoundaryCard, ProofRow } from "./SpikeCards";
 import { SQLiteHttpSection, type SQLiteHttpReport } from "./SQLiteHttpSection";
 import type {
@@ -58,6 +63,8 @@ export default function ControlPlanePortalSpikeView({
   storeCandidates,
   storeReport,
   sqliteHttpReport,
+  inviteAcceptReport,
+  postgresLiveReport,
 }: {
   auth: AuthSummary;
   projection: PublicControlPlaneProjection;
@@ -69,6 +76,8 @@ export default function ControlPlanePortalSpikeView({
   storeCandidates: PortalStoreCandidate[];
   storeReport: StoreReport;
   sqliteHttpReport: SQLiteHttpReport;
+  inviteAcceptReport: InviteAcceptReport;
+  postgresLiveReport: PostgresLiveReport;
 }) {
   const workspace = projection.workspaces[0];
   const provider = projection.providerLinks[0];
@@ -178,6 +187,12 @@ export default function ControlPlanePortalSpikeView({
 
         <SQLiteHttpSection report={sqliteHttpReport} messages={m} />
 
+        <InviteAcceptSection
+          inviteAccept={inviteAcceptReport}
+          postgres={postgresLiveReport}
+          messages={m}
+        />
+
         <SectionCard title={m.persistenceTitle} subtitle={m.persistenceSubtitle}>
           <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr 1fr" }, gap: 2 }}>
             <BoundaryCard
@@ -252,6 +267,9 @@ export default function ControlPlanePortalSpikeView({
             </ProofRow>
             <ProofRow label="S1d" ok={sqliteHttpReport.ok}>
               {m.proofS1d}
+            </ProofRow>
+            <ProofRow label="S1e" ok={inviteAcceptReport.ok}>
+              {m.proofS1e}
             </ProofRow>
           </Box>
         </SectionCard>

@@ -266,6 +266,24 @@ Implementado na fatia S1d:
 - A fronteira continua explicita: o portal nao concede authority governada,
   nao usa Neo4j como store de conta/convite e nao le conteudo do usuario.
 
+Implementado na fatia S1e:
+
+- `runBetterAuthSQLiteInviteAcceptHttpSpike()` prova o fluxo multiusuario em
+  HTTP real com SQLite:
+  criadora signup -> cria organizacao -> convida pessoa -> convidada signup ->
+  aceita convite.
+- O banco persiste 2 usuarios, 2 sessoes, 1 organizacao, 2 memberships e
+  1 convite `accepted`.
+- A pessoa convidada nao opera GitHub e membership de portal continua sem
+  authority governada.
+- `runBetterAuthPostgresPortalLiveSpike()` prepara a mesma prova para
+  PostgreSQL por ambiente. Por seguranca, ela so executa quando
+  `GOVERNANCE_PORTAL_POSTGRES_URL` existe **e**
+  `GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY=1|true`. Sem isso, retorna skipped
+  fail-visible.
+- A bancada visual mostra PostgreSQL como live-check opcional, nao como prova
+  executada no ambiente local sem banco.
+
 Nao aceitavel:
 
 - UI bonita sem provas de separacao dos planos;
@@ -282,7 +300,7 @@ O spike deve alimentar estas decisoes:
    alternativa?
 2. SQLite deve ser o store default para modo local/single-server?
 3. PostgreSQL deve ser o store default para portal compartilhado/self-hosted
-   depois de prova live com URL de ambiente?
+   depois de executar a prova live com URL de ambiente?
 4. Git-backed governance host entra como topologia suportada na release inicial?
 5. Portal self-hosted entra na release inicial ou fica como beta?
 6. Hosted portal operado pela mantenedora continua futuro?

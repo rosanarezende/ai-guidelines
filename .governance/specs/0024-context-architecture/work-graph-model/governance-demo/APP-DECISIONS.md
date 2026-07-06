@@ -2899,7 +2899,7 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   read-model;
 - provar que o control plane nao armazena conteudo governado como SSOT.
 
-**Evidence after spike S1/S1b/S1c/S1d**
+**Evidence after spike S1/S1b/S1c/S1d/S1e**
 
 - `SPIKE-CONTROL-PLANE-PORTAL.md` documenta o spike e seus limites.
 - `/spikes/control-plane-portal` mostra a bancada interna.
@@ -2921,10 +2921,17 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   `sign-up/email` emite cookie de sessao, `organization/create` persiste uma
   organizacao, `organization/list` le o estado e o banco contem usuario,
   sessao, organizacao e membership `owner`.
+- S1e provou o fluxo HTTP real de convite/aceite em SQLite:
+  criadora convida, pessoa convidada cria conta, aceita convite e vira
+  membership de portal; isto nao concede authority governada e nao exige que a
+  pessoa convidada opere GitHub.
+- S1e tambem adicionou o runner live de PostgreSQL por ambiente, protegido por
+  opt-in explicito (`GOVERNANCE_PORTAL_POSTGRES_URL` +
+  `GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY=1|true`).
 - A comparacao deixou de ser "Better Auth vs file-first" e virou
   "Better Auth SQLite para local; Better Auth PostgreSQL para compartilhado".
-  A prova live de PostgreSQL por ambiente ainda fica pendente antes de cravar o
-  modo compartilhado/self-hosted.
+  A execucao live de PostgreSQL por ambiente ainda fica pendente antes de
+  cravar o modo compartilhado/self-hosted.
 
 **Implications**
 
