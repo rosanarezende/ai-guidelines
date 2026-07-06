@@ -3,6 +3,7 @@
 import { Alert, Box, Button, Chip, Typography } from "@mui/material";
 import Link from "next/link";
 import type { GovernanceHostKind } from "@demo/contracts";
+import { useState } from "react";
 import AppShell from "@/app/_ui/shell/AppShell";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import WorkSourcesManager from "../../_components/WorkSourcesManager";
@@ -17,7 +18,73 @@ type WorkspaceSummary = {
   sandboxDeclared: boolean;
 };
 
+const HOST_OPTIONS: GovernanceHostKind[] = [
+  "local-folder",
+  "dedicated-repo",
+  "existing-repo-folder",
+];
+
+function suggestedPath(kind: GovernanceHostKind, workspaceName: string): string {
+  const slug = workspaceName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return kind === "existing-repo-folder" ? ".governance-host" : `${slug || "workspace"}-governance`;
+}
+
 export default function SourcesView({ workspace }: { workspace: WorkspaceSummary }) {
+  const [fitResult, setFitResult] = useState<string | null>(null);
+  const [sandboxDeclared, setSandboxDeclared] = useState(workspace.sandboxDeclared);
+  const [busyHostAction, setBusyHostAction] = useState(false);
+
+  async function runFitCheck(kind: GovernanceHostKind) {
+    setBusyHostAction(true);
+    setFitResult(null);
+    try {
+      const response = await fetch("/api/local/governance-host", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          action: "fit-check",
+          kind,
+          pathOrUrl: suggestedPath(kind, workspace.name),
+        }),
+      });
+      const data = (await response.json()) as {
+        ok: boolean;
+        error?: string;
+        fitCheck?: { ok: boolean; warnings: string[] };
+      };
+      if (!data.ok) {
+        setFitResult(`bloqueio: ${data.error || "fit-check falhou"}`);
+        return;
+      }
+      const warningText = data.fitCheck?.warnings?.length
+        ? `warning: ${data.fitCheck.warnings.join(" · ")}`
+        : "ok: caminho pode ser usado como host";
+      setFitResult(warningText);
+    } finally {
+      setBusyHostAction(false);
+    }
+  }
+
+  async function declareSandbox() {
+    setBusyHostAction(true);
+    try {
+      const response = await fetch("/api/local/governance-host", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "sandbox" }),
+      });
+      const data = (await response.json()) as { ok: boolean };
+      if (data.ok) setSandboxDeclared(true);
+    } finally {
+      setBusyHostAction(false);
+    }
+  }
+
   return (
     <AppShell
       chip={workspace.demo ? "demo" : "workspace"}
@@ -73,15 +140,50 @@ export default function SourcesView({ workspace }: { workspace: WorkspaceSummary
               </Box>
             </Box>
             {!workspace.governanceHost ? (
-              <Button
-                component={Link}
-                href="/settings"
-                variant="outlined"
-                size="small"
-                sx={{ justifySelf: "start" }}
-              >
-                {copy.hostCta}
-              </Button>
+              <Box data-testid="host-required-before-sources" sx={{ display: "grid", gap: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 850 }}>
+                  {copy.hostGateTitle}
+                </Typography>
+                <Flex gap={1} wrap>
+                  {HOST_OPTIONS.map((kind) => (
+                    <Button
+                      key={kind}
+                      data-testid={`host-option-${kind}`}
+                      disabled={busyHostAction}
+                      size="small"
+                      variant="outlined"
+                      onClick={() => void runFitCheck(kind)}
+                    >
+                      {copy.hostOptions[kind]}
+                    </Button>
+                  ))}
+                </Flex>
+                {fitResult ? (
+                  <Alert data-testid="host-fit-check-result" severity="info">
+                    {fitResult}
+                  </Alert>
+                ) : null}
+                <Flex gap={1} wrap>
+                  <Button component={Link} href="/settings" variant="contained" size="small">
+                    {copy.hostCta}
+                  </Button>
+                  <Button
+                    data-testid="host-use-sandbox"
+                    color="warning"
+                    disabled={busyHostAction || sandboxDeclared}
+                    size="small"
+                    variant="outlined"
+                    onClick={() => void declareSandbox()}
+                  >
+                    {copy.hostSandboxCta}
+                  </Button>
+                </Flex>
+                {sandboxDeclared ? (
+                  <Alert data-testid="sandbox-not-real-governance" severity="warning">
+                    {copy.hostSandboxBody}
+                  </Alert>
+                ) : null}
+              </Box>
             ) : null}
           </Box>
         </SectionCard>

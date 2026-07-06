@@ -67,9 +67,20 @@ export default function GovernanceHostSection({ initial }: { initial: HostInfo }
 
   if (info.governanceHost) {
     const check = info.governanceHost.fitCheck;
+    const kindLabel = m[`workspaceSettings.host.kind.${info.governanceHost.kind}`];
+    const hostLocation =
+      info.governanceHost.kind === "existing-repo-folder"
+        ? `${info.governanceHost.pathOrUrl}/.governance-host`
+        : info.governanceHost.pathOrUrl;
     return (
-      <Box sx={{ display: "grid", gap: 1 }}>
+      <Box data-testid="governance-host-card" sx={{ display: "grid", gap: 1 }}>
         <Flex wrap gap={1}>
+          <Chip
+            data-testid="governance-host-kind"
+            size="small"
+            variant="outlined"
+            label={`${kindLabel}: ${hostLocation}`}
+          />
           <Chip
             size="small"
             color="success"
@@ -84,7 +95,9 @@ export default function GovernanceHostSection({ initial }: { initial: HostInfo }
           ) : null}
         </Flex>
         {check?.warnings?.length ? (
-          <Alert severity="warning">{check.warnings.join(" · ")}</Alert>
+          <Alert data-testid="governance-host-warnings" severity="warning">
+            {check.warnings.join(" · ")}
+          </Alert>
         ) : null}
       </Box>
     );

@@ -13,6 +13,13 @@
   "sourceColumnTitle": "Projeto/fonte de trabalho",
   "sourceColumnBody": "É o repo, pasta, monorepo ou provider onde o trabalho acontece. Pode ter .governance/ sidecar próprio, mas não substitui o host do workspace.",
   "hostCta": "Configurar pasta de governança",
+  "hostSandboxCta": "Continuar como sandbox",
+  "hostGateTitle": "Escolha primeiro o tipo de host",
+  "hostOptions": {
+    "local-folder": "Pasta local dedicada",
+    "dedicated-repo": "Repo dedicado",
+    "existing-repo-folder": ".governance-host embutido"
+  },
   "badges": [
     "file-first",
     "scan local real",

@@ -18,7 +18,21 @@ export default async function ConsolePage({
 
   // O console mostra o grafo governado da organização ATUAL. Hoje só a demo
   // acme-* tem host vinculado; organização sem host recebe o estado honesto.
-  if (!gate.isDemo) return <ConsoleUnavailable workspaceName={workspace.name} />;
+  if (!gate.isDemo)
+    return (
+      <ConsoleUnavailable
+        workspaceName={workspace.name}
+        governanceHost={
+          workspace.governanceHost
+            ? {
+                pathOrUrl: workspace.governanceHost.pathOrUrl,
+                sourceRevision: workspace.governanceHost.fitCheck?.sourceRevision,
+                warnings: workspace.governanceHost.fitCheck?.warnings || [],
+              }
+            : null
+        }
+      />
+    );
 
   const { view } = await searchParams;
   const snapshot = await loadGovernanceSnapshot();

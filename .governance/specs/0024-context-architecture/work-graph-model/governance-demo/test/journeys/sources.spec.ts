@@ -3,8 +3,6 @@ import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Governance host e fontes de trabalho", () => {
   test("APP-08 governance host e escolhido antes das fontes", async ({ page, request }) => {
-    pendingContract("APP-08", "expected-fail");
-
     await openWorkspace(page, request, "workspace-sem-host", "/sources");
     await expect(page.getByTestId("host-required-before-sources")).toBeVisible();
     await page.getByTestId("host-option-local-folder").click();
@@ -26,8 +24,6 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-17 Settings gerencia governance host com fit-check", async ({ page, request }) => {
-    pendingContract("APP-17", "expected-fail");
-
     await openWorkspace(page, request, "workspace-host-local", "/settings");
     await expect(page.getByTestId("governance-host-card")).toContainText("sourceRevision");
     await expect(page.getByTestId("governance-host-warnings")).toBeVisible();
@@ -47,8 +43,6 @@ test.describe("Governance host e fontes de trabalho", () => {
   });
 
   test("APP-34 governance host embutido nao se confunde com sidecar", async ({ page, request }) => {
-    pendingContract("APP-34", "expected-fail");
-
     await openWorkspace(page, request, "workspace-host-embutido", "/settings");
     await expect(page.getByTestId("governance-host-kind")).toContainText(/\.governance-host/i);
     await expect(page.getByTestId("governance-host-kind")).not.toContainText(/sidecar/i);

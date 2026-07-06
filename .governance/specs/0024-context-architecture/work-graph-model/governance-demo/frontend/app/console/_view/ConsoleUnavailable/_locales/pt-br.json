@@ -3,6 +3,9 @@
   "messages": {
     "consoleUnavailable.title": "Console técnico — {name}",
     "consoleUnavailable.body": "Esta organização ainda não tem repositório de governança vinculado, então não há grafo, comandos nem event-log para mostrar. Isso é o estado real, não um erro.",
+    "consoleUnavailable.host.body": "Esta organização já tem host vinculado em {path}. A leitura completa do grafo ainda será habilitada por uma fatia dedicada; por enquanto o app mostra a revisão da fonte e não vaza a demo.",
+    "consoleUnavailable.host.revision": "sourceRevision do host: {revision}",
+    "consoleUnavailable.host.next": "O host está vinculado; a próxima fatia liga o read-model desse host ao console técnico.",
     "consoleUnavailable.next": "Vincule um host de governança no onboarding para habilitar o console.",
     "consoleUnavailable.cta.onboarding": "Abrir onboarding",
     "consoleUnavailable.cta.demo": "Ver o console na demo acme (em Organizações)"

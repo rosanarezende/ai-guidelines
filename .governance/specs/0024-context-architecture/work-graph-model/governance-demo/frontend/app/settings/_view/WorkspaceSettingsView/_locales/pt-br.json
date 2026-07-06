@@ -28,7 +28,7 @@
     "workspaceSettings.host.check.warnings": "Avisos do fit-check",
     "workspaceSettings.host.error": "Não foi possível concluir. Detalhe: {error}",
     "workspaceSettings.host.linked": "Host vinculado",
-    "workspaceSettings.host.revision": "revisão",
+    "workspaceSettings.host.revision": "sourceRevision",
     "workspaceSettings.switch.title": "Organizações",
     "workspaceSettings.switch.desc": "Você pode manter várias organizações (empresa, pessoal, clientes) e alternar sem misturar contexto.",
     "workspaceSettings.switch.cta": "Gerenciar organizações",

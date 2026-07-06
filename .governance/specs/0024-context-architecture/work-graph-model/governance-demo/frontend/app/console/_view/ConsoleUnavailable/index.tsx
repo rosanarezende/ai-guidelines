@@ -10,9 +10,16 @@ import copy from "./_locales/pt-br.json";
 
 const m = copy.messages;
 
-export default function ConsoleUnavailable({ workspaceName }: { workspaceName: string }) {
+export default function ConsoleUnavailable({
+  workspaceName,
+  governanceHost,
+}: {
+  workspaceName: string;
+  governanceHost: { pathOrUrl: string; sourceRevision?: string; warnings: string[] } | null;
+}) {
+  const hasHost = Boolean(governanceHost);
   return (
-    <AppShell chip={workspaceName}>
+    <AppShell chip={workspaceName} hasGovernanceHost={hasHost}>
       <Box
         data-testid="console-unavailable"
         sx={{ maxWidth: 640, mx: "auto", display: "grid", gap: 2 }}
@@ -20,9 +27,24 @@ export default function ConsoleUnavailable({ workspaceName }: { workspaceName: s
         <Typography sx={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.4px" }}>
           {m["consoleUnavailable.title"].replace("{name}", workspaceName)}
         </Typography>
-        <Alert severity="info">{m["consoleUnavailable.body"]}</Alert>
+        <Alert severity={hasHost ? "success" : "info"}>
+          {hasHost
+            ? m["consoleUnavailable.host.body"].replace("{path}", governanceHost?.pathOrUrl || "")
+            : m["consoleUnavailable.body"]}
+        </Alert>
+        {governanceHost?.sourceRevision ? (
+          <Alert data-testid="console-source-revision" severity="info">
+            {m["consoleUnavailable.host.revision"].replace(
+              "{revision}",
+              governanceHost.sourceRevision
+            )}
+          </Alert>
+        ) : null}
+        {governanceHost?.warnings.length ? (
+          <Alert severity="warning">{governanceHost.warnings.join(" · ")}</Alert>
+        ) : null}
         <Typography variant="body2" color="text.secondary">
-          {m["consoleUnavailable.next"]}
+          {hasHost ? m["consoleUnavailable.host.next"] : m["consoleUnavailable.next"]}
         </Typography>
         <Flex gap={1.5} wrap>
           <Button component={Link} href="/onboarding" variant="contained" size="small">

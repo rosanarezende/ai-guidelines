@@ -204,7 +204,7 @@ contracts:
       - Acumulo sensivel fica visivel conforme policy.
   - id: APP-08
     title: Governance host e escolhido antes das fontes
-    status: expected-fail
+    status: active
     spec: journeys/sources.spec.ts
     seed: workspace-sem-host
     actors:
@@ -312,7 +312,7 @@ contracts:
       - Revogar remove authority sem apagar historico.
   - id: APP-17
     title: Settings gerencia governance host com fit-check
-    status: expected-fail
+    status: active
     spec: journeys/sources.spec.ts
     seed: workspace-host-local
     actors:
@@ -939,7 +939,7 @@ contracts:
   # Host embutido usa a seed workspace-host-embutido (antes ociosa).
   - id: APP-34
     title: Governance host embutido nao se confunde com sidecar do repo
-    status: expected-fail
+    status: active
     spec: journeys/sources.spec.ts
     seed: workspace-host-embutido
     actors:
