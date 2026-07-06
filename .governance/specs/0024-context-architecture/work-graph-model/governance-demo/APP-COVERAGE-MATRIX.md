@@ -105,14 +105,23 @@ aplicado. O pacote `@demo/domain` deve expor apenas `.`, `./browser` e
 
 ## 5. Ordem de ativacao recomendada
 
-1. **APP-02** — workspace virgem sem vazamento de demo.
-2. **APP-08 / APP-17 / APP-34** — governance host escolhido, fit-check, scaffold/link e console degradado/habilitado.
-3. **APP-09 / APP-18 / APP-21 / CONS-02** — fontes de trabalho com sourceTrust compreensivel.
-4. **APP-05 / APP-06 / APP-15 / CONS-01** — perfil, regra de acumulo e Settings coerentes.
-5. **APP-07 / APP-16 / SEC-11 / SEC-12** — pessoas, grupos, convites, papeis e authority efetiva na UI.
-6. **APP-28 / APP-29** — `/results` e `/map` sobre demo/read-model com visualizacao real.
-7. **INT-01..03** — hub de integracoes read-only, depois GitHub work-source.
-8. **CUP-01 / CUP-02** — Cup deterministic C0/C1 sem provider externo.
+Antes de qualquer fluxo de configuracao, o fluxo humano comeca em `/signup`.
+Conta local/principal e pre-condicao para criar workspace, selecionar workspace,
+aceitar convite, receber membership e aceitar papel. Um convite nao integra a
+pessoa automaticamente: ele gera uma pendencia/token, e a pessoa convidada
+precisa criar/usar uma conta no app para aceitar e entrar na organizacao.
+
+1. **Zod por familia de API** — expandir `@demo/contracts` antes de novas telas: `onboarding/stack` → `members/roles` → `governance-host` → `work-sources` → `assistant/integrations`.
+2. **Higiene de testes e contratos** — garantir que os contratos das proximas telas estejam em `active`, `expected-fail` util ou `fixme` honesto; nenhum deny em `expected-fail`.
+3. **Decisoes QRD pendentes** — fechar o que afeta implementacao: workspace virgem, host, sources, obrigatorio vs degradado, authority para criar/aceitar convites.
+4. **APP-02** — workspace virgem sem vazamento de demo, partindo de `/signup`.
+5. **APP-08 / APP-17 / APP-34** — governance host escolhido, fit-check, scaffold/link e console degradado/habilitado.
+6. **APP-09 / APP-18 / APP-21 / CONS-02** — fontes de trabalho com sourceTrust compreensivel.
+7. **APP-05 / APP-06 / APP-15 / CONS-01** — perfil, regra de acumulo e Settings coerentes.
+8. **APP-07 / APP-16 / SEC-11 / SEC-12** — pessoas, grupos, convites, aceite de membership, aceite de papeis e authority efetiva na UI.
+9. **APP-28 / APP-29** — `/results` e `/map` sobre demo/read-model com visualizacao real.
+10. **INT-01..03** — hub de integracoes read-only, depois GitHub work-source.
+11. **CUP-01 / CUP-02** — Cup deterministic C0/C1 sem provider externo.
 
 ## 6. Zod como governanca de schema
 

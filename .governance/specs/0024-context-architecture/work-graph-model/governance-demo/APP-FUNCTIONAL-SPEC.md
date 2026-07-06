@@ -620,6 +620,13 @@ Esta etapa responde: **como este workspace sera executado, persistido e projetad
 
 **Decisao vigente:** seguir [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-10, QRD-11 e QRD-19. Account/principal, membership, role assignment e authority sao conceitos diferentes. Papeis podem ser atribuidos a pessoas, times, grupos, service accounts e grupos externos; authority efetiva e sempre derivada.
 
+**Regra de entrada:** convite nao substitui conta. Toda pessoa convidada precisa
+criar ou usar uma conta no app (`/signup`) antes de aceitar membership e papeis
+na organizacao. O convite pode carregar token/codigo, workspace alvo e papeis
+propostos, mas so vira membership efetiva depois que um principal local
+autenticado aceita o convite. Login externo futuro (GitHub, Google, OIDC) pode
+autenticar a pessoa; nao concede authority governada automaticamente.
+
 **Usuario ve:**
 
 - lista de pessoas do workspace;
@@ -680,6 +687,8 @@ Esta etapa responde: **como este workspace sera executado, persistido e projetad
 **Requisitos do primeiro release funcional:**
 
 - implementar convite local primeiro: convite gera token/codigo local e status `pending`; email/cloud fica para adapter futuro.
+- fluxo de aceite de convite passa por `/signup` quando a pessoa ainda nao tem conta local.
+- convite aceito vincula o token a um principal local e cria membership; papel proposto continua exigindo aceite separado quando aplicavel.
 - implementar groups/teams locais simples no mock-api e backend antes de identity-provider externo, para a UI nascer compativel com empresa maior.
 - papel atribuido a outra pessoa entra como `proposed` e so vira efetivo com aceite do sujeito.
 - em `shared`, membership efetiva exige convite aceito.
