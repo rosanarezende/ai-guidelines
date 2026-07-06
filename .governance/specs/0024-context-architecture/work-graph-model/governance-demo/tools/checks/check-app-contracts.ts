@@ -31,6 +31,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const demoRoot = path.resolve(here, "..", "..");
 const appRoot = path.join(demoRoot, "frontend", "app");
 const contractsFile = path.join(demoRoot, "test", "contracts", "app-contracts.yml");
+const iterationMapFile = path.join(demoRoot, "APP-ITERATION-MAP.md");
 const journeysRoot = path.join(demoRoot, "test", "journeys");
 const seedCoverageRegressionFile = path.join(demoRoot, "backend", "tests", "seed-coverage.test.ts");
 
@@ -257,6 +258,78 @@ function assertRoutePolicy(contracts: Contract[]): void {
   }
 }
 
+function markdownSection(text: string, heading: string): string {
+  const start = text.indexOf(heading);
+  if (start === -1) fail(`APP-ITERATION-MAP sem secao esperada: ${heading}`);
+  const afterStart = start + heading.length;
+  const next = text.indexOf("\n## ", afterStart);
+  return text.slice(afterStart, next === -1 ? text.length : next);
+}
+
+function parseMarkdownTable(section: string): string[][] {
+  return section
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|"))
+    .filter((line) => !/^\|\s*-+/.test(line))
+    .map((line) =>
+      line
+        .slice(1, -1)
+        .split("|")
+        .map((cell) => cell.trim())
+    )
+    .filter((cells) => cells.length > 0 && !/^Ordem$|^Contrato$/.test(cells[0] || ""));
+}
+
+function splitCoveredMapLines(value: string): string[] {
+  return value
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function assertIterationMapSync(contracts: Contract[]): void {
+  const text = readText(iterationMapFile);
+  const mapRows = parseMarkdownTable(markdownSection(text, "## 3. Mapa de telas e fluxos"));
+  const contractRows = parseMarkdownTable(markdownSection(text, "## 3.1 Contratos automatizados"));
+  const contractById = new Map(contracts.map((contract) => [contract.id, contract]));
+  const mapLines = new Set(
+    mapRows.map((row) => row[0]).filter((line) => /^\d+[A-Z]?$/.test(line || ""))
+  );
+  const coveredLines = new Set<string>();
+  const mappedContractIds = new Set<string>();
+  const intentionallyUncoveredMapLines = new Set(["33"]); // spike interno, nao tela de produto.
+
+  for (const row of contractRows) {
+    const [id, covers, status] = row;
+    const contract = contractById.get(id);
+    if (!contract) fail(`APP-ITERATION-MAP referencia contrato inexistente: ${id}`);
+    mappedContractIds.add(id);
+    if (contract.status !== status) {
+      fail(`APP-ITERATION-MAP status stale para ${id}: tabela=${status}, YAML=${contract.status}`);
+    }
+    for (const line of splitCoveredMapLines(covers)) {
+      if (!mapLines.has(line)) {
+        fail(`APP-ITERATION-MAP ${id} cobre linha inexistente: ${line}`);
+      }
+      coveredLines.add(line);
+    }
+  }
+
+  for (const line of mapLines) {
+    if (intentionallyUncoveredMapLines.has(line)) continue;
+    if (!coveredLines.has(line)) {
+      fail(`APP-ITERATION-MAP linha ${line} nao tem contrato automatizado associado`);
+    }
+  }
+
+  for (const contract of contracts) {
+    if (!mappedContractIds.has(contract.id)) {
+      fail(`APP-ITERATION-MAP nao lista contrato YAML: ${contract.id}`);
+    }
+  }
+}
+
 const doc = loadContracts();
 const contracts = doc.contracts || [];
 if (contracts.length === 0) fail("nenhum contrato encontrado");
@@ -271,6 +344,7 @@ assertUniqueIds(contracts);
 assertSeeds(doc, contracts);
 assertSpecs(contracts);
 assertRoutePolicy(contracts);
+assertIterationMapSync(contracts);
 
 const statusCounts = contracts.reduce<Record<string, number>>((acc, contract) => {
   acc[contract.status] = (acc[contract.status] || 0) + 1;

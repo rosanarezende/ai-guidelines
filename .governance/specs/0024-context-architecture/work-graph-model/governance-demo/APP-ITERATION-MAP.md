@@ -117,53 +117,65 @@ Os contratos alvo iniciais estao em
 [`test/contracts/app-contracts.yml`](test/contracts/app-contracts.yml). Eles
 nascem antes da implementacao e devem ser sincronizados com esta tabela.
 
-| Contrato | Cobre linhas do mapa | Estado inicial |
-| -------- | -------------------- | -------------- |
-| APP-01   | 01                   | active         |
-| APP-02   | 02, 13, 15           | fixme          |
-| APP-03   | 03                   | active         |
-| APP-04   | 04, 13               | active         |
-| APP-05   | 05, 06, 15           | fixme          |
-| APP-06   | 07, 16               | fixme          |
-| APP-07   | 08, 17               | fixme          |
-| APP-08   | 09, 18, 21           | fixme          |
-| APP-09   | 09, 21               | fixme          |
-| APP-10   | 10, 19               | fixme          |
-| APP-11   | 11, 40               | fixme          |
-| APP-12   | 12, 13, 15           | fixme          |
-| APP-13   | 13                   | fixme          |
-| APP-14   | 14                   | fixme          |
-| APP-15   | 15                   | fixme          |
-| APP-16   | 16                   | fixme          |
-| APP-17   | 17, 32               | fixme          |
-| APP-18   | 18, 21               | fixme          |
-| APP-19   | 19                   | fixme          |
-| APP-20   | 20, 40               | fixme          |
-| APP-21   | 21                   | fixme          |
-| APP-22   | 22, 28               | fixme          |
-| APP-23   | 23, 24               | fixme          |
-| APP-24   | 24                   | fixme          |
-| APP-25   | 25, 31               | fixme          |
-| APP-26   | 26, 28               | fixme          |
-| APP-27   | 27, 29, 31           | fixme          |
-| APP-28   | 28                   | fixme          |
-| APP-29   | 29                   | fixme          |
-| APP-30   | 30                   | fixme          |
-| APP-31   | 31                   | fixme          |
-| APP-32   | 32                   | fixme          |
-| INT-01   | 20, 40, 41, 43       | fixme          |
-| INT-02   | 42                   | fixme          |
-| INT-03   | 01, 20, 21, 44       | fixme          |
-| CUP-01   | 34, 35, 36, 37       | fixme          |
-| CUP-02   | 36, 40, 43           | fixme          |
-| CUP-03   | 39                   | fixme          |
-| CUP-04   | 35, 38, 43           | fixme          |
-| SEC-01   | 10, 19, 43           | fixme          |
-| SEC-02   | 28, 29, 32           | fixme          |
-| SEC-03   | 01, 16, 20           | fixme          |
-| CONS-01  | 05, 13, 15           | fixme          |
-| CONS-02  | 18, 21, 13           | fixme          |
-| CONS-03  | 20, 40, 42           | fixme          |
+| Contrato | Cobre linhas do mapa | Estado atual no YAML |
+| -------- | -------------------- | -------------------- |
+| APP-01   | 01                   | active               |
+| APP-02   | 02, 13, 15           | expected-fail        |
+| APP-03   | 03                   | active               |
+| APP-35   | 03A                  | fixme                |
+| APP-04   | 04, 13               | active               |
+| APP-05   | 05, 06, 15           | expected-fail        |
+| APP-06   | 07, 16               | expected-fail        |
+| APP-07   | 08, 17               | expected-fail        |
+| APP-08   | 09, 18, 21           | expected-fail        |
+| APP-09   | 09, 21               | expected-fail        |
+| APP-10   | 10, 19               | expected-fail        |
+| APP-11   | 11, 40               | fixme                |
+| APP-12   | 12, 13, 15           | expected-fail        |
+| APP-13   | 13                   | expected-fail        |
+| APP-14   | 14                   | expected-fail        |
+| APP-15   | 15                   | expected-fail        |
+| APP-16   | 16                   | expected-fail        |
+| APP-17   | 17, 32               | expected-fail        |
+| APP-18   | 18, 21               | expected-fail        |
+| APP-19   | 19                   | fixme                |
+| APP-20   | 20, 40               | fixme                |
+| APP-21   | 21                   | expected-fail        |
+| APP-22   | 22, 28               | fixme                |
+| APP-23   | 23, 24               | fixme                |
+| APP-24   | 24                   | fixme                |
+| APP-25   | 25, 31               | fixme                |
+| APP-26   | 26, 28               | expected-fail        |
+| APP-27   | 27, 29, 31           | fixme                |
+| APP-28   | 28                   | expected-fail        |
+| APP-29   | 29                   | expected-fail        |
+| APP-30   | 30                   | fixme                |
+| APP-31   | 31                   | fixme                |
+| APP-32   | 32                   | expected-fail        |
+| APP-33   | 22, 23, 24, 25, 31   | fixme                |
+| APP-34   | 08, 17               | expected-fail        |
+| INT-01   | 20, 40, 41, 43       | fixme                |
+| INT-02   | 42                   | fixme                |
+| INT-03   | 01, 20, 21, 44       | fixme                |
+| CUP-01   | 34, 35, 36, 37       | fixme                |
+| CUP-02   | 36, 40, 43           | fixme                |
+| CUP-03   | 39                   | fixme                |
+| CUP-04   | 35, 38, 43           | fixme                |
+| SEC-01   | 10, 19, 43           | fixme                |
+| SEC-02   | 28, 29, 32           | fixme                |
+| SEC-03   | 01, 16, 20           | fixme                |
+| SEC-04   | 31, 32               | fixme                |
+| SEC-05   | 18, 21               | fixme                |
+| SEC-06   | 16, 20, 43           | fixme                |
+| SEC-07   | 16                   | fixme                |
+| SEC-08   | 28, 31               | fixme                |
+| SEC-09   | 20, 43               | fixme                |
+| SEC-10   | 25, 31               | fixme                |
+| SEC-11   | 07, 16               | active               |
+| SEC-12   | 07, 16               | active               |
+| CONS-01  | 05, 13, 15           | expected-fail        |
+| CONS-02  | 18, 21, 13           | expected-fail        |
+| CONS-03  | 20, 40, 42           | fixme                |
 
 ## 4. Matriz de consistencia entre telas
 

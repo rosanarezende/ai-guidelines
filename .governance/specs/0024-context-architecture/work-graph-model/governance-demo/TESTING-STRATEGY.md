@@ -327,14 +327,15 @@ Antes de implementar/refatorar uma tela:
 Ordem:
 
 1. Signup, logout e multi-workspace.
-2. Onboarding resume/persistencia.
-3. Onboarding perfil/responsabilidades.
-4. Pessoas/papeis com aceite proposto.
-5. Governance host.
-6. Sources reformulada.
-7. Settings espelhando onboarding.
-8. Integrations hub basico.
-9. Cup shell/contexto local.
+2. QRD-35 de navegacao global e contrato APP-35.
+3. Onboarding resume/persistencia.
+4. Onboarding perfil/responsabilidades.
+5. Pessoas/papeis com aceite proposto.
+6. Governance host.
+7. Sources reformulada.
+8. Settings espelhando onboarding.
+9. Integrations hub basico.
+10. Cup shell/contexto local.
 
 Nada disso depende de navegar manualmente como fonte de verdade. A navegacao
 manual continua util para UX, mas o contrato funcional passa a ser automatizado.

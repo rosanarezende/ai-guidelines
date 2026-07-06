@@ -100,6 +100,22 @@ contracts:
       - Logout redireciona para /signup.
       - Reentrada preserva workspace e event-log.
       - Logout nao e delete.
+  - id: APP-35
+    title: Navegacao global organiza fluxo sem virar console tecnico
+    status: fixme
+    spec: journeys/navigation-shell.spec.ts
+    seed: empty-workspace
+    actors:
+      - workspace-admin
+      - stakeholder
+      - security-owner
+    surfaces:
+      - shell
+    assertions:
+      - A navegacao global tem item de primeiro nivel para configuracao, fontes, resultados/mapa, trabalho e integracoes quando aplicavel.
+      - Subitens, itens indisponiveis e itens em breve seguem a decisao QRD-35, sem falsa promessa.
+      - O console tecnico e Cup/CWP aparecem como entradas distintas da UX principal.
+      - Menu respeita perfil/authority sem usar permissao apenas como decoracao visual.
   - id: APP-04
     title: Onboarding parcial retoma no passo salvo
     status: active
