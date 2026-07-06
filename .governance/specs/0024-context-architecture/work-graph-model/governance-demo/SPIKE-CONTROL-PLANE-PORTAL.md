@@ -306,3 +306,36 @@ O spike deve alimentar estas decisoes:
 6. Hosted portal operado pela mantenedora continua futuro?
 7. Quais fluxos precisam GitHub App real no primeiro release e quais podem
    ficar dry-run/manual?
+
+## 9. Ordem de decisao para hospedagem/custo
+
+Ver tambem: [`PORTAL-DELIVERY-ROADMAP.md`](PORTAL-DELIVERY-ROADMAP.md).
+
+A proxima acao nao e escolher provedor de hospedagem. A proxima acao e provar
+o uso compartilhado em termos humanos:
+
+1. uma pessoa cria conta e workspace;
+2. outra pessoa recebe convite;
+3. a pessoa convidada cria conta e aceita;
+4. as duas veem o mesmo workspace;
+5. membership no portal continua separado de authority governada;
+6. a governanca oficial continua no governance host/Git-backed.
+
+So depois dessa prova faz sentido discutir custo e hospedagem com seriedade.
+
+Sequencia recomendada:
+
+- **S1f - Portal compartilhado real:** executar a prova S1e contra PostgreSQL
+  live em ambiente controlado.
+- **S1g - Governance host Git-backed real:** provar proposta com
+  `sourceRevision` contra repo/bridge Git sandbox, sem commit direto silencioso.
+- **S1h - Matriz de custo/operacao:** comparar local, self-hosted simples e
+  hosted opcional com requisitos de app, banco, email, dominio, backup e logs.
+
+Decisoes ainda bloqueadas ate S1h:
+
+- provedor final de deploy;
+- hosted portal operado pela mantenedora;
+- politica de cobranca;
+- custo mensal minimo;
+- stack default de producao.

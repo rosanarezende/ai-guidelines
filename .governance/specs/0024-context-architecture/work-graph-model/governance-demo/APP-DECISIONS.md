@@ -2947,3 +2947,74 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   entregue e qual esta apenas modelada.
 - QRD-16 continua valida: Neo4j deve existir como opcao real de read-model no
   primeiro release funcional, mas nao participa do store transacional do portal.
+
+## QRD-42 - Quando decidir hospedagem e custo do portal
+
+**Status:** decided-as-gate-order; a escolha de provedor/custo continua aberta.
+
+**Q - Question**
+
+Quando devemos escolher como o portal sera hospedado, quem paga, se existe
+portal hosted operado pela mantenedora e qual stack de deploy sera recomendada?
+
+**R - Reasoning/Research**
+
+A duvida da owner nao e apenas tecnica. O cenario real e:
+
+- uma pessoa pode comecar sozinha;
+- essa pessoa pode querer versionar a governanca no GitHub desde o dia 1;
+- depois pode convidar pessoas de negocio, design, investimento ou engenharia;
+- essas pessoas devem conseguir usar o portal sem operar Git diretamente;
+- a governanca oficial deve continuar recuperavel no governance host/Git, nao
+  presa ao banco do portal.
+
+Escolher hospedagem antes de provar esse fluxo cria um risco alto: podemos
+otimizar para Cloud/PaaS/Docker antes de saber se o produto resolve o problema
+humano principal.
+
+As evidencias S1d/S1e ja reduziram a incerteza de conta/convite em SQLite, mas
+nao respondem ainda:
+
+- se o mesmo fluxo funciona em store compartilhado real;
+- se o governance host Git-backed funciona como cofre/auditoria;
+- qual e o custo minimo operacional de app + banco + email + dominio + backup;
+- o que acontece se o portal sair do ar.
+
+**D - Decision**
+
+A decisao de hospedagem/custo fica bloqueada por tres provas, nesta ordem:
+
+1. **Portal compartilhado real**
+   - executar S1e contra PostgreSQL live;
+   - provar signup, workspace, invite, signup da pessoa convidada, accept e
+     leitura por duas contas;
+   - manter membership de portal separado de authority governada.
+
+2. **Governance host versionado**
+   - provar Git-backed bridge real ou sandbox equivalente;
+   - toda escrita vira proposta com `sourceRevision`;
+   - o portal nao grava authority efetiva sozinho e nao copia conteudo
+     governado como SSOT.
+
+3. **Matriz de custo e operacao**
+   - listar requisitos por modo: app, banco, email, dominio, backup, logs e
+     provider Git;
+   - separar custo self-hosted do custo de hosted operado pela mantenedora;
+   - explicitar responsabilidades de quem hospeda.
+
+Antes dessas tres provas, nao escolher provedor final de hospedagem, nao
+decidir cobranca, nao decidir hosted portal como produto operado pela
+mantenedora e nao amarrar o primeiro release a Cloudflare/Vercel/Railway/Fly,
+VPS ou qualquer outro vendor.
+
+**Implications**
+
+- `PORTAL-DELIVERY-ROADMAP.md` passa a ser o roteiro didatico da prova de uso
+  compartilhado e da decisao futura de custo.
+- S1f deve ser "portal compartilhado real", nao "escolher hosting".
+- S1g deve provar governance host Git-backed real ou sandbox com semantica
+  equivalente.
+- S1h pode entao comparar custos e modos de entrega.
+- O app deve continuar explicando quatro modos: `local-solo`,
+  `git-backed local app`, `self-hosted portal simples` e `hosted portal
+opcional`.
