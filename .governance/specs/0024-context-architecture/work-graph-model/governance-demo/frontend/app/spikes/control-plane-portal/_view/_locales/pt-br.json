@@ -3,12 +3,17 @@
   "messages": {
     "title": "Spike S1 - Portal e control plane",
     "lead": "Bancada interna para provar que conta, convite e portal podem existir sem virar fonte de autoridade governada.",
-    "honesty": "Isto nao e tela de produto. E uma falsificacao arquitetural: Better Auth e candidato, Git-backed host e o cofre, e o portal so pode propor mudancas governadas.",
+    "honesty": "Isto nao e tela de produto. E uma falsificacao arquitetural: Better Auth e candidato para conta/organizacao; a persistencia provada aqui e file-first de spike; Git-backed host continua sendo o cofre governado.",
     "controlPlane": "Control plane",
     "governancePlane": "Governance plane",
     "security": "Seguranca",
     "betterAuthTitle": "Candidato Better Auth",
-    "betterAuthSubtitle": "Instancia server-side com plugin de organizacao carregado. Esta bancada ainda nao escolhe a stack final.",
+    "betterAuthSubtitle": "Instancia server-side com plugin de organizacao carregado. Esta bancada ainda nao escolhe a stack final nem configura o banco nativo do Better Auth.",
+    "persistenceTitle": "Persistencia e bridge dry-run",
+    "persistenceSubtitle": "S1b prova um snapshot de portal sanitizado, event-log deterministico e uma proposta de PR sem escrita remota.",
+    "snapshotTitle": "Snapshot do portal",
+    "bridgeTitle": "GitHub bridge",
+    "secretTitle": "Segredos",
     "flowTitle": "Fluxo alvo",
     "flowSubtitle": "O caminho que precisa funcionar para uma pessoa nao tecnica usar o app sem operar Git diretamente.",
     "flowCreator": "Criadora abre o portal, cria workspace e aponta para um governance host Git-backed.",
@@ -21,6 +26,7 @@
     "proofApp40": "A projecao publica tem metadados de workspace/provider, nao conteudo governado.",
     "proofApp41": "Aceite de convite cria membership de portal, mas zero authority governada.",
     "proofSec13": "Segredo de provider simulado nao aparece na projecao publica.",
-    "proofArch": "Proposta exige sourceRevision e stale revision falha fechado."
+    "proofArch": "Proposta exige sourceRevision e stale revision falha fechado.",
+    "proofS1b": "Snapshot persistivel e GitHub bridge dry-run existem sem escrever remoto nem vazar segredo."
   }
 }

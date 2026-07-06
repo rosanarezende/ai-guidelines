@@ -2899,6 +2899,22 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   read-model;
 - provar que o control plane nao armazena conteudo governado como SSOT.
 
+**Evidence after spike S1/S1b**
+
+- `SPIKE-CONTROL-PLANE-PORTAL.md` documenta o spike e seus limites.
+- `/spikes/control-plane-portal` mostra a bancada interna.
+- `backend/tests/control-plane-portal-spike.test.ts` prova:
+  - projection publica sem conteudo governado;
+  - aceite de convite cria membership de portal, nao authority governada;
+  - provider secret nao vaza;
+  - proposta exige `sourceRevision`;
+  - bridge GitHub e dry-run, com `writesToRemote: false`;
+  - snapshot/event-log do portal sao persistiveis e sanitizados.
+- Better Auth foi validado como candidato de superficie para conta,
+  organizacao e convite, mas seu banco nativo ainda nao foi configurado.
+- A decisao final da stack do portal segue aberta: Better Auth com
+  SQLite/Postgres vs control plane file-first para release inicial.
+
 **Implications**
 
 - QRD-36 continua valida, mas precisa ser lida junto desta QRD: control plane

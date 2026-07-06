@@ -6,6 +6,12 @@ export * from "./adapters/fs/paths.ts";
 
 export { FileGovernanceRepository } from "./adapters/file/FileGovernanceRepository.ts";
 export { FileReadModelSource } from "./adapters/file/FileReadModelSource.ts";
+export {
+  FilePortalControlPlaneStore,
+  buildPortalSpikeEvents,
+  type PortalControlPlaneEvent,
+  type PortalPersistenceReceipt,
+} from "./adapters/control-plane/FilePortalControlPlaneStore.ts";
 export { InMemoryGraphSource } from "./adapters/graph-memory/InMemoryGraphSource.ts";
 export {
   loadManifest,

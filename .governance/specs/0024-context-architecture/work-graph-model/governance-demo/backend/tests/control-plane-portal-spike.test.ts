@@ -1,14 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import {
   acceptPortalInvite,
+  assertNoControlPlaneLeakage,
   collectSecretLeaks,
   createGovernanceProposal,
   createPortalControlPlaneSpikeFixture,
+  dryRunGitHubBridgeProposal,
   portalAccountHasGovernanceAuthority,
   projectPublicControlPlaneState,
   PORTAL_TOPOLOGIES,
+  runPortalSpikeFlow,
 } from "@demo/domain/server";
+import { FilePortalControlPlaneStore, buildPortalSpikeEvents } from "../src/index.ts";
 
 test("APP-40: public control-plane projection exposes workspace metadata without governed content", () => {
   const state = createPortalControlPlaneSpikeFixture();
@@ -87,6 +94,67 @@ test("ARCH-CP: governance proposal is proposal-only and requires matching source
     assert.equal(ok.proposal.branchCandidate, "governance/proposal-1");
   }
   assert.deepEqual(stale, { ok: false, error: "source-revision-stale" });
+});
+
+test("ARCH-CP: GitHub bridge dry-run creates a PR candidate without remote writes", () => {
+  const flow = runPortalSpikeFlow();
+
+  assert.equal(flow.bridgeDryRun.ok, true);
+  if (flow.bridgeDryRun.ok) {
+    assert.equal(flow.bridgeDryRun.repo, "rosana/mundo-da-mel-governance");
+    assert.equal(flow.bridgeDryRun.writesToRemote, false);
+    assert.equal(flow.bridgeDryRun.pullRequestCandidate.base, "main");
+    assert.equal(flow.bridgeDryRun.pullRequestCandidate.head, "governance/proposal-1");
+  }
+  assert.deepEqual(flow.secretLeaks, []);
+});
+
+test("S1b: portal store persists sanitized snapshot and deterministic event-log", async () => {
+  const rootDir = await mkdtemp(join(tmpdir(), "portal-control-plane-"));
+  try {
+    const flow = runPortalSpikeFlow();
+    const store = new FilePortalControlPlaneStore(rootDir);
+    const receipt = await store.persistState({
+      state: flow.proposedState,
+      events: buildPortalSpikeEvents({
+        workspaceId: "ws-mundo-da-mel",
+        sourceRevision: "rev-governance-001",
+      }),
+    });
+    const snapshot = await store.readSnapshot();
+    const events = await store.readEvents();
+    const rawSnapshot = await readFile(receipt.snapshotPath, "utf8");
+    const rawEvents = await readFile(receipt.eventLogPath, "utf8");
+
+    assert.equal(receipt.eventCount, 4);
+    assert.equal(snapshot.schemaVersion, 1);
+    assert.equal(snapshot.providerLinks[0]?.installationIdRedacted, "gh-i...3456");
+    assert.equal(snapshot.proposals[0]?.status, "proposal-only");
+    assert.equal(
+      events.every((event) => event.writesToRemote === false),
+      true
+    );
+    assert.equal(
+      events.some((event) => event.type === "portal.github-bridge.dry-run"),
+      true
+    );
+    assert.equal(rawSnapshot.includes("ghp_spike_secret_must_never_leak"), false);
+    assert.equal(rawEvents.includes("ghp_spike_secret_must_never_leak"), false);
+    assert.deepEqual(
+      assertNoControlPlaneLeakage({
+        publicProjection: flow.publicProjection,
+        persistedSnapshot: snapshot,
+        bridgeDryRun: dryRunGitHubBridgeProposal({
+          state: flow.proposedState,
+          proposalId: "proposal-1",
+        }),
+        secrets: flow.initialState.providerSecrets.map((secret) => secret.secretValue),
+      }),
+      []
+    );
+  } finally {
+    await rm(rootDir, { recursive: true, force: true });
+  }
 });
 
 test("QRD-41: all four delivery topologies are modeled", () => {

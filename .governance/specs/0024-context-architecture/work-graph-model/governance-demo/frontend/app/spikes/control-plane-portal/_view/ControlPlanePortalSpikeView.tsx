@@ -8,7 +8,12 @@ import NoEncryptionGmailerrorredIcon from "@mui/icons-material/NoEncryptionGmail
 import ScienceIcon from "@mui/icons-material/Science";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
-import type { ProposalResult, PublicControlPlaneProjection } from "@demo/domain";
+import type {
+  GitHubBridgeDryRunResult,
+  PortalPersistedSnapshot,
+  ProposalResult,
+  PublicControlPlaneProjection,
+} from "@demo/domain";
 import type { ReactNode } from "react";
 import copy from "./_locales/pt-br.json";
 
@@ -25,12 +30,16 @@ export default function ControlPlanePortalSpikeView({
   auth,
   projection,
   proposal,
+  bridgeDryRun,
+  persistedSnapshot,
   staleProposal,
   secretLeakCount,
 }: {
   auth: AuthSummary;
   projection: PublicControlPlaneProjection;
   proposal: ProposalResult;
+  bridgeDryRun: GitHubBridgeDryRunResult;
+  persistedSnapshot: PortalPersistedSnapshot;
   staleProposal: ProposalResult;
   secretLeakCount: number;
 }) {
@@ -79,7 +88,7 @@ export default function ControlPlanePortalSpikeView({
             items={[
               `${secretLeakCount} vazamentos de segredo`,
               staleProposal.ok ? "stale aceito" : "stale bloqueado",
-              proposal.ok ? "proposta criada como proposal-only" : "proposta falhou",
+              bridgeDryRun.ok ? "GitHub bridge em dry-run" : "bridge bloqueado",
             ]}
           />
         </Box>
@@ -100,6 +109,38 @@ export default function ControlPlanePortalSpikeView({
               />
             ))}
           </Flex>
+        </SectionCard>
+
+        <SectionCard title={m.persistenceTitle} subtitle={m.persistenceSubtitle}>
+          <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr 1fr" }, gap: 2 }}>
+            <BoundaryCard
+              icon={<CheckCircleIcon color="success" />}
+              title={m.snapshotTitle}
+              items={[
+                `schemaVersion ${persistedSnapshot.schemaVersion}`,
+                `${persistedSnapshot.memberships.length} memberships persistiveis`,
+                `${persistedSnapshot.proposals.length} propostas persistiveis`,
+              ]}
+            />
+            <BoundaryCard
+              icon={<AccountTreeIcon color="primary" />}
+              title={m.bridgeTitle}
+              items={[
+                bridgeDryRun.ok ? bridgeDryRun.repo : "sem PR candidate",
+                bridgeDryRun.ok ? bridgeDryRun.branchCandidate : "proposal requerida",
+                bridgeDryRun.ok && !bridgeDryRun.writesToRemote ? "zero escrita remota" : "risco",
+              ]}
+            />
+            <BoundaryCard
+              icon={<LockIcon color="primary" />}
+              title={m.secretTitle}
+              items={[
+                `${secretLeakCount} vazamentos detectados`,
+                persistedSnapshot.providerLinks[0]?.installationIdRedacted ?? "sem provider",
+                "provider secret fora do snapshot",
+              ]}
+            />
+          </Box>
         </SectionCard>
 
         <SectionCard title={m.flowTitle} subtitle={m.flowSubtitle}>
@@ -128,6 +169,9 @@ export default function ControlPlanePortalSpikeView({
             </ProofRow>
             <ProofRow label="ARCH-CP" ok={!staleProposal.ok && proposal.ok}>
               {m.proofArch}
+            </ProofRow>
+            <ProofRow label="S1b" ok={bridgeDryRun.ok && persistedSnapshot.proposals.length === 1}>
+              {m.proofS1b}
             </ProofRow>
           </Box>
         </SectionCard>

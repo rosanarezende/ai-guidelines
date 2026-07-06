@@ -13,6 +13,7 @@
 - A bancada interna foi criada em `/spikes/control-plane-portal`, fora da navegacao principal de produto.
 - O spike adicionou um kernel puro em `@demo/domain` para contas, workspaces, convites, memberships de portal, provider link, proposta e sanitizacao.
 - O spike adicionou teste de dominio em `backend/tests/control-plane-portal-spike.test.ts`.
+- A fatia S1b adicionou um store file-first de spike em `backend/src/adapters/control-plane/FilePortalControlPlaneStore.ts`.
 
 ## 2. Fatos
 
@@ -47,6 +48,24 @@ O app instancia Better Auth server-side com o plugin `organization` e verifica a
 
 Isto prova aderencia inicial de superficie, nao prova ainda persistencia, operacao, emails, RBAC final ou integracao GitHub real.
 
+### F5 - Persistencia file-first do portal foi provada sem virar SSOT governado
+
+`FilePortalControlPlaneStore` persiste:
+
+- snapshot JSON sanitizado do portal;
+- event-log JSONL deterministico;
+- `writesToRemote: false` em todos os eventos do spike.
+
+O snapshot persistido contem contas, workspaces, convites, memberships,
+provider links redigidos e propostas. Ele nao contem provider secret nem
+conteudo governado.
+
+### F6 - GitHub bridge continua dry-run
+
+`dryRunGitHubBridgeProposal(...)` produz repo, branch candidate e PR candidate,
+mas nao escreve no remoto. A ponte exige proposta e sourceRevision previamente
+validada.
+
 ## 3. Interpretacao
 
 O spike sustenta a direcao arquitetural da QRD-41: um portal humano pode existir sem substituir o governance host file-first/Git-backed. A separacao de planos fica mecanizavel:
@@ -68,6 +87,7 @@ O teste de dominio cobre:
 - SEC-13: segredo de provider nao vaza para projection publica;
 - ARCH-CP: proposta exige `sourceRevision` e falha fechado se stale;
 - QRD-41: quatro topologias modeladas (`local-solo`, `git-backed`, `self-hosted-portal`, `hosted-portal`).
+- S1b: store file-first persiste snapshot/event-log sem segredo e sem escrita remota.
 
 ## 5. Limites do spike
 
@@ -95,15 +115,15 @@ O spike prova endpoint surface, nao custo operacional, email, migracoes, deploy,
 
 ## 7. Recomendacao
 
-Avancar para **S1b - portal persistido + GitHub bridge dry-run** antes de decidir Better Auth como stack final.
+Avancar para **S1c - decisao de stack do portal** antes de decidir Better Auth como stack final.
 
 Escopo recomendado:
 
-1. Better Auth com store local persistido no app de spike.
-2. Signup -> workspace -> invite -> accept em rota interna.
+1. Comparar duas opcoes para release inicial: Better Auth com SQLite/Postgres vs portal file-first control plane.
+2. Provar signup -> workspace -> invite -> accept em rota interna com persistencia real escolhida.
 3. Usuario convidado nao precisa operar GitHub.
-4. GitHub App bridge em dry-run com repo pointer, sourceRevision e proposal.
-5. Teste de que portal DB nao contem conteudo governado nem secrets.
+4. GitHub App bridge segue dry-run ate haver credencial/instalacao real isolada.
+5. Teste de que o store do portal nao contem conteudo governado nem secrets.
 6. Teste de que membership de portal nao concede authority.
 
 Nao avancar ainda para hosted SaaS, nome publico ou decisao de licenca final do app.

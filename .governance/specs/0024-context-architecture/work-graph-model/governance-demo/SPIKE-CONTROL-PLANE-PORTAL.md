@@ -210,6 +210,22 @@ Implementado nesta primeira fatia:
   plugin `organization`, provando que os endpoints necessarios existem.
 - O GitHub bridge ainda e dry-run/modelado, nao usa credenciais reais.
 
+Implementado na fatia S1b:
+
+- `backend/src/adapters/control-plane/FilePortalControlPlaneStore.ts` persiste
+  snapshot sanitizado do portal e event-log JSONL deterministico, com escrita
+  atomica.
+- O snapshot persistido remove provider secrets e redige installation ids.
+- O event-log registra que a bridge GitHub e dry-run e `writesToRemote: false`.
+- `dryRunGitHubBridgeProposal(...)` gera candidato de branch/PR sem escrever no
+  remoto.
+- `runPortalSpikeFlow(...)` compoe invite -> accept -> proposal ->
+  GitHub dry-run -> projection -> persisted snapshot.
+- A bancada mostra persistencia/bridge como prova, mas nao grava em disco ao
+  renderizar a pagina.
+- Better Auth continua como candidato de conta/organizacao; seu banco nativo
+  ainda nao foi configurado nesta fatia.
+
 Nao aceitavel:
 
 - UI bonita sem provas de separacao dos planos;
