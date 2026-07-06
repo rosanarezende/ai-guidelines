@@ -6,6 +6,16 @@ test.describe("Settings, membros, papeis e assistentes", () => {
     await openWorkspace(page, request, "workspace-groups-teams", "/onboarding");
     await page.getByTestId("onboarding-start").click();
     await page.getByTestId("onboarding-step-02").click();
+    await expect(page.getByTestId("onboarding-creator-authority")).toBeVisible();
+    await page.getByTestId("creator-role-general").click();
+    await expect(page.getByTestId("self-role-workspace-admin")).toBeVisible();
+    await page.getByTestId("assume-selected-roles").click();
+    await expect(page.getByText(/autoridade efetiva/i)).toBeVisible();
+    await expect(page.getByTestId("open-responsibilities-list")).toContainText(/define metas/i);
+    await page.getByTestId("guided-invite-name").fill("Bia Produto");
+    await page.getByTestId("guided-invite-submit").click();
+    await expect(page.getByText(/convite criado/i)).toBeVisible();
+    await page.getByTestId("onboarding-advanced-authority").click();
     await expect(page.getByTestId("onboarding-people-manager")).toBeVisible();
     await expect(page.getByTestId("people-list")).toContainText("Ana");
     await expect(page.getByTestId("groups-list")).toContainText(/time|grupo/i);
@@ -14,10 +24,11 @@ test.describe("Settings, membros, papeis e assistentes", () => {
     await page.getByTestId("role-source-owner").click();
     await page.getByTestId("role-assign-submit").click();
     await expect(page.getByTestId("role-assignment-status")).toContainText(/proposed|pendente/i);
-    await expect(page.getByTestId("effective-authority-panel")).not.toContainText("source-owner");
+    await expect(page.getByTestId("effective-authority-panel")).toContainText(/owner de fontes/i);
 
     await page.goto("/settings");
     await expect(page.getByTestId("role-assignment-status")).toContainText(/proposed|pendente/i);
+    await expect(page.getByTestId("effective-authority-panel")).toContainText(/owner de fontes/i);
   });
 
   test("APP-10 assistente/modelo e opcional, multi-provider e seguro", async ({

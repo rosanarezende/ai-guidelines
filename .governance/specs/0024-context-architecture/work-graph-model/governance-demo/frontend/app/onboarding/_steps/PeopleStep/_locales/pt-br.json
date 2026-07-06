@@ -1,9 +1,61 @@
 {
   "heading": {
     "title": "Quem responde pelo quê?",
-    "lead": "São seis papéis diferentes de verdade: quem administra não é automaticamente quem paga, aprova segurança ou confirma resultados."
+    "lead": "Antes de convidar pessoas, defina quais responsabilidades ficam com você agora e quais precisam de outra pessoa depois."
   },
-  "realOrgIntro": "Cadastre pessoas ou convites e atribua papéis mínimos agora. Papel atribuído a outra pessoa nasce pendente de aceite; só depois vira autoridade efetiva.",
-  "peopleTitle": "Pessoas e convites",
-  "rolesTitle": "Papéis e autoridade"
+  "guidedIntro": "Você criou esta organização local. Nesta etapa, o app ajuda a separar poder administrativo, responsabilidade técnica, segurança, fontes, metas e resultados. O que você assumir fica registrado; o que faltar fica visível como responsabilidade aberta.",
+  "creatorQuestion": "Qual é o seu papel neste começo?",
+  "creatorLead": "{name}, escolha a opção mais parecida com a sua realidade. Você pode ajustar os papéis logo abaixo.",
+  "fallbackPersonName": "Você",
+  "creatorModes": {
+    "general": {
+      "title": "Tenho responsabilidade geral agora",
+      "description": "Bom para solo ou início de adoção: você administra, aprova segurança e segura a operação até delegar."
+    },
+    "technical": {
+      "title": "Sou responsável técnica/o",
+      "description": "Você cuida de arquitetura, fontes, segurança e integrações, mas negócio/metas podem ficar com outra pessoa."
+    },
+    "business": {
+      "title": "Sou negócio/produto",
+      "description": "Você responde por tese, metas e resultado, enquanto engenharia e segurança podem ficar em aberto."
+    },
+    "facilitator": {
+      "title": "Estou configurando para o time",
+      "description": "Você só prepara o workspace e deixa as autoridades reais para convite, aceite ou decisão posterior."
+    }
+  },
+  "assumeTitle": "Quais responsabilidades você assume agora?",
+  "assumeLead": "Marque apenas o que você pode responder de verdade. Assumir um papel para si vira autoridade imediata; atribuir a outra pessoa nasce pendente de aceite.",
+  "assumeCta": "Assumir papéis selecionados",
+  "rolesSuggested": "papéis sugeridos por este caminho",
+  "alreadyEffective": "já efetivo",
+  "selfAssignReason": "assumido no onboarding inicial",
+  "selfAssignNotice": "Papéis assumidos por você foram registrados como autoridade efetiva desta organização.",
+  "openTitle": "Responsabilidades ainda abertas",
+  "openLead": "O app não bloqueia a adoção por causa disso. Ele só deixa claro o que ainda depende de convite, aceite ou delegação.",
+  "noOpenRoles": "Nenhuma responsabilidade aberta",
+  "inviteTitle": "Quer chamar alguém agora?",
+  "inviteLead": "O convite nasce pendente. Por segurança, a pessoa precisa entrar no app e aceitar antes de virar autoridade.",
+  "inviteName": "Nome da pessoa",
+  "inviteEmail": "E-mail opcional",
+  "inviteRole": "Responsabilidade que você quer cobrir",
+  "inviteCta": "Criar convite",
+  "inviteNotice": "Convite criado. Quando a pessoa aceitar, atribua ou confirme o papel: {role}.",
+  "showAdvanced": "Abrir gestão avançada de pessoas, times e papéis",
+  "hideAdvanced": "Ocultar gestão avançada",
+  "peopleTitle": "Pessoas, convites, times e grupos",
+  "rolesTitle": "Atribuições manuais e autoridade derivada",
+  "error": "Não foi possível concluir. Detalhe: {error}",
+  "roleLabels": {
+    "workspace-admin": "Admin do workspace",
+    "sponsor": "Sponsor",
+    "cost-owner": "Responsável financeiro",
+    "security-owner": "Responsável por segurança",
+    "technical-owner": "Owner técnico",
+    "source-owner": "Owner de fontes",
+    "target-definer": "Define metas",
+    "actual-attester": "Atesta resultados",
+    "auditor": "Auditoria"
+  }
 }

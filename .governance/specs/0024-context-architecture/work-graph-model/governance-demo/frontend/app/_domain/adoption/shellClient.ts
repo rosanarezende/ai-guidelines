@@ -119,6 +119,7 @@ export async function listWorkSources(): Promise<Array<{ id: string; kind: strin
 }
 
 export type MembersOverview = {
+  currentPersonId?: string;
   people: WorkspacePerson[];
   groups: WorkspaceGroup[];
   serviceAccounts: Workspace["serviceAccounts"];

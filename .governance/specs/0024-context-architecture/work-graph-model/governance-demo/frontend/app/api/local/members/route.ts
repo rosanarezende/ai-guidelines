@@ -11,7 +11,7 @@ export async function GET() {
   const check = await requireWorkspaceSession();
   if (!check.ok)
     return NextResponse.json({ ok: false, error: check.error }, { status: check.status });
-  const overview = await membersOverview(check.session.workspaceId);
+  const overview = await membersOverview(check.session.workspaceId, check.session.principalId);
   if (!overview)
     return NextResponse.json({ ok: false, error: "unknown-workspace" }, { status: 404 });
   return NextResponse.json({ ok: true, ...overview });

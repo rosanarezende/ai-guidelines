@@ -24,6 +24,7 @@ import {
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type MembersOverview = {
+  currentPersonId?: string;
   people: Workspace["people"];
   groups: Workspace["groups"];
   serviceAccounts: Workspace["serviceAccounts"];
@@ -33,12 +34,16 @@ export type MembersOverview = {
   sensitiveAccumulations: Array<{ personId: string; roles: WorkspaceRoleId[] }>;
 };
 
-export async function membersOverview(workspaceId: string): Promise<MembersOverview | null> {
+export async function membersOverview(
+  workspaceId: string,
+  principalId?: string
+): Promise<MembersOverview | null> {
   const state = await readShellState();
   const workspace = state.workspaces.find((item) => item.id === workspaceId);
   if (!workspace) return null;
   const ws = normalizeWorkspace(workspace);
   return {
+    ...(principalId ? { currentPersonId: principalPersonId(state, principalId, workspaceId) } : {}),
     people: ws.people,
     groups: ws.groups,
     serviceAccounts: ws.serviceAccounts,

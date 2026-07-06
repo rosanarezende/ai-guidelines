@@ -1080,8 +1080,10 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 - status do onboarding persiste, incluindo passo parcial para retomada.
 - perfil, regra de acumulo sensivel, fontes declaradas/snapshot e assistente
   local/dispensado persistem por comando.
-- pessoas/papeis, governance host, stack e integracoes ja tem APIs, mas a
-  experiencia visual precisa ser iterada e conferida contra Settings.
+- pessoas/papeis ja tem authority-guide no onboarding para a pessoa criadora,
+  com self-assigned, lacunas, convite e gestao avancada; Settings permanece o
+  painel operacional completo. Governance host, stack e integracoes seguem em
+  iteracao visual conforme o mapa.
 
 ## 8. Home operacional (`/`)
 
@@ -1173,10 +1175,14 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 
 - backend real existe para convite local, aceite tokenizado, revogacao, status de membro,
   membership `principal -> person`, atribuicao de papeis por subject e authority derivada;
-- Settings ja lista pessoas/times/grupos, cria e revoga convite, atribui papel proposto e mostra
-  authority efetiva derivada;
-- ainda falta uma tela/fluxo humano dedicado para aceite de convite por outra conta, aceite de
-  membership/papel pela pessoa convidada e explicacao visual completa de autoridade herdada.
+- Onboarding guia a pessoa criadora: pergunta qual responsabilidade ela assume,
+  registra papeis proprios como `self-assigned`, mostra lacunas abertas e cria
+  convite sem fingir aceite;
+- Settings lista pessoas/times/grupos, cria e revoga convite, atribui papel
+  proposto e mostra authority efetiva derivada;
+- ainda falta uma tela/fluxo humano dedicado para aceite de convite por outra
+  conta, aceite de membership/papel pela pessoa convidada e explicacao visual
+  completa de autoridade herdada.
 
 **Backend pendente:**
 
