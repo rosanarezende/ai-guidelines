@@ -2445,3 +2445,46 @@ Uma tela/fluxo deixa de ser "demo" quando:
 4. prova reload/persistencia quando aplicavel;
 5. prova consistencia com outras telas quando o dado cruza superficies;
 6. atualiza `APP-ITERATION-MAP.md`.
+
+# QRD-35 - Navegacao global, menu e subitens
+
+> **Status:** PENDENTE.
+
+**Q - Question**
+
+Como deve funcionar a navegacao global da governance-demo: barra superior,
+sidebar, menu lateral, abas por area, itens e subitens, acesso ao console
+tecnico, acesso ao Cup/CWP e variacao por perfil/authority?
+
+**R - Reasoning/Research**
+
+A navegacao ainda nao foi decidida como contrato de produto. Isso afeta todas as
+telas depois de `/signup` e `/organizations`, porque a pessoa precisa entender:
+
+- onde esta no fluxo de adocao;
+- o que e configuracao inicial versus uso continuo;
+- quais areas sao de trabalho humano (`Home`, `Sources`, `Planning`, `Results`,
+  `Map`, `Work`) versus areas administrativas (`Settings`, `Integrations`,
+  `Audit`) versus area tecnica (`Console`);
+- se subitens aparecem sempre, por contexto, por autoridade ou por maturidade do
+  workspace;
+- como navegar em mobile/desktop sem transformar o app em console tecnico;
+- onde Cup/CWP aparece como overlay transversal sem competir com a navegacao;
+- como esconder ou rebaixar itens ainda indisponiveis sem criar falsa promessa.
+
+Sem essa decisao, APP-02 pode ate funcionar tecnicamente, mas a Home do workspace
+novo nao tera uma hierarquia clara para guiar proximos passos. A navegacao tambem
+afeta testes e contratos: cada rota precisa ter um caminho humano observavel, e
+o menu precisa respeitar authority sem usar permissao como mera decoracao visual.
+
+**D - Decision**
+
+Pendente. Antes de fechar APP-02 como experiencia final, decidir pelo menos:
+
+1. padrao de navegacao primario: topbar, sidebar, ambos ou outra composicao;
+2. lista inicial de itens de primeiro nivel;
+3. regra para subitens e agrupamentos;
+4. comportamento por perfil/authority e workspace sem host;
+5. diferenca entre item indisponivel, `em breve`, rebaixado e oculto;
+6. entrada do Cup/CWP e do console tecnico na estrutura;
+7. contratos de teste minimos para provar navegacao e consistencia entre telas.

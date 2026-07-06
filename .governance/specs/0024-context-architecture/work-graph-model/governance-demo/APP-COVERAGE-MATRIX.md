@@ -113,14 +113,15 @@ precisa criar/usar uma conta no app para aceitar e entrar na organizacao.
 
 1. **Higiene de testes e contratos** — garantir que os contratos das proximas telas estejam em `active`, `expected-fail` util ou `fixme` honesto; nenhum deny em `expected-fail`.
 2. **Decisoes QRD pendentes** — fechar o que afeta implementacao: workspace virgem, host, sources, obrigatorio vs degradado, authority para criar/aceitar convites.
-3. **APP-02** — workspace virgem sem vazamento de demo, partindo de `/signup`.
-4. **APP-08 / APP-17 / APP-34** — governance host escolhido, fit-check, scaffold/link e console degradado/habilitado.
-5. **APP-09 / APP-18 / APP-21 / CONS-02** — fontes de trabalho com sourceTrust compreensivel.
-6. **APP-05 / APP-06 / APP-15 / CONS-01** — perfil, regra de acumulo e Settings coerentes.
-7. **APP-07 / APP-16 / SEC-11 / SEC-12** — pessoas, grupos, convites, aceite de membership, aceite de papeis e authority efetiva na UI.
-8. **APP-28 / APP-29** — `/results` e `/map` sobre demo/read-model com visualizacao real.
-9. **INT-01..03** — hub de integracoes read-only, depois GitHub work-source.
-10. **CUP-01 / CUP-02** — Cup deterministic C0/C1 sem provider externo.
+3. **QRD-35 navegacao global** — decidir barra/menu, itens e subitens, agrupamento por fluxo, comportamento por perfil/authority e relacao com Cup/console antes de implementar APP-02 como experiencia final.
+4. **APP-02** — workspace virgem sem vazamento de demo, partindo de `/signup`.
+5. **APP-08 / APP-17 / APP-34** — governance host escolhido, fit-check, scaffold/link e console degradado/habilitado.
+6. **APP-09 / APP-18 / APP-21 / CONS-02** — fontes de trabalho com sourceTrust compreensivel.
+7. **APP-05 / APP-06 / APP-15 / CONS-01** — perfil, regra de acumulo e Settings coerentes.
+8. **APP-07 / APP-16 / SEC-11 / SEC-12** — pessoas, grupos, convites, aceite de membership, aceite de papeis e authority efetiva na UI.
+9. **APP-28 / APP-29** — `/results` e `/map` sobre demo/read-model com visualizacao real.
+10. **INT-01..03** — hub de integracoes read-only, depois GitHub work-source.
+11. **CUP-01 / CUP-02** — Cup deterministic C0/C1 sem provider externo.
 
 ## 6. Zod como governanca de schema
 
