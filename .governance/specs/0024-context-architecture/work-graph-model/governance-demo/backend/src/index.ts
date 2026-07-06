@@ -17,6 +17,10 @@ export {
   type BetterAuthPortalStoreReport,
   type PortalStoreProfileStatus,
 } from "./adapters/control-plane/BetterAuthPortalStoreProfiles.ts";
+export {
+  runBetterAuthSQLitePortalHttpSpike,
+  type BetterAuthSQLitePortalHttpSpikeReport,
+} from "./adapters/control-plane/BetterAuthSQLitePortalHttpSpike.ts";
 export { InMemoryGraphSource } from "./adapters/graph-memory/InMemoryGraphSource.ts";
 export {
   loadManifest,

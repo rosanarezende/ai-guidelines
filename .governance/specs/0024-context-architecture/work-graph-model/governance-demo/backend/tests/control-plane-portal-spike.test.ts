@@ -21,6 +21,7 @@ import {
   FilePortalControlPlaneStore,
   buildPortalSpikeEvents,
   evaluateBetterAuthPortalStoreProfiles,
+  runBetterAuthSQLitePortalHttpSpike,
 } from "../src/index.ts";
 
 test("APP-40: public control-plane projection exposes workspace metadata without governed content", () => {
@@ -224,4 +225,33 @@ test("S1c: Neo4j remains a graph read-model, not a portal account store", async 
   assert.equal(neo4j?.decision, "not-portal-store");
   assert.equal(neo4j?.role, "governance-graph-read-model");
   assert.equal(neo4j?.liveCheck.status, "not-portal-store");
+});
+
+test("S1d: Better Auth HTTP flow persists signup, session and organization in SQLite", async () => {
+  const report = await runBetterAuthSQLitePortalHttpSpike();
+
+  assert.equal(report.ok, true, report.error);
+  assert.equal(report.store, "sqlite");
+  assert.equal(report.http.signUpEmailStatus, 200);
+  assert.equal(report.http.createOrganizationStatus, 200);
+  assert.equal(report.http.listOrganizationsStatus, 200);
+  assert.equal(report.http.sessionCookieIssued, true);
+  assert.equal(report.migration.requiredTablesPresent, true);
+  assert.deepEqual(
+    report.migration.createdTables.filter((table) =>
+      ["account", "invitation", "member", "organization", "session", "user"].includes(table)
+    ),
+    ["account", "invitation", "member", "organization", "session", "user"]
+  );
+  assert.equal(report.persisted.userCount, 1);
+  assert.equal(report.persisted.sessionCount, 1);
+  assert.equal(report.persisted.organizationCount, 1);
+  assert.equal(report.persisted.memberCount, 1);
+  assert.equal(report.persisted.createdOrganizationSlug, "mundo-da-mel");
+  assert.equal(report.persisted.creatorRole, "owner");
+  assert.deepEqual(report.boundary, {
+    governanceAuthorityGrantedByPortal: false,
+    neo4jUsedAsAccountStore: false,
+    contentPlaneRead: false,
+  });
 });

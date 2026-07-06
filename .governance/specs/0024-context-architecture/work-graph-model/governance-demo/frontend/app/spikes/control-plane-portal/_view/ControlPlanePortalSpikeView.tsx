@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Box, Chip, Divider, Paper, Typography } from "@mui/material";
+import { Alert, Box, Chip, Typography } from "@mui/material";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LockIcon from "@mui/icons-material/Lock";
@@ -8,6 +8,8 @@ import NoEncryptionGmailerrorredIcon from "@mui/icons-material/NoEncryptionGmail
 import ScienceIcon from "@mui/icons-material/Science";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
+import { BoundaryCard, ProofRow } from "./SpikeCards";
+import { SQLiteHttpSection, type SQLiteHttpReport } from "./SQLiteHttpSection";
 import type {
   GitHubBridgeDryRunResult,
   PortalPersistedSnapshot,
@@ -15,7 +17,6 @@ import type {
   ProposalResult,
   PublicControlPlaneProjection,
 } from "@demo/domain";
-import type { ReactNode } from "react";
 import copy from "./_locales/pt-br.json";
 
 type AuthSummary = {
@@ -56,6 +57,7 @@ export default function ControlPlanePortalSpikeView({
   secretLeakCount,
   storeCandidates,
   storeReport,
+  sqliteHttpReport,
 }: {
   auth: AuthSummary;
   projection: PublicControlPlaneProjection;
@@ -66,6 +68,7 @@ export default function ControlPlanePortalSpikeView({
   secretLeakCount: number;
   storeCandidates: PortalStoreCandidate[];
   storeReport: StoreReport;
+  sqliteHttpReport: SQLiteHttpReport;
 }) {
   const workspace = projection.workspaces[0];
   const provider = projection.providerLinks[0];
@@ -173,6 +176,8 @@ export default function ControlPlanePortalSpikeView({
           </Alert>
         </SectionCard>
 
+        <SQLiteHttpSection report={sqliteHttpReport} messages={m} />
+
         <SectionCard title={m.persistenceTitle} subtitle={m.persistenceSubtitle}>
           <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr 1fr" }, gap: 2 }}>
             <BoundaryCard
@@ -245,6 +250,9 @@ export default function ControlPlanePortalSpikeView({
             >
               {m.proofS1c}
             </ProofRow>
+            <ProofRow label="S1d" ok={sqliteHttpReport.ok}>
+              {m.proofS1d}
+            </ProofRow>
           </Box>
         </SectionCard>
       </Box>
@@ -256,37 +264,4 @@ function storeDecisionLabel(decision: PortalStoreCandidate["decision"]): string 
   if (decision === "local-default") return m.storeLocalDefault;
   if (decision === "shared-default") return m.storeSharedDefault;
   return m.storeGraphOnly;
-}
-
-function BoundaryCard({ icon, title, items }: { icon: ReactNode; title: string; items: string[] }) {
-  return (
-    <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-      <Flex align="center" gap={1}>
-        {icon}
-        <Typography sx={{ fontWeight: 800 }}>{title}</Typography>
-      </Flex>
-      <Divider sx={{ my: 1.5 }} />
-      <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
-        {items.map((item) => (
-          <Typography key={item} component="li" variant="body2" sx={{ mb: 0.5 }}>
-            {item}
-          </Typography>
-        ))}
-      </Box>
-    </Paper>
-  );
-}
-
-function ProofRow({ label, ok, children }: { label: string; ok: boolean; children: ReactNode }) {
-  return (
-    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
-      <Flex align="center" gap={1.5}>
-        <Chip color={ok ? "success" : "error"} label={ok ? "passou" : "falhou"} size="small" />
-        <Typography sx={{ minWidth: 72, fontWeight: 800 }}>{label}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {children}
-        </Typography>
-      </Flex>
-    </Paper>
-  );
 }

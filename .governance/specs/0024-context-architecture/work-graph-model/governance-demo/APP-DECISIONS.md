@@ -2899,7 +2899,7 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   read-model;
 - provar que o control plane nao armazena conteudo governado como SSOT.
 
-**Evidence after spike S1/S1b/S1c**
+**Evidence after spike S1/S1b/S1c/S1d**
 
 - `SPIKE-CONTROL-PLANE-PORTAL.md` documenta o spike e seus limites.
 - `/spikes/control-plane-portal` mostra a bancada interna.
@@ -2917,9 +2917,14 @@ Para a proxima fatia, autorizar um spike de portal/control plane:
   - PostgreSQL: default compartilhado/self-hosted/hosted para portal multiusuario.
 - S1c tambem registrou que Neo4j permanece como `graph-read-model`, nao como
   store de conta/sessao/convite.
-- A decisao final da stack do portal ainda exige fluxo HTTP real com Better Auth
-  persistido, mas a comparacao deixou de ser "Better Auth vs file-first" e virou
+- S1d provou fluxo HTTP real com Better Auth persistido em SQLite:
+  `sign-up/email` emite cookie de sessao, `organization/create` persiste uma
+  organizacao, `organization/list` le o estado e o banco contem usuario,
+  sessao, organizacao e membership `owner`.
+- A comparacao deixou de ser "Better Auth vs file-first" e virou
   "Better Auth SQLite para local; Better Auth PostgreSQL para compartilhado".
+  A prova live de PostgreSQL por ambiente ainda fica pendente antes de cravar o
+  modo compartilhado/self-hosted.
 
 **Implications**
 

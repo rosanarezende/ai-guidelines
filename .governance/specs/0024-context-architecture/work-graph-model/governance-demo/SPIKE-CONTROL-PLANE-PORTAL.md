@@ -250,6 +250,22 @@ Implementado na fatia S1c:
   SQLite como default local, PostgreSQL como default compartilhado e Neo4j como
   grafo derivado.
 
+Implementado na fatia S1d:
+
+- `backend/src/adapters/control-plane/BetterAuthSQLitePortalHttpSpike.ts`
+  instancia Better Auth com `organization`, `emailAndPassword`, migrations
+  publicas de `better-auth/db/migration` e SQLite temporario via Kysely.
+- O teste S1d executa o handler HTTP real do Better Auth:
+  `sign-up/email` -> cookie de sessao -> `organization/create` ->
+  `organization/list`.
+- O banco SQLite cria as tabelas nativas (`user`, `session`, `account`,
+  `organization`, `member`, `invitation`, `verification`) e persiste 1 usuario,
+  1 sessao, 1 organizacao e 1 membership `owner`.
+- A bancada visual mostra o resultado S1d separado da matriz S1c, para nao
+  confundir "driver disponivel" com "fluxo HTTP persistido".
+- A fronteira continua explicita: o portal nao concede authority governada,
+  nao usa Neo4j como store de conta/convite e nao le conteudo do usuario.
+
 Nao aceitavel:
 
 - UI bonita sem provas de separacao dos planos;
@@ -265,7 +281,8 @@ O spike deve alimentar estas decisoes:
 1. Better Auth vira stack escolhida para portal/control plane ou apenas
    alternativa?
 2. SQLite deve ser o store default para modo local/single-server?
-3. PostgreSQL deve ser o store default para portal compartilhado/self-hosted?
+3. PostgreSQL deve ser o store default para portal compartilhado/self-hosted
+   depois de prova live com URL de ambiente?
 4. Git-backed governance host entra como topologia suportada na release inicial?
 5. Portal self-hosted entra na release inicial ou fica como beta?
 6. Hosted portal operado pela mantenedora continua futuro?

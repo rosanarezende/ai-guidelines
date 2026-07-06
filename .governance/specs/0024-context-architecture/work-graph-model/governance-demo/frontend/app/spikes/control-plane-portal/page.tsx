@@ -6,7 +6,10 @@ import {
   createGovernanceProposal,
   runPortalSpikeFlow,
 } from "@demo/domain";
-import { evaluateBetterAuthPortalStoreProfiles } from "@demo/backend";
+import {
+  evaluateBetterAuthPortalStoreProfiles,
+  runBetterAuthSQLitePortalHttpSpike,
+} from "@demo/backend";
 import { describeBetterAuthCandidate } from "./_model/better-auth-candidate";
 import ControlPlanePortalSpikeView from "./_view/ControlPlanePortalSpikeView";
 
@@ -15,6 +18,7 @@ export const dynamic = "force-dynamic";
 export default async function ControlPlanePortalSpikePage() {
   const flow = runPortalSpikeFlow();
   const storeReport = await evaluateBetterAuthPortalStoreProfiles();
+  const sqliteHttpReport = await runBetterAuthSQLitePortalHttpSpike();
   const staleProposal = createGovernanceProposal(flow.acceptedState, {
     workspaceId: "ws-mundo-da-mel",
     actorAccountId: "acct-business",
@@ -33,6 +37,7 @@ export default async function ControlPlanePortalSpikePage() {
       secretLeakCount={flow.secretLeaks.length}
       storeCandidates={comparePortalStoreCandidates()}
       storeReport={storeReport}
+      sqliteHttpReport={sqliteHttpReport}
     />
   );
 }

@@ -19,6 +19,13 @@
     "storeGraphOnly": "apenas grafo derivado",
     "storeProofOk": "S1c passou: SQLite e PostgreSQL estao viaveis para Better Auth; Neo4j permanece somente como read-model de grafo.",
     "storeProofRisk": "S1c apontou risco: revise drivers ou fronteira entre portal store e grafo derivado.",
+    "sqliteHttpTitle": "SQLite com HTTP real",
+    "sqliteHttpSubtitle": "S1d executa o handler real do Better Auth contra SQLite temporario: migrations, signup, cookie de sessao, criacao de organizacao e membership owner.",
+    "sqliteHttpFlow": "Fluxo HTTP",
+    "sqliteHttpPersistence": "Persistencia SQLite",
+    "sqliteHttpBoundary": "Fronteira de governanca",
+    "sqliteHttpProofOk": "S1d passou: SQLite ja suporta o fluxo local real de conta, sessao e organizacao. Isso nao concede authority governada e nao toca conteudo do usuario.",
+    "sqliteHttpProofRisk": "S1d falhou: nao promover SQLite como store local ate corrigir migrations, sessoes ou fronteira de governanca.",
     "persistenceTitle": "Persistencia e bridge dry-run",
     "persistenceSubtitle": "S1b prova um snapshot de portal sanitizado, event-log deterministico e uma proposta de PR sem escrita remota.",
     "snapshotTitle": "Snapshot do portal",
@@ -38,6 +45,7 @@
     "proofSec13": "Segredo de provider simulado nao aparece na projecao publica.",
     "proofArch": "Proposta exige sourceRevision e stale revision falha fechado.",
     "proofS1b": "Snapshot persistivel e GitHub bridge dry-run existem sem escrever remoto nem vazar segredo.",
-    "proofS1c": "SQLite cobre o modo local; PostgreSQL cobre portal compartilhado; Neo4j fica fora do store de conta/convite."
+    "proofS1c": "SQLite cobre o modo local; PostgreSQL cobre portal compartilhado; Neo4j fica fora do store de conta/convite.",
+    "proofS1d": "Handler HTTP real do Better Auth persiste signup, sessao, organizacao e membership owner em SQLite."
   }
 }

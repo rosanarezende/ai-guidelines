@@ -82,6 +82,29 @@ estao presentes para SQLite e PostgreSQL (`better-auth`,
 com PostgreSQL nao e exigida nesta fatia; sem URL de banco, o status fica
 `skipped-without-database-url`.
 
+### F8 - SQLite executa fluxo HTTP real com Better Auth
+
+`BetterAuthSQLitePortalHttpSpike` instancia Better Auth com:
+
+- `emailAndPassword`;
+- plugin `organization`;
+- migrations publicas de `better-auth/db/migration`;
+- SQLite temporario via Kysely/`better-sqlite3`;
+- handler HTTP real de Better Auth.
+
+O teste S1d executa:
+
+```text
+POST /sign-up/email
+  -> cookie de sessao
+POST /organization/create
+GET  /organization/list
+```
+
+O resultado persistido no SQLite contem 1 usuario, 1 sessao, 1 organizacao e
+1 membership `owner`. O teste tambem fixa que o fluxo nao concede authority
+governada, nao usa Neo4j como store de conta e nao le content plane.
+
 ## 3. Interpretacao
 
 O spike sustenta a direcao arquitetural da QRD-41: um portal humano pode existir sem substituir o governance host file-first/Git-backed. A separacao de planos fica mecanizavel:
@@ -92,7 +115,11 @@ governance plane       -> roles governados, authority, decisions, event-log
 content/work plane     -> repos, codigo, docs, metricas, evidencias
 ```
 
-Better Auth continua um candidato forte porque fornece os blocos de conta, sessao, organizacao e convite dentro do app. Mas a decisao final ainda precisa de uma fatia S1b com store real e fluxo end-to-end mais proximo do produto.
+Better Auth continua um candidato forte porque fornece os blocos de conta,
+sessao, organizacao e convite dentro do app. A fatia S1d reduziu a incerteza
+mais importante do modo local: SQLite ja rodou migrations e fluxo HTTP real.
+Ainda falta prova live equivalente para PostgreSQL antes de cravar o modo
+compartilhado/self-hosted.
 
 A fatia S1c reduz a incerteza da stack do portal: Better Auth pode operar nos
 dois perfis necessarios (SQLite local e PostgreSQL compartilhado), enquanto
@@ -112,11 +139,13 @@ O teste de dominio cobre:
 - S1b: store file-first persiste snapshot/event-log sem segredo e sem escrita remota.
 - S1c: SQLite/PostgreSQL viaveis como stores Better Auth; Neo4j rejeitado como
   store de portal.
+- S1d: Better Auth HTTP real persiste signup, sessao, organizacao e membership
+  `owner` em SQLite.
 
 ## 5. Limites do spike
 
 - Nao ha GitHub App real.
-- Nao ha persistencia Better Auth em banco real do produto.
+- Nao ha persistencia Better Auth ligada ao fluxo de produto.
 - Nao ha email delivery de convite.
 - Nao ha integracao com sessao real do app.
 - Nao ha rota de produto navegavel para negocio/design/investidor.
@@ -134,21 +163,23 @@ Se a proxima fatia salvar roles efetivos no DB do portal, o modelo perde a propr
 
 Git-backed deve ser uma topologia suportada, nao a unica. A QRD-41 ainda exige `local-solo`, `git-backed`, `self-hosted-portal` e `hosted-portal`.
 
-### R3 - Better Auth ser adotado antes da prova operacional
+### R3 - Better Auth ser adotado antes da prova operacional compartilhada
 
-O spike prova endpoint surface, nao custo operacional, email, migracoes, deploy, backup ou compliance. Mitigacao: S1b deve usar DB real de spike e fluxo HTTP end-to-end.
+O spike ja prova endpoint surface, migrations e fluxo HTTP em SQLite. Ele ainda
+nao prova custo operacional, email, deploy, backup, compliance nem PostgreSQL
+live. Mitigacao: proxima fatia deve testar PostgreSQL por ambiente e manter
+SQLite como default local.
 
 ## 7. Recomendacao
 
-Avancar para **S1d - fluxo HTTP real do portal** antes de decidir Better Auth
-como stack final.
+Avancar para **S1e - PostgreSQL live por ambiente + convite/aceite** antes de
+decidir Better Auth como stack final compartilhada.
 
 Escopo recomendado:
 
-1. Provar signup -> workspace -> invite -> accept em rota interna com Better
-   Auth persistido em SQLite.
-2. Provar que a mesma configuracao troca para PostgreSQL por ambiente, sem
+1. Provar que a mesma configuracao troca para PostgreSQL por ambiente, sem
    mudar contratos de dominio.
+2. Estender o fluxo HTTP para convite -> signup/signin convidado -> accept.
 3. Usuario convidado nao precisa operar GitHub.
 4. GitHub App bridge segue dry-run ate haver credencial/instalacao real isolada.
 5. Teste de que o store do portal nao contem conteudo governado nem secrets.
