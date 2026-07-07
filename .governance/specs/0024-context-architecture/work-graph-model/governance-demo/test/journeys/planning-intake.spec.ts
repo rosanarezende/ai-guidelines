@@ -3,14 +3,14 @@ import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Planejamento e intake", () => {
   test("APP-22 planejamento cria ciclo, objetivo, metrica e target", async ({ page, request }) => {
-    pendingContract("APP-22", "expected-fail");
-
     await openWorkspace(page, request, "workspace-planning-progressivo", "/planning");
     await page.getByTestId("planning-cycle-create").click();
     await page.getByTestId("objective-title").fill("Aumentar ativacao");
     await page.getByTestId("metric-definition").fill("activation-rate");
     await page.getByTestId("target-value").fill("12");
+    const saveResponse = page.waitForResponse("**/api/local/planning/targets");
     await page.getByTestId("planning-save").click();
+    expect((await saveResponse).ok()).toBeTruthy();
     await page.goto("/results");
     await expect(page.getByTestId("target-card-activation-rate")).toBeVisible();
     await expect(page.getByTestId("target-card-activation-rate")).toContainText(/sem actual/i);

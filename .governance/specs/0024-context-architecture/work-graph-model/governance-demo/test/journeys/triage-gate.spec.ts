@@ -6,8 +6,6 @@ test.describe("Triagem, matcher e gates", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-24", "expected-fail");
-
     await openWorkspace(page, request, "workspace-provider-versioned-source", "/triage");
     await page.getByTestId("triage-item-create-from-question").click();
     await expect(page.getByTestId("triage-item-fate-options")).toContainText(
@@ -15,7 +13,9 @@ test.describe("Triagem, matcher e gates", () => {
     );
     await page.getByTestId("matcher-run").click();
     await expect(page.getByTestId("matcher-suggestion-list")).toContainText(/score|unknown/i);
+    const confirmResponse = page.waitForResponse("**/api/local/triage/confirm");
     await page.getByTestId("matcher-human-confirm").click();
+    expect((await confirmResponse).ok()).toBeTruthy();
     await page.goto("/audit");
     await expect(page.getByTestId("audit-event-list")).toContainText(/matcher.*overrid|confirm/i);
   });

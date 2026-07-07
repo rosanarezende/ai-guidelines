@@ -513,7 +513,7 @@ contracts:
       - A UI nunca usa cache de TanStack Query como prova de authority; toda acao sensivel relê authority/sourceRevision no backend.
   - id: APP-22
     title: Planejamento cria ciclo, objetivo, metrica e target
-    status: expected-fail
+    status: active
     spec: journeys/planning-intake.spec.ts
     seed: workspace-planning-progressivo
     actors:
@@ -545,7 +545,7 @@ contracts:
       - Criar proposta gera item visivel para triagem.
   - id: APP-24
     title: Triage transforma duvidas em itens e usa matcher advisory
-    status: expected-fail
+    status: active
     spec: journeys/triage-gate.spec.ts
     seed: workspace-provider-versioned-source
     actors:
@@ -675,7 +675,7 @@ contracts:
       - Mutacao sensivel sem authority nao some do historico.
   - id: APP-32
     title: Console tecnico existe, mas nao substitui UX principal
-    status: expected-fail
+    status: active
     spec: journeys/results-audit.spec.ts
     seed: acme-demo
     actors:

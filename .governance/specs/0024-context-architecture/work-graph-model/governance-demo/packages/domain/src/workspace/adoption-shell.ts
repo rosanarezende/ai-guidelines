@@ -433,6 +433,34 @@ export type AssistantConnectionResult = {
 
 export type OnboardingPath = "guided" | "advanced";
 
+export type PlannedTarget = {
+  id: string;
+  objectiveTitle: string;
+  metricId: string;
+  targetValue: number;
+  cycle: string;
+  createdAt: string;
+  createdBy: string;
+};
+
+export type WorkspacePlanning = {
+  targets: PlannedTarget[];
+};
+
+export type TriageDecision = {
+  id: string;
+  question: string;
+  fate: "exploration" | "direct-answer" | "missing-info";
+  matcherScore: number;
+  unknowns: string[];
+  confirmedAt: string;
+  confirmedBy: string;
+};
+
+export type WorkspaceTriage = {
+  decisions: TriageDecision[];
+};
+
 export type Workspace = {
   id: string;
   name: string;
@@ -457,6 +485,8 @@ export type Workspace = {
   assistant?: AssistantPreference;
   assistantConfig?: WorkspaceAssistantConfig;
   integrations: WorkspaceIntegrationState[];
+  planning?: WorkspacePlanning;
+  triage?: WorkspaceTriage;
   onboardingStatus: OnboardingStatus;
 };
 
@@ -473,6 +503,8 @@ export function normalizeWorkspace(workspace: Workspace): Workspace {
     roleAssignments: workspace.roleAssignments || [],
     workSources: workspace.workSources || [],
     integrations: workspace.integrations || [],
+    planning: { targets: workspace.planning?.targets || [] },
+    triage: { decisions: workspace.triage?.decisions || [] },
   };
 }
 
@@ -514,6 +546,8 @@ export type LocalShellCommandType =
   | "local.profile.save"
   | "local.workspace-mode.save"
   | "local.workspace-stack.save"
+  | "local.planning.save"
+  | "local.triage.confirm"
   | "local.member.invite"
   | "local.invite.accept"
   | "local.invite.decline"
@@ -583,6 +617,8 @@ export function buildDemoWorkspace(companyName: string): Workspace {
     roleAssignments: [],
     workSources: [],
     integrations: [],
+    planning: { targets: [] },
+    triage: { decisions: [] },
     onboardingStatus: "finished",
   };
 }
@@ -601,6 +637,8 @@ export function buildEmptyWorkspace(id: string, name: string, kind: WorkspaceKin
     roleAssignments: [],
     workSources: [],
     integrations: [],
+    planning: { targets: [] },
+    triage: { decisions: [] },
     onboardingStatus: "not-started",
   };
 }

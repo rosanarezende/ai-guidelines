@@ -1452,7 +1452,12 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 
 - dados existem na demo acme.
 - app mostra parte em dashboard/console.
-- nao ha tela de planejamento funcional para workspace novo.
+- `/planning` ja registra o minimo objective + metric + target para workspace novo
+  via `local.planning.save`.
+- `/results` mostra esse target planejado como `sem actual valido`; isso nao
+  conta como outcome nem como evidencia.
+- thesis, opportunity-area, allocation, owner/definer explicito e rollover ainda
+  nao estao implementados.
 
 **Recomendacao de UX:**
 
@@ -1532,8 +1537,11 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 **Estado atual:**
 
 - `triage.save` existe.
+- `/triage` tem primeiro fluxo humano ativo: pergunta vira item, fates ficam
+  visiveis, matcher deterministico sugere `score`/`unknowns`, e a confirmacao
+  humana registra decisao local exibida em `/audit`.
 - adapters de assistente existem parcialmente.
-- matcher executavel completo ainda e lacuna.
+- matcher multi-provider executavel completo ainda e lacuna.
 
 **Decisao:**
 

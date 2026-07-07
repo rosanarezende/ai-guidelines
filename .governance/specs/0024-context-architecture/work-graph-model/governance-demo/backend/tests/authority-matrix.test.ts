@@ -61,6 +61,18 @@ const MATRIX: Array<{
     eva: { ok: false, error: "missing-authority" },
   },
   {
+    type: "local.planning.save",
+    ana: { ok: true },
+    bia: { ok: false, error: "missing-target-manager" },
+    eva: { ok: false, error: "missing-target-manager" },
+  },
+  {
+    type: "local.triage.confirm",
+    ana: { ok: true },
+    bia: { ok: false, error: "missing-triage-manager" },
+    eva: { ok: false, error: "missing-triage-manager" },
+  },
+  {
     type: "local.member.invite",
     ana: { ok: true },
     bia: { ok: true },

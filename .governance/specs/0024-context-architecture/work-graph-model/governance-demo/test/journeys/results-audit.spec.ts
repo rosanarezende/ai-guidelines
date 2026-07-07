@@ -52,8 +52,6 @@ test.describe("Resultados, mapa, operacao, auditoria e console", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-32", "expected-fail");
-
     await openWorkspace(page, request, "acme-demo", "/console", "demo-acme");
     await expect(page.getByTestId("technical-console")).toBeVisible();
     await expect(page.getByTestId("console-source-revision")).toBeVisible();

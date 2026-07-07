@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Alert, Box, Button, Card, CardContent, Chip, Typography } from "@mui/material";
 import type { GovernanceSnapshot } from "@demo/contracts";
+import type { TriageDecision } from "@demo/domain";
 import AppShell from "@/app/_ui/shell/AppShell";
 import { Flex } from "@/app/_ui/shared";
 
@@ -24,13 +25,18 @@ export default function AuditPlaceholderView({
   workspace,
   accountId,
   snapshot,
+  localDecisions,
 }: {
   workspace: { id: string; name: string; demo: boolean; hasGovernanceHost: boolean };
   accountId: string;
   snapshot: GovernanceSnapshot | null;
+  localDecisions: TriageDecision[];
 }) {
   const [filter, setFilter] = useState<"all" | "break-glass">("all");
-  const items = useMemo(() => (snapshot ? buildAuditItems(snapshot) : []), [snapshot]);
+  const items = useMemo(
+    () => [...(snapshot ? buildAuditItems(snapshot) : []), ...buildLocalAuditItems(localDecisions)],
+    [localDecisions, snapshot]
+  );
   const visibleItems =
     filter === "break-glass" ? items.filter((item) => item.kind === "break-glass") : items;
 
@@ -53,14 +59,18 @@ export default function AuditPlaceholderView({
           Toda linha precisa preservar actor, authority e revision. Quando faltar fonte forte, o
           estado fica visível como exceção/revisão pendente.
         </Alert>
-        {!snapshot ? (
+        {!snapshot && items.length === 0 ? (
           <Alert severity="warning">
             Este workspace ainda não tem read-model governado disponível para auditoria.
           </Alert>
         ) : (
           <>
             <Flex gap={1} wrap>
-              <Chip size="small" color="success" label={`sourceRevision ${snapshot.revision}`} />
+              <Chip
+                size="small"
+                color={snapshot ? "success" : "warning"}
+                label={`sourceRevision ${snapshot?.revision ?? "local-shell"}`}
+              />
               <Chip size="small" label={`${items.length} eventos derivados`} />
               <Button
                 data-testid="audit-filter-break-glass"
@@ -108,6 +118,18 @@ export default function AuditPlaceholderView({
       </Box>
     </AppShell>
   );
+}
+
+function buildLocalAuditItems(decisions: TriageDecision[]): AuditItem[] {
+  return decisions.map((decision) => ({
+    id: decision.id,
+    kind: "decision",
+    title: `matcher confirm: ${decision.fate}`,
+    actor: decision.confirmedBy,
+    authority: decision.confirmedBy,
+    revision: "local-shell",
+    reason: `score ${decision.matcherScore}; unknowns ${decision.unknowns.join(", ") || "none"}`,
+  }));
 }
 
 function buildAuditItems(snapshot: GovernanceSnapshot): AuditItem[] {

@@ -54,7 +54,9 @@ export default function HomeView({
 
         {onboardingStatus === "partial" ? <OnboardingPartialCard /> : null}
 
-        <ShortcutGrid profile={profile} pendingCount={pendingCount} />
+        <Box data-testid="home-primary-actions">
+          <ShortcutGrid profile={profile} pendingCount={pendingCount} />
+        </Box>
 
         <Box
           sx={{

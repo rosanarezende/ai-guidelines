@@ -23,6 +23,7 @@ export default async function Page() {
       }}
       accountId={gate.principal.id}
       snapshot={snapshot}
+      localDecisions={workspace.triage?.decisions || []}
     />
   );
 }

@@ -12,6 +12,8 @@ export * from "./host/schemas.ts";
 export * from "./integrations/schemas.ts";
 export * from "./members/schemas.ts";
 export * from "./onboarding/schemas.ts";
+export * from "./planning/schemas.ts";
 export * from "./schemas/constants.ts";
+export * from "./triage/schemas.ts";
 export * from "./work-sources/schemas.ts";
 export * from "./workspace/schemas.ts";

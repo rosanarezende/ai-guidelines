@@ -76,7 +76,10 @@ export default function GovernanceConsole({
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
+      <Box
+        data-testid="technical-console"
+        sx={{ minHeight: "100vh", bgcolor: "background.default" }}
+      >
         <ConsoleHeader selected={selected} busy={busy} onReload={reload} />
 
         <Container maxWidth="xl" sx={{ py: 2.5 }}>

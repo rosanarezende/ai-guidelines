@@ -24,7 +24,7 @@ export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardV
             return (
               <Box
                 key={target.targetId}
-                data-testid={isPrimaryWeakTarget ? "outcome-without-evidence" : undefined}
+                data-testid={`target-card-${target.targetId}`}
                 sx={{ borderTop: "1px solid", borderColor: "divider", pt: 1.25 }}
               >
                 <Flex align="flex-start" justify="space-between" gap={1.5} wrap>
@@ -41,6 +41,14 @@ export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardV
                   </Box>
                 </Flex>
                 <Flex gap={1} wrap sx={{ mt: 1 }}>
+                  {isPrimaryWeakTarget ? (
+                    <Chip
+                      data-testid="outcome-without-evidence"
+                      size="small"
+                      color="warning"
+                      label="sem evidência"
+                    />
+                  ) : null}
                   <Chip size="small" label={`${target.outcomeCount} outcome(s)`} />
                   <Chip
                     data-testid={isPrimaryWeakTarget ? "rollup-primary-status" : undefined}

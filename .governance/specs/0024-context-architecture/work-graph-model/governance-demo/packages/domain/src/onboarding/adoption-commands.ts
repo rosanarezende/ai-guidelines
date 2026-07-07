@@ -26,8 +26,10 @@ import {
   type HostFitCheck,
   type LocalAccount,
   type LocalShellCommand,
+  type PlannedTarget,
   type RoleAssignment,
   type SubjectRef,
+  type TriageDecision,
   type Workspace,
   type WorkspaceGroup,
   type WorkspaceInvite,
@@ -275,6 +277,78 @@ export function applyShellCommand(
         if (!["none", "file-export", "neo4j"].includes(next.graphReadModel?.kind || ""))
           return { error: "invalid-graph-read-model" };
         return { ...workspace, stack: next };
+      });
+    }
+
+    case "local.planning.save": {
+      const workspaceId = text(payload, "workspaceId");
+      const rawTarget = payload["target"] as Partial<PlannedTarget> | undefined;
+      if (!workspaceId) return err("missing-workspace-id");
+      if (!rawTarget || typeof rawTarget !== "object") return err("missing-planning-target");
+      const objectiveTitle =
+        typeof rawTarget.objectiveTitle === "string" ? rawTarget.objectiveTitle.trim() : "";
+      const metricId = typeof rawTarget.metricId === "string" ? rawTarget.metricId.trim() : "";
+      const cycle = typeof rawTarget.cycle === "string" ? rawTarget.cycle.trim() : "2026-Q3";
+      const targetValue = rawTarget.targetValue;
+      if (objectiveTitle.length < 3 || objectiveTitle.length > 160)
+        return err("invalid-objective-title");
+      if (!metricId || metricId.length > 80 || !/^[a-z0-9][a-z0-9._-]*$/i.test(metricId))
+        return err("invalid-metric-id");
+      if (typeof targetValue !== "number" || !Number.isFinite(targetValue))
+        return err("invalid-target-value");
+      if (!cycle || cycle.length > 32) return err("invalid-cycle");
+      const membership = requireMember(state, command, workspaceId);
+      if (membership) return err(membership);
+      return updateWorkspace(state, workspaceId, (workspace) => {
+        const planning = workspace.planning || { targets: [] };
+        const target: PlannedTarget = {
+          id: rawTarget.id || metricId,
+          objectiveTitle,
+          metricId,
+          targetValue,
+          cycle,
+          createdAt: command.issuedAt,
+          createdBy: command.principalId || "unknown-principal",
+        };
+        const targets = planning.targets.some((item) => item.id === target.id)
+          ? planning.targets.map((item) => (item.id === target.id ? target : item))
+          : [...planning.targets, target];
+        return { ...workspace, planning: { ...planning, targets } };
+      });
+    }
+
+    case "local.triage.confirm": {
+      const workspaceId = text(payload, "workspaceId");
+      const rawDecision = payload["decision"] as Partial<TriageDecision> | undefined;
+      if (!workspaceId) return err("missing-workspace-id");
+      if (!rawDecision || typeof rawDecision !== "object") return err("missing-triage-decision");
+      const question = typeof rawDecision.question === "string" ? rawDecision.question.trim() : "";
+      const fate = rawDecision.fate;
+      const matcherScore = rawDecision.matcherScore;
+      if (question.length < 3 || question.length > 240) return err("invalid-triage-question");
+      if (!fate || !["exploration", "direct-answer", "missing-info"].includes(fate))
+        return err("invalid-triage-fate");
+      if (typeof matcherScore !== "number" || !Number.isFinite(matcherScore))
+        return err("invalid-matcher-score");
+      const membership = requireMember(state, command, workspaceId);
+      if (membership) return err(membership);
+      return updateWorkspace(state, workspaceId, (workspace) => {
+        const triage = workspace.triage || { decisions: [] };
+        const decision: TriageDecision = {
+          id: rawDecision.id || `triage-${triage.decisions.length + 1}`,
+          question,
+          fate,
+          matcherScore,
+          unknowns: Array.isArray(rawDecision.unknowns)
+            ? rawDecision.unknowns.filter((item): item is string => typeof item === "string")
+            : [],
+          confirmedAt: command.issuedAt,
+          confirmedBy: command.principalId || "unknown-principal",
+        };
+        const decisions = triage.decisions.some((item) => item.id === decision.id)
+          ? triage.decisions.map((item) => (item.id === decision.id ? decision : item))
+          : [...triage.decisions, decision];
+        return { ...workspace, triage: { ...triage, decisions } };
       });
     }
 

@@ -28,6 +28,8 @@ const MEMBERSHIP_ROLES: WorkspaceRoleId[] = ["workspace-admin", "sponsor", "secu
 const ROLE_MANAGEMENT_ROLES: WorkspaceRoleId[] = ["workspace-admin", "sponsor", "security-owner"];
 const HOST_ROLES: WorkspaceRoleId[] = ["workspace-admin", "technical-owner", "security-owner"];
 const SOURCE_ROLES: WorkspaceRoleId[] = ["workspace-admin", "technical-owner", "source-owner"];
+const PLANNING_ROLES: WorkspaceRoleId[] = ["workspace-admin", "sponsor", "target-definer"];
+const TRIAGE_ROLES: WorkspaceRoleId[] = ["workspace-admin", "technical-owner", "source-owner"];
 const ASSISTANT_ROLES: WorkspaceRoleId[] = ["workspace-admin", "security-owner", "technical-owner"];
 const INTEGRATION_ROLES: WorkspaceRoleId[] = [
   "workspace-admin",
@@ -249,6 +251,18 @@ export function authorizeShellCommand(
     case "local.workspace-mode.save":
     case "local.workspace-stack.save":
       return requireAuthority(state, command, workspaceId, CONFIG_ROLES);
+
+    case "local.planning.save":
+      return requireAuthority(
+        state,
+        command,
+        workspaceId,
+        PLANNING_ROLES,
+        "missing-target-manager"
+      );
+
+    case "local.triage.confirm":
+      return requireAuthority(state, command, workspaceId, TRIAGE_ROLES, "missing-triage-manager");
 
     case "local.member.invite":
     case "local.group.create":
