@@ -577,7 +577,7 @@ contracts:
       - Ativacao cria intent sem mover refs de forma ambigua.
   - id: APP-26
     title: Work mostra repo-work, status, ack e evidencia
-    status: expected-fail
+    status: active
     spec: journeys/work-contracts.spec.ts
     seed: acme-demo
     actors:

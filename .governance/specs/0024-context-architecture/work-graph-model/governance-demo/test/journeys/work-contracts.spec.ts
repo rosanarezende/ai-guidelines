@@ -3,8 +3,6 @@ import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Execucao, repo-work e contratos", () => {
   test("APP-26 Work mostra repo-work, status, ack e evidencia", async ({ page, request }) => {
-    pendingContract("APP-26", "expected-fail");
-
     await openWorkspace(page, request, "acme-demo", "/work", "demo-acme");
     await expect(page.getByTestId("repo-work-list")).toBeVisible();
     await page.getByTestId("repo-work-filter-blocked").click();

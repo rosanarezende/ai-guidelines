@@ -12,7 +12,10 @@
   "search": "Buscar por título, dono, repo ou status",
   "allKinds": "Todos os tipos",
   "allConfidence": "Todas as confianças",
+  "blockedFilter": "Bloqueados/atenção",
   "rows": "linhas",
+  "openEvidence": "Ver evidência",
+  "evidenceTitle": "Evidência do trabalho",
   "columns": {
     "kind": "Tipo",
     "title": "Trabalho",
@@ -20,7 +23,8 @@
     "status": "Status",
     "confidence": "Confiança",
     "risk": "Risco",
-    "nextStep": "Próximo passo"
+    "nextStep": "Próximo passo",
+    "evidence": "Evidência"
   },
   "kind": {
     "intent": "iniciativa",

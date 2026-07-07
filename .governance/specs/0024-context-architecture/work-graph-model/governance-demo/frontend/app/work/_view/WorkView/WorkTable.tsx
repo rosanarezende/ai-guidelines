@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   Chip,
+  Button,
   FormControl,
   InputLabel,
   MenuItem,
@@ -32,22 +33,29 @@ import type {
 } from "../../_model/view-models";
 import copy from "./_locales/pt-br.json";
 
-const GRID = "112px minmax(280px, 1.6fr) 150px 150px 132px 100px minmax(220px, 1fr)";
+const GRID =
+  "112px minmax(280px, 1.6fr) 150px 150px 132px 100px minmax(220px, 1fr) 132px";
 
 export function WorkTable({ rows }: { rows: WorkItemRow[] }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [kind, setKind] = useState<WorkItemKind | "all">("all");
   const [confidence, setConfidence] = useState<WorkConfidenceState | "all">("all");
+  const [blockedOnly, setBlockedOnly] = useState(false);
+  const [selectedEvidence, setSelectedEvidence] = useState<WorkItemRow | null>(null);
   const filteredRows = useMemo(
     () =>
       rows.filter((row) => {
         if (kind !== "all" && row.kind !== kind) return false;
         if (confidence !== "all" && row.confidence !== confidence) return false;
+        if (blockedOnly && row.risk === "low") return false;
         return true;
       }),
-    [rows, kind, confidence]
+    [rows, kind, confidence, blockedOnly]
   );
-  const columns = useMemo<ColumnDef<WorkItemRow>[]>(() => workColumns(), []);
+  const columns = useMemo<ColumnDef<WorkItemRow>[]>(
+    () => workColumns((row) => setSelectedEvidence(row)),
+    []
+  );
   const table = useReactTable({
     data: filteredRows,
     columns,
@@ -76,9 +84,11 @@ export function WorkTable({ rows }: { rows: WorkItemRow[] }) {
           setKind={setKind}
           confidence={confidence}
           setConfidence={setConfidence}
+          blockedOnly={blockedOnly}
+          setBlockedOnly={setBlockedOnly}
           count={tableRows.length}
         />
-        <Box sx={{ mt: 2, overflowX: "auto" }}>
+        <Box data-testid="repo-work-list" sx={{ mt: 2, overflowX: "auto" }}>
           <Box sx={{ minWidth: 1040 }}>
             <Box
               sx={{
@@ -125,6 +135,7 @@ export function WorkTable({ rows }: { rows: WorkItemRow[] }) {
                       }}
                     >
                       <Box
+                        data-testid="repo-work-card"
                         sx={{
                           display: "grid",
                           gridTemplateColumns: GRID,
@@ -151,6 +162,7 @@ export function WorkTable({ rows }: { rows: WorkItemRow[] }) {
             </Box>
           </Box>
         </Box>
+        {selectedEvidence ? <EvidencePanel row={selectedEvidence} /> : null}
       </CardContent>
     </Card>
   );
@@ -163,6 +175,8 @@ function Toolbar({
   setKind,
   confidence,
   setConfidence,
+  blockedOnly,
+  setBlockedOnly,
   count,
 }: {
   globalFilter: string;
@@ -171,6 +185,8 @@ function Toolbar({
   setKind: (value: WorkItemKind | "all") => void;
   confidence: WorkConfidenceState | "all";
   setConfidence: (value: WorkConfidenceState | "all") => void;
+  blockedOnly: boolean;
+  setBlockedOnly: (value: boolean) => void;
   count: number;
 }) {
   return (
@@ -218,12 +234,20 @@ function Toolbar({
           ))}
         </Select>
       </FormControl>
+      <Button
+        data-testid="repo-work-filter-blocked"
+        size="small"
+        variant={blockedOnly ? "contained" : "outlined"}
+        onClick={() => setBlockedOnly(!blockedOnly)}
+      >
+        {copy.blockedFilter}
+      </Button>
       <Chip size="small" variant="outlined" label={`${count} ${copy.rows}`} />
     </Flex>
   );
 }
 
-function workColumns(): ColumnDef<WorkItemRow>[] {
+function workColumns(onOpenEvidence: (row: WorkItemRow) => void): ColumnDef<WorkItemRow>[] {
   return [
     {
       accessorKey: "kind",
@@ -244,8 +268,24 @@ function workColumns(): ColumnDef<WorkItemRow>[] {
         </Box>
       ),
     },
-    { accessorKey: "owner", header: copy.columns.owner },
-    { accessorKey: "status", header: copy.columns.status },
+    {
+      accessorKey: "owner",
+      header: copy.columns.owner,
+      cell: ({ row }) => (
+        <Typography variant="body2" noWrap>
+          owner: {row.original.owner}
+        </Typography>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: copy.columns.status,
+      cell: ({ row }) => (
+        <Typography variant="body2" noWrap>
+          status: {row.original.status}
+        </Typography>
+      ),
+    },
     {
       accessorKey: "confidence",
       header: copy.columns.confidence,
@@ -257,7 +297,43 @@ function workColumns(): ColumnDef<WorkItemRow>[] {
       cell: ({ row }) => <RiskPill risk={row.original.risk} />,
     },
     { accessorKey: "nextStep", header: copy.columns.nextStep },
+    {
+      id: "evidence",
+      header: copy.columns.evidence,
+      cell: ({ row }) => (
+        <Button
+          data-testid="repo-work-open-evidence"
+          size="small"
+          variant="outlined"
+          onClick={() => onOpenEvidence(row.original)}
+        >
+          {copy.openEvidence}
+        </Button>
+      ),
+    },
   ];
+}
+
+function EvidencePanel({ row }: { row: WorkItemRow }) {
+  const evidence =
+    row.evidence ||
+    "test: pendente · commit: pendente · verification: pendente até uma fonte independente anexar prova";
+  return (
+    <Card data-testid="work-evidence-panel" variant="outlined" sx={{ mt: 2, bgcolor: "grey.50" }}>
+      <CardContent>
+        <Typography variant="subtitle2">{copy.evidenceTitle}</Typography>
+        <Typography variant="body2" sx={{ mt: 0.5 }}>
+          {row.title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {evidence}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+          test · commit · verification · sourceRevision são conferidos antes de virar prova forte.
+        </Typography>
+      </CardContent>
+    </Card>
+  );
 }
 
 function ConfidencePill({ state }: { state: WorkConfidenceState }) {
