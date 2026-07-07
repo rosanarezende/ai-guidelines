@@ -3,24 +3,22 @@
 // Roda contra mock-api com seed resetada; valida EXPERIÊNCIA, não governança.
 import { expect, test } from "@playwright/test";
 import { MOCK_API_URL } from "../playwright.config.ts";
+import { completeLoginWithMagicLink } from "./support/contract-fixtures.ts";
 
 test.beforeEach(async ({ request }) => {
   const reset = await request.post(`${MOCK_API_URL}/__reset`, { data: { seed: "blank" } });
   expect(reset.ok()).toBeTruthy();
 });
 
-test("APP-01 APP-03 APP-04 signup → workspace → onboarding parcial → Home com continuar", async ({
+test("APP-01 APP-03 APP-04 login → workspace → onboarding parcial → Home com continuar", async ({
   page,
 }) => {
-  // sem principal, a raiz redireciona para /signup (gate server-side)
+  // sem principal, a raiz redireciona para /login (gate server-side)
   await page.goto("/");
-  await expect(page).toHaveURL(/\/signup$/);
-  await expect(page.getByText("Crie sua conta do portal")).toBeVisible();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByText("Entrar no portal de governança")).toBeVisible();
 
-  await page.getByLabel("Seu nome").fill("Ana E2E");
-  await page.getByLabel("E-mail").fill("ana-e2e@example.com");
-  await page.getByLabel("Senha").fill("correct horse battery staple");
-  await page.getByRole("button", { name: "Criar conta" }).click();
+  await completeLoginWithMagicLink(page, { email: "ana-e2e@example.com", name: "Ana E2E" });
 
   // sem organização, o fluxo segue para /organizations
   await expect(page).toHaveURL(/\/organizations$/);
@@ -55,5 +53,5 @@ test("APP-01 APP-03 APP-04 signup → workspace → onboarding parcial → Home 
   // logout limpa a sessão local, sem apagar o workspace/event-log
   await page.goto("/");
   await page.getByRole("button", { name: "Sair" }).click();
-  await expect(page).toHaveURL(/\/signup$/);
+  await expect(page).toHaveURL(/\/login$/);
 });

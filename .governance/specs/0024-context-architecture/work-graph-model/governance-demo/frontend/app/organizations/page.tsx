@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function OrganizationsPage() {
   const gate = await resolveAdoptionGate();
-  if (!gate.principal) redirect("/signup");
+  if (!gate.principal) redirect("/login");
   const organizations = gate.workspaces.map((workspace) => ({
     id: workspace.id,
     name: workspace.name,

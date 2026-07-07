@@ -45,7 +45,7 @@ export type LocalAccount = {
   id: string;
   displayName: string;
   email?: string;
-  identityProvider?: "local" | "better-auth";
+  identityProvider?: "local" | "better-auth" | "anonymous";
   portalUserId?: string;
   preferredLocale: LocaleCode;
   activeWorkspaceId?: string;

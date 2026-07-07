@@ -1,23 +1,20 @@
 import { expect, request as requestFactory, test } from "@playwright/test";
 import { MOCK_API_URL } from "../playwright.config.ts";
+import { signInWithMagicLink } from "./support/contract-fixtures.ts";
 
 test.beforeEach(async ({ request }) => {
   const reset = await request.post(`${MOCK_API_URL}/__reset`, { data: { seed: "blank" } });
   expect(reset.ok()).toBeTruthy();
 });
 
-test("APP-45 Better Auth cria conta, workspace, convite e aceite sem conceder authority", async () => {
+test("APP-45 Better Auth entra por magic link, cria workspace, convida e aceita sem conceder authority", async () => {
   const creator = await requestFactory.newContext({ baseURL: "http://127.0.0.1:3024" });
   const invitee = await requestFactory.newContext({ baseURL: "http://127.0.0.1:3024" });
   try {
-    const creatorSignup = await creator.post("/api/auth/sign-up/email", {
-      data: {
-        email: "portal-creator@example.com",
-        password: "correct horse battery staple",
-        name: "Portal Creator",
-      },
+    await signInWithMagicLink(creator, {
+      email: "portal-creator@example.com",
+      name: "Portal Creator",
     });
-    expect(creatorSignup.ok()).toBeTruthy();
 
     const creatorBridge = await creator.post("/api/local/auth/bridge", { data: {} });
     expect(creatorBridge.ok()).toBeTruthy();
@@ -39,14 +36,10 @@ test("APP-45 Better Auth cria conta, workspace, convite e aceite sem conceder au
     };
     expect(inviteBody.invite.portalInvitationId).toBeTruthy();
 
-    const inviteeSignup = await invitee.post("/api/auth/sign-up/email", {
-      data: {
-        email: "portal-invitee@example.com",
-        password: "correct horse battery staple",
-        name: "Bia Partner",
-      },
+    await signInWithMagicLink(invitee, {
+      email: "portal-invitee@example.com",
+      name: "Bia Partner",
     });
-    expect(inviteeSignup.ok()).toBeTruthy();
 
     const inviteeBridge = await invitee.post("/api/local/auth/bridge", { data: {} });
     expect(inviteeBridge.ok()).toBeTruthy();

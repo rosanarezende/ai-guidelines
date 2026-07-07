@@ -9,7 +9,11 @@ const nonSecretId = z
     message: "auth scope ids must be opaque non-secret ids, never tokens or secrets",
   });
 
-export const AuthProviderKindSchema = z.enum(["local-dev", "better-auth"]);
+export const AuthProviderKindSchema = z.enum(["local-dev", "better-auth", "anonymous-demo"]);
+
+export const PortalAuthMethodSchema = z.enum(["magic-link", "github", "google"]);
+
+export type PortalAuthMethod = z.infer<typeof PortalAuthMethodSchema>;
 
 export const PortalQueryScopeSchema = z
   .object({
@@ -160,6 +164,7 @@ export function sensitiveQueryCacheDirective(
 
 export const AUTH_QUERY_ZOD_SCHEMA_IDS = [
   "AuthProviderKindSchema",
+  "PortalAuthMethodSchema",
   "PortalQueryScopeSchema",
   "GovernedQueryResourceSchema",
   "SensitiveCacheEventSchema",

@@ -8,7 +8,10 @@ const MOCK_API_PORT = 3025;
 const APP_PORT = 3024;
 const REUSE_EXISTING_SERVER = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
-const LOCAL_STATE_DIR = path.join(TEST_DIR, "reports", "local-state", String(process.pid));
+export const LOCAL_STATE_DIR =
+  process.env.GOVERNANCE_E2E_LOCAL_STATE_DIR ||
+  path.join(TEST_DIR, "reports", "local-state", String(process.pid));
+process.env.GOVERNANCE_E2E_LOCAL_STATE_DIR = LOCAL_STATE_DIR;
 
 export const MOCK_API_URL = `http://127.0.0.1:${MOCK_API_PORT}`;
 

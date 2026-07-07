@@ -55,18 +55,19 @@ seed_matrix:
   acme-demo: snapshot demo acme anexado explicitamente
 contracts:
   - id: APP-01
-    title: Criar identidade local sem confundir com auth corporativa
+    title: Entrar sem senha sem confundir login com authority
     status: active
     spec: journeys/onboarding-journey.spec.ts
     seed: blank
     actors:
       - new-local-user
     surfaces:
-      - /signup
+      - /login
       - /organizations
     assertions:
-      - A raiz redireciona para /signup quando nao ha sessao.
-      - Identidade local e criada sem prometer SSO, billing ou authority governada.
+      - A raiz redireciona para /login quando nao ha sessao.
+      - Entrada usa link magico/provedor, sem senha armazenada pelo produto.
+      - Login nao promete SSO, billing ou authority governada.
       - Fluxo segue para /organizations.
   - id: APP-02
     title: Criar workspace novo sem vazar dados da demo
@@ -94,10 +95,10 @@ contracts:
       - workspace-admin
     surfaces:
       - shell
-      - /signup
+      - /login
       - /organizations
     assertions:
-      - Logout redireciona para /signup.
+      - Logout redireciona para /login.
       - Reentrada preserva workspace e event-log.
       - Logout nao e delete.
   - id: APP-35
@@ -210,7 +211,7 @@ contracts:
     actors:
       - workspace-admin
     surfaces:
-      - /signup
+      - /login
       - /organizations
       - /onboarding
     assertions:
@@ -226,7 +227,7 @@ contracts:
       - invited-member
       - proposed-role
     surfaces:
-      - /signup
+      - /login
       - /onboarding
       - /settings
     assertions:
@@ -455,7 +456,7 @@ contracts:
       - workspace-admin
       - source-owner
     surfaces:
-      - /signup
+      - /login
       - /integrations
       - /sources
     assertions:
@@ -463,7 +464,7 @@ contracts:
       - GitHub work-source exige permissao e repos selecionados.
       - Conectar repo nao concede authority governada.
   - id: APP-45
-    title: Better Auth cria conta, workspace, convite e aceite sem conceder authority
+    title: Better Auth passwordless cria sessao, workspace, convite e aceite sem conceder authority
     status: active
     spec: journeys/portal-auth-flow.spec.ts
     seed: workspace-shared-convites
@@ -471,14 +472,29 @@ contracts:
       - workspace-admin
       - invited-member
     surfaces:
-      - /signup
+      - /login
       - /organizations
       - state
     assertions:
       - Better Auth fica montado pela integracao Next.js, nao pela integracao TanStack Start.
-      - Signup/login/accept-invite produzem sessao/membership de portal, mas nao authority governada.
+      - Link magico/provedor/accept-invite produzem sessao/membership de portal, mas nao authority governada.
+      - O produto nao armazena senha de usuario final.
       - Workspace criado no shell tambem possui organizacao de portal com slug equivalente.
-      - Pessoa convidada faz signup antes de aceitar o convite e passa a ver o workspace sem ganhar role governada.
+      - Pessoa convidada entra no portal antes de aceitar o convite e passa a ver o workspace sem ganhar role governada.
+  - id: APP-47
+    title: Demo anonima permite experimentar sem conta
+    status: active
+    spec: journeys/auth-workspace.spec.ts
+    seed: blank
+    actors:
+      - anonymous-visitor
+    surfaces:
+      - /login
+      - /
+    assertions:
+      - Pessoa pode abrir a sandbox Acme sem criar usuario Better Auth.
+      - Demo fica claramente marcada como sandbox/demo.
+      - Tentar bridge de portal apos demo anonima nao encontra sessao Better Auth.
   - id: APP-46
     title: Better Auth escopa cache TanStack por sessao/workspace
     status: expected-fail
@@ -488,7 +504,7 @@ contracts:
       - workspace-admin
       - invited-member
     surfaces:
-      - /signup
+      - /login
       - /organizations
       - state
     assertions:
@@ -779,7 +795,7 @@ contracts:
       - workspace-admin
       - member
     surfaces:
-      - /signup
+      - /login
       - /organizations
       - /settings
       - /integrations

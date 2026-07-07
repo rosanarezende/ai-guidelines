@@ -1,8 +1,11 @@
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
-import { MOCK_API_URL } from "../../playwright.config.ts";
+import { LOCAL_STATE_DIR, MOCK_API_URL } from "../../playwright.config.ts";
 
 const APP_URL = "http://127.0.0.1:3024";
 const SESSION_COOKIE = "governance-local-session";
+const MAGIC_LINK_OUTBOX = path.join(LOCAL_STATE_DIR, "portal-magic-links.jsonl");
 export type PendingContractMode = "fixme" | "expected-fail";
 export type ContractPersona =
   | "admin"
@@ -66,6 +69,67 @@ export async function armExpectedFailAfterArrival(
 export async function resetSeed(request: APIRequestContext, seed: string): Promise<void> {
   const reset = await request.post(`${MOCK_API_URL}/__reset`, { data: { seed } });
   expect(reset.ok(), `reset seed ${seed}`).toBeTruthy();
+}
+
+type MagicLinkRecord = {
+  email: string;
+  url: string;
+};
+
+function readMagicLinkOutbox(): MagicLinkRecord[] {
+  if (!existsSync(MAGIC_LINK_OUTBOX)) return [];
+  return readFileSync(MAGIC_LINK_OUTBOX, "utf8")
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as MagicLinkRecord);
+}
+
+async function waitForMagicLink(email: string, previousCount: number): Promise<string> {
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const records = readMagicLinkOutbox();
+    const record = records
+      .slice(previousCount)
+      .reverse()
+      .find((item) => item.email === email && item.url);
+    if (record) return record.url;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(`magic link not recorded for ${email}`);
+}
+
+export async function signInWithMagicLink(
+  request: APIRequestContext,
+  input: { email: string; name: string }
+): Promise<void> {
+  const previousCount = readMagicLinkOutbox().length;
+  const response = await request.post("/api/auth/sign-in/magic-link", {
+    data: {
+      email: input.email,
+      name: input.name,
+      callbackURL: "/auth/complete",
+      newUserCallbackURL: "/auth/complete",
+      errorCallbackURL: "/login",
+    },
+  });
+  expect(response.ok(), "magic-link request").toBeTruthy();
+  const url = await waitForMagicLink(input.email, previousCount);
+  const verify = await request.get(url);
+  expect(verify.status(), "magic-link verification").toBeLessThan(400);
+}
+
+export async function completeLoginWithMagicLink(
+  page: Page,
+  input: { email: string; name: string }
+): Promise<void> {
+  const previousCount = readMagicLinkOutbox().length;
+  await page.goto("/login");
+  await page.getByTestId("login-email").fill(input.email);
+  await page.getByTestId("login-display-name").fill(input.name);
+  await page.getByTestId("login-magic-link-submit").click();
+  await expect(page.getByText(/Link gerado/i)).toBeVisible();
+  const url = await waitForMagicLink(input.email, previousCount);
+  await page.goto(url);
+  await expect(page).toHaveURL(/\/organizations$/);
 }
 
 export async function signInAs(

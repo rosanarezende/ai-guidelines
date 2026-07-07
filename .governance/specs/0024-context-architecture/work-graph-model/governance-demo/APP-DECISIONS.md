@@ -8,7 +8,7 @@
 ## Estado resumido
 
 - Backend runtime real: `backend/src/` em TypeScript strict, com dominio, application, ports, adapters e API handlers.
-- Frontend real: `frontend/` em Next/MUI, com signup, organizacoes, onboarding, Home, Settings e console tecnico.
+- Frontend real: `frontend/` em Next/MUI, com login passwordless, demo anonima, organizacoes, onboarding, Home, Settings e console tecnico.
 - Lacuna principal: o app ainda tem muita UI parcial/read-only; escolhas de onboarding e configuracoes precisam virar estado persistido e comandos/use cases reais.
 - Regra de produto: fake/mock API valida experiencia; backend real valida governanca.
 
@@ -1992,23 +1992,23 @@ Cup deve aparecer em tres formas:
 
 Cup muda de especialista por contexto:
 
-| Superficie      | Especialista CWP      | Ajuda principal                                                                  |
-| --------------- | --------------------- | -------------------------------------------------------------------------------- |
-| Signup          | `adoption-guide`      | conta local, demo, workspace, diferenca entre login e authority                  |
-| Organizations   | `workspace-guide`     | criar workspace, anexar demo, entender local/shared/controlled                   |
-| Onboarding      | `setup-guide`         | perfil, papeis, governance host, fontes, assistente, integracoes                 |
-| Sources         | `source-guide`        | pasta local, Git, cloud sync, GitHub, `.governance`, `.governance-host`, trust   |
-| Settings        | `configuration-guide` | coerencia com onboarding, policy, defaults, roles, providers                     |
-| Planning        | `planning-guide`      | objetivos, metricas, targets, allocation e contexto progressivo                  |
-| Intake/Register | `initiative-guide`    | problema, hipotese, aposta, riscos, lacunas e possiveis fontes                   |
-| Triage          | `triage-guide`        | perguntas, matcher, repos, contratos, unknowns e sugestoes comparaveis           |
-| Gates           | `decision-guide`      | autoridade, evidencia, risco, aceitar/rejeitar/promover sem falsificar confianca |
-| Work/Contracts  | `execution-guide`     | repo-work, dependencias, contracts, compatibility window, contention             |
-| Results         | `results-guide`       | outcomes, rollup, self-attested, stale, fonte, unidade e dashboard               |
-| Operations      | `operations-guide`    | incidentes, follow-ups, SLO, toil e trabalho operacional                         |
-| Audit/Policy    | `policy-guide`        | por que bloqueou/avisou/rebaixou e qual regra se aplica                          |
-| Integrations    | `integration-guide`   | provider, egress, capabilities, health, probe, backlog                           |
-| Map/Graph       | `graph-guide`         | explicar relacoes, caminhos, impacto, vizinhanca e leitura do mapa               |
+| Superficie      | Especialista CWP      | Ajuda principal                                                                    |
+| --------------- | --------------------- | ---------------------------------------------------------------------------------- |
+| Login           | `adoption-guide`      | link magico/provedores, demo anonima, workspace, diferenca entre login e authority |
+| Organizations   | `workspace-guide`     | criar workspace, anexar demo, entender local/shared/controlled                     |
+| Onboarding      | `setup-guide`         | perfil, papeis, governance host, fontes, assistente, integracoes                   |
+| Sources         | `source-guide`        | pasta local, Git, cloud sync, GitHub, `.governance`, `.governance-host`, trust     |
+| Settings        | `configuration-guide` | coerencia com onboarding, policy, defaults, roles, providers                       |
+| Planning        | `planning-guide`      | objetivos, metricas, targets, allocation e contexto progressivo                    |
+| Intake/Register | `initiative-guide`    | problema, hipotese, aposta, riscos, lacunas e possiveis fontes                     |
+| Triage          | `triage-guide`        | perguntas, matcher, repos, contratos, unknowns e sugestoes comparaveis             |
+| Gates           | `decision-guide`      | autoridade, evidencia, risco, aceitar/rejeitar/promover sem falsificar confianca   |
+| Work/Contracts  | `execution-guide`     | repo-work, dependencias, contracts, compatibility window, contention               |
+| Results         | `results-guide`       | outcomes, rollup, self-attested, stale, fonte, unidade e dashboard                 |
+| Operations      | `operations-guide`    | incidentes, follow-ups, SLO, toil e trabalho operacional                           |
+| Audit/Policy    | `policy-guide`        | por que bloqueou/avisou/rebaixou e qual regra se aplica                            |
+| Integrations    | `integration-guide`   | provider, egress, capabilities, health, probe, backlog                             |
+| Map/Graph       | `graph-guide`         | explicar relacoes, caminhos, impacto, vizinhanca e leitura do mapa                 |
 
 Contrato minimo de contexto:
 
@@ -2018,7 +2018,7 @@ type CwpPageContext = {
   workspaceId: string;
   actorId: string;
   surface:
-    | "signup"
+    | "login"
     | "organizations"
     | "onboarding"
     | "home"
@@ -2241,7 +2241,7 @@ momento certo, com copy curta:
 
 | Tela/feature     | Sugestoes principais                                                          | Copy esperada                                                                                   |
 | ---------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `/signup`        | GitHub OAuth, Google, OIDC                                                    | "Login identifica voce; authority ainda depende do workspace."                                  |
+| `/login`         | GitHub OAuth, Google, OIDC                                                    | "Login identifica voce; authority ainda depende do workspace."                                  |
 | `/organizations` | GitHub OAuth, OIDC                                                            | "Conectar identidade ajuda convites, mas nao conecta repos automaticamente."                    |
 | `/onboarding`    | GitHub work-source, assistant local, identity provider, Neo4j, Docker Compose | "Escolha agora ou deixe para depois; o app mostra o que fica manual."                           |
 | `/sources`       | GitHub/GitLab/Bitbucket/Gitea, Drive/SharePoint, CODEOWNERS, service catalog  | "Conectar provider eleva confianca de fonte; pasta local continua valida com trust menor."      |
@@ -2459,7 +2459,7 @@ tecnico, acesso ao Cup/CWP e variacao por perfil/authority?
 **R - Reasoning/Research**
 
 A navegacao ainda nao foi decidida como contrato de produto. Isso afeta todas as
-telas depois de `/signup` e `/organizations`, porque a pessoa precisa entender:
+telas depois de `/login` e `/organizations`, porque a pessoa precisa entender:
 
 - onde esta no fluxo de adocao;
 - o que e configuracao inicial versus uso continuo;
@@ -3222,7 +3222,7 @@ Para a governance-demo, a integracao vigente e:
 4. **Ordem obrigatoria antes de tela**
    - fechar schemas Zod/modelagem/testes da fronteira auth/session/cache;
    - adicionar contrato funcional `APP-45`;
-   - so depois montar a rota real Better Auth e adaptar signup/session;
+   - so depois montar a rota real Better Auth e adaptar login/session;
    - so depois voltar a UX/telas.
 
 **Implications**
@@ -3240,16 +3240,95 @@ Para a governance-demo, a integracao vigente e:
 - A segunda fatia tecnica montou a rota Next `/api/auth/[...all]` com
   `toNextJsHandler`, criou o `auth-client` React e ligou diretivas reais de
   cache TanStack no logout e na troca/criacao de workspace. Isso fecha a
-  infraestrutura, nao a UX completa de signup/convite.
-- A terceira fatia adaptou `/signup`, `/organizations` e convites para usar
-  Better Auth como identidade real: a UI cria conta por `sign-up/email`,
-  `/api/local/auth/bridge` cria/garante principal local `portal-*`,
-  `/api/local/organizations` cria/garante organizacao de portal com slug do
-  workspace, e `/api/local/members` cria convite Better Auth quando ha e-mail e
-  sessao de portal.
-- `journeys/portal-auth-flow.spec.ts` prova signup do criador -> bridge ->
-  workspace -> convite -> signup da pessoa convidada -> bridge -> accept, e
+  infraestrutura, nao a UX completa de login/convite.
+- A terceira fatia adaptou `/login`, `/organizations` e convites para usar
+  Better Auth como identidade real sem senha: a UI entra por magic link ou
+  provider habilitado, `/api/local/auth/bridge` cria/garante principal local
+  `portal-*`, `/api/local/organizations` cria/garante organizacao de portal com
+  slug do workspace, e `/api/local/members` cria convite Better Auth quando ha
+  e-mail e sessao de portal.
+- `journeys/portal-auth-flow.spec.ts` prova magic link do criador -> bridge ->
+  workspace -> convite -> magic link da pessoa convidada -> bridge -> accept, e
   confirma que membership de portal nao cria authority governada.
 - O endpoint `/api/local/signup` permanece como compatibilidade local/teste; o
   caminho feliz visual agora e Better Auth + bridge.
 - Nenhuma tela nova de auth real deve nascer sem contrato de cache/sessao.
+
+## QRD-46 - Entrada passwordless, demo anonima e telemetria de jornada
+
+**Status:** decided-active-for-login-boundary.
+
+**Q - Question**
+
+O produto deve guardar senhas de usuarios finais, oferecer login por provedor ou
+link magico, permitir experimentar a demo sem conta, e como deve tratar
+ferramentas de growth/analytics?
+
+**R - Reasoning/Research**
+
+A mantenedora nao quer assumir responsabilidade de guardar senhas. Isso reduz
+risco operacional e combina com a separacao ja decidida entre identidade,
+membership e authority governada:
+
+- login responde "quem e esta pessoa no portal";
+- membership responde "em qual workspace ela participa";
+- role assignment/authority responde "o que ela pode fazer";
+- governance host continua sendo o plano de autoridade e decisao.
+
+Better Auth suporta entrada por provedor OAuth e magic link. Magic link permite
+login sem senha, mas exige um canal de entrega de e-mail ou webhook. Em
+desenvolvimento/teste, o link pode ir para um outbox local para e2e; em
+producao-like, a ausencia de entrega configurada deve falhar fechado.
+
+A demo sem conta precisa existir para reduzir friccao de avaliacao, mas nao pode
+criar conta de portal silenciosa, conceder authority ou misturar dados demo com
+workspace real. Ela deve ser uma sessao local anonima e restrita a sandbox.
+
+Ferramentas de growth sao uteis para entender abandono de signup/login,
+onboarding e configuracao inicial, mas sao uma nova fronteira de egress. O app
+de governanca nao deve enviar YAML, conteudo governado, secrets, tokens, prompt
+ou payloads de repos para analytics. Eventos de jornada devem ser
+minimizados, sem conteudo sensivel, e tratados como integracao opcional.
+
+**D - Decision**
+
+1. **O caminho humano de entrada passa a ser `/login`.**
+   - `/signup` redireciona para `/login`.
+   - `/api/local/signup` permanece apenas como compatibilidade local/teste.
+
+2. **Senha de usuario final fica fora do produto.**
+   - `emailAndPassword` fica desabilitado no Better Auth.
+   - Entrada principal: magic link.
+   - Entrada por provedor: GitHub e Google quando credenciais de ambiente
+     existirem; OIDC generico segue trilha avancada futura.
+
+3. **Magic link falha fechado quando nao houver entrega configurada.**
+   - desenvolvimento/teste podem usar outbox local (`portal-magic-links.jsonl`);
+   - producao-like precisa de webhook/e-mail adapter aprovado.
+
+4. **Demo anonima e sandbox local, nao conta de portal.**
+   - `/api/local/demo` cria principal anonimo local e anexa a demo Acme;
+   - nao cria usuario Better Auth;
+   - nao concede membership/authority governada;
+   - nao mistura dados demo com workspace real.
+
+5. **Growth analytics vira integration kind separado.**
+   - `journey-analytics` mede funil e eventos de produto;
+   - eventos sao minimizados e tipados em `@demo/contracts`;
+   - nenhuma ferramenta de analytics recebe conteudo governado, YAML, secrets,
+     prompt, token ou payload de repos;
+   - analytics ajuda a melhorar experiencia, nao vira gate nem authority.
+
+**Implications**
+
+- APP-01/03/45 passam a falar de `/login`, magic link/provedores e ausencia de
+  senha.
+- APP-47 cobre "experimentar demo sem conta".
+- `integration-catalog.yml` passa a listar `journey-analytics` como adapter
+  opcional de product experience.
+- `@demo/contracts` passa a ter schemas de eventos de growth com filtro
+  anti-secrets.
+- GitHub login continua separado de GitHub work-source/repo provider.
+- Google login continua separado de Drive/Gmail/Calendar.
+- O produto ainda precisa decidir provider real de e-mail, termos de uso e
+  politica de retencao de analytics antes de um deploy publico.

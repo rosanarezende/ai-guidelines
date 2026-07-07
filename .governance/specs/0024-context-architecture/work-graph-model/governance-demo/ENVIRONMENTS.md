@@ -41,6 +41,15 @@ Rules:
 
 Better Auth is mounted in the Next app at `/api/auth/[...all]`.
 
+The product login is passwordless. The app does **not** collect or store
+end-user passwords. Supported entry methods are:
+
+- magic link by e-mail;
+- GitHub provider when configured;
+- Google provider when configured;
+- anonymous demo, which creates only a local sandbox session and no portal
+  account.
+
 Local/default persistence:
 
 ```text
@@ -60,6 +69,37 @@ BETTER_AUTH_URL=<public app url ending in /api/auth>
 
 Without `BETTER_AUTH_SECRET`, the auth route fails closed in production. Local
 development uses a fixed non-production secret only to keep the demo bootable.
+
+Magic link delivery:
+
+```text
+GOVERNANCE_AUTH_MAGIC_LINK_WEBHOOK_URL=<optional HTTPS endpoint>
+GOVERNANCE_AUTH_MAGIC_LINK_WEBHOOK_TOKEN=<optional bearer token>
+GOVERNANCE_AUTH_MAGIC_LINK_DELIVERY=dev-outbox
+```
+
+Rules:
+
+- when `GOVERNANCE_AUTH_MAGIC_LINK_WEBHOOK_URL` is set, the app POSTs the link
+  to that endpoint;
+- in development/test, or when `GOVERNANCE_AUTH_MAGIC_LINK_DELIVERY=dev-outbox`,
+  links are appended to `portal-magic-links.jsonl` under the local state
+  directory for automated tests and local dogfood;
+- in production-like runtime, magic link delivery fails closed unless a webhook
+  or approved e-mail adapter is configured.
+
+Social provider credentials:
+
+```text
+GOVERNANCE_AUTH_GITHUB_CLIENT_ID=<optional>
+GOVERNANCE_AUTH_GITHUB_CLIENT_SECRET=<optional>
+GOVERNANCE_AUTH_GOOGLE_CLIENT_ID=<optional>
+GOVERNANCE_AUTH_GOOGLE_CLIENT_SECRET=<optional>
+```
+
+Provider login identifies the person in the portal. It does not connect GitHub
+repositories, Google Drive, Gmail or Calendar, and it does not grant governance
+authority.
 
 ## 3. Docker contract
 

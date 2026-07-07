@@ -46,6 +46,9 @@ adapter-kinds:
   agent-gateway:
     purpose: "gateway agentivo amplo; classe adiada/risk-gated por ampliar superficie de autoridade e egress"
     may-write-authoritative-state: false
+  journey-analytics:
+    purpose: "mede uso do app e funil de adocao sem receber conteudo governado"
+    may-write-authoritative-state: false
 
 common-contract:
   required-fields:
@@ -122,6 +125,7 @@ app-projection:
       - service-catalog
       - finops-cost
       - product-analytics
+      - journey-analytics
       - knowledge-assistant
       - design-system
       - knowledge-base
@@ -136,6 +140,7 @@ app-projection:
         - identity-directory
         - assistant-runtime-local-cloud
         - service-catalog
+        - journey-analytics
       ui-copy: "Integracoes disponiveis em breve: GitLab, Bitbucket, Google Workspace/Okta, Backstage/OpsLevel."
     work-sources:
       purpose: "descobrir repos, pastas, ownership, capabilities e source revisions"
@@ -337,6 +342,16 @@ integrations:
     framework-works-without-it: true
     value-add: "conecta experimentos e jornadas de produto a outcomes reais"
     authority: "analytics externo nao aceita verdict; verdict depende de outcome resolvido"
+    priority: P1
+
+  - id: journey-analytics
+    category: product-experience
+    systems: [posthog, plausible, matomo, umami, google-analytics, segment, amplitude, mixpanel]
+    adapter-kind: journey-analytics
+    feeds: [signup-step, demo-start, onboarding-step, workspace-created, activation-funnel]
+    framework-works-without-it: true
+    value-add: "mostra onde usuarios abandonam ou travam na adocao do app"
+    authority: "telemetria de jornada nao recebe YAML, conteudo governado, secrets nem concede authority"
     priority: P1
 
   - id: feature-flags

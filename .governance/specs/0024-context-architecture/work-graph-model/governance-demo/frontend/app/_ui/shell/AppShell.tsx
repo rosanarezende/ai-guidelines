@@ -67,7 +67,7 @@ export default function AppShell({
     await authClient.signOut().catch(() => null);
     await logoutLocal();
     await applySensitiveQueryCacheEvent(queryClient, { type: "logout" });
-    window.location.href = "/signup";
+    window.location.href = "/login";
   }
 
   return (

@@ -7,6 +7,7 @@ export * from "./api/result.ts";
 export * from "./assistant/schemas.ts";
 export * from "./auth/schemas.ts";
 export * from "./errors/types.ts";
+export * from "./growth/schemas.ts";
 export * from "./host/schemas.ts";
 export * from "./integrations/schemas.ts";
 export * from "./members/schemas.ts";

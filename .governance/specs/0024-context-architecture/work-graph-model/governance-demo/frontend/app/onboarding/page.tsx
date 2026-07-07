@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
   const gate = await resolveAdoptionGate();
-  if (!gate.principal) redirect("/signup");
+  if (!gate.principal) redirect("/login");
   const workspace = gate.currentWorkspace;
   if (!workspace) redirect("/organizations");
 

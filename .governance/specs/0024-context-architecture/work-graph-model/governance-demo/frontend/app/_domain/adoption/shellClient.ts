@@ -71,6 +71,13 @@ export function attachDemoOrganization() {
   });
 }
 
+export function startAnonymousDemo() {
+  return postJson<{
+    principal: { id: string; displayName: string; identityProvider?: string };
+    workspace: ShellWorkspaceSummary;
+  }>("/api/local/demo", {});
+}
+
 export function selectOrganization(workspaceId: string) {
   return postJson<{ workspace: ShellWorkspaceSummary }>("/api/local/organizations/select", {
     workspaceId,

@@ -1,0 +1,8 @@
+{
+  "messages": {
+    "auth.complete.title": "Conectando sua identidade",
+    "auth.complete.body": "Estamos ligando sua sessão do portal ao shell local deste workspace.",
+    "auth.complete.error": "Não foi possível concluir a entrada. Volte para o login e tente novamente. Detalhe: {error}",
+    "auth.complete.back": "Voltar ao login"
+  }
+}

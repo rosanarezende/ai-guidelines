@@ -1,15 +1,17 @@
 import { expect, test } from "@playwright/test";
-import { expectNoAcmeDemoLeak, openWorkspace, resetSeed } from "./support/contract-fixtures.ts";
+import {
+  completeLoginWithMagicLink,
+  expectNoAcmeDemoLeak,
+  openWorkspace,
+  resetSeed,
+} from "./support/contract-fixtures.ts";
 
 test.describe("Auth, workspace e shell", () => {
   test("APP-02 cria workspace novo sem vazar dados da demo", async ({ page, request }) => {
     await resetSeed(request, "blank");
     await page.goto("/");
-    await expect(page).toHaveURL(/\/signup$/);
-    await page.getByTestId("signup-display-name").fill("Ana Admin");
-    await page.getByTestId("signup-email").fill("ana-admin@example.com");
-    await page.getByTestId("signup-password").fill("correct horse battery staple");
-    await page.getByTestId("signup-submit").click();
+    await expect(page).toHaveURL(/\/login$/);
+    await completeLoginWithMagicLink(page, { email: "ana-admin@example.com", name: "Ana Admin" });
     await expect(page).toHaveURL(/\/organizations$/);
 
     await page.getByTestId("workspace-create-name").fill("Mundo da Mel");
@@ -49,5 +51,16 @@ test.describe("Auth, workspace e shell", () => {
     await page.goto("/organizations");
     await page.getByTestId("workspace-switcher").click();
     await expect(page.getByTestId("workspace-real-list")).toBeVisible();
+  });
+
+  test("APP-47 demo anonima abre sem conta de portal", async ({ page, request }) => {
+    await resetSeed(request, "blank");
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/login$/);
+    await page.getByTestId("login-demo-anonymous").click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByTestId("home-demo-banner")).toContainText(/demo|sandbox/i);
+    const bridge = await page.context().request.post("/api/local/auth/bridge", { data: {} });
+    expect(bridge.status()).toBe(401);
   });
 });

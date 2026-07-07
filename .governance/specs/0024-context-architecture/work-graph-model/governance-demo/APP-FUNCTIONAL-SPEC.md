@@ -20,7 +20,7 @@ Ele parte da declaracao de produto: o app e a superficie humana do framework, en
 
 Ele descreve, tela por tela, o que o app precisa entregar desde o primeiro acesso ate o uso diario:
 
-- criacao de conta local;
+- entrada passwordless no portal sem guardar senha de usuario final;
 - criacao e selecao de organizacoes/workspaces;
 - convite de pessoas;
 - atribuicao de papeis;
@@ -55,7 +55,7 @@ Quando uma funcionalidade ainda nao tem backend real, isso fica explicitamente m
 | QRD-03 | pasta separada `governance-demo/mock-api/`; nome oficial `mock-api`                                                                                                                                |
 | QRD-04 | Hono + `@hono/node-server`; frontend consome via `GOVERNANCE_API_BASE_URL`                                                                                                                         |
 | QRD-05 | MSW entra quando houver primeiros testes de componente/hook (ainda não há)                                                                                                                         |
-| QRD-06 | Playwright em `governance-demo/test/`; primeira jornada: signup → workspace → onboarding parcial → Home; seed resetada por teste                                                                   |
+| QRD-06 | Playwright em `governance-demo/test/`; primeira jornada: login passwordless → workspace → onboarding parcial → Home; seed resetada por teste                                                       |
 | QRD-07 | régua aplicada: jornada e2e = `UX-provada`; persistência via `/api/local/*` = `Produto-integrado`; governança real segue nos checks do backend                                                     |
 
 ## 2.2 APIs de produto do shell (R1 entregue)
@@ -64,31 +64,32 @@ Rotas Next (`frontend/app/api/local/*`) sobre use cases + reducer puro
 (`@demo/domain`, fisicamente em `packages/domain/src/onboarding`); toda mutação
 vira comando + evento:
 
-| Rota                                        | Método   | Função                                                                         |
-| ------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `/api/local/signup`                         | POST     | compatibilidade local/teste: cria local-principal + sessao                     |
-| `/api/local/auth/bridge`                    | POST     | liga sessao Better Auth a um principal local `portal-*`                        |
-| `/api/local/logout`                         | POST     | limpa cookie da sessao local; nao apaga workspaces nem event-log               |
-| `/api/local/organizations[/select]`         | POST     | criar/anexar demo/selecionar workspace                                         |
-| `/api/local/onboarding/status`              | POST     | partial/finished (nunca rebaixa finished)                                      |
-| `/api/local/onboarding/path`                | POST     | guided/advanced                                                                |
-| `/api/local/onboarding/profile`             | POST     | perfil de governanca + regra de acumulo sensivel                               |
-| `/api/local/onboarding/workspace-mode`      | POST     | local/shared/controlled                                                        |
-| `/api/local/onboarding/stack`               | POST     | execution-mode, operational-store, graph-read-model, identity (+ warnings)     |
-| `/api/local/members`                        | GET/POST | visão pessoas/grupos/convites/papéis/authority derivada · convidar (token)     |
-| `/api/local/members/invites/[id]`           | POST     | accept (com token) / decline / revoke; expiração honesta                       |
-| `/api/local/members/groups`                 | POST     | criar time/grupo local                                                         |
-| `/api/local/roles`                          | GET/POST | catálogo + atribuições · propor papel por subject (proposed; self-assigned)    |
-| `/api/local/roles/[id]`                     | POST     | accept / reject / revoke                                                       |
-| `/api/local/governance-host`                | GET/POST | fit-check · create (scaffold real + sourceRevision) · link · sandbox           |
-| `/api/local/work-sources`                   | GET/POST | listar/adicionar fonte (entra como `declared`)                                 |
-| `/api/local/work-sources/[id]/scan`         | POST     | scan local real (git head, hash, cloud-sync) → `sourceTrust` derivado          |
-| `/api/local/work-sources/[id]/browser-scan` | POST     | registra snapshot escolhido no navegador (`snapshot-only`, sem Git/autoria)    |
-| `/api/local/assistant`                      | GET/POST | config providers · salvar provider (teste real) · dismiss                      |
-| `/api/local/assistant/test`                 | POST     | Ollama `/api/tags` ou OpenAI-compatible `/v1/models`; egress fail-closed       |
-| `/api/local/assistant/defaults`             | POST     | default por função (QRD-24)                                                    |
-| `/api/local/integration-backlog`            | GET      | catálogo projetado: disponivel/release-1/em-breve/adiado + nota de honestidade |
-| `/api/local/integrations/[id]`              | POST     | configured/disabled por workspace                                              |
+| Rota                                        | Método   | Função                                                                            |
+| ------------------------------------------- | -------- | --------------------------------------------------------------------------------- |
+| `/api/local/signup`                         | POST     | compatibilidade local/teste: cria local-principal + sessao sem passar pelo portal |
+| `/api/local/auth/bridge`                    | POST     | liga sessao Better Auth a um principal local `portal-*`                           |
+| `/api/local/demo`                           | POST     | cria sessao local anonima restrita a sandbox/demo sem conta de portal             |
+| `/api/local/logout`                         | POST     | limpa cookie da sessao local; nao apaga workspaces nem event-log                  |
+| `/api/local/organizations[/select]`         | POST     | criar/anexar demo/selecionar workspace                                            |
+| `/api/local/onboarding/status`              | POST     | partial/finished (nunca rebaixa finished)                                         |
+| `/api/local/onboarding/path`                | POST     | guided/advanced                                                                   |
+| `/api/local/onboarding/profile`             | POST     | perfil de governanca + regra de acumulo sensivel                                  |
+| `/api/local/onboarding/workspace-mode`      | POST     | local/shared/controlled                                                           |
+| `/api/local/onboarding/stack`               | POST     | execution-mode, operational-store, graph-read-model, identity (+ warnings)        |
+| `/api/local/members`                        | GET/POST | visão pessoas/grupos/convites/papéis/authority derivada · convidar (token)        |
+| `/api/local/members/invites/[id]`           | POST     | accept (com token) / decline / revoke; expiração honesta                          |
+| `/api/local/members/groups`                 | POST     | criar time/grupo local                                                            |
+| `/api/local/roles`                          | GET/POST | catálogo + atribuições · propor papel por subject (proposed; self-assigned)       |
+| `/api/local/roles/[id]`                     | POST     | accept / reject / revoke                                                          |
+| `/api/local/governance-host`                | GET/POST | fit-check · create (scaffold real + sourceRevision) · link · sandbox              |
+| `/api/local/work-sources`                   | GET/POST | listar/adicionar fonte (entra como `declared`)                                    |
+| `/api/local/work-sources/[id]/scan`         | POST     | scan local real (git head, hash, cloud-sync) → `sourceTrust` derivado             |
+| `/api/local/work-sources/[id]/browser-scan` | POST     | registra snapshot escolhido no navegador (`snapshot-only`, sem Git/autoria)       |
+| `/api/local/assistant`                      | GET/POST | config providers · salvar provider (teste real) · dismiss                         |
+| `/api/local/assistant/test`                 | POST     | Ollama `/api/tags` ou OpenAI-compatible `/v1/models`; egress fail-closed          |
+| `/api/local/assistant/defaults`             | POST     | default por função (QRD-24)                                                       |
+| `/api/local/integration-backlog`            | GET      | catálogo projetado: disponivel/release-1/em-breve/adiado + nota de honestidade    |
+| `/api/local/integrations/[id]`              | POST     | configured/disabled por workspace                                                 |
 
 ## 3. Principios de produto
 
@@ -107,11 +108,12 @@ vira comando + evento:
 O onboarding nao e uma tela unica. Ele e uma experiencia condicional que depende
 de **como a pessoa chegou ao app** e de **qual autoridade ela ja tem**.
 
-O fluxo humano sempre comeca em `/signup`. Mesmo quem recebeu convite precisa
-ter uma conta de portal antes de aceitar membership ou papel. Criar conta,
-entrar em um workspace e receber autoridade sao eventos distintos: Better Auth
-identifica a pessoa; o shell local escopa a sessao/workspace; o governance host
-continua sendo a fonte de autoridade e decisoes.
+O fluxo humano sempre comeca em `/login`. Mesmo quem recebeu convite precisa
+autenticar no portal por link magico ou provedor antes de aceitar membership ou
+papel. Entrar no portal, entrar em um workspace e receber autoridade sao eventos
+distintos: Better Auth identifica a pessoa; o shell local escopa a sessao/
+workspace; o governance host continua sendo a fonte de autoridade e decisoes.
+O app nao coleta nem armazena senha de usuario final.
 
 ### 3.1.1 Contextos de entrada
 
@@ -261,7 +263,7 @@ type CwpPageContext = {
   workspaceId?: string;
   actorId?: string;
   surface:
-    | "signup"
+    | "login"
     | "organizations"
     | "onboarding"
     | "home"
@@ -296,7 +298,7 @@ permissao.
 
 | Rota/superficie          | Especialista CWP                          | Oportunidade principal                                                                  |
 | ------------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------- |
-| `/signup`                | `adoption-guide`                          | explicar conta local, auth futura, demo e diferenca entre login e authority             |
+| `/login`                 | `adoption-guide`                          | explicar link magico/provedores, demo anonima e diferenca entre login e authority       |
 | `/organizations`         | `workspace-guide`                         | escolher workspace, anexar demo, entender local/shared/controlled                       |
 | `/onboarding`            | `setup-guide`/`member-guide`/`demo-guide` | escolher trilha por contexto; guiar setup, entrada de participante ou tour demo         |
 | `/sources`               | `source-guide`                            | escolher local/cloud/GitHub, explicar `sourceTrust`, `.governance` e `.governance-host` |
@@ -377,7 +379,7 @@ do pipeline de provider/policy/audit.
 
 | Area          | Tela/rota desejada       | Estado atual                                     | Papel principal                                 |
 | ------------- | ------------------------ | ------------------------------------------------ | ----------------------------------------------- |
-| Entrada       | `/signup`                | `UI real` para identidade local minima           | Criar usuario local                             |
+| Entrada       | `/login`                 | `UI real` para identidade passwordless do portal | Entrar por link magico/provedor ou demo anonima |
 | Entrada       | `/organizations`         | `UI real/parcial`                                | Criar, escolher e anexar demo                   |
 | Onboarding    | `/onboarding`            | `UI parcial`                                     | Configurar workspace                            |
 | Home          | `/`                      | `UI parcial`                                     | Proximo passo e pendencias                      |
@@ -408,30 +410,34 @@ novo responde vazio honesto ate existir governance host publicado.
 **Ainda falta:** visualizacao relacional opcional em ECharts graph, links de
 acao governada por tipo de no e mapa para workspace real fora da demo.
 
-## 6. Fluxo 0: primeiro acesso e conta do portal
+## 6. Fluxo 0: primeiro acesso e entrada no portal
 
-### 6.1 Tela: Criar conta do portal (`/signup`)
+### 6.1 Tela: Login do portal (`/login`)
 
 **Objetivo:** permitir que uma pessoa comece a usar o app com identidade real
-do portal sem confundir login/membership com autoridade governada.
+do portal sem guardar senha no produto e sem confundir login/membership com
+autoridade governada.
 
 **Usuario ve:**
 
-- explicacao curta: "Esta conta identifica voce no portal; as permissoes reais sao configuradas por workspace";
-- campos: nome, email e senha;
+- explicacao curta: "Login identifica voce no portal; authority continua no workspace/governance host";
+- campo de e-mail para receber link magico;
+- campo de nome opcional para primeiro acesso por link magico;
+- botoes de provedor quando configurados: GitHub, Google e OIDC futuro;
 - aviso: conta/membership de portal nao concede authority governada;
-- acao primaria: `Criar conta`;
-- opcoes de entrada:
-  - `Continuar localmente`;
-  - `Entrar com GitHub`;
-  - `Entrar com Google`;
-  - `Conectar provedor corporativo (OIDC)`;
-  - `Usar demo acme`.
+- acao primaria: `Enviar link magico`;
+- acao secundaria: `Experimentar demo sem conta`.
 
 **Backend necessario:**
 
 - Better Auth em `/api/auth/[...all]` via integracao Next.js;
+- Magic Link plugin para entrada sem senha;
+- social providers opcionais por env (`GOVERNANCE_AUTH_GITHUB_*`,
+  `GOVERNANCE_AUTH_GOOGLE_*`);
+- entrega de magic link por webhook configurado ou outbox local somente em
+  desenvolvimento/teste;
 - `/api/local/auth/bridge` para criar/garantir principal local `portal-*`;
+- `/api/local/demo` para criar principal local anonimo e anexar a sandbox Acme;
 - `local-principal.create` como compatibilidade local/teste e como ponte do portal;
 - persistencia local file-first em `.local-state`;
 - cookie/sessao local;
@@ -439,23 +445,28 @@ do portal sem confundir login/membership com autoridade governada.
 
 **Estado atual:**
 
-- a UI de signup usa Better Auth (`sign-up/email`) e em seguida chama
-  `/api/local/auth/bridge`.
+- a UI de login usa Better Auth passwordless (`sign-in/magic-link`) e, apos o
+  retorno `/auth/complete`, chama `/api/local/auth/bridge`.
+- senha de usuario final nao e coletada nem armazenada pelo produto.
+- `/login` permite abrir a demo anonima sem conta de portal; essa sessao local
+  fica restrita a sandbox/demo.
 - `/api/local/organizations` cria/garante organizacao de portal quando ha
   sessao Better Auth, mantendo workspace/shell separado.
 - `/api/local/members` cria convite Better Auth quando ha sessao de portal e
   email do convidado; aceite local continua separado.
-- ainda nao ha aceite de termos, reset, multi-device nem provider externo
-  (GitHub/Google/OIDC) integrado na tela.
+- GitHub/Google aparecem como botoes somente quando as credenciais estao
+  configuradas no ambiente; OIDC generico segue futuro.
+- ainda nao ha aceite de termos, multi-device, provider OIDC generico nem
+  provedor real de e-mail embutido.
 
 **Decisao vigente:**
 
 - seguir [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-19.
 - primeiros providers externos seguem [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-20: GitHub, Google / Google Workspace e OIDC generico avancado.
-- signup do portal cria um usuario Better Auth e um principal local `portal-*`,
-  nao uma autoridade governada.
+- link magico/provedor cria ou reutiliza usuario Better Auth e o bridge cria um
+  principal local `portal-*`, nao uma autoridade governada.
 - `/api/local/signup` permanece como compatibilidade de teste/mode local; nao e
-  o caminho feliz da UI.
+  o caminho feliz da UI. O caminho feliz humano e `/login`.
 - `shared` exige pelo menos `local-auth`, convite e aceite explicito de membership/papeis.
 - `controlled` exige `local-auth` endurecido ou identity-provider externo.
 - login GitHub/Google autentica a pessoa, mas nao cria membership, authority, acesso a repos ou acesso a Drive/Gmail automaticamente.
@@ -497,7 +508,7 @@ do portal sem confundir login/membership com autoridade governada.
 
 - criacao/selecao de organizacao existe.
 - estado local foi limpo em 2026-07-05 para reiniciar a iteracao visual por
-  signup -> onboarding -> settings.
+  login -> onboarding -> settings.
 - demo acme nao deve aparecer como realidade padrao, apenas quando anexada.
 
 **Lacunas:**
@@ -729,12 +740,11 @@ Esta etapa responde: **como este workspace sera executado, persistido e projetad
 **Decisao vigente:** seguir [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-10, QRD-11 e QRD-19. Account/principal, membership, role assignment e authority sao conceitos diferentes. Papeis podem ser atribuidos a pessoas, times, grupos, service accounts e grupos externos; authority efetiva e sempre derivada.
 
 **Regra de entrada:** convite nao substitui conta. Toda pessoa convidada precisa
-criar ou usar uma conta de portal (`/signup`) antes de aceitar membership e
-papeis na organizacao. O convite pode carregar token/codigo, workspace alvo,
-convite Better Auth e papeis propostos, mas so vira membership efetiva depois
-que um principal local ligado ao portal aceita o convite. Login externo futuro
-(GitHub, Google, OIDC) pode autenticar a pessoa; nao concede authority
-governada automaticamente.
+entrar por `/login` antes de aceitar membership e papeis na organizacao. O
+convite pode carregar token/codigo, workspace alvo, convite Better Auth e
+papeis propostos, mas so vira membership efetiva depois que um principal local
+ligado ao portal aceita o convite. Login externo (GitHub, Google, OIDC futuro)
+pode autenticar a pessoa; nao concede authority governada automaticamente.
 
 **Varia por trilha:**
 
@@ -810,7 +820,7 @@ governada automaticamente.
 **Requisitos do primeiro release funcional:**
 
 - implementar convite local primeiro: convite gera token/codigo local e status `pending`; email/cloud fica para adapter futuro.
-- fluxo de aceite de convite passa por `/signup` quando a pessoa ainda nao tem conta local.
+- fluxo de aceite de convite passa por `/login` quando a pessoa ainda nao esta autenticada no portal.
 - convite aceito vincula o token a um principal local e cria membership; papel proposto continua exigindo aceite separado quando aplicavel.
 - implementar groups/teams locais simples no mock-api e backend antes de identity-provider externo, para a UI nascer compativel com empresa maior.
 - papel atribuido a outra pessoa entra como `proposed` e so vira efetivo com aceite do sujeito.
@@ -1979,7 +1989,7 @@ ou automatizar evidencia naquele ponto do fluxo.
 
 | Tela/feature  | Integracao sugerida                 | Quando sugerir                                          | O que deve explicar                                       |
 | ------------- | ----------------------------------- | ------------------------------------------------------- | --------------------------------------------------------- |
-| Signup        | GitHub OAuth, Google, OIDC          | quando a pessoa quer identidade externa                 | login nao concede membership/authority automaticamente    |
+| Login         | GitHub OAuth, Google, OIDC          | quando a pessoa quer identidade externa                 | login nao concede membership/authority automaticamente    |
 | Organizations | GitHub OAuth, OIDC                  | workspace shared/controlled                             | identidade ajuda convites, nao conecta repos sozinho      |
 | Onboarding    | GitHub work-source, assistant local | quando pessoa escolhe configurar fontes/assistente      | pode pular; o app mostra o que fica manual                |
 | Sources       | GitHub/GitLab/Bitbucket/Drive       | fonte local ficou `snapshot-only` ou cloud-sync sem API | provider eleva `sourceTrust` quando traz revision id      |
@@ -2052,7 +2062,7 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 
 | Fluxo            | Backend minimo para ser funcional                                               | Estado                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Signup           | principal local + sessao                                                        | existe                                                                                 |
+| Login            | Better Auth passwordless/provedor + bridge para principal local; demo anonima   | existe parcialmente; magic link/outbox e demo anonima implementados                    |
 | Multi-workspace  | create/select/list workspace                                                    | existe parcialmente                                                                    |
 | Governance host  | create/link/validate/scaffold                                                   | backend + UI parcial existem; falta validacao visual fim-a-fim                         |
 | Membros/convites | invite/accept/assign/revoke                                                     | backend existe; falta UI completa                                                      |
@@ -2240,7 +2250,7 @@ Cada tela/fluxo deste documento deve ter, antes da implementacao incremental:
 
 | Tipo                      | Exemplo                                               |
 | ------------------------- | ----------------------------------------------------- |
-| Jornada                   | signup -> workspace -> onboarding -> Home             |
+| Jornada                   | login -> workspace -> onboarding -> Home              |
 | Consistencia entre telas  | fonte criada em `/sources` aparece em Settings e Home |
 | Persistencia/reload       | onboarding parcial retoma no passo salvo              |
 | Security/authority        | provider cloud nao ativa sem egress/approval          |

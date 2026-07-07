@@ -12,7 +12,7 @@ export default async function ConsolePage({
   searchParams: Promise<{ view?: string }>;
 }) {
   const gate = await resolveAdoptionGate();
-  if (!gate.principal) redirect("/signup");
+  if (!gate.principal) redirect("/login");
   const workspace = gate.currentWorkspace;
   if (!workspace) redirect("/organizations");
 

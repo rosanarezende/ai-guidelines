@@ -113,7 +113,7 @@ const requiredColocatedLocaleFiles = [
   "app/settings/_sections/RolesSection/_locales/pt-br.json",
   "app/settings/_sections/SourcesSection/_locales/pt-br.json",
   "app/settings/_view/SettingsView/_locales/pt-br.json",
-  "app/signup/_view/SignupView/_locales/pt-br.json",
+  "app/login/_view/LoginView/_locales/pt-br.json",
   "app/organizations/_view/OrganizationsView/_locales/pt-br.json",
   "app/(home)/_view/WorkspaceHome/_locales/pt-br.json",
   "app/settings/_view/WorkspaceSettingsView/_locales/pt-br.json",
@@ -629,8 +629,9 @@ for (const relativeFile of walk(path.join(appDir, "app", "api", "local")).filter
     fail(`rota /api/local com parsing JSON manual em vez de parseZodJson: ${normalized}`);
   }
 }
-// ── fluxo inicial signup → organizações → onboarding → home ────────────────
+// ── fluxo inicial login → organizações → onboarding → home ─────────────────
 const requiredFlowRoutes = [
+  "app/login/page.tsx",
   "app/signup/page.tsx",
   "app/organizations/page.tsx",
   "app/onboarding/page.tsx",
@@ -646,7 +647,7 @@ for (const relativeFile of requiredFlowRoutes) {
 // (principal/organização/onboarding) no servidor antes de renderizar.
 const gatedPages = [
   "app/(home)/page.tsx",
-  "app/signup/page.tsx",
+  "app/login/page.tsx",
   "app/onboarding/page.tsx",
   "app/settings/page.tsx",
   "app/console/page.tsx",

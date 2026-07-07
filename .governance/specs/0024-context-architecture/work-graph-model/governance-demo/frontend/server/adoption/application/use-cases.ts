@@ -176,6 +176,24 @@ export async function attachDemoWorkspace(input: {
   return { ok: true, value: normalizeWorkspace(attached) };
 }
 
+export async function startAnonymousDemoSession(): Promise<
+  UseCaseResult<{ principal: LocalAccount; workspace: Workspace }>
+> {
+  const principal: LocalAccount = {
+    id: `anonymous-${randomUUID()}`,
+    displayName: "Visitante da demo",
+    identityProvider: "anonymous",
+    preferredLocale: "pt-br",
+  };
+  const created = await dispatchShellCommand(
+    newShellCommand("local.principal.create", principal.id, { principal })
+  );
+  if (!created.ok) return created;
+  const workspace = await attachDemoWorkspace({ principalId: principal.id, companyName: "Acme" });
+  if (!workspace.ok) return workspace;
+  return { ok: true, value: { principal, workspace: workspace.value } };
+}
+
 export async function selectWorkspace(input: {
   principalId: string;
   workspaceId: string;
