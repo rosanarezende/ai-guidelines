@@ -6,14 +6,8 @@ import {
   CardContent,
   Chip,
   Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
   Typography,
 } from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   flexRender,
@@ -24,13 +18,14 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table";
 import { useMemo, useRef, useState } from "react";
-import { Flex } from "@/app/_ui/shared";
 import type {
   WorkConfidenceState,
   WorkItemKind,
   WorkItemRow,
   WorkRiskLevel,
 } from "../../_model/view-models";
+import { WorkEvidencePanel } from "./WorkEvidencePanel";
+import { WorkTableToolbar } from "./WorkTableToolbar";
 import copy from "./_locales/pt-br.json";
 
 const GRID =
@@ -77,7 +72,7 @@ export function WorkTable({ rows }: { rows: WorkItemRow[] }) {
   return (
     <Card variant="outlined">
       <CardContent>
-        <Toolbar
+        <WorkTableToolbar
           globalFilter={globalFilter}
           setGlobalFilter={setGlobalFilter}
           kind={kind}
@@ -162,88 +157,9 @@ export function WorkTable({ rows }: { rows: WorkItemRow[] }) {
             </Box>
           </Box>
         </Box>
-        {selectedEvidence ? <EvidencePanel row={selectedEvidence} /> : null}
+        {selectedEvidence ? <WorkEvidencePanel row={selectedEvidence} /> : null}
       </CardContent>
     </Card>
-  );
-}
-
-function Toolbar({
-  globalFilter,
-  setGlobalFilter,
-  kind,
-  setKind,
-  confidence,
-  setConfidence,
-  blockedOnly,
-  setBlockedOnly,
-  count,
-}: {
-  globalFilter: string;
-  setGlobalFilter: (value: string) => void;
-  kind: WorkItemKind | "all";
-  setKind: (value: WorkItemKind | "all") => void;
-  confidence: WorkConfidenceState | "all";
-  setConfidence: (value: WorkConfidenceState | "all") => void;
-  blockedOnly: boolean;
-  setBlockedOnly: (value: boolean) => void;
-  count: number;
-}) {
-  return (
-    <Flex gap={1.5} align="center" wrap>
-      <TextField
-        size="small"
-        value={globalFilter}
-        onChange={(event) => setGlobalFilter(event.target.value)}
-        label={copy.search}
-        sx={{ minWidth: { xs: "100%", md: 360 } }}
-      />
-      <FormControl size="small" sx={{ minWidth: 180 }}>
-        <InputLabel>{copy.columns.kind}</InputLabel>
-        <Select
-          value={kind}
-          label={copy.columns.kind}
-          onChange={(event: SelectChangeEvent) =>
-            setKind(event.target.value as WorkItemKind | "all")
-          }
-        >
-          <MenuItem value="all">{copy.allKinds}</MenuItem>
-          {(["intent", "proposal", "standalone", "target"] as const).map((value) => (
-            <MenuItem key={value} value={value}>
-              {copy.kind[value]}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl size="small" sx={{ minWidth: 200 }}>
-        <InputLabel>{copy.columns.confidence}</InputLabel>
-        <Select
-          value={confidence}
-          label={copy.columns.confidence}
-          onChange={(event: SelectChangeEvent) =>
-            setConfidence(event.target.value as WorkConfidenceState | "all")
-          }
-        >
-          <MenuItem value="all">{copy.allConfidence}</MenuItem>
-          {(
-            ["verified", "pending", "no-evidence", "self-declared", "break-glass", "stale"] as const
-          ).map((value) => (
-            <MenuItem key={value} value={value}>
-              {copy.confidence[value]}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Button
-        data-testid="repo-work-filter-blocked"
-        size="small"
-        variant={blockedOnly ? "contained" : "outlined"}
-        onClick={() => setBlockedOnly(!blockedOnly)}
-      >
-        {copy.blockedFilter}
-      </Button>
-      <Chip size="small" variant="outlined" label={`${count} ${copy.rows}`} />
-    </Flex>
   );
 }
 
@@ -312,28 +228,6 @@ function workColumns(onOpenEvidence: (row: WorkItemRow) => void): ColumnDef<Work
       ),
     },
   ];
-}
-
-function EvidencePanel({ row }: { row: WorkItemRow }) {
-  const evidence =
-    row.evidence ||
-    "test: pendente · commit: pendente · verification: pendente até uma fonte independente anexar prova";
-  return (
-    <Card data-testid="work-evidence-panel" variant="outlined" sx={{ mt: 2, bgcolor: "grey.50" }}>
-      <CardContent>
-        <Typography variant="subtitle2">{copy.evidenceTitle}</Typography>
-        <Typography variant="body2" sx={{ mt: 0.5 }}>
-          {row.title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {evidence}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-          test · commit · verification · sourceRevision são conferidos antes de virar prova forte.
-        </Typography>
-      </CardContent>
-    </Card>
-  );
 }
 
 function ConfidencePill({ state }: { state: WorkConfidenceState }) {
