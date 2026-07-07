@@ -31,7 +31,8 @@ export default function AuditPlaceholderView({
 }) {
   const [filter, setFilter] = useState<"all" | "break-glass">("all");
   const items = useMemo(() => (snapshot ? buildAuditItems(snapshot) : []), [snapshot]);
-  const visibleItems = filter === "break-glass" ? items.filter((item) => item.kind === "break-glass") : items;
+  const visibleItems =
+    filter === "break-glass" ? items.filter((item) => item.kind === "break-glass") : items;
 
   return (
     <AppShell
@@ -155,16 +156,16 @@ function buildAuditItems(snapshot: GovernanceSnapshot): AuditItem[] {
   const attestationBreakGlass = snapshot.targets
     .filter((target) => target["attestation-collapse"])
     .map<AuditItem>((target) => ({
-    id: `attestation-collapse-${target.id}`,
-    kind: "break-glass",
-    title: `Colapso de atestação: ${target.id}`,
-    actor: target["attestation-collapse"]?.["approved-by"] ?? target.definer,
-    authority: target["attestation-collapse"]?.["approved-by"] ?? target.definer,
-    revision: snapshot.revision,
-    reason: target["attestation-collapse"]?.reason ?? "colapso registrado",
-    ttl: "n/a",
-    review: target["attestation-collapse"]?.["review-at"] ?? "n/a",
-  }));
+      id: `attestation-collapse-${target.id}`,
+      kind: "break-glass",
+      title: `Colapso de atestação: ${target.id}`,
+      actor: target["attestation-collapse"]?.["approved-by"] ?? target.definer,
+      authority: target["attestation-collapse"]?.["approved-by"] ?? target.definer,
+      revision: snapshot.revision,
+      reason: target["attestation-collapse"]?.reason ?? "colapso registrado",
+      ttl: "n/a",
+      review: target["attestation-collapse"]?.["review-at"] ?? "n/a",
+    }));
   return [
     ...verdicts,
     ...outcomes,

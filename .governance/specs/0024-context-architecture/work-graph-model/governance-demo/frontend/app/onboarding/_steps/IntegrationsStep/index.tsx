@@ -42,7 +42,11 @@ export function IntegrationsStep() {
       </ResponsiveGrid>
       <Flex gap={1} align="flex-start">
         <VerifiedUserIcon fontSize="small" sx={{ color: "text.secondary", mt: 0.25 }} />
-        <Typography data-testid="integration-manual-alternative" variant="caption" color="text.secondary">
+        <Typography
+          data-testid="integration-manual-alternative"
+          variant="caption"
+          color="text.secondary"
+        >
           {copy.authorityNotice}
         </Typography>
       </Flex>

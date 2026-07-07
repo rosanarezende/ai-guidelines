@@ -7,8 +7,9 @@ import copy from "./_locales/pt-br.json";
 import { RESULT_CONFIDENCE_COLORS } from "./resultCharts";
 
 export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardViewModel }) {
-  const firstWeakTargetId = dashboard.targetCards.find((target) => isWeakEvidenceTarget(target))
-    ?.targetId;
+  const firstWeakTargetId = dashboard.targetCards.find((target) =>
+    isWeakEvidenceTarget(target)
+  )?.targetId;
   return (
     <Card variant="outlined">
       <CardContent>
@@ -76,9 +77,7 @@ export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardV
   );
 }
 
-function isWeakEvidenceTarget(
-  target: ResultsDashboardViewModel["targetCards"][number]
-): boolean {
+function isWeakEvidenceTarget(target: ResultsDashboardViewModel["targetCards"][number]): boolean {
   return (
     target.confidence === "no-evidence" ||
     target.confidence === "self-declared" ||

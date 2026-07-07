@@ -17,7 +17,9 @@ export default function ContractsPlaceholderView({
 }) {
   const [selectedId, setSelectedId] = useState("acme-user-context");
   const selected =
-    snapshot?.contracts.find((contract) => contract.id === selectedId) ?? snapshot?.contracts[0] ?? null;
+    snapshot?.contracts.find((contract) => contract.id === selectedId) ??
+    snapshot?.contracts[0] ??
+    null;
   const linkedIntents = useMemo(() => {
     if (!snapshot || !selected) return [];
     return snapshot.portfolio.intents.filter(

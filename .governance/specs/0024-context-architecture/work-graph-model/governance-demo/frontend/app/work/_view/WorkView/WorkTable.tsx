@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Button,
-  Typography,
-} from "@mui/material";
+import { Box, Card, CardContent, Chip, Button, Typography } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   flexRender,
@@ -28,8 +21,7 @@ import { WorkEvidencePanel } from "./WorkEvidencePanel";
 import { WorkTableToolbar } from "./WorkTableToolbar";
 import copy from "./_locales/pt-br.json";
 
-const GRID =
-  "112px minmax(280px, 1.6fr) 150px 150px 132px 100px minmax(220px, 1fr) 132px";
+const GRID = "112px minmax(280px, 1.6fr) 150px 150px 132px 100px minmax(220px, 1fr) 132px";
 
 export function WorkTable({ rows }: { rows: WorkItemRow[] }) {
   const [globalFilter, setGlobalFilter] = useState("");

@@ -42,7 +42,8 @@ export default function ResultsView({ workspace }: { workspace: WorkspaceSummary
 
         <Alert data-testid="contextual-integration-observability" severity="info">
           Integração sugerida: observability/analytics/feature-flags podem reduzir evidência manual
-          de outcomes. Sem elas, o rollup continua derivado do host e marca confiança explicitamente.
+          de outcomes. Sem elas, o rollup continua derivado do host e marca confiança
+          explicitamente.
         </Alert>
 
         <Flex gap={1} wrap>

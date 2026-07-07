@@ -124,9 +124,17 @@ export default function IntegrationsHubView({
             >
               <Box sx={{ display: "grid", gap: 1 }}>
                 <Flex gap={0.5} wrap>
-                  <Chip size="small" color={entry.configured ? "success" : "default"} label={statusLabel(entry)} />
-                  {entry.localAdapter ? <Chip size="small" label={`adapter local: ${entry.localAdapter}`} /> : null}
-                  {entry.cloudRelease1 ? <Chip size="small" color="info" label="cloud release 1" /> : null}
+                  <Chip
+                    size="small"
+                    color={entry.configured ? "success" : "default"}
+                    label={statusLabel(entry)}
+                  />
+                  {entry.localAdapter ? (
+                    <Chip size="small" label={`adapter local: ${entry.localAdapter}`} />
+                  ) : null}
+                  {entry.cloudRelease1 ? (
+                    <Chip size="small" color="info" label="cloud release 1" />
+                  ) : null}
                 </Flex>
                 <Typography variant="body2" color="text.secondary">
                   Sem esta integracao, o framework continua file-first; a evidência fica manual,

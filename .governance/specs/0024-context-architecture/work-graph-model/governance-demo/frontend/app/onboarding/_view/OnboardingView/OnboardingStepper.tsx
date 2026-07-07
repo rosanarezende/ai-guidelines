@@ -21,9 +21,9 @@ export function OnboardingStepper() {
             ? "onboarding-review-step"
             : number === 5
               ? "onboarding-step-integrations"
-            : number === 3
-              ? "onboarding-step-sources"
-              : `onboarding-step-${String(number).padStart(2, "0")}`;
+              : number === 3
+                ? "onboarding-step-sources"
+                : `onboarding-step-${String(number).padStart(2, "0")}`;
         return (
           <ButtonBase
             key={label}

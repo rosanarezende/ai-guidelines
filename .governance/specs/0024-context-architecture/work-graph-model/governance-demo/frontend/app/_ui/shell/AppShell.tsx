@@ -58,7 +58,11 @@ export default function AppShell({
   maxWidth?: "md" | "lg" | "xl";
   navigationMode?: "public" | "workspace";
   hasGovernanceHost?: boolean;
-  cacheScope?: { accountId: string; workspaceId?: string; session: "local" | "portal" | "anonymous" };
+  cacheScope?: {
+    accountId: string;
+    workspaceId?: string;
+    session: "local" | "portal" | "anonymous";
+  };
 }) {
   const [mounted, setMounted] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -239,14 +243,22 @@ function CupPanel({ pathname }: { pathname: string }) {
               : "especialista contextual";
 
   return (
-    <Box data-testid="cup-panel" sx={{ width: { xs: 320, sm: 420 }, p: 3, display: "grid", gap: 2 }}>
+    <Box
+      data-testid="cup-panel"
+      sx={{ width: { xs: 320, sm: 420 }, p: 3, display: "grid", gap: 2 }}
+    >
       <Box>
         <Typography variant="h6" gutterBottom>
           {t("app.cup.title")}
         </Typography>
         <Typography color="text.secondary">{t("app.cup.body")}</Typography>
       </Box>
-      <Chip data-testid="cup-specialist" size="small" label={specialist} sx={{ justifySelf: "start" }} />
+      <Chip
+        data-testid="cup-specialist"
+        size="small"
+        label={specialist}
+        sx={{ justifySelf: "start" }}
+      />
       <Chip
         data-testid="cup-provider-status"
         size="small"
@@ -254,9 +266,10 @@ function CupPanel({ pathname }: { pathname: string }) {
         sx={{ justifySelf: "start" }}
       />
       <Alert data-testid="cup-context-boundary" severity="info">
-        Contexto entregue por rota e papel. Conteúdo restrito é redacted por policy antes de qualquer provider.
+        Contexto entregue por rota e papel. Conteúdo restrito é redacted por policy antes de
+        qualquer provider.
       </Alert>
-      {(pathname.startsWith("/integrations") || pathname.startsWith("/settings")) ? (
+      {pathname.startsWith("/integrations") || pathname.startsWith("/settings") ? (
         <Alert severity="warning">
           <Typography data-testid="cup-policy-reference" variant="body2">
             POLICY-HANDBOOK · egress: integração cloud exige aprovação de security e registro de
@@ -279,7 +292,8 @@ function CupPanel({ pathname }: { pathname: string }) {
           {draftOpen ? (
             <>
               <Alert data-testid="cup-draft-command" severity="info">
-                dry-run preparado com baseRevision atual. Nada será executado sem confirmação humana.
+                dry-run preparado com baseRevision atual. Nada será executado sem confirmação
+                humana.
               </Alert>
               <FormControlLabel
                 control={
