@@ -21,7 +21,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { logoutLocal } from "@/app/_domain/adoption/shellClient";
+import { applySensitiveQueryCacheEvent } from "@/app/_domain/cache/sensitive-query-cache";
 import { t } from "@/lib/i18n";
 import GlobalNavigation from "./GlobalNavigation";
 import { theme } from "../theme";
@@ -54,6 +56,7 @@ export default function AppShell({
   const [mounted, setMounted] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [cupOpen, setCupOpen] = useState(false);
+  const queryClient = useQueryClient();
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -61,6 +64,7 @@ export default function AppShell({
 
   async function logout() {
     await logoutLocal();
+    await applySensitiveQueryCacheEvent(queryClient, { type: "logout" });
     window.location.href = "/signup";
   }
 

@@ -110,8 +110,10 @@ Base tecnica de APP-45 ja fica no layer rapido: `@demo/contracts` define
 `buildGovernedQueryKey()` e `sensitiveQueryCacheDirective()`;
 `backend/tests/auth-query-scope.test.ts` prova que ids de escopo nao carregam
 token/secret, que query keys mudam por conta/sessao/workspace/membership e que
-eventos sensiveis retornam diretivas explicitas de cache. A tela/rota real
-continua `fixme` ate o Better Auth runtime existir no app.
+eventos sensiveis retornam diretivas explicitas de cache. O runtime Better Auth
+ja existe em `/api/auth/[...all]`; o contrato APP-45 continua `fixme` porque a
+UX completa de signup/convite/troca de conta ainda nao exercita membership de
+portal sem authority governada.
 
 Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
 dos testes do backend (`test:shell`), o typecheck strict + `test:api` da

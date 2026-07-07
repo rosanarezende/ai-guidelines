@@ -6,12 +6,14 @@ import { Alert, Box, Button, Typography } from "@mui/material";
 import ScienceIcon from "@mui/icons-material/Science";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   attachDemoOrganization,
   createOrganization,
   routeAfterSelect,
   selectOrganization,
 } from "@/app/_domain/adoption/shellClient";
+import { applySensitiveQueryCacheEvent } from "@/app/_domain/cache/sensitive-query-cache";
 import { SectionCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
 import type { WorkspaceKind } from "@demo/contracts";
@@ -22,15 +24,18 @@ import copy from "./_locales/pt-br.json";
 const m = copy.messages;
 
 export default function OrganizationsView({
+  principalId,
   principalName,
   organizations,
   demoAttached,
 }: {
+  principalId: string;
   principalName: string;
   organizations: OrganizationListItem[];
   demoAttached: boolean;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +48,11 @@ export default function OrganizationsView({
       setBusyId(null);
       return;
     }
+    await applySensitiveQueryCacheEvent(queryClient, {
+      type: "workspace-switch",
+      accountId: principalId,
+      toWorkspaceId: result.workspace.id,
+    });
     router.push(routeAfterSelect(result.workspace));
   }
 
@@ -55,6 +65,11 @@ export default function OrganizationsView({
       setBusyId(null);
       return;
     }
+    await applySensitiveQueryCacheEvent(queryClient, {
+      type: "workspace-switch",
+      accountId: principalId,
+      toWorkspaceId: result.workspace.id,
+    });
     router.push("/onboarding");
   }
 
@@ -67,6 +82,11 @@ export default function OrganizationsView({
       setBusyId(null);
       return;
     }
+    await applySensitiveQueryCacheEvent(queryClient, {
+      type: "workspace-switch",
+      accountId: principalId,
+      toWorkspaceId: result.workspace.id,
+    });
     router.push(routeAfterSelect(result.workspace));
   }
 

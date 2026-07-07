@@ -179,18 +179,19 @@ Regras de produto:
 - `/results` e a primeira tela real que aplica QRD-29: Apache ECharts +
   TanStack Query sobre `/api/results/dashboard`. Ela confirma dashboards na
   demo; workspace novo ainda precisa de host/outcomes antes de ter dados.
-- Better Auth deve seguir a integracao **Next.js App Router** do produto:
-  `/api/auth/[...all]` + `toNextJsHandler(auth)`. A integracao
-  `tanstackStartCookies()` e especifica de TanStack Start e nao e o caminho do
-  app atual.
-- Quando Better Auth virar auth real, TanStack Query precisa invalidar/limpar
-  queries sensiveis em login, logout, troca de workspace e aceite de convite.
+- Better Auth segue a integracao **Next.js App Router** do produto:
+  `/api/auth/[...all]` + `toNextJsHandler(auth)`, com `auth-client` React
+  separado. A integracao `tanstackStartCookies()` e especifica de TanStack
+  Start e nao e o caminho do app atual.
+- TanStack Query invalida/limpa queries sensiveis por contrato em login,
+  logout, troca de workspace, mudanca de membership e aceite de convite.
   Query key de dado governado deve carregar workspace e escopo de sessao/conta
-  suficiente para impedir vazamento cross-workspace.
+  suficiente para impedir vazamento cross-workspace; enquanto telas legadas usam
+  a chave `workspace`, o helper limpa tambem esse formato.
 - A fronteira tipada dessa regra vive em `@demo/contracts`:
   `PortalQueryScopeSchema`, `SensitiveCacheEventSchema`,
-  `buildGovernedQueryKey()` e `sensitiveQueryCacheDirective()`. Tela e rota
-  real usam esses contratos; cache nunca e prova de authority.
+  `buildGovernedQueryKey()` e `sensitiveQueryCacheDirective()`. Tela, rota e
+  helper de cache usam esses contratos; cache nunca e prova de authority.
 - Se listas operacionais exigirem scroll infinito real (>100 linhas por pagina),
   a decisao de tabela volta para novo QRD.
 - Cytoscape esta banido do produto, do roadmap e dos spikes.
@@ -433,9 +434,11 @@ acao governada por tipo de no e mapa para workspace real fora da demo.
 **Estado atual:**
 
 - existe fluxo local de signup e sessao local.
-- ainda nao ha auth real, aceite de termos, identity-provider, reset ou multi-device.
-- Better Auth foi decidido como candidato de auth real/control plane, mas ainda
-  nao esta montado na rota Next `/api/auth/[...all]`.
+- Better Auth ja esta montado em `/api/auth/[...all]` como control-plane auth
+  real local (SQLite em `.local-state` por padrao), mas ainda nao substitui a UX
+  de signup/convite do app.
+- ainda nao ha aceite de termos, reset, multi-device nem provider externo
+  (GitHub/Google/OIDC) integrado na tela.
 
 **Decisao vigente:**
 

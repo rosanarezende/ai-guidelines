@@ -18,6 +18,7 @@ export default async function OrganizationsPage() {
   }));
   return (
     <OrganizationsView
+      principalId={gate.principal.id}
       principalName={gate.principal.displayName}
       organizations={organizations}
       demoAttached={organizations.some((organization) => organization.id === DEMO_WORKSPACE_ID)}

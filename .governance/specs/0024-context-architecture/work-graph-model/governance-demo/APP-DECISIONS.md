@@ -3235,6 +3235,11 @@ Para a governance-demo, a integracao vigente e:
   `@demo/contracts`: `PortalQueryScopeSchema`, `SensitiveCacheEventSchema`,
   `buildGovernedQueryKey()` e `sensitiveQueryCacheDirective()`, com regressao em
   `backend/tests/auth-query-scope.test.ts`.
-- A proxima fatia tecnica deve montar a rota/client Better Auth e ligar
-  invalidation real, ainda sem transformar cache em prova de authority.
+- A segunda fatia tecnica montou a rota Next `/api/auth/[...all]` com
+  `toNextJsHandler`, criou o `auth-client` React e ligou diretivas reais de
+  cache TanStack no logout e na troca/criacao de workspace. Isso fecha a
+  infraestrutura, nao a UX completa de signup/convite.
+- A proxima fatia deve adaptar signup/organizations/invites para usar Better
+  Auth como identidade real e provar que membership de portal nao vira authority
+  governada.
 - Nenhuma tela nova de auth real deve nascer sem contrato de cache/sessao.

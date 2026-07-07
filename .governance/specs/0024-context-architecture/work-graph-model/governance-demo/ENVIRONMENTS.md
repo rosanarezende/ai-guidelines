@@ -37,6 +37,30 @@ Rules:
 - source selection never comes from browser storage;
 - `GOVERNANCE_API_BASE_URL` is used only when `GOVERNANCE_DATA_SOURCE=mock-api`.
 
+## 2.1 Portal auth contract
+
+Better Auth is mounted in the Next app at `/api/auth/[...all]`.
+
+Local/default persistence:
+
+```text
+GOVERNANCE_PORTAL_SQLITE_PATH=<optional absolute path>
+```
+
+If unset, the portal auth database lives beside the local adoption shell in
+`frontend/.local-state/portal-auth.sqlite` (or under `GOVERNANCE_LOCAL_STATE_DIR`
+when that override is set).
+
+Production-like runtime must provide:
+
+```text
+BETTER_AUTH_SECRET=<strong secret>
+BETTER_AUTH_URL=<public app url ending in /api/auth>
+```
+
+Without `BETTER_AUTH_SECRET`, the auth route fails closed in production. Local
+development uses a fixed non-production secret only to keep the demo bootable.
+
 ## 3. Docker contract
 
 SQLite/local-solo does **not** need Docker.

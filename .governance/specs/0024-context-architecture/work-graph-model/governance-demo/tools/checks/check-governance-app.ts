@@ -476,6 +476,45 @@ for (const relativeFile of requiredApiRoutes) {
     fail(`rota da API local declarada no contrato ausente: ${relativeFile}`);
   }
 }
+// APP-45: Better Auth é integração Next.js do portal; TanStack Query é cache
+// de dados governados, não runtime de auth.
+const authRouteFile = path.join(appDir, "app", "api", "auth", "[...all]", "route.ts");
+const authServerFile = path.join(appDir, "server", "auth", "portal-auth.ts");
+const authClientFile = path.join(appDir, "app", "_domain", "auth", "auth-client.ts");
+const sensitiveCacheFile = path.join(appDir, "app", "_domain", "cache", "sensitive-query-cache.ts");
+for (const file of [authRouteFile, authServerFile, authClientFile, sensitiveCacheFile]) {
+  if (!fs.existsSync(file)) {
+    fail(`APP-45 sem artefato obrigatorio: ${path.relative(appDir, file).replaceAll("\\", "/")}`);
+  }
+}
+const authRouteText = fs.readFileSync(authRouteFile, "utf8");
+if (!authRouteText.includes("better-auth/next-js") || !authRouteText.includes("toNextJsHandler")) {
+  fail("APP-45 exige Better Auth pela integracao Next.js: app/api/auth/[...all]/route.ts");
+}
+if (authRouteText.includes("tanstack-start")) {
+  fail("APP-45 proibe integrar auth via TanStack Start no app Next");
+}
+const authClientText = fs.readFileSync(authClientFile, "utf8");
+if (!authClientText.includes("better-auth/react") || !authClientText.includes("createAuthClient")) {
+  fail("APP-45 exige auth-client React oficial do Better Auth");
+}
+if (
+  !authClientText.includes("better-auth/client/plugins") ||
+  !authClientText.includes("organizationClient")
+) {
+  fail("APP-45 exige client de organizacao do Better Auth para convites/memberships de portal");
+}
+const sensitiveCacheText = fs.readFileSync(sensitiveCacheFile, "utf8");
+if (
+  !sensitiveCacheText.includes("SensitiveCacheEventSchema") ||
+  !sensitiveCacheText.includes("sensitiveQueryCacheDirective") ||
+  !sensitiveCacheText.includes("QueryClient")
+) {
+  fail("APP-45 exige helper TanStack Query usando o contrato Zod de eventos sensiveis");
+}
+if (!sensitiveCacheText.includes("workspace") || !sensitiveCacheText.includes("governance-demo")) {
+  fail("APP-45 exige limpar/invalidate tanto query key escopada quanto legado workspace");
+}
 // Rotas ja migradas para contrato runtime Zod. O guard evita regressao para
 // validacao manual/ad hoc nos pontos que viraram schema compartilhado.
 const zodContractRoutes = [
