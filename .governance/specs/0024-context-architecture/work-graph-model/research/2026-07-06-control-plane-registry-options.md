@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Control plane / registry opcional — opções
 
 > **Frente:** Spec 0024 · work-graph-model · governance-demo

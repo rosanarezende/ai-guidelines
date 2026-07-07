@@ -1,3 +1,7 @@
+---
+artifact-kind: prompt
+---
+
 # Prompt - Pesquisa open-source, produto, control plane e grafos
 
 Use este prompt em Claude/LLM de pesquisa com effort alto. O objetivo nao e

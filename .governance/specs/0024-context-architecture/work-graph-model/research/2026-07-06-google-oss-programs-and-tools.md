@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Ecossistema Google e programas para open source
 
 > **Frente:** Spec 0024 · work-graph-model · governance-demo

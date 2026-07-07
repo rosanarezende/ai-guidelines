@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # Fluxo da iniciativa aos trabalhos — registro · triagem · investigação · gate · intent · breakdown (5 tipos)
 
 - Data: 2026-06-30 · Spec 0024 · Natureza: **síntese de referência, não-autoridade** (companion do tracker `tracker.md`).

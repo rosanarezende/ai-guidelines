@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # Banco e view POR-REPO, auto-contidos via lib compartilhada (padrão contrato-first + implementação swappable)
 
 - Data: 2026-06-28 (atualizado **2026-06-29 — ✅ IMPLEMENTADO**, ver §8) · Spec 0024 · Natureza: **research, não-autoridade** (insumo de DEC; não decide sozinho).

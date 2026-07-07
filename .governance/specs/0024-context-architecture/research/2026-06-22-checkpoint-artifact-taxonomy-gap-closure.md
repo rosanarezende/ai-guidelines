@@ -1,3 +1,7 @@
+---
+artifact-kind: gap
+---
+
 # PR #45 — Gap closure antes da taxonomia de artefatos
 
 Data: 2026-06-22  
@@ -82,6 +86,14 @@ O comando deve:
 A próxima abertura de PR governado dentro da continuação deve ser possível por
 um caminho de produto com preview/confirm, sem exigir que o humano conheça todos
 os arquivos internos.
+
+### Disposição em 2026-07-07
+
+A readiness do PR #45 não implementa esse comando. O gap foi reclassificado como
+automação futura e recebeu protocolo interino em
+`research/2026-07-07-pr-continuation-protocol.md`: quando um PR ficar grande, a
+continuidade deve ser decidida por readiness + próximo movimento governado,
+preservando decisão humana e proibindo Ready/Human Gate/merge automático.
 
 ## 4. Gap C — Vocabulário do lifecycle ainda não está modelado
 

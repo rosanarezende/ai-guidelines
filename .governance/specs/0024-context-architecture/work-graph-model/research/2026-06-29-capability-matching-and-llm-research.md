@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Research — casamento de `capabilities` (texto + tags + grafo) e o adapter de Matcher por LLM (incl. modelos LOCAIS)
 
 - Data: 2026-06-29 · Spec 0024 · Natureza: **research, não-autoridade** (embasa a **Q2** da [deliberação do roteamento vertical](../deliberation/2026-06-29-vertical-routing-deliberation.md)).

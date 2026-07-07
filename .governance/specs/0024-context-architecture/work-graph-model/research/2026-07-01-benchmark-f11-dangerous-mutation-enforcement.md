@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Benchmark — mutação perigosa sem revisão: BLOQUEAR ou só DETECTAR? (F11 · P11)
 
 - **status:** research concluído · **decisão TOMADA (owner, 2026-07-01): opção C aceita**

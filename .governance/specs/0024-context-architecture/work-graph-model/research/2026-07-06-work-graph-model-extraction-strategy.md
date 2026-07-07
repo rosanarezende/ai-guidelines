@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Estratégia de extração/promoção do `work-graph-model`
 
 > **Frente:** Spec 0024 · work-graph-model · governance-demo

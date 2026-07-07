@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Comunicação cross-repo: manifesto-por-repo, descoberta automática e os eixos vertical × horizontal
 
 - Data: 2026-06-29 · Spec 0024 · Natureza: **research, não-autoridade** (insumo de DEC; não decide sozinho).

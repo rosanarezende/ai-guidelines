@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Ecossistema open-source de grafos — oportunidades
 
 > **Frente:** Spec 0024 · work-graph-model · governance-demo

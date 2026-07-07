@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Posicionamento open-source e naming do produto
 
 > **Frente:** Spec 0024 · work-graph-model · governance-demo

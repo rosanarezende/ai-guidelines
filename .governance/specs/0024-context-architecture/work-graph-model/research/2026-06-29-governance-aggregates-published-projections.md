@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # A governança agrega PROJEÇÕES PUBLICADAS, não bancos vivos (multi-repo, multi-backend)
 
 - Data: 2026-06-29 · Spec 0024 · Natureza: **research, não-autoridade** (insumo de DEC; não decide sozinho).

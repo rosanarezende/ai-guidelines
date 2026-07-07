@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Benchmark — spikes / POCs / discovery: trabalho ou modalidade?
 
 - Data: 2026-06-27 · Spec 0024 · Natureza: **research, não-autoridade** (em divergência vencem `state.yml`, `tasks.md`, `decision-brief.md`, Git/GitHub).
