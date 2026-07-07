@@ -181,7 +181,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | SEC-12   | 07, 16               | active               |
 | CONS-01  | 05, 13, 15           | active               |
 | CONS-02  | 18, 21, 13           | active               |
-| CONS-03  | 20, 40, 42           | expected-fail        |
+| CONS-03  | 20, 40, 42           | active               |
 
 ## 4. Matriz de consistencia entre telas
 

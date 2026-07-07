@@ -147,7 +147,12 @@ export default function IntegrationsHubView({
                 </Typography>
                 <Flex gap={0.5} wrap>
                   {(cardAliases[entry.id] ?? []).slice(1).map((testId) => (
-                    <Chip key={testId} data-testid={testId} size="small" label={entry.id} />
+                    <Chip
+                      key={testId}
+                      data-testid={testId}
+                      size="small"
+                      label={`${entry.id} · ${entry.configured ? "connected" : statusLabel(entry)}`}
+                    />
                   ))}
                   {entry.systems.slice(0, 4).map((system) => (
                     <Chip key={system} size="small" variant="outlined" label={system} />

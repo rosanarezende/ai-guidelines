@@ -27,8 +27,6 @@ test.describe("Consistencia entre telas", () => {
     page,
     request,
   }) => {
-    pendingContract("CONS-03", "expected-fail");
-
     await openWorkspace(page, request, "workspace-with-integration-statuses", "/integrations");
     await expect(page.getByTestId("integration-card-git-local")).toContainText(
       /disponivel|connected/i

@@ -833,7 +833,7 @@ contracts:
       - Scan/freshness aparece de forma consistente.
   - id: CONS-03
     title: Integracao conectada aparece igual no hub, Settings e sugestoes
-    status: expected-fail
+    status: active
     spec: journeys/cross-screen-consistency.spec.ts
     seed: workspace-with-integration-statuses
     actors:
