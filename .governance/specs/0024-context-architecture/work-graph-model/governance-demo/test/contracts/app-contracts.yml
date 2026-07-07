@@ -463,21 +463,35 @@ contracts:
       - GitHub work-source exige permissao e repos selecionados.
       - Conectar repo nao concede authority governada.
   - id: APP-45
-    title: Better Auth escopa sessao/workspace sem vazar cache TanStack
-    status: fixme
-    spec: journeys/auth-query-scope.spec.ts
+    title: Better Auth cria conta, workspace, convite e aceite sem conceder authority
+    status: active
+    spec: journeys/portal-auth-flow.spec.ts
     seed: workspace-shared-convites
     actors:
       - workspace-admin
       - invited-member
     surfaces:
-      - /api/auth/[...all]
       - /signup
       - /organizations
       - state
     assertions:
       - Better Auth fica montado pela integracao Next.js, nao pela integracao TanStack Start.
       - Signup/login/accept-invite produzem sessao/membership de portal, mas nao authority governada.
+      - Workspace criado no shell tambem possui organizacao de portal com slug equivalente.
+      - Pessoa convidada faz signup antes de aceitar o convite e passa a ver o workspace sem ganhar role governada.
+  - id: APP-46
+    title: Better Auth escopa cache TanStack por sessao/workspace
+    status: expected-fail
+    spec: journeys/auth-query-scope.spec.ts
+    seed: workspace-shared-convites
+    actors:
+      - workspace-admin
+      - invited-member
+    surfaces:
+      - /signup
+      - /organizations
+      - state
+    assertions:
       - Troca de conta, logout, aceite de convite e troca de workspace limpam ou invalidam queries sensiveis do TanStack Query.
       - Query keys de dados governados carregam workspace e escopo de sessao/conta suficiente para impedir vazamento cross-workspace.
       - A UI nunca usa cache de TanStack Query como prova de authority; toda acao sensivel relê authority/sourceRevision no backend.

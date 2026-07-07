@@ -62,16 +62,16 @@ se uma regra pode ser provada por funcao de dominio + estado (sem browser), ela
 NAO deve virar teste Playwright. E2E fica para o que so o browser prova (jornada
 humana, cross-screen, persistencia via UI, sentinela de rota).
 
-| Camada                    | Ferramenta principal                      | Escopo                                                                                                                                                                                                | Status                  |
-| ------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| Static/typecheck          | TypeScript                                | contratos, dominio, view-models e APIs tipadas                                                                                                                                                        | atual                   |
-| Domain/invariante         | `node --test` (backend/tests, ~1.5s)      | authority (matriz papel x comando), role state-machine, sourceTrust, onboarding, isolamento demo, invariantes sobre TODAS as seeds, read-model/rollup/grafo derivado (`/api/results,work,map,graph*`) | atual (primeira classe) |
-| API in-memory             | `node --test` (mock-api/tests, ~300ms)    | handler `/api/shell/commands` via Hono `app.request()` sem servidor: schema 400, replay/idempotencia 422, authority 422, isolamento, seed unknown                                                     | atual (primeira classe) |
-| Rota real HTTP            | Playwright `request` (sem browser)        | casca das rotas: `/api/local/*` sessao (401/400), JSON (400) e Zod schema-invalid (400); gate de `/api/results,work,map` (401 signup / 404 workspace / 200 governance-host-not-linked) sem vazar demo | atual                   |
-| Component/integration UI  | Testing Library + MSW (proposto)          | componentes/steps isolados com requests reais interceptados                                                                                                                                           | futuro                  |
-| E2E/journey               | Playwright                                | fluxos entre telas, persistencia, auth local, mock-api                                                                                                                                                | atual                   |
-| Governance/backend checks | tools/checks + backend tests              | fail-closed, event-log, resolver, adapters                                                                                                                                                            | atual                   |
-| Reporting/management      | Playwright HTML/JSON/JUnit; Allure depois | visualizacao e historico de testes                                                                                                                                                                    | inicial                 |
+| Camada                    | Ferramenta principal                      | Escopo                                                                                                                                                                                                                                                   | Status                  |
+| ------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| Static/typecheck          | TypeScript                                | contratos, dominio, view-models e APIs tipadas                                                                                                                                                                                                           | atual                   |
+| Domain/invariante         | `node --test` (backend/tests, ~1.5s)      | authority (matriz papel x comando), role state-machine, sourceTrust, onboarding, isolamento demo, invariantes sobre TODAS as seeds, read-model/rollup/grafo derivado (`/api/results,work,map,graph*`)                                                    | atual (primeira classe) |
+| API in-memory             | `node --test` (mock-api/tests, ~300ms)    | handler `/api/shell/commands` via Hono `app.request()` sem servidor: schema 400, replay/idempotencia 422, authority 422, isolamento, seed unknown                                                                                                        | atual (primeira classe) |
+| Rota real HTTP            | Playwright `request` (sem browser)        | casca das rotas: `/api/local/*` sessao (401/400), JSON (400) e Zod schema-invalid (400); gate de `/api/results,work,map` (401 signup / 404 workspace / 200 governance-host-not-linked) sem vazar demo; Better Auth signup/bridge/workspace/invite/accept | atual                   |
+| Component/integration UI  | Testing Library + MSW (proposto)          | componentes/steps isolados com requests reais interceptados                                                                                                                                                                                              | futuro                  |
+| E2E/journey               | Playwright                                | fluxos entre telas, persistencia, auth local, mock-api                                                                                                                                                                                                   | atual                   |
+| Governance/backend checks | tools/checks + backend tests              | fail-closed, event-log, resolver, adapters                                                                                                                                                                                                               | atual                   |
+| Reporting/management      | Playwright HTML/JSON/JUnit; Allure depois | visualizacao e historico de testes                                                                                                                                                                                                                       | inicial                 |
 
 Layer de dominio/invariante: `npm --workspace acme-governance-backend run
 test:shell` (`node --test tests/**/*.test.ts`). Usa o MESMO executor autorizado
@@ -95,14 +95,14 @@ camada `Rota real HTTP` ou `API in-memory`, conforme o handler exercitado. O
 erro esperado e `400 schema-invalid`, com issues rastreaveis por `path`, `code`
 e `message`. Isso protege contra regressao para validacao manual silenciosa.
 
-Auth real e cache sao contrato, nao detalhe de UI. O contrato APP-45 deve ser
-fechado antes de transformar Better Auth em fluxo de produto:
+Auth real e cache sao contrato, nao detalhe de UI. APP-45 cobre o fluxo de
+identidade/membership do portal; APP-46 cobre o escopo fino de cache TanStack:
 
 - `/api/auth/[...all]` usa a integracao Next.js do Better Auth;
 - query keys/invalidation de TanStack Query consideram workspace e escopo de
   sessao/conta;
-- login/logout/accept-invite/workspace-switch limpam ou invalidam queries
-  sensiveis;
+- login/logout/accept-invite/workspace-switch devem limpar ou invalidar queries
+  sensiveis (APP-46, `expected-fail` ate a UI expor o escopo);
 - membership do portal nao concede authority governada.
 
 Base tecnica de APP-45 ja fica no layer rapido: `@demo/contracts` define
@@ -111,9 +111,11 @@ Base tecnica de APP-45 ja fica no layer rapido: `@demo/contracts` define
 `backend/tests/auth-query-scope.test.ts` prova que ids de escopo nao carregam
 token/secret, que query keys mudam por conta/sessao/workspace/membership e que
 eventos sensiveis retornam diretivas explicitas de cache. O runtime Better Auth
-ja existe em `/api/auth/[...all]`; o contrato APP-45 continua `fixme` porque a
-UX completa de signup/convite/troca de conta ainda nao exercita membership de
-portal sem authority governada.
+existe em `/api/auth/[...all]`. APP-45 agora roda em
+`journeys/portal-auth-flow.spec.ts`: signup Better Auth -> `/api/local/auth/bridge`
+-> workspace -> convite -> signup da pessoa convidada -> accept; o teste prova
+que membership de portal nao cria authority governada. APP-46 permanece
+`expected-fail` para a parte visual de escopo/limpeza de cache.
 
 Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
 dos testes do backend (`test:shell`), o typecheck strict + `test:api` da

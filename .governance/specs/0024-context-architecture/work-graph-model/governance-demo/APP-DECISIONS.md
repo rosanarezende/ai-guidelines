@@ -3148,7 +3148,7 @@ Adotar uma estrategia em duas camadas:
 
 ## QRD-45 - Better Auth, Next.js e TanStack Query
 
-**Status:** decided-contract-first.
+**Status:** decided-active-for-identity-bridge.
 
 **Q - Question**
 
@@ -3229,8 +3229,10 @@ Para a governance-demo, a integracao vigente e:
 
 - O link do Better Auth para TanStack Start e util como referencia conceitual de
   cookie/session, mas nao deve ser copiado para o app Next.
-- `APP-45` passa a governar a ponte identity -> workspace scope -> TanStack
-  Query.
+- `APP-45` governa a ponte identity -> shell workspace -> membership sem
+  authority governada.
+- `APP-46` governa a parte visual de escopo/limpeza de cache TanStack por
+  sessao/workspace/convite.
 - A primeira fatia tecnica de contrato/modelagem/teste foi materializada em
   `@demo/contracts`: `PortalQueryScopeSchema`, `SensitiveCacheEventSchema`,
   `buildGovernedQueryKey()` e `sensitiveQueryCacheDirective()`, com regressao em
@@ -3239,7 +3241,15 @@ Para a governance-demo, a integracao vigente e:
   `toNextJsHandler`, criou o `auth-client` React e ligou diretivas reais de
   cache TanStack no logout e na troca/criacao de workspace. Isso fecha a
   infraestrutura, nao a UX completa de signup/convite.
-- A proxima fatia deve adaptar signup/organizations/invites para usar Better
-  Auth como identidade real e provar que membership de portal nao vira authority
-  governada.
+- A terceira fatia adaptou `/signup`, `/organizations` e convites para usar
+  Better Auth como identidade real: a UI cria conta por `sign-up/email`,
+  `/api/local/auth/bridge` cria/garante principal local `portal-*`,
+  `/api/local/organizations` cria/garante organizacao de portal com slug do
+  workspace, e `/api/local/members` cria convite Better Auth quando ha e-mail e
+  sessao de portal.
+- `journeys/portal-auth-flow.spec.ts` prova signup do criador -> bridge ->
+  workspace -> convite -> signup da pessoa convidada -> bridge -> accept, e
+  confirma que membership de portal nao cria authority governada.
+- O endpoint `/api/local/signup` permanece como compatibilidade local/teste; o
+  caminho feliz visual agora e Better Auth + bridge.
 - Nenhuma tela nova de auth real deve nascer sem contrato de cache/sessao.

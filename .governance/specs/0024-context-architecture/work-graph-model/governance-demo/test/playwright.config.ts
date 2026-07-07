@@ -1,10 +1,14 @@
 // playwright.config.ts — e2e da governance-demo (QRD-06).
 // Sobe mock-api (Hono+lowdb) + Next em modo mock; cada teste reseta a seed.
 import { defineConfig } from "@playwright/test";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const MOCK_API_PORT = 3025;
 const APP_PORT = 3024;
 const REUSE_EXISTING_SERVER = process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === "1";
+const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
+const LOCAL_STATE_DIR = path.join(TEST_DIR, "reports", "local-state", String(process.pid));
 
 export const MOCK_API_URL = `http://127.0.0.1:${MOCK_API_PORT}`;
 
@@ -46,6 +50,7 @@ export default defineConfig({
         GOVERNANCE_DATA_SOURCE: "mock-api",
         GOVERNANCE_API_BASE_URL: MOCK_API_URL,
         GOVERNANCE_APP_ENV: "test",
+        GOVERNANCE_LOCAL_STATE_DIR: LOCAL_STATE_DIR,
       },
     },
   ],

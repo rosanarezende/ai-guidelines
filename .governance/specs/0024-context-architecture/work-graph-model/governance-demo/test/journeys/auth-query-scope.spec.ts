@@ -2,11 +2,11 @@ import { expect, test } from "@playwright/test";
 import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Auth real e escopo de cache", () => {
-  test("APP-45 Better Auth escopa sessao/workspace sem vazar cache TanStack", async ({
+  test("APP-46 Better Auth escopa cache TanStack por sessao/workspace", async ({
     page,
     request,
   }) => {
-    pendingContract("APP-45", "fixme");
+    pendingContract("APP-46", "expected-fail");
 
     await openWorkspace(page, request, "workspace-shared-convites", "/organizations");
 

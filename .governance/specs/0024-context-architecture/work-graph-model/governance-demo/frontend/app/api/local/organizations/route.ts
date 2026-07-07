@@ -2,8 +2,14 @@
 // A sessão passa a apontar para a organização criada/anexada.
 import { NextResponse } from "next/server";
 import { OrganizationRequestSchema } from "@demo/contracts";
-import { attachDemoWorkspace, createWorkspace } from "@/server/adoption/application/use-cases";
+import { workspaceSlugId } from "@demo/domain";
+import {
+  attachDemoWorkspace,
+  createWorkspace,
+  readShellState,
+} from "@/server/adoption/application/use-cases";
 import { readSession, writeSession } from "@/server/adoption/session";
+import { ensurePortalOrganization, readPortalSession } from "@/server/auth/portal-bridge";
 import { parseZodJson } from "../_shared/parse-zod-request";
 
 export async function POST(request: Request) {
@@ -15,8 +21,7 @@ export async function POST(request: Request) {
   const result =
     "mode" in parsed.data
       ? await attachDemoWorkspace({ principalId: session.principalId, companyName: "Acme" })
-      : await createWorkspace({
-          principalId: session.principalId,
+      : await createWorkspaceWithOptionalPortal(request, session.principalId, {
           name: parsed.data.name,
           kind: parsed.data.kind,
         });
@@ -30,5 +35,31 @@ export async function POST(request: Request) {
       kind: result.value.kind,
       onboardingStatus: result.value.onboardingStatus,
     },
+  });
+}
+
+async function createWorkspaceWithOptionalPortal(
+  request: Request,
+  principalId: string,
+  input: { name: string; kind: string }
+) {
+  const state = await readShellState();
+  const workspaceId = workspaceSlugId(
+    input.name,
+    state.workspaces.map((workspace) => workspace.id)
+  );
+  const portal = await readPortalSession(request);
+  if (portal.ok) {
+    const portalOrg = await ensurePortalOrganization(request, {
+      name: input.name,
+      slug: workspaceId,
+    });
+    if (!portalOrg.ok) return { ok: false as const, error: portalOrg.error };
+  }
+  return createWorkspace({
+    principalId,
+    name: input.name,
+    kind: input.kind,
+    workspaceId,
   });
 }

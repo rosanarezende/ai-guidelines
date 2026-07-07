@@ -9,7 +9,7 @@ Ela e a interface humana sobre a governanca file-first. A org ficticia `acme-*` 
 Pronto nesta fatia:
 
 - App Next em TypeScript, isolado no workspace `acme/governance-next-app`.
-- Fluxo inicial real: `/signup` (identidade local honesta, `local-principal`) -> `/organizations` (criar/escolher organizacao; multi-organizacao com contexto separado) -> `/onboarding` por organizacao -> `/` Home da organizacao atual.
+- Fluxo inicial real: `/signup` (conta Better Auth do portal) -> ponte `/api/local/auth/bridge` (principal local `portal-*`) -> `/organizations` (criar/escolher organizacao; multi-organizacao com contexto separado) -> `/onboarding` por organizacao -> `/` Home da organizacao atual.
 - Backend TypeScript do shell local em `server/adoption/` com boundaries claros: shared kernel em `../packages/domain`, contratos em `../packages/contracts`, use-cases em `application/`, persistencia file-first em `infrastructure/` (estado JSON + event-log JSONL + lock + escrita atomica + idempotencia por comando) e interface em `app/api/local/*` + cookie de sessao httpOnly.
 - Fronteira backend por SDK: o app consome apenas `@demo/backend` (use cases/handlers server-side), `@demo/contracts` (tipos/DTOs compartilhados) e `@demo/domain` (funcoes/constantes puras browser-safe). `@demo/domain/server` e proibido no frontend. Import de modulo interno (`backend/src/...`, `tools/...`, qualquer `.mjs`) e barrado pelo guard — a fronteira ja nasce pronta para clientes web/native separados.
 - API local tipada: rotas de graph queries (`/api/graph*`), integracoes (`/api/integrations*`), advisory do assistente e contrato verificavel em `/api/contract`; requests validadas por schema (400 fail-closed) na camada `backend/src/api`.
@@ -29,7 +29,7 @@ Feito nesta fatia (R0/R1):
 - Escolhas do onboarding persistem como comandos reais ao concluir: perfil + regra de acumulo, fontes declaradas e assistente (local salva provider com teste real; cloud fica pendente de aprovacao/egress). Recarregar preserva tudo.
 - Governance host para organizacao nova: fit-check, scaffold real (`host.yml` + `events/events.jsonl` + `sourceRevision`) e vinculo pelos 3 formatos, ou sandbox explicito — na secao Governanca das configuracoes.
 - Convites com token local (pending → accepted/declined/revoked/expired) e papeis por subject com aceite via `/api/local/members*` e `/api/local/roles*` (API de produto; telas dedicadas de membros/papeis sao fatia seguinte — o painel do onboarding segue como contrato declarado, marcado como pendente de aceite).
-- mock-api + Playwright: jornada signup → workspace → onboarding parcial → Home roda contra seed resetavel.
+- mock-api + Playwright: jornada signup → workspace → onboarding parcial → Home roda contra seed resetavel; APP-45 prova conta Better Auth -> bridge local -> workspace -> convite -> signup da pessoa convidada -> aceite sem authority governada.
 - Spike da stack visual (QRD-27/28/29) em `app/spikes/visual-stack/`: view-models independentes de renderer
   (`_model/`), candidatos isolados (`_candidates/`), fixture sintetica seedada (ate ~6k nos/10k linhas) e tela
   comparativa interna com busca, filtros, foco, painel de detalhe e acao governada simulada (dry-run).
@@ -40,7 +40,7 @@ Feito nesta fatia (R0/R1):
 
 Ainda por vir:
 
-- Auth real (senha/SSO/identity-provider): o signup atual e identidade LOCAL, sem seguranca de conta; o cookie de sessao nao e assinado.
+- Login dedicado, reset de senha, aceite de termos e providers externos (GitHub/Google/OIDC). A conta Better Auth por e-mail/senha ja existe; o cookie local do shell continua sendo apenas escopo de workspace, nao authority.
 - Telas dedicadas de membros/papeis (fontes ja tem `/sources` real; PeopleStep/SourcesStep do onboarding continuam parcialmente UX e estao marcados assim).
 - Detalhe acionavel por linha em `/work` (breakdown, repo-work ack, verdict); a rota atual e lista operacional derivada.
 - GitHub work-source cloud real (contrato/kind/backlog modelados; conexao OAuth/App e fatia seguinte — nunca aparece como `connected` sem mecanismo).
@@ -54,7 +54,7 @@ Ainda por vir:
 | Rota                                                        | Responsabilidade                                                                                   |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `/`                                                         | Home da organizacao ATUAL (demo: snapshot; nova: checklist honesto). Gate redireciona o fluxo.     |
-| `/signup`                                                   | Identidade local minima (`local-principal`); honesto: nao e conta segura nem auth cloud.           |
+| `/signup`                                                   | Conta Better Auth do portal; cria sessao real e depois liga ao shell local (`portal-*`).           |
 | `/organizations`                                            | Criar/escolher organizacao (empresa/pessoal/cliente, perguntas guiadas) + anexar demo `acme-*`.    |
 | `/onboarding`                                               | Fluxo guiado da ORGANIZACAO atual; progresso partial/finished persiste por organizacao.            |
 | `/settings`                                                 | Configuracoes da organizacao atual (demo: secoes completas; nova: identidade/governanca/troca).    |
@@ -68,7 +68,8 @@ Ainda por vir:
 | `/api/map/governance`                                       | View-model derivado para `/map`; workspace novo responde vazio honesto ate ter host/objetivos.     |
 | `/api/results/dashboard`                                    | View-model derivado para `/results`; workspace novo responde vazio honesto ate ter host/outcomes.  |
 | `/api/work/items`                                           | View-model derivado para `/work`; workspace novo responde vazio honesto ate ter host/contextos.    |
-| `/api/local/signup`                                         | Cria local-principal + sessao (cookie httpOnly, nao assinado — nao e auth).                        |
+| `/api/local/signup`                                         | Compatibilidade local/teste: cria local-principal + sessao sem Better Auth.                        |
+| `/api/local/auth/bridge`                                    | Liga sessao Better Auth a um principal local `portal-*`; nao concede authority governada.          |
 | `/api/local/logout`                                         | Limpa a sessao local; nao apaga organizacoes, workspaces nem event-log.                            |
 | `/api/local/organizations`                                  | Cria organizacao vazia ou anexa a demo; atualiza sessao.                                           |
 | `/api/local/organizations/select`                           | Troca a organizacao ativa da sessao.                                                               |

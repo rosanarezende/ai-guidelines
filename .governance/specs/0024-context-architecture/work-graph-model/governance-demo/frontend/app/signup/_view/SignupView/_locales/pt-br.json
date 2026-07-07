@@ -1,20 +1,24 @@
 {
   "locale": "pt-br",
   "messages": {
-    "signup.title": "Quem está governando?",
-    "signup.lead": "Crie sua identidade local para começar. Isto NÃO é uma conta na nuvem: é um perfil local desta máquina (local-principal), registrado em arquivo seu.",
+    "signup.title": "Crie sua conta do portal",
+    "signup.lead": "Esta conta identifica você no app e permite entrar em workspaces e aceitar convites. Ela não concede autoridade governada sozinha: papéis e decisões continuam no shell/governance host.",
     "signup.name.label": "Seu nome",
     "signup.name.help": "Como você aparece em decisões e registros.",
-    "signup.email.label": "E-mail (opcional)",
-    "signup.email.help": "Só um identificador legível; nada é enviado para fora.",
+    "signup.email.label": "E-mail",
+    "signup.email.help": "Usado para login e convites do portal.",
+    "signup.password.label": "Senha",
+    "signup.password.help": "Mínimo de 8 caracteres. Em produção, o portal deve usar segredo e banco próprios.",
     "signup.honesty.title": "O que isto é — e o que não é",
-    "signup.honesty.local": "Identidade local em arquivo: sem senha, sem servidor, sem sincronização.",
-    "signup.honesty.future": "Autenticação real (SSO/identity-provider) é um adapter futuro; nada aqui fecha essa porta.",
-    "signup.honesty.privacy": "Não pedimos dados sensíveis. Não chame isto de conta segura — não é.",
-    "signup.submit": "Criar identidade local",
+    "signup.honesty.local": "Conta do portal via Better Auth: autentica a pessoa e cria sessão real.",
+    "signup.honesty.future": "Membership do portal não é authority governada. Autoridade efetiva continua derivada dos papéis aceitos no workspace.",
+    "signup.honesty.privacy": "O shell local/governance host continua separado: workspaces, host, fontes e decisões não viram dados do Better Auth.",
+    "signup.submit": "Criar conta",
     "signup.submitting": "Criando...",
     "signup.error.invalid-display-name": "Informe um nome com pelo menos 2 caracteres.",
-    "signup.error.generic": "Não foi possível criar a identidade local. Detalhe: {error}",
+    "signup.error.email-exists": "Já existe uma conta com este e-mail. Entre com outra conta por enquanto; o fluxo de login dedicado entra na próxima fatia.",
+    "signup.error.auth": "Não foi possível criar a conta. Detalhe: {error}",
+    "signup.error.generic": "Não foi possível ligar a conta ao shell local. Detalhe: {error}",
     "signup.next": "Depois disto você cria ou escolhe uma organização."
   }
 }

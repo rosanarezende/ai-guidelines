@@ -15,10 +15,12 @@ test("APP-01 APP-03 APP-04 signup → workspace → onboarding parcial → Home 
   // sem principal, a raiz redireciona para /signup (gate server-side)
   await page.goto("/");
   await expect(page).toHaveURL(/\/signup$/);
-  await expect(page.getByText("Quem está governando?")).toBeVisible();
+  await expect(page.getByText("Crie sua conta do portal")).toBeVisible();
 
   await page.getByLabel("Seu nome").fill("Ana E2E");
-  await page.getByRole("button", { name: "Criar identidade local" }).click();
+  await page.getByLabel("E-mail").fill("ana-e2e@example.com");
+  await page.getByLabel("Senha").fill("correct horse battery staple");
+  await page.getByRole("button", { name: "Criar conta" }).click();
 
   // sem organização, o fluxo segue para /organizations
   await expect(page).toHaveURL(/\/organizations$/);

@@ -7,6 +7,8 @@ test.describe("Auth, workspace e shell", () => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/signup$/);
     await page.getByTestId("signup-display-name").fill("Ana Admin");
+    await page.getByTestId("signup-email").fill("ana-admin@example.com");
+    await page.getByTestId("signup-password").fill("correct horse battery staple");
     await page.getByTestId("signup-submit").click();
     await expect(page).toHaveURL(/\/organizations$/);
 

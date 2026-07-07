@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { logoutLocal } from "@/app/_domain/adoption/shellClient";
+import { authClient } from "@/app/_domain/auth/auth-client";
 import { applySensitiveQueryCacheEvent } from "@/app/_domain/cache/sensitive-query-cache";
 import { t } from "@/lib/i18n";
 import GlobalNavigation from "./GlobalNavigation";
@@ -63,6 +64,7 @@ export default function AppShell({
   if (!mounted) return <ShellSkeleton />;
 
   async function logout() {
+    await authClient.signOut().catch(() => null);
     await logoutLocal();
     await applySensitiveQueryCacheEvent(queryClient, { type: "logout" });
     window.location.href = "/signup";

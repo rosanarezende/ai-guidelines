@@ -57,6 +57,10 @@ export function signupLocal(input: { displayName: string; email?: string }) {
   return postJson<{ principal: { id: string; displayName: string } }>("/api/local/signup", input);
 }
 
+export function bridgePortalSession() {
+  return postJson<{ principal: { id: string; displayName: string } }>("/api/local/auth/bridge", {});
+}
+
 export function createOrganization(input: { name: string; kind: WorkspaceKind }) {
   return postJson<{ workspace: ShellWorkspaceSummary }>("/api/local/organizations", input);
 }

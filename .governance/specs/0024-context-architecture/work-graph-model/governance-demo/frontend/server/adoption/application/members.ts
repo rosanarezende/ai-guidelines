@@ -60,12 +60,16 @@ export async function invitePerson(input: {
   workspaceId: string;
   personName: unknown;
   email?: unknown;
+  portalOrganizationId?: string;
+  portalInvitationId?: string;
 }): Promise<UseCaseResult<WorkspaceInvite>> {
   const now = new Date().getTime();
   const invite: WorkspaceInvite = {
     id: `inv-${randomUUID()}`,
     personName: typeof input.personName === "string" ? input.personName.trim() : "",
     ...(typeof input.email === "string" && input.email.trim() ? { email: input.email.trim() } : {}),
+    ...(input.portalOrganizationId ? { portalOrganizationId: input.portalOrganizationId } : {}),
+    ...(input.portalInvitationId ? { portalInvitationId: input.portalInvitationId } : {}),
     token: randomUUID().replaceAll("-", ""),
     status: "pending",
     invitedBy: input.principalId,
@@ -80,6 +84,22 @@ export async function invitePerson(input: {
   );
   // devolve o convite COM token uma única vez (quem convida repassa o código)
   return result.ok ? { ok: true, value: invite } : result;
+}
+
+export async function findInviteForDecision(input: {
+  inviteId: string;
+  token?: unknown;
+}): Promise<{ workspaceId: string; invite: WorkspaceInvite } | null> {
+  const state = await readShellState();
+  for (const workspace of state.workspaces) {
+    const invite = normalizeWorkspace(workspace).invites.find((item) => {
+      if (item.id !== input.inviteId) return false;
+      if (typeof input.token === "string") return item.token === input.token;
+      return true;
+    });
+    if (invite) return { workspaceId: workspace.id, invite };
+  }
+  return null;
 }
 
 export async function decideInvite(input: {

@@ -45,6 +45,8 @@ export type LocalAccount = {
   id: string;
   displayName: string;
   email?: string;
+  identityProvider?: "local" | "better-auth";
+  portalUserId?: string;
   preferredLocale: LocaleCode;
   activeWorkspaceId?: string;
 };
@@ -199,6 +201,8 @@ export type WorkspaceInvite = {
   personName: string;
   email?: string;
   token: string;
+  portalOrganizationId?: string;
+  portalInvitationId?: string;
   status: InviteStatus;
   invitedBy: string;
   createdAt: string;

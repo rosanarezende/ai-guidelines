@@ -3,8 +3,9 @@
 import { NextResponse } from "next/server";
 import { InviteDecisionRequestSchema } from "@demo/contracts";
 import { requireWorkspaceSession } from "@/server/adoption/api-session";
-import { decideInvite } from "@/server/adoption/application/members";
+import { decideInvite, findInviteForDecision } from "@/server/adoption/application/members";
 import { readSession } from "@/server/adoption/session";
+import { acceptPortalInvitation, readPortalSession } from "@/server/auth/portal-bridge";
 import { parseZodJson } from "../../../_shared/parse-zod-request";
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -20,6 +21,17 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ ok: false, error: session.error }, { status: session.status });
   if (!session.session) {
     return NextResponse.json({ ok: false, error: "no-session" }, { status: 401 });
+  }
+  if (action === "accept") {
+    const localInvite = await findInviteForDecision({ inviteId: id, token: parsed.data.token });
+    if (localInvite?.invite.portalInvitationId) {
+      const portal = await readPortalSession(request);
+      if (!portal.ok) return NextResponse.json(portal, { status: portal.status });
+      const accepted = await acceptPortalInvitation(request, {
+        invitationId: localInvite.invite.portalInvitationId,
+      });
+      if (!accepted.ok) return NextResponse.json(accepted, { status: accepted.status });
+    }
   }
   const result = await decideInvite({
     principalId: session.session.principalId,

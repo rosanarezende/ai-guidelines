@@ -1,11 +1,12 @@
 "use client";
 
-// SignupView — identidade local mínima (local-principal). Honesto: não é auth.
+// SignupView — conta real do portal via Better Auth + ponte para o shell local.
 import { Alert, Box, Button, Paper, TextField, Typography } from "@mui/material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signupLocal } from "@/app/_domain/adoption/shellClient";
+import { bridgePortalSession } from "@/app/_domain/adoption/shellClient";
+import { authClient } from "@/app/_domain/auth/auth-client";
 import { Flex } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
 import copy from "./_locales/pt-br.json";
@@ -16,21 +17,34 @@ export default function SignupView() {
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
     setBusy(true);
     setError(null);
-    const result = await signupLocal({
-      displayName,
-      ...(email.trim() ? { email: email.trim() } : {}),
+    const signup = await authClient.signUp.email({
+      name: displayName.trim(),
+      email: email.trim(),
+      password,
     });
-    if (!result.ok) {
+    if (signup.error) {
+      const authError = String(signup.error.message || signup.error.code || "auth-error");
       setError(
-        result.error === "invalid-display-name"
+        signup.error.code === "USER_ALREADY_EXISTS"
+          ? m["signup.error.email-exists"]
+          : m["signup.error.auth"].replace("{error}", authError)
+      );
+      setBusy(false);
+      return;
+    }
+    const bridge = await bridgePortalSession();
+    if (!bridge.ok) {
+      setError(
+        bridge.error === "invalid-display-name"
           ? m["signup.error.invalid-display-name"]
-          : m["signup.error.generic"].replace("{error}", result.error)
+          : m["signup.error.generic"].replace("{error}", bridge.error)
       );
       setBusy(false);
       return;
@@ -39,7 +53,7 @@ export default function SignupView() {
   }
 
   return (
-    <AppShell chip="local-principal" navigationMode="public">
+    <AppShell chip="portal" navigationMode="public">
       <Box sx={{ maxWidth: 560, mx: "auto", display: "grid", gap: 2 }}>
         <Flex align="center" gap={1.5}>
           <PersonOutlineIcon color="primary" fontSize="large" />
@@ -64,12 +78,24 @@ export default function SignupView() {
             helperText={m["signup.email.help"]}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            type="email"
+            slotProps={{ htmlInput: { "data-testid": "signup-email" } }}
+          />
+          <TextField
+            label={m["signup.password.label"]}
+            helperText={m["signup.password.help"]}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            type="password"
+            slotProps={{ htmlInput: { "data-testid": "signup-password" } }}
           />
           {error ? <Alert severity="warning">{error}</Alert> : null}
           <Flex align="center" gap={2}>
             <Button
               variant="contained"
-              disabled={busy || displayName.trim().length < 2}
+              disabled={
+                busy || displayName.trim().length < 2 || !email.includes("@") || password.length < 8
+              }
               onClick={submit}
               data-testid="signup-submit"
             >

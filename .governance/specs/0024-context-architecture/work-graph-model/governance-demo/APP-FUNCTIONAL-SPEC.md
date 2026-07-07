@@ -66,7 +66,8 @@ vira comando + evento:
 
 | Rota                                        | Método   | Função                                                                         |
 | ------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `/api/local/signup`                         | POST     | cria local-principal + sessão                                                  |
+| `/api/local/signup`                         | POST     | compatibilidade local/teste: cria local-principal + sessao                     |
+| `/api/local/auth/bridge`                    | POST     | liga sessao Better Auth a um principal local `portal-*`                        |
 | `/api/local/logout`                         | POST     | limpa cookie da sessao local; nao apaga workspaces nem event-log               |
 | `/api/local/organizations[/select]`         | POST     | criar/anexar demo/selecionar workspace                                         |
 | `/api/local/onboarding/status`              | POST     | partial/finished (nunca rebaixa finished)                                      |
@@ -107,8 +108,10 @@ O onboarding nao e uma tela unica. Ele e uma experiencia condicional que depende
 de **como a pessoa chegou ao app** e de **qual autoridade ela ja tem**.
 
 O fluxo humano sempre comeca em `/signup`. Mesmo quem recebeu convite precisa
-ter uma conta/principal local antes de aceitar membership ou papel. Criar conta,
-entrar em um workspace e receber autoridade sao eventos distintos.
+ter uma conta de portal antes de aceitar membership ou papel. Criar conta,
+entrar em um workspace e receber autoridade sao eventos distintos: Better Auth
+identifica a pessoa; o shell local escopa a sessao/workspace; o governance host
+continua sendo a fonte de autoridade e decisoes.
 
 ### 3.1.1 Contextos de entrada
 
@@ -405,18 +408,19 @@ novo responde vazio honesto ate existir governance host publicado.
 **Ainda falta:** visualizacao relacional opcional em ECharts graph, links de
 acao governada por tipo de no e mapa para workspace real fora da demo.
 
-## 6. Fluxo 0: primeiro acesso e conta local
+## 6. Fluxo 0: primeiro acesso e conta do portal
 
-### 6.1 Tela: Criar conta local (`/signup`)
+### 6.1 Tela: Criar conta do portal (`/signup`)
 
-**Objetivo:** permitir que uma pessoa comece a usar o app sem confundir identidade local com autoridade governada.
+**Objetivo:** permitir que uma pessoa comece a usar o app com identidade real
+do portal sem confundir login/membership com autoridade governada.
 
 **Usuario ve:**
 
-- explicacao curta: "Esta conta identifica voce neste app local; as permissoes reais sao configuradas por workspace";
-- campos: nome, email opcional, idioma;
-- aviso: conta local nao e autenticacao corporativa;
-- acao primaria: `Criar e continuar`;
+- explicacao curta: "Esta conta identifica voce no portal; as permissoes reais sao configuradas por workspace";
+- campos: nome, email e senha;
+- aviso: conta/membership de portal nao concede authority governada;
+- acao primaria: `Criar conta`;
 - opcoes de entrada:
   - `Continuar localmente`;
   - `Entrar com GitHub`;
@@ -426,17 +430,21 @@ acao governada por tipo de no e mapa para workspace real fora da demo.
 
 **Backend necessario:**
 
-- `local-principal.create` ou use case equivalente;
+- Better Auth em `/api/auth/[...all]` via integracao Next.js;
+- `/api/local/auth/bridge` para criar/garantir principal local `portal-*`;
+- `local-principal.create` como compatibilidade local/teste e como ponte do portal;
 - persistencia local file-first em `.local-state`;
 - cookie/sessao local;
 - leitura de usuario atual.
 
 **Estado atual:**
 
-- existe fluxo local de signup e sessao local.
-- Better Auth ja esta montado em `/api/auth/[...all]` como control-plane auth
-  real local (SQLite em `.local-state` por padrao), mas ainda nao substitui a UX
-  de signup/convite do app.
+- a UI de signup usa Better Auth (`sign-up/email`) e em seguida chama
+  `/api/local/auth/bridge`.
+- `/api/local/organizations` cria/garante organizacao de portal quando ha
+  sessao Better Auth, mantendo workspace/shell separado.
+- `/api/local/members` cria convite Better Auth quando ha sessao de portal e
+  email do convidado; aceite local continua separado.
 - ainda nao ha aceite de termos, reset, multi-device nem provider externo
   (GitHub/Google/OIDC) integrado na tela.
 
@@ -444,8 +452,10 @@ acao governada por tipo de no e mapa para workspace real fora da demo.
 
 - seguir [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-19.
 - primeiros providers externos seguem [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-20: GitHub, Google / Google Workspace e OIDC generico avancado.
-- signup local cria um `local-principal`, nao uma autoridade governada.
-- `local-principal` basta para `local`/sandbox.
+- signup do portal cria um usuario Better Auth e um principal local `portal-*`,
+  nao uma autoridade governada.
+- `/api/local/signup` permanece como compatibilidade de teste/mode local; nao e
+  o caminho feliz da UI.
 - `shared` exige pelo menos `local-auth`, convite e aceite explicito de membership/papeis.
 - `controlled` exige `local-auth` endurecido ou identity-provider externo.
 - login GitHub/Google autentica a pessoa, mas nao cria membership, authority, acesso a repos ou acesso a Drive/Gmail automaticamente.
@@ -719,11 +729,12 @@ Esta etapa responde: **como este workspace sera executado, persistido e projetad
 **Decisao vigente:** seguir [`APP-DECISIONS.md`](APP-DECISIONS.md) QRD-10, QRD-11 e QRD-19. Account/principal, membership, role assignment e authority sao conceitos diferentes. Papeis podem ser atribuidos a pessoas, times, grupos, service accounts e grupos externos; authority efetiva e sempre derivada.
 
 **Regra de entrada:** convite nao substitui conta. Toda pessoa convidada precisa
-criar ou usar uma conta no app (`/signup`) antes de aceitar membership e papeis
-na organizacao. O convite pode carregar token/codigo, workspace alvo e papeis
-propostos, mas so vira membership efetiva depois que um principal local
-autenticado aceita o convite. Login externo futuro (GitHub, Google, OIDC) pode
-autenticar a pessoa; nao concede authority governada automaticamente.
+criar ou usar uma conta de portal (`/signup`) antes de aceitar membership e
+papeis na organizacao. O convite pode carregar token/codigo, workspace alvo,
+convite Better Auth e papeis propostos, mas so vira membership efetiva depois
+que um principal local ligado ao portal aceita o convite. Login externo futuro
+(GitHub, Google, OIDC) pode autenticar a pessoa; nao concede authority
+governada automaticamente.
 
 **Varia por trilha:**
 

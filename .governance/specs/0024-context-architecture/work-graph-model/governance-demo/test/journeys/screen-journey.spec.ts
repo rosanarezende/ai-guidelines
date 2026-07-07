@@ -126,9 +126,10 @@ test("onboarding diagnostica time enxuto e leva para papéis sem autoridade fake
   await next(page);
 
   await expect(page.getByText("Quem responde pelo quê?")).toBeVisible();
-  await expect(page.getByText(/ainda não tem pessoas\/autoridades cadastradas/)).toBeVisible();
+  await expect(page.getByText("Qual é o seu papel neste começo?")).toBeVisible();
+  await expect(page.getByText(/o app ajuda a separar poder administrativo/)).toBeVisible();
   await expect(
-    page.getByText(/papéis ficam como contrato de responsabilidade declarado/)
+    page.getByText(/o que faltar fica visível como responsabilidade aberta/)
   ).toBeVisible();
 });
 

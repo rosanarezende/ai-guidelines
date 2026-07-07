@@ -74,6 +74,7 @@ export async function signupLocalPrincipal(input: {
     id: `local-${randomUUID()}`,
     displayName: String(input.displayName).trim(),
     ...(email ? { email } : {}),
+    identityProvider: "local",
     preferredLocale: "pt-br",
   };
   const result = await dispatchShellCommand(
@@ -82,19 +83,71 @@ export async function signupLocalPrincipal(input: {
   return result.ok ? { ok: true, value: principal } : result;
 }
 
+export function portalPrincipalId(portalUserId: string): string {
+  const normalized = portalUserId
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72);
+  return `portal-${normalized || "user"}`;
+}
+
+export async function ensurePortalPrincipal(input: {
+  portalUserId: string;
+  displayName: unknown;
+  email?: unknown;
+}): Promise<UseCaseResult<LocalAccount>> {
+  const principalId = portalPrincipalId(input.portalUserId);
+  const state = await readShellState();
+  const existing = state.principals.find((principal) => principal.id === principalId);
+  if (existing) return { ok: true, value: existing };
+
+  const displayName =
+    validDisplayName(input.displayName) && String(input.displayName).trim()
+      ? String(input.displayName).trim()
+      : typeof input.email === "string" && input.email.includes("@")
+        ? input.email.split("@")[0] || "Usuario do portal"
+        : "Usuario do portal";
+  const email =
+    typeof input.email === "string" && input.email.trim() ? input.email.trim() : undefined;
+  const principal: LocalAccount = {
+    id: principalId,
+    displayName,
+    ...(email ? { email } : {}),
+    identityProvider: "better-auth",
+    portalUserId: input.portalUserId,
+    preferredLocale: "pt-br",
+  };
+  const result = await dispatchShellCommand(
+    newShellCommand("local.principal.create", principal.id, { principal })
+  );
+  if (result.ok) return { ok: true, value: principal };
+  if (result.error === "duplicate-principal") {
+    const next = await readShellState();
+    const duplicate = next.principals.find((item) => item.id === principalId);
+    if (duplicate) return { ok: true, value: duplicate };
+  }
+  return result;
+}
+
 export async function createWorkspace(input: {
   principalId: string;
   name: unknown;
   kind: unknown;
+  workspaceId?: string;
 }): Promise<UseCaseResult<Workspace>> {
   if (!validWorkspaceName(input.name)) return { ok: false, error: "invalid-workspace-name" };
   const kind = CREATABLE_KINDS.find((item) => item === input.kind);
   if (!kind) return { ok: false, error: "invalid-workspace-kind" };
   const state = await readShellState();
-  const workspaceId = workspaceSlugId(
-    String(input.name),
-    state.workspaces.map((workspace) => workspace.id)
-  );
+  const workspaceId =
+    input.workspaceId ||
+    workspaceSlugId(
+      String(input.name),
+      state.workspaces.map((workspace) => workspace.id)
+    );
+  if (!/^[a-z0-9][a-z0-9-]{1,80}$/.test(workspaceId))
+    return { ok: false, error: "invalid-workspace-id" };
   const result = await dispatchShellCommand(
     newShellCommand("local.workspace.create", input.principalId, {
       workspaceId,
