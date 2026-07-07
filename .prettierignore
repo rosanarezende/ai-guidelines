@@ -47,3 +47,10 @@ packages/*/dist/
 **/.cache/
 .governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v2/_viewer/db.json
 .governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v2/_viewer/public/snapshot.json
+
+# Artefatos gerados pela governance-demo (mock-api local + relatórios Playwright).
+# São gitignored nos subprojetos, mas o `prettier --check .` da raiz não deve
+# tratar estes outputs mutáveis como fonte versionada.
+.governance/specs/0024-context-architecture/work-graph-model/governance-demo/mock-api/.data/
+.governance/specs/0024-context-architecture/work-graph-model/governance-demo/test/reports/
+.governance/specs/0024-context-architecture/work-graph-model/governance-demo/test/test-results/
