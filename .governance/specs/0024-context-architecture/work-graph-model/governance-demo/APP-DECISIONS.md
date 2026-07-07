@@ -3145,3 +3145,93 @@ Adotar uma estrategia em duas camadas:
   antes de ter UI completa para todas as integracoes.
 - Em workspace controlled/cloud, qualquer consulta live deve respeitar policy
   de egress; relatorio local versionado continua sendo o caminho mais seguro.
+
+## QRD-45 - Better Auth, Next.js e TanStack Query
+
+**Status:** decided-contract-first.
+
+**Q - Question**
+
+Como integrar Better Auth e TanStack Query sem misturar identity, membership,
+authority governada e cache de server state?
+
+**R - Reasoning/Research**
+
+A documentacao do Better Auth tem duas trilhas que parecem parecidas, mas nao
+sao equivalentes para este app:
+
+- **TanStack Start integration** monta o handler em rotas TanStack Start e usa
+  `tanstackStartCookies()` para chamadas que precisam setar cookies nesse
+  runtime.
+- **Next.js integration** monta o handler em
+  `app/api/auth/[...all]/route.ts` com `toNextJsHandler(auth)` e, quando server
+  actions precisam setar cookies, usa `nextCookies()`.
+
+A governance-demo usa **Next.js App Router**, nao TanStack Start. Portanto,
+`tanstackStartCookies()` nao e a integracao correta para o runtime atual.
+
+TanStack Query continua sendo a escolha correta para **server state**:
+
+- cache de leitura;
+- fetching;
+- mutations;
+- invalidation;
+- stale state.
+
+Ele nao substitui:
+
+- o banco do portal/control plane;
+- o governance host file/Git-backed;
+- authority derivada;
+- policy/egress;
+- Context API ou estado local de UI.
+
+O risco principal e cache cross-account/cross-workspace: apos login, logout,
+aceite de convite ou troca de workspace, uma tela nao pode exibir dados do
+workspace anterior por cache de TanStack Query. O risco simetrico e tratar uma
+membership do Better Auth como authority governada. Better Auth pode autenticar
+e registrar membership no portal; a authority efetiva continua vindo do
+governance host/reducer.
+
+**D - Decision**
+
+Para a governance-demo, a integracao vigente e:
+
+1. **Better Auth segue a trilha Next.js**
+   - montar `auth` server-side;
+   - expor `app/api/auth/[...all]/route.ts` via `toNextJsHandler(auth)`;
+   - criar `auth-client.ts` com `createAuthClient` de `better-auth/react`;
+   - usar `nextCookies()` apenas se server actions que setam cookies forem
+     adotadas.
+
+2. **TanStack Query segue como server-state cache**
+   - um `QueryClientProvider` global;
+   - query keys sempre escopadas por workspace e recurso;
+   - quando a sessao real existir, query keys ou invalidation tambem precisam
+     considerar o escopo de conta/sessao;
+   - login/logout/troca de workspace/aceite de convite invalidam ou limpam
+     queries sensiveis.
+
+3. **Authority continua fora do Better Auth**
+   - login, conta e membership nao concedem sponsor/security/source-owner;
+   - role assignment/acceptance e authority efetiva continuam governados pelo
+     workspace/governance host;
+   - GitHub/Google/OIDC seguem identidade, nao permissao de repos nem authority
+     governada.
+
+4. **Ordem obrigatoria antes de tela**
+   - fechar schemas Zod/modelagem/testes da fronteira auth/session/cache;
+   - adicionar contrato funcional `APP-45`;
+   - so depois montar a rota real Better Auth e adaptar signup/session;
+   - so depois voltar a UX/telas.
+
+**Implications**
+
+- O link do Better Auth para TanStack Start e util como referencia conceitual de
+  cookie/session, mas nao deve ser copiado para o app Next.
+- `APP-45` passa a governar a ponte identity -> workspace scope -> TanStack
+  Query.
+- A proxima fatia tecnica deve ser contrato/modelagem/teste: auth route, schema
+  de session scope, query invalidation e prova de que membership nao concede
+  authority.
+- Nenhuma tela nova de auth real deve nascer sem contrato de cache/sessao.

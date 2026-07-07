@@ -95,6 +95,16 @@ camada `Rota real HTTP` ou `API in-memory`, conforme o handler exercitado. O
 erro esperado e `400 schema-invalid`, com issues rastreaveis por `path`, `code`
 e `message`. Isso protege contra regressao para validacao manual silenciosa.
 
+Auth real e cache sao contrato, nao detalhe de UI. O contrato APP-45 deve ser
+fechado antes de transformar Better Auth em fluxo de produto:
+
+- `/api/auth/[...all]` usa a integracao Next.js do Better Auth;
+- query keys/invalidation de TanStack Query consideram workspace e escopo de
+  sessao/conta;
+- login/logout/accept-invite/workspace-switch limpam ou invalidam queries
+  sensiveis;
+- membership do portal nao concede authority governada.
+
 Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
 dos testes do backend (`test:shell`), o typecheck strict + `test:api` da
 mock-api. Assim as camadas rapidas (dominio + API in-memory) nao dependem de

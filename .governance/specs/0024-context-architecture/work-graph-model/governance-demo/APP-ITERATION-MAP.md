@@ -110,6 +110,7 @@ Para marcar uma linha como `validado-local`, registrar na coluna de notas:
 | 42    | Integracoes - sugestao contextual  | varias rotas                  | Mostrar poucas sugestoes no ponto do fluxo em que elevam confianca ou reduzem trabalho manual.                                 | integration catalog por surface               | `nao-iterado`       | `nao-validado-visual`  | `nao-testado`             |                                                                                                                                  |
 | 43    | Integracoes - autoridade/egress    | `/integrations`               | Separar solicitar, aprovar/ativar e usar; bloquear cloud sem authority/policy.                                                 | authority + egress decision                   | `nao-iterado`       | `nao-validado-visual`  | `nao-testado`             |                                                                                                                                  |
 | 44    | Integracoes - GitHub work-source   | `/integrations` + `/sources`  | Implementar primeira cloud work-source sem confundir login GitHub com repos/authority.                                         | GitHub adapter futuro                         | `nao-iterado`       | `nao-validado-visual`  | `bloqueado`               |                                                                                                                                  |
+| 45    | Auth real + cache escopado         | `/api/auth/[...all]`          | Montar Better Auth via Next.js e garantir que TanStack Query nunca vaze dados entre conta/workspace.                           | Better Auth + query invalidation              | `nao-iterado`       | `nao-validado-visual`  | `bloqueado`               | QRD-45: contrato/modelagem/teste antes de qualquer tela nova de auth real.                                                       |
 
 ## 3.1 Contratos automatizados
 
@@ -159,6 +160,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | INT-01   | 20, 40, 41, 43       | fixme                |
 | INT-02   | 42                   | fixme                |
 | INT-03   | 01, 20, 21, 44       | fixme                |
+| APP-45   | 01, 02, 03, 45       | fixme                |
 | CUP-01   | 34, 35, 36, 37       | fixme                |
 | CUP-02   | 36, 40, 43           | fixme                |
 | CUP-03   | 39                   | fixme                |
@@ -200,6 +202,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | Cup explica bloqueios citando policy versionada, nao texto improvisado.          | overlay Cup + `POLICY-HANDBOOK.md`             | `nao-testado` |               |
 | Integracao cloud nao aparece como `connected` sem auth/permissao/probe real.     | `/integrations`, `/sources`, `/settings`       | `nao-testado` |               |
 | Login GitHub nao conecta repos nem concede authority automaticamente.            | `/signup`, `/integrations`, `/sources`         | `nao-testado` |               |
+| Login/logout/aceite/troca de workspace nao reaproveitam cache sensivel.          | `/signup`, `/organizations`, `TanStack Query`  | `nao-testado` | APP-45 fixme  |
 | Settings e `/integrations` mostram o mesmo status efetivo do provider.           | `/settings`, `/integrations`                   | `nao-testado` |               |
 | Sugestao contextual de integracao explica o que funciona sem a ferramenta.       | varias rotas                                   | `nao-testado` |               |
 

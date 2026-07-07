@@ -179,6 +179,14 @@ Regras de produto:
 - `/results` e a primeira tela real que aplica QRD-29: Apache ECharts +
   TanStack Query sobre `/api/results/dashboard`. Ela confirma dashboards na
   demo; workspace novo ainda precisa de host/outcomes antes de ter dados.
+- Better Auth deve seguir a integracao **Next.js App Router** do produto:
+  `/api/auth/[...all]` + `toNextJsHandler(auth)`. A integracao
+  `tanstackStartCookies()` e especifica de TanStack Start e nao e o caminho do
+  app atual.
+- Quando Better Auth virar auth real, TanStack Query precisa invalidar/limpar
+  queries sensiveis em login, logout, troca de workspace e aceite de convite.
+  Query key de dado governado deve carregar workspace e escopo de sessao/conta
+  suficiente para impedir vazamento cross-workspace.
 - Se listas operacionais exigirem scroll infinito real (>100 linhas por pagina),
   a decisao de tabela volta para novo QRD.
 - Cytoscape esta banido do produto, do roadmap e dos spikes.
@@ -422,6 +430,8 @@ acao governada por tipo de no e mapa para workspace real fora da demo.
 
 - existe fluxo local de signup e sessao local.
 - ainda nao ha auth real, aceite de termos, identity-provider, reset ou multi-device.
+- Better Auth foi decidido como candidato de auth real/control plane, mas ainda
+  nao esta montado na rota Next `/api/auth/[...all]`.
 
 **Decisao vigente:**
 
@@ -432,6 +442,9 @@ acao governada por tipo de no e mapa para workspace real fora da demo.
 - `shared` exige pelo menos `local-auth`, convite e aceite explicito de membership/papeis.
 - `controlled` exige `local-auth` endurecido ou identity-provider externo.
 - login GitHub/Google autentica a pessoa, mas nao cria membership, authority, acesso a repos ou acesso a Drive/Gmail automaticamente.
+- membership vinda de Better Auth tambem nao cria authority governada; ela
+  apenas identifica quem pode entrar no portal/workspace antes do resolver de
+  autoridade do governance host.
 
 ### 6.2 Tela: Selecionar ou criar organizacao (`/organizations`)
 

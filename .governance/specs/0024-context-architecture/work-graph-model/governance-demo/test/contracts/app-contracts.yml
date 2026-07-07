@@ -462,6 +462,25 @@ contracts:
       - GitHub OAuth identifica usuario, mas nao conecta repos automaticamente.
       - GitHub work-source exige permissao e repos selecionados.
       - Conectar repo nao concede authority governada.
+  - id: APP-45
+    title: Better Auth escopa sessao/workspace sem vazar cache TanStack
+    status: fixme
+    spec: journeys/auth-query-scope.spec.ts
+    seed: workspace-shared-convites
+    actors:
+      - workspace-admin
+      - invited-member
+    surfaces:
+      - /api/auth/[...all]
+      - /signup
+      - /organizations
+      - state
+    assertions:
+      - Better Auth fica montado pela integracao Next.js, nao pela integracao TanStack Start.
+      - Signup/login/accept-invite produzem sessao/membership de portal, mas nao authority governada.
+      - Troca de conta, logout, aceite de convite e troca de workspace limpam ou invalidam queries sensiveis do TanStack Query.
+      - Query keys de dados governados carregam workspace e escopo de sessao/conta suficiente para impedir vazamento cross-workspace.
+      - A UI nunca usa cache de TanStack Query como prova de authority; toda acao sensivel relê authority/sourceRevision no backend.
   - id: APP-22
     title: Planejamento cria ciclo, objetivo, metrica e target
     status: fixme
