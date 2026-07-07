@@ -9,6 +9,13 @@ artifact-kind: research
 > **QRDs alvo:** QRD-12 (natureza do app), QRD-13 (relação com CLI), QRD-37 (produto/nome), QRD-38 (extração — ver [research irmã](2026-07-06-work-graph-model-extraction-strategy.md)).
 > **Regra:** repositório vence narrativa. Separo FATO de INTERPRETAÇÃO. Nenhuma stack é escolhida por inércia. Default mental = open-source, self-hostable, local-first.
 
+> **Reconciliação 2026-07-07:** a owner decidiu pelo modelo hibrido:
+> portal para contas/convites/memberships e governance host Git-backed no
+> provedor do usuario. Esta pesquisa continua valida como base de
+> posicionamento OSS/naming, mas a recomendacao "nao precisa de decisao de
+> nome/repo agora para continuar" foi superada para as proximas grandes telas:
+> o app visual deve caminhar para nome proprio e repo irmao do `ai-guidelines`.
+
 ## 1. Base verificada
 
 **Arquivos locais lidos (fonte de verdade):**

@@ -4,8 +4,28 @@
 > **Criado em:** 2026-07-05.
 > **Autoridade funcional:** [`APP-FUNCTIONAL-SPEC.md`](APP-FUNCTIONAL-SPEC.md).
 > **Matriz de cobertura automatizada:** [`APP-COVERAGE-MATRIX.md`](APP-COVERAGE-MATRIX.md).
+> **Topologia de produto:** [`PRODUCT-TOPOLOGY.md`](PRODUCT-TOPOLOGY.md).
 > **Regra inicial:** toda tela nasce como `nao-iterado` e `nao-validado-visual`.
 > **Uso:** marcar aqui apenas o que foi conferido com o app rodando, por uma pessoa, em um workspace limpo ou em um cenario explicitamente descrito.
+
+## 0. Pausa de produto antes de novas grandes telas
+
+A partir da decisao hibrida registrada em QRD-36/37/38/41/46, o app visual nao
+deve ser tratado como "demo interna" nem como pronto para readiness da Spec 0024. Antes de uma nova leva grande de telas, precisamos fechar a direcao de
+produto:
+
+- nome publico candidato para o produto visual;
+- plano de extracao para repo irmao do `ai-guidelines`;
+- contrato do GitHub governance host como primeiro provider real;
+- politica minima do portal: contas, convites, memberships, magic link/e-mail,
+  retencao e analytics;
+- criterio de dogfood da plataforma, conectando `ai-guidelines` e o repo do app
+  a um governance host de plataforma.
+
+Os testes automatizados podem continuar evoluindo, mas **nao substituem**
+validacao visual humana nem decisao de produto. Uma linha `active` no contrato
+significa que o comportamento automatizado esta coberto; nao significa que a
+tela foi validada como experiencia final.
 
 Este arquivo existe para separar tres coisas que estavam se misturando:
 
@@ -210,6 +230,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 
 ## 5. Proxima ordem sugerida
 
+0. Fechar nome/extracao/topologia GitHub-backed antes de novas telas grandes.
 1. Login passwordless, demo anonima, logout e multi-workspace.
 2. Onboarding completo com estado limpo.
 3. Settings refletindo exatamente o que foi escolhido no onboarding.

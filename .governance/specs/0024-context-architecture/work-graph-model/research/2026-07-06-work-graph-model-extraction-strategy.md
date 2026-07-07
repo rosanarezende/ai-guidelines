@@ -9,6 +9,13 @@ artifact-kind: research
 > **QRDs alvo:** QRD-38 (extração/promoção), com QRD-37 (produto/nome) e QRD-13 (relação com CLI).
 > **Regra:** repositório vence narrativa; preservar histórico/testes/docs/governança; não abrir repo separado por inércia.
 
+> **Reconciliação 2026-07-07:** a owner decidiu que o app visual deve virar
+> produto proprio, com portal hibrido e governance host Git-backed no provedor
+> do usuario. Esta pesquisa continua util como matriz de riscos, mas a
+> recomendacao de manter o app dentro da Spec 0024 enquanto amadurece foi
+> estreitada: antes de novas grandes telas, preparar a extracao para repo irmao
+> e registrar a topologia de dogfood da plataforma.
+
 ## 1. Base verificada
 
 **Local:**

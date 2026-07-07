@@ -2534,9 +2534,9 @@ Contrato minimo APP-35:
 - Cup/CWP e console tecnico aparecem como entradas distintas;
 - authority altera CTA/estado, nao vira decoracao visual.
 
-## QRD-36 - Control plane opcional para contas, workspaces e convites
+## QRD-36 - Portal hibrido para contas, workspaces e convites
 
-**Status:** research-open; nao ha plataforma escolhida.
+**Status:** decided; arquitetura hibrida portal + governance host Git-backed.
 
 **Q - Question**
 
@@ -2591,27 +2591,48 @@ Fontes iniciais a aprofundar:
 - Keycloak:
   <https://www.keycloak.org/>
 
-**D - Current boundary**
+**D - Decision**
 
-Decidido por enquanto:
+O primeiro release do produto visual deve assumir um **modelo hibrido**:
 
-- existe o conceito de **control plane opcional**;
-- o modo `local` nao pode depender dele;
-- `shared` e `controlled` precisam de algum control plane compartilhado ou
-  identity provider equivalente para convites reais;
-- login nunca concede membership, role ou authority automaticamente;
-- roles e authority efetiva continuam resolvidas no governance plane;
-- nenhuma plataforma (`cloudflare`, `supabase`, `appwrite`, `github`,
-  `keycloak`, etc.) esta escolhida como default.
+```text
+Portal
+  guarda: contas, sessoes, convites, memberships e registry de workspaces
+  nao guarda: decisoes, iniciativas, contratos, evidencias, authority governada
 
-Ainda aberto:
+Governance host Git-backed
+  guarda: arquivos governados, work graph, roles governados, policies,
+  event-log, sourceRevision e decisoes auditaveis
 
-- se teremos um control plane operado por nos, apenas self-hosted, ou ambos;
-- onde hospedar esse control plane;
-- qual auth/session stack usar;
-- se o site publico `ai-guidelines.pages.dev` deve ser apenas docs/landing ou
-  tambem entrada para conta;
-- como nomear esse produto sem prender tudo ao nome `ai-guidelines`.
+Repos de trabalho
+  guardam: codigo, docs, design, infra, metricas e evidencias de execucao
+```
+
+Decisoes fechadas:
+
+- o portal e parte da v1 usavel, nao uma feature opcional futura;
+- o portal pode ser usado como entrada publica/portfolio do produto;
+- o portal pode ser hospedado pela mantenedora no futuro, mas o produto deve
+  continuar open-source e self-hostable;
+- o portal guarda identidade, sessao, convite, membership de portal e registry
+  minimo de workspace;
+- senha de usuario final fica fora do produto: magic link e provedores OAuth
+  sao os caminhos de entrada;
+- GitHub e o primeiro provider real para governance host remoto;
+- GitLab, Bitbucket e outros providers entram como adapters posteriores;
+- login GitHub/Google/OIDC autentica pessoa no portal, mas nao conecta repos
+  automaticamente e nao concede authority governada;
+- a authority efetiva continua derivada do governance host/reducer;
+- o conteudo governado deve morar no Git/host do usuario, nao no banco do
+  portal.
+
+Ainda aberto, mas nao bloqueia a direcao:
+
+- nome publico do produto visual;
+- provider real de e-mail/magic link para ambiente publico;
+- hospedagem publica operada pela mantenedora versus apenas self-hosted;
+- politica de retencao de dados do portal e analytics;
+- termos de uso e politica de privacidade para um portal publico.
 
 Contratos futuros, ainda pendentes de pesquisa:
 
@@ -2625,9 +2646,9 @@ Contratos futuros, ainda pendentes de pesquisa:
 - SEC-13: token/secret de provider nao aparece em payload publico, event-log ou
   read-model.
 
-## QRD-37 - Produto, nome e relacao com `ai-guidelines`
+## QRD-37 - Produto visual, nome e relacao com `ai-guidelines`
 
-**Status:** research-open.
+**Status:** decided-direction; nome publico ainda aberto.
 
 **Q - Question**
 
@@ -2654,22 +2675,47 @@ Benchmarks open-source costumam separar:
 Essa separacao aumenta clareza de manutencao e reduz risco de a Spec 0024 ficar
 presa indefinidamente a um produto que cresceu alem do escopo inicial.
 
-**D - Current boundary**
+**D - Decision**
 
-Ainda nao decidir nome nem packaging. A pesquisa deve comparar:
+O produto visual deve ser tratado como **produto open-source proprio**,
+complementar ao `ai-guidelines`, nao como simples demo interna.
 
-- manter tudo sob `ai-guidelines`;
-- manter no monorepo, mas promover para app de primeira classe na raiz;
-- criar repo separado para o app/produto;
-- criar organizacao/repo separado no futuro, preservando `ai-guidelines` como
-  pacote nativo.
+Separacao de responsabilidades:
 
-O nome `governance-demo` e apenas nome de fase. Ele nao deve ser tratado como
-nome publico do produto.
+```text
+ai-guidelines
+  framework/CLI/core repo-first
+  checks, runtime governado, bootstrap, contracts e adapters headless
 
-## QRD-38 - Extracao ou promocao do `work-graph-model`
+produto visual (nome a decidir)
+  portal humano para contas, convites, workspaces, onboarding, operacao,
+  dashboards, Cup/CWP e integracoes
 
-**Status:** research-open.
+governance host do workspace
+  SSOT Git-backed da governanca real
+```
+
+Decisoes fechadas:
+
+- `governance-demo` e codinome de fase, nao nome publico;
+- o app visual precisa de nome proprio antes de sair como v1 publica;
+- `ai-guidelines` permanece como framework/CLI/core que o app usa de forma
+  nativa;
+- o app visual pode ser implementado junto com `ai-guidelines`, mas deve poder
+  seguir roadmap, issues, release e validacao proprios;
+- a narrativa publica deve explicar que os dois produtos se complementam:
+  CLI/headless para repos e automacao; portal visual para humanos.
+
+Ainda aberto:
+
+- nome publico;
+- disponibilidade de nome em GitHub/npm/domain;
+- licenca do app visual se houver hosted publico;
+- organizacao/repo final.
+
+## QRD-38 - Extracao do produto visual do `work-graph-model`
+
+**Status:** decided-direction; plano de extracao deve ser detalhado antes de novas grandes telas.
 
 **Q - Question**
 
@@ -2694,17 +2740,38 @@ Isso cria dois riscos:
 - esconder uma aplicacao relevante dentro de uma pasta de spec, dificultando
   contribuicao open-source e manutencao humana/IA.
 
-**D - Current boundary**
+**D - Decision**
 
-Nao decidir extracao antes de pesquisa. A pesquisa deve propor uma estrategia em
-fases, com criterios objetivos:
+O produto visual nao deve continuar crescendo indefinidamente dentro de
+`.governance/specs/0024-context-architecture/work-graph-model/`.
 
-- o que precisa ficar na Spec 0024 como evidencia historica;
-- o que deve ser promovido para raiz do repo atual;
-- o que deve virar pacote/app independente;
-- quando vale abrir repo separado;
-- como preservar historico, testes, docs e governanca;
-- como evitar que `work-graph-model` continue bloqueando o encerramento da Spec 0024.
+A decisao da owner muda a leitura da pesquisa de 2026-07-06: ela nao invalida a
+preocupacao contra fork prematuro, mas torna **mais caro continuar iterando
+telas e arquitetura de produto dentro de um checkpoint da Spec 0024**.
+
+Direcao fechada:
+
+- preparar a extracao do app visual para um **repo irmao** do `ai-guidelines`;
+- manter na Spec 0024 a evidencia historica: research, deliberacoes, reviews,
+  modelagem e rastreabilidade do nascimento do produto;
+- mover o produto vivo quando o plano de corte estiver claro: frontend,
+  backend, packages do app, mock-api, testes, docs operacionais e dogfood
+  necessario;
+- preservar historico por `git filter-repo` ou estrategia equivalente, sem
+  perder blame dos arquivos do produto;
+- tratar o repo novo como superficie de v1 do produto visual;
+- usar a v1 para dogfood da propria plataforma de governanca, conectando o
+  repo `ai-guidelines` e o repo do produto visual a um governance host de
+  plataforma.
+
+Antes de novas grandes telas, decidir/documentar:
+
+- nome publico candidato;
+- topologia do repo irmao;
+- quais pacotes ficam em `ai-guidelines` e quais vao para o app visual;
+- como o repo novo consome `ai-guidelines` como pacote/core;
+- como os testes/fixtures/dogfood migram;
+- como o governance host da plataforma governa os dois repos.
 
 ## QRD-39 - Grafos, Neo4j e oportunidades open-source
 
@@ -2799,8 +2866,7 @@ mesmo que a aplicacao nao use Google Cloud.
 
 ## QRD-41 - Portal humano sobre governance host Git-backed
 
-**Status:** proposed; decidido como direcao de spike, nao como implementacao
-final.
+**Status:** decided; consolidado como arquitetura de produto da v1.
 
 **Q - Question**
 
