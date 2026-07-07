@@ -121,13 +121,14 @@ the governance host/Git-backed SSOT.
 
 ### Frontend (`acme-governance-next-app`)
 
-| Script     | Purpose                                                                 |
-| ---------- | ----------------------------------------------------------------------- |
-| `dev`      | Plain Next dev server; defaults to `real-runtime`.                      |
-| `dev:real` | Explicit real-runtime dev server.                                       |
-| `dev:mock` | Cross-platform helper that starts mock-api in-process and Next in mock. |
-| `build`    | Production build.                                                       |
-| `start`    | Production-like Next start.                                             |
+| Script      | Purpose                                                                       |
+| ----------- | ----------------------------------------------------------------------------- |
+| `dev`       | Plain Next dev server; defaults to `real-runtime`.                            |
+| `dev:real`  | Explicit real-runtime dev server.                                             |
+| `dev:mock`  | Cross-platform helper that starts mock-api in-process and Next in mock.       |
+| `typecheck` | Strict TypeScript check for the Next app, server adapters and route handlers. |
+| `build`     | Production build.                                                             |
+| `start`     | Production-like Next start.                                                   |
 
 ### Backend (`acme-governance-backend`)
 

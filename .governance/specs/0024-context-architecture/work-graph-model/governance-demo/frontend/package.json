@@ -6,6 +6,7 @@
     "dev": "next dev --hostname 127.0.0.1 --port 3024",
     "dev:real": "next dev --hostname 127.0.0.1 --port 3024",
     "dev:mock": "node ../mock-api/src/dev-app.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "build": "next build --webpack",
     "start": "next start --hostname 127.0.0.1 --port 3024"
   },

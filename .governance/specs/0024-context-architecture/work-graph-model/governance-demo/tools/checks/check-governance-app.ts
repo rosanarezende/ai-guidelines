@@ -220,6 +220,22 @@ function importedPackages(files: string[]) {
   return [...packages].sort();
 }
 
+function runNpmWorkspaceScript(workspace: string, script: string) {
+  const args = ["--workspace", workspace, "run", script];
+  if (process.platform === "win32") {
+    return spawnSync("cmd.exe", ["/d", "/s", "/c", `npm ${args.join(" ")}`], {
+      cwd: repoRoot,
+      stdio: "inherit",
+      shell: false,
+    });
+  }
+  return spawnSync("npm", args, {
+    cwd: repoRoot,
+    stdio: "inherit",
+    shell: false,
+  });
+}
+
 function assertAcmeFixtureLayout() {
   if (!fs.existsSync(acmeGovernanceRoot)) {
     fail("fixture acme sem host central: acme/governance");
@@ -312,6 +328,9 @@ function assertWorkspaceDependencyContract(files: string[]) {
   }
   if (!rootPackage.workspaces?.includes(appWorkspacePath)) {
     fail(`governance-next nao esta declarado como npm workspace: ${appWorkspacePath}`);
+  }
+  if (appPackage.scripts?.typecheck !== "tsc -p tsconfig.json --noEmit") {
+    fail("frontend/package.json precisa declarar script typecheck: tsc -p tsconfig.json --noEmit");
   }
 
   const declared = new Set([
@@ -807,6 +826,9 @@ const backendTsc = spawnSync(process.execPath, [tscBin, "-p", backendTsconfigFil
   shell: false,
 });
 if (backendTsc.status !== 0) fail("typecheck strict do backend falhou");
+
+const frontendTsc = runNpmWorkspaceScript("acme-governance-next-app", "typecheck");
+if (frontendTsc.status !== 0) fail("typecheck strict do frontend falhou");
 
 const backendShellTests = spawnSync(process.execPath, ["--test", "tests/**/*.test.ts"], {
   cwd: backendRoot,

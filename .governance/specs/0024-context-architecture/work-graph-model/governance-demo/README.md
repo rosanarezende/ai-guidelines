@@ -47,6 +47,7 @@ node tools/checks/check-integrations.ts # smoke dos integration adapters + API h
 npm --workspace acme-governance-backend run typecheck # TypeScript strict do backend (src/)
 node tools/journeys/adoption-journey.ts # dogfood completo da adoção repo-existente → host agregado
 # produto (R0/R1) — na RAIZ do repositório:
+npm --workspace acme-governance-next-app run typecheck # TypeScript strict do app Next/frontend
 npm --workspace acme-governance-next-app run dev:real   # app em modo real (file-first .local-state)
 npm --workspace acme-governance-next-app run dev:mock   # mock-api + app em modo mock (lowdb)
 npm --workspace acme-governance-mock-api run dev        # só a mock-api (porta 3025)

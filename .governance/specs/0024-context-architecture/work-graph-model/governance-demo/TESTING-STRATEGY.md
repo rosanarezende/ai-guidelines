@@ -112,15 +112,16 @@ Base tecnica de APP-45 ja fica no layer rapido: `@demo/contracts` define
 token/secret, que query keys mudam por conta/sessao/workspace/membership e que
 eventos sensiveis retornam diretivas explicitas de cache. O runtime Better Auth
 existe em `/api/auth/[...all]`. APP-45 agora roda em
-`journeys/portal-auth-flow.spec.ts`: signup Better Auth -> `/api/local/auth/bridge`
--> workspace -> convite -> signup da pessoa convidada -> accept; o teste prova
+`journeys/portal-auth-flow.spec.ts`: magic link Better Auth -> `/api/local/auth/bridge`
+-> workspace -> convite -> magic link da pessoa convidada -> accept; o teste prova
 que membership de portal nao cria authority governada. APP-46 permanece
 `expected-fail` para a parte visual de escopo/limpeza de cache.
 
 Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
-dos testes do backend (`test:shell`), o typecheck strict + `test:api` da
-mock-api. Assim as camadas rapidas (dominio + API in-memory) nao dependem de
-alguem lembrar de invoca-las: entram no check governado da governance-demo.
+dos testes do backend (`test:shell`), o `typecheck` do frontend, o typecheck
+strict da mock-api e `test:api`. Assim as camadas rapidas (dominio + API
+in-memory) e o contrato TypeScript do app nao dependem de alguem lembrar de
+invoca-las: entram no check governado da governance-demo.
 
 ## 4. Ferramentas escolhidas
 
