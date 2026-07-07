@@ -85,6 +85,14 @@ for (const expected of [
   if (!dataSource.includes(expected)) fail(`data-source.ts sem contrato esperado: ${expected}`);
 }
 
+const portalAuth = readText("frontend/server/auth/portal-auth.ts");
+for (const expected of [
+  'resolveAppEnv() === "production"',
+  "BETTER_AUTH_SECRET is required for the governance portal in production-like runtime",
+] as const) {
+  if (!portalAuth.includes(expected)) fail(`portal-auth.ts sem contrato de segredo: ${expected}`);
+}
+
 const devApp = readText("mock-api/src/dev-app.ts");
 for (const expected of [
   'GOVERNANCE_DATA_SOURCE: "mock-api"',

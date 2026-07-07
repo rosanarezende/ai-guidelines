@@ -11,6 +11,7 @@ import { magicLink, organization } from "better-auth/plugins";
 import Database from "better-sqlite3";
 import { SqliteDialect } from "kysely";
 import { localStateDir } from "@/server/adoption/infrastructure/paths";
+import { resolveAppEnv } from "@/server/adoption/data-source";
 
 type PortalAuthRuntime = {
   handler: (request: Request) => Promise<Response>;
@@ -83,8 +84,10 @@ async function createPortalAuthRuntime(): Promise<PortalAuthRuntime> {
   mkdirSync(path.dirname(databasePath), { recursive: true });
 
   const secret = process.env.BETTER_AUTH_SECRET;
-  if (process.env.NODE_ENV === "production" && !secret) {
-    throw new Error("BETTER_AUTH_SECRET is required for the governance portal in production");
+  if (resolveAppEnv() === "production" && !secret) {
+    throw new Error(
+      "BETTER_AUTH_SECRET is required for the governance portal in production-like runtime"
+    );
   }
 
   const sqlite = new Database(databasePath);

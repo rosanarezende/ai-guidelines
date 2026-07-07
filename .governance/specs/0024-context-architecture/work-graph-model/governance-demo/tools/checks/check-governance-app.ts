@@ -574,6 +574,14 @@ const zodContractRoutes = [
     schema: "IntakeInitiativeRequestSchema",
   },
   {
+    file: "app/api/local/planning/targets/route.ts",
+    schema: "PlanningTargetRequestSchema",
+  },
+  {
+    file: "app/api/local/triage/confirm/route.ts",
+    schema: "TriageConfirmRequestSchema",
+  },
+  {
     file: "app/api/local/members/route.ts",
     schema: "InvitePersonRequestSchema",
   },
@@ -626,6 +634,13 @@ const zodContractRoutes = [
     schema: "IntegrationStatusRequestSchema",
   },
 ];
+const noBodyLocalRoutes = new Set([
+  "app/api/local/auth/bridge/route.ts", // derives identity from Better Auth session only
+  "app/api/local/demo/route.ts", // starts anonymous demo without client payload
+  "app/api/local/integration-backlog/route.ts", // read-only GET
+  "app/api/local/logout/route.ts", // clears local session only
+]);
+const zodContractRouteFiles = new Set(zodContractRoutes.map((route) => route.file));
 for (const route of zodContractRoutes) {
   const file = path.join(appDir, ...route.file.split("/"));
   if (!fs.existsSync(file)) {
@@ -647,9 +662,15 @@ for (const relativeFile of walk(path.join(appDir, "app", "api", "local")).filter
 )) {
   const normalized = path.relative(appDir, relativeFile).replace(/\\/g, "/");
   if (normalized === "app/api/local/_shared/parse-zod-request.ts") continue;
+  if (!zodContractRouteFiles.has(normalized) && !noBodyLocalRoutes.has(normalized)) {
+    fail(`rota /api/local sem contrato Zod nem justificativa no-body: ${normalized}`);
+  }
   const text = fs.readFileSync(relativeFile, "utf8");
   if (text.includes("request.json(")) {
     fail(`rota /api/local com parsing JSON manual em vez de parseZodJson: ${normalized}`);
+  }
+  if (noBodyLocalRoutes.has(normalized) && text.includes("parseZodJson")) {
+    fail(`rota /api/local no-body nao deve aceitar payload: ${normalized}`);
   }
 }
 // ── fluxo inicial login → organizações → onboarding → home ─────────────────

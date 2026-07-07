@@ -67,8 +67,10 @@ BETTER_AUTH_SECRET=<strong secret>
 BETTER_AUTH_URL=<public app url ending in /api/auth>
 ```
 
-Without `BETTER_AUTH_SECRET`, the auth route fails closed in production. Local
-development uses a fixed non-production secret only to keep the demo bootable.
+Without `BETTER_AUTH_SECRET`, the auth route fails closed whenever the resolved
+app env is production-like (`GOVERNANCE_APP_ENV=production` or
+`NODE_ENV=production`). Local development uses a fixed non-production secret only
+to keep the demo bootable.
 
 Magic link delivery:
 
