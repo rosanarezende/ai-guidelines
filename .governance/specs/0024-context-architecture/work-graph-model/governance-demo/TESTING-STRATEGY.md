@@ -105,6 +105,14 @@ fechado antes de transformar Better Auth em fluxo de produto:
   sensiveis;
 - membership do portal nao concede authority governada.
 
+Base tecnica de APP-45 ja fica no layer rapido: `@demo/contracts` define
+`PortalQueryScopeSchema`, `SensitiveCacheEventSchema`,
+`buildGovernedQueryKey()` e `sensitiveQueryCacheDirective()`;
+`backend/tests/auth-query-scope.test.ts` prova que ids de escopo nao carregam
+token/secret, que query keys mudam por conta/sessao/workspace/membership e que
+eventos sensiveis retornam diretivas explicitas de cache. A tela/rota real
+continua `fixme` ate o Better Auth runtime existir no app.
+
 Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
 dos testes do backend (`test:shell`), o typecheck strict + `test:api` da
 mock-api. Assim as camadas rapidas (dominio + API in-memory) nao dependem de

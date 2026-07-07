@@ -3231,7 +3231,10 @@ Para a governance-demo, a integracao vigente e:
   cookie/session, mas nao deve ser copiado para o app Next.
 - `APP-45` passa a governar a ponte identity -> workspace scope -> TanStack
   Query.
-- A proxima fatia tecnica deve ser contrato/modelagem/teste: auth route, schema
-  de session scope, query invalidation e prova de que membership nao concede
-  authority.
+- A primeira fatia tecnica de contrato/modelagem/teste foi materializada em
+  `@demo/contracts`: `PortalQueryScopeSchema`, `SensitiveCacheEventSchema`,
+  `buildGovernedQueryKey()` e `sensitiveQueryCacheDirective()`, com regressao em
+  `backend/tests/auth-query-scope.test.ts`.
+- A proxima fatia tecnica deve montar a rota/client Better Auth e ligar
+  invalidation real, ainda sem transformar cache em prova de authority.
 - Nenhuma tela nova de auth real deve nascer sem contrato de cache/sessao.

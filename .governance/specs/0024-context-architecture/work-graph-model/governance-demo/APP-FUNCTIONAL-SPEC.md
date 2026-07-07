@@ -187,6 +187,10 @@ Regras de produto:
   queries sensiveis em login, logout, troca de workspace e aceite de convite.
   Query key de dado governado deve carregar workspace e escopo de sessao/conta
   suficiente para impedir vazamento cross-workspace.
+- A fronteira tipada dessa regra vive em `@demo/contracts`:
+  `PortalQueryScopeSchema`, `SensitiveCacheEventSchema`,
+  `buildGovernedQueryKey()` e `sensitiveQueryCacheDirective()`. Tela e rota
+  real usam esses contratos; cache nunca e prova de authority.
 - Se listas operacionais exigirem scroll infinito real (>100 linhas por pagina),
   a decisao de tabela volta para novo QRD.
 - Cytoscape esta banido do produto, do roadmap e dos spikes.
