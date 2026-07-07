@@ -387,8 +387,8 @@ do pipeline de provider/policy/audit.
 | Mapa          | `/map`                   | `UI real/read-only` na demo                      | Caminho objetivo → resultado                    |
 | Console       | `/console`               | `Console tecnico`                                | Operacao avancada                               |
 | Planejamento  | `/planning`              | `Futuro`                                         | Ciclo, objetivos, targets                       |
-| Intake        | `/intake`                | `Futuro`, comando existe no console              | Registrar proposta/iniciativa                   |
-| Triagem       | `/triage`                | `Futuro`, comando existe no console              | Perguntas, matcher, contratos                   |
+| Intake        | `/intake`                | `UI real/parcial`                                | Registrar proposta/iniciativa                   |
+| Triagem       | `/triage`                | `UI real/parcial`                                | Perguntas, matcher, contratos                   |
 | Gates         | `/gates`                 | `Futuro`, comando existe no console              | Aprovar/descartar/promover                      |
 | Execucao      | `/work`                  | `UI real/read-only` na demo                      | Lista operacional de trabalho                   |
 | Fontes        | `/sources`               | `UI real/parcial`                                | Repos/pastas/contextos/capabilities             |
@@ -1489,22 +1489,25 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 
 **Backend necessario:**
 
-- `proposal.create` ou `register.create`;
+- `local.intake.register` para registrar a iniciativa local;
+- `proposal.create` ou `register.create` para promoção governada futura;
 - anexos/link externo com policy;
 - classificacao/secret scan;
 - validacao de target autorizado.
 
 **Estado atual:**
 
-- `proposal.create` existe no backend/console.
-- nao ha tela humana completa de intake.
+- `/intake` registra problema, aposta, duvida e target opcional via rota Zod `POST /api/local/intake/initiatives`.
+- O comando local `local.intake.register` persiste a iniciativa no shell do workspace com status `triage`.
+- `/triage` mostra a fila de iniciativas criada no intake.
+- `proposal.create` ainda existe no runtime governado/console para a etapa futura de promoção.
 
 **Lacunas:**
 
 - anexos externos;
 - prompt injection scan;
 - link fetch policy;
-- workflow de proposta ate triagem.
+- workflow de proposta ate gate/intent/auditoria completa.
 
 ## 12. Triagem e matcher (`/triage`)
 
@@ -2079,8 +2082,8 @@ Em breve significa backlog priorizado, nao mecanismo ativo. O app mostra o que j
 | Assistente       | providers/defaults/health/probe/test/advisory/audit                             | provider/defaults/health/egress basicos existem em Settings; Cup/advisory/audit faltam |
 | Integracoes      | list/configure/test/evidence feed                                               | backend parcial; UI parcial                                                            |
 | Planning         | objectives/metrics/targets/cycle + thesis/opportunity-area/allocation opcionais | falta UI/comandos completos                                                            |
-| Intake           | proposal/register create                                                        | backend existe para proposal; falta UI                                                 |
-| Triage           | triage save + matcher multi-provider                                            | comando parcial; matcher falta                                                         |
+| Intake           | proposal/register create                                                        | local intake existe; promocao governada para proposal/gate falta                       |
+| Triage           | triage save + matcher multi-provider                                            | triage local existe; matcher provider real falta                                       |
 | Gate             | decide/activate                                                                 | backend existe; falta UI                                                               |
 | Breakdown        | apply + repo ack                                                                | backend existe; falta UI                                                               |
 | Contracts        | propose/review/impact                                                           | backend parcial; falta UI                                                              |

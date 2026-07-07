@@ -529,7 +529,7 @@ contracts:
       - Target aparece no dashboard sem actual ate haver outcome.
   - id: APP-23
     title: Intake registra iniciativa sem breakdown tecnico inicial
-    status: fixme
+    status: active
     spec: journeys/planning-intake.spec.ts
     seed: workspace-planning-progressivo
     actors:

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
+import { openWorkspace } from "./support/contract-fixtures.ts";
 
 test.describe("Planejamento e intake", () => {
   test("APP-22 planejamento cria ciclo, objetivo, metrica e target", async ({ page, request }) => {
@@ -20,14 +20,14 @@ test.describe("Planejamento e intake", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-23", "fixme");
-
     await openWorkspace(page, request, "workspace-planning-progressivo", "/intake");
     await page.getByTestId("initiative-register").click();
     await page.getByTestId("initiative-problem").fill("Usuários não concluem a etapa inicial");
     await page.getByTestId("initiative-bet").fill("Melhorar orientação no primeiro uso");
     await page.getByTestId("initiative-question").fill("Quais repos/superficies são afetados?");
+    const saveResponse = page.waitForResponse("**/api/local/intake/initiatives");
     await page.getByTestId("initiative-submit").click();
+    expect((await saveResponse).ok()).toBeTruthy();
     await expect(page.getByTestId("proposal-status")).toContainText(/triagem/i);
     await page.goto("/triage");
     await expect(page.getByTestId("triage-queue")).toContainText(/primeiro uso/i);

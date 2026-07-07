@@ -25,6 +25,7 @@ test.describe("Cup / Contextual Work Partner", () => {
 
   test("CUP-03 Cup nao executa mutacao sem confirmacao humana", async ({ page, request }) => {
     await openWorkspace(page, request, "workspace-host-local", "/sources");
+    await expect(page.getByTestId("cup-open-button")).toBeVisible({ timeout: 10000 });
     await page.getByTestId("cup-open-button").click();
     await page.getByTestId("cup-draft-add-source").click();
     await expect(page.getByTestId("cup-draft-command")).toContainText(/dry-run|baseRevision/i);

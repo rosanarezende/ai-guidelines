@@ -67,6 +67,12 @@ const MATRIX: Array<{
     eva: { ok: false, error: "missing-target-manager" },
   },
   {
+    type: "local.intake.register",
+    ana: { ok: true },
+    bia: { ok: false, error: "missing-intake-manager" },
+    eva: { ok: false, error: "missing-intake-manager" },
+  },
+  {
     type: "local.triage.confirm",
     ana: { ok: true },
     bia: { ok: false, error: "missing-triage-manager" },

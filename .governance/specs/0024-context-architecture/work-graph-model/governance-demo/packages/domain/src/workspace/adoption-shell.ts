@@ -447,6 +447,21 @@ export type WorkspacePlanning = {
   targets: PlannedTarget[];
 };
 
+export type IntakeInitiative = {
+  id: string;
+  problem: string;
+  bet: string;
+  question: string;
+  linkedTargetId?: string;
+  status: "triage";
+  createdAt: string;
+  createdBy: string;
+};
+
+export type WorkspaceIntake = {
+  initiatives: IntakeInitiative[];
+};
+
 export type TriageDecision = {
   id: string;
   question: string;
@@ -486,6 +501,7 @@ export type Workspace = {
   assistantConfig?: WorkspaceAssistantConfig;
   integrations: WorkspaceIntegrationState[];
   planning?: WorkspacePlanning;
+  intake?: WorkspaceIntake;
   triage?: WorkspaceTriage;
   onboardingStatus: OnboardingStatus;
 };
@@ -504,6 +520,7 @@ export function normalizeWorkspace(workspace: Workspace): Workspace {
     workSources: workspace.workSources || [],
     integrations: workspace.integrations || [],
     planning: { targets: workspace.planning?.targets || [] },
+    intake: { initiatives: workspace.intake?.initiatives || [] },
     triage: { decisions: workspace.triage?.decisions || [] },
   };
 }
@@ -547,6 +564,7 @@ export type LocalShellCommandType =
   | "local.workspace-mode.save"
   | "local.workspace-stack.save"
   | "local.planning.save"
+  | "local.intake.register"
   | "local.triage.confirm"
   | "local.member.invite"
   | "local.invite.accept"
@@ -618,6 +636,7 @@ export function buildDemoWorkspace(companyName: string): Workspace {
     workSources: [],
     integrations: [],
     planning: { targets: [] },
+    intake: { initiatives: [] },
     triage: { decisions: [] },
     onboardingStatus: "finished",
   };
@@ -638,6 +657,7 @@ export function buildEmptyWorkspace(id: string, name: string, kind: WorkspaceKin
     workSources: [],
     integrations: [],
     planning: { targets: [] },
+    intake: { initiatives: [] },
     triage: { decisions: [] },
     onboardingStatus: "not-started",
   };

@@ -570,6 +570,10 @@ const zodContractRoutes = [
     schema: "WorkspaceStackRequestSchema",
   },
   {
+    file: "app/api/local/intake/initiatives/route.ts",
+    schema: "IntakeInitiativeRequestSchema",
+  },
+  {
     file: "app/api/local/members/route.ts",
     schema: "InvitePersonRequestSchema",
   },

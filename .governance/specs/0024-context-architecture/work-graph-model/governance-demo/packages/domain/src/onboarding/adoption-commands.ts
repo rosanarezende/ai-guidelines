@@ -24,6 +24,7 @@ import {
   type AssistantProviderConfig,
   type GovernanceHost,
   type HostFitCheck,
+  type IntakeInitiative,
   type LocalAccount,
   type LocalShellCommand,
   type PlannedTarget,
@@ -314,6 +315,44 @@ export function applyShellCommand(
           ? planning.targets.map((item) => (item.id === target.id ? target : item))
           : [...planning.targets, target];
         return { ...workspace, planning: { ...planning, targets } };
+      });
+    }
+
+    case "local.intake.register": {
+      const workspaceId = text(payload, "workspaceId");
+      const rawInitiative = payload["initiative"] as Partial<IntakeInitiative> | undefined;
+      if (!workspaceId) return err("missing-workspace-id");
+      if (!rawInitiative || typeof rawInitiative !== "object")
+        return err("missing-intake-initiative");
+      const problem = typeof rawInitiative.problem === "string" ? rawInitiative.problem.trim() : "";
+      const bet = typeof rawInitiative.bet === "string" ? rawInitiative.bet.trim() : "";
+      const question =
+        typeof rawInitiative.question === "string" ? rawInitiative.question.trim() : "";
+      const linkedTargetId =
+        typeof rawInitiative.linkedTargetId === "string"
+          ? rawInitiative.linkedTargetId.trim()
+          : undefined;
+      if (problem.length < 8 || problem.length > 280) return err("invalid-initiative-problem");
+      if (bet.length < 4 || bet.length > 220) return err("invalid-initiative-bet");
+      if (question.length < 4 || question.length > 220) return err("invalid-initiative-question");
+      const membership = requireMember(state, command, workspaceId);
+      if (membership) return err(membership);
+      return updateWorkspace(state, workspaceId, (workspace) => {
+        const intake = workspace.intake || { initiatives: [] };
+        const initiative: IntakeInitiative = {
+          id: rawInitiative.id || `initiative-${intake.initiatives.length + 1}`,
+          problem,
+          bet,
+          question,
+          ...(linkedTargetId ? { linkedTargetId } : {}),
+          status: "triage",
+          createdAt: command.issuedAt,
+          createdBy: command.principalId || "unknown-principal",
+        };
+        const initiatives = intake.initiatives.some((item) => item.id === initiative.id)
+          ? intake.initiatives.map((item) => (item.id === initiative.id ? initiative : item))
+          : [...intake.initiatives, initiative];
+        return { ...workspace, intake: { ...intake, initiatives } };
       });
     }
 

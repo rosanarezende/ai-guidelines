@@ -9,7 +9,13 @@ export default function TriagePlaceholderView({
   workspace,
   accountId,
 }: {
-  workspace: { id: string; name: string; demo: boolean; hasGovernanceHost: boolean };
+  workspace: {
+    id: string;
+    name: string;
+    demo: boolean;
+    hasGovernanceHost: boolean;
+    initiatives: Array<{ id: string; problem: string; bet: string; question: string }>;
+  };
   accountId: string;
 }) {
   const [itemCreated, setItemCreated] = useState(false);
@@ -56,6 +62,21 @@ export default function TriagePlaceholderView({
           roteamento manual.
         </Alert>
         <Box sx={{ display: "grid", gap: 1.5, maxWidth: 760 }}>
+          <Box data-testid="triage-queue" sx={{ display: "grid", gap: 1 }}>
+            <Typography variant="h2">Fila de triagem</Typography>
+            {workspace.initiatives.length ? (
+              workspace.initiatives.map((initiative) => (
+                <Alert key={initiative.id} severity="warning">
+                  {initiative.bet} · {initiative.problem} · dúvida: {initiative.question}
+                </Alert>
+              ))
+            ) : (
+              <Alert severity="info">
+                Nenhuma iniciativa de intake aguardando triagem neste workspace.
+              </Alert>
+            )}
+          </Box>
+
           <Button
             data-testid="triage-item-create-from-question"
             variant="contained"
