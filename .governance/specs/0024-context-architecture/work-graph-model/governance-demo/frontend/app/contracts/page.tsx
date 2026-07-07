@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { loadGovernanceSnapshot } from "@demo/backend";
 import { entryRedirect, resolveAdoptionGate } from "@/server/adoption/gate";
 import ContractsPlaceholderView from "./_view/ContractsPlaceholderView";
 
@@ -10,6 +11,7 @@ export default async function Page() {
   if (target) redirect(target);
   const workspace = gate.currentWorkspace;
   if (!workspace || !gate.principal) redirect("/organizations");
+  const snapshot = gate.isDemo ? await loadGovernanceSnapshot() : null;
 
   return (
     <ContractsPlaceholderView
@@ -20,6 +22,7 @@ export default async function Page() {
         hasGovernanceHost: Boolean(workspace.governanceHost),
       }}
       accountId={gate.principal.id}
+      snapshot={snapshot}
     />
   );
 }

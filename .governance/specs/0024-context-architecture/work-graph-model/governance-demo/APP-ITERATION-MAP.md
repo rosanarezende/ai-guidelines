@@ -149,7 +149,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | APP-24   | 24                   | expected-fail        |
 | APP-25   | 25, 31               | fixme                |
 | APP-26   | 26, 28               | active               |
-| APP-27   | 27, 29, 31           | expected-fail        |
+| APP-27   | 27, 29, 31           | active               |
 | APP-28   | 28                   | active               |
 | APP-29   | 29                   | active               |
 | APP-30   | 30                   | fixme                |

@@ -593,7 +593,7 @@ contracts:
       - Outcome nao soma se work necessario esta aberto/bloqueado/dropped.
   - id: APP-27
     title: Contracts mostra owner, consumers, janela e contention
-    status: expected-fail
+    status: active
     spec: journeys/work-contracts.spec.ts
     seed: acme-demo
     actors:

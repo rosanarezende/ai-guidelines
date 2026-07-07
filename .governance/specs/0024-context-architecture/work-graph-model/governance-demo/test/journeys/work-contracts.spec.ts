@@ -19,8 +19,6 @@ test.describe("Execucao, repo-work e contratos", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-27", "expected-fail");
-
     await openWorkspace(page, request, "acme-demo", "/contracts", "demo-acme");
     await expect(page.getByTestId("contract-list")).toContainText(/owner|consumer|revision/i);
     await page.getByTestId("contract-acme-user-context").click();

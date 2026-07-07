@@ -138,6 +138,14 @@ function MapState({ response }: { response: Extract<GovernanceMapsResponse, { ok
         >
           Filtrar risco
         </Button>
+        {filteredMap.nodes.some((node) => node.kind === "contract") ? (
+          <Chip
+            data-testid="map-contract-impact"
+            size="small"
+            color="info"
+            label="contract impact: intents, consumers e outcomes derivados"
+          />
+        ) : null}
       </Flex>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 320px" }, gap: 2 }}>
         <GovernanceMapCanvas
