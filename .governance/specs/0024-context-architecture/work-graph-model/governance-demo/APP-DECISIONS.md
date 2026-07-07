@@ -3084,3 +3084,64 @@ governanca. Ele e uma etapa de dogfood operacional para o modo
 - A proxima prova continua sendo S1g: governance host Git-backed real/sandbox
   com `sourceRevision`. O compose ajuda a operar o portal, mas nao prova a
   fronteira Git-backed sozinho.
+
+## QRD-44 - OSV/deps.dev como supply-chain evidence, nao SSOT
+
+**Status:** decided.
+
+**Q - Question**
+
+Como incorporar OSV-Scanner, OSV.dev e deps.dev ao framework sem transformar
+uma API externa em autoridade do modelo e sem prender o projeto a Google Cloud?
+
+**R - Reasoning/Research**
+
+A pesquisa de 2026-07-06 separou ferramentas Google neutras de infraestrutura
+Google:
+
+- OSV-Scanner roda localmente/CI e usa OSV.dev para vulnerabilidades
+  conhecidas;
+- OSV.dev expoe API publica para consultar vulnerabilidades por pacote,
+  versao ou commit;
+- deps.dev/Open Source Insights expoe metadados de dependencias, licencas,
+  advisories e grafo de pacotes;
+- nenhuma dessas ferramentas exige Google Cloud, Assured OSS ou conta GCP;
+- todas sao boas como evidencias, mas ruins como autoridade final: um finding
+  externo precisa de triagem, owner, severidade contextual e decisao governada.
+
+O repo ja tinha `code-security` no catalogo, mas ele ainda estava como item
+catalogado, sem mecanismo local. Isso deixava a decisao pesquisada sem dente
+executavel.
+
+**D - Decision**
+
+Adotar uma estrategia em duas camadas:
+
+1. **ai-guidelines repo**
+   - adicionar workflow GitHub oficial do OSV-Scanner para PR/scheduled scan;
+   - adicionar comando TypeScript `supply-chain:check` para validar offline que
+     o `package-lock.json` e parseavel pelo advisory;
+   - adicionar comando TypeScript `supply-chain:advisory` para consultar
+     OSV.dev e deps.dev sob demanda e gravar relatorio em `.tmp/`;
+   - por default o advisory nao bloqueia commit; `SUPPLY_CHAIN_FAIL_ON_VULNS=1`
+     ou `--fail-on-vulns` transforma vulnerabilidade OSV em exit 1.
+
+2. **governance-demo**
+   - mecanizar `code-security` como adapter local que le
+     `reports/code-security.json`;
+   - exigir `contentHash` do corpo do relatorio;
+   - tratar relatorio ausente como `not-configured`, adulterado como
+     `unavailable` e critical/high como `failed`;
+   - nunca escrever YAML autoritativo, nunca fechar gate e nunca aceitar
+     verdict.
+
+**Implications**
+
+- `integration-catalog.yml` passa a listar `osv-scanner`, `osv-dev` e
+  `deps-dev` como sistemas de `code-security`.
+- OSV/deps.dev devem aparecer no hub de integracoes como evidencia de
+  supply-chain e dependencia, nao como requisito para o framework funcionar.
+- O primeiro release pode oferecer OSV-Scanner como check recomendado mesmo
+  antes de ter UI completa para todas as integracoes.
+- Em workspace controlled/cloud, qualquer consulta live deve respeitar policy
+  de egress; relatorio local versionado continua sendo o caminho mais seguro.

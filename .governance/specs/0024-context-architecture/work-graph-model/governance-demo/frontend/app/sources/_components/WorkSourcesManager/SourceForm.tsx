@@ -171,9 +171,9 @@ export function SourceForm({
                       ? "local-source-git-state"
                       : item.id === "local-empty"
                         ? "local-source-empty-state"
-                      : item.id === "github"
-                        ? "cloud-provider-github"
-                        : undefined
+                        : item.id === "github"
+                          ? "cloud-provider-github"
+                          : undefined
                   }
                 />
               );

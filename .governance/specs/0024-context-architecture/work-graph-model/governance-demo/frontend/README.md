@@ -46,7 +46,7 @@ Ainda por vir:
 - GitHub work-source cloud real (contrato/kind/backlog modelados; conexao OAuth/App e fatia seguinte — nunca aparece como `connected` sem mecanismo).
 - Health-check vivo do Neo4j como graph-read-model (config/status/sourceRevision persistem; verificacao ativa e fatia seguinte).
 - Assistente conversacional completo: hoje ha health-check local e advisory local (`/api/integrations/assistant/advisory`) com egress fail-closed + redacao minima; UI conversacional e fatia futura.
-- Adapters cloud alem dos locais (git-local, ci-local, code-quality, observability ja tem mecanismo executavel; SonarQube remoto exige allowlist de egress e cliente ainda nao mecanizado).
+- Adapters cloud alem dos locais (git-local, ci-local, code-quality, code-security OSV/deps.dev e observability ja tem mecanismo executavel; SonarQube remoto exige allowlist de egress e cliente ainda nao mecanizado).
 - Empacotamento desktop/mobile.
 
 ## Rotas

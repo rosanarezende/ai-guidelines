@@ -37,22 +37,22 @@ export function OnboardingStepper() {
             }}
           >
             <Flex gap={1.25} align="center" sx={{ py: 1, width: "100%" }}>
-            <Chip
-              size="small"
-              label={done ? <CheckIcon sx={{ fontSize: 15 }} /> : number}
-              color={current || done ? "primary" : "default"}
-              variant={current || done ? "filled" : "outlined"}
-              sx={{ width: 28, height: 28 }}
-            />
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: current ? 800 : done ? 700 : 500,
-                color: current ? "text.primary" : done ? "text.primary" : "text.secondary",
-              }}
-            >
-              {label}
-            </Typography>
+              <Chip
+                size="small"
+                label={done ? <CheckIcon sx={{ fontSize: 15 }} /> : number}
+                color={current || done ? "primary" : "default"}
+                variant={current || done ? "filled" : "outlined"}
+                sx={{ width: 28, height: 28 }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: current ? 800 : done ? 700 : 500,
+                  color: current ? "text.primary" : done ? "text.primary" : "text.secondary",
+                }}
+              >
+                {label}
+              </Typography>
             </Flex>
           </ButtonBase>
         );

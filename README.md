@@ -208,6 +208,18 @@ Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guideline
 >
 > Contribuições com evidência de uso real são bem-vindas.
 
+## Supply-chain
+
+O próprio repositório usa OSV/deps.dev como evidência consultiva de dependências:
+
+```bash
+npm run supply-chain:check     # offline: valida package-lock e contrato do advisory
+npm run supply-chain:advisory  # live: consulta OSV.dev + deps.dev e grava em .tmp/
+```
+
+O GitHub Actions também roda OSV-Scanner em PRs e em varredura agendada. Esses sinais não fecham
+gate sozinhos: vulnerabilidade externa vira evidência para triagem, patch e decisão governada.
+
 ## Documentação & contribuição
 
 - [`.core/governance/GOVERNANCE-CATALOG.md`](.core/governance/GOVERNANCE-CATALOG.md) — topologia canônica (paths, gêneros, lookup)

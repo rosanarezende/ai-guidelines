@@ -53,7 +53,8 @@ Em uma frase:
 - FinOps/custo: cloud billing export, AWS Cost Explorer, Azure Cost Management, GCP Billing;
 - feature flags/experimentation: LaunchDarkly, GrowthBook, Statsig, Optimizely, Unleash;
 - service catalog: Backstage, OpsLevel, Cortex;
-- quality/security: SonarQube, Semgrep, CodeQL, OSV, Dependency-Track;
+- quality/security: SonarQube, Semgrep, CodeQL, OSV-Scanner, OSV.dev, deps.dev,
+  Dependency-Track;
 - knowledge assistants: Onyx, Open WebUI, AnythingLLM, Dify, Khoj;
 - coding-agent channels: OpenCode, Claude Code, Codex CLI, Aider.
 
@@ -90,7 +91,7 @@ Para a release 1, GitHub work-source deve:
 | Fontes de trabalho      | GitHub/GitLab/Bitbucket/Gitea, CODEOWNERS, Backstage/OpsLevel/Cortex, Drive/SharePoint | descobrir repos, owners, capabilities, source revisions e contexto           |
 | Assistente e matcher    | Ollama, OpenAI-compatible, LiteLLM, Onyx/Open WebUI, Claude Code/Codex CLI             | sugerir matches, perguntas, resumo, policy e patches sem virar autoridade    |
 | Planejamento e outcomes | BigQuery/Snowflake/dbt, PostHog/Amplitude, cloud billing, Prometheus/Grafana           | provar actual, target, janela, aggregation e attester                        |
-| Execução                | CI, JUnit/coverage/Playwright, SonarQube/Semgrep/CodeQL, deploy/release                | provar done, testes, qualidade, rollout, rollback e risco                    |
+| Execução                | CI, JUnit/coverage/Playwright, SonarQube/Semgrep/CodeQL, OSV/deps.dev, deploy/release  | provar done, testes, qualidade, supply-chain, rollout, rollback e risco      |
 | Contratos               | OpenAPI, GraphQL, protobuf, AsyncAPI, Pact                                             | materializar interfaces versionadas e compatibilidade provider/consumer      |
 | Incidentes/operação     | OpenTelemetry/Prometheus/Grafana, PagerDuty/Opsgenie/incident.io                       | declarar incidente com evento, severidade, timeline e follow-up verificáveis |
 | Intake/backlog          | Jira, Linear, Azure DevOps, GitHub Issues, knowledge base                              | importar trabalho existente como proposal/register ou link, sem segundo SSOT |
@@ -101,7 +102,7 @@ Para a release 1, GitHub work-source deve:
 A tela de integrações deve mostrar explicitamente:
 
 ```text
-Já disponível: Assistente local, Git local, CI local, qualidade local, observabilidade local e Neo4j como read-model.
+Já disponível: Assistente local, Git local, CI local, qualidade local, segurança de dependências local, observabilidade local e Neo4j como read-model.
 Primeira integração cloud da release 1: GitHub como fonte de trabalho.
 Disponíveis em breve: GitLab, Bitbucket, OpenAPI/GraphQL, Jira/Linear, BigQuery/dbt, PostHog/Amplitude, PagerDuty, SonarQube/Semgrep e Backstage.
 ```
@@ -121,12 +122,14 @@ Todo adapter precisa declarar:
 
 Se uma integração não consegue responder isso, ela ainda é conveniente demais e governada de menos.
 
-Cinco itens já têm o spike mínimo mecanizado na governance-demo (campo `local-adapter` no YAML):
+Seis itens já têm o spike mínimo mecanizado na governance-demo (campo `local-adapter` no YAML):
 `assistant-runtime-local-cloud` → `assistant-ollama` (health/models por `/api/tags` loopback +
 advisory local com redação mínima), `git-provider` → `git-local` (revision/status/último commit via
 git CLI), `ci-status` → `ci-local` (executa o `test.mjs` do repo e reporta exit code real),
 `code-quality` (relatório local Sonar-compatível hash-verificado; endpoint remoto só com allowlist
-de egress) e `observability` (relatório do `acme-obs-stack` hash-verificado, declarado fixture).
+de egress), `code-security` (relatório OSV/deps.dev hash-verificado, produzido por scanner local/CI
+fora do estado autoritativo) e `observability` (relatório do `acme-obs-stack` hash-verificado,
+declarado fixture).
 Todos falham fechado — egress negado, evidência adulterada ou dependência ausente nunca viram
 sucesso textual; o smoke é `backend/tools/check-integrations.mjs`.
 

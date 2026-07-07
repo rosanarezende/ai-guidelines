@@ -4,6 +4,7 @@
 import { OllamaAssistantProvider } from "../../adapters/integrations/assistant/ollama.ts";
 import { CiLocalAdapter } from "../../adapters/integrations/ci/local.ts";
 import { CodeQualityAdapter } from "../../adapters/integrations/code-quality/local-report.ts";
+import { CodeSecurityAdapter } from "../../adapters/integrations/code-security/osv-report.ts";
 import { GitLocalAdapter } from "../../adapters/integrations/git/local.ts";
 import { ObservabilityAdapter } from "../../adapters/integrations/observability/local-report.ts";
 import type { EvidenceProvider, IntegrationResult } from "../../ports/IntegrationAdapter.ts";
@@ -14,6 +15,7 @@ const evidenceProviders: EvidenceProvider[] = [
   new GitLocalAdapter(),
   new CiLocalAdapter(),
   new CodeQualityAdapter(),
+  new CodeSecurityAdapter(),
   new ObservabilityAdapter(),
 ];
 

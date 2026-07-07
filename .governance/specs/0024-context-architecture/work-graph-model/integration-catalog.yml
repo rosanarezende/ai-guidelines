@@ -289,13 +289,14 @@ integrations:
 
   - id: code-security
     category: quality-security
-    systems: [codeql, semgrep, snyk, osv-scanner, dependency-track, trivy]
+    systems: [osv-scanner, osv-dev, deps-dev, codeql, semgrep, snyk, dependency-track, trivy]
     adapter-kind: evidence-provider
     feeds: [security-signal, patch-candidate, dependency-risk, policy-alert]
     framework-works-without-it: true
-    value-add: "conecta vulnerabilidades e dependencias a maintenance/patch com evidencia"
+    value-add: "conecta vulnerabilidades, dependencias, licencas e sinais de supply-chain a maintenance/patch com evidencia"
     authority: "finding precisa de triagem/owner; severidade externa nao fecha gate"
     priority: P1
+    local-adapter: code-security
 
   - id: observability
     category: metrics-incident

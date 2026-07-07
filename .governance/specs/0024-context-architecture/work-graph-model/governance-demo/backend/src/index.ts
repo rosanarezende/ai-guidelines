@@ -103,6 +103,11 @@ export {
   CODE_QUALITY_REPORT_FILE,
 } from "./adapters/integrations/code-quality/local-report.ts";
 export {
+  CodeSecurityAdapter,
+  CODE_SECURITY_REPORT_SCHEMA,
+  CODE_SECURITY_REPORT_FILE,
+} from "./adapters/integrations/code-security/osv-report.ts";
+export {
   ObservabilityAdapter,
   OBSERVABILITY_REPORT_SCHEMA,
   OBSERVABILITY_SOURCE_REPO,

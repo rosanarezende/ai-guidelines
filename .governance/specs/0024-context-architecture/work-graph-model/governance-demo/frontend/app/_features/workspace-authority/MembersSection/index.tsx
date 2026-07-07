@@ -176,33 +176,33 @@ export default function MembersSection() {
             overview.invites.map((invite) => {
               const isCreatedInvite = invite.id === createdInviteId;
               return (
-              <Box key={invite.id} sx={{ display: "grid", gap: 0.5 }}>
-                <Flex gap={1} align="center" wrap>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {invite.personName}
-                  </Typography>
-                  <Chip
-                    data-testid={isCreatedInvite ? "invite-status" : undefined}
-                    size="small"
-                    label={`${m.status}: ${invite.status}`}
-                  />
-                  {isCreatedInvite && invite.status === "pending" ? (
-                    <Button
-                      data-testid="invite-revoke"
+                <Box key={invite.id} sx={{ display: "grid", gap: 0.5 }}>
+                  <Flex gap={1} align="center" wrap>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {invite.personName}
+                    </Typography>
+                    <Chip
+                      data-testid={isCreatedInvite ? "invite-status" : undefined}
                       size="small"
-                      color="warning"
-                      disabled={busy}
-                      onClick={() => void revokeInvite(invite.id)}
-                    >
-                      {m.revokeCta}
-                    </Button>
-                  ) : null}
-                </Flex>
-                <Typography variant="caption" color="text.secondary">
-                  {invite.email ? `${invite.email} · ` : ""}
-                  {m.expires}: {invite.expiresAt.slice(0, 10)}
-                </Typography>
-              </Box>
+                      label={`${m.status}: ${invite.status}`}
+                    />
+                    {isCreatedInvite && invite.status === "pending" ? (
+                      <Button
+                        data-testid="invite-revoke"
+                        size="small"
+                        color="warning"
+                        disabled={busy}
+                        onClick={() => void revokeInvite(invite.id)}
+                      >
+                        {m.revokeCta}
+                      </Button>
+                    ) : null}
+                  </Flex>
+                  <Typography variant="caption" color="text.secondary">
+                    {invite.email ? `${invite.email} · ` : ""}
+                    {m.expires}: {invite.expiresAt.slice(0, 10)}
+                  </Typography>
+                </Box>
               );
             })
           ) : (

@@ -121,6 +121,18 @@ profiles:
         mutates: false
         consumers: [human]
         description: Cobertura combinada das suites mjs e Jest.
+      - name: supply-chain:check
+        command: node tools/supply-chain/supply-chain-advisory.ts --dry-run
+        category: security
+        mutates: false
+        consumers: [human, script]
+        description: Verifica offline que o package-lock e legivel para o advisory OSV/deps.dev.
+      - name: supply-chain:advisory
+        command: node tools/supply-chain/supply-chain-advisory.ts --output .tmp/supply-chain/advisory-report.json
+        category: security
+        mutates: true
+        consumers: [human]
+        description: Consulta OSV.dev e deps.dev e grava relatorio consultivo de supply-chain.
       - name: living-docs:generate
         command: npm run build && node dist/cli/bin.js living-docs generate
         category: docs

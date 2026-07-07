@@ -45,9 +45,7 @@ export function SQLiteHttpSection({
     <SectionCard title={messages.sqliteHttpTitle} subtitle={messages.sqliteHttpSubtitle}>
       <Box sx={{ display: "grid", gridTemplateColumns: { md: "1fr 1fr 1fr" }, gap: 2 }}>
         <BoundaryCard
-          icon={
-            report.ok ? <CheckCircleIcon color="success" /> : <LockIcon color="error" />
-          }
+          icon={report.ok ? <CheckCircleIcon color="success" /> : <LockIcon color="error" />}
           title={messages.sqliteHttpFlow}
           items={[
             `sign-up/email: ${report.http.signUpEmailStatus}`,

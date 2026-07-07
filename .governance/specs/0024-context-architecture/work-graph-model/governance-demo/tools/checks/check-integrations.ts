@@ -10,8 +10,11 @@ import {
   buildApiContractDocument,
   CiLocalAdapter,
   CodeQualityAdapter,
+  CodeSecurityAdapter,
   CODE_QUALITY_REPORT_FILE,
   CODE_QUALITY_REPORT_SCHEMA,
+  CODE_SECURITY_REPORT_FILE,
+  CODE_SECURITY_REPORT_SCHEMA,
   GitLocalAdapter,
   handleCommandDryRun,
   handleContractImpact,
@@ -104,6 +107,62 @@ try {
   );
 } finally {
   rmSync(tamperRoot, { recursive: true, force: true });
+}
+
+// ── code-security: OSV/deps.dev materializado como evidência local ─────────
+const security = new CodeSecurityAdapter();
+const securityOk = await security.collect("acme-core-api");
+check(
+  "code-security lê relatório OSV/deps.dev verificado de acme-core-api",
+  securityOk.status === "ok" && securityOk.evidence[0]?.contentHash,
+  JSON.stringify(securityOk)
+);
+const securityMissing = await security.collect("acme-web-host");
+check(
+  "code-security reporta not-configured sem relatório OSV/deps.dev",
+  securityMissing.status === "not-configured"
+);
+
+const tamperSecurityRoot = mkdtempSync(path.join(tmpdir(), "governance-security-tamper-"));
+try {
+  const tamperRepo = path.join(tamperSecurityRoot, "acme-core-api");
+  mkdirSync(path.join(tamperRepo, "reports"), { recursive: true });
+  const body = {
+    scanner: "osv-scanner",
+    lockfile: "package-lock.json",
+    scannedPackages: 1,
+    vulnerabilities: [],
+  };
+  writeFileSync(
+    path.join(tamperRepo, CODE_SECURITY_REPORT_FILE),
+    JSON.stringify({
+      schema: CODE_SECURITY_REPORT_SCHEMA,
+      source: "acme-core-api",
+      generatedAt: "2027-01-01T00:00:00Z",
+      body: {
+        ...body,
+        vulnerabilities: [
+          {
+            id: "GHSA-example",
+            packageName: "left-pad",
+            installedVersion: "1.0.0",
+            source: "osv.dev",
+            severity: "critical",
+          },
+        ],
+      },
+      contentHash: reportBodyHash(body), // hash do corpo ANTIGO => adulterado
+    })
+  );
+  const tampered = await new CodeSecurityAdapter({
+    reposRoot: tamperSecurityRoot,
+  }).collect("acme-core-api");
+  check(
+    "code-security rejeita relatório adulterado/stale (fail-closed)",
+    tampered.status === "unavailable" && /contentHash/.test(tampered.error || "")
+  );
+} finally {
+  rmSync(tamperSecurityRoot, { recursive: true, force: true });
 }
 
 // ── observability: fixture verificável, sem telemetria fingida ──────────────

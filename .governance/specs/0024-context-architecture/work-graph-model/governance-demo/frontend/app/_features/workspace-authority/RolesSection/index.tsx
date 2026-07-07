@@ -231,7 +231,11 @@ export default function RolesSection() {
 
       <Divider />
 
-      <RoleAssignmentsList busy={busy} roles={roles} onDecide={(id, action) => void decide(id, action)} />
+      <RoleAssignmentsList
+        busy={busy}
+        roles={roles}
+        onDecide={(id, action) => void decide(id, action)}
+      />
 
       <Box sx={{ display: "grid", gap: 1 }}>
         <Typography variant="body2" sx={{ fontWeight: 800 }}>
