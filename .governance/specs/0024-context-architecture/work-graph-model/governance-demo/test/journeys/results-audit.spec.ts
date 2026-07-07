@@ -42,8 +42,6 @@ test.describe("Resultados, mapa, operacao, auditoria e console", () => {
   });
 
   test("APP-31 Audit mostra trilha de decisoes e break-glass", async ({ page, request }) => {
-    pendingContract("APP-31", "expected-fail");
-
     await openWorkspace(page, request, "acme-demo", "/audit", "demo-acme");
     await expect(page.getByTestId("audit-event-list")).toContainText(/actor|authority|revision/i);
     await page.getByTestId("audit-filter-break-glass").click();

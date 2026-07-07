@@ -659,7 +659,7 @@ contracts:
       - MTTR/SLO derivam de eventos, nao texto livre.
   - id: APP-31
     title: Audit mostra trilha de decisoes e break-glass
-    status: expected-fail
+    status: active
     spec: journeys/results-audit.spec.ts
     seed: acme-demo
     actors:

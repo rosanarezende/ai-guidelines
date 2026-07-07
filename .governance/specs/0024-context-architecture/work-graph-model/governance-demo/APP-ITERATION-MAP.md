@@ -153,7 +153,7 @@ nascem antes da implementacao e devem ser sincronizados com esta tabela.
 | APP-28   | 28                   | active               |
 | APP-29   | 29                   | active               |
 | APP-30   | 30                   | fixme                |
-| APP-31   | 31                   | expected-fail        |
+| APP-31   | 31                   | active               |
 | APP-32   | 32                   | expected-fail        |
 | APP-33   | 22, 23, 24, 25, 31   | fixme                |
 | APP-34   | 08, 17               | active               |
