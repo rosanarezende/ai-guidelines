@@ -8,5 +8,5 @@
     "graph-export": "parcial hoje",
     "default": "catalogado · adapter futuro"
   },
-  "authorityNotice": "Nenhuma integração escreve o estado autoritativo. Os arquivos continuam sendo a fonte da verdade."
+  "authorityNotice": "Nenhuma integração escreve o estado autoritativo. Alternativa manual: o framework continua funcionando com arquivos, evidência local e revisão humana; os arquivos continuam sendo a fonte da verdade."
 }

@@ -7,6 +7,8 @@ import copy from "./_locales/pt-br.json";
 import { RESULT_CONFIDENCE_COLORS } from "./resultCharts";
 
 export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardViewModel }) {
+  const firstWeakTargetId = dashboard.targetCards.find((target) => isWeakEvidenceTarget(target))
+    ?.targetId;
   return (
     <Card variant="outlined">
       <CardContent>
@@ -16,9 +18,12 @@ export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardV
             const sources = dashboard.series.find(
               (entry) => entry.targetId === target.targetId
             )?.sources;
+            const hasWeakEvidence = isWeakEvidenceTarget(target);
+            const isPrimaryWeakTarget = target.targetId === firstWeakTargetId;
             return (
               <Box
                 key={target.targetId}
+                data-testid={isPrimaryWeakTarget ? "outcome-without-evidence" : undefined}
                 sx={{ borderTop: "1px solid", borderColor: "divider", pt: 1.25 }}
               >
                 <Flex align="flex-start" justify="space-between" gap={1.5} wrap>
@@ -30,10 +35,22 @@ export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardV
                       {target.period} · esperado {target.expected} · atual {target.actual}
                     </Typography>
                   </Box>
-                  <ConfidencePill state={target.confidence} />
+                  <Box data-testid={isPrimaryWeakTarget ? "outcome-confidence" : undefined}>
+                    <ConfidencePill state={target.confidence} />
+                  </Box>
                 </Flex>
                 <Flex gap={1} wrap sx={{ mt: 1 }}>
                   <Chip size="small" label={`${target.outcomeCount} outcome(s)`} />
+                  <Chip
+                    data-testid={isPrimaryWeakTarget ? "rollup-primary-status" : undefined}
+                    size="small"
+                    color={hasWeakEvidence ? "warning" : "success"}
+                    label={
+                      hasWeakEvidence
+                        ? "sem evidencia minima para rollup primario forte"
+                        : "rollup primario valido"
+                    }
+                  />
                   {target.invalidCount > 0 ? (
                     <Chip
                       size="small"
@@ -56,6 +73,16 @@ export function TargetEvidenceList({ dashboard }: { dashboard: ResultsDashboardV
         </Box>
       </CardContent>
     </Card>
+  );
+}
+
+function isWeakEvidenceTarget(
+  target: ResultsDashboardViewModel["targetCards"][number]
+): boolean {
+  return (
+    target.confidence === "no-evidence" ||
+    target.confidence === "self-declared" ||
+    target.invalidCount > 0
   );
 }
 

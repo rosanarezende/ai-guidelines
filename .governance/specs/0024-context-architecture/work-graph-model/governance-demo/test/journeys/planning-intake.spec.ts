@@ -3,7 +3,7 @@ import { openWorkspace, pendingContract } from "./support/contract-fixtures.ts";
 
 test.describe("Planejamento e intake", () => {
   test("APP-22 planejamento cria ciclo, objetivo, metrica e target", async ({ page, request }) => {
-    pendingContract("APP-22", "fixme");
+    pendingContract("APP-22", "expected-fail");
 
     await openWorkspace(page, request, "workspace-planning-progressivo", "/planning");
     await page.getByTestId("planning-cycle-create").click();

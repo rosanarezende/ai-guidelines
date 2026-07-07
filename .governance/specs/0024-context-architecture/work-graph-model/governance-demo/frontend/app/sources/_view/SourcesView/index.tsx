@@ -101,6 +101,14 @@ export default function SourcesView({ workspace }: { workspace: WorkspaceSummary
           </Typography>
         </Box>
 
+        <Alert data-testid="contextual-integration-github-work-source" severity="info">
+          Integração sugerida: GitHub/GitLab/Bitbucket como fonte de trabalho. Sem ela, pastas
+          locais continuam funcionando, mas evidência automática fica limitada ao snapshot local.
+        </Alert>
+        <Alert data-testid="contextual-integration-git-local" severity="info">
+          Adapter local de Git disponível para repositórios na sua máquina.
+        </Alert>
+
         <SectionCard title={copy.hostRelationTitle}>
           <Box sx={{ display: "grid", gap: 1.5 }}>
             <Alert severity={workspace.governanceHost ? "success" : "warning"}>

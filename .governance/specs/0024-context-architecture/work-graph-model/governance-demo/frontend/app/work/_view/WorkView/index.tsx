@@ -34,6 +34,10 @@ export default function WorkView({ workspace }: { workspace: WorkspaceSummary })
             {copy.subtitle}
           </Typography>
         </Box>
+        <Alert data-testid="contextual-integration-ci-code-quality" severity="info">
+          Integração sugerida: CI/code-quality pode anexar evidência independente ao trabalho.
+          Sem ela, a execução segue visível como dado derivado e evidência manual.
+        </Alert>
         <Flex gap={1} wrap>
           <Chip size="small" label={`${copy.queryKey}: ${queryKey.join(" / ")}`} />
           {query.data?.ok && query.data.work ? (

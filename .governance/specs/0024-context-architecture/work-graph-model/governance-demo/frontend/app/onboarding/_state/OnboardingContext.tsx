@@ -39,9 +39,14 @@ import {
 // Contexto da ORGANIZAÇÃO em onboarding. `snapshot` só existe na demo acme;
 // organização nova não recebe dados da demo (catálogo de adapters é neutro).
 export type OnboardingOrg = {
+  principalId: string;
   workspaceId: string;
   workspaceName: string;
   isDemo: boolean;
+  entryContext: {
+    kind: "workspace-setup" | "member-join";
+    proposedRoles: Array<{ id: string; roleId: string }>;
+  };
   onboardingStatus: "not-started" | "partial" | "finished";
   persistedStep?: number;
   initialProfile: ProfileId;

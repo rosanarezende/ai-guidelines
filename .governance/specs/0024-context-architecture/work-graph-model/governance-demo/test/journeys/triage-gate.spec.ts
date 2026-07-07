@@ -6,7 +6,7 @@ test.describe("Triagem, matcher e gates", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-24", "fixme");
+    pendingContract("APP-24", "expected-fail");
 
     await openWorkspace(page, request, "workspace-provider-versioned-source", "/triage");
     await page.getByTestId("triage-item-create-from-question").click();

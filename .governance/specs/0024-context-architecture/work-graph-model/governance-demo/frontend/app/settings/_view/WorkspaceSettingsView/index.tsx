@@ -2,7 +2,7 @@
 
 // WorkspaceSettingsView — configurações de organização NÃO-demo.
 // Não renderiza dados da acme: contexto é da organização atual.
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Button, Chip, Typography } from "@mui/material";
 import { Flex, SectionCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
 import {
@@ -126,6 +126,29 @@ export default function WorkspaceSettingsView({ workspace }: { workspace: Worksp
 
         <SectionCard title={m["workspaceSettings.assistant.title"]}>
           <AssistantWorkspaceSection />
+        </SectionCard>
+
+        <SectionCard title={m["workspaceSettings.integrations.title"]}>
+          <Box sx={{ display: "grid", gap: 1 }}>
+            <Typography data-testid="settings-integration-summary" variant="body2">
+              {m["workspaceSettings.integrations.summary"]
+                .replace("{count}", String(workspace.integrations.length))
+                .replace(
+                  "{ids}",
+                  workspace.integrations.map((integration) => integration.id).join(", ") ||
+                    "nenhuma"
+                )}
+            </Typography>
+            <Button
+              data-testid="settings-open-integrations-hub"
+              href="/integrations"
+              variant="outlined"
+              size="small"
+              sx={{ justifySelf: "start" }}
+            >
+              {m["workspaceSettings.integrations.cta"]}
+            </Button>
+          </Box>
         </SectionCard>
 
         <SwitchSection />

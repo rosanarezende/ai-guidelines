@@ -1,7 +1,8 @@
 "use client";
 
-import { Alert, Box, Chip, CircularProgress, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { workspaceQueryKeys } from "@/app/_domain/queryKeys";
 import { Flex, ResponsiveGrid, StatCard } from "@/app/_ui/shared";
 import AppShell from "@/app/_ui/shell/AppShell";
@@ -39,6 +40,11 @@ export default function ResultsView({ workspace }: { workspace: WorkspaceSummary
           </Typography>
         </Box>
 
+        <Alert data-testid="contextual-integration-observability" severity="info">
+          Integração sugerida: observability/analytics/feature-flags podem reduzir evidência manual
+          de outcomes. Sem elas, o rollup continua derivado do host e marca confiança explicitamente.
+        </Alert>
+
         <Flex gap={1} wrap>
           <Chip size="small" label={`${copy.queryKey}: ${queryKey.join(" / ")}`} />
           {query.data?.ok && query.data.dashboard ? (
@@ -67,6 +73,7 @@ function DashboardState({
 }: {
   response: Extract<ResultsDashboardResponse, { ok: true }>;
 }) {
+  const [showSelfAttestedWarning, setShowSelfAttestedWarning] = useState(false);
   if (!response.dashboard) {
     return (
       <Alert severity="info">
@@ -92,6 +99,26 @@ function DashboardState({
           />
         ))}
       </ResponsiveGrid>
+      <Flex data-testid="results-confidence-legend" gap={0.75} wrap>
+        <Chip size="small" color="success" label="valid" />
+        <Chip size="small" color="warning" label={copy.trust["self-declared"]} />
+        <Chip size="small" label={copy.trust["no-evidence"]} />
+        <Chip size="small" label={copy.trust.stale} />
+        <Button
+          data-testid="results-filter-self-attested"
+          size="small"
+          variant="outlined"
+          onClick={() => setShowSelfAttestedWarning(true)}
+        >
+          Mostrar auto-declarados
+        </Button>
+      </Flex>
+      {showSelfAttestedWarning ? (
+        <Alert data-testid="results-warning-panel" severity="warning">
+          Resultados auto-declarados/self-attested ficam visíveis, mas não contam como evidência
+          independente enquanto o resolver não provar fonte e atestador.
+        </Alert>
+      ) : null}
       <Box>
         <Typography variant="h2" sx={{ mb: 1 }}>
           {copy.overview}

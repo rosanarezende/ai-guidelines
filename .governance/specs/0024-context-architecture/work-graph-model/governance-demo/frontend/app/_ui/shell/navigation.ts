@@ -62,8 +62,8 @@ export const primaryNavigationGroups: NavigationGroup[] = [
       {
         id: "integrations",
         labelKey: "app.nav.integrations",
+        href: "/integrations",
         icon: IntegrationInstructionsOutlinedIcon,
-        state: "soon",
       },
     ],
   },
@@ -78,7 +78,7 @@ export const primaryNavigationGroups: NavigationGroup[] = [
         icon: PlaylistAddCheckOutlinedIcon,
         state: "soon",
       },
-      { id: "triage", labelKey: "app.nav.triage", icon: HubOutlinedIcon, state: "soon" },
+      { id: "triage", labelKey: "app.nav.triage", href: "/triage", icon: HubOutlinedIcon },
       {
         id: "gates",
         labelKey: "app.nav.gates",

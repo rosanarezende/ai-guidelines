@@ -3,8 +3,6 @@ import { openWorkspace, openWorkspaceAs, pendingContract } from "./support/contr
 
 test.describe("Seguranca, authority e fail-closed", () => {
   test("SEC-01 provider cloud nao ativa sem egress/authority", async ({ page, request }) => {
-    pendingContract("SEC-01", "fixme");
-
     await openWorkspace(page, request, "workspace-controlled", "/integrations");
     await page.getByTestId("integration-card-cloud-assistant").click();
     await page.getByTestId("integration-request-activation").click();
@@ -19,7 +17,7 @@ test.describe("Seguranca, authority e fail-closed", () => {
   test("SEC-02 read-model derivado nao autoriza acao stale", async ({ page, request }) => {
     pendingContract("SEC-02", "fixme");
 
-    await openWorkspace(page, request, "acme-demo", "/map", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/map", "demo-acme");
     await page.getByTestId("map-node-outcome").click();
     await page.getByTestId("derived-action-open").click();
     await page.getByTestId("simulate-stale-revision").click();
@@ -93,19 +91,15 @@ test.describe("Seguranca, authority e fail-closed", () => {
   });
 
   test("SEC-08 outcome sem evidencia minima nao entra no rollup", async ({ page, request }) => {
-    pendingContract("SEC-08", "fixme");
-
-    await openWorkspace(page, request, "acme-demo", "/results", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/results", "demo-acme");
     await page.getByTestId("outcome-without-evidence").click();
     await expect(page.getByTestId("outcome-confidence")).toContainText(
-      /sem evidencia|autodeclarado/i
+      /sem evid[eê]ncia|autodeclarado/i
     );
     await expect(page.getByTestId("rollup-primary-status")).not.toContainText(/valid/i);
   });
 
   test("SEC-09 adapter nao grava estado autoritativo sem contrato", async ({ page, request }) => {
-    pendingContract("SEC-09", "fixme");
-
     await openWorkspace(page, request, "workspace-with-integration-statuses", "/integrations");
     await page.getByTestId("integration-card-observability").click();
     await expect(page.getByTestId("integration-write-authority")).toContainText(

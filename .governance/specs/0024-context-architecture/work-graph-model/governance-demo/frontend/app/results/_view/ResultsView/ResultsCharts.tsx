@@ -17,6 +17,7 @@ export function ResultsCharts({ dashboard }: { dashboard: ResultsDashboardViewMo
       title: copy.charts.targetActual,
       option: targetActualOption(dashboard),
       height: 300,
+      dataTestId: "results-target-chart",
     },
     {
       title: copy.charts.confidence,
@@ -47,6 +48,7 @@ export function ResultsCharts({ dashboard }: { dashboard: ResultsDashboardViewMo
               option={chart.option}
               height={chart.height}
               ariaLabel={`Gráfico de resultados: ${chart.title}`}
+              dataTestId={chart.dataTestId}
             />
           </CardContent>
         </Card>

@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Chip, Paper, Typography } from "@mui/material";
 import BalanceIcon from "@mui/icons-material/Balance";
 import FolderIcon from "@mui/icons-material/Folder";
 import LockIcon from "@mui/icons-material/Lock";
@@ -14,9 +14,12 @@ const cardIcons = {
 };
 
 export function WelcomeStep() {
-  const { setStep } = useOnboarding();
+  const { setStep, org } = useOnboarding();
   return (
-    <Box sx={{ maxWidth: 660, mx: "auto", display: "grid", gap: 2 }}>
+    <Box
+      data-testid="onboarding-track-workspace-setup"
+      sx={{ maxWidth: 720, mx: "auto", display: "grid", gap: 2 }}
+    >
       <Typography
         variant="caption"
         sx={{ fontWeight: 700, letterSpacing: 0.6, color: "text.secondary" }}
@@ -29,6 +32,17 @@ export function WelcomeStep() {
       <Typography variant="body1" color="text.secondary">
         {copy.lead}
       </Typography>
+      <Paper variant="outlined" sx={{ p: 2, display: "grid", gap: 1 }}>
+        <Typography data-testid="entry-context-summary" variant="body2" sx={{ fontWeight: 800 }}>
+          Você está configurando o workspace {org.workspaceName}
+        </Typography>
+        <Flex gap={0.75} wrap>
+          <Chip data-testid="workspace-setup-diagnosis-step" size="small" label="diagnóstico" />
+          <Chip data-testid="workspace-setup-profile-step" size="small" label="perfil" />
+          <Chip data-testid="workspace-setup-host-step" size="small" label="host de governança" />
+          <Chip data-testid="workspace-setup-sources-step" size="small" label="fontes" />
+        </Flex>
+      </Paper>
       <Box sx={{ display: "grid", gap: 1.5, mt: 1 }}>
         {copy.cards.map((card) => (
           <WelcomeCard

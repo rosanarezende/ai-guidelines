@@ -10,6 +10,7 @@ export function Flex({
   wrap = false,
   direction = "row",
   sx,
+  "data-testid": dataTestId,
 }: {
   children: ReactNode;
   gap?: number;
@@ -18,9 +19,11 @@ export function Flex({
   wrap?: boolean;
   direction?: "row" | "column";
   sx?: SxProps<Theme>;
+  "data-testid"?: string;
 }) {
   return (
     <Box
+      data-testid={dataTestId}
       sx={[
         {
           display: "flex",

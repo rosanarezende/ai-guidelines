@@ -1,10 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { openWorkspace, openWorkspaceAs, pendingContract } from "./support/contract-fixtures.ts";
+import { openWorkspace, openWorkspaceAs } from "./support/contract-fixtures.ts";
 
 test.describe("Onboarding como contrato funcional", () => {
   test("APP-36 criador entra na trilha de setup do workspace", async ({ page, request }) => {
-    pendingContract("APP-36", "expected-fail");
-
     await openWorkspace(page, request, "empty-workspace", "/onboarding");
     await expect(page.getByTestId("onboarding-track-workspace-setup")).toBeVisible();
     await expect(page.getByTestId("workspace-setup-diagnosis-step")).toBeVisible();
@@ -15,8 +13,6 @@ test.describe("Onboarding como contrato funcional", () => {
   });
 
   test("APP-37 convidado entra na trilha de participacao", async ({ page, request }) => {
-    pendingContract("APP-37", "expected-fail");
-
     await openWorkspaceAs(
       page,
       request,

@@ -60,6 +60,7 @@ export function MapControls({
   return (
     <Flex gap={1.25} align="center" wrap>
       <TextField
+        slotProps={{ htmlInput: { "data-testid": "map-search" } }}
         size="small"
         value={filter.text}
         label={copy.search}

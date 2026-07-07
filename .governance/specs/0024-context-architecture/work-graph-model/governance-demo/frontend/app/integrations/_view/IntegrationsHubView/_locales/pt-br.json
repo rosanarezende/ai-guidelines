@@ -1,0 +1,9 @@
+{
+  "locale": "pt-br",
+  "title": "Integrações",
+  "subtitle": "Governança · integrações",
+  "lead": "Conecte ferramentas para reduzir trabalho manual. O framework já entrega governança file-first; integrações potencializam evidência, automação e leitura.",
+  "filterAvailable": "Disponíveis / release 1",
+  "noSecondSsot": "nenhuma vira segundo SSOT",
+  "identityVsWorkTitle": "GitHub login não é GitHub fonte de trabalho"
+}

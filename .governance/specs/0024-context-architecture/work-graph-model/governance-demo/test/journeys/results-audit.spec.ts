@@ -6,9 +6,7 @@ test.describe("Resultados, mapa, operacao, auditoria e console", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-28", "expected-fail");
-
-    await openWorkspace(page, request, "acme-demo", "/results", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/results", "demo-acme");
     await expect(page.getByTestId("results-target-chart")).toBeVisible();
     await expect(page.getByTestId("results-confidence-legend")).toContainText(
       /valid|self|stale|sem evidencia/i
@@ -18,9 +16,7 @@ test.describe("Resultados, mapa, operacao, auditoria e console", () => {
   });
 
   test("APP-29 Mapa de governanca explica caminho e impacto", async ({ page, request }) => {
-    pendingContract("APP-29", "expected-fail");
-
-    await openWorkspace(page, request, "acme-demo", "/map", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/map", "demo-acme");
     await expect(page.getByTestId("governance-map")).toBeVisible();
     await page.getByTestId("map-search").fill("checkout");
     await page.getByTestId("map-result-checkout-stack").click();
@@ -37,7 +33,7 @@ test.describe("Resultados, mapa, operacao, auditoria e console", () => {
   }) => {
     pendingContract("APP-30", "fixme");
 
-    await openWorkspace(page, request, "acme-demo", "/operations", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/operations", "demo-acme");
     await expect(page.getByTestId("incident-lifecycle")).toContainText(
       /declare|mitigate|resolve|postmortem/i
     );
@@ -46,9 +42,9 @@ test.describe("Resultados, mapa, operacao, auditoria e console", () => {
   });
 
   test("APP-31 Audit mostra trilha de decisoes e break-glass", async ({ page, request }) => {
-    pendingContract("APP-31", "fixme");
+    pendingContract("APP-31", "expected-fail");
 
-    await openWorkspace(page, request, "acme-demo", "/audit", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/audit", "demo-acme");
     await expect(page.getByTestId("audit-event-list")).toContainText(/actor|authority|revision/i);
     await page.getByTestId("audit-filter-break-glass").click();
     await expect(page.getByTestId("break-glass-event")).toContainText(/reason|ttl|review/i);
@@ -60,7 +56,7 @@ test.describe("Resultados, mapa, operacao, auditoria e console", () => {
   }) => {
     pendingContract("APP-32", "expected-fail");
 
-    await openWorkspace(page, request, "acme-demo", "/console", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/console", "demo-acme");
     await expect(page.getByTestId("technical-console")).toBeVisible();
     await expect(page.getByTestId("console-source-revision")).toBeVisible();
     await page.goto("/");

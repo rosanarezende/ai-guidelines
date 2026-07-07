@@ -18,10 +18,12 @@ export function EChartsPanel({
   option,
   height = 320,
   ariaLabel,
+  dataTestId,
 }: {
   option: EChartsOption;
   height?: number;
   ariaLabel: string;
+  dataTestId?: string;
 }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
@@ -46,6 +48,7 @@ export function EChartsPanel({
   return (
     <Box>
       <Box
+        data-testid={dataTestId}
         ref={hostRef}
         role="img"
         aria-label={ariaLabel}

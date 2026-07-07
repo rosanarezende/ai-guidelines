@@ -205,7 +205,7 @@ contracts:
       - Acumulo sensivel fica visivel conforme policy.
   - id: APP-36
     title: Criador entra na trilha de setup do workspace
-    status: expected-fail
+    status: active
     spec: journeys/onboarding.spec.ts
     seed: empty-workspace
     actors:
@@ -220,7 +220,7 @@ contracts:
       - A tela deixa claro que a pessoa esta configurando a organizacao/workspace, nao apenas entrando como participante.
   - id: APP-37
     title: Pessoa convidada entra na trilha de participacao
-    status: expected-fail
+    status: active
     spec: journeys/onboarding.spec.ts
     seed: workspace-authority-personas
     actors:
@@ -285,7 +285,7 @@ contracts:
       - Dispensar assistente deixa app funcional.
   - id: APP-11
     title: Onboarding mostra integracoes como opcionais e contextuais
-    status: fixme
+    status: active
     spec: journeys/integrations.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -373,7 +373,7 @@ contracts:
       - Fonte rebaixada nao vira evidencia forte em Results.
   - id: APP-19
     title: Settings de assistente mostra provider/defaults reais
-    status: fixme
+    status: active
     spec: journeys/settings.spec.ts
     seed: workspace-multi-assistant
     actors:
@@ -388,7 +388,7 @@ contracts:
       - Cup usa somente provider permitido pela policy.
   - id: APP-20
     title: Settings resume integracoes e aponta para hub
-    status: fixme
+    status: active
     spec: journeys/integrations.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -419,7 +419,7 @@ contracts:
       - Trust/limitation fica visivel.
   - id: INT-01
     title: Hub /integrations compara providers por valor, permissao e risco
-    status: fixme
+    status: active
     spec: journeys/integrations.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -432,7 +432,7 @@ contracts:
       - Status cloud nao vira connected sem auth/probe.
   - id: INT-02
     title: Sugestoes contextuais de integracao aparecem no fluxo certo
-    status: fixme
+    status: active
     spec: journeys/integrations.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -449,7 +449,7 @@ contracts:
       - Triage sugere matcher/catalog/CODEOWNERS.
   - id: INT-03
     title: GitHub work-source nao se confunde com GitHub login
-    status: fixme
+    status: active
     spec: journeys/integrations.spec.ts
     seed: workspace-github-work-source
     actors:
@@ -497,7 +497,7 @@ contracts:
       - Tentar bridge de portal apos demo anonima nao encontra sessao Better Auth.
   - id: APP-46
     title: Better Auth escopa cache TanStack por sessao/workspace
-    status: expected-fail
+    status: active
     spec: journeys/auth-query-scope.spec.ts
     seed: workspace-shared-convites
     actors:
@@ -513,7 +513,7 @@ contracts:
       - A UI nunca usa cache de TanStack Query como prova de authority; toda acao sensivel relê authority/sourceRevision no backend.
   - id: APP-22
     title: Planejamento cria ciclo, objetivo, metrica e target
-    status: fixme
+    status: expected-fail
     spec: journeys/planning-intake.spec.ts
     seed: workspace-planning-progressivo
     actors:
@@ -545,7 +545,7 @@ contracts:
       - Criar proposta gera item visivel para triagem.
   - id: APP-24
     title: Triage transforma duvidas em itens e usa matcher advisory
-    status: fixme
+    status: expected-fail
     spec: journeys/triage-gate.spec.ts
     seed: workspace-provider-versioned-source
     actors:
@@ -593,7 +593,7 @@ contracts:
       - Outcome nao soma se work necessario esta aberto/bloqueado/dropped.
   - id: APP-27
     title: Contracts mostra owner, consumers, janela e contention
-    status: fixme
+    status: expected-fail
     spec: journeys/work-contracts.spec.ts
     seed: acme-demo
     actors:
@@ -610,7 +610,7 @@ contracts:
       - Outcome que cita revision fora da janela falha/rebaixa.
   - id: APP-28
     title: Results mostra targets, outcomes, actual e confidence
-    status: expected-fail
+    status: active
     spec: journeys/results-audit.spec.ts
     seed: acme-demo
     actors:
@@ -626,7 +626,7 @@ contracts:
       - Outcome sem evidencia verificavel nao soma como prova forte.
   - id: APP-29
     title: Mapa de governanca explica caminho e impacto
-    status: expected-fail
+    status: active
     spec: journeys/results-audit.spec.ts
     seed: acme-demo
     actors:
@@ -659,7 +659,7 @@ contracts:
       - MTTR/SLO derivam de eventos, nao texto livre.
   - id: APP-31
     title: Audit mostra trilha de decisoes e break-glass
-    status: fixme
+    status: expected-fail
     spec: journeys/results-audit.spec.ts
     seed: acme-demo
     actors:
@@ -689,7 +689,7 @@ contracts:
       - Acoes do console tambem respeitam baseRevision e authority.
   - id: CUP-01
     title: Cup abre como overlay contextual sem provider externo
-    status: fixme
+    status: active
     spec: journeys/cup.spec.ts
     seed: empty-workspace
     actors:
@@ -705,7 +705,7 @@ contracts:
       - Sem provider, Cup so usa explicacao deterministica/local.
   - id: CUP-02
     title: Cup explica policies versionadas
-    status: fixme
+    status: active
     spec: journeys/cup.spec.ts
     seed: workspace-controlled
     actors:
@@ -720,7 +720,7 @@ contracts:
       - Cup nao inventa policy fora do catalogo.
   - id: CUP-03
     title: Cup nao executa mutacao sem confirmacao humana
-    status: fixme
+    status: active
     deny: true
     spec: journeys/cup.spec.ts
     seed: workspace-host-local
@@ -736,7 +736,7 @@ contracts:
       - Audit registra a decisao humana, nao Cup como authority.
   - id: CUP-04
     title: Cup respeita permissoes e nao vaza contexto bloqueado
-    status: fixme
+    status: active
     deny: true
     spec: journeys/cup.spec.ts
     seed: workspace-controlled
@@ -753,7 +753,7 @@ contracts:
       - Fallback local explica limitacao sem bypass.
   - id: SEC-01
     title: Provider cloud nao ativa sem egress/authority
-    status: fixme
+    status: active
     deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-controlled
@@ -833,7 +833,7 @@ contracts:
       - Scan/freshness aparece de forma consistente.
   - id: CONS-03
     title: Integracao conectada aparece igual no hub, Settings e sugestoes
-    status: fixme
+    status: expected-fail
     spec: journeys/cross-screen-consistency.spec.ts
     seed: workspace-with-integration-statuses
     actors:
@@ -912,7 +912,7 @@ contracts:
       - Break-glass registra motivo, TTL e revisao posterior.
   - id: SEC-08
     title: Outcome/rollup sem evidencia minima nao entra como resultado valido
-    status: fixme
+    status: active
     deny: true
     spec: journeys/security-authority.spec.ts
     seed: acme-demo
@@ -928,7 +928,7 @@ contracts:
       - Dashboard aponta a pendencia acionavel.
   - id: SEC-09
     title: Integracao nao escreve estado autoritativo sem contrato explicito
-    status: fixme
+    status: active
     deny: true
     spec: journeys/security-authority.spec.ts
     seed: workspace-with-integration-statuses

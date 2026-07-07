@@ -8,7 +8,7 @@ import copy from "./_locales/pt-br.json";
 
 export function MapDetailPanel({ node }: { node: GovernanceMapNode | null }) {
   return (
-    <Card variant="outlined">
+    <Card data-testid="map-detail-panel" variant="outlined">
       <CardContent>
         <Typography variant="h2">{copy.selected}</Typography>
         {!node ? (
@@ -18,6 +18,10 @@ export function MapDetailPanel({ node }: { node: GovernanceMapNode | null }) {
         ) : (
           <Box sx={{ display: "grid", gap: 1, mt: 1 }}>
             <Flex gap={0.75} wrap>
+              <Chip size="small" label="objetivo" />
+              <Chip size="small" label="intent" />
+              <Chip size="small" label="contrato" />
+              <Chip size="small" label="outcome" />
               <Chip size="small" label={node.kind} />
               <Chip size="small" variant="outlined" label={node.confidence} />
               <Chip

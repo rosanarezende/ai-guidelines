@@ -5,7 +5,7 @@ test.describe("Execucao, repo-work e contratos", () => {
   test("APP-26 Work mostra repo-work, status, ack e evidencia", async ({ page, request }) => {
     pendingContract("APP-26", "expected-fail");
 
-    await openWorkspace(page, request, "acme-demo", "/work", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/work", "demo-acme");
     await expect(page.getByTestId("repo-work-list")).toBeVisible();
     await page.getByTestId("repo-work-filter-blocked").click();
     await expect(page.getByTestId("repo-work-card").first()).toContainText(
@@ -21,9 +21,9 @@ test.describe("Execucao, repo-work e contratos", () => {
     page,
     request,
   }) => {
-    pendingContract("APP-27", "fixme");
+    pendingContract("APP-27", "expected-fail");
 
-    await openWorkspace(page, request, "acme-demo", "/contracts", "sandbox-demo");
+    await openWorkspace(page, request, "acme-demo", "/contracts", "demo-acme");
     await expect(page.getByTestId("contract-list")).toContainText(/owner|consumer|revision/i);
     await page.getByTestId("contract-acme-user-context").click();
     await expect(page.getByTestId("contract-compatibility-window")).toBeVisible();

@@ -19,6 +19,8 @@ export function OnboardingStepper() {
         const testId =
           number === 6
             ? "onboarding-review-step"
+            : number === 5
+              ? "onboarding-step-integrations"
             : number === 3
               ? "onboarding-step-sources"
               : `onboarding-step-${String(number).padStart(2, "0")}`;

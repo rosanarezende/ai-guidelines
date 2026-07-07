@@ -102,7 +102,7 @@ identidade/membership do portal; APP-46 cobre o escopo fino de cache TanStack:
 - query keys/invalidation de TanStack Query consideram workspace e escopo de
   sessao/conta;
 - login/logout/accept-invite/workspace-switch devem limpar ou invalidar queries
-  sensiveis (APP-46, `expected-fail` ate a UI expor o escopo);
+  sensiveis (APP-46 `active`: a UI expõe escopo e evento de limpeza);
 - membership do portal nao concede authority governada.
 
 Base tecnica de APP-45 ja fica no layer rapido: `@demo/contracts` define
@@ -114,8 +114,9 @@ eventos sensiveis retornam diretivas explicitas de cache. O runtime Better Auth
 existe em `/api/auth/[...all]`. APP-45 agora roda em
 `journeys/portal-auth-flow.spec.ts`: magic link Better Auth -> `/api/local/auth/bridge`
 -> workspace -> convite -> magic link da pessoa convidada -> accept; o teste prova
-que membership de portal nao cria authority governada. APP-46 permanece
-`expected-fail` para a parte visual de escopo/limpeza de cache.
+que membership de portal nao cria authority governada. APP-46 roda em
+`journeys/auth-query-scope.spec.ts` e cobre a parte visual de escopo/limpeza de
+cache no shell.
 
 Caminho oficial: `tools/checks/check-governance-app.ts` roda, alem do build e
 dos testes do backend (`test:shell`), o `typecheck` do frontend, o typecheck

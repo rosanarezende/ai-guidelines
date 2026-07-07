@@ -65,6 +65,7 @@ export function OrganizationList({
               </Typography>
             </Box>
             <Button
+              data-testid={!organization.isDemo ? "workspace-option-empty" : undefined}
               size="small"
               variant="outlined"
               disabled={busyId !== null}

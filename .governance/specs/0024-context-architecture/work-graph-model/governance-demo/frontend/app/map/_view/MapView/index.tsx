@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Box, Chip, CircularProgress, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { workspaceQueryKeys } from "@/app/_domain/queryKeys";
@@ -74,6 +74,9 @@ function MapState({ response }: { response: Extract<GovernanceMapsResponse, { ok
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const map = response.maps?.find((item) => item.scopeId === scopeId) ?? response.maps?.[0] ?? null;
   const filteredMap = useMemo(() => (map ? applyMapFilter(map, filter) : null), [map, filter]);
+  const checkoutNode = filteredMap?.nodes.find(
+    (node) => node.id.includes("checkout") || node.title.toLowerCase().includes("checkout")
+  );
   const selectedNode = filteredMap?.nodes.find((node) => node.id === selectedId) ?? null;
   const highlight = useMemo(
     () =>
@@ -98,6 +101,7 @@ function MapState({ response }: { response: Extract<GovernanceMapsResponse, { ok
       <Flex gap={1.5} align="center" justify="space-between" wrap>
         <ScopeSelect maps={response.maps} scopeId={filteredMap.scopeId} setScopeId={setScopeId} />
         <Chip
+          data-testid="map-visible-count"
           size="small"
           variant="outlined"
           label={copy.nodeCount
@@ -112,6 +116,29 @@ function MapState({ response }: { response: Extract<GovernanceMapsResponse, { ok
           setSelectedId(null);
         }}
       />
+      <Flex gap={1} wrap>
+        {checkoutNode ? (
+          <Button
+            data-testid="map-result-checkout-stack"
+            size="small"
+            variant="outlined"
+            onClick={() => setSelectedId(checkoutNode.id)}
+          >
+            Focar checkout
+          </Button>
+        ) : null}
+        <Button
+          data-testid="map-filter-risk"
+          size="small"
+          variant="outlined"
+          onClick={() => {
+            setFilter({ ...filter, risk: "high" });
+            setSelectedId(null);
+          }}
+        >
+          Filtrar risco
+        </Button>
+      </Flex>
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 320px" }, gap: 2 }}>
         <GovernanceMapCanvas
           map={filteredMap}

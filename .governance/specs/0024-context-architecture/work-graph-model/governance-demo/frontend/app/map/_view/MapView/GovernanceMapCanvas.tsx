@@ -82,7 +82,10 @@ export function GovernanceMapCanvas({
   if (!positions) return <Skeleton variant="rounded" height={540} />;
 
   return (
-    <Box sx={{ height: 560, border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+    <Box
+      data-testid="governance-map"
+      sx={{ height: 560, border: "1px solid", borderColor: "divider", borderRadius: 2 }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}

@@ -14,6 +14,7 @@ export function IntegrationsStep() {
         {catalogHighlights.map((item) => (
           <Paper
             key={item.id}
+            data-testid={item.id === "git-provider" ? "integration-status-release-1" : undefined}
             variant="outlined"
             sx={{ p: 2, display: "grid", gap: 1, alignContent: "start" }}
           >
@@ -41,7 +42,7 @@ export function IntegrationsStep() {
       </ResponsiveGrid>
       <Flex gap={1} align="flex-start">
         <VerifiedUserIcon fontSize="small" sx={{ color: "text.secondary", mt: 0.25 }} />
-        <Typography variant="caption" color="text.secondary">
+        <Typography data-testid="integration-manual-alternative" variant="caption" color="text.secondary">
           {copy.authorityNotice}
         </Typography>
       </Flex>

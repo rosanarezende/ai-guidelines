@@ -147,6 +147,7 @@ export const SEEDS: Record<string, () => AdoptionState> = {
   "workspace-controlled": () =>
     base((ws) => ({
       ...ws,
+      onboardingStatus: "partial",
       mode: "controlled",
       stack: {
         ...defaultWorkspaceStack(),
@@ -587,6 +588,7 @@ export const SEEDS: Record<string, () => AdoptionState> = {
   "workspace-github-work-source": () =>
     base((ws) => ({
       ...ws,
+      onboardingStatus: "partial",
       workSources: [
         {
           id: "src-github",

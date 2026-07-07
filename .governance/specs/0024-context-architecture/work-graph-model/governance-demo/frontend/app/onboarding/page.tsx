@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { loadGovernanceSnapshot, loadIntegrationCatalog } from "@demo/backend";
+import { principalPersonId } from "@demo/domain";
 import { resolveAdoptionGate } from "@/server/adoption/gate";
 import type { ProfileId } from "@/app/_domain/adoption/model";
 import OnboardingView from "./_view/OnboardingView";
@@ -29,9 +30,11 @@ export default async function OnboardingPage() {
     <OnboardingView
       snapshot={snapshot}
       org={{
+        principalId: gate.principal.id,
         workspaceId: workspace.id,
         workspaceName: workspace.name,
         isDemo: gate.isDemo,
+        entryContext: deriveEntryContext(gate.state, gate.principal.id, workspace.id),
         onboardingStatus: workspace.onboardingStatus,
         persistedStep: workspace.onboardingStep,
         initialProfile,
@@ -42,4 +45,25 @@ export default async function OnboardingPage() {
       }}
     />
   );
+}
+
+function deriveEntryContext(
+  state: Awaited<ReturnType<typeof resolveAdoptionGate>>["state"],
+  principalId: string,
+  workspaceId: string
+) {
+  const workspace = state.workspaces.find((item) => item.id === workspaceId);
+  const personId = principalPersonId(state, principalId, workspaceId);
+  if (!workspace || !personId) return { kind: "workspace-setup" as const, proposedRoles: [] };
+  const proposedRoles = workspace.roleAssignments
+    .filter(
+      (assignment) =>
+        assignment.status === "proposed" &&
+        assignment.subject.kind === "person" &&
+        assignment.subject.id === personId
+    )
+    .map((assignment) => ({ id: assignment.id, roleId: assignment.roleId }));
+  return proposedRoles.length
+    ? { kind: "member-join" as const, proposedRoles }
+    : { kind: "workspace-setup" as const, proposedRoles: [] };
 }

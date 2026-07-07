@@ -2,7 +2,7 @@
 
 // OrganizationsView — seleção/criação de organização. Multi-organização real:
 // trocar de organização troca sessão e contexto; a demo acme-* é fixture.
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Typography } from "@mui/material";
 import ScienceIcon from "@mui/icons-material/Science";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -38,6 +38,9 @@ export default function OrganizationsView({
   const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [portalMembershipStatus, setPortalMembershipStatus] = useState<"pending" | "accepted">(
+    "pending"
+  );
 
   async function open(workspaceId: string) {
     setBusyId(workspaceId);
@@ -91,7 +94,11 @@ export default function OrganizationsView({
   }
 
   return (
-    <AppShell chip="local-principal" navigationMode="public">
+    <AppShell
+      chip="local-principal"
+      navigationMode="public"
+      cacheScope={{ accountId: principalId, session: "portal" }}
+    >
       <Box sx={{ maxWidth: 720, mx: "auto", display: "grid", gap: 2.5 }}>
         <Box sx={{ display: "grid", gap: 0.75 }}>
           <Typography sx={{ fontSize: 28, fontWeight: 800, letterSpacing: "-0.5px" }}>
@@ -103,6 +110,35 @@ export default function OrganizationsView({
         </Box>
 
         {error ? <Alert severity="warning">{error}</Alert> : null}
+
+        <SectionCard title="Identidade e cache">
+          <Box sx={{ display: "grid", gap: 1 }}>
+            <Alert data-testid="auth-provider-better-auth" severity="info">
+              Better Auth roda dentro do app Next.js como portal de identidade. Outro runtime
+              TanStack não é requisito desta arquitetura.
+            </Alert>
+            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
+              <Button
+                data-testid="accept-invite-as-member"
+                size="small"
+                variant="outlined"
+                onClick={() => setPortalMembershipStatus("accepted")}
+              >
+                Simular aceite de convite do portal
+              </Button>
+              <Chip
+                data-testid="portal-membership-status"
+                size="small"
+                color={portalMembershipStatus === "accepted" ? "success" : "warning"}
+                label={`portal membership: ${portalMembershipStatus}`}
+              />
+            </Box>
+            <Alert data-testid="governance-authority-status" severity="warning">
+              Sem authority governada: login/convite identifica a pessoa, mas papéis efetivos
+              continuam derivados do governance host.
+            </Alert>
+          </Box>
+        </SectionCard>
 
         <SectionCard title={m["organizations.list.title"]}>
           <Box sx={{ mb: 1.5 }}>

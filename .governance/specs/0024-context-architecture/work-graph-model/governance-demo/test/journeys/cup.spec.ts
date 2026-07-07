@@ -1,13 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { openWorkspace, openWorkspaceAs, pendingContract } from "./support/contract-fixtures.ts";
+import { openWorkspace, openWorkspaceAs } from "./support/contract-fixtures.ts";
 
 test.describe("Cup / Contextual Work Partner", () => {
   test("CUP-01 Cup abre como overlay contextual sem provider externo", async ({
     page,
     request,
   }) => {
-    pendingContract("CUP-01", "fixme");
-
     await openWorkspace(page, request, "empty-workspace", "/onboarding");
     await page.getByTestId("cup-open-button").click();
     await expect(page.getByTestId("cup-panel")).toBeVisible();
@@ -18,8 +16,6 @@ test.describe("Cup / Contextual Work Partner", () => {
   });
 
   test("CUP-02 Cup explica policies versionadas", async ({ page, request }) => {
-    pendingContract("CUP-02", "fixme");
-
     await openWorkspace(page, request, "workspace-controlled", "/integrations");
     await page.getByTestId("cloud-provider-request").click();
     await page.getByTestId("cup-open-button").click();
@@ -28,8 +24,6 @@ test.describe("Cup / Contextual Work Partner", () => {
   });
 
   test("CUP-03 Cup nao executa mutacao sem confirmacao humana", async ({ page, request }) => {
-    pendingContract("CUP-03", "fixme");
-
     await openWorkspace(page, request, "workspace-host-local", "/sources");
     await page.getByTestId("cup-open-button").click();
     await page.getByTestId("cup-draft-add-source").click();
@@ -43,8 +37,6 @@ test.describe("Cup / Contextual Work Partner", () => {
     page,
     request,
   }) => {
-    pendingContract("CUP-04", "fixme");
-
     // persona member: contexto entregue ao Cup deve depender do papel
     await openWorkspaceAs(page, request, "workspace-controlled", "member", "/triage");
     await page.getByTestId("cup-open-button").click();
