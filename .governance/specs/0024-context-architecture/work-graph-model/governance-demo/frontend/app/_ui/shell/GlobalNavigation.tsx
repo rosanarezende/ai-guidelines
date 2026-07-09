@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { guildaColors } from "@/app/_ui/theme";
 import { t } from "@/lib/i18n";
 import {
   primaryNavigationGroups,
@@ -62,7 +63,32 @@ function NavigationRow({
       {...(item.href && !disabled ? { component: Link, href: item.href } : {})}
       selected={selected}
       disabled={disabled}
-      sx={{ borderRadius: 1.5, px: 1.25, py: 0.75 }}
+      sx={{
+        borderRadius: 1.5,
+        px: 1.25,
+        py: 0.75,
+        color: "rgba(255, 255, 255, 0.82)",
+        "& .MuiListItemIcon-root": {
+          color: selected ? guildaColors.brass500 : "rgba(255, 255, 255, 0.68)",
+        },
+        "&.Mui-selected": {
+          bgcolor: "rgba(201, 163, 90, 0.18)",
+          color: guildaColors.white,
+        },
+        "&.Mui-selected:hover": {
+          bgcolor: "rgba(201, 163, 90, 0.24)",
+        },
+        "&:hover": {
+          bgcolor: "rgba(255, 255, 255, 0.08)",
+        },
+        "&.Mui-disabled": {
+          color: "rgba(255, 255, 255, 0.42)",
+          opacity: 1,
+          "& .MuiListItemIcon-root": {
+            color: "rgba(255, 255, 255, 0.28)",
+          },
+        },
+      }}
     >
       <ListItemIcon sx={{ minWidth: 34 }}>
         <Icon fontSize="small" />
@@ -74,7 +100,18 @@ function NavigationRow({
           </Typography>
         }
       />
-      {status ? <Chip size="small" variant="outlined" label={status} /> : null}
+      {status ? (
+        <Chip
+          size="small"
+          variant="outlined"
+          label={status}
+          sx={{
+            color: "rgba(255, 255, 255, 0.72)",
+            borderColor: "rgba(255, 255, 255, 0.22)",
+            bgcolor: "rgba(255, 255, 255, 0.04)",
+          }}
+        />
+      ) : null}
     </ListItemButton>
   );
 
@@ -83,15 +120,19 @@ function NavigationRow({
 
 export default function GlobalNavigation({ hasGovernanceHost }: { hasGovernanceHost: boolean }) {
   return (
-    <Box data-testid="global-navigation" sx={{ width: 280, p: 2 }}>
+    <Box data-testid="global-navigation" sx={{ width: 280, p: 2, color: guildaColors.white }}>
       <Box sx={{ display: "grid", gap: 2 }}>
         <Box data-testid="global-navigation-primary">
           {primaryNavigationGroups.map((group) => (
             <Box key={group.id} sx={{ mb: 1.5 }}>
               <Typography
                 variant="overline"
-                color="text.secondary"
-                sx={{ display: "block", px: 1, lineHeight: 1.8 }}
+                sx={{
+                  display: "block",
+                  px: 1,
+                  lineHeight: 1.8,
+                  color: "rgba(255, 255, 255, 0.62)",
+                }}
               >
                 {t(group.labelKey)}
               </Typography>
@@ -103,12 +144,16 @@ export default function GlobalNavigation({ hasGovernanceHost }: { hasGovernanceH
             </Box>
           ))}
         </Box>
-        <Divider />
+        <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.12)" }} />
         <Box data-testid="global-navigation-technical">
           <Typography
             variant="overline"
-            color="text.secondary"
-            sx={{ display: "block", px: 1, lineHeight: 1.8 }}
+            sx={{
+              display: "block",
+              px: 1,
+              lineHeight: 1.8,
+              color: "rgba(255, 255, 255, 0.62)",
+            }}
           >
             {t("app.nav.group.advanced")}
           </Typography>

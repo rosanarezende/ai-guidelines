@@ -4,8 +4,8 @@ import QueryProvider from "./_providers/QueryProvider";
 import "./styles.css";
 
 export const metadata: Metadata = {
-  title: "acme governance",
-  description: "Aplicacao operacional da org simulada v3",
+  title: "Guilda Governance",
+  description: "Governanca de trabalho open-source: pessoas decidem, o sistema apoia.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

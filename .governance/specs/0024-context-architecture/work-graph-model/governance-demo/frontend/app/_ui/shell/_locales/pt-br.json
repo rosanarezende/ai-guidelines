@@ -1,8 +1,8 @@
 {
   "locale": "pt-br",
   "messages": {
-    "app.brand.name": "Acme",
-    "app.brand.product": "Governança",
+    "app.brand.name": "Guilda",
+    "app.brand.product": "Governance",
     "app.nav.audit": "Auditoria",
     "app.nav.contracts": "Contratos",
     "app.nav.cup": "Cup",
@@ -22,6 +22,8 @@
     "app.nav.openMenu": "Abrir navegação",
     "app.nav.operations": "Operações",
     "app.nav.organizations": "Organizações",
+    "app.nav.product": "Produto",
+    "app.nav.login": "Entrar",
     "app.nav.planning": "Ciclo",
     "app.nav.results": "Resultados",
     "app.nav.search": "Buscar",

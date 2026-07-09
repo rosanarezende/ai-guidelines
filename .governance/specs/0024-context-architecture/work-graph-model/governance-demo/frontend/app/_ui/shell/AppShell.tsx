@@ -26,10 +26,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { logoutLocal } from "@/app/_domain/adoption/shellClient";
 import { authClient } from "@/app/_domain/auth/auth-client";
 import { applySensitiveQueryCacheEvent } from "@/app/_domain/cache/sensitive-query-cache";
+import { GuildaBrand } from "@/app/_ui/brand";
 import { t } from "@/lib/i18n";
 import { CupPanel } from "./CupPanel";
 import GlobalNavigation from "./GlobalNavigation";
-import { theme } from "../theme";
+import { guildaColors, theme } from "../theme";
 
 function ShellSkeleton() {
   return (
@@ -83,6 +84,8 @@ export default function AppShell({
     }, 1200);
   }
 
+  const brandHref = navigationMode === "public" ? "/public" : "/";
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -103,69 +106,96 @@ export default function AppShell({
                 <MenuIcon />
               </IconButton>
             ) : null}
-            <Box
-              sx={{
-                width: 28,
-                height: 28,
-                borderRadius: 2,
-                bgcolor: "primary.main",
-                color: "primary.contrastText",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 15,
-                fontWeight: 800,
-                flexShrink: 0,
-              }}
-            >
-              a
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, minWidth: 0 }}>
-              <Typography
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
+              <Box
                 component={Link}
-                href="/"
-                sx={{ fontWeight: 700, color: "text.primary", textDecoration: "none" }}
+                href={brandHref}
+                aria-label="Guilda Governance"
+                sx={{ display: "inline-flex", color: "inherit", textDecoration: "none" }}
               >
-                {t("app.brand.name")}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" noWrap>
-                {subtitle}
-              </Typography>
+                <GuildaBrand compact />
+              </Box>
+              {subtitle ? (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  noWrap
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    borderLeft: "1px solid",
+                    borderColor: "divider",
+                    pl: 1.25,
+                  }}
+                >
+                  {subtitle}
+                </Typography>
+              ) : null}
             </Box>
             {chip ? <Chip size="small" variant="outlined" label={chip} /> : null}
             <Box sx={{ flex: 1 }} />
             {headerAction}
-            <Button
-              size="small"
-              color="inherit"
-              startIcon={<SearchIcon fontSize="small" />}
-              disabled
-              sx={{ display: { xs: "none", lg: "inline-flex" } }}
-            >
-              {t("app.nav.search")}
-            </Button>
-            <Button
-              size="small"
-              color="inherit"
-              startIcon={<ChatOutlinedIcon fontSize="small" />}
-              onClick={() => setCupOpen(true)}
-            >
-              <span data-testid="cup-launcher">
-                <span data-testid="cup-open-button">{t("app.nav.cup")}</span>
-              </span>
-            </Button>
-            <Button component={Link} href="/organizations" size="small" color="inherit">
-              {t("app.nav.organizations")}
-            </Button>
-            <Button
-              data-testid="logout-button"
-              size="small"
-              color="inherit"
-              startIcon={<LogoutIcon fontSize="small" />}
-              onClick={() => void logout()}
-            >
-              {t("app.nav.logout")}
-            </Button>
+            {navigationMode === "public" ? (
+              <>
+                <Button
+                  component={Link}
+                  href="/public"
+                  size="small"
+                  color="inherit"
+                  sx={{ display: { xs: "none", sm: "inline-flex" } }}
+                >
+                  {t("app.nav.product")}
+                </Button>
+                {cacheScope ? (
+                  <Button
+                    data-testid="logout-button"
+                    size="small"
+                    color="inherit"
+                    startIcon={<LogoutIcon fontSize="small" />}
+                    onClick={() => void logout()}
+                  >
+                    {t("app.nav.logout")}
+                  </Button>
+                ) : pathname === "/login" ? null : (
+                  <Button component={Link} href="/login" size="small" variant="contained">
+                    {t("app.nav.login")}
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                <Button
+                  size="small"
+                  color="inherit"
+                  startIcon={<SearchIcon fontSize="small" />}
+                  disabled
+                  sx={{ display: { xs: "none", lg: "inline-flex" } }}
+                >
+                  {t("app.nav.search")}
+                </Button>
+                <Button
+                  size="small"
+                  color="inherit"
+                  startIcon={<ChatOutlinedIcon fontSize="small" />}
+                  onClick={() => setCupOpen(true)}
+                >
+                  <span data-testid="cup-launcher">
+                    <span data-testid="cup-open-button">{t("app.nav.cup")}</span>
+                  </span>
+                </Button>
+                <Button component={Link} href="/organizations" size="small" color="inherit">
+                  {t("app.nav.organizations")}
+                </Button>
+                <Button
+                  data-testid="logout-button"
+                  size="small"
+                  color="inherit"
+                  startIcon={<LogoutIcon fontSize="small" />}
+                  onClick={() => void logout()}
+                >
+                  {t("app.nav.logout")}
+                </Button>
+              </>
+            )}
           </Toolbar>
         </AppBar>
         <Box sx={{ display: "flex" }}>
@@ -177,8 +207,8 @@ export default function AppShell({
                   display: { xs: "none", md: "block" },
                   width: 280,
                   borderRight: "1px solid",
-                  borderColor: "divider",
-                  bgcolor: "background.paper",
+                  borderColor: "rgba(255, 255, 255, 0.12)",
+                  bgcolor: guildaColors.green900,
                   minHeight: "calc(100vh - 65px)",
                   position: "sticky",
                   top: 65,
@@ -187,7 +217,11 @@ export default function AppShell({
               >
                 <GlobalNavigation hasGovernanceHost={hasGovernanceHost} />
               </Box>
-              <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+              <Drawer
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                slotProps={{ paper: { sx: { bgcolor: guildaColors.green900 } } }}
+              >
                 <GlobalNavigation hasGovernanceHost={hasGovernanceHost} />
               </Drawer>
             </>

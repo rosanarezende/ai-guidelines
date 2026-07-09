@@ -23,7 +23,7 @@ export function ConsoleHeader({
       <Toolbar sx={{ gap: 2, alignItems: "center" }}>
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography variant="h1" component="div">
-            acme governance · console técnico
+            Guilda Governance · console técnico
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Área avançada (grafo, comandos, resolver, event-log) · audiencia: {selected.audience}

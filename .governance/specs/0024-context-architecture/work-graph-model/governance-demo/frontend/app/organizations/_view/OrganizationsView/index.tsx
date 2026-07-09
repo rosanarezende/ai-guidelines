@@ -95,7 +95,7 @@ export default function OrganizationsView({
 
   return (
     <AppShell
-      chip="local-principal"
+      chip="portal"
       navigationMode="public"
       cacheScope={{ accountId: principalId, session: "portal" }}
     >
@@ -111,11 +111,10 @@ export default function OrganizationsView({
 
         {error ? <Alert severity="warning">{error}</Alert> : null}
 
-        <SectionCard title="Identidade e cache">
+        <SectionCard title={m["organizations.identity.title"]}>
           <Box sx={{ display: "grid", gap: 1 }}>
             <Alert data-testid="auth-provider-better-auth" severity="info">
-              Better Auth roda dentro do app Next.js como portal de identidade. Outro runtime
-              TanStack não é requisito desta arquitetura.
+              {m["organizations.identity.portal"]}
             </Alert>
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
               <Button
@@ -134,8 +133,7 @@ export default function OrganizationsView({
               />
             </Box>
             <Alert data-testid="governance-authority-status" severity="warning">
-              Sem authority governada: login/convite identifica a pessoa, mas papéis efetivos
-              continuam derivados do governance host.
+              {m["organizations.identity.authority"]}
             </Alert>
           </Box>
         </SectionCard>
