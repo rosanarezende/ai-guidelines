@@ -14,6 +14,7 @@ Thumbs.db
 .aider*
 scratch/
 .codex/
+.codex-remote-attachments/
 
 # Testes e Linter
 coverage/
