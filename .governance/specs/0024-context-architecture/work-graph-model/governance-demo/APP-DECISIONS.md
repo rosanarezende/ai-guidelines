@@ -3398,3 +3398,242 @@ minimizados, sem conteudo sensivel, e tratados como integracao opcional.
 - Google login continua separado de Drive/Gmail/Calendar.
 - O produto ainda precisa decidir provider real de e-mail, termos de uso e
   politica de retencao de analytics antes de um deploy publico.
+
+## QRD-47 - Nome publico do produto visual
+
+**Status:** criteria-decided; nome publico ainda aberto.
+
+**Q - Question**
+
+Qual sera o nome publico candidato do produto visual que nasceu como
+`governance-demo`, e quais criterios precisam ser satisfeitos antes de usar esse
+nome em repo, package, site, docs e comunicacao open-source?
+
+**R - Reasoning/Research**
+
+A decisao QRD-37 ja separou o produto visual da CLI/framework `ai-guidelines`.
+Sem nome publico, qualquer extracao fisica cria paths e docs temporarios. Ao
+mesmo tempo, escolher nome cedo demais pode gerar retrabalho se disponibilidade
+de GitHub/npm/dominio ou posicionamento open-source nao fecharem.
+
+O nome precisa comunicar que o produto e um portal humano de governanca de
+trabalho, nao apenas uma demo tecnica, um dashboard, um Jira alternativo ou uma
+CLI. Tambem precisa conviver com `ai-guidelines` como pacote/framework
+complementar.
+
+**D - Decision**
+
+Os criterios de escolha do nome estao decididos. O nome publico ainda nao.
+
+Um nome so pode entrar na shortlist se:
+
+1. **Diferenciar o produto visual de `ai-guidelines`.**
+   - `ai-guidelines` continua sendo framework/CLI/core.
+   - O novo nome representa o portal humano, nao a engine headless.
+
+2. **Comunicar governanca sem soar burocratico.**
+   - Deve remeter a coordenacao, contexto, decisao, evidencia, confianca ou
+     fluxo de trabalho.
+   - Deve evitar tom de ferramenta corporativa pesada.
+
+3. **Funcionar para publico nao tecnico.**
+   - Pessoas de negocio, design, lideranca e investimento nao devem sentir que
+     o nome e apenas para devs.
+   - O nome pode ser sofisticado, mas nao pode exigir conhecimento de CLI,
+     YAML, grafo ou Git para fazer sentido.
+
+4. **Nao prometer autonomia de IA.**
+   - O produto ajuda humanos a decidir melhor.
+   - O nome nao deve sugerir que IA aprova, governa ou decide sozinha.
+
+5. **Ser adequado para open-source.**
+   - Deve funcionar em GitHub, README, docs, talks, issues, comunidade e
+     contribuicoes externas.
+   - Deve ser simples de explicar como projeto aberto, nao como SaaS fechado.
+
+6. **Ser internacionalizavel.**
+   - Preferir nome curto, sem acentos, pronunciavel em portugues e ingles.
+   - Evitar trocadilhos que funcionem em uma lingua e fiquem estranhos em
+     outra.
+
+7. **Ser extensivel.**
+   - Deve comportar portal, governance host Git-backed, Cup/CWP, grafos,
+     integracoes, dashboards e CLI como ecossistema complementar.
+   - Nao deve prender o produto a uma feature especifica.
+
+8. **Ter disponibilidade verificavel.**
+   - Antes da decisao final, checar GitHub org/repo, npm package, dominio,
+     busca geral e conflito de marca.
+   - Nome sem disponibilidade minima nao vira candidato final.
+
+9. **Nao ser generico demais.**
+   - Nomes descritivos como "Governance Portal", "Work Graph" ou
+     "AI Governance" podem explicar a categoria, mas sao fracos como marca.
+
+10. **Combinar com a arquitetura hibrida.**
+    - O nome precisa aceitar a narrativa: portal humano + governanca no Git do
+      usuario + open-source + integracoes.
+
+**Filtro de corte para shortlist**
+
+Um nome so vira candidato forte se passar por estes quatro filtros:
+
+1. faz sentido sem explicar por cinco minutos;
+2. nao confunde com `ai-guidelines`;
+3. pode virar repo, package, site e documentacao;
+4. nao contradiz a promessa: humanos decidem, o sistema organiza contexto,
+   evidencia e fluxo.
+
+Proxima acao desta QRD: montar shortlist de 10 a 20 nomes e aplicar os filtros
+acima antes de decidir o nome publico.
+
+As tres primeiras respostas de naming (Codex, Gemini 3.1 Pro e Claude Opus 4.8)
+foram registradas em
+[`PRODUCT-NAMING-CANDIDATES.md`](PRODUCT-NAMING-CANDIDATES.md). Esse arquivo e
+material de entrada para comparacao; nao decide nome nem disponibilidade.
+
+O primeiro filtro semantico da QRD-47 destacou um tier inicial para comparacao:
+Guilda, Nodus, Lumina, Contexta, Pacta, Tessera, Trellis e Vento. A owner
+sinalizou atencao especial para **Guilda**, **Nodus** e **Lumina**. Esse sinal
+orienta a proxima comparacao, mas ainda nao e decisao de nome.
+
+Checagem factual inicial em 2026-07-07 rebaixou **Nodus** e **Lumina** para
+nome principal por colisao operacional/publica. Nodus ja aparece em npm/PyPI,
+GitHub e ecossistemas de grafo/rede; Lumina aparece em npm/PyPI, GitHub e em
+OSS/AI/analytics. **Guilda** segue como melhor dos tres destacados, mas o nome
+curto tambem tem GitHub/dominios ocupados; a proxima rodada deve testar
+variacoes compostas (`guilda-work`, `guilda-governance`, `use-guilda` etc.) e
+comparar com Tessera, Pacta, Contexta, Trellis e Vento. Detalhes estao em
+[`PRODUCT-NAMING-CANDIDATES.md`](PRODUCT-NAMING-CANDIDATES.md).
+
+Hipotese de arquitetura de marca atualizada: **Guilda** como guarda-chuva,
+**Guilda Governance** como app/produto visual, **guilda flow** como CLI publica
+futura, **Guilda Workgraph** como modelo tecnico, **Guilda Host** como local
+Git-backed da governanca, **Guilda Cup** como assistente contextual, e
+`ai-guidelines` como engine/core repo-first ate uma decisao especifica de
+incorporacao, renomeacao ou preservacao como pacote tecnico. A alternativa
+`Governance-first` foi adaptada e virou a hipotese preferida; `Flow-first` foi
+rebaixada para superficie tecnica/CLI; `Workgraph-first` continua melhor como
+camada tecnica.
+
+Rodada visual posterior em 2026-07-08 refinou essa hipotese: a candidata
+principal deixa de ser um monograma literal com **G** e passa a ser um simbolo
+de **workgraph humano**: decisao humana central, areas de trabalho, contexto,
+evidencias, politicas/guardrails, responsabilidades e fluxo de saida para
+repositorios, integracoes e governance host. A narrativa registrada e "Pessoas
+decidem. O sistema apoia." **Guilda Cup** fica definido como Contextual Work
+Partner, nao copilot decisor, com iconografia de xicara de cha/cafe. A direcao
+esta registrada em
+[`PRODUCT-BRAND-DIRECTION.md`](PRODUCT-BRAND-DIRECTION.md).
+
+Checagem operacional preliminar em 2026-07-08 nao encontrou os compostos
+`guilda-governance`, `guilda-flow`, `guilda-workgraph`, `guilda-host`,
+`guilda-cup`, `use-guilda`, `guilda-cli`, `guilda-platform`, `guilda-app`,
+`guildagovernance`, `guildaflow` e `guildaworkgraph` como pacote npm, pacote
+PyPI ou usuario/organizacao exata no GitHub. RDAP indicou parte dos dominios
+compostos como `not found`, mas algumas consultas deram timeout e precisam ser
+rechecadas. Risco principal: existe **GUILDA Cyber Solutions** no setor de
+cybersecurity/compliance/governance; logo, **Guilda Governance** segue como
+candidata principal, mas nao como decisao final ate clearance formal de marca.
+
+## QRD-48 - Extracao para repo irmao
+
+**Status:** pending-decision.
+
+**Q - Question**
+
+O produto visual deve sair de
+`.governance/specs/0024-context-architecture/work-graph-model/governance-demo/`
+para um repo irmao do `ai-guidelines` antes da proxima grande leva de telas? Se
+sim, qual e o plano de corte e o que permanece neste repo?
+
+**R - Reasoning/Research**
+
+QRD-38 decidiu a direcao: o produto visual deve virar produto proprio, mas a
+extracao precisa preservar historico, testes, docs, governanca e relacao com o
+core/CLI. A pesquisa de extracao recomenda `git filter-repo` quando o corte
+fisico for feito, mas tambem alerta para riscos de repo separado prematuro.
+
+A decisao da owner estreitou essa recomendacao: antes de novas grandes telas,
+precisamos preparar a extracao para repo irmao, porque continuar dentro da Spec
+0024 aumenta churn de paths, CI, imports e docs.
+
+**D - Decision**
+
+Pendente. A rodada deve definir destino, paths, historico, CI minimo, estrategia
+de consumo do `ai-guidelines` e criterio para o primeiro commit do repo irmao.
+
+## QRD-49 - Contrato do GitHub governance host
+
+**Status:** pending-decision.
+
+**Q - Question**
+
+Como o portal cria, vincula, le e escreve em um governance host no GitHub sem
+transformar o portal em segundo SSOT e sem exigir que pessoas nao tecnicas
+operem Git diretamente?
+
+**R - Reasoning/Research**
+
+QRD-41 decidiu que a experiencia v1 precisa de portal humano + governance host
+Git-backed. O stress test da owner mostrou o caso real: uma pessoa pode comecar
+sozinha, versionar a governanca em um repo dedicado no GitHub, e depois convidar
+pessoas de negocio, design ou investimento para usar o portal.
+
+Isso exige contrato explicito para: repo dedicado vs host embutido, permissoes
+GitHub, commits ou PRs, leitura read-only, `sourceRevision`, stale/conflict,
+audit trail, scopes minimos e erro visivel quando o portal nao tiver permissao.
+
+**D - Decision**
+
+Pendente. GitHub e o primeiro provider real. GitLab/Bitbucket ficam como
+providers futuros, mas o contrato nao pode ser GitHub-specific ao ponto de
+impedir adapters equivalentes.
+
+## QRD-50 - Politica minima do portal
+
+**Status:** pending-decision.
+
+**Q - Question**
+
+Quais dados o portal pode guardar, como entrega magic link, por quanto tempo
+retém contas/convites/memberships/eventos de jornada, e quais garantias sao
+necessarias antes de um deploy publico ou producao-like?
+
+**R - Reasoning/Research**
+
+QRD-46 decidiu que o produto nao deve guardar senhas, mas o portal ainda guarda
+dados sensiveis de operacao: email, provider id, sessoes, convites,
+memberships, workspace registry e possivelmente eventos de jornada. Mesmo sem
+armazenar governanca autoritativa, isso exige politica minima de privacidade,
+retencao, egress, logs e analytics.
+
+**D - Decision**
+
+Pendente. Ate fechar esta politica, deploys publicos devem ser tratados como
+spike ou ambiente controlado, nao como portal de producao para terceiros.
+
+## QRD-51 - Dogfood da plataforma
+
+**Status:** pending-decision.
+
+**Q - Question**
+
+Como a propria plataforma deve se governar usando o produto visual, conectando
+`ai-guidelines`, o futuro repo do app e um governance host da plataforma?
+
+**R - Reasoning/Research**
+
+O produto so prova a promessa se governar a si mesmo. O dogfood precisa mostrar
+que a CLI/framework `ai-guidelines` e o app visual podem ser governados por um
+workspace de plataforma, com roles, decisions, initiatives, work sources,
+reviews, outcomes e event-log recuperaveis.
+
+Sem esse criterio, o app pode continuar funcionando em modo demo/acme sem provar
+o uso real que pretende vender como open-source.
+
+**D - Decision**
+
+Pendente. A rodada deve definir topologia de repos, governance host da
+plataforma, roles iniciais e criterio de "dogfood suficiente" para continuar a
+v1.

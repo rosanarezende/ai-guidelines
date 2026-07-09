@@ -5,6 +5,7 @@
 > **Autoridade funcional:** [`APP-FUNCTIONAL-SPEC.md`](APP-FUNCTIONAL-SPEC.md).
 > **Matriz de cobertura automatizada:** [`APP-COVERAGE-MATRIX.md`](APP-COVERAGE-MATRIX.md).
 > **Topologia de produto:** [`PRODUCT-TOPOLOGY.md`](PRODUCT-TOPOLOGY.md).
+> **Rodada de decisao aberta:** [`PRODUCT-DECISION-ROUND.md`](PRODUCT-DECISION-ROUND.md).
 > **Regra inicial:** toda tela nasce como `nao-iterado` e `nao-validado-visual`.
 > **Uso:** marcar aqui apenas o que foi conferido com o app rodando, por uma pessoa, em um workspace limpo ou em um cenario explicitamente descrito.
 
@@ -12,7 +13,8 @@
 
 A partir da decisao hibrida registrada em QRD-36/37/38/41/46, o app visual nao
 deve ser tratado como "demo interna" nem como pronto para readiness da Spec 0024. Antes de uma nova leva grande de telas, precisamos fechar a direcao de
-produto:
+produto. A fila operacional esta em
+[`PRODUCT-DECISION-ROUND.md`](PRODUCT-DECISION-ROUND.md) e cobre:
 
 - nome publico candidato para o produto visual;
 - plano de extracao para repo irmao do `ai-guidelines`;

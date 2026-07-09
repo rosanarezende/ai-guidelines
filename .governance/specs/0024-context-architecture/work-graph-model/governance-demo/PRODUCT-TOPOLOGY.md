@@ -3,6 +3,7 @@
 > **Status:** decisao de produto para a `governance-demo`.
 > **Data:** 2026-07-07.
 > **Autoridade:** complementa [`APP-PRODUCT-STATEMENT.md`](APP-PRODUCT-STATEMENT.md) e [`APP-DECISIONS.md`](APP-DECISIONS.md), especialmente QRD-36, QRD-37, QRD-38, QRD-41 e QRD-46.
+> **Rodada aberta:** [`PRODUCT-DECISION-ROUND.md`](PRODUCT-DECISION-ROUND.md).
 
 ## 1. Decisao curta
 
