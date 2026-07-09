@@ -18,10 +18,20 @@ Este arquivo existe para impedir que a aplicacao pareca pronta apenas porque exi
 
 Ele parte da declaracao de produto: o app e a superficie humana do framework, enquanto a CLI `ai-guidelines` continua sendo a superficie headless para terminal, CI e automacao. As duas superficies precisam operar o mesmo modelo, o mesmo governance host e os mesmos comandos conceituais.
 
+Depois da QRD-52, este contrato deve ser lido com uma prioridade nova:
+
+```text
+desktop local-first e a superficie fundadora da v1;
+portal web e superficie complementar para conta, convite e colaboracao;
+ambas usam o mesmo modelo, contratos, backend e governance host.
+```
+
 Ele descreve, tela por tela, o que o app precisa entregar desde o primeiro acesso ate o uso diario:
 
-- entrada passwordless no portal sem guardar senha de usuario final;
+- entrada local/demo sem conta quando a pessoa quer operar sozinha;
+- entrada passwordless no portal sem guardar senha de usuario final quando a topologia usa portal;
 - criacao e selecao de organizacoes/workspaces;
+- selecao de pasta local e descoberta de repos Git no desktop;
 - convite de pessoas;
 - atribuicao de papeis;
 - configuracao de perfil de governanca;
@@ -410,7 +420,17 @@ novo responde vazio honesto ate existir governance host publicado.
 **Ainda falta:** visualizacao relacional opcional em ECharts graph, links de
 acao governada por tipo de no e mapa para workspace real fora da demo.
 
-## 6. Fluxo 0: primeiro acesso e entrada no portal
+## 6. Fluxo 0: primeiro acesso, desktop local e entrada no portal
+
+Depois da QRD-52, o primeiro acesso tem duas trilhas legitimas:
+
+- **desktop local-first:** abrir app, escolher pasta/workspace local, detectar
+  repos Git e criar/vincular governance host sem conta de portal;
+- **portal:** entrar por magic link/provedor ou demo anonima quando a pessoa
+  precisa de conta, convite, membership ou leitura compartilhada.
+
+As telas abaixo descrevem a trilha de portal ja implementada. A trilha desktop
+deve nascer do spike S2 antes de ser tratada como tela final.
 
 ### 6.1 Tela: Login do portal (`/login`)
 

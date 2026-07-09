@@ -22,8 +22,8 @@ Isso cria uma divergencia importante:
 
 - o runtime da Spec 0024 ainda projeta readiness do checkpoint de taxonomia;
 - a owner decidiu que o app ainda nao foi validado como produto;
-- continuar criando telas grandes sem decidir nome, extracao, GitHub host e
-  politica do portal aumenta retrabalho.
+- continuar criando telas grandes sem decidir nome, distribuicao desktop,
+  extracao, GitHub host e politica do portal aumenta retrabalho.
 
 Portanto, esta rodada pausa novas grandes telas e organiza as decisoes que
 precisam ser fechadas antes de continuar a v1 do produto visual.
@@ -42,6 +42,8 @@ precisam ser fechadas antes de continuar a v1 do produto visual.
   do portal.
 - O app visual deve virar produto proprio, separado conceitualmente da CLI
   `ai-guidelines`.
+- QRD-52 mudou a direcao da v1 para desktop local-first; portal continua
+  complementar para colaboracao e pessoas nao tecnicas.
 
 ## 3. Ordem de decisao
 
@@ -99,7 +101,25 @@ juridico/comercial: existe **GUILDA Cyber Solutions** em setor proximo
 (cybersecurity/compliance/governance), entao o nome continua candidato, nao
 decisao final.
 
-### 3.2 Extracao para repo irmao
+### 3.2 Distribuicao desktop local-first
+
+**Pergunta:** como o produto sera distribuido para o caso fundador de dev
+solo/local que trabalha com varios repos, sem depender de portal publico?
+
+**Por que vem antes de novas telas:** se a superficie principal for desktop,
+as telas de onboarding, sources, workspace e host precisam conhecer filesystem,
+Git local, SQLite local, permissoes do shell e sincronizacao com GitHub.
+
+**Saida esperada:** spike S2b/S2c com bancada desktop-local, decisao Tauri/Rust
+vs Electron, contrato de dialogo de pasta, indice local, empacotamento minimo e
+fronteira com web/portal.
+
+**Estado atual:** QRD-52 decidiu a direcao e
+[`SPIKE-DESKTOP-LOCAL-FIRST.md`](SPIKE-DESKTOP-LOCAL-FIRST.md) documenta a
+primeira prova. O backend ja prova filesystem/Git/host/SQLite em
+`backend/tests/desktop-local-spike.test.ts`.
+
+### 3.3 Extracao para repo irmao
 
 **Pergunta:** o produto visual sai da Spec 0024 diretamente para um repo irmao?
 O que fica em `ai-guidelines` e o que passa a viver no novo repo?
@@ -111,7 +131,17 @@ paths, workspaces, CI, docs, imports e checks.
 preservacao de historico, checks minimos no repo novo e contrato de consumo do
 `ai-guidelines`.
 
-### 3.3 Governance host GitHub
+**Decisao atual:** sim, o produto vivo deve ir para um repo irmao antes da
+proxima grande leva de implementacao. A decisao foi registrada na QRD-53 e o
+protocolo operacional esta em
+[`PRODUCT-EXTRACTION-PLAN.md`](PRODUCT-EXTRACTION-PLAN.md).
+
+**Regra pratica:** este repo mantem a historia da Spec 0024; o repo novo passa
+a conter a v1 viva do produto visual/desktop. Enquanto o corte nao acontecer,
+novas implementacoes estruturais devem ser limitadas a preparacao de extracao,
+spikes isolados ou correcoes pequenas.
+
+### 3.4 Governance host GitHub
 
 **Pergunta:** como o portal cria, vincula, le e escreve em um governance host no
 GitHub sem virar segundo SSOT?
@@ -124,7 +154,7 @@ necessarias.
 permissoes, commit/PR, `sourceRevision`, conflito/stale, audit trail e modo
 read-only quando a permissao nao basta.
 
-### 3.4 Politica do portal
+### 3.5 Politica do portal
 
 **Pergunta:** quais dados o portal pode guardar, por quanto tempo, como entrega
 magic link, e quais eventos de jornada podem ser medidos?
@@ -135,7 +165,7 @@ memberships. Mesmo sem guardar governanca, isso exige politica minima.
 **Saida esperada:** politica de dados, e-mail/magic-link provider,
 analytics/growth minimizado, redacao de secrets, retencao e modo self-hosted.
 
-### 3.5 Dogfood da plataforma
+### 3.6 Dogfood da plataforma
 
 **Pergunta:** como a propria plataforma sera governada usando o produto visual?
 
@@ -152,6 +182,7 @@ governance host, fontes de trabalho e criterio de "dogfood suficiente".
 - Converter o PR para Ready.
 - Fazer merge.
 - Construir novas telas grandes antes de fechar as decisoes acima.
+- Tratar hospedagem do portal como pre-requisito para o caso desktop local.
 - Transformar portal membership em authority governada.
 - Fazer do banco do portal um segundo SSOT.
 
@@ -160,10 +191,11 @@ governance host, fontes de trabalho e criterio de "dogfood suficiente".
 A rodada termina quando houver QRDs fechadas ou dispositionadas para:
 
 1. nome publico candidato;
-2. plano de extracao para repo irmao;
-3. contrato inicial do GitHub governance host;
-4. politica minima do portal;
-5. topologia de dogfood da plataforma.
+2. contrato de distribuicao desktop local-first;
+3. plano de extracao para repo irmao;
+4. contrato inicial do GitHub governance host;
+5. politica minima do portal;
+6. topologia de dogfood da plataforma.
 
 Enquanto isso nao estiver resolvido, implementacoes devem ser limitadas a:
 

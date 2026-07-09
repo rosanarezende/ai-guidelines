@@ -8,6 +8,17 @@
 > nao estiver implementado, o teste nasce `fixme` ou `expected-fail`; nao se
 > implementa primeiro para testar depois.
 
+## Prioridade 0 — corte para repo irmao
+
+Antes de novas grandes telas ou de aprofundar Tauri/Rust, executar ou preparar
+o corte do produto vivo para um repo irmao (`guilda-governance` como nome local
+candidato). O protocolo esta em
+[`PRODUCT-EXTRACTION-PLAN.md`](PRODUCT-EXTRACTION-PLAN.md).
+
+Regra: este path profundo da Spec 0024 deve parar de receber implementacao
+estrutural de produto. Ele preserva historia, research, reviews e decisoes; o
+produto vivo deve continuar no repo irmao.
+
 ## Estado atual
 
 A v3 já prova uma adoção repo-first mais próxima de uma empresa que já tem seus repos:
@@ -110,9 +121,10 @@ Fechado:
 14. **Portabilidade do legado v2 arquivado → v3:** completar matcher executável e authoring completo aproveitando `_archive/org-simulation-v2` como referência histórica, sem reintroduzir a taxonomia antiga nem apagar os resolvers da v3.
 15. **Integrações — hub dedicado e sugestões contextuais:** QRD-33 decidiu que Settings não basta. Criar `/integrations` como inventário governado de providers, status, permissões, riscos, health/probe, owner e alternativa manual; cada tela também deve sugerir poucas integrações relevantes no momento em que elas elevam confiança ou reduzem trabalho manual. GitHub work-source continua primeira integração cloud real.
 16. **Adapters externos — spikes locais FEITOS:** `assistant-runtime` (Ollama health + advisory), `git-provider` (git-local), `ci-status` (ci-local), `code-quality`, `code-security` (OSV/deps.dev via relatório hash-verificado) e `observability` têm adapter executável com egress fail-closed e evidência verificável. O repo também tem `supply-chain:check`/`supply-chain:advisory` e workflow OSV-Scanner para dogfood. Próximo: ligar essa evidência ao resolver de outcome/repo-work (evidence provider alimentando o dashboard, não SSOT paralelo) e o primeiro adapter genuinamente cloud atrás de allowlist.
-17. **Portal/control plane — proxima prova antes de decidir hospedagem:** QRD-42 decidiu a ordem. S1f esta feito: o fluxo de convite/aceite rodou contra PostgreSQL live e as duas contas enxergaram o mesmo workspace sem ganhar authority governada. QRD-43 tambem criou o caminho operacional `deploy/shared-portal/`: Docker Compose oficial para PostgreSQL do portal compartilhado; SQLite/local-solo continua sem Docker. Proximo: S1g = provar governance host Git-backed real/sandbox com `sourceRevision`; depois S1h = montar matriz de custo/operacao. O roteiro didatico fica em [`PORTAL-DELIVERY-ROADMAP.md`](PORTAL-DELIVERY-ROADMAP.md).
-18. **APP-45 — Better Auth + TanStack Query antes de telas de auth real:** QRD-45 fechou que o app usa Better Auth pela integracao Next.js (`/api/auth/[...all]` + `toNextJsHandler`), nao TanStack Start. A base Zod/modelagem/teste de session scope, query keys e invalidation/clear de TanStack Query existe em `@demo/contracts` + `backend/tests/auth-query-scope.test.ts`; a rota Better Auth, o `auth-client` React e o helper de cache TanStack tambem ja existem. Logout e troca/criacao de workspace aplicam as diretivas de cache. Proxima subfatia: adaptar signup/organizations/invites para usar Better Auth como identidade real, mantendo membership de portal separada de authority governada.
-19. **Revisão adversarial pós-iteração visual:** pedir ao Claude Code/Fable 5 uma nova revisão apenas depois de a owner percorrer o mapa visual e termos marcado o que foi iterado/validado.
+17. **Desktop local-first — nova prova fundadora antes de hospedagem:** QRD-52 mudou a ordem de produto: a v1 deve provar primeiro o caso da owner/dev solo com app desktop local-first, repos locais, Git, `.governance-host` e indice SQLite. O spike S2 esta documentado em [`SPIKE-DESKTOP-LOCAL-FIRST.md`](SPIKE-DESKTOP-LOCAL-FIRST.md) e ja tem prova mecanica em `backend/tests/desktop-local-spike.test.ts`: detectar repos Git, expor dirty state, criar governance host e persistir snapshot local. Proximo: S2b = bancada interna `/spikes/desktop-local`; S2c = decisao tecnica Tauri/Rust vs Electron com dialogo real de pasta e empacotamento minimo.
+18. **Portal/control plane — complementar, nao pre-requisito da v1:** QRD-42/43 continuam validas para colaboracao e pessoas nao tecnicas. S1f esta feito: o fluxo de convite/aceite rodou contra PostgreSQL live e as duas contas enxergaram o mesmo workspace sem ganhar authority governada. QRD-43 tambem criou `deploy/shared-portal/` com Docker Compose oficial para PostgreSQL do portal compartilhado. A proxima prova do portal agora deve acontecer depois de S2b/S2c ou em paralelo controlado: S1g = governance host Git-backed real/sandbox com `sourceRevision`; S1h = matriz de custo/operacao/hospedagem. O roteiro didatico fica em [`PORTAL-DELIVERY-ROADMAP.md`](PORTAL-DELIVERY-ROADMAP.md).
+19. **APP-45 — Better Auth + TanStack Query continua valido para portal:** QRD-45 fechou que o app usa Better Auth pela integracao Next.js (`/api/auth/[...all]` + `toNextJsHandler`), nao TanStack Start. A base Zod/modelagem/teste de session scope, query keys e invalidation/clear de TanStack Query existe em `@demo/contracts` + `backend/tests/auth-query-scope.test.ts`; a rota Better Auth, o `auth-client` React e o helper de cache TanStack tambem ja existem. Logout e troca/criacao de workspace aplicam as diretivas de cache. Proxima subfatia de auth so deve voltar a bloquear produto quando a superficie portal for priorizada novamente.
+20. **Revisão adversarial pós-iteração visual:** pedir ao Claude Code/Fable 5 uma nova revisão apenas depois de a owner percorrer o mapa visual e termos marcado o que foi iterado/validado.
 
 ## Comandos de aceite
 

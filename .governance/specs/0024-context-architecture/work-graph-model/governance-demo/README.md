@@ -4,6 +4,16 @@
 >
 > **Autoridade:** o MODELO mora em [`../model.yml`](../model.yml) (SSOT normativo v3 limpo; histórico v2 em [`../_archive/model-v2-history-2026-07-05`](../_archive/model-v2-history-2026-07-05)). Esta sim **valida** o modelo — quando a sim contradiz o modelo, ou se corrige a sim, ou se abre provocação no modelo. Substitui a `_org-simulation-v2` como frente ativa; a v2 está fisicamente arquivada em [`../_archive/org-simulation-v2`](../_archive/org-simulation-v2). Os protótipos estáticos F3/F4 da v3 estão em [`../_archive/org-simulation-v3-static-apps-v1`](../_archive/org-simulation-v3-static-apps-v1); a superfície ativa é [`frontend/`](frontend/). Próximos passos operacionais: [`NEXT-STEPS.md`](NEXT-STEPS.md). Arquitetura da app/demo: [`ARCHITECTURE.md`](ARCHITECTURE.md). Declaracao de produto do app: [`APP-PRODUCT-STATEMENT.md`](APP-PRODUCT-STATEMENT.md). Contrato funcional do app: [`APP-FUNCTIONAL-SPEC.md`](APP-FUNCTIONAL-SPEC.md). Matriz de cobertura produto/testes: [`APP-COVERAGE-MATRIX.md`](APP-COVERAGE-MATRIX.md). Decisoes QRD do app: [`APP-DECISIONS.md`](APP-DECISIONS.md). Mapa de iteracao visual: [`APP-ITERATION-MAP.md`](APP-ITERATION-MAP.md). Ambientes e scripts: [`ENVIRONMENTS.md`](ENVIRONMENTS.md). Politicas explicaveis: [`POLICY-HANDBOOK.md`](POLICY-HANDBOOK.md). Prompts, handoffs e diagnosticos historicos foram arquivados em [`../_archive/governance-demo-docs-2026-07-05`](../_archive/governance-demo-docs-2026-07-05).
 
+> **Direcao de produto atual:** QRD-52 muda a v1 para **desktop local-first**.
+> O portal/Better Auth continua como prova de colaboracao, mas nao e mais
+> pre-requisito para o caso fundador de uso real. O spike esta em
+> [`SPIKE-DESKTOP-LOCAL-FIRST.md`](SPIKE-DESKTOP-LOCAL-FIRST.md).
+
+> **Direcao de repositorio:** QRD-53 decidiu que o produto vivo deve sair deste
+> path profundo da Spec 0024 para um repo irmao antes da proxima grande leva de
+> implementacao estrutural. Plano:
+> [`PRODUCT-EXTRACTION-PLAN.md`](PRODUCT-EXTRACTION-PLAN.md).
+
 ## O plano ponta-a-ponta (fases)
 
 | fase | entrega                                                                                                                                                                                                                                                                                                                                             | status |

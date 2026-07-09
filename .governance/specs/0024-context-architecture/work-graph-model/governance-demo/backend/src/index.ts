@@ -70,6 +70,16 @@ export {
   type BackendExampleArtifacts,
 } from "./application/backend-examples/build.ts";
 export {
+  ensureDesktopGovernanceHost,
+  inspectDesktopLocalWorkspace,
+  persistDesktopLocalSnapshot,
+  readPersistedDesktopLocalSnapshot,
+  type DesktopGovernanceHostSnapshot,
+  type DesktopLocalRepoSnapshot,
+  type DesktopLocalWorkspaceSnapshot,
+  type PersistedDesktopLocalSnapshot,
+} from "./application/desktop-local/desktop-local-spike.ts";
+export {
   loadBackendExampleModel,
   runBackendExampleSmoke,
   splitCypherStatements,

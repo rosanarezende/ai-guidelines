@@ -2,31 +2,37 @@
 
 > **Status:** decisao de produto para a `governance-demo`.
 > **Data:** 2026-07-07.
-> **Autoridade:** complementa [`APP-PRODUCT-STATEMENT.md`](APP-PRODUCT-STATEMENT.md) e [`APP-DECISIONS.md`](APP-DECISIONS.md), especialmente QRD-36, QRD-37, QRD-38, QRD-41 e QRD-46.
+> **Autoridade:** complementa [`APP-PRODUCT-STATEMENT.md`](APP-PRODUCT-STATEMENT.md) e [`APP-DECISIONS.md`](APP-DECISIONS.md), especialmente QRD-36, QRD-37, QRD-38, QRD-41, QRD-46 e QRD-52.
 > **Rodada aberta:** [`PRODUCT-DECISION-ROUND.md`](PRODUCT-DECISION-ROUND.md).
 
 ## 1. Decisao curta
 
-O produto visual adota um modelo hibrido:
+O produto visual adota um modelo multi-superficie, com **desktop local-first**
+como superficie fundadora da v1:
 
 ```text
-Portal
-  contas, sessoes, convites, memberships e registry de workspaces
+Desktop local-first
+  pastas, repos Git locais, indice SQLite, trabalho offline e shell do usuario
 
 Governance host Git-backed
   governanca real, work graph, roles governados, policies, event-log e decisoes
 
 Repos de trabalho
   codigo, docs, design, infra, metricas, evidencias e sidecars
+
+Portal
+  contas, sessoes, convites, memberships e registry minimo de workspaces quando usado
 ```
 
-O portal existe para tornar a governanca operavel por pessoas. Ele nao e o SSOT
-da governanca.
+O desktop existe para tornar o trabalho diario em repos locais operavel. O
+portal existe para tornar colaboracao e leitura humana operaveis. Nenhum deles
+e o SSOT da governanca.
 
 ## 2. O que cada plano pode guardar
 
 | Plano                      | Pode guardar                                                                | Nao pode guardar como autoridade                                      |
 | -------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Desktop local              | indice SQLite, caminho local autorizado, cache de snapshot, preferencias    | role governado sem host, decisao sem comando, segredo de portal       |
 | Portal                     | conta, sessao, email, provider id, convite, membership, workspace registry  | role governado, decisao, iniciativa, contrato, outcome, evidencia     |
 | Governance host Git-backed | arquivos governados, roles, policies, event-log, sourceRevision, decisoes   | senha, sessao web, cookie, token de provider em payload publico       |
 | Repo de trabalho           | codigo, docs, design, infra, metricas, context sidecars e evidencias locais | estado global de membership do portal ou authority fora da governanca |
@@ -34,7 +40,17 @@ da governanca.
 
 ## 3. Fluxo humano esperado
 
-### Pessoa criadora
+### Pessoa criadora local/desktop
+
+1. Abre o Guilda Governance Desktop.
+2. Escolhe uma pasta local de trabalho.
+3. O app detecta repos Git, dirty state e revisoes.
+4. Cria ou vincula um governance host local/Git-backed.
+5. Configura perfis, papeis, fontes e integracoes.
+6. Trabalha offline quando necessario.
+7. Sincroniza via Git/GitHub quando quiser publicar ou colaborar.
+
+### Pessoa criadora em portal compartilhado
 
 1. Entra no portal por magic link ou provider.
 2. Cria workspace no portal.
@@ -64,6 +80,7 @@ da governanca.
 
 | Topologia            | Para quem serve                                        | Portal                             | Governance host                 | Observacao                                                            |
 | -------------------- | ------------------------------------------------------ | ---------------------------------- | ------------------------------- | --------------------------------------------------------------------- |
+| `desktop-local`      | dev solo, mantenedora, repos locais, trabalho offline  | dispensavel                        | pasta local ou repo Git         | topologia fundadora da v1                                             |
 | `local-solo`         | pessoa sozinha, experimento local                      | local ou dispensavel               | pasta local                     | menor friccao, mas nao resolve convite real                           |
 | `git-backed`         | pessoa solo rigorosa ou time pequeno com GitHub        | local ou hospedado                 | repo Git dedicado ou embutido   | GitHub e o primeiro provider real                                     |
 | `self-hosted-portal` | time que quer UI compartilhada sem SaaS da mantenedora | app + PostgreSQL operado pelo time | Git ou filesystem compartilhado | Docker Compose ajuda no dogfood, mas nao decide provedor final        |
@@ -77,16 +94,17 @@ Direcao de produto:
 ai-guidelines
   framework/CLI/core headless
 
-produto visual (nome a decidir)
-  portal humano, app Next/MUI, backend do portal, Cup, dashboards e integracoes
+produto visual (Guilda Governance como candidato operacional)
+  desktop local-first, portal humano, app Next/MUI, backend, Cup, dashboards e integracoes
 
 governance host da plataforma
   governanca da propria plataforma: governa ai-guidelines + produto visual
 ```
 
-O app visual deve sair de `work-graph-model` para um repo irmao quando o plano
-de corte estiver definido. A Spec 0024 mantem a historia, as pesquisas e as
-decisoes que explicam como o produto nasceu.
+O app visual deve sair de `work-graph-model` para um repo irmao antes da
+proxima grande leva de implementacao de produto. A Spec 0024 mantem a historia,
+as pesquisas e as decisoes que explicam como o produto nasceu. O plano de corte
+esta em [`PRODUCT-EXTRACTION-PLAN.md`](PRODUCT-EXTRACTION-PLAN.md).
 
 ## 6. Regra de seguranca
 
@@ -95,8 +113,8 @@ diferentes:
 
 | Pergunta                         | Quem responde                                  |
 | -------------------------------- | ---------------------------------------------- |
-| Quem e esta pessoa?              | portal / identity provider                     |
-| Em qual workspace ela participa? | membership do portal                           |
+| Quem e esta pessoa?              | desktop local ou portal / identity provider    |
+| Em qual workspace ela participa? | workspace local ou membership do portal        |
 | Onde a governanca mora?          | workspace registry + governance host config    |
 | O que ela pode fazer?            | authority derivada do governance host          |
 | Qual evidencia sustenta isso?    | governance host + repos de trabalho + adapters |
@@ -109,6 +127,7 @@ mostrar essa separacao na UX, nos testes e nos contratos.
 - nome publico candidato;
 - plano de extracao para repo irmao;
 - contrato do GitHub governance host;
-- provider de magic link/e-mail para ambiente publico ou producao-like;
-- politica minima de dados do portal;
+- contrato desktop local-first: filesystem, Git, SQLite e shell nativo;
+- provider de magic link/e-mail para ambiente publico ou producao-like quando houver portal;
+- politica minima de dados do portal quando houver deploy publico;
 - criterio de dogfood da plataforma governando `ai-guidelines` e o repo do app.

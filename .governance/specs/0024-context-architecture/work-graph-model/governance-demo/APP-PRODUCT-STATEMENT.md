@@ -6,25 +6,34 @@
 
 ## 1. Em uma frase
 
-O app e um portal humano open-source para operar governanca file-first/Git-backed
-do work graph sem exigir que a pessoa use YAML, console tecnico ou comandos de
-terminal para cada decisao.
+O app e uma superficie humana open-source, desktop local-first e Git-backed para
+operar governanca file-first do work graph sem exigir que a pessoa use YAML,
+console tecnico ou comandos de terminal para cada decisao.
 
 ## 2. O que o app se propoe a ser
 
-O app deve ser um **portal humano de governanca de trabalho**:
+O app deve ser uma **superficie humana de governanca de trabalho**.
 
-- cria e seleciona workspaces/organizacoes;
-- autentica pessoas sem guardar senhas, usando magic link e provedores;
-- gerencia convites, memberships e registry de workspaces;
-- guia a adocao inicial do framework;
-- configura governance host, membros, papeis, fontes de trabalho, assistente e integracoes;
-- oferece um hub de integracoes para conectar ferramentas existentes com status, risco, permissao e alternativa manual claros;
-- oferece o Cup, um par contextual de trabalho que explica, orienta e rascunha proximos passos sem decidir pela pessoa;
-- ajuda a planejar ciclos, registrar iniciativas, triar, decidir gates, quebrar trabalho, acompanhar execucao e publicar outcomes;
-- mostra dashboards e pendencias em linguagem humana;
-- preserva a trilha de auditoria: quem decidiu, com qual autoridade, em qual revisao, com qual evidencia;
-- integra com ferramentas que a empresa ja usa, sem transformar essas ferramentas em segundo SSOT.
+A v1 fundadora prioriza o uso **desktop local-first**: uma pessoa abre seus
+workspaces, pastas e repos locais, cria ou vincula um governance host
+Git-backed, trabalha offline quando necessario e sincroniza via Git/GitHub
+quando fizer sentido. O portal web continua importante, mas como superficie
+complementar para convites, pessoas nao tecnicas, leitura compartilhada,
+portfolio publico e topologias self-hosted/hosted.
+
+O produto deve:
+
+- criar e selecionar workspaces/organizacoes;
+- autenticar pessoas sem guardar senhas, usando magic link e provedores quando houver portal;
+- gerenciar convites, memberships e registry de workspaces quando houver portal;
+- guiar a adocao inicial do framework;
+- configurar governance host, membros, papeis, fontes de trabalho, assistente e integracoes;
+- oferecer um hub de integracoes para conectar ferramentas existentes com status, risco, permissao e alternativa manual claros;
+- oferecer o Cup, um par contextual de trabalho que explica, orienta e rascunha proximos passos sem decidir pela pessoa;
+- ajudar a planejar ciclos, registrar iniciativas, triar, decidir gates, quebrar trabalho, acompanhar execucao e publicar outcomes;
+- mostrar dashboards e pendencias em linguagem humana;
+- preservar a trilha de auditoria: quem decidiu, com qual autoridade, em qual revisao, com qual evidencia;
+- integrar com ferramentas que a empresa ja usa, sem transformar essas ferramentas em segundo SSOT.
 
 O app deve tornar a governanca **operavel por humanos**, nao apenas validavel por scripts.
 
@@ -46,7 +55,8 @@ Se o app gravar algo que a CLI/runtime nao entende, o desenho esta errado.
 
 | Camada               | Papel                                                                                     | Exemplo atual                               |
 | -------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------- |
-| Portal/control plane | Guarda conta, sessao, convite, membership e registry minimo de workspace.                 | Better Auth + app Next                      |
+| Desktop local        | Abre pastas/repos, le Git local, cria host, indexa SQLite e permite trabalho offline.     | Spike S2 desktop local-first                |
+| Portal/control plane | Guarda conta, sessao, convite, membership e registry minimo de workspace quando usado.    | Better Auth + app Next                      |
 | Modelo/SSOT          | Define ontologia, fluxos, estados, edges, politicas e invariantes.                        | `../model.yml`                              |
 | Governance host      | Guarda a governanca real em arquivos versionados pelo usuario.                            | GitHub repo dedicado ou `.governance-host/` |
 | Runtime/core         | Executa validacao, comandos, resolvers, event-log, read-models e adapters.                | `governance-demo/backend/src/`              |
@@ -60,7 +70,8 @@ Se o app gravar algo que a CLI/runtime nao entende, o desenho esta errado.
 Regra central:
 
 ```text
-Portal guarda identidade e acesso ao workspace.
+Desktop guarda indice local e acesso autorizado a filesystem/repos.
+Portal guarda identidade e acesso ao workspace quando a topologia usa portal.
 Governance host guarda a governanca real.
 CLI e app sao superficies diferentes sobre o mesmo modelo/runtime.
 Nenhuma superficie pode inventar estado autoritativo que a outra nao consegue ler.
@@ -114,22 +125,29 @@ Isso evita dois problemas:
 - a UI virar apenas uma casca que edita YAML sem invariantes;
 - a CLI virar um caminho paralelo que aceita estado que o app nao reconhece.
 
-## 7. Produto open-source e hibrido primeiro
+## 7. Produto open-source e desktop primeiro
 
 O framework nasceu open-source. Portanto, o app deve ser desenhado primeiro como:
 
 - open-source;
-- self-hostable;
-- usavel localmente por uma pessoa;
-- usavel por times via portal compartilhado;
+- desktop local-first;
+- usavel localmente por uma pessoa sem conta de portal;
+- capaz de trabalhar offline sobre repos e governance host locais;
 - capaz de conectar um governance host Git-backed do proprio usuario;
+- self-hostable quando usado como portal compartilhado;
+- usavel por times via Git/GitHub e, quando necessario, portal compartilhado;
 - transparente sobre o que e demo, mock, rascunho, evidencia manual e governanca real.
 
 Isso nao impede um portal hospedado pela mantenedora no futuro. Pelo contrario:
-o portal pode ser uma porta publica/portfolio do produto. A restricao e outra:
-mesmo em portal hospedado, o conteudo governado deve morar no Git/host do
-usuario, e o portal deve guardar apenas conta, sessao, convite, membership e
-registry minimo de workspace.
+o portal pode ser uma porta publica/portfolio do produto e uma superficie
+melhor para pessoas de negocio, design, investimento e lideranca. A restricao e
+outra: mesmo em portal hospedado, o conteudo governado deve morar no Git/host do
+usuario, e o portal deve guardar apenas conta, sessao, convite, membership,
+registry minimo de workspace e eventos de jornada permitidos por politica.
+
+PWA pode existir como canal leve, demo publica ou superficie de leitura, mas nao
+deve ser vendido como substituto do desktop para quem precisa operar codigo e
+repos locais.
 
 Nao devemos introduzir billing, plano pago, tenant cloud ou licenciamento como
 se fossem requisitos centrais agora.
@@ -142,19 +160,21 @@ O app comeca a sair do papel quando uma pessoa consegue, sem console tecnico:
 
 1. entrar por magic link/provedor ou experimentar demo anonima sem conta;
 2. criar ou selecionar workspace;
-3. escolher onde mora o governance host;
-4. convidar ou cadastrar membros;
-5. atribuir papeis com aceite/policy;
-6. conectar uma fonte de trabalho;
-7. configurar ou dispensar assistente;
-8. planejar ciclo minimo;
-9. registrar iniciativa;
-10. passar por triagem/gate;
-11. gerar breakdown;
-12. acompanhar repo-work/contratos;
-13. publicar outcome;
-14. ver resultado e pendencias;
-15. auditar decisoes.
+3. no desktop, escolher uma pasta local de trabalho;
+4. detectar repos Git, dirty state, revisoes e fontes de trabalho;
+5. escolher onde mora o governance host;
+6. convidar ou cadastrar membros quando a topologia envolver mais pessoas;
+7. atribuir papeis com aceite/policy;
+8. conectar uma fonte de trabalho;
+9. configurar ou dispensar assistente;
+10. planejar ciclo minimo;
+11. registrar iniciativa;
+12. passar por triagem/gate;
+13. gerar breakdown;
+14. acompanhar repo-work/contratos;
+15. publicar outcome;
+16. ver resultado e pendencias;
+17. auditar decisoes.
 
 Enquanto a maioria desses passos depender de payload manual no console tecnico, o app e uma sim tecnica com UX parcial, nao uma superficie operacional completa.
 

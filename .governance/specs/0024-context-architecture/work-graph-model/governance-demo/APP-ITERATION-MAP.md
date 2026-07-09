@@ -11,13 +11,15 @@
 
 ## 0. Pausa de produto antes de novas grandes telas
 
-A partir da decisao hibrida registrada em QRD-36/37/38/41/46, o app visual nao
+A partir da decisao multi-superficie registrada em QRD-36/37/38/41/46/52, o app visual nao
 deve ser tratado como "demo interna" nem como pronto para readiness da Spec 0024. Antes de uma nova leva grande de telas, precisamos fechar a direcao de
 produto. A fila operacional esta em
 [`PRODUCT-DECISION-ROUND.md`](PRODUCT-DECISION-ROUND.md) e cobre:
 
 - nome publico candidato para o produto visual;
 - plano de extracao para repo irmao do `ai-guidelines`;
+- contrato desktop local-first: abrir pasta, detectar repos Git, criar/vincular
+  governance host, persistir indice local e decidir shell nativo;
 - contrato do GitHub governance host como primeiro provider real;
 - politica minima do portal: contas, convites, memberships, magic link/e-mail,
   retencao e analytics;

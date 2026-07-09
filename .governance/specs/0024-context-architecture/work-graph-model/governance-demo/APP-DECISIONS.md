@@ -2715,7 +2715,8 @@ Ainda aberto:
 
 ## QRD-38 - Extracao do produto visual do `work-graph-model`
 
-**Status:** decided-direction; plano de extracao deve ser detalhado antes de novas grandes telas.
+**Status:** decided; detalhado por QRD-53 e
+[`PRODUCT-EXTRACTION-PLAN.md`](PRODUCT-EXTRACTION-PLAN.md).
 
 **Q - Question**
 
@@ -3637,3 +3638,165 @@ o uso real que pretende vender como open-source.
 Pendente. A rodada deve definir topologia de repos, governance host da
 plataforma, roles iniciais e criterio de "dogfood suficiente" para continuar a
 v1.
+
+## QRD-52 - Distribuicao desktop local-first
+
+**Status:** decided-direction; spike S2 active.
+
+**Q - Question**
+
+Se o caso fundador da owner e trabalhar diariamente em workspaces com varios
+repos locais e governance host Git-backed, a v1 deve priorizar portal web/PWA,
+app desktop ou ambos desde o inicio?
+
+**R - Reasoning/Research**
+
+O stress test da owner mostrou uma divergencia importante: um portal web ou PWA
+pode resolver conta, convite, leitura compartilhada, demo publica e experiencia
+de pessoas nao tecnicas, mas nao entrega sozinho a experiencia profunda de quem
+trabalha com codigo. Um app web nao consegue operar com a mesma confianca sobre
+filesystem, Git local, watchers, editores, comandos, caches locais e repos
+offline.
+
+Ao mesmo tempo, o portal/control plane ja provou valor: Better Auth, magic link,
+convites, membership de portal e store SQLite/PostgreSQL funcionam sem conceder
+authority governada. Essa prova nao deve ser descartada. Ela apenas deixa de ser
+o caminho obrigatorio da v1.
+
+O modelo correto passa a ser multi-superficie:
+
+```text
+Desktop local-first
+  dev solo, mantenedora, repos locais, Git, host e trabalho diario
+
+Web/portal
+  pessoas nao tecnicas, convite, leitura compartilhada, portfolio, hosted/self-hosted
+
+CLI / guilda flow
+  automacao, CI, scripts e operacao repo-first
+```
+
+A restricao central continua igual: nenhuma superficie vira segundo SSOT. A
+governanca real continua no governance host Git-backed do usuario.
+
+**D - Decision**
+
+A direcao preferida para a v1 e **Guilda Governance Desktop local-first**.
+
+Isso significa:
+
+1. **Desktop vira a superficie fundadora para uso real da owner e de devs.**
+   - abrir pasta/workspace local;
+   - detectar repos Git;
+   - ler `HEAD`, dirty state e status;
+   - criar/vincular `.governance-host`;
+   - persistir indice local em SQLite;
+   - trabalhar offline;
+   - sincronizar via Git/GitHub quando configurado.
+
+2. **Web/portal continua valido, mas como superficie complementar.**
+   - login sem senha, convite, membership e registry minimo;
+   - experiencia de negocio/design/investimento;
+   - portal publico/portfolio futuro;
+   - self-hosted/hosted quando houver politica de dados, custo e operacao.
+
+3. **PWA nao e o caminho principal para a v1.**
+   - pode servir para marketing, demo, docs e acesso leve;
+   - nao deve prometer gestao profunda de codigo/repos locais.
+
+4. **Tauri/Rust vira candidato principal para o shell desktop.**
+   - Electron segue como comparacao/fallback tecnica, nao decisao tomada;
+   - a UI Next/MUI atual deve ser reaproveitada ao maximo;
+   - o backend/domain/contracts continuam compartilhados.
+
+5. **O portal/control plane nao e removido.**
+   - QRD-36/41/42/43 continuam validas como prova de colaboracao e portal;
+   - apenas perdem a posicao de pre-requisito para a primeira v1 utilizavel.
+
+6. **O spike S2 documenta e prova o primeiro contrato local.**
+   - [`SPIKE-DESKTOP-LOCAL-FIRST.md`](SPIKE-DESKTOP-LOCAL-FIRST.md)
+   - `backend/src/application/desktop-local/desktop-local-spike.ts`
+   - `backend/tests/desktop-local-spike.test.ts`
+
+**Implications**
+
+- `APP-PRODUCT-STATEMENT.md` deve falar em superficie humana desktop
+  local-first, nao apenas portal humano.
+- `PRODUCT-TOPOLOGY.md` deve colocar `desktop-local` antes de portal
+  compartilhado.
+- `NEXT-STEPS.md` deve trocar "decidir hospedagem do portal" por "provar
+  desktop local-first e depois decidir como o portal complementa".
+- A decisao de hospedagem continua importante, mas nao bloqueia o caso pessoal
+  fundador.
+- A extracao para repo irmao deve considerar desde o inicio `desktop/`,
+  `frontend/`, `backend/`, `packages/`, `deploy/` e `tools/`, nao apenas Next
+  web.
+
+## QRD-53 - Corte do produto vivo para repo irmao
+
+**Status:** decided; execucao fisica pendente.
+
+**Q - Question**
+
+Agora que a direcao do produto visual mudou para desktop local-first e o app ja
+tem marca, frontend, backend, mock-api, packages, testes, assets e docs de
+produto, devemos continuar implementando dentro da pasta profunda da Spec 0024
+ou mover o produto vivo para um repo irmao de `ai-guidelines` antes da proxima
+grande leva?
+
+**R - Reasoning/Research**
+
+A pesquisa de extracao de 2026-07-06 recomendava cuidado contra fork prematuro.
+Esse alerta continua valido para uma publicacao externa apressada, mas a
+situacao mudou:
+
+- a owner declarou que o app ainda nao esta pronto para readiness;
+- PR #45 continua sendo um checkpoint de taxonomia/model-review, nao uma v1 do
+  produto;
+- `governance-demo` ja contem produto vivo, nao apenas evidencia da spec;
+- QRD-52 tornou desktop local-first a superficie fundadora, o que exige paths,
+  permissao de filesystem, Git local, SQLite, shell nativo, empacotamento e
+  possivelmente Tauri/Rust;
+- cada nova tela ou spike dentro do path atual aumenta o custo de mover depois.
+
+Manter o produto vivo na Spec 0024 agora cria o erro inverso ao fork prematuro:
+um produto real fica preso dentro de uma pasta historica de pesquisa, e a spec
+passa a carregar uma v1 que nunca termina.
+
+**D - Decision**
+
+Mover o produto vivo para um **repo irmao** antes da proxima grande leva de
+implementacao estrutural.
+
+Nome operacional local recomendado enquanto o clearance publico nao fecha:
+
+```text
+C:\Users\Rosana\dev\guilda-governance
+```
+
+O que muda:
+
+- `ai-guidelines` continua sendo framework/engine/CLI repo-first;
+- `guilda-governance` passa a ser o produto visual/desktop local-first;
+- a Spec 0024 mantem a historia, research, QRDs, reviews e explicacao do
+  nascimento do produto;
+- o produto vivo deixa de crescer indefinidamente dentro de
+  `.governance/specs/0024-context-architecture/work-graph-model/governance-demo/`;
+- a fronteira entre os repos sera dogfoodeada por um governance host da propria
+  plataforma.
+
+Plano operacional:
+
+- seguir [`PRODUCT-EXTRACTION-PLAN.md`](PRODUCT-EXTRACTION-PLAN.md);
+- preservar historico com `git filter-repo` ou estrategia equivalente;
+- primeiro cortar localmente e provar os checks no repo novo;
+- so depois decidir publicacao, organizacao GitHub, dominio, package e
+  licenca;
+- nao tratar o PR #45 como readiness do app.
+
+Regra ate o corte:
+
+- implementacoes estruturais novas devem ser preparacao de extracao, spikes
+  isolados ou correcoes pequenas;
+- Tauri/Rust, desktop shell real, empacotamento e grandes telas devem ocorrer
+  no repo irmao ou apos uma etapa explicita de preparacao para corte.
