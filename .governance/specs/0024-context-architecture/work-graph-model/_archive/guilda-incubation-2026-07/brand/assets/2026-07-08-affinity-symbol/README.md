@@ -1,5 +1,8 @@
 ---
-artifact-kind: decision-brief
+artifact-kind: projection
+title: Simbolo Guilda - primeira vetorizacao Affinity
+date: 2026-07-08
+disposition: evidence
 ---
 
 # Simbolo Guilda - primeira vetorizacao Affinity

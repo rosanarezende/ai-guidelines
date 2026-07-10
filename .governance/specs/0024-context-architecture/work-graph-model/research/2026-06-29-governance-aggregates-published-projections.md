@@ -1,5 +1,8 @@
 ---
 artifact-kind: pre-coding-review
+subject: "governanca agregando projecoes publicadas em vez de bancos vivos"
+date: 2026-06-29
+disposition: evidence
 ---
 
 # A governança agrega PROJEÇÕES PUBLICADAS, não bancos vivos (multi-repo, multi-backend)

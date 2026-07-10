@@ -63,7 +63,11 @@ Aplica-se a artefatos de classe **`research/` e `assets/`**. Artefatos governado
 
 **Metadado ortogonal (não cria `kind`):** `reviewer: internal|external` (Codex/Antigravity/Gemini = `external`) e `method: falsification|assessment`. Por isso "external review" e "falsification review" **não** são kinds — são atributos: um `pre-coding-review` pode ser `external` e por `falsification`.
 
+**Disposição ortogonal (não cria `kind`):** `disposition: living|evidence|legacy|open`. Ela descreve o papel atual do artefato no repositório sem conceder autoridade. `living` = ainda usado como contexto operacional; `evidence` = evidência histórica preservada; `legacy` = snapshot/legado sem contrato atual; `open` = lacuna/questão ainda não promovida a DEC/task/review.
+
 **Por que `pre-coding-review` (e não "model-review"):** o eixo distintivo é o **tempo** (antes de codar) e o **sujeito** (um modelo/desenho, **não** modelo/LLM nem a entrega). Materializa o "review pré-codificação/model-review" nomeado por `[DEC-0024-G21]` e pela etapa `artifact-taxonomy-and-model-review-contract`.
+
+**Schema mínimo de `pre-coding-review`:** todo artefato com `artifact-kind: pre-coding-review` deve declarar no frontmatter `subject` (modelo/direção/arquitetura/taxonomia revisada) e `date` (`YYYY-MM-DD`). O check `artifact-kind:check` valida isso. Findings desse artefato são advisory até virarem DEC/task/review governado.
 
 ### Ordem de autoridade canônica (mantenedor)
 

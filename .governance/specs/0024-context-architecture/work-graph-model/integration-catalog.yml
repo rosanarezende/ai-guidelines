@@ -7,9 +7,10 @@ principle: >
   existente da empresa. Nenhuma integracao substitui o SSOT file-first nem autoriza
   mutacao sem comando governado.
 
-# local-adapter: quando presente, indica o adapter local EXECUTAVEL da governance-demo
-# (backend/src/adapters/integrations) que ja materializa o spike minimo deste item,
-# com egress fail-closed e evidencia verificavel (smoke: backend/tools/check-integrations.mjs).
+# local-adapter: quando presente, indica adapter local que foi EXECUTAVEL durante
+# a incubacao Guilda arquivada em _archive/guilda-incubation-2026-07. O codigo
+# vivo do produto segue no repo Guilda; este catalogo conserva a classificacao
+# conceitual dos adapters opcionais.
 # Entradas sem local-adapter continuam catalogadas, nao mecanizadas.
 
 adapter-kinds:

@@ -14,26 +14,33 @@ Legenda: ✅ feito · 🚧 parcial · ⬜ a fazer · 🧊 histórico/arquivado.
 
 ## Estado atual da frente
 
-✅ A sim ativa é [`governance-demo/`](governance-demo/). Ela substitui a v2 como dogfood
-físico, mas não apaga os aprendizados da v2.
+🧊 A sim que viveu em `governance-demo/` foi extraída para o repo irmão **Guilda**.
+O caminho ativo antigo agora é apenas um tombstone: [`governance-demo/`](governance-demo/).
+A evidência histórica foi preservada em
+[`_archive/guilda-incubation-2026-07/`](_archive/guilda-incubation-2026-07/).
+A disposição oficial está em
+[`GUILDA-EXTRACTION-DISPOSITION.md`](GUILDA-EXTRACTION-DISPOSITION.md).
+A matriz de preservação que liga as QRDs de Guilda aos objetivos do checkpoint
+atual está em
+[`GUILDA-QRD-PRESERVATION-MATRIX.md`](GUILDA-QRD-PRESERVATION-MATRIX.md).
 
-✅ Já existe:
+🧊 A incubação provou, como evidência histórica:
 
-- host central `governance-demo/acme/governance/`;
-- repos adotados em `governance-demo/acme/repos/<repo>/` com código MVP e sidecar `.governance/`;
+- host central `acme/governance/`;
+- repos adotados em `acme/repos/<repo>/` com código MVP e sidecar `.governance/`;
 - manifests, `context.json`, repo-work ack e repo-contract registry;
-- runtime `governance-demo/backend/` com domínio/validador, adapter file, command dry-run/execute mínimo e
-  read-model de grafo;
-- app operacional React/Next + Material UI em `governance-demo/frontend/`;
-- exemplos derivados file/SQLite/Neo4j/Mongo em `governance-demo/backend/examples/read-models/`;
+- runtime com domínio/validador, adapter file, command dry-run/execute mínimo e read-model de
+  grafo;
+- app operacional React/Next + Material UI;
+- exemplos derivados file/SQLite/Neo4j/Mongo;
 - smoke operacional de file + Neo4j, com Neo4j ainda como read-model/projeção;
 - resolvers fail-closed para schema, outcome, repo-work, contrato, trust-policy, authority,
   break-glass, incident e verdict;
 - backend file-first transacional mínimo: lock global por comando, escrita atômica, event-log
   append-only, marker de recovery para crash entre write e evento, replay por idempotency/nonce e
-  fixtures de concorrência.
+  fixtures de concorrência;
 - segundo outcome real em `intent-checkout-stack`, tocando contrato e citando
-  `acme-user-context@v4`, com todos os repo-work acks fechados por comando.
+  `acme-user-context@v4`, com todos os repo-work acks fechados por comando;
 - primeiro outcome operacional sem intent: `fix-checkout-timeout` foi concluído via
   `standalone.complete` e publicou `out-fix-checkout-timeout-2027h1` em `tgt-sre-incidents`, com
   colapso de attestation visível.
@@ -41,7 +48,7 @@ físico, mas não apaga os aprendizados da v2.
 🚧 Ainda falta para considerar o work-graph pronto ponta a ponta:
 
 - matcher executável v3;
-- authoring completo no app Next/MUI;
+- authoring completo no produto Guilda;
 - adapters externos como evidence providers;
 - decisão posterior sobre SQLite/Neo4j/Mongo write-capable, sem quebrar file-first.
 
@@ -50,9 +57,10 @@ físico, mas não apaga os aprendizados da v2.
 ## Decisões fechadas nesta rodada
 
 1. **App operacional**
-   - Decisão: o app Next/MUI continua incubado dentro da sim/spec por enquanto.
-   - Não é ainda o pacote oficial do framework.
-   - Promoção futura exige journeys adicionais, backend transacional mínimo e authoring básico.
+   - Decisão atualizada: o app deixou de ser incubação dentro da sim/spec e foi extraído para o
+     repo irmão Guilda.
+   - `ai-guidelines` não deve mais tratá-lo como pacote do framework.
+   - Evolução de produto, jornadas e authoring agora pertencem ao repo Guilda.
 
 2. **Primeiro backend transacional**
    - Decisão: provar primeiro `file + event-log/lock`.
@@ -103,7 +111,11 @@ Status: 🚧 em andamento.
 - ✅ marcar que SQLite/Neo4j/Mongo transacionais ainda não existem;
 - ✅ arquivar handoffs/prompts Fable e documentos substituidos pela `governance-demo`;
 - ✅ criar catálogo versionado de integrações externas.
-- 🚧 iterar visualmente o app pelo mapa [`governance-demo/APP-ITERATION-MAP.md`](governance-demo/APP-ITERATION-MAP.md).
+- ✅ extrair o produto para o repo irmão Guilda e arquivar a incubação em
+  `_archive/guilda-incubation-2026-07`.
+- ✅ mapear as QRDs da incubação Guilda para o checkpoint
+  `artifact-taxonomy-and-model-review-contract`, sem transformar validação de
+  produto em readiness do PR #45.
 
 ### R2 · Revisão adversarial pós-F7
 
@@ -238,28 +250,28 @@ Direção:
 
 ## Matriz v2 -> v3
 
-| aprendizado/feature da v2                | estado na v3                                                                                                                                                     | próximo passo                                                                        |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `.governance/` por repo + host agregador | ✅ migrado e endurecido                                                                                                                                          | manter base física.                                                                  |
-| `context.json` publicado                 | ✅ migrado com freshness                                                                                                                                         | adicionar envelope/ttl/producer real.                                                |
-| Manifesto/capabilities                   | ✅ migrado com candidates/review packet                                                                                                                          | owner-attested-by/observed-from com dente real.                                      |
-| Matcher léxico/local/API                 | 🚧 conceito preservado; executor v3 ainda não existe                                                                                                             | implementar R6.                                                                      |
-| `governance-demo/backend` DDD            | ✅ base v3 criada + file transaction mínimo                                                                                                                      | próximo dente: matcher/authoring, não bypassar command runtime.                      |
-| Backends file/sqlite/neo4j/mongo         | 🚧 file transacional mínimo + exemplos derivados; Neo4j loader dry-run                                                                                           | R9 depois, com a mesma suíte transacional do file backend.                           |
-| Read-models                              | 🚧 graph read-model v3 existe; snapshots multi-backend existem                                                                                                   | persistência operacional depois do file backend.                                     |
-| App de autoria                           | 🚧 app Next/MUI v2 em TypeScript strict existe como workspace com deps explícitas, comandos principais + onboarding de configurações; autoria completa ainda não | R7 depois de validar a Home de Adoção/Governança com Fable/owner.                    |
-| Scaffold de repo novo                    | 🚧 foco atual é adoção de repos existentes                                                                                                                       | manter separado de create-new-repo.                                                  |
-| `backend.yml` por repo                   | ⬜ modelado como futuro (`physical.por-repo-futuro`), sem executor                                                                                               | não aceitar como evidência até existir adapter real.                                 |
-| Templates v2                             | 🧊 arquivados em `_archive/templates-v2`                                                                                                                         | usar `governance-demo/backend/templates` como fonte ativa.                           |
-| q/r/d físico por work/repo               | ⬜ não migrado fisicamente                                                                                                                                       | reintroduzir só quando houver comando/resolver, sem vazar histórico privado de repo. |
-| Visualização                             | ✅ owner/company static apps + app Next/MUI                                                                                                                      | static apps são projeções; Next/MUI é superfície operacional em incubação.           |
+| aprendizado/feature da v2                | estado na v3                                                                                                          | próximo passo                                                                        |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `.governance/` por repo + host agregador | ✅ migrado e endurecido                                                                                               | manter base física.                                                                  |
+| `context.json` publicado                 | ✅ migrado com freshness                                                                                              | adicionar envelope/ttl/producer real.                                                |
+| Manifesto/capabilities                   | ✅ migrado com candidates/review packet                                                                               | owner-attested-by/observed-from com dente real.                                      |
+| Matcher léxico/local/API                 | 🚧 conceito preservado; executor v3 ainda não existe                                                                  | implementar R6.                                                                      |
+| Backend DDD da incubação Guilda          | 🧊 base v3 criada + file transaction mínimo; arquivada em `_archive/guilda-incubation-2026-07`                        | evolução de produto agora ocorre no repo Guilda.                                     |
+| Backends file/sqlite/neo4j/mongo         | 🚧 file transacional mínimo + exemplos derivados; Neo4j loader dry-run                                                | R9 depois, com a mesma suíte transacional do file backend.                           |
+| Read-models                              | 🚧 graph read-model v3 existe; snapshots multi-backend existem                                                        | persistência operacional depois do file backend.                                     |
+| App de autoria                           | 🧊 app Next/MUI v2 em TypeScript strict existiu como incubação; produto vivo extraído para o repo Guilda              | continuar produto no repo Guilda; este repo preserva apenas modelo/evidência.        |
+| Scaffold de repo novo                    | 🚧 foco atual é adoção de repos existentes                                                                            | manter separado de create-new-repo.                                                  |
+| `backend.yml` por repo                   | ⬜ modelado como futuro (`physical.por-repo-futuro`), sem executor                                                    | não aceitar como evidência até existir adapter real.                                 |
+| Templates v2                             | 🧊 arquivados em `_archive/templates-v2`; templates da incubação Guilda estão em `_archive/guilda-incubation-2026-07` | templates runtime do framework devem nascer no core, não na incubação arquivada.     |
+| q/r/d físico por work/repo               | ⬜ não migrado fisicamente                                                                                            | reintroduzir só quando houver comando/resolver, sem vazar histórico privado de repo. |
+| Visualização                             | 🧊 owner/company static apps + app Next/MUI preservados como evidência histórica                                      | novas superfícies visuais pertencem ao repo Guilda.                                  |
 
 ---
 
 ## Perguntas ainda abertas
 
 1. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
-2. Quando o app incubado deixa de ser sim e vira pacote do framework?
+2. Como o repo Guilda vai dogfoodar `ai-guidelines` sem reabrir a Spec 0024?
 3. Qual é a próxima revisão adversarial necessária antes de declarar readiness desta frente?
 
 ---

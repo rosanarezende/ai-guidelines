@@ -1,5 +1,8 @@
 ---
 artifact-kind: pre-coding-review
+subject: "fluxo da iniciativa aos trabalhos: registro, triagem, investigacao, gate, intent e breakdown"
+date: 2026-06-30
+disposition: evidence
 ---
 
 # Fluxo da iniciativa aos trabalhos — registro · triagem · investigação · gate · intent · breakdown (5 tipos)

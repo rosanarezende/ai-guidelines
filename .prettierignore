@@ -54,3 +54,11 @@ packages/*/dist/
 .governance/specs/0024-context-architecture/work-graph-model/governance-demo/mock-api/.data/
 .governance/specs/0024-context-architecture/work-graph-model/governance-demo/test/reports/
 .governance/specs/0024-context-architecture/work-graph-model/governance-demo/test/test-results/
+
+# A mesma incubação foi arquivada após a extração para o repo Guilda. Estes
+# diretórios continuam sendo estado/relatório gerado, preservados como evidência
+# histórica, não fonte formatável.
+.governance/specs/0024-context-architecture/work-graph-model/_archive/guilda-incubation-2026-07/frontend/.local-state/
+.governance/specs/0024-context-architecture/work-graph-model/_archive/guilda-incubation-2026-07/mock-api/.data/
+.governance/specs/0024-context-architecture/work-graph-model/_archive/guilda-incubation-2026-07/test/reports/
+.governance/specs/0024-context-architecture/work-graph-model/_archive/guilda-incubation-2026-07/test/test-results/

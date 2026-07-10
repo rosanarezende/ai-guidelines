@@ -1,5 +1,8 @@
 ---
 artifact-kind: pre-coding-review
+subject: "nomenclatura e confronto do mapa V4 da spec 0024"
+date: 2026-06-22
+disposition: evidence
 ---
 
 # PR #45 — Revisão de nomenclatura e confronto para o mapa V4

@@ -1,5 +1,8 @@
 ---
 artifact-kind: pre-coding-review
+subject: "auditoria decidido-vs-aberto das perguntas do modelo de governanca"
+date: 2026-06-23
+disposition: evidence
 ---
 
 # Auditoria — perguntas do modelo de governança (decidido vs aberto)

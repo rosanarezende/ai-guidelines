@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-23 — **`[DEC-0024-G23]` registrada**: estende `[DEC-0024-G08]` para grafo de governança **derivado**, entrega incremental com prova de valor e camada de consulta (graph snapshot/banco **estritamente derivados**, sem 2ª SSOT), mantendo tudo dentro da 0024 (sem spec nova) e roteando às etapas planejadas; auditoria em `research/2026-06-23-governance-model-question-audit.md`. Antes — **`[DEC-0024-G22]` registrada**: adota o vocabulário de modelagem **Spec › Frente › Checkpoint › Etapa › Tarefa** (`Frente` no lugar de `Fase`, como leitura derivada da topologia — não SSOT) e reconcilia a tensão estrutural do #45 (`sequence: 12` ⇒ é nó topológico ativo). Não implementa a taxonomia/model-review.
+> Última atualização: 2026-07-10 — **`[DEC-0024-G24]` registrada**: fecha o contrato do checkpoint `artifact-taxonomy-and-model-review-contract`: `disposition` vira dimensão ortogonal, `pre-coding-review` exige `subject`+`date`, `artifact-kind:check` valida research/assets classificados e a incubação Guilda fica preservada como evidência/legado fora do app vivo. Não declara Ready/Human Gate. Antes — **`[DEC-0024-G23]` registrada**: estende `[DEC-0024-G08]` para grafo de governança **derivado**, entrega incremental com prova de valor e camada de consulta (graph snapshot/banco **estritamente derivados**, sem 2ª SSOT), mantendo tudo dentro da 0024 (sem spec nova) e roteando às etapas planejadas; auditoria em `research/2026-06-23-governance-model-question-audit.md`.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -664,6 +664,37 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G24] Contrato de artifact-kind, disposição e pre-coding-review
+
+**Pergunta:** Como fechar o checkpoint `artifact-taxonomy-and-model-review-contract` sem transformar pesquisa, assets, handoffs ou a incubação Guilda em segunda fonte de autoridade, e sem perder o raciocínio produzido durante a tentativa de chegar à taxonomia proposta?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-07-10, após extração da Guilda para repositório irmão e reconciliação do work-graph-model como evidência da taxonomia. -->
+
+**Contexto:** O checkpoint #45 nasceu para materializar a taxonomia de artefatos e o contrato de review pré-codificação/model-review. Durante a execução, o `work-graph-model` incubou a Guilda Governance até ela ser extraída para repo próprio, produzindo QRDs, assets, testes, seeds, frontend/backend e documentação de produto. Esse volume ampliou o PR e expôs uma tensão: preservar a informação valiosa sem deixar que demos, projeções, assets ou arquivos legados pareçam estado vivo da Spec 0024. A revisão `research/2026-06-24-artifact-taxonomy-and-folder-model-review.md` já convergiu a distinção entre `artifact-kind` e uma dimensão de **disposição**; a matriz `work-graph-model/GUILDA-QRD-PRESERVATION-MATRIX.md` mapeia como as decisões da Guilda alimentam, mas não substituem, os objetivos do checkpoint.
+
+**Decisão (Resolved):**
+
+- `artifact-kind` permanece um conjunto fechado para artefatos de classe `research/` e `assets/`, distinto de `WorkItemKind` e da topologia da spec.
+- `disposition: living|evidence|legacy|open` vira dimensão ortogonal em `.core/governance/artifact-taxonomy.yml`. Ela descreve o papel atual do artefato no repositório, **sem conceder autoridade**.
+- `artifact-kind:check` continua brando para cobertura: arquivo sem `artifact-kind` não bloqueia. Mas qualquer artefato em `research/` ou `assets/` que declare `artifact-kind` ou `disposition` passa a ser validado contra o conjunto fechado.
+- `pre-coding-review` exige frontmatter mínimo `subject` e `date` (`YYYY-MM-DD`). O artefato continua advisory; findings só governam quando promovidos a DEC/task/review/gate.
+- A incubação Guilda fica arquivada em `work-graph-model/_archive/guilda-incubation-2026-07/` e a antiga pasta `governance-demo/` vira tombstone. Isso preserva histórico, QRDs, testes e assets como evidência/legado, não como produto vivo dentro deste repo.
+- O mapeamento `GUILDA-QRD-PRESERVATION-MATRIX.md` é aceito como ponte de preservação: ele mostra quais decisões alimentam `model.yml`, `tracker.md`, `features.md`, `integration-catalog.*` e quais foram migradas para o repo Guilda.
+- A reorganização física ampla sugerida no model-review (`falsifications/`, `evidence/`, `legacy/`) fica deferida. A disposição no frontmatter é o contrato mínimo do #45 para evitar débito silencioso sem mover toda a árvore agora.
+- O antigo Gap B ("comando para abrir próximo PR interno") fica diferido como automação futura; o protocolo interino em `research/2026-07-07-pr-continuation-protocol.md` é o contrato humano até o comando existir.
+
+**O que NÃO está sendo decidido:** declarar Ready; exercer Human Gate; fazer merge; fechar PR #45; abrir o próximo PR automaticamente; transformar a Guilda em produto vivo dentro de `ai-guidelines`; reverter a extração para repo irmão; exigir classificação universal de todos os Markdown legados; mover `research/` para `falsifications/`/`evidence/`/`legacy/`; transformar assets/projeções em SSOT.
+
+**Impacto esperado:**
+
+- O checkpoint passa a ter enforcement mecânico para kind inválido, disposição inválida e `pre-coding-review` incompleto.
+- A história da Guilda permanece auditável dentro da Spec 0024, mas claramente separada do produto ativo e da autoridade do framework `ai-guidelines`.
+- O próximo ciclo pode retomar o objetivo original do checkpoint com menos ambiguidade: taxonomia, model-review e preservação do aprendizado, não validação final do app Guilda.
+
+**Status:** Resolved (2026-07-10) / @rosanarezende — contrato de artifact-kind/disposition/pre-coding-review e disposição da incubação Guilda dentro do checkpoint #45.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -741,6 +772,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G21`        | checkpoints semânticos + sem débito arquitetural silencioso                | **Decidido** — § 1 (Resolved 2026-06-22, owner); PR #44 fecha decisão/inventário e próximo PR implementa taxonomia/review pré-codificação com enforcement                                    |
 | `G22`        | vocabulário Spec›Frente›Checkpoint›Etapa›Tarefa + tensão #45               | **Decidido** — § 1 (Resolved 2026-06-22, owner); `Frente` (rejeita `Fase`) como agrupamento derivado/não-SSOT; #45 reconciliado como nó topológico ativo (seq 12)                            |
 | `G23`        | extensão de G08: grafo derivado + entrega incremental + camada de consulta | **Decidido** — § 1 (Resolved 2026-06-23, owner); H1/H3/H4 dentro da 0024 como projeção derivada (sem 2ª SSOT, sem spec nova); roteado a `internal-…-refactor`/`broad-flow-falsification`/#45 |
+| `G24`        | artifact-kind, disposição e contrato pre-coding-review                     | **Decidido** — § 1 (Resolved 2026-07-10, owner); `disposition` ortogonal, `pre-coding-review` com `subject`+`date`, Guilda preservada como evidência/legado sem virar app vivo               |
 
 ---
 
@@ -768,6 +800,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G21]` — Resolved 2026-06-22 / @rosanarezende
 - [x] `[DEC-0024-G22]` — Resolved 2026-06-22 / @rosanarezende
 - [x] `[DEC-0024-G23]` — Resolved 2026-06-23 / @rosanarezende
+- [x] `[DEC-0024-G24]` — Resolved 2026-07-10 / @rosanarezende
 
 ---
 

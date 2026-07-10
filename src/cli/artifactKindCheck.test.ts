@@ -12,6 +12,11 @@ kinds:
   - id: research
   - id: dogfood
   - id: pre-coding-review
+dispositions:
+  - id: living
+  - id: evidence
+  - id: legacy
+  - id: open
 `;
 
 function writeTaxonomy(repo: string, text = TAXONOMY): void {
@@ -36,7 +41,7 @@ describe("artifact-kind:check [BR-ARTIFACT-KIND-CHECK]", () => {
   it("DADO artifact-kind válido ENTÃO retorna 0", () => {
     const repo = tempRepo();
     writeTaxonomy(repo);
-    writeResearch(repo, "a.md", "---\nartifact-kind: dogfood\n---\n# x\n");
+    writeResearch(repo, "a.md", "---\nartifact-kind: dogfood\ndisposition: evidence\n---\n# x\n");
     expect(main(repo, silent)).toBe(0);
   });
 
@@ -48,6 +53,38 @@ describe("artifact-kind:check [BR-ARTIFACT-KIND-CHECK]", () => {
     const code = main(repo, { info: jest.fn(), error: (m) => errors.push(m) });
     expect(code).toBe(1);
     expect(errors.join("\n")).toContain("banana");
+  });
+
+  it("DADO disposition fora do conjunto fechado ENTÃO retorna 1 + nome do valor", () => {
+    const repo = tempRepo();
+    writeTaxonomy(repo);
+    writeResearch(repo, "a.md", "---\nartifact-kind: research\ndisposition: maybe\n---\n# x\n");
+    const errors: string[] = [];
+    const code = main(repo, { info: jest.fn(), error: (m) => errors.push(m) });
+    expect(code).toBe(1);
+    expect(errors.join("\n")).toContain("maybe");
+  });
+
+  it("DADO pre-coding-review sem subject/date ENTÃO retorna 1", () => {
+    const repo = tempRepo();
+    writeTaxonomy(repo);
+    writeResearch(repo, "a.md", "---\nartifact-kind: pre-coding-review\n---\n# x\n");
+    const errors: string[] = [];
+    const code = main(repo, { info: jest.fn(), error: (m) => errors.push(m) });
+    expect(code).toBe(1);
+    expect(errors.join("\n")).toContain("sem subject");
+    expect(errors.join("\n")).toContain("sem date");
+  });
+
+  it("DADO pre-coding-review com subject/date ENTÃO retorna 0", () => {
+    const repo = tempRepo();
+    writeTaxonomy(repo);
+    writeResearch(
+      repo,
+      "a.md",
+      "---\nartifact-kind: pre-coding-review\nsubject: modelo de teste\ndate: 2026-06-24\n---\n# x\n"
+    );
+    expect(main(repo, silent)).toBe(0);
   });
 
   it("DADO arquivos sem artifact-kind ENTÃO não bloqueia (advisory) e retorna 0", () => {

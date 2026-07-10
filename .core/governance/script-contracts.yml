@@ -49,18 +49,6 @@ profiles:
         mutates: false
         consumers: [script]
         description: Verifica formatacao sem alterar arquivos.
-      - name: format:governance-demo
-        command: prettier --write .governance/specs/0024-context-architecture/work-graph-model/governance-demo
-        category: format
-        mutates: true
-        consumers: [human]
-        description: Formata apenas a governance-demo.
-      - name: format:governance-demo:check
-        command: prettier --check .governance/specs/0024-context-architecture/work-graph-model/governance-demo
-        category: format
-        mutates: false
-        consumers: [script, human]
-        description: Verifica a formatacao apenas da governance-demo.
       - name: lint-staged
         command: lint-staged
         category: format
@@ -246,7 +234,7 @@ profiles:
         category: governance
         mutates: true
         consumers: [script]
-        description: Brando; falha so se um artefato research/-class declarar artifact-kind fora do conjunto fechado (artifact-taxonomy.yml). Cobertura advisory, nao bloqueia legados nao marcados.
+        description: Brando; valida artifact-kind/disposition declarados em artefatos research/assets contra artifact-taxonomy.yml e exige subject/date em pre-coding-review. Cobertura advisory, nao bloqueia legados nao marcados.
       - name: handoff:check
         command: npm run build && node dist/cli/bin.js handoff-check
         category: governance

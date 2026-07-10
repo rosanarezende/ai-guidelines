@@ -1,5 +1,8 @@
 ---
 artifact-kind: pre-coding-review
+subject: "falsificacao pre-decisao da taxonomia de artefatos do PR 44"
+date: 2026-06-22
+disposition: evidence
 ---
 
 # PR #44 — Revisão de falsificação pré-decisão da taxonomia de artefatos

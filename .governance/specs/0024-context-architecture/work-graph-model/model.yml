@@ -13,8 +13,10 @@ meta:
   supersedes: _archive/model-v2-history-2026-07-05/model.yml
   grounded-by: tracker.md
   artifact: _map/model-map.html
-  governance-demo: governance-demo/
-  note: "Modelo conceitual do framework; schemas executaveis de API/comandos vivem em governance-demo/packages/contracts."
+  product-extraction: GUILDA-EXTRACTION-DISPOSITION.md
+  qrd-preservation: GUILDA-QRD-PRESERVATION-MATRIX.md
+  historical-demo: _archive/guilda-incubation-2026-07/
+  note: "Modelo conceitual do framework; o produto que nasceu como governance-demo foi extraido para o repo irmao Guilda."
 
 adoption-shell:
   status: applied-in-app
@@ -268,15 +270,17 @@ decision-points:
     on-block: "veredito segue pending; override = dangerous"
 
 physical:
-  host-root: "governance-demo/acme/governance/"
-  repos-root: "governance-demo/acme/repos/<repo>/"
-  intake-proposals: "governance-demo/acme/governance/intake/proposals.yml"
-  intake-triage: "governance-demo/acme/governance/intake/triage/<proposal-id>.yml"
-  intents: "governance-demo/acme/governance/intents/<id>.yml"
-  decisions: "governance-demo/acme/governance/decisions/verdicts.yml"
-  events: "governance-demo/acme/governance/events/events.jsonl"
-  incidents: "governance-demo/acme/governance/incidents/incidents.yml"
-  por-repo: "governance-demo/acme/repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml}"
+  status: historical-example
+  extraction: "A materializacao fisica Acme/Guilda saiu da superficie ativa deste repo; ver _archive/guilda-incubation-2026-07/ e GUILDA-EXTRACTION-DISPOSITION.md."
+  host-root: "_archive/guilda-incubation-2026-07/acme/governance/"
+  repos-root: "_archive/guilda-incubation-2026-07/acme/repos/<repo>/"
+  intake-proposals: "_archive/guilda-incubation-2026-07/acme/governance/intake/proposals.yml"
+  intake-triage: "_archive/guilda-incubation-2026-07/acme/governance/intake/triage/<proposal-id>.yml"
+  intents: "_archive/guilda-incubation-2026-07/acme/governance/intents/<id>.yml"
+  decisions: "_archive/guilda-incubation-2026-07/acme/governance/decisions/verdicts.yml"
+  events: "_archive/guilda-incubation-2026-07/acme/governance/events/events.jsonl"
+  incidents: "_archive/guilda-incubation-2026-07/acme/governance/incidents/incidents.yml"
+  por-repo: "_archive/guilda-incubation-2026-07/acme/repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml}"
   backend: [file, sqlite, neo4j, mongo]
   backend-status: "file runtime transacional aplicado; sqlite/neo4j/mongo sao read-models derivados no primeiro release, nao SSOT de escrita"
 
@@ -543,7 +547,7 @@ approach-model:
     rollout-slice: release-rollout
 
 schema-policy:
-  runtime: "schemas executaveis ficam em governance-demo/packages/contracts"
+  runtime: "schemas executaveis do produto vivem no repo Guilda; este modelo registra a politica conceitual"
   desired-library: zod
   rule: "tipo TS apagado nao basta para fronteira de governanca; request/response publico deve ter validacao runtime compartilhada"
 

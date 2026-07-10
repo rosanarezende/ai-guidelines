@@ -1,5 +1,8 @@
 ---
 artifact-kind: pre-coding-review
+subject: "banco e view por repositorio auto-contidos via lib compartilhada"
+date: 2026-06-28
+disposition: evidence
 ---
 
 # Banco e view POR-REPO, auto-contidos via lib compartilhada (padrão contrato-first + implementação swappable)

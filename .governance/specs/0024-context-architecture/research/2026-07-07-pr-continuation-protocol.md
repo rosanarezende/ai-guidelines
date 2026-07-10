@@ -1,5 +1,8 @@
 ---
 artifact-kind: pre-coding-review
+subject: "protocolo interino para PR grande e continuidade governada"
+date: 2026-07-07
+disposition: living
 ---
 
 # Protocolo interino — PR grande e continuidade governada

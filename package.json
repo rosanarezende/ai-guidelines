@@ -20,15 +20,6 @@
     "cli"
   ],
   "bin": "dist/cli/main.js",
-  "workspaces": [
-    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/packages/domain",
-    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/packages/contracts",
-    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/packages/test-fixtures",
-    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/backend",
-    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/frontend",
-    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/mock-api",
-    ".governance/specs/0024-context-architecture/work-graph-model/governance-demo/test"
-  ],
   "files": [
     "dist",
     "!dist/**/*.test.*",
@@ -48,8 +39,6 @@
     "build:all": "npm run build && npm run build:rules",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "format:governance-demo": "prettier --write .governance/specs/0024-context-architecture/work-graph-model/governance-demo",
-    "format:governance-demo:check": "prettier --check .governance/specs/0024-context-architecture/work-graph-model/governance-demo",
     "lint-staged": "lint-staged",
     "test": "npm run test:unit && npm run test:ts",
     "test:unit": "node --experimental-default-config-file --test \"tests/integration/**/*.test.mjs\"",

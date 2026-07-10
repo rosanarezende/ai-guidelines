@@ -59,6 +59,19 @@ metadata:
   reviewer: [internal, external] # quem revisou (Codex/Antigravity/Gemini = external)
   method: [falsification, assessment] # como (falsificacao adversarial vs parecer)
 
+# Disposicao e uma dimensao ortogonal ao kind: descreve o papel atual do artefato
+# no repositorio, sem criar uma nova natureza. Serve para impedir que evidencia,
+# projection ou lixo de processo ganhem autoridade silenciosa.
+dispositions:
+  - id: living
+    purpose: Artefato vivo, ainda usado como contexto operacional da frente/checkpoint.
+  - id: evidence
+    purpose: Evidencia historica preservada; informa decisoes, mas nao governa estado atual.
+  - id: legacy
+    purpose: Legado/snapshot preservado para rastreabilidade; nao e contrato atual.
+  - id: open
+    purpose: Questao ou lacuna aberta, ainda nao promovida a DEC/task/review governado.
+
 # Ordem de autoridade canonica (mantenedor). Em divergencia, vence o nivel mais alto.
 # Fonte UNICA: research/README.md e inventarios apontam para ca, nao restabelecem.
 authority_order:

@@ -35,6 +35,7 @@ OSV.dev e deps.dev geram evidencia de supply-chain. Eles nao:
 - escrevem estado de governanca;
 - substituem triagem humana/contextual.
 
-Na `governance-demo`, o adapter `code-security` consome relatorios locais
-hash-verificados (`reports/code-security.json`) e falha fechado quando o corpo
-e adulterado ou stale.
+Durante a incubacao Guilda, o adapter `code-security` consumia relatorios locais
+hash-verificados (`reports/code-security.json`) e falhava fechado quando o corpo
+era adulterado ou stale. Esse codigo agora e historico neste repo e deve evoluir
+no repo Guilda se voltar a ser produto ativo.
