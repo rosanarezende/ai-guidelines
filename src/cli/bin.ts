@@ -9,6 +9,7 @@ import { main as runCoKnowledgeInventory } from "./coKnowledgeInventoryCheck.js"
 import { main as runConstraintsCheck } from "./constraintsCheck.js";
 import { main as runDisclosure } from "./disclosureRender.js";
 import { main as runGateDecidability } from "./gateDecidabilityCheck.js";
+import { main as runGovernedWorkMap } from "./governedWorkMap.js";
 import { main as runHandoffCheck } from "./handoffCheck.js";
 import { main as runInsightsCheck } from "./insightsCheck.js";
 import { main as runIntentCheck } from "./intentCheck.js";
@@ -51,7 +52,7 @@ function usage(): string {
     "Scripts: build-rules, living-docs, state-yml-check, active-specs-check,",
     "reconcile-check, research-index-check, artifact-kind-check, handoff-check, co-knowledge-check, co-knowledge-inventory,",
     "constraints-check, knowledge-compile, script-contracts, runtime-bootstrap,",
-    "gate-decidability-check, ruleset-check, review-check, insights-check,",
+    "gate-decidability-check, governed-work-map, ruleset-check, review-check, insights-check,",
     "intent-check, disclosure-render, review-publish, review-seal,",
     "pr-body-create, pr-body-update, pr-body-check, pr-body-publish, pr-body-pull, pr-ready-check, site-flow-copy, site-scenarios,",
     "site-prompts, consumer-journey",
@@ -114,6 +115,8 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runRuntimeBootstrap([...args], root);
     case "gate-decidability-check":
       return runGateDecidability(root);
+    case "governed-work-map":
+      return runGovernedWorkMap(args, root);
     case "ruleset-check": {
       const mode = args.includes("--parity") ? "parity" : "producibility";
       const liveIdx = args.indexOf("--live");

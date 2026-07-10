@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mapa Vivo do Trabalho Governado — Context Architecture / 0024</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f4ef;
+        --surface: #fffaf2;
+        --surface-2: #eee8dd;
+        --ink: #142321;
+        --muted: #66716d;
+        --green: #0d3b31;
+        --sage: #8fa99a;
+        --brass: #c19a4b;
+        --graphite: #2b2f33;
+        --line: rgba(20, 35, 33, 0.13);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(193, 154, 75, 0.16), transparent 32rem),
+          radial-gradient(circle at 82% 10%, rgba(13, 59, 49, 0.12), transparent 36rem), var(--bg);
+        color: var(--ink);
+      }
+      main {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 32px;
+      }
+      header {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+        gap: 24px;
+        align-items: stretch;
+        margin-bottom: 24px;
+      }
+      .hero,
+      .panel,
+      .toolbar,
+      .node,
+      .detail {
+        border: 1px solid var(--line);
+        background: rgba(255, 250, 242, 0.82);
+        box-shadow: 0 16px 50px rgba(20, 35, 33, 0.08);
+        border-radius: 8px;
+      }
+      .hero {
+        padding: 34px;
+      }
+      .eyebrow {
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      h1 {
+        font-size: clamp(38px, 5vw, 76px);
+        line-height: 0.94;
+        margin: 14px 0;
+        max-width: 980px;
+      }
+      h2 {
+        margin: 0 0 10px;
+        font-size: 22px;
+      }
+      p {
+        color: var(--muted);
+        line-height: 1.58;
+      }
+      .hero p {
+        max-width: 780px;
+        font-size: 18px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 24px;
+      }
+      .metric {
+        background: rgba(13, 59, 49, 0.06);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px;
+      }
+      .metric strong {
+        display: block;
+        color: var(--green);
+        font-size: 28px;
+      }
+      .panel {
+        padding: 24px;
+      }
+      .toolbar {
+        display: grid;
+        grid-template-columns: minmax(240px, 1fr) repeat(3, auto);
+        gap: 12px;
+        padding: 14px;
+        margin-bottom: 18px;
+      }
+      input,
+      button {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        min-height: 42px;
+        padding: 0 14px;
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+        font-weight: 700;
+      }
+      button.active {
+        background: var(--green);
+        color: white;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        gap: 18px;
+        align-items: start;
+      }
+      .work-map {
+        display: grid;
+        gap: 14px;
+      }
+      .lane {
+        display: grid;
+        gap: 10px;
+      }
+      .lane-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .nodes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
+      }
+      .node {
+        padding: 16px;
+        cursor: pointer;
+        position: relative;
+        min-height: 180px;
+      }
+      .node.active-node {
+        outline: 3px solid rgba(193, 154, 75, 0.28);
+      }
+      .node h3 {
+        margin: 8px 0 4px;
+        font-size: 18px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.58);
+        color: var(--muted);
+        font-size: 12px;
+        padding: 5px 9px;
+      }
+      .status-concluded {
+        border-left: 5px solid var(--sage);
+      }
+      .status-active {
+        border-left: 5px solid var(--brass);
+      }
+      .status-planned {
+        border-left: 5px solid var(--graphite);
+      }
+      .detail {
+        padding: 20px;
+        position: sticky;
+        top: 18px;
+      }
+      .detail dl {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 8px 12px;
+        margin: 0;
+      }
+      .detail dt {
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .detail dd {
+        margin: 0;
+      }
+      .checkpoint-list {
+        margin: 16px 0 0;
+        padding-left: 18px;
+      }
+      .hidden {
+        display: none;
+      }
+      .empty {
+        padding: 24px;
+        color: var(--muted);
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+      }
+      .matrix {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .matrix th,
+      .matrix td {
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      .matrix th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      @media (max-width: 980px) {
+        main {
+          padding: 18px;
+        }
+        header,
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .toolbar {
+          grid-template-columns: 1fr 1fr;
+        }
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .detail {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <section class="hero">
+          <div class="eyebrow">Projeção derivada · não-SSOT</div>
+          <h1>Mapa Vivo do Trabalho Governado</h1>
+          <p>
+            Visão navegável da topologia em <code>state.yml</code>. O mapa mostra todos os nós
+            concluídos, o checkpoint ativo e a cauda planejada sem substituir o contrato governado.
+          </p>
+          <div class="metrics" aria-label="Resumo da topologia">
+            <div class="metric"><strong>12</strong><span>nós concluídos</span></div>
+            <div class="metric"><strong>1</strong><span>nó ativo</span></div>
+            <div class="metric"><strong>6</strong><span>nós planejados</span></div>
+            <div class="metric"><strong>45</strong><span>checkpoints</span></div>
+          </div>
+        </section>
+        <aside class="panel">
+          <h2>Cursor atual</h2>
+          <p>
+            <strong>artifact-taxonomy-and-model-review-contract</strong
+            ><br />checkpoint-artifact-taxonomy-and-model-review-contract
+          </p>
+          <p>Stage: <strong>implementation</strong><br />Gate: <strong>closed</strong></p>
+          <p>Fonte: <code>.governance/specs/0024-context-architecture/state.yml</code></p>
+        </aside>
+      </header>
+
+      <section class="toolbar" aria-label="Filtros do mapa">
+        <input id="search" type="search" placeholder="Buscar PR, checkpoint, papel..." />
+        <button type="button" class="active" data-filter="all">Todos</button>
+        <button type="button" data-filter="concluded">Concluídos</button>
+        <button type="button" data-filter="active">Ativo</button>
+      </section>
+
+      <section class="layout">
+        <div>
+          <div id="map" class="work-map" aria-live="polite"></div>
+          <div id="empty" class="empty hidden">Nenhum nó encontrado para os filtros atuais.</div>
+        </div>
+        <aside id="detail" class="detail"></aside>
+      </section>
+    </main>
+
+    <script id="governed-work-data" type="application/json">
+      {
+        "schemaVersion": 1,
+        "title": "Mapa Vivo do Trabalho Governado",
+        "subtitle": "Context Architecture / 0024",
+        "source": {
+          "statePath": ".governance/specs/0024-context-architecture/state.yml",
+          "sourceKind": "derived-projection",
+          "authority": "state-yml-topology"
+        },
+        "stage": "implementation",
+        "gateStatus": "closed",
+        "cursor": {
+          "pr": "artifact-taxonomy-and-model-review-contract",
+          "checkpoint": "checkpoint-artifact-taxonomy-and-model-review-contract"
+        },
+        "counts": { "concluded": 12, "active": 1, "planned": 6, "checkpoints": 45 },
+        "focus": [
+          "RECONCILIACAO 2026-06-03 ([DEC-0024-G08], owner): G03 (promotion pipeline) / G04 (casa unica/tri-root) / G05 (projecoes) foram REABERTOS. Os eixos deixados em aberto no Stage 1 mostraram-se necessarios para problemas reais observados no uso (mis-binding da retomada, recuperabilidade, 'a resposta estava num ADR esquecido'). A 0024 VOLTOU A TRATAR MODELAGEM nesses eixos -- isto e DECISAO, nao drift. Direcao assumida: arquitetura orientada a grafo (entidades + relacoes navegaveis KnowledgeRef + projecoes derivadas). NAO ha 0025 independente (o split foi superado no Checkpoint 2; o trabalho mapeia em G03/G04/G05 + candidatas Grupo B). O kernel Knowledge + KnowledgeGraph nucleo + capability Insights JA materializados (PR #34). Motivacao persistida como Insights (PIT-0004..0006).",
+          "0024 em ABSORCAO OPERACIONAL (pesquisa encerrada). Problema = falta de absorcao, nao falta de decisao: decisoes convergidas ainda nao alteraram o comportamento do sistema ('arquitetura converge enquanto codigo diverge'). Backlog = relatorio de auditoria do Codex (divergencias decisao\u003c->codigo).",
+          "Plano executavel CANONICO no repo: plan.md secoes 'Sequencia de Checkpoints' + 'Topologia operacional'. VOCABULARIO (Checkpoint 2.1): PR/#N = Pull Request real do GitHub; Checkpoint N = unidade de implementacao da spec; Gate = ritual de validacao (Technical Audit -> Architectural Review -> Human).",
+          "TOPOLOGIA CANONICA (corrigida no Checkpoint 2.1a; modelo da 0023 / ADR 0020 + 0024 / DEC-0023-M01): #32 = PR de governanca/bootstrap + LINHA DE INTEGRACAO da spec; NAO mergeia cedo, e a BASE DA STACK. Checkpoint 3+ = PR real proprio STACKED sobre a linha da spec (NAO off-main, NAO independente). Modo UNIT: merge em main e evento UNICO ao fim (veiculo = PR terminal de implementacao; #32 + intermediarios + Integration PR via landed-via reconciliation; 1 SHA canonico), apos review.md R8. Integration PR = homologacao antes do merge (NAO veiculo).",
+          "Decisoes cravadas (NAO reabrir): G00/G02/G06; Open abolido/DEC nasce Pendente/Deferred canonico; brief por estado; GG-0001 interno (DOGFOOD-*); WorkflowType removido; proveniencia runtime-scoped (role livre, espinha impl+gate derivada, projecao NAO governanca); GG-0002 antes da remocao.",
+          "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim.",
+          "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
+        ],
+        "next": [
+          "canonical-next: artifact-taxonomy-and-model-review-contract. PR #43 (co-flow-convergence / seq 10) e PR #44 (co-flow-continuation / seq 11) CONCLUIDOS-NA-STACK por Human Gate approved; modo unit, SEM merge isolado em main. No ATIVO = artifact-taxonomy-and-model-review-contract (seq 12, checkpoint-artifact-taxonomy-and-model-review-contract; PR #45 stacked sobre #44). Primeira fatia obrigatoria deste recorte: fechar o dogfood da propria abertura do PR #45 — visao pretendida via .governance/visual-prompts, operacao governada para preparar o proximo PR interno e decisao de vocabulario humano do lifecycle. Depois: implementar a taxonomia de artefatos e o contrato de review pre-codificacao/model-review definidos por DEC-0024-G21/GG-0005; em seguida refactor DDD/BDD, falsificacao ampla e review/Human Gate da continuacao. NAO implementar dualroot-collapse, co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
+        ],
+        "nodes": [
+          {
+            "id": "base-governance",
+            "status": "concluded",
+            "githubPr": 32,
+            "role": "governance",
+            "terminal": false,
+            "sequence": null,
+            "checkpoints": ["checkpoint-1", "checkpoint-2", "checkpoint-2.1", "checkpoint-2.1a"],
+            "isCursor": false
+          },
+          {
+            "id": "ruleset-producibility",
+            "status": "concluded",
+            "githubPr": 33,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 1,
+            "checkpoints": [
+              "checkpoint-2.2",
+              "checkpoint-2.2b",
+              "checkpoint-2.3",
+              "checkpoint-2.3a",
+              "checkpoint-2.3b",
+              "checkpoint-2.4",
+              "checkpoint-2.4a",
+              "checkpoint-2.4b",
+              "checkpoint-2.4c",
+              "checkpoint-2.4d"
+            ],
+            "isCursor": false
+          },
+          {
+            "id": "insights-in-flight",
+            "status": "concluded",
+            "githubPr": 34,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 2,
+            "checkpoints": [
+              "checkpoint-insights",
+              "checkpoint-knowledge-kernel",
+              "checkpoint-graph-core"
+            ],
+            "isCursor": false
+          },
+          {
+            "id": "pr-cli-cutover",
+            "status": "concluded",
+            "githubPr": 35,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 3,
+            "checkpoints": ["checkpoint-cli-cutover"],
+            "isCursor": false
+          },
+          {
+            "id": "co-reconcile",
+            "status": "concluded",
+            "githubPr": 36,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 4,
+            "checkpoints": ["checkpoint-co-reconcile"],
+            "isCursor": false
+          },
+          {
+            "id": "co-knowledge",
+            "status": "concluded",
+            "githubPr": 37,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 5,
+            "checkpoints": [
+              "checkpoint-co-knowledge",
+              "checkpoint-co-knowledge-backfill",
+              "checkpoint-script-contracts",
+              "checkpoint-runtime-bootstrap-readiness",
+              "checkpoint-runtime-ledger-partition",
+              "checkpoint-review-policy-events"
+            ],
+            "isCursor": false
+          },
+          {
+            "id": "bootstrap-compiler",
+            "status": "concluded",
+            "githubPr": 38,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 6,
+            "checkpoints": ["checkpoint-compiler-ts", "checkpoint-bootstrap-registry"],
+            "isCursor": false
+          },
+          {
+            "id": "toolchain-simplification",
+            "status": "concluded",
+            "githubPr": 39,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 7,
+            "checkpoints": ["checkpoint-npm-toolchain"],
+            "isCursor": false
+          },
+          {
+            "id": "co-projection",
+            "status": "concluded",
+            "githubPr": 41,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 8,
+            "checkpoints": ["checkpoint-co-projection"],
+            "isCursor": false
+          },
+          {
+            "id": "co-enforcement",
+            "status": "concluded",
+            "githubPr": 42,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 9,
+            "checkpoints": ["checkpoint-co-enforcement"],
+            "isCursor": false
+          },
+          {
+            "id": "co-flow-convergence",
+            "status": "concluded",
+            "githubPr": 43,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 10,
+            "checkpoints": ["checkpoint-co-flow-convergence"],
+            "isCursor": false
+          },
+          {
+            "id": "co-flow-continuation",
+            "status": "concluded",
+            "githubPr": 44,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 11,
+            "checkpoints": ["checkpoint-co-flow-continuation"],
+            "isCursor": false
+          },
+          {
+            "id": "artifact-taxonomy-and-model-review-contract",
+            "status": "active",
+            "githubPr": 45,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 12,
+            "checkpoints": ["checkpoint-artifact-taxonomy-and-model-review-contract"],
+            "isCursor": true
+          },
+          {
+            "id": "dualroot-collapse",
+            "status": "planned",
+            "githubPr": null,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 13,
+            "checkpoints": ["checkpoint-dualroot-collapse"],
+            "isCursor": false
+          },
+          {
+            "id": "co-capture",
+            "status": "planned",
+            "githubPr": null,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 14,
+            "checkpoints": ["checkpoint-co-capture"],
+            "isCursor": false
+          },
+          {
+            "id": "co-events",
+            "status": "planned",
+            "githubPr": null,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 15,
+            "checkpoints": ["checkpoint-co-events"],
+            "isCursor": false
+          },
+          {
+            "id": "housekeeping",
+            "status": "planned",
+            "githubPr": null,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 16,
+            "checkpoints": [
+              "checkpoint-taxonomy-removal",
+              "checkpoint-agents-sync",
+              "checkpoint-gg-0002",
+              "checkpoint-decouple-brief",
+              "checkpoint-doc-cleanup"
+            ],
+            "isCursor": false
+          },
+          {
+            "id": "knowledge-readiness",
+            "status": "planned",
+            "githubPr": null,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 17,
+            "checkpoints": [
+              "checkpoint-knowledge-health",
+              "checkpoint-knowledge-backfill-wide",
+              "checkpoint-co-knowledge-promotion"
+            ],
+            "isCursor": false
+          },
+          {
+            "id": "integration-final",
+            "status": "planned",
+            "githubPr": null,
+            "role": "integration",
+            "terminal": true,
+            "sequence": null,
+            "checkpoints": ["review-and-merge"],
+            "isCursor": false
+          }
+        ]
+      }
+    </script>
+    <script>
+      const data = JSON.parse(document.getElementById("governed-work-data").textContent);
+      const byStatus = ["concluded", "active", "planned"];
+      const labels = { concluded: "Concluído", active: "Ativo", planned: "Planejado" };
+      const map = document.getElementById("map");
+      const detail = document.getElementById("detail");
+      const empty = document.getElementById("empty");
+      const search = document.getElementById("search");
+      let currentFilter = "all";
+      let selectedId = data.cursor.pr;
+
+      function textMatch(node, term) {
+        if (!term) return true;
+        const haystack = [
+          node.id,
+          node.status,
+          node.role,
+          String(node.githubPr ?? ""),
+          ...node.checkpoints,
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(term.toLowerCase());
+      }
+
+      function filteredNodes() {
+        const term = search.value.trim();
+        return data.nodes.filter((node) => {
+          const filterOk = currentFilter === "all" || node.status === currentFilter;
+          return filterOk && textMatch(node, term);
+        });
+      }
+
+      function render() {
+        const nodes = filteredNodes();
+        map.innerHTML = "";
+        empty.classList.toggle("hidden", nodes.length > 0);
+        for (const status of byStatus) {
+          const laneNodes = nodes.filter((node) => node.status === status);
+          if (laneNodes.length === 0) continue;
+          const lane = document.createElement("section");
+          lane.className = "lane";
+          lane.innerHTML = `
+          <div class="lane-title">
+            <span>${labels[status]}</span>
+            <span>${laneNodes.length}</span>
+          </div>
+          <div class="nodes"></div>
+        `;
+          const list = lane.querySelector(".nodes");
+          for (const node of laneNodes) list.appendChild(renderNode(node));
+          map.appendChild(lane);
+        }
+        const selected =
+          data.nodes.find((node) => node.id === selectedId) ?? nodes[0] ?? data.nodes[0];
+        renderDetail(selected);
+      }
+
+      function renderNode(node) {
+        const button = document.createElement("article");
+        button.className = `node status-${node.status}${node.id === selectedId ? " active-node" : ""}`;
+        button.tabIndex = 0;
+        button.setAttribute("role", "button");
+        button.setAttribute("aria-label", `Abrir detalhes de ${node.id}`);
+        button.innerHTML = `
+        <span class="chip">${labels[node.status]}</span>
+        <h3>${node.id}</h3>
+        <p>PR ${node.githubPr ?? "futuro"} · ${node.role} · seq ${node.sequence ?? "n/a"}</p>
+        <div class="chips">
+          ${node.checkpoints
+            .slice(0, 4)
+            .map((cp) => `<span class="chip">${cp}</span>`)
+            .join("")}
+          ${node.checkpoints.length > 4 ? `<span class="chip">+${node.checkpoints.length - 4}</span>` : ""}
+        </div>
+      `;
+        const select = () => {
+          selectedId = node.id;
+          render();
+        };
+        button.addEventListener("click", select);
+        button.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            select();
+          }
+        });
+        return button;
+      }
+
+      function renderDetail(node) {
+        detail.innerHTML = `
+        <h2>${node.id}</h2>
+        <dl>
+          <dt>Status</dt><dd>${labels[node.status]}</dd>
+          <dt>PR</dt><dd>${node.githubPr ?? "planejado"}</dd>
+          <dt>Papel</dt><dd>${node.role}</dd>
+          <dt>Sequência</dt><dd>${node.sequence ?? "n/a"}</dd>
+          <dt>Terminal</dt><dd>${node.terminal ? "sim" : "não"}</dd>
+          <dt>Cursor</dt><dd>${node.isCursor ? "sim" : "não"}</dd>
+        </dl>
+        <h3>Checkpoints</h3>
+        <ol class="checkpoint-list">
+          ${node.checkpoints.map((cp) => `<li><code>${cp}</code></li>`).join("")}
+        </ol>
+      `;
+      }
+
+      search.addEventListener("input", render);
+      for (const button of document.querySelectorAll("[data-filter]")) {
+        button.addEventListener("click", () => {
+          currentFilter = button.dataset.filter;
+          for (const other of document.querySelectorAll("[data-filter]"))
+            other.classList.remove("active");
+          button.classList.add("active");
+          render();
+        });
+      }
+      render();
+    </script>
+  </body>
+</html>

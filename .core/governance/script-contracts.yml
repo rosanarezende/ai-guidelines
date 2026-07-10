@@ -235,6 +235,18 @@ profiles:
         mutates: true
         consumers: [script]
         description: Brando; valida artifact-kind/disposition declarados em artefatos research/assets contra artifact-taxonomy.yml e exige subject/date em pre-coding-review. Cobertura advisory, nao bloqueia legados nao marcados.
+      - name: governed-work-map:build
+        command: npm run build && node dist/cli/bin.js governed-work-map build
+        category: governance
+        mutates: true
+        consumers: [script, human]
+        description: Regenera a projeção viva do trabalho governado a partir de state.yml (JSON + HTML derivados; nao-SSOT).
+      - name: governed-work-map:check
+        command: npm run build && node dist/cli/bin.js governed-work-map check
+        category: governance
+        mutates: true
+        consumers: [script, workflow, human]
+        description: Falha se a projeção viva do trabalho governado estiver stale em relação a state.yml.
       - name: handoff:check
         command: npm run build && node dist/cli/bin.js handoff-check
         category: governance
@@ -392,7 +404,7 @@ profiles:
         consumers: [hook, workflow, human]
         description: Validacao intermediaria orientada ao diff; usada no pre-push diario. Com --fix pode formatar somente arquivos alterados.
       - name: validate
-        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run research-index:check && npm run artifact-kind:check && npm run drift:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
+        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run research-index:check && npm run artifact-kind:check && npm run governed-work-map:check && npm run drift:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate
         mutates: true
         consumers: [workflow, human]
