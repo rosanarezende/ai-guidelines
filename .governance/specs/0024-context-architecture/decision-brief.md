@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-07-10 — **`[DEC-0024-G24]` registrada**: fecha o contrato do checkpoint `artifact-taxonomy-and-model-review-contract`: `disposition` vira dimensão ortogonal, `pre-coding-review` exige `subject`+`date`, `artifact-kind:check` valida research/assets classificados e a incubação Guilda fica preservada como evidência/legado fora do app vivo. Não declara Ready/Human Gate. Antes — **`[DEC-0024-G23]` registrada**: estende `[DEC-0024-G08]` para grafo de governança **derivado**, entrega incremental com prova de valor e camada de consulta (graph snapshot/banco **estritamente derivados**, sem 2ª SSOT), mantendo tudo dentro da 0024 (sem spec nova) e roteando às etapas planejadas; auditoria em `research/2026-06-23-governance-model-question-audit.md`.
+> Última atualização: 2026-07-10 — **`[DEC-0024-G25]` registrada**: "Spec" permanece como invólucro histórico/caminho físico; a linguagem viva de mapas, geradores e projeções passa a ser **trabalho governado** e **work graph**, para não confundir container histórico, taxonomia de artefatos e grafo operacional. Antes — **`[DEC-0024-G24]` registrada**: fecha o contrato do checkpoint `artifact-taxonomy-and-model-review-contract`: `disposition` vira dimensão ortogonal, `pre-coding-review` exige `subject`+`date`, `artifact-kind:check` valida research/assets classificados e a incubação Guilda fica preservada como evidência/legado fora do app vivo. Não declara Ready/Human Gate.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -695,6 +695,35 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G25] Linguagem viva: trabalho governado e work graph
+
+**Pergunta:** Como nomear os mapas e projeções vivas depois dos aprendizados do `work-graph-model`, sem manter "spec" como centro conceitual e sem perder o identificador histórico `0024-context-architecture`?
+
+**Modo de gate:** `aceitação` <!-- decisão de linguagem/modelagem da owner, 2026-07-10, após revisão do mapa V5 e identificação de que "spec" confundia o entendimento da taxonomia. -->
+
+**Contexto:** `[DEC-0024-G22]` adotou o vocabulário humano **Spec › Frente › Checkpoint › Etapa › Tarefa** para resolver a leitura do mapa V4 e reduzir colisões com "Fase". Depois, o `work-graph-model` amadureceu: `model.yml` passou a ser o SSOT normativo do work graph, Guilda foi extraída para repo próprio e `[DEC-0024-G24]` separou `artifact-kind`, `disposition`, evidência histórica e produto vivo. Nesse ponto, continuar nomeando novas projeções como "mapa da spec" reforça uma leitura errada: a taxonomia não é "da spec"; é uma taxonomia de artefatos/evidências dentro de um **trabalho governado**.
+
+**Decisão (Resolved):**
+
+- **"Spec" permanece como invólucro histórico e caminho físico**, por compatibilidade com `.governance/specs/0024-context-architecture/`, PRs/branches existentes e documentação antiga.
+- **A linguagem viva para novas projeções, geradores e documentação operacional passa a ser "trabalho governado" e "work graph".**
+- Mapas futuros devem nomear o objeto como **Mapa Vivo do Trabalho Governado**, preservando `0024` apenas como identificador do recorte histórico: `Context Architecture / 0024`.
+- Scripts/geradores futuros devem preferir nomes como `governed-work-map:build` e `governed-work-map:check`, não `spec-map:*`.
+- `artifact-kind` é a taxonomia dos **artefatos** (`research/` e `assets/`), distinta de `WorkItemKind`, da topologia e do work graph.
+- `[DEC-0024-G22]` não é apagada: ela continua válida como decisão histórica do V4 e como explicação da transição. A partir desta DEC, porém, "Spec" não deve ser usado como centro conceitual das projeções vivas.
+
+**Consequências práticas:**
+
+- O `spec-0024-map-v5.html` passa a se apresentar como **Mapa Vivo do Trabalho Governado — Context Architecture / 0024**.
+- O eventual gerador vivo deve seguir o fluxo `SSOT governada -> modelo tipado -> projection`, sem criar segunda fonte de verdade.
+- O PR #45 continua sendo checkpoint de framework (`artifact-kind`, `disposition`, `pre-coding-review`, research-index e reconciliação), não readiness do produto Guilda.
+
+**O que NÃO está sendo decidido:** renomear fisicamente `.governance/specs/`; migrar todo histórico para outro diretório; abrir nova spec; alterar `state.yml`; declarar Ready/Human Gate; mudar a taxonomia fechada de `artifact-kind`; implementar o gerador nesta DEC.
+
+**Status:** Resolved (2026-07-10) / @rosanarezende — linguagem viva das projeções passa de "spec" para "trabalho governado" + "work graph", mantendo `0024` como identificador histórico.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -773,6 +802,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G22`        | vocabulário Spec›Frente›Checkpoint›Etapa›Tarefa + tensão #45               | **Decidido** — § 1 (Resolved 2026-06-22, owner); `Frente` (rejeita `Fase`) como agrupamento derivado/não-SSOT; #45 reconciliado como nó topológico ativo (seq 12)                            |
 | `G23`        | extensão de G08: grafo derivado + entrega incremental + camada de consulta | **Decidido** — § 1 (Resolved 2026-06-23, owner); H1/H3/H4 dentro da 0024 como projeção derivada (sem 2ª SSOT, sem spec nova); roteado a `internal-…-refactor`/`broad-flow-falsification`/#45 |
 | `G24`        | artifact-kind, disposição e contrato pre-coding-review                     | **Decidido** — § 1 (Resolved 2026-07-10, owner); `disposition` ortogonal, `pre-coding-review` com `subject`+`date`, Guilda preservada como evidência/legado sem virar app vivo               |
+| `G25`        | linguagem viva: trabalho governado + work graph                            | **Decidido** — § 1 (Resolved 2026-07-10, owner); "Spec" fica como invólucro histórico/caminho físico; novas projeções falam em trabalho governado e work graph                               |
 
 ---
 
@@ -801,6 +831,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G22]` — Resolved 2026-06-22 / @rosanarezende
 - [x] `[DEC-0024-G23]` — Resolved 2026-06-23 / @rosanarezende
 - [x] `[DEC-0024-G24]` — Resolved 2026-07-10 / @rosanarezende
+- [x] `[DEC-0024-G25]` — Resolved 2026-07-10 / @rosanarezende
 
 ---
 
