@@ -1,0 +1,56 @@
+# Resoluções do implementador para o Technical Audit do checkpoint
+# artifact-taxonomy-and-model-review-contract. Lane separada da review: propõe
+# action, mas não fecha disposition nem destrava o gate por si só.
+checkpoint: checkpoint-artifact-taxonomy-and-model-review-contract
+by: codex-cli
+resolutions:
+  - finding: technical_audit#F1
+    action: fixed
+    ref: 9232885e
+    human_context:
+      resolution_summary: "O body versionado importou a imagem publicada no GitHub e voltou a ser a fonte reconciliada do PR #45."
+    evidence: >
+      `pr-body:pull --confirm` importou a imagem de Valor entregue que existia
+      apenas no GitHub, preservando a baseline publicada em
+      pull-requests/pr-45/body.md. O body também foi atualizado para refletir
+      que o Technical Audit já foi executado.
+    tests:
+      - "npm run pr-body:check -- --spec 0024 --pr 45"
+
+  - finding: technical_audit#F2
+    action: fixed
+    ref: 9232885e
+    human_context:
+      resolution_summary: "O pr-ready:check agora falha se o body publicado divergir do body versionado."
+    evidence: >
+      `pr-ready:check` passou a comparar o body publicado no GitHub com o
+      arquivo versionado resolvido por `pull-requests/pr-<n>/body.md`; qualquer
+      divergência entra em `versionedPrBodyReasons` e falha a precondição de
+      Ready como `sincronia do PR body`.
+    tests:
+      - "npm run test:ts -- prReadyCheck.test.ts"
+      - "npm run pr-ready:check -- --pr 45"
+
+  - finding: technical_audit#F3
+    action: fixed
+    ref: 9232885e
+    human_context:
+      resolution_summary: "As fixtures históricas foram anonimizadas para Acme Honey."
+    evidence: >
+      Ocorrências de `mundo-da-mel` e `Mundo da Mel` no arquivo da incubação
+      Guilda foram substituídas por nomes fictícios Acme, preservando a
+      utilidade técnica das fixtures sem versionar nome real de negócio.
+    tests:
+      - 'rg -n "mundo-da-mel|Mundo da Mel" .'
+
+  - finding: technical_audit#F4
+    action: fixed
+    ref: 9232885e
+    human_context:
+      resolution_summary: "O tracker deixou de se autodeclarar SSOT."
+    evidence: >
+      O cabeçalho de tracker.md agora declara explicitamente que o arquivo é
+      síntese viva e embasamento, não SSOT; a autoridade normativa continua
+      concentrada no model.yml.
+    tests:
+      - "npm run artifact-kind:check"
