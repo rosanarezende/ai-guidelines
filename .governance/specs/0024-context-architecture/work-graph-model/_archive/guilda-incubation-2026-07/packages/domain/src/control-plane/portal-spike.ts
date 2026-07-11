@@ -153,7 +153,7 @@ export function createPortalControlPlaneSpikeFixture(): PortalControlPlaneState 
   const governanceHostRef: GovernanceHostRef = {
     provider: "github",
     owner: "rosana",
-    repo: "mundo-da-mel-governance",
+    repo: "acme-honey-governance",
     defaultBranch: "main",
     sourceRevision: "rev-governance-001",
     installationId: "gh-installation-123456",
@@ -176,8 +176,8 @@ export function createPortalControlPlaneSpikeFixture(): PortalControlPlaneState 
     ],
     workspaces: [
       {
-        id: "ws-mundo-da-mel",
-        name: "Mundo da Mel",
+        id: "ws-acme-honey",
+        name: "Acme Honey",
         topology: "git-backed",
         governanceHostRef,
       },
@@ -185,18 +185,18 @@ export function createPortalControlPlaneSpikeFixture(): PortalControlPlaneState 
     invites: [
       {
         id: "invite-business",
-        workspaceId: "ws-mundo-da-mel",
+        workspaceId: "ws-acme-honey",
         email: "negocios@example.test",
         invitedByAccountId: "acct-rosana",
         intendedPersona: "business",
         status: "pending",
       },
     ],
-    memberships: [{ accountId: "acct-rosana", workspaceId: "ws-mundo-da-mel", source: "creator" }],
+    memberships: [{ accountId: "acct-rosana", workspaceId: "ws-acme-honey", source: "creator" }],
     providerLinks: [
       {
         id: "provider-link-github",
-        workspaceId: "ws-mundo-da-mel",
+        workspaceId: "ws-acme-honey",
         provider: "github",
         owner: governanceHostRef.owner,
         repo: governanceHostRef.repo,
@@ -389,7 +389,7 @@ export function runPortalSpikeFlow(): PortalSpikeFlowResult {
   const initialState = createPortalControlPlaneSpikeFixture();
   const acceptedState = acceptPortalInvite(initialState, "invite-business", "acct-business");
   const proposalResult = createGovernanceProposal(acceptedState, {
-    workspaceId: "ws-mundo-da-mel",
+    workspaceId: "ws-acme-honey",
     actorAccountId: "acct-business",
     sourceRevision: "rev-governance-001",
     targetPath: "intents/intent-new-market.yml",

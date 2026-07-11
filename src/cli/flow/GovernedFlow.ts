@@ -135,6 +135,7 @@ export interface PrReadyFlowFacts {
   readonly prState: string;
   readonly prDraft: boolean;
   readonly readyBodyContractReasons: readonly string[];
+  readonly versionedPrBodyReasons?: readonly string[];
   readonly smokeTestsSuspended: boolean;
   readonly smokeRequired?: boolean;
   readonly smokeRequirementReason?: string;
@@ -606,6 +607,7 @@ export function prReadyFlowFactsFromReadySnapshot(snapshot: ReadyCheckSnapshot):
     prState: snapshot.pr.state,
     prDraft: snapshot.pr.isDraft,
     readyBodyContractReasons: snapshot.readyBodyContractReasons,
+    versionedPrBodyReasons: snapshot.versionedPrBodyReasons,
     smokeTestsSuspended: smokePolicy?.suspended ?? snapshot.smokeTestsSuspended === true,
     smokeRequired: smokePolicy?.required,
     smokeRequirementReason: smokePolicy?.reason,
@@ -632,6 +634,9 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
   }
   for (const reason of f.readyBodyContractReasons) {
     failures.push(`contrato Ready do body: ${reason}`);
+  }
+  for (const reason of f.versionedPrBodyReasons ?? []) {
+    failures.push(`sincronia do PR body: ${reason}`);
   }
   if (f.smokeTestsSuspended && smokeRequired) {
     failures.push(

@@ -52,6 +52,7 @@ function validSnapshot(overrides: Partial<ReadyCheckSnapshot> = {}): ReadyCheckS
       { name: "governance-pr-check", bucket: "pass" },
     ],
     readyBodyContractReasons: [],
+    versionedPrBodyReasons: [],
     localHeadSha: SHA,
     workingTreeClean: true,
     smokeTestsSuspended: false,
@@ -89,6 +90,18 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
     );
     expect(result.ok).toBe(false);
     expect(result.failures.some((f) => f.startsWith("contrato Ready do body:"))).toBe(true);
+  });
+
+  it("DADO body publicado divergente do body versionado QUANDO avalia ENTÃO falha", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        versionedPrBodyReasons: [
+          "body publicado do PR #39 diverge do body versionado (.governance/specs/0024-x/pull-requests/pr-39/body.md); rode pr-body:pull ou pr-body:publish antes de Ready.",
+        ],
+      })
+    );
+    expect(result.ok).toBe(false);
+    expect(result.failures.some((f) => f.startsWith("sincronia do PR body:"))).toBe(true);
   });
 
   it("DADO Valor entregue só com placeholder QUANDO avalia ENTÃO falha", () => {

@@ -24,7 +24,7 @@ export default async function ControlPlanePortalSpikePage() {
   const inviteAcceptReport = await runBetterAuthSQLiteInviteAcceptHttpSpike();
   const postgresLiveReport = await runBetterAuthPostgresPortalLiveSpike();
   const staleProposal = createGovernanceProposal(flow.acceptedState, {
-    workspaceId: "ws-mundo-da-mel",
+    workspaceId: "ws-acme-honey",
     actorAccountId: "acct-business",
     sourceRevision: "rev-stale",
     targetPath: "intents/intent-new-market.yml",

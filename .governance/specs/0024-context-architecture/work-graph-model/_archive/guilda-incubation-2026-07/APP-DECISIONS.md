@@ -308,7 +308,7 @@ Adotar estes layouts:
 Pasta local ou repo dedicado:
 
 ```text
-mundo-da-mel-governance/
+acme-honey-governance/
   host.yml
   members/
   sources/
@@ -322,7 +322,7 @@ mundo-da-mel-governance/
 Host embutido em repo existente:
 
 ```text
-mundo-da-mel-site/
+acme-honey-site/
   .governance-host/
     host.yml
     members/
@@ -344,7 +344,7 @@ mundo-da-mel-site/
 Repo governado normal:
 
 ```text
-mundo-da-mel-editorial/
+acme-honey-editorial/
   .governance/
     sidecar.yml
     manifest.yml

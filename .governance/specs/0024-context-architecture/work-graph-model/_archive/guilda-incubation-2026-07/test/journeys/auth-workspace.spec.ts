@@ -14,7 +14,7 @@ test.describe("Auth, workspace e shell", () => {
     await completeLoginWithMagicLink(page, { email: "ana-admin@example.com", name: "Ana Admin" });
     await expect(page).toHaveURL(/\/organizations$/);
 
-    await page.getByTestId("workspace-create-name").fill("Mundo da Mel");
+    await page.getByTestId("workspace-create-name").fill("Acme Honey");
     await page.getByTestId("workspace-kind-company").click();
     await page.getByTestId("workspace-create-submit").click();
 
@@ -26,7 +26,7 @@ test.describe("Auth, workspace e shell", () => {
     await expectNoAcmeDemoLeak(page);
 
     await page.goto("/settings");
-    await expect(page.getByTestId("settings-workspace-name")).toContainText("Mundo da Mel");
+    await expect(page.getByTestId("settings-workspace-name")).toContainText("Acme Honey");
     await expectNoAcmeDemoLeak(page);
 
     await page.goto("/console");

@@ -257,6 +257,8 @@ Histórico preservado da incubação:
 - PostgreSQL não é simulado como verde: `runBetterAuthPostgresPortalLiveSpike()` só executa com `GOVERNANCE_PORTAL_POSTGRES_URL` + `GOVERNANCE_PORTAL_POSTGRES_SPIKE_APPLY=1|true`; sem isso, o relatório fica `skipped-*` fail-visible.
 - APP-45 e APP-23 foram ativados durante a incubação, mas agora são histórico da extração e devem evoluir no repo Guilda.
 
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/878eaf33-98ec-4160-8c9e-41905efd755f" />
+
 <details>
 <summary><strong>Prompt final — valor entregue</strong></summary>
 
@@ -324,8 +326,8 @@ git push     # pre-push: validate:changed
 
 ### Evidências e gates
 
-- Technical Audit: pendente — será executada antes de qualquer Ready/Human Gate.
-- Architectural Review: pendente — será executada depois da auditoria técnica e antes do Human Gate.
+- Technical Audit: executada em `reviews/c-artifact-taxonomy-and-model-review-contract-technical_audit.yml` (`changes_requested`). F1-F4 foram reconciliados nesta rodada; F5 segue pendente de decisão da owner antes de qualquer tightening de política.
+- Architectural Review: pendente — será executada depois da reconciliação técnica e antes do Human Gate.
 - Human Gate: pendente — decisão reservada à owner; não é autorização de merge.
 - Merge: fora do escopo deste PR individual; a stack segue em modo unit.
 - CI: estado do PR reconciliado via GitHub nesta revisão — `governance-pr-check`, `validate-changed`, `repo-validation`, `smoke`, `osv-scan`/OSV-Scanner e Cloudflare Pages verdes; `scan-full-advisory` e `validate-os` aparecem como skipped esperado. Repetir a reconciliação no HEAD final antes de Ready.

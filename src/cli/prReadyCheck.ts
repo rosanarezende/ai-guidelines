@@ -24,6 +24,7 @@ import { parse as parseYaml } from "yaml";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { runGovernancePrCheck } from "./governance-pr-check.js";
+import { normalizePrBody, resolveVersionedPrBodyPath } from "./prBodyVersioned.js";
 import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
 import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
 import { collectFunctionalFreshness } from "./reviewFreshness.js";
@@ -82,6 +83,8 @@ export interface ReadyCheckSnapshot {
   readonly checks: ReadonlyArray<{ readonly name: string; readonly bucket: string }>;
   /** Razões de falha do contrato READY do body (governance-pr-check com isDraft=false). */
   readonly readyBodyContractReasons: ReadonlyArray<string>;
+  /** Razões de divergência entre o body publicado no GitHub e o body versionado no repo. */
+  readonly versionedPrBodyReasons?: ReadonlyArray<string>;
   /** SHA do HEAD local (null = indisponível). */
   readonly localHeadSha: string | null;
   /** Working tree local limpa (null = indisponível). */
@@ -148,6 +151,44 @@ export function normalizeCheckRuns(
 export function evaluateReadyPreconditions(snapshot: ReadyCheckSnapshot): ReadyCheckResult {
   const result = derivePrReadyFlow(prReadyFlowFactsFromReadySnapshot(snapshot));
   return { ok: result.failures.length === 0, failures: result.failures, warnings: result.warnings };
+}
+
+function collectVersionedPrBodyReasons(input: {
+  readonly repoRoot: string;
+  readonly pr: ReadyCheckPr;
+}): string[] {
+  const parsed = parseSpecBranch(input.pr.headRefName);
+  if (!parsed) return [];
+
+  let file: string;
+  try {
+    file = resolveVersionedPrBodyPath({
+      repoRoot: input.repoRoot,
+      prNumber: input.pr.number,
+      specId: parsed.specId,
+    });
+  } catch (error) {
+    return [
+      `body versionado do PR #${input.pr.number} não pôde ser localizado: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    ];
+  }
+
+  if (!fs.existsSync(file)) {
+    return [`body versionado do PR #${input.pr.number} não encontrado: ${file}.`];
+  }
+
+  const local = normalizePrBody(fs.readFileSync(file, "utf8"));
+  const remote = normalizePrBody(input.pr.body);
+  if (local === remote) return [];
+
+  return [
+    `body publicado do PR #${input.pr.number} diverge do body versionado (${path.relative(
+      input.repoRoot,
+      file
+    )}); rode pr-body:pull ou pr-body:publish antes de Ready.`,
+  ];
 }
 
 // ── Coleta do snapshot (gh + git + artefatos locais) ─────────────────────────
@@ -480,12 +521,14 @@ export class GhSnapshotCollector implements SnapshotCollector {
       new NodeWorkflowFileSystem(repoRoot)
     );
     const readyBodyContractReasons = bodyResult.kind === "fail" ? bodyResult.reasons : [];
+    const versionedPrBodyReasons = collectVersionedPrBodyReasons({ repoRoot, pr });
 
     const status = gitOrNull(repoRoot, ["status", "--porcelain"]);
     return {
       pr,
       checks,
       readyBodyContractReasons,
+      versionedPrBodyReasons,
       localHeadSha: gitOrNull(repoRoot, ["rev-parse", "HEAD"]),
       workingTreeClean: status === null ? null : status === "",
       checkpoint: collectCheckpoint(repoRoot, pr.headRefName, pr.labels, changedPaths),

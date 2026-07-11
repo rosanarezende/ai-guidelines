@@ -20,8 +20,8 @@ test(
   () => {
     const workspace = createTempWorkspace();
     try {
-      initRepo(join(workspace, "mundo-da-mel-api"));
-      initRepo(join(workspace, "mundo-da-mel-site"));
+      initRepo(join(workspace, "acme-honey-api"));
+      initRepo(join(workspace, "acme-honey-site"));
 
       const snapshot = inspectDesktopLocalWorkspace({ workspaceRoot: workspace });
 
@@ -29,7 +29,7 @@ test(
       assert.equal(snapshot.governanceHost.exists, false);
       assert.deepEqual(
         snapshot.repos.map((repo) => repo.relativePath),
-        ["mundo-da-mel-api", "mundo-da-mel-site"]
+        ["acme-honey-api", "acme-honey-site"]
       );
       assert.equal(
         snapshot.repos.every((repo) => repo.head && repo.head.length === 40),

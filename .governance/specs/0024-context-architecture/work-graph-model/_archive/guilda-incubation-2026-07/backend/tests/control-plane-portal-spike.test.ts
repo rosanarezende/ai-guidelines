@@ -30,8 +30,8 @@ test("APP-40: public control-plane projection exposes workspace metadata without
   const state = createPortalControlPlaneSpikeFixture();
   const projection = projectPublicControlPlaneState(state);
 
-  assert.equal(projection.workspaces[0]?.id, "ws-mundo-da-mel");
-  assert.equal(projection.providerLinks[0]?.repo, "mundo-da-mel-governance");
+  assert.equal(projection.workspaces[0]?.id, "ws-acme-honey");
+  assert.equal(projection.providerLinks[0]?.repo, "acme-honey-governance");
   assert.equal(projection.governanceAuthorityGrantCount, 0);
   assert.deepEqual(
     Object.keys(projection).sort(),
@@ -58,12 +58,12 @@ test("APP-41: accepting a portal invite creates membership but never governance 
   assert.equal(
     invited.memberships.some(
       (membership) =>
-        membership.accountId === "acct-business" && membership.workspaceId === "ws-mundo-da-mel"
+        membership.accountId === "acct-business" && membership.workspaceId === "ws-acme-honey"
     ),
     true
   );
   assert.equal(
-    portalAccountHasGovernanceAuthority(invited, "acct-business", "ws-mundo-da-mel"),
+    portalAccountHasGovernanceAuthority(invited, "acct-business", "ws-acme-honey"),
     false
   );
   assert.equal(invited.governanceAuthorityGrants.length, 0);
@@ -85,13 +85,13 @@ test("ARCH-CP: governance proposal is proposal-only and requires matching source
     "acct-business"
   );
   const ok = createGovernanceProposal(state, {
-    workspaceId: "ws-mundo-da-mel",
+    workspaceId: "ws-acme-honey",
     actorAccountId: "acct-business",
     sourceRevision: "rev-governance-001",
     targetPath: "intents/intent-new-market.yml",
   });
   const stale = createGovernanceProposal(state, {
-    workspaceId: "ws-mundo-da-mel",
+    workspaceId: "ws-acme-honey",
     actorAccountId: "acct-business",
     sourceRevision: "rev-stale",
     targetPath: "intents/intent-new-market.yml",
@@ -110,7 +110,7 @@ test("ARCH-CP: GitHub bridge dry-run creates a PR candidate without remote write
 
   assert.equal(flow.bridgeDryRun.ok, true);
   if (flow.bridgeDryRun.ok) {
-    assert.equal(flow.bridgeDryRun.repo, "rosana/mundo-da-mel-governance");
+    assert.equal(flow.bridgeDryRun.repo, "rosana/acme-honey-governance");
     assert.equal(flow.bridgeDryRun.writesToRemote, false);
     assert.equal(flow.bridgeDryRun.pullRequestCandidate.base, "main");
     assert.equal(flow.bridgeDryRun.pullRequestCandidate.head, "governance/proposal-1");
@@ -126,7 +126,7 @@ test("S1b: portal store persists sanitized snapshot and deterministic event-log"
     const receipt = await store.persistState({
       state: flow.proposedState,
       events: buildPortalSpikeEvents({
-        workspaceId: "ws-mundo-da-mel",
+        workspaceId: "ws-acme-honey",
         sourceRevision: "rev-governance-001",
       }),
     });
@@ -249,7 +249,7 @@ test("S1d: Better Auth HTTP flow persists signup, session and organization in SQ
   assert.equal(report.persisted.sessionCount, 1);
   assert.equal(report.persisted.organizationCount, 1);
   assert.equal(report.persisted.memberCount, 1);
-  assert.equal(report.persisted.createdOrganizationSlug, "mundo-da-mel");
+  assert.equal(report.persisted.createdOrganizationSlug, "acme-honey");
   assert.equal(report.persisted.creatorRole, "owner");
   assert.deepEqual(report.boundary, {
     governanceAuthorityGrantedByPortal: false,
@@ -279,7 +279,7 @@ test("S1e: Better Auth HTTP invite and accept flow persists portal membership in
   assert.equal(report.persisted.acceptedInvitationCount, 1);
   assert.equal(report.persisted.ownerMemberCount, 1);
   assert.equal(report.persisted.invitedMemberCount, 1);
-  assert.equal(report.persisted.organizationSlug, "mundo-da-mel-invite");
+  assert.equal(report.persisted.organizationSlug, "acme-honey-invite");
   assert.deepEqual(report.sharedAccess, {
     creatorOrganizationCount: 1,
     inviteeOrganizationCount: 1,

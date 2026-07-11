@@ -11,7 +11,7 @@ import {
 const SCOPE: PortalQueryScope = {
   accountId: "acct-rosana",
   principalId: "principal-rosana",
-  workspaceId: "mundo-da-mel",
+  workspaceId: "acme-honey",
   authProvider: "better-auth",
   sessionEpoch: "session-epoch-2026-07-06",
   membershipRevision: "membership-rev-001",
@@ -48,7 +48,7 @@ test("APP-45 governed query key is scoped by account, session, workspace and mem
     "session",
     "session-epoch-2026-07-06",
     "workspace",
-    "mundo-da-mel",
+    "acme-honey",
     "membership",
     "membership-rev-001",
     "resource",
@@ -93,7 +93,7 @@ test("APP-45 sensitive cache events parse fail-closed and return explicit direct
     sensitiveQueryCacheDirective({
       type: "workspace-switch",
       accountId: "acct-rosana",
-      fromWorkspaceId: "mundo-da-mel",
+      fromWorkspaceId: "acme-honey",
       toWorkspaceId: "cliente-acme",
     }),
     {
@@ -107,13 +107,13 @@ test("APP-45 sensitive cache events parse fail-closed and return explicit direct
     sensitiveQueryCacheDirective({
       type: "invite-accept",
       accountId: "acct-rosana",
-      workspaceId: "mundo-da-mel",
+      workspaceId: "acme-honey",
       membershipRevision: "membership-rev-002",
     }),
     {
       action: "invalidate-workspace-sensitive",
       accountId: "acct-rosana",
-      workspaceId: "mundo-da-mel",
+      workspaceId: "acme-honey",
       reason: "invite-accept",
     }
   );
@@ -123,7 +123,7 @@ test("APP-45 sensitive cache events parse fail-closed and return explicit direct
       SensitiveCacheEventSchema.parse({
         type: "invite-accept",
         accountId: "acct-rosana",
-        workspaceId: "mundo-da-mel",
+        workspaceId: "acme-honey",
         token: "invite-token-must-not-enter-cache-policy",
       }),
     /Unrecognized key/

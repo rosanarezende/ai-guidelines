@@ -46,7 +46,7 @@ test("read-model routes em workspace real não-demo expõem indisponível, não 
   const signup = await request.post("/api/local/signup", { data: { displayName: "Ana Admin" } });
   expect(signup.ok()).toBeTruthy();
   const org = await request.post("/api/local/organizations", {
-    data: { name: "Mundo da Mel", kind: "company" },
+    data: { name: "Acme Honey", kind: "company" },
   });
   expect(org.ok()).toBeTruthy();
 

@@ -139,8 +139,8 @@ export async function runBetterAuthSQLitePortalHttpSpike(options?: {
       auth,
       "/organization/create",
       {
-        name: "Mundo da Mel Governance",
-        slug: "mundo-da-mel",
+        name: "Acme Honey Governance",
+        slug: "acme-honey",
       },
       sessionCookie
     );
@@ -160,7 +160,7 @@ export async function runBetterAuthSQLitePortalHttpSpike(options?: {
       persisted.sessionCount === 1 &&
       persisted.organizationCount === 1 &&
       persisted.memberCount === 1 &&
-      createdOrganizationSlug === "mundo-da-mel" &&
+      createdOrganizationSlug === "acme-honey" &&
       persisted.creatorRole === "owner";
 
     return {
@@ -252,7 +252,7 @@ export async function runBetterAuthSQLiteInviteAcceptHttpSpike(options?: {
       auth,
       creatorEmail: "creator.portal@example.com",
       inviteeEmail: "guest.portal@example.com",
-      organizationSlug: "mundo-da-mel-invite",
+      organizationSlug: "acme-honey-invite",
     });
     const persisted = readInviteAcceptSqliteState(sqlite, flow.organizationSlug);
     const ok =
@@ -347,7 +347,7 @@ export async function runBetterAuthPostgresPortalLiveSpike(
       auth,
       creatorEmail: `creator-${namespace}@example.com`,
       inviteeEmail: `guest-${namespace}@example.com`,
-      organizationSlug: `mundo-da-mel-${namespace}`,
+      organizationSlug: `acme-honey-${namespace}`,
     });
     const persisted = await readInviteAcceptPostgresState(pool, flow.organizationSlug);
     const ok =
@@ -528,7 +528,7 @@ async function runInviteAcceptHttpFlow({
     auth,
     "/organization/create",
     {
-      name: "Mundo da Mel Governance",
+      name: "Acme Honey Governance",
       slug: organizationSlug,
     },
     creatorCookie

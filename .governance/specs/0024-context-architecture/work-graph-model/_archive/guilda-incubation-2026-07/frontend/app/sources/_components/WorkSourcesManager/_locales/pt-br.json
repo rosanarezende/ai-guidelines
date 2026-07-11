@@ -19,7 +19,7 @@
   "pathRequired": "Informe um caminho acessível pela aplicação para escanear esta fonte.",
   "pathOptional": "Opcional para fontes declaradas ou providers ainda não conectados.",
   "pathScopeWarning": "Não cole segredos nem dados sensíveis aqui. O caminho fica registrado no estado local do workspace; conteúdo dos arquivos não é armazenado, apenas inventário/hash/estado de scan.",
-  "labelHelp": "Ex.: mundo-da-mel-site, checkout-api, design-system. Se você selecionar uma pasta, o app sugere um nome.",
+  "labelHelp": "Ex.: acme-honey-site, checkout-api, design-system. Se você selecionar uma pasta, o app sugere um nome.",
   "manualPathTitle": "Modo avançado: informar caminho que o app consegue ler",
   "manualPathBody": "Use quando o app está rodando na mesma máquina ou em um servidor que tem acesso a essa pasta. Assim o backend consegue escanear Git, sujeira local e inventário de forma mais forte que o snapshot do navegador.",
   "manualPathOpen": "Informar caminho manualmente",
