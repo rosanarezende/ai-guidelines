@@ -18,7 +18,7 @@ findings:
       DEC-0024-G26; reconciliar antes de Ready sem pr-body:pull apagaria a
       imagem via pr-body:publish, ou o Ready seria apresentado com um check
       governado vermelho."
-    disposition: open
+    disposition: accepted
     fingerprint: fc26e90aa5fc
   - id: F2
     severity: medium
@@ -30,7 +30,7 @@ findings:
       pr-body:check; resultado observado nesta auditoria: pr-ready:check verde
       com pr-body:check vermelho no mesmo HEAD, permitindo Ready com a fonte
       versionada stale."
-    disposition: open
+    disposition: accepted
     fingerprint: 74523ba7378c
   - id: F3
     severity: medium
@@ -44,7 +44,7 @@ findings:
       ocorrencias na base); nao ha RD/fronthub/PII/e-mails/segredos, mas um nome
       real de negocio entra na historia permanente do repo se o PR mergear sem
       decisao humana explicita de aceitar ou anonimizar."
-    disposition: open
+    disposition: accepted
     fingerprint: 8a0d8d265099
   - id: F4
     severity: low
@@ -55,7 +55,7 @@ findings:
       v3; a contradicao editorial no cabecalho convida leitura errada de
       autoridade num PR cujo objeto e exatamente disciplinar autoridade de
       artefatos."
-    disposition: open
+    disposition: accepted
     fingerprint: 9f734fdbbcdf
   - id: F5
     severity: low
