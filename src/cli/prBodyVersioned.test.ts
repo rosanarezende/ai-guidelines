@@ -53,8 +53,9 @@ function writeVersionedBody(repoRoot: string, body: string): string {
     ".governance",
     "specs",
     "0024-context-architecture",
-    "pr-bodies",
-    "pr-45.md"
+    "pull-requests",
+    "pr-45",
+    "body.md"
   );
   mkdirSync(path.dirname(file), { recursive: true });
   writeFileSync(file, body, "utf8");
@@ -76,9 +77,9 @@ describe("CLI — pr-body versionado [BR-PR-BODY-VERSIONED]", () => {
       expect(specDir.endsWith(path.join(".governance", "specs", "0024-context-architecture"))).toBe(
         true
       );
-      expect(file.endsWith(path.join("0024-context-architecture", "pr-bodies", "pr-45.md"))).toBe(
-        true
-      );
+      expect(
+        file.endsWith(path.join("0024-context-architecture", "pull-requests", "pr-45", "body.md"))
+      ).toBe(true);
     }));
 
   it("confirma PR body sincronizado quando arquivo versionado e GitHub equivalem", () =>

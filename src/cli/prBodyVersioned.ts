@@ -66,6 +66,22 @@ export function findSpecDirectory(input: {
   throw new Error(`Spec ${input.specId} ambígua em ${specsRoot}: ${matches.join(", ")}.`);
 }
 
+export function formatVersionedPullRequestDirectoryName(prNumber: number): string {
+  return `pr-${prNumber}`;
+}
+
+export function resolveVersionedPullRequestDirectory(input: {
+  readonly repoRoot: string;
+  readonly prNumber: number;
+  readonly specId: string;
+}): string {
+  return path.join(
+    findSpecDirectory({ repoRoot: input.repoRoot, specId: input.specId }),
+    "pull-requests",
+    formatVersionedPullRequestDirectoryName(input.prNumber)
+  );
+}
+
 export function resolveVersionedPrBodyPath(input: {
   readonly repoRoot: string;
   readonly prNumber: number;
@@ -77,9 +93,12 @@ export function resolveVersionedPrBodyPath(input: {
     throw new Error("Informe --file ou --spec para localizar o PR body versionado.");
   }
   return path.join(
-    findSpecDirectory({ repoRoot: input.repoRoot, specId: input.specId }),
-    "pr-bodies",
-    `pr-${input.prNumber}.md`
+    resolveVersionedPullRequestDirectory({
+      repoRoot: input.repoRoot,
+      prNumber: input.prNumber,
+      specId: input.specId,
+    }),
+    "body.md"
   );
 }
 

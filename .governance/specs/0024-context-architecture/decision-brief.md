@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-07-10 — **`[DEC-0024-G25]` registrada**: "Spec" permanece como invólucro histórico/caminho físico; a linguagem viva de mapas, geradores e projeções passa a ser **trabalho governado** e **work graph**, para não confundir container histórico, taxonomia de artefatos e grafo operacional. Antes — **`[DEC-0024-G24]` registrada**: fecha o contrato do checkpoint `artifact-taxonomy-and-model-review-contract`: `disposition` vira dimensão ortogonal, `pre-coding-review` exige `subject`+`date`, `artifact-kind:check` valida research/assets classificados e a incubação Guilda fica preservada como evidência/legado fora do app vivo. Não declara Ready/Human Gate.
+> Última atualização: 2026-07-10 — **`[DEC-0024-G26]` registrada**: artefatos versionados de Pull Request passam a morar em `pull-requests/pr-N/`, começando por `body.md`, e futuras continuações/assets ficam sob o mesmo contêiner de PR. Antes — **`[DEC-0024-G25]` registrada**: "Spec" permanece como invólucro histórico/caminho físico; a linguagem viva de mapas, geradores e projeções passa a ser **trabalho governado** e **work graph**, para não confundir container histórico, taxonomia de artefatos e grafo operacional. Não declara Ready/Human Gate.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -724,6 +724,35 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G26] Artefatos de Pull Request sob `pull-requests/pr-N/`
+
+**Pergunta:** `pr-bodies/` deve continuar como pasta isolada, enquanto continuações e assets específicos de PR nascem em outros lugares, ou o framework deve ter uma casa canônica por Pull Request para reunir body versionado, assets e pacotes de continuação?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-07-10, após QRD sobre PRs grandes, continuação governada e aprendizado do work-graph-model. -->
+
+**Contexto:** O PR #45 mostrou que PRs longos não são apenas problema de texto: eles precisam de um contêiner versionado para o que pertence ao PR, sem transformar GitHub em memória e sem espalhar `body`, assets e propostas de continuação por pastas paralelas. `pr-bodies/` nasceu dentro da Spec 0024 para resolver o body como fonte versionada, mas o próprio dogfood revelou uma organização melhor: o PR é uma superfície de revisão/projeção; portanto, seus artefatos devem ficar juntos por número de PR.
+
+**Decisão (Resolved):**
+
+- A casa canônica de artefatos versionados de PR passa a ser `pull-requests/pr-<n>/` dentro do trabalho governado.
+- O body versionado do PR passa a ser `pull-requests/pr-<n>/body.md`; a pasta isolada `pr-bodies/` deixa de ser o padrão.
+- Futuras automações de continuação devem usar o mesmo contêiner, por exemplo `pull-requests/pr-<n>/continuations/<date>-<slug>/`.
+- Assets específicos de PR devem ficar em `pull-requests/pr-<n>/assets/`; assets de valor geral continuam em `assets/` conforme `artifact-kind`/`disposition`.
+- O contêiner de PR é **projeção/evidência/revisão**, não autoridade de topologia. `state.yml`, `tasks.md`, `decision-brief.md`, reviews e gates continuam sendo as fontes governadas do trabalho.
+- Scripts `pr-body:check`, `pr-body:publish` e `pr-body:pull`, quando chamados com `--spec` + `--pr`, devem derivar o caminho `pull-requests/pr-<n>/body.md`.
+
+**Consequências práticas:**
+
+- O body do PR #45 migra de `pr-bodies/pr-45.md` para `pull-requests/pr-45/body.md`.
+- O mapa vivo e a documentação operacional passam a apontar para a nova casa.
+- A futura sequência `continuation:check -> continuation:prepare -> continuation:create-pr` deve produzir pacotes versionáveis sob `pull-requests/pr-N/continuations/`, com decisão humana explícita antes de qualquer criação de PR.
+
+**O que NÃO está sendo decidido:** criar automações de continuação nesta fatia; converter PR #45 para Ready; executar Human Gate; alterar a topologia; criar ou publicar novo PR; mover todo histórico antigo fora do PR #45; transformar o diretório de PR em SSOT do trabalho.
+
+**Status:** Resolved (2026-07-10) / @rosanarezende — pasta canônica de PR definida como `pull-requests/pr-N/`, com body versionado em `body.md` e espaço reservado para assets/continuations.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -832,6 +861,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G23]` — Resolved 2026-06-23 / @rosanarezende
 - [x] `[DEC-0024-G24]` — Resolved 2026-07-10 / @rosanarezende
 - [x] `[DEC-0024-G25]` — Resolved 2026-07-10 / @rosanarezende
+- [x] `[DEC-0024-G26]` — Resolved 2026-07-10 / @rosanarezende
 
 ---
 

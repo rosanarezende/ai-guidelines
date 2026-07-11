@@ -132,6 +132,8 @@ O `governance-pr-check` valida o body conforme o **tipo** do PR — derivado do 
 
 Baselines preservadas pelo `npm run pr-body:update`: `## Visão pretendida` (execution), `## Visão de valor` e `## Arquitetura pretendida` (governance) — mudanças entram como atualização complementar, nunca apagando o original.
 
+Quando o body do PR precisa ser versionado no trabalho governado, a casa canônica é `.governance/specs/<id>-<slug>/pull-requests/pr-<n>/body.md`. A pasta do PR também é o lugar previsto para assets específicos e pacotes de continuação (`continuations/`), sem transformar o PR em fonte de autoridade da topologia.
+
 ---
 
 ## Fechamento de PR (sequência canônica)
