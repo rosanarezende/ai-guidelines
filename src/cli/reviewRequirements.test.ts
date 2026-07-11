@@ -15,6 +15,8 @@ import {
   matchesGlob,
   resolveRequirement,
   resolveReviewType,
+  reviewPlanDecisionIssues,
+  reviewPlanToNodeOverrides,
 } from "./reviewRequirements.js";
 import { ReviewPolicy, parseReviewPolicy } from "../infrastructure/yaml/reviewPolicyReader.js";
 
@@ -272,6 +274,61 @@ review_requirement_overrides:
     });
     expect(r.errors.some((e) => e.includes("relaxation NÃO permitida"))).toBe(true);
     expect(r.level).toBe("required");
+  });
+});
+
+describe("review_plan — recomendação do sistema + decisão humana [CO-4 r9]", () => {
+  it("projeta owner_decision required como override situado que bloqueia se faltar review atual aprovado", () => {
+    const p = policy("");
+    const { registry } = buildReviewTypeRegistry(p);
+    const overrides = reviewPlanToNodeOverrides({
+      technical_audit: {
+        system_recommendation: "recommended",
+        owner_decision: "required",
+        actor: "owner",
+        reason: "PR altera contrato de Ready.",
+      },
+    });
+    const statuses = deriveEffectiveReviewStatuses({
+      registry,
+      policy: p,
+      ctx: CTX,
+      nodeOverrides: overrides,
+      observed: {},
+      functionalHead: "abc1234",
+    });
+    const ta = statuses.find((s) => s.typeId === "technical_audit")!;
+    expect(ta.requirement).toBe("required");
+    expect(ta.requirementSource).toContain("node-override");
+    expect(ta.blocking).toBe(true);
+  });
+
+  it("projeta owner_decision waived como optional com actor/reason, sem bloquear", () => {
+    const overrides = reviewPlanToNodeOverrides({
+      security_review: {
+        system_recommendation: "optional",
+        owner_decision: "waived",
+        actor: "owner",
+        reason: "Sem alteração de runtime sensível.",
+      },
+    });
+    expect(overrides.security_review).toEqual({
+      requirement: "optional",
+      actor: "owner",
+      reason: "Sem alteração de runtime sensível.",
+    });
+    expect(reviewPlanDecisionIssues({})).toHaveLength(0);
+  });
+
+  it("owner_decision pending não cria override e aparece como pendência de Ready", () => {
+    const plan = {
+      architectural_review: {
+        system_recommendation: "recommended" as const,
+        owner_decision: "pending" as const,
+      },
+    };
+    expect(reviewPlanToNodeOverrides(plan)).toEqual({});
+    expect(reviewPlanDecisionIssues(plan)[0].message).toContain("decisão humana pendente");
   });
 });
 

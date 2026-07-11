@@ -4,6 +4,7 @@ import {
   isGateStatus,
   isWorkflowStage,
   isTopologyRole,
+  NodeReviewPlanEntry,
   NodeReviewRequirementOverride,
   PrTopologyNode,
   WorkflowTopology,
@@ -28,10 +29,19 @@ const ALLOWED_NODE_KEYS = [
   "terminal",
   "sequence",
   "checkpoints",
+  "review_plan",
   "review_requirements",
 ] as const;
 const ALLOWED_NODE_REVIEW_OVERRIDE_KEYS = ["requirement", "reason", "actor"] as const;
+const ALLOWED_NODE_REVIEW_PLAN_KEYS = [
+  "system_recommendation",
+  "owner_decision",
+  "reason",
+  "actor",
+] as const;
 const REQUIREMENT_LEVELS = ["disabled", "optional", "recommended", "required"] as const;
+const REVIEW_PLAN_RECOMMENDATIONS = ["not_needed", "optional", "recommended", "required"] as const;
+const REVIEW_PLAN_DECISIONS = ["pending", "waived", "optional", "recommended", "required"] as const;
 
 /** Overrides situados por tipo de review do nó (CO-4, rodada 8). */
 function parseNodeReviewRequirements(
@@ -70,6 +80,62 @@ function parseNodeReviewRequirements(
     }
     result[typeId] = {
       requirement: o.requirement as NodeReviewRequirementOverride["requirement"],
+      ...(o.reason !== undefined ? { reason: o.reason } : {}),
+      ...(o.actor !== undefined ? { actor: o.actor } : {}),
+    };
+  }
+  return result;
+}
+
+/** Plano situado: sistema recomenda, owner decide; sem decisao implicita. */
+function parseNodeReviewPlan(raw: unknown, where: string): Record<string, NodeReviewPlanEntry> {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new WorkflowStateParseError(`${where} must be a mapping of <type_id> decisions`);
+  }
+  const result: Record<string, NodeReviewPlanEntry> = {};
+  for (const [typeId, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      throw new WorkflowStateParseError(`${where}.${typeId} must be a mapping`);
+    }
+    const o = value as Record<string, unknown>;
+    for (const key of Object.keys(o)) {
+      if (!(ALLOWED_NODE_REVIEW_PLAN_KEYS as readonly string[]).includes(key)) {
+        throw new WorkflowStateParseError(
+          `${where}.${typeId}: unexpected key "${key}" (allowed: ${ALLOWED_NODE_REVIEW_PLAN_KEYS.join(", ")})`
+        );
+      }
+    }
+    if (
+      typeof o.system_recommendation !== "string" ||
+      !(REVIEW_PLAN_RECOMMENDATIONS as readonly string[]).includes(o.system_recommendation)
+    ) {
+      throw new WorkflowStateParseError(
+        `${where}.${typeId}.system_recommendation must be one of: ${REVIEW_PLAN_RECOMMENDATIONS.join("|")}`
+      );
+    }
+    if (
+      typeof o.owner_decision !== "string" ||
+      !(REVIEW_PLAN_DECISIONS as readonly string[]).includes(o.owner_decision)
+    ) {
+      throw new WorkflowStateParseError(
+        `${where}.${typeId}.owner_decision must be one of: ${REVIEW_PLAN_DECISIONS.join("|")}`
+      );
+    }
+    if (o.reason !== undefined && typeof o.reason !== "string") {
+      throw new WorkflowStateParseError(`${where}.${typeId}.reason must be a string`);
+    }
+    if (o.actor !== undefined && typeof o.actor !== "string") {
+      throw new WorkflowStateParseError(`${where}.${typeId}.actor must be a string`);
+    }
+    if (o.owner_decision !== "pending" && (!o.actor || !o.reason)) {
+      throw new WorkflowStateParseError(
+        `${where}.${typeId}: owner_decision "${o.owner_decision}" requires actor and reason`
+      );
+    }
+    result[typeId] = {
+      system_recommendation:
+        o.system_recommendation as NodeReviewPlanEntry["system_recommendation"],
+      owner_decision: o.owner_decision as NodeReviewPlanEntry["owner_decision"],
       ...(o.reason !== undefined ? { reason: o.reason } : {}),
       ...(o.actor !== undefined ? { actor: o.actor } : {}),
     };
@@ -237,6 +303,13 @@ function parseTopology(raw: unknown): WorkflowTopology {
               `topology.prs.${groupName}[${index}].review_requirements`
             )
           : undefined;
+      const reviewPlan =
+        nodeObj.review_plan !== undefined && nodeObj.review_plan !== null
+          ? parseNodeReviewPlan(
+              nodeObj.review_plan,
+              `topology.prs.${groupName}[${index}].review_plan`
+            )
+          : undefined;
 
       nodes.push({
         id: nodeObj.id,
@@ -245,6 +318,7 @@ function parseTopology(raw: unknown): WorkflowTopology {
         terminal: nodeObj.terminal,
         sequence: nodeObj.sequence as number | null,
         checkpoints: nodeCheckpoints,
+        ...(reviewPlan ? { review_plan: reviewPlan } : {}),
         ...(reviewRequirements ? { review_requirements: reviewRequirements } : {}),
       });
     }
@@ -397,6 +471,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
         terminal: n.terminal,
         sequence: n.sequence,
         checkpoints: [...n.checkpoints],
+        ...(n.review_plan ? { review_plan: n.review_plan } : {}),
         ...(n.review_requirements ? { review_requirements: n.review_requirements } : {}),
       }));
     }
@@ -408,6 +483,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
         terminal: n.terminal,
         sequence: n.sequence,
         checkpoints: [...n.checkpoints],
+        ...(n.review_plan ? { review_plan: n.review_plan } : {}),
         ...(n.review_requirements ? { review_requirements: n.review_requirements } : {}),
       }));
     }
@@ -419,6 +495,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
         terminal: n.terminal,
         sequence: n.sequence,
         checkpoints: [...n.checkpoints],
+        ...(n.review_plan ? { review_plan: n.review_plan } : {}),
         ...(n.review_requirements ? { review_requirements: n.review_requirements } : {}),
       }));
     }

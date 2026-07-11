@@ -324,10 +324,17 @@ git push     # pre-push: validate:changed
 
 ## Validação, evidências e checklist
 
+### Plano situado de revisões
+
+Fonte versionada: `state.yml § topology.prs.active[].review_plan`.
+
+- Technical Audit: sistema recomendou `recommended`; owner decidiu `required`. Executada em `reviews/c-artifact-taxonomy-and-model-review-contract-technical_audit.yml` (`changes_requested`). F1-F4 foram reconciliados; F5 foi materializado como plano situado de revisões. Antes de Ready/Human Gate, precisa estar `current+approved` ou ter evento/review revalidando a correção.
+- Architectural Review: sistema recomendou `recommended`; owner decidiu `required`. Pendente antes de Ready/Human Gate.
+- Security Review: sistema recomendou `optional`; owner decidiu `waived` neste PR porque o escopo atual é governança, processo e documentação, sem nova superfície runtime de auth, secrets ou dados de usuário. TA/AR podem reabrir esse risco se encontrarem evidência.
+
 ### Evidências e gates
 
-- Technical Audit: executada em `reviews/c-artifact-taxonomy-and-model-review-contract-technical_audit.yml` (`changes_requested`). F1-F4 foram reconciliados nesta rodada; F5 segue pendente de decisão da owner antes de qualquer tightening de política.
-- Architectural Review: pendente — será executada depois da reconciliação técnica e antes do Human Gate.
+- `pr-ready:check` deve bloquear enquanto revisão decidida como obrigatória no `review_plan` não estiver `current+approved`; isso é intencional, não erro.
 - Human Gate: pendente — decisão reservada à owner; não é autorização de merge.
 - Merge: fora do escopo deste PR individual; a stack segue em modo unit.
 - CI: estado do PR reconciliado via GitHub nesta revisão — `governance-pr-check`, `validate-changed`, `repo-validation`, `smoke`, `osv-scan`/OSV-Scanner e Cloudflare Pages verdes; `scan-full-advisory` e `validate-os` aparecem como skipped esperado. Repetir a reconciliação no HEAD final antes de Ready.

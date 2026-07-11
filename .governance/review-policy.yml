@@ -1,12 +1,16 @@
 # Review Policy — camada governada de evidência/review.
 # GitHub continua responsável por enforcement de merge em main.
 #
-# QUATRO conceitos INDEPENDENTES (CO-4, rodada 8 — capacidade ≠ obrigação):
+# CINCO conceitos INDEPENDENTES (CO-4, rodada 9 — capacidade ≠ obrigação):
 #   review_types         → catálogo: o que cada review É (identidade/objetivo/vetores)
 #   review_applicability → onde cada tipo FAZ SENTIDO (perfil/labels/paths)
 #   review_requirements  → quando/com qual força é exigido (disabled|optional|recommended|required)
+#   review_plan          → plano situado por PR: sistema recomenda; owner decide
+#                          (pending|waived|optional|recommended|required)
 #   estado/freshness     → derivado dos artefatos (missing|current|stale) — NUNCA cria obrigação
-# Somente requirement=required + estado≠current bloqueia Ready/gate.
+# Somente decisão/requirement required + estado≠current bloqueia Ready/gate.
+# Uma decisão pending no review_plan bloqueia Ready porque o PR ainda não declarou
+# honestamente se aquela revisão será exigida, opcional ou dispensada.
 #
 # Perfis de colaboração governam APENAS a camada nativa do GitHub (approvals,
 # code owners, merge) — NÃO impõem reviews semânticos (team ≠ TA obrigatório).

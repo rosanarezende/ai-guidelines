@@ -450,6 +450,33 @@ describe("GovernedFlow", () => {
     expect(result.failures.join(" ")).toMatch(/working tree/);
   });
 
+  it("PR Ready bloqueia quando o plano situado de reviews ainda tem decisão humana pendente", () => {
+    const result = derivePrReadyFlow({
+      prNumber: 45,
+      prState: "OPEN",
+      prDraft: true,
+      readyBodyContractReasons: [],
+      smokeTestsSuspended: false,
+      smokeRequired: false,
+      checks: [{ name: "validate", bucket: "pass" }],
+      localHeadSha: "abc1234",
+      prHeadRefOid: "abc1234",
+      workingTreeClean: true,
+      checkpoint: {
+        id: "checkpoint-artifact-taxonomy-and-model-review-contract",
+        gateDecision: null,
+        openBlockingCount: 0,
+        reviewPlanDecisionReasons: [
+          "technical_audit: decisão humana pendente (sistema recomendou recommended).",
+        ],
+        reviewStatuses: [],
+      },
+    });
+
+    expect(result.failures.join(" ")).toContain("plano de revisão do PR");
+    expect(result.failures.join(" ")).toContain("technical_audit");
+  });
+
   it("última etapa pronta não recomenda advance-step", () => {
     const facts = coFlowFacts({
       steps: [

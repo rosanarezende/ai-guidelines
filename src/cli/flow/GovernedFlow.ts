@@ -147,6 +147,7 @@ export interface PrReadyFlowFacts {
     readonly id: string;
     readonly gateDecision: "approved" | "changes_requested" | null;
     readonly openBlockingCount: number;
+    readonly reviewPlanDecisionReasons?: ReadonlyArray<string>;
     readonly reviewStatuses: ReadonlyArray<{
       readonly typeId: string;
       readonly requirement: "disabled" | "optional" | "recommended" | "required";
@@ -697,6 +698,9 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
       failures.push(
         `há ${checkpoint.openBlockingCount} finding(s) bloqueante(s) (critical/high) aberto(s) no checkpoint "${checkpoint.id}".`
       );
+    }
+    for (const reason of checkpoint.reviewPlanDecisionReasons ?? []) {
+      failures.push(`plano de revisão do PR: ${reason}`);
     }
     for (const s of checkpoint.reviewStatuses) {
       for (const e of s.errors) failures.push(`policy de reviews inválida: ${e}`);

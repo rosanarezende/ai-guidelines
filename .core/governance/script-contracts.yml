@@ -396,7 +396,7 @@ profiles:
         category: governance
         mutates: true
         consumers: [human]
-        description: Valida precondicoes da conversao Draft->Ready (FU-2); read-only, nao converte.
+        description: "Valida precondicoes da conversao Draft->Ready (FU-2): plano situado de revisoes decidido, reviews obrigatorios current+approved, PR body e demais gates; read-only, nao converte."
       - name: continuation:check
         command: npm run build && node dist/cli/bin.js continuation-check
         category: governance

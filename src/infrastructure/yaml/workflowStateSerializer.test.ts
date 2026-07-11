@@ -169,6 +169,66 @@ ${active}
       );
     });
 
+    it("DADO nó com review_plan ENTÃO parseia recomendação, decisão humana e round-trippa", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+        review_plan:
+          technical_audit:
+            system_recommendation: recommended
+            owner_decision: required
+            reason: "PR altera contrato de review e readiness."
+            actor: "owner"
+          security_review:
+            system_recommendation: optional
+            owner_decision: waived
+            reason: "Sem nova superfície de runtime."
+            actor: "owner"`);
+      const state = parseWorkflowState(yaml);
+      const plan = state.topology?.prs.active[0].review_plan;
+      expect(plan?.technical_audit.owner_decision).toBe("required");
+      expect(plan?.security_review.system_recommendation).toBe("optional");
+      const reparsed = parseWorkflowState(serializeWorkflowState(state));
+      expect(reparsed.topology?.prs.active[0].review_plan).toEqual(plan);
+    });
+
+    it("DADO review_plan com decisão final sem actor/reason ENTÃO rejeita", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+        review_plan:
+          technical_audit:
+            system_recommendation: recommended
+            owner_decision: required`);
+      expect(() => parseWorkflowState(yaml)).toThrow(/requires actor and reason/);
+    });
+
+    it("DADO review_plan pending sem decisão humana final ENTÃO aceita como pendência explícita", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+        review_plan:
+          technical_audit:
+            system_recommendation: recommended
+            owner_decision: pending`);
+      const state = parseWorkflowState(yaml);
+      expect(state.topology?.prs.active[0].review_plan?.technical_audit.owner_decision).toBe(
+        "pending"
+      );
+    });
+
     it("DADO override com requirement inválido ou chave desconhecida ENTÃO rejeita", () => {
       const invalidLevel = withNodes(`      - id: pr-1
         github_pr: 33

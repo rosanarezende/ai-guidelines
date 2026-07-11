@@ -489,7 +489,7 @@ describe("CLI — pr-ready:check · saída e semântica [BR-PR-READY-CHECK]", ()
     });
     expect(code).toBe(1);
     expect(lines.join("\n")).toContain(
-      "PR body final → CI verde no HEAD final → Draft → Ready → Human Gate"
+      "plano situado de revisões decidido → PR body final → CI verde no HEAD final → reviews obrigatórios current+approved → Draft → Ready → Human Gate"
     );
   });
 

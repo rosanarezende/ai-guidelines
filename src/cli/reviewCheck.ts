@@ -41,6 +41,8 @@ import {
   ReviewTypeRegistry,
   availableTypesLine,
   buildReviewTypeRegistry,
+  reviewPlanDecisionIssues,
+  reviewPlanToNodeOverrides,
   resolveRequirement,
 } from "./reviewRequirements.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
@@ -62,6 +64,9 @@ export interface CheckpointTopologyContext {
   readonly nodeId: string;
   readonly nodeRole: string;
   readonly overrides?: Readonly<Record<string, NodeReviewOverride>>;
+  /** Decisões humanas do plano situado do PR; aplicadas somente no Ready check. */
+  readonly reviewPlanOverrides?: Readonly<Record<string, NodeReviewOverride>>;
+  readonly reviewPlanIssues?: readonly string[];
 }
 
 export interface SpecArtifacts {
@@ -473,10 +478,14 @@ export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: 
               ...topology.prs.active,
               ...topology.prs.planned,
             ]) {
+              const reviewPlanOverrides = reviewPlanToNodeOverrides(node.review_plan);
+              const planIssues = reviewPlanDecisionIssues(node.review_plan).map((i) => i.message);
               const nodeContext: CheckpointTopologyContext = {
                 nodeId: node.id,
                 nodeRole: node.role,
                 ...(node.review_requirements ? { overrides: node.review_requirements } : {}),
+                ...(Object.keys(reviewPlanOverrides).length > 0 ? { reviewPlanOverrides } : {}),
+                ...(planIssues.length > 0 ? { reviewPlanIssues: planIssues } : {}),
               };
               const requiredRoles = requiredRolesForNode(
                 { role: node.role, overrides: node.review_requirements },

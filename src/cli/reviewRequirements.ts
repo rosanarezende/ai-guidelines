@@ -1,5 +1,5 @@
 /**
- * Governança de reviews em QUATRO conceitos independentes (CO-4, rodada 8):
+ * Governança de reviews em CINCO conceitos independentes (CO-4, rodada 8):
  *
  *   1. CATÁLOGO  — `review_types`: o que cada review É (identidade, aliases,
  *      objetivo, vetores, template). Capacidade disponível ≠ obrigação.
@@ -8,9 +8,12 @@
  *      `unknown` (nunca `false` silencioso).
  *   3. REQUISITO — disabled | optional | recommended | required, resolvido por
  *      defaults → regras do repo (prioridade; conflito de mesma prioridade =
- *      ERRO, nunca escolha arbitrária) → override situado do nó (tightening/
+ *      ERRO, nunca escolha arbitrária) → decisão situada do nó (tightening/
  *      relaxation governados pela policy, com actor+reason).
- *   4. ESTADO — missing | current | stale | in-progress (freshness do artefato
+ *   4. PLANO SITUADO — `state.yml § topology...review_plan`: sistema recomenda,
+ *      owner decide. Decisão pending bloqueia Ready por honestidade; decisão
+ *      final projeta requisito efetivo sem reescrever a policy global.
+ *   5. ESTADO — missing | current | stale | in-progress (freshness do artefato
  *      contra a cabeça FUNCIONAL). Freshness NÃO cria obrigação.
  *
  * SOMENTE `requirement = required` + `state != current` (ou decisão ≠ approved)
@@ -25,6 +28,11 @@ import {
   ReviewRequirementLevel,
   REQUIREMENT_LEVELS,
 } from "../infrastructure/yaml/reviewPolicyReader.js";
+import type {
+  NodeReviewPlanDecision,
+  NodeReviewPlanEntry,
+  NodeReviewRequirementOverride,
+} from "../domain/workflow/WorkflowState.js";
 
 // ── Catálogo ─────────────────────────────────────────────────────────────────
 
@@ -373,6 +381,61 @@ export interface NodeReviewOverride {
   readonly requirement: ReviewRequirementLevel;
   readonly reason?: string;
   readonly actor?: string;
+}
+
+const PLAN_DECISION_TO_REQUIREMENT: Partial<
+  Readonly<Record<NodeReviewPlanDecision, ReviewRequirementLevel>>
+> = {
+  waived: "optional",
+  optional: "optional",
+  recommended: "recommended",
+  required: "required",
+};
+
+export interface ReviewPlanDecisionIssue {
+  readonly typeId: string;
+  readonly message: string;
+}
+
+export function reviewPlanToNodeOverrides(
+  plan?: Readonly<Record<string, NodeReviewPlanEntry>>
+): Record<string, NodeReviewOverride> {
+  const overrides: Record<string, NodeReviewOverride> = {};
+  for (const [typeId, entry] of Object.entries(plan ?? {})) {
+    const requirement = PLAN_DECISION_TO_REQUIREMENT[entry.owner_decision];
+    if (!requirement) continue;
+    overrides[typeId] = {
+      requirement,
+      ...(entry.reason ? { reason: entry.reason } : {}),
+      ...(entry.actor ? { actor: entry.actor } : {}),
+    };
+  }
+  return overrides;
+}
+
+export function reviewPlanDecisionIssues(
+  plan?: Readonly<Record<string, NodeReviewPlanEntry>>
+): readonly ReviewPlanDecisionIssue[] {
+  const issues: ReviewPlanDecisionIssue[] = [];
+  for (const [typeId, entry] of Object.entries(plan ?? {})) {
+    if (entry.owner_decision === "pending") {
+      issues.push({
+        typeId,
+        message: `${typeId}: decisão humana pendente (sistema recomendou ${entry.system_recommendation}).`,
+      });
+    }
+  }
+  return issues;
+}
+
+export function effectiveNodeReviewOverrides(input: {
+  readonly reviewRequirements?: Readonly<Record<string, NodeReviewRequirementOverride>>;
+  readonly reviewPlan?: Readonly<Record<string, NodeReviewPlanEntry>>;
+}): Readonly<Record<string, NodeReviewOverride>> {
+  return {
+    ...(input.reviewRequirements ?? {}),
+    ...reviewPlanToNodeOverrides(input.reviewPlan),
+  };
 }
 
 export interface ResolvedRequirement {

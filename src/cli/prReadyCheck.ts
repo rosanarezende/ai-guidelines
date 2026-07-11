@@ -4,8 +4,9 @@
  * A sequência canônica de fechamento de PR não pode depender da memória do
  * agente (PIT-0010):
  *
- *   PR body final → CI verde no HEAD final → Draft → Ready → Human Gate da
- *   owner → registro do gate artifact → próximo checkpoint.
+ *   plano situado de revisões decidido → PR body final → CI verde no HEAD final
+ *   → reviews obrigatórios current+approved → Draft → Ready → Human Gate da owner
+ *   → registro do gate artifact → próximo checkpoint.
  *
  * Este comando é READ-ONLY: valida as precondições ANTES da conversão e nunca
  * converte o PR — o ato Draft → Ready e o Human Gate seguem sendo atos
@@ -66,6 +67,8 @@ export interface ReadyCheckCheckpoint {
   readonly gateDecision: "approved" | "changes_requested" | null;
   readonly openBlockingCount: number;
   readonly reviewDecisions: ReadonlyArray<{ readonly role: string; readonly decision: string }>;
+  /** Decisões humanas pendentes no plano situado de reviews do PR. */
+  readonly reviewPlanDecisionReasons?: ReadonlyArray<string>;
   readonly reviewStatuses: ReadonlyArray<ReadyCheckReviewStatus>;
 }
 
@@ -407,7 +410,14 @@ function collectCheckpoint(
       labels: prLabels,
       changedPaths,
     },
-    ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+    ...(nodeCtx?.overrides || nodeCtx?.reviewPlanOverrides
+      ? {
+          nodeOverrides: {
+            ...(nodeCtx.overrides ?? {}),
+            ...(nodeCtx.reviewPlanOverrides ?? {}),
+          },
+        }
+      : {}),
     observed: observedReviewStates(artifacts, cursor),
     functionalHead: freshness.effectiveFunctionalHead,
   });
@@ -417,6 +427,7 @@ function collectCheckpoint(
     gateDecision: entry?.gate?.decision ?? null,
     openBlockingCount: entry?.openBlocking.length ?? 0,
     reviewDecisions: entry?.reviewDecisions ?? [],
+    reviewPlanDecisionReasons: nodeCtx?.reviewPlanIssues ?? [],
     reviewStatuses: statuses.map((s) => ({
       typeId: s.typeId,
       applicability: s.applicability,
@@ -589,7 +600,7 @@ export function main(argv: ReadonlyArray<string> = [], options: MainOptions = {}
     logger.error(`❌ pr-ready:check — PR #${pr} NÃO está pronto para Ready:`);
     for (const failure of result.failures) logger.error(`   - ${failure}`);
     logger.error(
-      `\nSequência canônica: PR body final → CI verde no HEAD final → Draft → Ready → Human Gate → registro do gate → próximo checkpoint.`
+      `\nSequência canônica: plano situado de revisões decidido → PR body final → CI verde no HEAD final → reviews obrigatórios current+approved → Draft → Ready → Human Gate → registro do gate → próximo checkpoint.`
     );
     return 1;
   }

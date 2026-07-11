@@ -210,6 +210,22 @@ topology:
         sequence: 12
         checkpoints:
           - checkpoint-artifact-taxonomy-and-model-review-contract # PR #45: taxonomia de artefatos + contrato de model-review/pre-coding review
+        review_plan:
+          technical_audit:
+            system_recommendation: recommended
+            owner_decision: required
+            actor: owner
+            reason: "PR #45 altera taxonomia, review, readiness e preservacao da incubacao Guilda; a Technical Audit foi solicitada e deve estar current+approved antes de Ready/Human Gate."
+          architectural_review:
+            system_recommendation: recommended
+            owner_decision: required
+            actor: owner
+            reason: "PR #45 altera arquitetura de governanca, mapa vivo, casa de PR e contrato de revisao; Architectural Review deve validar a direcao antes do Human Gate."
+          security_review:
+            system_recommendation: optional
+            owner_decision: waived
+            actor: owner
+            reason: "Escopo atual e governanca/processo/documentacao, sem nova superficie de runtime de auth, secrets ou dados de usuario; TA/AR podem reabrir risco se encontrarem evidencia."
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
