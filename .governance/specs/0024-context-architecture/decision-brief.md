@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-07-11 — **`[DEC-0024-G27]` registrada**: o protocolo interino de PR grande vira fluxo governado `continuation:check -> continuation:prepare -> continuation:create-pr`, preparando pacotes versionados em `pull-requests/pr-N/continuations/` e exigindo confirmação humana explícita antes de criar Draft PR. Antes — **`[DEC-0024-G26]` registrada**: artefatos versionados de Pull Request passam a morar em `pull-requests/pr-N/`, começando por `body.md`, e futuras continuações/assets ficam sob o mesmo contêiner de PR. Não declara Ready/Human Gate.
+> Última atualização: 2026-07-11 — **`[DEC-0024-G28]` registrada**: temas estruturais antigos (`G01`, `G03`, `G05`, `F-014`) deixam de ficar implícitos e passam a ter disposição explícita entre o PR #45, `internal-architecture-refactor-ddd-bdd`, `broad-flow-falsification` e `continuation-review-human-gate`. Antes — **`[DEC-0024-G27]` registrada**: o protocolo interino de PR grande vira fluxo governado `continuation:check -> continuation:prepare -> continuation:create-pr`, preparando pacotes versionados em `pull-requests/pr-N/continuations/` e exigindo confirmação humana explícita antes de criar Draft PR. Não declara Ready/Human Gate.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -782,17 +782,56 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G28] Disposição dos temas estruturais residuais antes do Ready do PR #45
+
+**Pergunta:** Como o checkpoint `artifact-taxonomy-and-model-review-contract` pode seguir para readiness sem fingir que resolveu todos os temas estruturais antigos (`G01`, `G03`, `G05`, `F-014`) e sem deixar dívida arquitetural silenciosa para os próximos checkpoints?
+
+**Modo de gate:** `aceitação` <!-- decisão de escopo/continuidade da owner, 2026-07-11, após revisão dos temas antigos ainda abertos no decision-brief e confirmação de que eles precisam ser roteados explicitamente antes do Ready do PR #45. -->
+
+**Contexto:** O PR #45 amadureceu a taxonomia de artefatos, a separação entre framework `ai-guidelines` e produto Guilda, a casa versionada de PRs e o fluxo governado de continuação. Mesmo assim, o `decision-brief` ainda listava como abertos ou residuais: estrutura/gramática (`G01`), pipeline de promoção (`G03`), projeções por consumidor (`G05`) e explicação do comportamento não-linear (`F-014`). O risco não é técnico imediato, mas de leitura: declarar readiness do PR #45 poderia parecer fechamento global desses temas, quando o PR atual só fecha a parte de taxonomia/contrato de artefatos.
+
+**Decisão (Resolved):**
+
+- O PR #45 fecha apenas a **gramática de artefatos e evidências**: `artifact-kind`, `disposition`, autoridade por domínio, projeções como não-autoridade, `pre-coding-review`/model-review e casa versionada de PRs.
+- O PR #45 **não** fecha a gramática completa do modelo operacional, o pipeline completo de promoção de work-items, todas as projeções por consumidor, nem a explicação final do comportamento não-linear.
+- `G01` fica dividido:
+  - gramática de artefatos/evidências: fechada neste PR;
+  - gramática operacional do work graph/runtime: critério explícito de `internal-architecture-refactor-ddd-bdd`.
+- `G03` passa a ser critério explícito de `broad-flow-falsification`: o próximo fluxo de falsificação deve provar quando um work-item muda de estado, quando uma promoção é apenas contextual/projetada e quando autoridade humana é exigida.
+- `G05` fica dividido:
+  - regras de projeção como não-autoridade: fechadas neste PR;
+  - contrato do graph snapshot derivado: critério explícito de `internal-architecture-refactor-ddd-bdd`;
+  - projeções por consumidor real (CLI, site, PR body, checks, mapas, jornadas): critério explícito de `broad-flow-falsification`.
+- `F-014` não bloqueia o PR #45, mas deixa de ser invisível: a explicação do comportamento não-linear deve aparecer como projeção viva/mapa ou como jornada falsificada em `broad-flow-falsification`; se continuar opcional, precisa ser rebaixada explicitamente por revisão final, não por esquecimento.
+- A matriz `work-graph-model/GUILDA-QRD-PRESERVATION-MATRIX.md` vira insumo obrigatório dos próximos checkpoints da continuação: ela não reativa o produto Guilda dentro deste repositório, mas registra quais aprendizados do incubador (`model.yml`, `tracker.md`, `features.md`, QRDs, seeds/fixtures, contratos, adapters e separação identity/governance/content) precisam ser aplicados, migrados ao repo Guilda, arquivados como evidência ou rebaixados explicitamente.
+- `continuation-review-human-gate` deve verificar se essas disposições foram cumpridas, rebaixadas por decisão explícita ou ainda bloqueiam o fechamento da continuação.
+
+**Consequências práticas:**
+
+- O `Valor entregue` do PR #45 deve declarar que a taxonomia/contrato de artefatos foi entregue sem validar o app Guilda e sem fechar toda a gramática operacional.
+- O pacote de continuação para `internal-architecture-refactor-ddd-bdd` deve tratar `G01/G05` como entradas explícitas do refactor, não como contexto solto.
+- O pacote de continuação para `internal-architecture-refactor-ddd-bdd` deve listar como leituras obrigatórias `work-graph-model/model.yml`, `work-graph-model/tracker.md`, `work-graph-model/features.md` e `work-graph-model/GUILDA-QRD-PRESERVATION-MATRIX.md`, usando-os para a gramática operacional e para o contrato do graph snapshot derivado.
+- `broad-flow-falsification` deve carregar `G03/G05/F-014` e as categorias da matriz da Guilda como critérios de falsificação, reduzindo o risco de uma suíte que só prove transições felizes.
+- A revisão final `continuation-review-human-gate` deve produzir uma disposição explícita para os aprendizados relevantes da matriz: aplicado no framework, migrado ao repo Guilda, preservado como legado/evidência ou rebaixado com justificativa.
+- A readiness do PR #45 passa a depender de honestidade de escopo, não de resolver todos os temas estruturais históricos.
+
+**O que NÃO está sendo decidido:** implementar o graph snapshot agora; reescrever `src/cli`; criar nova spec; declarar Ready; exercer Human Gate; fechar `G03/G05/F-014` por declaração; transformar o mapa visual em SSOT; promover automaticamente qualquer work-item; criar adapter de banco/grafo.
+
+**Status:** Resolved (2026-07-11) / @rosanarezende — temas estruturais residuais roteados explicitamente para PR #45, `internal-architecture-refactor-ddd-bdd`, `broad-flow-falsification` e `continuation-review-human-gate`.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
 
-| Tema                                            | Finding            | Por que ainda é pesquisa                                                                          |
-| :---------------------------------------------- | :----------------- | :------------------------------------------------------------------------------------------------ |
-| Estrutura/gramática (ex-`G01`)                  | `F-AG01` / `F-003` | pilares MECE vs reframe _estados > entidade_; `terminus` não falsificado — alternativas vivas     |
-| Pipeline de promoção (ex-`G03`)                 | `F-AG03`           | reconciliar promoção de work-item (ADR 0010) × promoção contextual — desenho em aberto            |
-| Contrato de boilerplate / casa única (ex-`G04`) | `F-AG04`           | modelo de fonte única (tri-root → SSOT) em aberto; o **drift-guard** já vira enforcement (§ 4)    |
-| Projeções por consumidor (ex-`G05`, resíduo)    | `F-AG05`           | modelo de N projeções da SSOT; a projeção _gate-ready_ já **saiu daqui** (virou GG-0001, § 3/§ 4) |
-| Explicação do comportamento não-linear          | `F-014`            | 3 explicações concorrentes, nenhuma decidida — **opcional, baixa prioridade**                     |
+| Tema                                            | Finding            | Por que ainda é pesquisa                                                                                                        |
+| :---------------------------------------------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| Estrutura/gramática (ex-`G01`)                  | `F-AG01` / `F-003` | artefatos/evidências fecham no #45; gramática operacional vai para `internal-architecture-refactor-ddd-bdd` por G28             |
+| Pipeline de promoção (ex-`G03`)                 | `F-AG03`           | reconciliar promoção de work-item (ADR 0010) × promoção contextual — critério de `broad-flow-falsification` por G28             |
+| Contrato de boilerplate / casa única (ex-`G04`) | `F-AG04`           | modelo de fonte única (tri-root → SSOT) em aberto; o **drift-guard** já vira enforcement (§ 4)                                  |
+| Projeções por consumidor (ex-`G05`, resíduo)    | `F-AG05`           | projeções como não-autoridade fecham no #45; graph snapshot vai para refactor; consumidores reais vão para falsificação por G28 |
+| Explicação do comportamento não-linear          | `F-014`            | baixa prioridade, mas com casa explícita: mapa/projeção viva ou jornada em `broad-flow-falsification` por G28                   |
 
 ---
 
@@ -861,6 +900,9 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G23`        | extensão de G08: grafo derivado + entrega incremental + camada de consulta | **Decidido** — § 1 (Resolved 2026-06-23, owner); H1/H3/H4 dentro da 0024 como projeção derivada (sem 2ª SSOT, sem spec nova); roteado a `internal-…-refactor`/`broad-flow-falsification`/#45 |
 | `G24`        | artifact-kind, disposição e contrato pre-coding-review                     | **Decidido** — § 1 (Resolved 2026-07-10, owner); `disposition` ortogonal, `pre-coding-review` com `subject`+`date`, Guilda preservada como evidência/legado sem virar app vivo               |
 | `G25`        | linguagem viva: trabalho governado + work graph                            | **Decidido** — § 1 (Resolved 2026-07-10, owner); "Spec" fica como invólucro histórico/caminho físico; novas projeções falam em trabalho governado e work graph                               |
+| `G26`        | artefatos versionados de PR sob `pull-requests/pr-N/`                      | **Decidido** — § 1 (Resolved 2026-07-10, owner); PR body, assets e continuações específicas passam a morar no contêiner versionado do PR, sem virar SSOT de topologia                        |
+| `G27`        | fluxo governado de continuação de PR                                       | **Decidido** — § 1 (Resolved 2026-07-11, owner); `continuation:check -> continuation:prepare -> continuation:create-pr`, com confirmação humana antes de Draft PR                            |
+| `G28`        | disposição de temas estruturais residuais                                  | **Decidido** — § 1 (Resolved 2026-07-11, owner); `G01/G03/G05/F-014` roteados explicitamente para #45, refactor, falsificação e revisão final sem debt silencioso                            |
 
 ---
 
@@ -891,6 +933,8 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G24]` — Resolved 2026-07-10 / @rosanarezende
 - [x] `[DEC-0024-G25]` — Resolved 2026-07-10 / @rosanarezende
 - [x] `[DEC-0024-G26]` — Resolved 2026-07-10 / @rosanarezende
+- [x] `[DEC-0024-G27]` — Resolved 2026-07-11 / @rosanarezende
+- [x] `[DEC-0024-G28]` — Resolved 2026-07-11 / @rosanarezende
 
 ---
 
