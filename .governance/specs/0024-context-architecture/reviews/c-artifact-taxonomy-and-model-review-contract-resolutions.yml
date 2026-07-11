@@ -54,3 +54,22 @@ resolutions:
       concentrada no model.yml.
     tests:
       - "npm run artifact-kind:check"
+
+  - finding: technical_audit#F5
+    action: fixed
+    ref: 2fe8ea54
+    human_context:
+      resolution_summary: "Reviews opcionais deixam de ser promessa implicita: cada PR pode registrar um plano situado, com recomendacao do sistema e decisao humana explicita."
+    evidence: >
+      `state.yml § topology` agora aceita `review_plan` por no de PR: o sistema
+      registra recomendacao (`not_needed|optional|recommended|required`) e a
+      owner registra decisao (`pending|waived|optional|recommended|required`)
+      com actor+reason quando final. Decisao `pending` bloqueia Ready por
+      honestidade; decisoes `required` viram requisito efetivo somente no
+      `pr-ready:check`, sem transformar `review:check` ou `validate` em bloqueio
+      prematuro durante Draft. O PR #45 declara TA e AR como required por
+      decisao da owner, e security_review como waived para este escopo.
+    tests:
+      - "npm run test:ts -- --runTestsByPath src/cli/prReadyCheck.test.ts src/infrastructure/yaml/workflowStateSerializer.test.ts src/cli/reviewRequirements.test.ts src/cli/flow/GovernedFlow.test.ts"
+      - "npm run review:check"
+      - "npm run validate"
