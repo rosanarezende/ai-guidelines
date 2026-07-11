@@ -397,6 +397,24 @@ profiles:
         mutates: true
         consumers: [human]
         description: Valida precondicoes da conversao Draft->Ready (FU-2); read-only, nao converte.
+      - name: continuation:check
+        command: npm run build && node dist/cli/bin.js continuation-check
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Verifica a casa versionada do PR e pacotes de continuacao sem escrever nem criar PR.
+      - name: continuation:prepare
+        command: npm run build && node dist/cli/bin.js continuation-prepare
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Prepara pacote versionado de continuacao em pull-requests/pr-N/continuations sem criar PR remoto.
+      - name: continuation:create-pr
+        command: npm run build && node dist/cli/bin.js continuation-create-pr
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Cria Draft PR a partir de pacote de continuacao somente com confirmacao explicita.
       - name: validate:changed
         command: npm run build && node dist/cli/main.js validate changed
         category: aggregate

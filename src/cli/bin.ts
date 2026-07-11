@@ -24,6 +24,11 @@ import {
   mainPublish as runPrBodyPublish,
   mainPull as runPrBodyPull,
 } from "./prBodyVersioned.js";
+import {
+  mainCheck as runContinuationCheck,
+  mainCreatePr as runContinuationCreatePr,
+  mainPrepare as runContinuationPrepare,
+} from "./prContinuation.js";
 import { main as runPrBodyUpdate } from "./prBodyUpdate.js";
 import { main as runPrReadyCheck } from "./prReadyCheck.js";
 import { main as runArtifactKindCheck } from "./artifactKindCheck.js";
@@ -55,6 +60,7 @@ function usage(): string {
     "gate-decidability-check, governed-work-map, ruleset-check, review-check, insights-check,",
     "intent-check, disclosure-render, review-publish, review-seal,",
     "pr-body-create, pr-body-update, pr-body-check, pr-body-publish, pr-body-pull, pr-ready-check, site-flow-copy, site-scenarios,",
+    "continuation-check, continuation-prepare, continuation-create-pr,",
     "site-prompts, consumer-journey",
   ].join("\n");
 }
@@ -175,6 +181,12 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runPrBodyPull(args, { repoRoot: root });
     case "pr-ready-check":
       return runPrReadyCheck(args, { repoRoot: root });
+    case "continuation-check":
+      return runContinuationCheck(args, { repoRoot: root });
+    case "continuation-prepare":
+      return runContinuationPrepare(args, { repoRoot: root });
+    case "continuation-create-pr":
+      return runContinuationCreatePr(args, { repoRoot: root });
     default:
       process.stderr.write(`${usage()}\n`);
       return 2;

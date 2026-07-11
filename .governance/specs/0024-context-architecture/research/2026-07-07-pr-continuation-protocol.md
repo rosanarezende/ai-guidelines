@@ -8,8 +8,14 @@ disposition: living
 # Protocolo interino — PR grande e continuidade governada
 
 Data: 2026-07-07  
+Atualização: 2026-07-11 — substituído por automação governada em `[DEC-0024-G27]`
 Spec: 0024 — context-architecture  
 PR observado: #45 — `artifact-taxonomy-and-model-review-contract`
+
+> **Status atual:** este documento permanece como evidência do protocolo
+> interino que evitou débito silencioso no PR #45. A partir de
+> `[DEC-0024-G27]`, o caminho operacional preferido é
+> `continuation:check -> continuation:prepare -> continuation:create-pr`.
 
 ## 1. Problema
 
@@ -55,7 +61,8 @@ Até existir comando governado próprio, PR grande deve usar este protocolo:
 
 ## 5. Critério para automação futura
 
-Um comando futuro só deve nascer quando tiver contrato explícito para:
+O comando governado adotado por `[DEC-0024-G27]` só é aceitável enquanto mantiver
+contrato explícito para:
 
 - checkpoint/etapa de origem e destino;
 - branch base/head;
@@ -67,7 +74,11 @@ Um comando futuro só deve nascer quando tiver contrato explícito para:
 
 ## 6. Disposição do Gap B
 
-O Gap B deixa de ser débito silencioso deste PR: ele fica **diferido
-explicitamente** como automação futura. Para a readiness do PR #45, o mecanismo
-aceito é o protocolo interino acima, porque ele preserva decisão humana e evita
-uma automação incompleta.
+O Gap B deixou de ser débito silencioso neste PR em duas etapas:
+
+1. em 2026-07-07, foi diferido explicitamente por este protocolo interino;
+2. em 2026-07-11, foi materializado como fluxo governado por
+   `[DEC-0024-G27]`.
+
+O princípio permanece o mesmo: a automação pode verificar e preparar; a decisão
+continua humana.

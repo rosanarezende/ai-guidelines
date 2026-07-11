@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-07-10 — **`[DEC-0024-G26]` registrada**: artefatos versionados de Pull Request passam a morar em `pull-requests/pr-N/`, começando por `body.md`, e futuras continuações/assets ficam sob o mesmo contêiner de PR. Antes — **`[DEC-0024-G25]` registrada**: "Spec" permanece como invólucro histórico/caminho físico; a linguagem viva de mapas, geradores e projeções passa a ser **trabalho governado** e **work graph**, para não confundir container histórico, taxonomia de artefatos e grafo operacional. Não declara Ready/Human Gate.
+> Última atualização: 2026-07-11 — **`[DEC-0024-G27]` registrada**: o protocolo interino de PR grande vira fluxo governado `continuation:check -> continuation:prepare -> continuation:create-pr`, preparando pacotes versionados em `pull-requests/pr-N/continuations/` e exigindo confirmação humana explícita antes de criar Draft PR. Antes — **`[DEC-0024-G26]` registrada**: artefatos versionados de Pull Request passam a morar em `pull-requests/pr-N/`, começando por `body.md`, e futuras continuações/assets ficam sob o mesmo contêiner de PR. Não declara Ready/Human Gate.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -750,6 +750,35 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 **O que NÃO está sendo decidido:** criar automações de continuação nesta fatia; converter PR #45 para Ready; executar Human Gate; alterar a topologia; criar ou publicar novo PR; mover todo histórico antigo fora do PR #45; transformar o diretório de PR em SSOT do trabalho.
 
 **Status:** Resolved (2026-07-10) / @rosanarezende — pasta canônica de PR definida como `pull-requests/pr-N/`, com body versionado em `body.md` e espaço reservado para assets/continuations.
+
+---
+
+### [DEC-0024-G27] Fluxo governado de continuação de PR
+
+**Pergunta:** Depois de criar a casa `pull-requests/pr-N/`, o framework deve continuar dependendo apenas de um protocolo humano para PRs grandes, ou deve entregar um fluxo completo para diagnosticar, preparar e criar continuações de PR sem capturar decisões humanas?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-07-11, após concordância explícita com a sequência check/prepare/create-pr e com a regra de que a automação prepara/verifica, mas não decide Ready, Human Gate, merge ou avanço. -->
+
+**Contexto:** O PR #45 mostrou dois aprendizados simultâneos. Primeiro, PR grande precisa de um protocolo honesto para não misturar escopo, readiness e validação de produto. Segundo, apenas avisar o humano que há continuação pendente não é suficiente: sem pacote versionado, body inicial, briefing, branch proposta e cross-ref, o alerta vira trabalho manual solto. `[DEC-0024-G24]` aceitou um protocolo interino; `[DEC-0024-G26]` definiu a casa `pull-requests/pr-N/`. Esta DEC transforma o protocolo em automação segura.
+
+**Decisão (Resolved):**
+
+- Criar uma família de scripts `continuation:*` para PRs grandes e continuações governadas.
+- `continuation:check` é read-only no efeito governado: verifica se o PR tem casa versionada, body versionado, protocolo de continuidade e pacotes de continuação válidos. Ele não escreve, não cria branch e não cria PR.
+- `continuation:prepare` cria um pacote versionado sob `pull-requests/pr-<n>/continuations/<date>-<slug>/`, contendo `manifest.yml`, `body.md`, `briefing.md` e `commands.md`.
+- `continuation:create-pr` consome um pacote preparado. Sem `--confirm`, apenas imprime o comando de criação. Com `--confirm`, cria no máximo um **Draft PR** via `gh pr create --draft`.
+- Nenhum comando `continuation:*` pode declarar Ready, registrar Human Gate, fazer merge, alterar topologia ou avançar estado governado.
+- O pacote de continuação é evidência/projeção operacional, não SSOT. `state.yml`, `tasks.md`, `decision-brief.md`, reviews e gates continuam governando o trabalho.
+
+**Consequências práticas:**
+
+- O antigo Gap B deixa de ser apenas protocolo interino: passa a ter caminho executável, auditável e versionado.
+- PRs longos passam a ter uma forma segura de gerar a próxima superfície de revisão sem depender de memória de chat.
+- A owner ainda decide se quer criar o PR, quando criar e se a continuação deve avançar.
+
+**O que NÃO está sendo decidido:** converter PR #45 para Ready; exercer Human Gate; fazer merge; abrir PR automaticamente sem confirmação; alterar `state.yml`; criar nova frente/checkpoint; substituir `flow -- decide`; criar automação de merge/advance; transformar pacotes de continuação em autoridade de topologia.
+
+**Status:** Resolved (2026-07-11) / @rosanarezende — sequência `continuation:check -> continuation:prepare -> continuation:create-pr` adotada como fluxo completo e seguro para continuação governada de PR.
 
 ---
 
