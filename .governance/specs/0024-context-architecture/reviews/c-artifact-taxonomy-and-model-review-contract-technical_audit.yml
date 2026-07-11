@@ -1,0 +1,71 @@
+checkpoint: "checkpoint-artifact-taxonomy-and-model-review-contract"
+role: technical_audit
+executor:
+  platform: claude-code
+  model: claude-fable-5
+decision: changes_requested
+findings_emitted: 5
+subject_ref: "origin/feat/spec-0024-co-flow-continuation..59d95f52"
+review_fingerprint: ffe9d836fd7a
+findings:
+  - id: F1
+    severity: high
+    location: ".governance/specs/0024-context-architecture/pull-requests/pr-45/body\
+      .md#L259-L260"
+    description: "pr-body:check falha no PR #45: o body publicado no GitHub contem a
+      imagem de Valor entregue (user-attachments, inserida apos a lista de
+      historico) ausente do body versionado, que e a fonte canonica por
+      DEC-0024-G26; reconciliar antes de Ready sem pr-body:pull apagaria a
+      imagem via pr-body:publish, ou o Ready seria apresentado com um check
+      governado vermelho."
+    disposition: open
+    fingerprint: fc26e90aa5fc
+  - id: F2
+    severity: medium
+    location: "src/cli/prReadyCheck.ts#L469-L482"
+    description: "pr-ready:check declara as precondicoes de Ready satisfeitas sem
+      verificar a sincronia do body publicado com pull-requests/pr-45/body.md
+      (fonte canonica por DEC-0024-G26): valida o contrato READY apenas contra o
+      body do GitHub, e a sequencia canonica do WORKFLOW.md tampouco cita
+      pr-body:check; resultado observado nesta auditoria: pr-ready:check verde
+      com pr-body:check vermelho no mesmo HEAD, permitindo Ready com a fonte
+      versionada stale."
+    disposition: open
+    fingerprint: 74523ba7378c
+  - id: F3
+    severity: medium
+    location: ".governance/specs/0024-context-architecture/work-graph-model/_archiv\
+      e/guilda-incubation-2026-07/backend/src/adapters/control-plane/BetterAuth\
+      SQLitePortalHttpSpike.ts#L142-L143"
+    description: "A convencao de anonimizacao da frente (org ficticia acme-*,
+      declarada no tracker.md) e violada por mundo-da-mel / Mundo da Mel
+      Governance em 11 arquivos do arquivo da incubacao (fixtures de spike,
+      testes, APP-DECISIONS, APP-COVERAGE-MATRIX), todos novos neste PR (0
+      ocorrencias na base); nao ha RD/fronthub/PII/e-mails/segredos, mas um nome
+      real de negocio entra na historia permanente do repo se o PR mergear sem
+      decisao humana explicita de aceitar ou anonimizar."
+    disposition: open
+    fingerprint: 8a0d8d265099
+  - id: F4
+    severity: low
+    location: ".governance/specs/0024-context-architecture/work-graph-model/tracker\
+      .md#L3-L6"
+    description: "tracker.md abre como SSOT vivo desta frente e, no mesmo bloco,
+      declara-se EMBASAMENTO nao-autoridade com model.yml como SSOT normativo
+      v3; a contradicao editorial no cabecalho convida leitura errada de
+      autoridade num PR cujo objeto e exatamente disciplinar autoridade de
+      artefatos."
+    disposition: open
+    fingerprint: 9f734fdbbcdf
+  - id: F5
+    severity: low
+    location: "global"
+    description: "technical_audit e architectural_review sao optional (repo-default)
+      e o no artifact-taxonomy-and-model-review-contract nao declara tightening
+      override em state.yml; mecanicamente pr-ready:check pode passar sem as
+      revisoes que o proprio body do PR #45 promete antes de Ready — coerente
+      com a policy deliberada (catalogo separado de obrigatoriedade, PIT-0012),
+      mas nao enforcado para este checkpoint; se a owner quiser o bloqueio
+      mecanico, o override por no existe."
+    disposition: open
+    fingerprint: a7425a877940
