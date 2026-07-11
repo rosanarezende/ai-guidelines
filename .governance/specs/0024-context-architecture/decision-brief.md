@@ -716,9 +716,10 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 - O `spec-0024-map-v5.html` passa a se apresentar como **Mapa Vivo do Trabalho Governado — Context Architecture / 0024**.
 - O eventual gerador vivo deve seguir o fluxo `SSOT governada -> modelo tipado -> projection`, sem criar segunda fonte de verdade.
+- O fluxo diário de PR deve proteger essa projeção: quando o diff tocar `state.yml`, o gerador `governedWorkMap.ts` ou os artefatos `assets/governed-work-map-*`, `validate:changed` deve executar `governed-work-map:check`.
 - O PR #45 continua sendo checkpoint de framework (`artifact-kind`, `disposition`, `pre-coding-review`, research-index e reconciliação), não readiness do produto Guilda.
 
-**O que NÃO está sendo decidido:** renomear fisicamente `.governance/specs/`; migrar todo histórico para outro diretório; abrir nova spec; alterar `state.yml`; declarar Ready/Human Gate; mudar a taxonomia fechada de `artifact-kind`; implementar o gerador nesta DEC.
+**O que NÃO está sendo decidido:** renomear fisicamente `.governance/specs/`; migrar todo histórico para outro diretório; abrir nova spec; alterar `state.yml`; declarar Ready/Human Gate; mudar a taxonomia fechada de `artifact-kind`.
 
 **Status:** Resolved (2026-07-10) / @rosanarezende — linguagem viva das projeções passa de "spec" para "trabalho governado" + "work graph", mantendo `0024` como identificador histórico.
 

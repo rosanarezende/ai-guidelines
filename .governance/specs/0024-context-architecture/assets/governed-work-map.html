@@ -107,9 +107,24 @@
       .panel {
         padding: 24px;
       }
+      .section-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .live-list {
+        margin: 12px 0 0;
+        padding-left: 20px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .live-list li + li {
+        margin-top: 8px;
+      }
       .toolbar {
         display: grid;
-        grid-template-columns: minmax(240px, 1fr) repeat(3, auto);
+        grid-template-columns: minmax(240px, 1fr) repeat(4, auto);
         gap: 12px;
         padding: 14px;
         margin-bottom: 18px;
@@ -253,7 +268,8 @@
           padding: 18px;
         }
         header,
-        .layout {
+        .layout,
+        .section-grid {
           grid-template-columns: 1fr;
         }
         .toolbar {
@@ -296,11 +312,98 @@
         </aside>
       </header>
 
+      <section class="section-grid" aria-label="Foco e próximas ações">
+        <article class="panel">
+          <div class="eyebrow">Foco atual</div>
+          <h2>O que este checkpoint está tentando fechar</h2>
+          <ul class="live-list">
+            <li>
+              RECONCILIACAO 2026-06-03 ([DEC-0024-G08], owner): G03 (promotion pipeline) / G04 (casa
+              unica/tri-root) / G05 (projecoes) foram REABERTOS. Os eixos deixados em aberto no
+              Stage 1 mostraram-se necessarios para problemas reais observados no uso (mis-binding
+              da retomada, recuperabilidade, &#039;a resposta estava num ADR esquecido&#039;). A
+              0024 VOLTOU A TRATAR MODELAGEM nesses eixos -- isto e DECISAO, nao drift. Direcao
+              assumida: arquitetura orientada a grafo (entidades + relacoes navegaveis KnowledgeRef
+              + projecoes derivadas). NAO ha 0025 independente (o split foi superado no Checkpoint
+              2; o trabalho mapeia em G03/G04/G05 + candidatas Grupo B). O kernel Knowledge +
+              KnowledgeGraph nucleo + capability Insights JA materializados (PR #34). Motivacao
+              persistida como Insights (PIT-0004..0006).
+            </li>
+            <li>
+              0024 em ABSORCAO OPERACIONAL (pesquisa encerrada). Problema = falta de absorcao, nao
+              falta de decisao: decisoes convergidas ainda nao alteraram o comportamento do sistema
+              (&#039;arquitetura converge enquanto codigo diverge&#039;). Backlog = relatorio de
+              auditoria do Codex (divergencias decisao&lt;-&gt;codigo).
+            </li>
+            <li>
+              Plano executavel CANONICO no repo: plan.md secoes &#039;Sequencia de Checkpoints&#039;
+              + &#039;Topologia operacional&#039;. VOCABULARIO (Checkpoint 2.1): PR/#N = Pull
+              Request real do GitHub; Checkpoint N = unidade de implementacao da spec; Gate = ritual
+              de validacao (Technical Audit -&gt; Architectural Review -&gt; Human).
+            </li>
+            <li>
+              TOPOLOGIA CANONICA (corrigida no Checkpoint 2.1a; modelo da 0023 / ADR 0020 + 0024 /
+              DEC-0023-M01): #32 = PR de governanca/bootstrap + LINHA DE INTEGRACAO da spec; NAO
+              mergeia cedo, e a BASE DA STACK. Checkpoint 3+ = PR real proprio STACKED sobre a linha
+              da spec (NAO off-main, NAO independente). Modo UNIT: merge em main e evento UNICO ao
+              fim (veiculo = PR terminal de implementacao; #32 + intermediarios + Integration PR via
+              landed-via reconciliation; 1 SHA canonico), apos review.md R8. Integration PR =
+              homologacao antes do merge (NAO veiculo).
+            </li>
+            <li>
+              Decisoes cravadas (NAO reabrir): G00/G02/G06; Open abolido/DEC nasce Pendente/Deferred
+              canonico; brief por estado; GG-0001 interno (DOGFOOD-*); WorkflowType removido;
+              proveniencia runtime-scoped (role livre, espinha impl+gate derivada, projecao NAO
+              governanca); GG-0002 antes da remocao.
+            </li>
+            <li>
+              Gate por checkpoint: implementacao -&gt; revisoes exigidas pela
+              .governance/review-policy.yml (quando aplicavel) -&gt; Human Gate (owner) -&gt; AVANCA
+              (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review
+              como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O
+              Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por
+              vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera;
+              mudanca estrutural sim.
+            </li>
+            <li>
+              Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): &#039;ja foi validado
+              empiricamente na 0024?&#039; -&gt; absorver/enforcar/executar. NAO re-modelar o
+              DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram
+              reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a
+              direcao, nao o risco. O &#039;risco dominante&#039; original (modelar em vez de
+              absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho.
+            </li>
+          </ul>
+        </article>
+        <article class="panel">
+          <div class="eyebrow">Próximas ações derivadas</div>
+          <h2>O que o trabalho governado aponta agora</h2>
+          <ul class="live-list">
+            <li>
+              canonical-next: artifact-taxonomy-and-model-review-contract. PR #43
+              (co-flow-convergence / seq 10) e PR #44 (co-flow-continuation / seq 11)
+              CONCLUIDOS-NA-STACK por Human Gate approved; modo unit, SEM merge isolado em main. No
+              ATIVO = artifact-taxonomy-and-model-review-contract (seq 12,
+              checkpoint-artifact-taxonomy-and-model-review-contract; PR #45 stacked sobre #44).
+              Primeira fatia obrigatoria deste recorte: fechar o dogfood da propria abertura do PR
+              #45 — visao pretendida via .governance/visual-prompts, operacao governada para
+              preparar o proximo PR interno e decisao de vocabulario humano do lifecycle. Depois:
+              implementar a taxonomia de artefatos e o contrato de review
+              pre-codificacao/model-review definidos por DEC-0024-G21/GG-0005; em seguida refactor
+              DDD/BDD, falsificacao ampla e review/Human Gate da continuacao. NAO implementar
+              dualroot-collapse, co-capture, co-events, Ready/Human Gate automatico, merge em main
+              ou movimentacao fisica de .specify neste PR.
+            </li>
+          </ul>
+        </article>
+      </section>
+
       <section class="toolbar" aria-label="Filtros do mapa">
         <input id="search" type="search" placeholder="Buscar PR, checkpoint, papel..." />
         <button type="button" class="active" data-filter="all">Todos</button>
         <button type="button" data-filter="concluded">Concluídos</button>
         <button type="button" data-filter="active">Ativo</button>
+        <button type="button" data-filter="planned">Planejados</button>
       </section>
 
       <section class="layout">

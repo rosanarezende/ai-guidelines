@@ -25,6 +25,12 @@ export interface ChangedValidationDeps {
 
 const FORMAT_EXTENSIONS = new Set([".ts", ".mjs", ".js", ".cjs", ".md", ".json", ".yml", ".yaml"]);
 const PRETTIER_ARG_BUDGET = 6000;
+const GOVERNED_WORK_MAP_INPUTS = new Set([
+  ".governance/specs/0024-context-architecture/state.yml",
+  ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
+  ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
+  "src/cli/governedWorkMap.ts",
+]);
 
 function binary(name: "npm" | "npx"): string {
   return name;
@@ -195,6 +201,14 @@ export function planChangedValidation(
       label: "Verificar projection active specs",
       command: binary("npm"),
       args: ["run", "active-specs:check"],
+    });
+  }
+
+  if (hasAny(paths, (p) => GOVERNED_WORK_MAP_INPUTS.has(p))) {
+    steps.push({
+      label: "Verificar mapa vivo governado",
+      command: binary("npm"),
+      args: ["run", "governed-work-map:check"],
     });
   }
 

@@ -125,6 +125,8 @@ function renderData(data: GovernedWorkMapData): string {
 
 function renderHtml(data: GovernedWorkMapData): string {
   const embedded = JSON.stringify(data).replace(/</g, "\\u003c");
+  const focusItems = data.focus.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const nextItems = data.next.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   return `<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -191,9 +193,12 @@ function renderHtml(data: GovernedWorkMapData): string {
     .metric { background: rgba(13, 59, 49, 0.06); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
     .metric strong { display: block; color: var(--green); font-size: 28px; }
     .panel { padding: 24px; }
+    .section-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; margin-bottom: 18px; }
+    .live-list { margin: 12px 0 0; padding-left: 20px; color: var(--muted); line-height: 1.6; }
+    .live-list li + li { margin-top: 8px; }
     .toolbar {
       display: grid;
-      grid-template-columns: minmax(240px, 1fr) repeat(3, auto);
+      grid-template-columns: minmax(240px, 1fr) repeat(4, auto);
       gap: 12px;
       padding: 14px;
       margin-bottom: 18px;
@@ -258,7 +263,7 @@ function renderHtml(data: GovernedWorkMapData): string {
     .matrix th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
     @media (max-width: 980px) {
       main { padding: 18px; }
-      header, .layout { grid-template-columns: 1fr; }
+      header, .layout, .section-grid { grid-template-columns: 1fr; }
       .toolbar { grid-template-columns: 1fr 1fr; }
       .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .detail { position: static; }
@@ -290,11 +295,25 @@ function renderHtml(data: GovernedWorkMapData): string {
       </aside>
     </header>
 
+    <section class="section-grid" aria-label="Foco e próximas ações">
+      <article class="panel">
+        <div class="eyebrow">Foco atual</div>
+        <h2>O que este checkpoint está tentando fechar</h2>
+        <ul class="live-list">${focusItems}</ul>
+      </article>
+      <article class="panel">
+        <div class="eyebrow">Próximas ações derivadas</div>
+        <h2>O que o trabalho governado aponta agora</h2>
+        <ul class="live-list">${nextItems}</ul>
+      </article>
+    </section>
+
     <section class="toolbar" aria-label="Filtros do mapa">
       <input id="search" type="search" placeholder="Buscar PR, checkpoint, papel..." />
       <button type="button" class="active" data-filter="all">Todos</button>
       <button type="button" data-filter="concluded">Concluídos</button>
       <button type="button" data-filter="active">Ativo</button>
+      <button type="button" data-filter="planned">Planejados</button>
     </section>
 
     <section class="layout">
@@ -426,7 +445,8 @@ function escapeHtml(value: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 async function formatGenerated(

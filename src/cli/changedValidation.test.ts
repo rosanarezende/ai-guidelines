@@ -73,6 +73,16 @@ describe("changedValidation", () => {
     );
   });
 
+  it("aciona o check do mapa vivo quando o diff toca state, gerador ou projeção gerada", () => {
+    expect(
+      labels([
+        ".governance/specs/0024-context-architecture/state.yml",
+        ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
+        "src/cli/governedWorkMap.ts",
+      ])
+    ).toContain("Verificar mapa vivo governado");
+  });
+
   it("aciona review:check quando o diff toca reviews/gates", () => {
     expect(
       labels([
