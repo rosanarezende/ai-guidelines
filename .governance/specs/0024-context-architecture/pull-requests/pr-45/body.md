@@ -187,7 +187,8 @@ auditar limites de implementação.
 
 ### Dentro do escopo
 
-- **Decisão de vocabulário (`[DEC-0024-G22]`)**: adotar **Spec › Frente › Checkpoint › Etapa › Tarefa** (`Frente` no lugar de `Fase`, como leitura derivada de `state.yml` — não SSOT); reconciliar a tensão estrutural do #45 (`sequence: 12` ⇒ é nó topológico ativo); projetar isso na V4 (`assets/spec-0024-map-v4.html`). Esta fatia entrega a **decisão**, não a implementação da taxonomia/model-review.
+- **Decisão de vocabulário (`[DEC-0024-G22]`)**: adotar **Spec › Frente › Checkpoint › Etapa › Tarefa** (`Frente` no lugar de `Fase`, como leitura derivada de `state.yml` — não SSOT); reconciliar a tensão estrutural do #45 (`sequence: 12` ⇒ é nó topológico ativo); projetar isso na V4 (`assets/spec-0024-map-v4.html`) e na leitura viva derivada de `state.yml`.
+- Implementar a entrega nomeada do checkpoint: taxonomia de artefatos, contrato de model-review/pre-coding review, research index, governança de PR body e mapa vivo do trabalho governado.
 - Materializar o checkpoint `checkpoint-artifact-taxonomy-and-model-review-contract`.
 - Trabalhar somente o nó `artifact-taxonomy-and-model-review-contract`.
 - Arquivar a sim file-first que nasceu em `work-graph-model/governance-demo/` para `work-graph-model/_archive/guilda-incubation-2026-07/`, preservando repos acme adotados, código MVP, contextos publicados, repo-work ack, registry de contratos, outcomes, trust-policy, runtime, frontend, mock-api, testes, packages, assets e docs.
@@ -260,7 +261,32 @@ Histórico preservado da incubação:
 <summary><strong>Prompt final — valor entregue</strong></summary>
 
 ```text
-<prompt pronto para colar no gerador>
+Crie um quadro visual de valor entregue para o PR #45 da Spec 0024 do repositório ai-guidelines.
+
+Objetivo da imagem:
+mostrar, de forma clara e auditável, que o PR deixou de validar um app incubado como se fosse produto final e passou a entregar o framework de governança que a Spec 0024 precisava: taxonomia de artefatos, contrato de model-review/pre-coding review, research index, governança de PR body, script contracts e mapa vivo do trabalho governado derivado de state.yml.
+
+Estrutura visual:
+- Título principal: "PR #45 — Taxonomia de artefatos e revisão antes do código"
+- Subtítulo: "Framework ai-guidelines focado em governança; Guilda preservada como produto extraído."
+- Três colunas:
+  1. "Antes": work-graph-model misturava framework, produto Guilda, app demo, validação de telas e experimentos de graph/workflow.
+  2. "Agora": ai-guidelines entrega contratos governados do framework; Guilda foi extraída para repo irmão; governance-demo virou tombstone; a incubação foi preservada em arquivo histórico.
+  3. "Próximo": Technical Audit, Architectural Review e Human Gate decidem o próximo movimento da stack, sem declarar o app Guilda como v1 pronta e sem merge isolado em main.
+
+Elementos de evidência:
+- state.yml como fonte estrutural do mapa vivo.
+- artifact taxonomy + model-review contract como entrega central.
+- research index e script contracts como checks governados.
+- pull-requests/pr-45/body.md como PR body reconciliado.
+- work-graph-model/_archive/guilda-incubation-2026-07/ como histórico preservado.
+- work-graph-model/governance-demo/README.md como tombstone.
+
+Tom visual:
+governance-first, repo-first, técnico mas legível para decisão humana. Use metáfora de grafo/fluxo de trabalho, trilha auditável e separação de planos. Evite parecer dashboard de produto Guilda pronto, landing page comercial ou tela de app validada. Não usar medieval literal, mascotes, robôs, estrelas de IA, SaaS genérico ou promessas de automação autônoma.
+
+Mensagem central:
+"Produto incubado preservado. Framework governado entregue. Próximo movimento depende de revisão técnica, revisão arquitetural e Human Gate."
 ```
 
 </details>
@@ -269,7 +295,7 @@ Histórico preservado da incubação:
 <summary><strong>Prompt complementar (opcional — um detalhe por bloco)</strong></summary>
 
 ```text
-<prompt complementar, quando necessário>
+Não usado nesta rodada. O prompt final acima é suficiente para gerar a imagem de valor entregue; prompts complementares só devem ser adicionados se a owner pedir refinamento visual específico.
 ```
 
 </details>
@@ -298,11 +324,11 @@ git push     # pre-push: validate:changed
 
 ### Evidências e gates
 
-- Technical Audit:
-- Architectural Review:
-- Human Gate:
-- Merge:
-- CI: GitHub `governance-pr-check`, `validate-changed`, `repo-validation`, `smoke` e Cloudflare Pages verdes no último commit publicado antes desta atualização; reconciliar novamente após o próximo push.
+- Technical Audit: pendente — será executada antes de qualquer Ready/Human Gate.
+- Architectural Review: pendente — será executada depois da auditoria técnica e antes do Human Gate.
+- Human Gate: pendente — decisão reservada à owner; não é autorização de merge.
+- Merge: fora do escopo deste PR individual; a stack segue em modo unit.
+- CI: estado do PR reconciliado via GitHub nesta revisão — `governance-pr-check`, `validate-changed`, `repo-validation`, `smoke`, `osv-scan`/OSV-Scanner e Cloudflare Pages verdes; `scan-full-advisory` e `validate-os` aparecem como skipped esperado. Repetir a reconciliação no HEAD final antes de Ready.
 
 ### Checklist operacional
 
