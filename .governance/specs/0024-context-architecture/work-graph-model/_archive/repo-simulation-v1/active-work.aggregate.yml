@@ -1,0 +1,15 @@
+# DERIVADO CROSS-REPO — o "índice público" multi-repo: união regenerável dos active-work.yml de N repos.
+# É a função do BANCO (F3/D2): ids NAMESPACED <repo>/<id> (resolve a colisão), drift-checked. O repo VENCE.
+# NÃO é SSOT: reconstrói-se dos repos; se divergir, o repo ganha e isto se regenera.
+version: 1
+repos: [backend, frontend]
+active_work:
+  - { id: backend/deliv-001, kind: delivery, repo: backend, coordinates-with: frontend/deliv-001 }
+  - { id: frontend/deliv-001, kind: delivery, repo: frontend, coordinates-with: backend/deliv-001 }
+  - { id: backend/deliv-002, kind: delivery, repo: backend, coordinates-with: frontend/deliv-003 }
+  - { id: frontend/deliv-003, kind: delivery, repo: frontend, coordinates-with: backend/deliv-002 }
+# DERIVADO do grafo de `coordinates-with`: trabalhos ligados = uma FEATURE cross-repo (o valor de portfólio).
+# É uma VIEW derivada, não um 8º kind (evita 2ª SSOT) — ver [F4] na research.
+features:
+  - { name: "Login social (OAuth)", works: [backend/deliv-001, frontend/deliv-001] }
+  - { name: "Checkout 1-clique", works: [backend/deliv-002, frontend/deliv-003] }

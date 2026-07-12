@@ -1,0 +1,6 @@
+# exploration-brief — captcha-spike_1 (acme-design-system). A FERRAMENTA: investiga e devolve um verdict.
+node: exploration-brief
+id: captcha-spike_1
+explores: "captcha/anti-bot no login: o DS provê um componente, ou usamos serviço externo?"
+timebox: 2d
+intent: login_1

@@ -1,0 +1,23 @@
+{
+  "schema": "acme.code-quality-report/v1",
+  "source": "acme-core-api",
+  "generatedAt": "2027-12-30T12:00:00Z",
+  "body": {
+    "analyzer": "acme-local-lint/1.0 (sonar-compatible export)",
+    "issues": [
+      {
+        "rule": "js:S1481",
+        "severity": "minor",
+        "file": "src/modules/billing-legacy.mjs",
+        "message": "variavel local nao utilizada"
+      }
+    ],
+    "measures": {
+      "files": 7,
+      "code-smells": 1,
+      "bugs": 0,
+      "vulnerabilities": 0
+    }
+  },
+  "contentHash": "9638bdd8f53f"
+}

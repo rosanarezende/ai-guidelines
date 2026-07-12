@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { HumanGateDefinition } from "./humanGate.js";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { deriveHandoff, SUBCHECKPOINT_READINESS } from "../handoffFacts.js";
+import { deriveHandoff, STEP_READINESS } from "../handoffFacts.js";
 import { evaluateReadyPreconditions, ReadyCheckSnapshot } from "../prReadyCheck.js";
 import { deriveWorkBrief } from "../workBrief.js";
 import { parseGate } from "../../infrastructure/yaml/reviewArtifactsReader.js";
@@ -39,7 +39,7 @@ class FakeGit implements DecisionGitOps {
   }
 }
 
-/** Snapshot ELEGÍVEL: PR Ready, CI verde, sem findings/sub-checkpoints/reviews pendentes. */
+/** Snapshot ELEGÍVEL: PR Ready, CI verde, sem findings/etapas/reviews pendentes. */
 function readySnapshot(over: Partial<DecisionSnapshot> = {}): DecisionSnapshot {
   const facts = makeHandoffFacts({
     pullRequest: {
@@ -68,7 +68,7 @@ function readySnapshot(over: Partial<DecisionSnapshot> = {}): DecisionSnapshot {
     facts,
     openFindings: [],
     lanes: [],
-    subCheckpoints: [
+    steps: [
       { id: "CO-3.1", title: "x", state: "done", line: 1 },
       { id: "CO-3.2", title: "y", state: "done", line: 2 },
     ],
@@ -132,26 +132,30 @@ function readyPreconditionsSnapshot(over: Partial<ReadyCheckSnapshot> = {}): Rea
 }
 
 describe("human-gate · elegibilidade [decide]", () => {
-  it("[6][33] Draft + sub-checkpoints pendentes ⇒ blocked, explicado em linguagem humana", () => {
+  it("[6][33] Draft + etapa ativa sem readiness ⇒ blocked, explicado em linguagem humana", () => {
     const av = def.detect(makeDecisionSnapshot());
     expect(av.status).toBe("blocked");
     const reasons = av.reasons.join(" ");
-    expect(reasons).toMatch(/CO-3\.2 ainda está aberto/);
-    expect(reasons).toMatch(/CO-3\.3 ainda está aberto/);
-    expect(reasons).toMatch(/CO-3\.4 ainda está aberto/);
+    expect(reasons).toMatch(/CO-3\.1 ainda não declarou readiness/);
     expect(reasons).toMatch(/Draft/);
   });
 
-  it("[34] sub-checkpoint (tarefa) pendente bloqueia", () => {
+  it("[34] etapas futuras pendentes não bloqueiam o gate do checkpoint atual", () => {
     const s = readySnapshot({
-      subCheckpoints: [{ id: "CO-3.4", title: "x", state: "pending", line: 1 }],
+      steps: [
+        { id: "CO-3.4", title: "x", state: "in-progress", readiness: STEP_READINESS, line: 1 },
+        { id: "CO-3.5", title: "y", state: "pending", line: 2 },
+      ],
     });
-    expect(def.detect(s).status).toBe("blocked");
+    const av = def.detect(s);
+
+    expect(av.status).toBe("available");
+    expect(av.reasons.join(" ")).not.toMatch(/CO-3\.5/);
   });
 
-  it("[34b] sub-checkpoint ativo sem readiness bloqueia o gate", () => {
+  it("[34b] etapa ativa sem readiness bloqueia o gate", () => {
     const s = readySnapshot({
-      subCheckpoints: [{ id: "CO-3.5", title: "colapso", state: "in-progress", line: 5 }],
+      steps: [{ id: "CO-3.5", title: "colapso", state: "in-progress", line: 5 }],
     });
     const av = def.detect(s);
     expect(av.status).toBe("blocked");
@@ -278,22 +282,22 @@ describe("human-gate · elegibilidade [decide]", () => {
   });
 
   it("pr-ready:check, decide e work/handoff convergem no estado Ready", () => {
-    const terminalSubCheckpoints = [
+    const terminalSteps = [
       { id: "CO-3.1", title: "base", state: "done" as const, line: 1 },
       {
         id: "CO-3.5",
         title: "colapso integral do runtime CLI",
         state: "in-progress" as const,
         line: 5,
-        readiness: SUBCHECKPOINT_READINESS,
+        readiness: STEP_READINESS,
       },
     ];
     const facts = makeHandoffFacts({
       pullRequest: { ...readySnapshot().facts.pullRequest! },
       lifecycle: readySnapshot().facts.lifecycle!,
-      subCheckpoints: terminalSubCheckpoints,
+      steps: terminalSteps,
     });
-    const snap = readySnapshot({ facts, subCheckpoints: terminalSubCheckpoints });
+    const snap = readySnapshot({ facts, steps: terminalSteps });
     const handoff = deriveHandoff(facts);
     const work = deriveWorkBrief({
       facts,
@@ -313,9 +317,9 @@ describe("human-gate · elegibilidade [decide]", () => {
     expect(work.nextAction.commands.some((c) => c.command === "npm run flow -- decide")).toBe(true);
   });
 
-  it("readiness terminal do último sub-checkpoint ⇒ available para Human Gate", () => {
+  it("readiness terminal do última etapa ⇒ available para Human Gate", () => {
     const terminal = readySnapshot({
-      subCheckpoints: [
+      steps: [
         { id: "CO-3.1", title: "base", state: "done", line: 1 },
         {
           id: "CO-3.5",

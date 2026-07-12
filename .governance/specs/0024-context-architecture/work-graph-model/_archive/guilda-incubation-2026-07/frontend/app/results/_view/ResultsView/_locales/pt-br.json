@@ -1,0 +1,28 @@
+{
+  "locale": "pt-br",
+  "title": "Resultados",
+  "subtitle": "O que as metas dizem hoje, com confiança explícita e fonte derivada.",
+  "loading": "Carregando resultados derivados...",
+  "error": "Não foi possível carregar os resultados.",
+  "emptyTitle": "Ainda não há resultados governados neste workspace",
+  "emptyBody": "Conecte um host de governança e publique outcomes para transformar metas em dashboards verificáveis.",
+  "sourceRevision": "revisão",
+  "derived": "derivado",
+  "queryKey": "queryKey",
+  "overview": "Visão executiva",
+  "targets": "Metas e evidências",
+  "charts": {
+    "targetActual": "Target vs actual",
+    "confidence": "Confiança por ciclo",
+    "outcomes": "Outcomes válidos x inválidos",
+    "attainment": "Atingimento por objetivo"
+  },
+  "trust": {
+    "verified": "válido",
+    "pending": "pendente",
+    "no-evidence": "sem evidência",
+    "self-declared": "auto-declarado",
+    "break-glass": "exceção",
+    "stale": "desatualizado"
+  }
+}

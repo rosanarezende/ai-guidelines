@@ -1,0 +1,17 @@
+node: work-brief
+kind: exploration
+exploration: <exploration-id> # REFERENCIA a registry (o `id` é DELA); o brief é CONTEÚDO, não duplica o id
+question: # ⊛ a PERGUNTA — texto IDÊNTICO à open-question da intent (o exploration-brief é a casa do conteúdo do exploration)
+timebox: # ⊛ prazo
+references: []
+
+# kernel — provar um ponto ANTES de entregar valor (a `question` acima é o goal)
+objective:
+  approach: # como investigar — PoC, benchmark, análise
+  success-signal: # o que conta como resposta
+
+unblocks-decision: # a decisão que isto destrava
+output: # a RESPOSTA (não o código) → fecha em exploration-answer
+
+details: |
+  <nuance opcional>

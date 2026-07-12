@@ -46,6 +46,37 @@ export interface NodeReviewRequirementOverride {
   readonly actor?: string;
 }
 
+export type NodeReviewPlanRecommendation = "not_needed" | "optional" | "recommended" | "required";
+
+export type NodeReviewPlanDecision = "pending" | "waived" | "optional" | "recommended" | "required";
+
+export type NodeReviewRevalidationDecision = "pending" | "waived" | "required";
+
+/**
+ * Decisão SITUADA sobre revalidação quando uma review obrigatória já aprovada
+ * fica stale por um delta posterior. A dispensa nunca transforma stale em
+ * current; apenas declara que a owner aceitou não repetir a review inteira
+ * para aquele delta.
+ */
+export interface NodeReviewPlanRevalidation {
+  readonly owner_decision: NodeReviewRevalidationDecision;
+  readonly reason?: string;
+  readonly actor?: string;
+}
+
+/**
+ * Plano SITUADO de review para um PR/nó. A automação recomenda; a owner decide.
+ * A decisão é projetada para `review_requirements` efetivos, mas preserva a
+ * distinção entre sugestão do sistema e escolha humana.
+ */
+export interface NodeReviewPlanEntry {
+  readonly system_recommendation: NodeReviewPlanRecommendation;
+  readonly owner_decision: NodeReviewPlanDecision;
+  readonly reason?: string;
+  readonly actor?: string;
+  readonly revalidation?: NodeReviewPlanRevalidation;
+}
+
 export interface PrTopologyNode {
   readonly id: string;
   readonly github_pr: number | null;
@@ -53,6 +84,8 @@ export interface PrTopologyNode {
   readonly terminal: boolean;
   readonly sequence: number | null;
   readonly checkpoints: ReadonlyArray<string>;
+  /** Plano situado por tipo de review (sistema recomenda; owner decide). */
+  readonly review_plan?: Readonly<Record<string, NodeReviewPlanEntry>>;
   /** Overrides situados por tipo de review (opcional). */
   readonly review_requirements?: Readonly<Record<string, NodeReviewRequirementOverride>>;
 }

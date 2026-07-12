@@ -1,0 +1,16 @@
+{
+  "schema": "acme.code-security-report/v1",
+  "source": "acme-core-api",
+  "generatedAt": "2026-07-06T00:00:00.000Z",
+  "body": {
+    "scanner": "osv-scanner",
+    "lockfile": "package-lock.json",
+    "scannedPackages": 42,
+    "vulnerabilities": [],
+    "depsDev": {
+      "enrichedPackages": 8,
+      "licensesObserved": ["Apache-2.0", "MIT"]
+    }
+  },
+  "contentHash": "03aedc93844a"
+}

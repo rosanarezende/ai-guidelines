@@ -1,0 +1,10 @@
+{
+  "nextStepBadge": "PRÓXIMO PASSO SEGURO",
+  "setupTitle": "O que já está configurado",
+  "setupProgress": "{done} de {total} passos",
+  "console": {
+    "title": "Console técnico",
+    "subtitle": "Grafo, comandos, event-log e resolver — para quem precisa do detalhe.",
+    "cta": "Abrir console"
+  }
+}

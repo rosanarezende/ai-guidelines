@@ -1,7 +1,7 @@
 /**
  * Coleta FACTUAL ÚNICA das decisões humanas (`guidelines decide`).
  *
- * Anti-TOCTOU (Etapa 11): UMA coleta por execução alimenta briefing,
+ * Anti-TOCTOU (regra 11): UMA coleta por execução alimenta briefing,
  * elegibilidade, prévia e plano. A camada de I/O vive aqui; `detect`/
  * `buildBrief`/`plan` das definições são puros sobre o snapshot.
  *
@@ -19,8 +19,8 @@ import {
   HandoffFacts,
   HandoffPrFact,
   HandoffNodeFact,
-  HandoffSubCheckpoint,
-  parseSubCheckpoints,
+  HandoffStep,
+  parseSteps,
 } from "../handoffFacts.js";
 import {
   HandoffLoadSnapshot,
@@ -38,10 +38,7 @@ import {
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 import { MainOptions as PrReadyMainOptions, main as runPrReadyCheck } from "../prReadyCheck.js";
 import { main as runGateDecidabilityCheck } from "../gateDecidabilityCheck.js";
-import {
-  collectSubCheckpointDeliveryEvidence,
-  SubCheckpointDeliveryEvidence,
-} from "../flow/subCheckpointDeliveryEvidence.js";
+import { collectStepDeliveryEvidence, StepDeliveryEvidence } from "../flow/stepDeliveryEvidence.js";
 
 export const HUMAN_DECISION_POLICY_PATH = ".core/governance/human-decision-policy.yml";
 
@@ -100,8 +97,8 @@ export interface DecisionReviewLane {
   readonly approvedVerifications: readonly DecisionVerification[];
 }
 
-/** Sub-checkpoint do checkpoint do cursor (fonte única: HandoffFacts/tasks.md). */
-export type DecisionSubCheckpoint = HandoffSubCheckpoint;
+/** Etapa do checkpoint do cursor (fonte única: HandoffFacts/tasks.md). */
+export type DecisionStep = HandoffStep;
 
 export interface ExternalCheckResult {
   readonly ok: boolean;
@@ -143,8 +140,8 @@ export interface DecisionSnapshot {
   readonly lanes: readonly DecisionReviewLane[];
   readonly gateExists: boolean;
   readonly gateFile: string | null;
-  readonly subCheckpoints: readonly DecisionSubCheckpoint[];
-  readonly subCheckpointDeliveryEvidence: SubCheckpointDeliveryEvidence;
+  readonly steps: readonly DecisionStep[];
+  readonly stepDeliveryEvidence: StepDeliveryEvidence;
   readonly nextPlannedNode: HandoffNodeFact | null;
   /** Coletados só quando PR Ready; null em Draft / não coletado. */
   readonly prReady: ExternalCheckResult | null;
@@ -206,9 +203,9 @@ function loadPolicy(repoRoot: string): {
   }
 }
 
-// Sub-checkpoints: fonte única em handoffFacts (`facts.subCheckpoints`); o parser
-// canônico (`parseSubCheckpoints`) é re-exportado para compat de testes.
-export { parseSubCheckpoints };
+// Etapas: fonte única em handoffFacts (`facts.steps`); o parser
+// canônico (`parseSteps`) é re-exportado para compat de testes.
+export { parseSteps };
 
 type PrReadyMainRunner = (argv: readonly string[], options: PrReadyMainOptions) => number;
 type GateDecidabilityRunner = (repoRoot: string) => number;
@@ -420,21 +417,21 @@ export function collectDecisionSnapshot(
     });
   }
 
-  // Sub-checkpoints: fonte única já coletada nos HandoffFacts (tasks.md).
-  const subCheckpoints = facts.subCheckpoints;
-  const activeSubCheckpoints = subCheckpoints.filter((s) => s.state === "in-progress");
-  const subCheckpointDeliveryEvidence =
-    activeSubCheckpoints.length === 1
-      ? collectSubCheckpointDeliveryEvidence(
+  // Etapas: fonte única já coletada nos HandoffFacts (tasks.md).
+  const steps = facts.steps;
+  const activeSteps = steps.filter((s) => s.state === "in-progress");
+  const stepDeliveryEvidence =
+    activeSteps.length === 1
+      ? collectStepDeliveryEvidence(
           repoRoot,
           `${facts.spec.path}/tasks.md`,
-          activeSubCheckpoints[0].id,
+          activeSteps[0].id,
           facts.git.head ?? "HEAD"
         )
       : {
           status: "unknown" as const,
-          activeId: activeSubCheckpoints[0]?.id ?? "(sem ativo)",
-          reason: "Não há sub-checkpoint ativo inequívoco para comprovar entrega.",
+          activeId: activeSteps[0]?.id ?? "(sem ativo)",
+          reason: "Não há etapa ativa inequívoca para comprovar entrega.",
         };
 
   const { policy, error: policyError } = loadPolicy(repoRoot);
@@ -467,8 +464,8 @@ export function collectDecisionSnapshot(
     lanes,
     gateExists: gate !== null,
     gateFile: gate?.file ?? null,
-    subCheckpoints,
-    subCheckpointDeliveryEvidence,
+    steps,
+    stepDeliveryEvidence,
     nextPlannedNode: facts.nextPlannedNode,
     prReady: external.prReady,
     gateDecidability: external.gateDecidability,

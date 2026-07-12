@@ -1,0 +1,39 @@
+# login_1 — cadastrada via "form" de governança (Lente 5). A intent é uma REGISTRY:
+# guarda o que o cadastrante informa + REFERÊNCIAS; o conteúdo das investigações vive nas explorations (repos).
+node: intent
+id: login_1
+status: active
+owner: "@ana-pm" # quem TOCA a iniciativa (a dona)
+created-at: 2026-06-27
+updated-at: 2026-06-28 # último toque: breakdown criou as deliveries draft
+
+# ===== o que o CADASTRANTE preenche no form =====
+title: Sistema de login (multi-repo)
+objective:
+  goal: novo fluxo de login, com ajuda sob demanda e proativa
+  success-signal: login navegável atrás de flag
+
+references: # anexos / links que ele junta
+  - {
+      type: modeling,
+      label: "modelagem do login (produto)",
+      url: "https://docs.acme.example/login-modeling",
+    }
+
+details: |
+  Feature cross-repo. As deliveries só nascem depois que os explore-points forem respondidos pelas explorations.
+
+explores: # INPUT (os pontos a EXPLORAR). NÃO é q/r/d ("question" é só do work/exploration). Quem responde/verdict/resolvido = DERIVADO.
+  - id: e1
+    subject: "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?"
+  - id: e2
+    subject: "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)"
+  - id: e3
+    subject: "captcha/anti-bot no login: o design system provê um componente, ou usamos serviço externo?"
+
+# ===== contratos que a feature coordena (INPUT — a declaração); known/pending é DERIVADO (sem baldes) =====
+contracts:
+  - { name: form-component, awaits: e1 }
+  - { name: failure-event, awaits: e2 }
+
+# (breaks-into NÃO mora aqui — é DERIVADO; o banco projeta a vista do plano por status.)

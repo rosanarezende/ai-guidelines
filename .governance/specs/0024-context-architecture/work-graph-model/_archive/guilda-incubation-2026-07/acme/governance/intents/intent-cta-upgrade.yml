@@ -1,0 +1,58 @@
+# intent-cta-upgrade — abordagem validate-first (a única escolha estrutural do humano)
+id: intent-cta-upgrade
+title: "CTA contextual de upgrade no billing"
+team: time-billing
+authorized-by: obj-revenue
+primary-target: tgt-billing-conv
+thesis: tese-cross-sell
+approach: validate-first
+hypothesis: "um CTA contextual no billing aumenta a conversão de cross-sell em X%"
+decision-rule: "roda 4 semanas OU 50k exposições; ganha se conversão ↑ X% sem churn ↑"
+signal: none
+contracts-consumed: [acme-events-schema] # consome SEM revisão — não é sinal
+works:
+  - id: spike-elegibilidade
+    repo: acme-api-billing
+    purpose: discover
+    desc: "EXPLORATION — dá p/ reusar o motor de elegibilidade que já existe? pergunta falsificável + fate"
+    timebox: 3d
+    review: interno
+  - id: api-elegibilidade
+    repo: acme-api-billing
+    purpose: create
+    desc: "elegibilidade + endpoint (o fate do spike decide: reusar × construir)"
+    blocked-by: [spike-elegibilidade]
+    review: interno
+  - id: ui-cta
+    repo: acme-mfe-billing
+    purpose: create
+    desc: "UI do CTA atrás da flag — constrói em paralelo com mock; a integração espera o endpoint"
+    delivery-after: [api-elegibilidade]
+    review: interno
+  - id: contas-legadas
+    repo: acme-core-api
+    module: mod-accounts
+    purpose: sustain
+    desc: "expõe leitura de contas legadas p/ a elegibilidade — MONOLITO: o dono é o do MÓDULO"
+    review: "externo: time-identity"
+  - id: baseline-eventos
+    repo: acme-analytics
+    purpose: operate
+    desc: "instrumenta com o schema EXISTENTE (consome sem revisão); pronto ANTES de ligar a flag"
+    review: "externo: time-data"
+next:
+  - {
+      when: "veredito: ganhou",
+      then: "graduation — efetiva a variante; outcome soma no placar",
+      gate: accept-verdict,
+    }
+  - {
+      when: "veredito: perdeu",
+      then: "cleanup — remove flag/variante; aprendizado registrado",
+      gate: accept-verdict,
+    }
+  - {
+      when: "veredito: inconclusivo",
+      then: "novo experimento refinado OU vira descoberta",
+      gate: accept-verdict,
+    }

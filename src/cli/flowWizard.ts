@@ -357,14 +357,12 @@ export function renderFlowSummary(
 
   const facts = model.work.snapshot.collected.facts;
   const pr = facts.pullRequest;
-  const active = model.work.brief.object.subCheckpoint;
+  const active = model.work.brief.object.step;
   const fallback = [
     `branch: ${facts.git.branch ?? "?"}`,
     `HEAD: ${facts.git.head ?? "?"}`,
     `modo: ${model.work.brief.mode}`,
-    active
-      ? `sub-checkpoint: ${active.id} — ${active.title}`
-      : `sub-checkpoint: ${COMMON_COPY.none}`,
+    active ? `etapa: ${active.id} — ${active.title}` : `etapa: ${COMMON_COPY.none}`,
     pr
       ? `PR #${pr.number}: ${pr.isDraft ? "Draft" : "Ready"} · CI ${pr.checks.pass} ok / ${pr.checks.fail} falha(s) / ${pr.checks.pending} pendente(s)`
       : `PR: ${COMMON_COPY.notObserved}`,
@@ -754,8 +752,8 @@ function dailyWorkContextLines(model: CockpitModel): readonly string[] {
   ) {
     lines.push(WIZARD_COPY.context.readinessAvailable);
   }
-  if (recommended?.id === "finish-subcheckpoint") lines.push(WIZARD_COPY.context.finishAvailable);
-  if (model.flow?.blocked.some((action) => action.id === "advance-subcheckpoint")) {
+  if (recommended?.id === "finish-step") lines.push(WIZARD_COPY.context.finishAvailable);
+  if (model.flow?.blocked.some((action) => action.id === "advance-step")) {
     lines.push(WIZARD_COPY.context.advanceBlocked);
   }
   return lines;

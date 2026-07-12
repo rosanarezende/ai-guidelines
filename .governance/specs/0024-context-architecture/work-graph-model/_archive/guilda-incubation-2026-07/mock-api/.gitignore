@@ -1,0 +1,2 @@
+# estado mutável local da mock API — resetável, nunca versionado
+.data/

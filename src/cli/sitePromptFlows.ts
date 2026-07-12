@@ -584,7 +584,7 @@ function dailySpecsResult(fixture: DailyFlowSpec["fixture"]): {
 
 function dailyAction(title: string, command: string): GovernedFlowAction {
   return {
-    id: "finish-subcheckpoint",
+    id: "finish-step",
     title,
     availability: { status: "available", reasons: [] },
     command,
@@ -651,7 +651,7 @@ function dailyCockpitModel(spec: DailyFlowSpec): CockpitModel {
         modeBasis: [],
         degraded: [],
         object: {
-          subCheckpoint: { id: "DEMO-1", title: "trabalho em andamento", line: 1 },
+          step: { id: "DEMO-1", title: "trabalho em andamento", line: 1 },
         },
         authorization: { granted: false, reason: "site simulator" },
         allowedActions: [],

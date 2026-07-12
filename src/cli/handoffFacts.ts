@@ -127,6 +127,8 @@ export interface HandoffReviewStatusFact {
   readonly blocking: boolean;
   /** Origem da decisão de requirement (repo default, rule:<id>, node-override). */
   readonly source: string;
+  /** Notas derivadas do plano situado, por exemplo dispensa governada de revalidação. */
+  readonly notes?: ReadonlyArray<string>;
 }
 
 export interface HandoffLifecycleFact {
@@ -149,15 +151,15 @@ export interface HandoffTaskFact {
 }
 
 /**
- * Sub-checkpoint aninhado sob o checkpoint do cursor em tasks.md. A
+ * Etapa aninhada sob o checkpoint do cursor em tasks.md. A
  * granularidade real de TRABALHO de um checkpoint composto vive aqui: o
- * checkpoint-pai é container, os sub-checkpoints é que carregam o objeto
+ * checkpoint-pai é container, as etapas é que carregam o objeto
  * executável. O id pode ser legado (`CO-x.y`) ou semântico
  * (`artifact-taxonomy-and-model-review-contract`). Três estados (espelham os
  * marcadores do tasks.md):
  * `pending` (`[ ]`), `in-progress` (`[/]`), `done` (`[x]`).
  */
-export interface HandoffSubCheckpoint {
+export interface HandoffStep {
   readonly id: string;
   readonly title: string;
   readonly state: "pending" | "in-progress" | "done";
@@ -165,17 +167,17 @@ export interface HandoffSubCheckpoint {
   readonly line: number;
   /**
    * Sinal EXPLÍCITO de prontidão para transição: presente (`"ready-for-transition"`)
-   * SOMENTE quando o sub-checkpoint ATIVO declarou seus critérios de saída
+   * SOMENTE quando a etapa ATIVA declarou seus critérios de saída
    * satisfeitos e aguarda a decisão humana. É a FONTE ÚNICA de "implementação
    * terminada" — substitui a inferência por contagem de findings/resolutions
-   * (que pertencem aos reviews ACUMULADOS do checkpoint, não ao sub-checkpoint
+   * (que pertencem aos reviews ACUMULADOS do checkpoint, não aa etapa
    * atual). Vive INLINE na própria linha do marcador (mesma SSOT; mesmo parser).
    * Ausente/`undefined` ⇒ ainda em implementação.
    */
   readonly readiness?: "ready-for-transition";
   /**
    * Texto BRUTO da linha do marcador (para checagens de coerência
-   * estado↔narrativa). Opcional: só presente quando vem de `parseSubCheckpoints`;
+   * estado↔narrativa). Opcional: só presente quando vem de `parseSteps`;
    * fixtures que constroem o objeto à mão podem omiti-lo.
    */
   readonly text?: string;
@@ -214,8 +216,8 @@ export interface HandoffFacts {
   readonly lifecycle: HandoffLifecycleFact | null;
   /** Tarefas de tasks.md pertencentes ao checkpoint do cursor. */
   readonly tasks: ReadonlyArray<HandoffTaskFact>;
-  /** Sub-checkpoints (CO-x.y) aninhados sob o checkpoint do cursor em tasks.md. */
-  readonly subCheckpoints: ReadonlyArray<HandoffSubCheckpoint>;
+  /** Etapas (CO-x.y) aninhados sob o checkpoint do cursor em tasks.md. */
+  readonly steps: ReadonlyArray<HandoffStep>;
   readonly insights: ReadonlyArray<HandoffInsightFact>;
   /** Drift de projeção detectado na coleta (specs/active.yml etc.). */
   readonly driftWarnings: ReadonlyArray<string>;
@@ -231,8 +233,8 @@ export type NextActionKind =
   | "exercise-human-gate"
   | "conclude-node-open-next"
   | "execute-task"
-  | "implement-subcheckpoint"
-  | "advance-subcheckpoint-transition"
+  | "implement-step"
+  | "advance-step-transition"
   | "investigate-checkpoint";
 
 export interface NextAction {
@@ -301,23 +303,58 @@ export function parseCheckpointTasks(
 }
 
 /**
- * Extrai os sub-checkpoints aninhados sob o checkpoint do cursor. Lê a fonte
+ * Extrai as etapas aninhadas sob o checkpoint do cursor. Lê a fonte
  * CANÔNICA (tasks.md): ancora na linha `**Checkpoint <normalizado>**` e coleta
  * os itens de checkbox subsequentes até o próximo checkpoint de topo.
  * Reconhece os três estados — `[ ]` pending, `[/]` in-progress, `[x]` done — e
- * aceita IDs legados `CO-N.M` e slugs semânticos. Conservador: mencionar um
- * sub-checkpoint em prosa de outro bloco NÃO cria pertencimento.
+ * aceita IDs legados/hierárquicos `CO-N.M[.K...]` e slugs semânticos. Conservador: mencionar um
+ * etapa em prosa de outro bloco NÃO cria pertencimento.
  */
 /**
- * Valor canônico do sinal de prontidão de transição (ver `HandoffSubCheckpoint.readiness`).
+ * Valor canônico do sinal de prontidão de transição (ver `HandoffStep.readiness`).
  * Representação INLINE em tasks.md: um code-span `` `readiness: ready-for-transition` ``
- * logo após o título em negrito do sub-checkpoint — humano-legível (renderiza como
+ * logo após o título em negrito da etapa — humano-legível (renderiza como
  * código), machine-readable e parseado pelo MESMO parser (sem 2ª SSOT).
  */
-export const SUBCHECKPOINT_READINESS = "ready-for-transition" as const;
+export const STEP_READINESS = "ready-for-transition" as const;
 
 /** Token de readiness na linha do marcador; captura o valor para validação de coerência. */
 export const READINESS_TOKEN_RE = /`readiness:\s*([A-Za-z0-9-]+)`/;
+
+const CHECKBOX_CHECKPOINT_RE = /^(\s*)-\s*\[[ xX/]\]\s+\*\*Checkpoint\s+/;
+
+function indentation(line: string): number {
+  return /^\s*/.exec(line)?.[0].length ?? 0;
+}
+
+function findCheckpointSectionAnchor(lines: readonly string[], checkpointIndex: number): number {
+  const checkpointLine = lines[checkpointIndex] ?? "";
+  const checkpointIndent = indentation(checkpointLine);
+  if (!CHECKBOX_CHECKPOINT_RE.test(checkpointLine) || checkpointIndent === 0)
+    return checkpointIndex;
+
+  for (let i = checkpointIndex - 1; i >= 0; i--) {
+    const candidate = lines[i] ?? "";
+    if (indentation(candidate) < checkpointIndent && CHECKBOX_CHECKPOINT_RE.test(candidate))
+      return i;
+  }
+  return checkpointIndex;
+}
+
+function stepTitle(inlineTitle: string | undefined, tail: string | undefined): string {
+  const inline = inlineTitle?.trim();
+  if (inline) return inline;
+
+  const cleanedTail = (tail ?? "")
+    .replace(/^[:—\-\s]+/, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[.]$/, "");
+  if (!cleanedTail) return "";
+
+  const firstClause = cleanedTail.split(/[:.]\s+/)[0]?.trim();
+  return firstClause || cleanedTail;
+}
 
 export function findCheckpointTaskLine(tasksMd: string, checkpoint: string): number | null {
   const normalized = checkpoint.replace(/^checkpoint-/, "");
@@ -326,26 +363,27 @@ export function findCheckpointTaskLine(tasksMd: string, checkpoint: string): num
   return anchor < 0 ? null : anchor + 1;
 }
 
-export function parseSubCheckpoints(tasksMd: string, checkpoint: string): HandoffSubCheckpoint[] {
+export function parseSteps(tasksMd: string, checkpoint: string): HandoffStep[] {
   const lines = tasksMd.split(/\r?\n/);
   const checkpointLine = findCheckpointTaskLine(tasksMd, checkpoint);
   if (checkpointLine === null) return [];
-  const anchor = checkpointLine - 1;
-  const out: HandoffSubCheckpoint[] = [];
+  const anchor = findCheckpointSectionAnchor(lines, checkpointLine - 1);
+  const anchorIndent = indentation(lines[anchor] ?? "");
+  const out: HandoffStep[] = [];
   for (let i = anchor + 1; i < lines.length; i++) {
-    if (/\*\*Checkpoint /.test(lines[i])) break; // próximo checkpoint de topo
+    if (CHECKBOX_CHECKPOINT_RE.test(lines[i]) && indentation(lines[i]) <= anchorIndent) break;
     const m =
-      /^\s*-\s*\[([ xX/])\]\s*\*\*((?:CO-\d+\.\d+)|(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)+))\b\s*[—-]?\s*(.*?)\*\*/.exec(
+      /^\s*-\s*\[([ xX/])\]\s*\*\*(?:Checkpoint\s+)?((?:CO-\d+(?:\.\d+)+)|(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)+))\b(?:\s*[—-]\s*([^*]+?))?\*\*(?:\s*(.*?))?$/.exec(
         lines[i]
       );
     if (!m) continue;
     const mark = m[1];
     const state = mark === " " ? "pending" : mark === "/" ? "in-progress" : "done";
     const rm = READINESS_TOKEN_RE.exec(lines[i]);
-    const readiness = rm && rm[1] === SUBCHECKPOINT_READINESS ? SUBCHECKPOINT_READINESS : undefined;
+    const readiness = rm && rm[1] === STEP_READINESS ? STEP_READINESS : undefined;
     out.push({
       id: m[2],
-      title: m[3].trim(),
+      title: stepTitle(m[3], m[4]),
       state,
       line: i + 1,
       ...(readiness ? { readiness } : {}),
@@ -355,46 +393,46 @@ export function parseSubCheckpoints(tasksMd: string, checkpoint: string): Handof
   return out;
 }
 
-// ── Resolução compartilhada do OBJETO de sub-checkpoint (handoff ↔ work) ───────
-// Fonte ÚNICA da derivação de sub-checkpoints: o `handoff` (deriveNextAction) e o
+// ── Resolução compartilhada do OBJETO de etapa (handoff ↔ work) ───────
+// Fonte ÚNICA da derivação de etapas: o `handoff` (deriveNextAction) e o
 // `work` (deriveWorkBrief) consomem a MESMA função, garantindo que nomeiem o
 // mesmo objeto factual e que nenhum declare "zero tarefas" havendo um `[/]` ativo.
 
-/** Referência mínima a um sub-checkpoint (sem estado/narrativa). */
-export interface SubCheckpointRef {
+/** Referência mínima a uma etapa (sem estado/narrativa). */
+export interface StepRef {
   readonly id: string;
   readonly title: string;
   readonly line: number;
 }
 
-export type SubCheckpointResolution =
-  | { kind: "implement"; subCheckpoint: SubCheckpointRef; basis: string[] }
-  | { kind: "terminal-ready"; subCheckpoint: SubCheckpointRef; basis: string[] }
+export type StepResolution =
+  | { kind: "implement"; step: StepRef; basis: string[] }
+  | { kind: "terminal-ready"; step: StepRef; basis: string[] }
   | {
       kind: "transition";
-      transition: { conclude: SubCheckpointRef | null; activate: SubCheckpointRef };
+      transition: { conclude: StepRef | null; activate: StepRef };
       basis: string[];
     }
   | { kind: "none"; basis: string[] };
 
 /**
- * Resolve o OBJETO de trabalho a partir dos sub-checkpoints (CO-x.y) quando não há
+ * Resolve o OBJETO de trabalho a partir das etapas (CO-x.y) quando não há
  * tarefa de topo executável. Fail-closed: nunca devolve `implement` sem um
- * sub-checkpoint ATIVO concreto.
+ * etapa ATIVA concreto.
  *
  * Conclusão = READINESS EXPLÍCITA. Um `[/]` ativo só vira `transition` quando ELE
  * MESMO declarou `readiness: ready-for-transition` em tasks.md (critérios de saída
  * satisfeitos) E há um pendente adiante. Se não há próximo pendente, a readiness é
  * terminal: fecha a implementação interna e projeta o checkpoint para Ready/Gate,
- * sem inventar `advance-subcheckpoint`. SEM readiness ⇒ ainda em implementação —
+ * sem inventar `advance-step`. SEM readiness ⇒ ainda em implementação —
  * independe de findings/resolutions ACUMULADOS do checkpoint (que pertencem aos
- * reviews — p.ex. o audit do CO-3.1 — e NÃO provam que o sub-checkpoint atual
+ * reviews — p.ex. o audit do CO-3.1 — e NÃO provam que a etapa atual
  * terminou). Concluir/ativar é ATO VISÍVEL em tasks.md, decisão governada da owner.
  */
-export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointResolution {
-  const subs = facts.subCheckpoints;
+export function resolveStepWork(facts: HandoffFacts): StepResolution {
+  const subs = facts.steps;
   if (subs.length === 0) return { kind: "none", basis: [] };
-  const ref = (s: { id: string; title: string; line: number }): SubCheckpointRef => ({
+  const ref = (s: { id: string; title: string; line: number }): StepRef => ({
     id: s.id,
     title: s.title,
     line: s.line,
@@ -404,32 +442,32 @@ export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointReso
   if (inProgress.length >= 1) {
     const active = inProgress[0];
     const pendingAfter = pending.filter((s) => s.line > active.line);
-    if (active.readiness === SUBCHECKPOINT_READINESS && pendingAfter.length >= 1) {
+    if (active.readiness === STEP_READINESS && pendingAfter.length >= 1) {
       return {
         kind: "transition",
         transition: { conclude: ref(active), activate: ref(pendingAfter[0]) },
         basis: [
-          `${active.id} declarou readiness "${SUBCHECKPOINT_READINESS}" (critérios de saída satisfeitos) mas segue [/] em tasks.md;`,
+          `${active.id} declarou readiness "${STEP_READINESS}" (critérios de saída satisfeitos) mas segue [/] em tasks.md;`,
           `próximo pendente: ${pendingAfter[0].id} — ${pendingAfter[0].title}.`,
           "concluir e ativar é ato VISÍVEL em tasks.md (decisão governada da owner).",
         ],
       };
     }
-    if (active.readiness === SUBCHECKPOINT_READINESS && pendingAfter.length === 0) {
+    if (active.readiness === STEP_READINESS && pendingAfter.length === 0) {
       return {
         kind: "terminal-ready",
-        subCheckpoint: ref(active),
+        step: ref(active),
         basis: [
-          `${active.id} declarou readiness "${SUBCHECKPOINT_READINESS}" e não há próximo sub-checkpoint pendente.`,
-          "o próximo movimento governado é preparar fechamento do checkpoint/Ready/Human Gate; advance-subcheckpoint não se aplica.",
+          `${active.id} declarou readiness "${STEP_READINESS}" e não há próxima etapa pendente.`,
+          "o próximo movimento governado é preparar fechamento do checkpoint/Ready/Human Gate; avanço de etapa não se aplica.",
         ],
       };
     }
     return {
       kind: "implement",
-      subCheckpoint: ref(active),
+      step: ref(active),
       basis: [
-        `sub-checkpoint ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})` +
+        `etapa ativa: ${active.id} — ${active.title} (tasks.md linha ${active.line})` +
           (active.readiness ? "." : "; sem readiness declarada (ainda em implementação)."),
       ],
     };
@@ -439,7 +477,7 @@ export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointReso
       kind: "transition",
       transition: { conclude: null, activate: ref(pending[0]) },
       basis: [
-        `nenhum sub-checkpoint ativo; ative o próximo pendente: ${pending[0].id} — ${pending[0].title} (ato visível em tasks.md).`,
+        `nenhuma etapa ativa; ative a próxima etapa pendente: ${pending[0].id} — ${pending[0].title} (ato visível em tasks.md).`,
       ],
     };
   }
@@ -447,8 +485,8 @@ export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointReso
 }
 
 /**
- * Coerência ESTADO↔NARRATIVA dos sub-checkpoints (invariante de estado contínuo).
- * Reusa o resultado de {@link parseSubCheckpoints} (sem parser paralelo). Regras:
+ * Coerência ESTADO↔NARRATIVA das etapas (invariante de estado contínuo).
+ * Reusa o resultado de {@link parseSteps} (sem parser paralelo). Regras:
  *   - no máximo um `[/]` (in-progress) — exatamente um pode estar ativo;
  *   - `[x]` (done) não pode narrar "em execução/progresso";
  *   - `[ ]` (pending) não pode narrar "concluído/implementado".
@@ -458,12 +496,12 @@ export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointReso
 const IN_PROGRESS_NARRATIVE = /\bEM\s+EXECU[ÇC][ÃA]O\b|\bEM\s+PROGRESSO\b/i;
 const DONE_NARRATIVE = /\bCONCLU[ÍI]D[OA]\b|\bIMPLEMENTAD[OA]\b/i;
 
-export function checkSubCheckpointCoherence(subs: ReadonlyArray<HandoffSubCheckpoint>): string[] {
+export function checkStepCoherence(subs: ReadonlyArray<HandoffStep>): string[] {
   const violations: string[] = [];
   const inProgress = subs.filter((s) => s.state === "in-progress");
   if (inProgress.length > 1) {
     violations.push(
-      `mais de um sub-checkpoint [/] ativo (${inProgress
+      `mais de uma etapa [/] ativa (${inProgress
         .map((s) => `${s.id} (linha ${s.line})`)
         .join(", ")}); exatamente um pode estar em progresso.`
     );
@@ -483,15 +521,15 @@ export function checkSubCheckpointCoherence(subs: ReadonlyArray<HandoffSubCheckp
     // Invariantes do sinal de readiness (fonte única de "implementação terminada").
     const rm = READINESS_TOKEN_RE.exec(text);
     if (rm) {
-      if (rm[1] !== SUBCHECKPOINT_READINESS) {
+      if (rm[1] !== STEP_READINESS) {
         violations.push(
-          `${s.id}: marcador de readiness inválido "${rm[1]}" — único valor aceito é "${SUBCHECKPOINT_READINESS}" (tasks.md linha ${s.line}).`
+          `${s.id}: marcador de readiness inválido "${rm[1]}" — único valor aceito é "${STEP_READINESS}" (tasks.md linha ${s.line}).`
         );
       } else if (s.state !== "in-progress") {
         violations.push(
-          `${s.id} carrega readiness "${SUBCHECKPOINT_READINESS}" mas está ${
+          `${s.id} carrega readiness "${STEP_READINESS}" mas está ${
             s.state === "pending" ? "[ ] (pendente)" : "[x] (concluído)"
-          } — readiness só vale para o sub-checkpoint [/] ATIVO (tasks.md linha ${s.line}).`
+          } — readiness só vale para a etapa [/] ATIVA (tasks.md linha ${s.line}).`
         );
       }
     }
@@ -559,10 +597,10 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
 
   const lifecycle = facts.lifecycle;
   const openTasks = facts.tasks.filter((t) => !t.done);
-  const subResolution = resolveSubCheckpointWork(facts);
-  const terminalSubCheckpointReady = subResolution.kind === "terminal-ready";
+  const subResolution = resolveStepWork(facts);
+  const terminalStepReady = subResolution.kind === "terminal-ready";
   const implementationConcluded =
-    (facts.tasks.length > 0 && openTasks.length === 0) || terminalSubCheckpointReady;
+    (facts.tasks.length > 0 && openTasks.length === 0) || terminalStepReady;
 
   // 2 — findings abertos bloqueiam avanço do nó.
   if (lifecycle && lifecycle.openFindings > 0) {
@@ -589,10 +627,10 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
           .map((s) => `${s.typeId} (${s.state})`)
           .join(", ")}.`,
         basis: [
-          terminalSubCheckpointReady
-            ? `sub-checkpoint terminal pronto: ${subResolution.subCheckpoint.id} — ${subResolution.subCheckpoint.title}`
+          terminalStepReady
+            ? `etapa terminal pronta: ${subResolution.step.id} — ${subResolution.step.title}`
             : `tasks do checkpoint concluídas (${facts.tasks.length}/${facts.tasks.length})`,
-          ...(terminalSubCheckpointReady ? subResolution.basis : []),
+          ...(terminalStepReady ? subResolution.basis : []),
           ...blocking.map((s) => `${s.typeId}: required (${s.source}) · ${s.state}`),
           `decisões presentes: ${lifecycle.reviewDecisions.map((d) => `${d.role}=${d.decision}`).join(", ") || "(nenhuma)"}`,
         ],
@@ -630,7 +668,7 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
         description: `Preparar o PR #${facts.pullRequest.number} para Ready: completar o body (contrato READY) e validar com pr-ready:check.`,
         basis: [
           "nenhum review obrigatório pendente (required satisfeitos ou inexistentes)",
-          ...(terminalSubCheckpointReady ? subResolution.basis : []),
+          ...(terminalStepReady ? subResolution.basis : []),
           ...lateralRecommendations(lifecycle).map(
             (s) => `recomendação (não bloqueia): ${s.typeId} ${s.state}`
           ),
@@ -647,7 +685,7 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
         basis: [
           `PR #${facts.pullRequest.number} Ready (não-Draft) no estado ${facts.pullRequest.state}`,
           "nenhum review obrigatório pendente; gate artifact ausente",
-          ...(terminalSubCheckpointReady ? subResolution.basis : []),
+          ...(terminalStepReady ? subResolution.basis : []),
           ...lateralRecommendations(lifecycle).map(
             (s) => `advisory ao gate (não bloqueia): ${s.typeId} ${s.state}`
           ),
@@ -660,6 +698,30 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
   // 6 — gate do checkpoint aprovado e nó ainda ativo: concluir/abrir o próximo.
   if (lifecycle?.gateDecision === "approved" && facts.activeNode) {
     const next = facts.nextPlannedNode;
+    const pendingSteps = facts.steps.filter((s) => s.state !== "done");
+
+    if (pendingSteps.length > 0) {
+      const first = pendingSteps[0];
+      const pendingStepIds = pendingSteps.map((s) => s.id).join(", ");
+      return {
+        kind: "conclude-node-open-next",
+        description: next
+          ? `Human Gate aprovado para ${facts.cursor?.checkpoint ?? "?"}, mas a Frente ainda tem checkpoint(s) pendente(s): ${pendingStepIds}. Abra o próximo PR governado da continuação antes de abrir o nó topológico ${next.id} (seq ${next.sequence ?? "?"}).`
+          : `Human Gate aprovado para ${facts.cursor?.checkpoint ?? "?"}, mas a Frente ainda tem checkpoint(s) pendente(s): ${pendingStepIds}. Abra o próximo PR governado da continuação antes de concluir a topologia.`,
+        basis: [
+          `gate do checkpoint ${facts.cursor?.checkpoint ?? "?"} = approved`,
+          `nó ${facts.activeNode.id} ainda em topology.prs.active`,
+          `checkpoint pendente em tasks.md linha ${first.line}: ${first.id} — ${first.title}`,
+          ...(next
+            ? [
+                `próximo nó topológico bloqueado enquanto a Frente não fecha: ${next.id} (seq ${next.sequence ?? "?"})`,
+              ]
+            : []),
+        ],
+        blocking: true,
+      };
+    }
+
     return {
       kind: "conclude-node-open-next",
       description: next
@@ -688,15 +750,15 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
     };
   }
 
-  // 7.5 — sub-checkpoints (CO-x.y) são as unidades executáveis quando o checkpoint
+  // 7.5 — etapas (antigos CO-x.y) são as unidades executáveis quando o checkpoint
   // está fatiado. REUSA a MESMA resolução que o `work` consome para o objeto de
   // trabalho (invariante handoff↔work): se há um `[/]` ativo, o handoff o NOMEIA e
   // NÃO declara "zero tarefas"; se há transição pendente, aponta o ato humano.
   if (subResolution.kind === "implement") {
-    const sc = subResolution.subCheckpoint;
+    const sc = subResolution.step;
     return {
-      kind: "implement-subcheckpoint",
-      description: `Implementar o sub-checkpoint ativo ${sc.id} — ${sc.title} (tasks.md linha ${sc.line}).`,
+      kind: "implement-step",
+      description: `Implementar a etapa ativa ${sc.id} — ${sc.title} (tasks.md linha ${sc.line}).`,
       basis: [
         ...subResolution.basis,
         `cursor: ${facts.cursor ? `${facts.cursor.pr} · ${facts.cursor.checkpoint}` : "(sem topology)"}`,
@@ -707,30 +769,30 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
   if (subResolution.kind === "transition") {
     const { conclude, activate } = subResolution.transition;
     return {
-      kind: "advance-subcheckpoint-transition",
+      kind: "advance-step-transition",
       description: conclude
-        ? `Concluir o sub-checkpoint ${conclude.id} e ativar ${activate.id} — ${activate.title} (decisão humana \`advance-subcheckpoint\`; ato visível em tasks.md).`
-        : `Ativar o sub-checkpoint pendente ${activate.id} — ${activate.title} (decisão humana \`advance-subcheckpoint\`; ato visível em tasks.md).`,
+        ? `Concluir a etapa ${conclude.id} e ativar ${activate.id} — ${activate.title} (decisão humana \`advance-step\`; ato visível em tasks.md).`
+        : `Ativar a etapa pendente ${activate.id} — ${activate.title} (decisão humana \`advance-step\`; ato visível em tasks.md).`,
       basis: subResolution.basis,
       blocking: false,
     };
   }
   if (subResolution.kind === "terminal-ready") {
-    const sc = subResolution.subCheckpoint;
+    const sc = subResolution.step;
     return {
       kind: "prepare-ready",
-      description: `Preparar o fechamento do checkpoint ${facts.cursor?.checkpoint ?? "?"}: ${sc.id} está pronto e não há próximo sub-checkpoint pendente.`,
+      description: `Preparar o fechamento do checkpoint ${facts.cursor?.checkpoint ?? "?"}: ${sc.id} está pronto e não há próxima etapa pendente.`,
       basis: subResolution.basis,
       blocking: false,
     };
   }
 
-  // 8 — sem tarefa executável materializada (nem tarefa de topo nem sub-checkpoint).
+  // 8 — sem tarefa executável materializada (nem tarefa de topo nem etapa).
   return {
     kind: "investigate-checkpoint",
     description: `Investigar e planejar o checkpoint ${facts.cursor?.checkpoint ?? "(sem cursor)"} — não há tarefa executável materializada em tasks.md.`,
     basis: [
-      `tasks.md: ${facts.tasks.length} tarefa(s) de topo associada(s) ao checkpoint, 0 abertas; 0 sub-checkpoint ativo`,
+      `tasks.md: ${facts.tasks.length} tarefa(s) de topo associada(s) ao checkpoint, 0 abertas; 0 etapa ativa`,
       `cursor: ${facts.cursor ? `${facts.cursor.pr} · ${facts.cursor.checkpoint}` : "(sem topology)"}`,
     ],
     blocking: false,

@@ -45,7 +45,7 @@ import {
   deriveHandoff,
   fingerprintSource,
   parseCheckpointTasks,
-  parseSubCheckpoints,
+  parseSteps,
 } from "./handoffFacts.js";
 import {
   extractAiGuidelinesBlock,
@@ -415,7 +415,15 @@ function collectLifecycle(
       labels: prLabels,
       changedPaths: null,
     },
-    ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+    ...(nodeCtx?.overrides || nodeCtx?.reviewPlanOverrides
+      ? {
+          nodeOverrides: {
+            ...(nodeCtx.overrides ?? {}),
+            ...(nodeCtx.reviewPlanOverrides ?? {}),
+          },
+        }
+      : {}),
+    ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
     observed: observedReviewStates(artifacts, cursor.checkpoint),
     functionalHead: freshness.effectiveFunctionalHead,
   });
@@ -428,6 +436,7 @@ function collectLifecycle(
     decision: s.decision,
     blocking: s.blocking,
     source: s.requirementSource,
+    notes: s.notes,
   }));
 
   const lifecycle: HandoffLifecycleFact = {
@@ -790,8 +799,7 @@ export function collectHandoffFacts(
   const tasksOrigin = `${resolved.specPath}/tasks.md`;
   const tasksText = readIfExists(repoRoot, tasksOrigin);
   const tasks = cursor && tasksText !== null ? parseCheckpointTasks(tasksText, cursor) : [];
-  const subCheckpoints =
-    cursor && tasksText !== null ? parseSubCheckpoints(tasksText, cursor.checkpoint) : [];
+  const steps = cursor && tasksText !== null ? parseSteps(tasksText, cursor.checkpoint) : [];
   sources.push({
     id: "tasks.md",
     origin: tasksOrigin,
@@ -837,7 +845,7 @@ export function collectHandoffFacts(
     pullRequest,
     lifecycle,
     tasks,
-    subCheckpoints,
+    steps,
     insights,
     driftWarnings: [...diagnostics.warnings, ...contractCollected.driftWarnings],
     sources,

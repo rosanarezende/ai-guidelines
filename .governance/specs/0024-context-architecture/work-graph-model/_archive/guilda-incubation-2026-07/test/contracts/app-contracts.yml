@@ -1,0 +1,1032 @@
+version: 2
+status: active
+updated: 2026-07-05
+purpose: >
+  Contratos funcionais da governance-demo. Este arquivo descreve o produto-alvo, nao apenas o que o
+  app entrega hoje. Cada tela/fluxo/feature deve ter teste Playwright correspondente antes da
+  implementacao ou refactor. Contratos podem nascer fixme/expected-fail, mas nao podem nascer sem
+  ID, seed, superficies e criterios observaveis.
+conventions:
+  status:
+    active: executa e deve passar
+    expected-fail: executa e deve falhar ate a implementacao corrigir
+    fixme: nao executa porque rota/infra ainda falta ou travaria
+    skip: nao aplicavel a uma configuracao especifica
+    manual: validacao humana temporaria com plano para automatizar
+  test_shape:
+    - Todo contrato deve ter spec Playwright, mesmo que test.fixme.
+    - O corpo do teste deve conter passos/assertions alvo, nao placeholder vazio.
+    - Design/copy podem mudar; behavior, persistencia, authority e consistencia nao.
+    - Fluxo que cruza telas precisa provar origem, destino e reload quando aplicavel.
+  selector_policy:
+    - Preferir data-testid semantico para comportamento estavel.
+    - Usar getByRole/getByLabel quando o texto e parte do contrato de entendimento.
+    - Nao usar classes MUI, ordem visual, DOM interno ou seletores CSS frageis.
+  evidence:
+    - Todo contrato ativo deve produzir trace em falha.
+    - Todo contrato cross-screen deve provar que o mesmo dado aparece coerente nas telas declaradas.
+    - Todo contrato de seguranca deve provar block/warn/fail-visible, nao apenas copy.
+seed_matrix:
+  blank: sem principal, sem workspace
+  empty-workspace: principal local + workspace novo sem onboarding
+  onboarding-partial: workspace com onboarding parcial
+  workspace-sem-host: workspace sem governance host
+  workspace-host-local: workspace com governance host local
+  workspace-host-embutido: workspace com .governance-host embutido
+  workspace-local: workspace solo/local
+  workspace-shared: workspace compartilhado
+  workspace-controlled: workspace controlado/security
+  workspace-controlled-neo4j: workspace controlado com Neo4j read-model
+  workspace-docker-compose: workspace com stack compose
+  workspace-docker-ollama-profile: workspace com profile Ollama local
+  workspace-groups-teams: workspace com pessoas/times/grupos
+  workspace-authority-personas: workspace com principals distintos para personas/authority
+  workspace-shared-convites: workspace com convites pendentes
+  workspace-shared-github: workspace com GitHub identity provider
+  workspace-shared-google: workspace com Google/OIDC
+  workspace-controlled-oidc: workspace controlled com OIDC generico
+  workspace-cloud-synced-folder: fonte local sincronizada em nuvem
+  workspace-provider-versioned-source: fonte versionada por provider
+  workspace-compact-policy: perfil compact com policy de acumulacao
+  workspace-multi-assistant: multiplos assistentes/defaults
+  workspace-with-integration-statuses: integrações configuradas, desabilitadas e fontes mistas
+  workspace-planning-progressivo: planejamento progressivo
+  workspace-github-work-source: GitHub como work-source release-1
+  acme-demo: snapshot demo acme anexado explicitamente
+contracts:
+  - id: APP-01
+    title: Entrar sem senha sem confundir login com authority
+    status: active
+    spec: journeys/onboarding-journey.spec.ts
+    seed: blank
+    actors:
+      - new-local-user
+    surfaces:
+      - /login
+      - /organizations
+    assertions:
+      - A raiz redireciona para /login quando nao ha sessao.
+      - Entrada usa link magico/provedor, sem senha armazenada pelo produto.
+      - Login nao promete SSO, billing ou authority governada.
+      - Fluxo segue para /organizations.
+  - id: APP-02
+    title: Criar workspace novo sem vazar dados da demo
+    status: active
+    spec: journeys/auth-workspace.spec.ts
+    seed: blank
+    actors:
+      - workspace-admin
+    surfaces:
+      - /organizations
+      - /
+      - /settings
+      - /console
+    assertions:
+      - Workspace novo nasce vazio e honesto.
+      - Home/Settings nao exibem dados acme por acidente.
+      - Console tecnico fica indisponivel ou degradado enquanto nao ha host.
+      - Demo so aparece quando anexada explicitamente.
+  - id: APP-03
+    title: Logout limpa sessao sem apagar workspace/event-log
+    status: active
+    spec: journeys/onboarding-journey.spec.ts
+    seed: blank
+    actors:
+      - workspace-admin
+    surfaces:
+      - shell
+      - /login
+      - /organizations
+    assertions:
+      - Logout redireciona para /login.
+      - Reentrada preserva workspace e event-log.
+      - Logout nao e delete.
+  - id: APP-35
+    title: Navegacao global organiza fluxo sem virar console tecnico
+    status: active
+    spec: journeys/navigation-shell.spec.ts
+    seed: empty-workspace
+    actors:
+      - workspace-admin
+      - stakeholder
+      - security-owner
+    surfaces:
+      - shell
+    assertions:
+      - A navegacao global tem item de primeiro nivel para configuracao, fontes, resultados/mapa, trabalho e integracoes quando aplicavel.
+      - Subitens, itens indisponiveis e itens em breve seguem a decisao QRD-35, sem falsa promessa.
+      - O console tecnico e Cup/CWP aparecem como entradas distintas da UX principal.
+      - Menu respeita perfil/authority sem usar permissao apenas como decoracao visual.
+  - id: APP-04
+    title: Onboarding parcial retoma no passo salvo
+    status: active
+    spec: journeys/onboarding-journey.spec.ts
+    seed: blank
+    actors:
+      - workspace-admin
+    surfaces:
+      - /onboarding
+      - /
+    assertions:
+      - Home mostra card de continuar onboarding.
+      - Reload preserva o passo salvo.
+      - Abrir onboarding nao volta para tela inicial.
+  - id: APP-13
+    title: Home de workspace parcial mostra proximo passo real
+    status: active
+    spec: journeys/auth-workspace.spec.ts
+    seed: onboarding-partial
+    actors:
+      - workspace-admin
+    surfaces:
+      - /
+    assertions:
+      - Home nao parece dashboard completo antes de host/fontes.
+      - Proximo passo aponta para onboarding/host/fontes conforme estado.
+      - Pendencias sao acionaveis e nao tecnicas demais.
+  - id: APP-14
+    title: Home demo acme permanece explicitamente demo
+    status: active
+    spec: journeys/auth-workspace.spec.ts
+    seed: acme-demo
+    actors:
+      - workspace-admin
+    surfaces:
+      - /
+      - /organizations
+    assertions:
+      - Chip/badge deixa claro que e demo/sandbox.
+      - Demo nao altera workspace real selecionado.
+      - Dados demo nao sao tratados como dados do usuario.
+  - id: APP-05
+    title: Perfil e responsabilidades guiam recomendacao compreensivel
+    status: active
+    spec: journeys/onboarding.spec.ts
+    seed: empty-workspace
+    actors:
+      - workspace-admin
+    surfaces:
+      - /onboarding
+      - /
+      - /settings
+    assertions:
+      - Perguntas filtram perfis em vez de dropdown cru.
+      - Solo nao mostra perguntas de separacao de papeis que nao fazem sentido.
+      - Regra de acumulacao altera recomendacao/configuracao visivel.
+      - Home e Settings refletem o mesmo perfil.
+  - id: APP-06
+    title: Responsabilidades aparecem somente quando fazem sentido
+    status: active
+    spec: journeys/onboarding.spec.ts
+    seed: empty-workspace
+    actors:
+      - workspace-admin
+    surfaces:
+      - /onboarding
+    assertions:
+      - Selecionar solo colapsa perguntas irrelevantes.
+      - Selecionar time pequeno abre perguntas de acumulacao/revisao.
+      - Selecionar organizacao maior abre separacao de papeis/SoD.
+  - id: APP-07
+    title: Pessoas, times e papeis sao modelados por sujeito
+    status: active
+    spec: journeys/settings.spec.ts
+    seed: workspace-groups-teams
+    actors:
+      - workspace-admin
+      - invited-member
+    surfaces:
+      - /onboarding
+      - /settings
+    assertions:
+      - A UI lista pessoas/times/grupos e seus papeis.
+      - Papel atribuido a outra pessoa fica proposed ate aceite.
+      - Authority efetiva e derivada de assignments aceitos e grupos.
+      - Acumulo sensivel fica visivel conforme policy.
+  - id: APP-36
+    title: Criador entra na trilha de setup do workspace
+    status: active
+    spec: journeys/onboarding.spec.ts
+    seed: empty-workspace
+    actors:
+      - workspace-admin
+    surfaces:
+      - /login
+      - /organizations
+      - /onboarding
+    assertions:
+      - Criar workspace leva a trilha workspace-setup, nao a um onboarding generico.
+      - A trilha mostra diagnostico/perfil, host e fontes como passos de configuracao do workspace.
+      - A tela deixa claro que a pessoa esta configurando a organizacao/workspace, nao apenas entrando como participante.
+  - id: APP-37
+    title: Pessoa convidada entra na trilha de participacao
+    status: active
+    spec: journeys/onboarding.spec.ts
+    seed: workspace-authority-personas
+    actors:
+      - invited-member
+      - proposed-role
+    surfaces:
+      - /login
+      - /onboarding
+      - /settings
+    assertions:
+      - Pessoa convidada faz signup/entrada antes de aceitar membership ou papel.
+      - A trilha member-join mostra quem convidou, workspace, papeis propostos e permissoes.
+      - Pessoa convidada pode aceitar, recusar ou pedir ajuste sem ganhar authority automaticamente.
+      - Diagnostico da organizacao, perfil, host e fontes nao aparecem como caminho principal para convidado sem authority.
+  - id: APP-08
+    title: Governance host e escolhido antes das fontes
+    status: active
+    spec: journeys/sources.spec.ts
+    seed: workspace-sem-host
+    actors:
+      - workspace-admin
+    surfaces:
+      - /onboarding
+      - /settings
+      - /sources
+    assertions:
+      - UI diferencia governance host de fonte de trabalho.
+      - Opcoes local, repo dedicado e .governance-host embutido sao explicadas.
+      - Fit-check mostra riscos e bloqueios antes de scaffold/link.
+      - Sandbox explicito e permitido, mas nao e vendido como governanca real.
+  - id: APP-09
+    title: Onboarding de fontes guia local vs nuvem
+    status: active
+    spec: journeys/sources.spec.ts
+    seed: workspace-host-local
+    actors:
+      - workspace-admin
+    surfaces:
+      - /onboarding
+      - /sources
+      - /settings
+    assertions:
+      - Pessoa escolhe projeto local ou projeto na nuvem.
+      - Local pergunta pasta vazia/em andamento, Git/sem Git e relacao com .governance.
+      - Nuvem direciona para provider; nao pede URL solta como caminho feliz.
+      - Fonte cadastrada aparece igual em Sources, Settings e Home.
+  - id: APP-10
+    title: Assistente/modelo e opcional, multi-provider e seguro
+    status: active
+    spec: journeys/settings.spec.ts
+    seed: workspace-multi-assistant
+    actors:
+      - workspace-admin
+      - security-owner
+    surfaces:
+      - /onboarding
+      - /settings
+    assertions:
+      - Ollama/local pode ser configurado sem egress externo.
+      - Cloud provider exige approval/policy antes de ficar ativo.
+      - Defaults por funcao ficam visiveis e alteraveis.
+      - Dispensar assistente deixa app funcional.
+  - id: APP-11
+    title: Onboarding mostra integracoes como opcionais e contextuais
+    status: active
+    spec: journeys/integrations.spec.ts
+    seed: workspace-with-integration-statuses
+    actors:
+      - workspace-admin
+    surfaces:
+      - /onboarding
+      - /integrations
+    assertions:
+      - Integracoes aparecem com disponivel/release-1/em-breve/adiado.
+      - Cada sugestao explica o que funciona sem a ferramenta.
+      - Nada fica connected sem mecanismo real.
+  - id: APP-12
+    title: Revisao final do onboarding e honesta
+    status: active
+    spec: journeys/onboarding.spec.ts
+    seed: workspace-host-local
+    actors:
+      - workspace-admin
+    surfaces:
+      - /onboarding
+      - /
+      - /settings
+    assertions:
+      - Mostra o que esta configurado, pendente, rebaixado e bloqueado.
+      - Nao permite finalizar sem host ou sandbox explicito.
+      - Finalizar persiste e Home deixa de mostrar onboarding como pendente.
+  - id: APP-15
+    title: Settings de organizacao espelha onboarding
+    status: active
+    spec: journeys/settings.spec.ts
+    seed: workspace-compact-policy
+    actors:
+      - workspace-admin
+    surfaces:
+      - /settings
+      - /onboarding
+      - /
+    assertions:
+      - Perfil, workspace-mode, stack e policy aparecem iguais ao onboarding.
+      - Mudanca futura exige comando/approval quando policy pedir.
+      - Nada e editado so no estado visual.
+  - id: APP-16
+    title: Settings gerencia pessoas, grupos, convites e roles
+    status: active
+    spec: journeys/settings.spec.ts
+    seed: workspace-shared-convites
+    actors:
+      - workspace-admin
+      - invited-member
+    surfaces:
+      - /settings
+    assertions:
+      - Convite tem token/status e pode expirar/revogar.
+      - Revogar convite muda o status visivel sem apagar a pessoa ou workspace.
+      - Papeis e authority efetiva aparecem na mesma area de configuracao.
+  - id: APP-17
+    title: Settings gerencia governance host com fit-check
+    status: active
+    spec: journeys/sources.spec.ts
+    seed: workspace-host-local
+    actors:
+      - workspace-admin
+    surfaces:
+      - /settings
+      - /console
+      - /
+    assertions:
+      - Host vinculado aparece com sourceRevision.
+      - Warnings de Git/CODEOWNERS/permissao ficam visiveis.
+      - Console so abre quando host permite leitura segura.
+  - id: APP-18
+    title: Settings e Sources mostram as mesmas fontes
+    status: active
+    spec: journeys/sources.spec.ts
+    seed: workspace-provider-versioned-source
+    actors:
+      - workspace-admin
+    surfaces:
+      - /sources
+      - /settings
+      - /
+    assertions:
+      - A mesma fonte tem mesmo status/trust nas tres telas.
+      - Scan altera todas as superficies depois de reload.
+      - Fonte rebaixada nao vira evidencia forte em Results.
+  - id: APP-19
+    title: Settings de assistente mostra provider/defaults reais
+    status: active
+    spec: journeys/settings.spec.ts
+    seed: workspace-multi-assistant
+    actors:
+      - workspace-admin
+    surfaces:
+      - /settings
+      - /integrations
+      - Cup
+    assertions:
+      - Provider padrao por funcao fica visivel.
+      - Health/probe falho deixa provider limited/unavailable.
+      - Cup usa somente provider permitido pela policy.
+  - id: APP-20
+    title: Settings resume integracoes e aponta para hub
+    status: active
+    spec: journeys/integrations.spec.ts
+    seed: workspace-with-integration-statuses
+    actors:
+      - workspace-admin
+    surfaces:
+      - /settings
+      - /integrations
+    assertions:
+      - Settings nao tenta substituir o hub.
+      - Status em Settings bate com /integrations.
+      - Acoes sensiveis levam para detalhe/approval.
+  - id: APP-21
+    title: Sources dedicada cadastra fonte local/cloud/manual
+    status: active
+    spec: journeys/sources.spec.ts
+    seed: workspace-host-local
+    actors:
+      - workspace-admin
+      - source-owner
+    surfaces:
+      - /sources
+      - /settings
+      - /
+    assertions:
+      - Wizard pergunta local vs nuvem.
+      - Local permite browser/select de pasta quando suportado; fallback manual e honesto.
+      - GitHub redireciona para conectar provider, nao pede token bruto como caminho principal.
+      - Trust/limitation fica visivel.
+  - id: INT-01
+    title: Hub /integrations compara providers por valor, permissao e risco
+    status: active
+    spec: journeys/integrations.spec.ts
+    seed: workspace-with-integration-statuses
+    actors:
+      - workspace-admin
+    surfaces:
+      - /integrations
+    assertions:
+      - Cada card mostra o que o framework ja entrega sem a integracao.
+      - Mostra dados acessados, permissoes, quem solicita, quem aprova e como desativar.
+      - Status cloud nao vira connected sem auth/probe.
+  - id: INT-02
+    title: Sugestoes contextuais de integracao aparecem no fluxo certo
+    status: active
+    spec: journeys/integrations.spec.ts
+    seed: workspace-with-integration-statuses
+    actors:
+      - workspace-admin
+    surfaces:
+      - /sources
+      - /results
+      - /work
+      - /triage
+    assertions:
+      - Sources sugere work-source/repo provider.
+      - Results sugere observability/analytics/feature-flags.
+      - Work sugere CI/code-quality.
+      - Triage sugere matcher/catalog/CODEOWNERS.
+  - id: INT-03
+    title: GitHub work-source nao se confunde com GitHub login
+    status: active
+    spec: journeys/integrations.spec.ts
+    seed: workspace-github-work-source
+    actors:
+      - workspace-admin
+      - source-owner
+    surfaces:
+      - /login
+      - /integrations
+      - /sources
+    assertions:
+      - GitHub OAuth identifica usuario, mas nao conecta repos automaticamente.
+      - GitHub work-source exige permissao e repos selecionados.
+      - Conectar repo nao concede authority governada.
+  - id: APP-45
+    title: Better Auth passwordless cria sessao, workspace, convite e aceite sem conceder authority
+    status: active
+    spec: journeys/portal-auth-flow.spec.ts
+    seed: workspace-shared-convites
+    actors:
+      - workspace-admin
+      - invited-member
+    surfaces:
+      - /login
+      - /organizations
+      - state
+    assertions:
+      - Better Auth fica montado pela integracao Next.js, nao pela integracao TanStack Start.
+      - Link magico/provedor/accept-invite produzem sessao/membership de portal, mas nao authority governada.
+      - O produto nao armazena senha de usuario final.
+      - Workspace criado no shell tambem possui organizacao de portal com slug equivalente.
+      - Pessoa convidada entra no portal antes de aceitar o convite e passa a ver o workspace sem ganhar role governada.
+  - id: APP-47
+    title: Demo anonima permite experimentar sem conta
+    status: active
+    spec: journeys/auth-workspace.spec.ts
+    seed: blank
+    actors:
+      - anonymous-visitor
+    surfaces:
+      - /login
+      - /
+    assertions:
+      - Pessoa pode abrir a sandbox Acme sem criar usuario Better Auth.
+      - Demo fica claramente marcada como sandbox/demo.
+      - Tentar bridge de portal apos demo anonima nao encontra sessao Better Auth.
+  - id: APP-46
+    title: Better Auth escopa cache TanStack por sessao/workspace
+    status: active
+    spec: journeys/auth-query-scope.spec.ts
+    seed: workspace-shared-convites
+    actors:
+      - workspace-admin
+      - invited-member
+    surfaces:
+      - /login
+      - /organizations
+      - state
+    assertions:
+      - Troca de conta, logout, aceite de convite e troca de workspace limpam ou invalidam queries sensiveis do TanStack Query.
+      - Query keys de dados governados carregam workspace e escopo de sessao/conta suficiente para impedir vazamento cross-workspace.
+      - A UI nunca usa cache de TanStack Query como prova de authority; toda acao sensivel relê authority/sourceRevision no backend.
+  - id: APP-22
+    title: Planejamento cria ciclo, objetivo, metrica e target
+    status: active
+    spec: journeys/planning-intake.spec.ts
+    seed: workspace-planning-progressivo
+    actors:
+      - sponsor
+      - metric-owner
+    surfaces:
+      - /planning
+      - /
+      - /results
+    assertions:
+      - Fluxo padrao pede minimo objective+metric+target.
+      - Thesis, opportunity-area e allocation estao disponiveis como contexto opcional.
+      - Target aparece no dashboard sem actual ate haver outcome.
+  - id: APP-23
+    title: Intake registra iniciativa sem breakdown tecnico inicial
+    status: active
+    spec: journeys/planning-intake.spec.ts
+    seed: workspace-planning-progressivo
+    actors:
+      - requester
+      - product-owner
+    surfaces:
+      - /intake
+      - /triage
+      - /
+    assertions:
+      - Registro captura problema, aposta, contexto e duvidas.
+      - Intake pode se ligar a objective/target sem exigir solucao tecnica.
+      - Criar proposta gera item visivel para triagem.
+  - id: APP-24
+    title: Triage transforma duvidas em itens e usa matcher advisory
+    status: active
+    spec: journeys/triage-gate.spec.ts
+    seed: workspace-provider-versioned-source
+    actors:
+      - technical-owner
+      - triager
+    surfaces:
+      - /triage
+      - /sources
+      - /audit
+    assertions:
+      - "Cada duvida vira item com fate: exploration, direct-answer ou missing-info."
+      - Matcher sugere fontes/repos com score e unknowns.
+      - Humano confirma/sobrescreve e auditoria registra a decisao.
+  - id: APP-25
+    title: Gate/ativacao exige autoridade e evidencia visivel
+    status: fixme
+    spec: journeys/triage-gate.spec.ts
+    seed: workspace-shared
+    actors:
+      - approver
+      - requester
+    surfaces:
+      - /gates
+      - /intake
+      - /audit
+    assertions:
+      - Requester e approver aparecem separados quando policy exige.
+      - Aprovar, descartar ou pedir mais informacao deixa evento auditavel.
+      - Ativacao cria intent sem mover refs de forma ambigua.
+  - id: APP-26
+    title: Work mostra repo-work, status, ack e evidencia
+    status: active
+    spec: journeys/work-contracts.spec.ts
+    seed: acme-demo
+    actors:
+      - technical-owner
+      - developer
+    surfaces:
+      - /work
+      - /sources
+      - /results
+    assertions:
+      - Repo-work mostra lifecycle e owner.
+      - Done exige evidencia de codigo/teste/verificacao.
+      - Outcome nao soma se work necessario esta aberto/bloqueado/dropped.
+  - id: APP-27
+    title: Contracts mostra owner, consumers, janela e contention
+    status: active
+    spec: journeys/work-contracts.spec.ts
+    seed: acme-demo
+    actors:
+      - contract-owner
+      - consumer-owner
+    surfaces:
+      - /contracts
+      - /work
+      - /map
+      - /audit
+    assertions:
+      - Contrato lista owner, consumers, revision e compatibility-window.
+      - Duas intents mexendo no mesmo contrato geram contention/decision.
+      - Outcome que cita revision fora da janela falha/rebaixa.
+  - id: APP-28
+    title: Results mostra targets, outcomes, actual e confidence
+    status: active
+    spec: journeys/results-audit.spec.ts
+    seed: acme-demo
+    actors:
+      - stakeholder
+      - metric-owner
+    surfaces:
+      - /results
+      - /planning
+      - /audit
+    assertions:
+      - ECharts mostra actual vs target, outcome valido/invalido e confidence.
+      - Self-attested aparece com badge, nao como independente.
+      - Outcome sem evidencia verificavel nao soma como prova forte.
+  - id: APP-29
+    title: Mapa de governanca explica caminho e impacto
+    status: active
+    spec: journeys/results-audit.spec.ts
+    seed: acme-demo
+    actors:
+      - stakeholder
+      - technical-owner
+    surfaces:
+      - /map
+      - /results
+      - /contracts
+    assertions:
+      - React Flow/ELK mostra caminho humano objetivo->intent->work->contract->outcome.
+      - Filtros/search/foco reduzem ruido.
+      - ECharts/Sigma ficam para grafo tecnico opcional.
+  - id: APP-30
+    title: Operacoes mostra incidentes, follow-ups, SLO e trabalho operacional
+    status: fixme
+    spec: journeys/results-audit.spec.ts
+    seed: acme-demo
+    actors:
+      - operations-owner
+      - technical-owner
+    surfaces:
+      - /operations
+      - /work
+      - /results
+      - /audit
+    assertions:
+      - Incidente mostra declare->mitigate->resolve->postmortem.
+      - Follow-up aparece como standalone/proposal resolvivel.
+      - MTTR/SLO derivam de eventos, nao texto livre.
+  - id: APP-31
+    title: Audit mostra trilha de decisoes e break-glass
+    status: active
+    spec: journeys/results-audit.spec.ts
+    seed: acme-demo
+    actors:
+      - auditor
+      - sponsor
+    surfaces:
+      - /audit
+      - /settings
+      - /integrations
+    assertions:
+      - Evento mostra actor, authority, base/source revision e idempotency.
+      - Break-glass fica visivel com motivo, TTL e revisao.
+      - Mutacao sensivel sem authority nao some do historico.
+  - id: APP-32
+    title: Console tecnico existe, mas nao substitui UX principal
+    status: active
+    spec: journeys/results-audit.spec.ts
+    seed: acme-demo
+    actors:
+      - technical-owner
+    surfaces:
+      - /console
+      - /
+    assertions:
+      - Console mostra grafo/comandos/event-log para usuarios tecnicos.
+      - Fluxos principais nao dependem de payload manual no console.
+      - Acoes do console tambem respeitam baseRevision e authority.
+  - id: CUP-01
+    title: Cup abre como overlay contextual sem provider externo
+    status: active
+    spec: journeys/cup.spec.ts
+    seed: empty-workspace
+    actors:
+      - workspace-admin
+    surfaces:
+      - Cup
+      - /onboarding
+      - /sources
+      - /settings
+    assertions:
+      - Botao global abre painel sem navegar para outra pagina.
+      - Cup identifica rota e mostra especialista/contexto.
+      - Sem provider, Cup so usa explicacao deterministica/local.
+  - id: CUP-02
+    title: Cup explica policies versionadas
+    status: active
+    spec: journeys/cup.spec.ts
+    seed: workspace-controlled
+    actors:
+      - workspace-admin
+    surfaces:
+      - Cup
+      - /integrations
+      - /settings
+    assertions:
+      - Bloqueio/warning aponta para POLICY-HANDBOOK.
+      - Cup explica razao, impacto e proximo passo.
+      - Cup nao inventa policy fora do catalogo.
+  - id: CUP-03
+    title: Cup nao executa mutacao sem confirmacao humana
+    status: active
+    deny: true
+    spec: journeys/cup.spec.ts
+    seed: workspace-host-local
+    actors:
+      - workspace-admin
+    surfaces:
+      - Cup
+      - /sources
+      - /audit
+    assertions:
+      - Cup pode preparar draft/dry-run.
+      - Executar exige confirmacao humana e base/source revision atual.
+      - Audit registra a decisao humana, nao Cup como authority.
+  - id: CUP-04
+    title: Cup respeita permissoes e nao vaza contexto bloqueado
+    status: active
+    deny: true
+    spec: journeys/cup.spec.ts
+    seed: workspace-controlled
+    actors:
+      - member
+      - security-owner
+    surfaces:
+      - Cup
+      - /results
+      - /triage
+    assertions:
+      - Contexto entregue ao Cup depende do papel do usuario.
+      - Dados restricted nao saem para provider sem egress aprovado.
+      - Fallback local explica limitacao sem bypass.
+  - id: SEC-01
+    title: Provider cloud nao ativa sem egress/authority
+    status: active
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: workspace-controlled
+    actors:
+      - workspace-admin
+      - security-owner
+    surfaces:
+      - /integrations
+      - /settings
+      - Cup
+    assertions:
+      - Admin sem security approval nao ativa cloud provider.
+      - Status fica blocked/pending, nunca connected.
+      - Explicacao mostra quem aprova e por que.
+  - id: SEC-02
+    title: Read-model derivado nao autoriza acao stale
+    status: fixme
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: acme-demo
+    actors:
+      - technical-owner
+    surfaces:
+      - /map
+      - /results
+      - /work
+      - /console
+    assertions:
+      - Acao iniciada a partir de read-model relê source/base revision.
+      - Revision stale retorna erro fail-closed.
+      - UI mostra refresh/retry, nao aplica estado antigo.
+  - id: SEC-03
+    title: Authority nunca deriva apenas de login externo
+    status: fixme
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: workspace-shared-github
+    actors:
+      - workspace-admin
+      - member
+    surfaces:
+      - /login
+      - /organizations
+      - /settings
+      - /integrations
+    assertions:
+      - Login GitHub/Google/OIDC identifica principal.
+      - Membership e role assignment continuam governados pelo workspace.
+      - Provider externo nao concede sponsor/security/source-owner sozinho.
+  - id: CONS-01
+    title: Perfil escolhido aparece igual em onboarding, Home e Settings
+    status: active
+    spec: journeys/cross-screen-consistency.spec.ts
+    seed: workspace-compact-policy
+    actors:
+      - workspace-admin
+    surfaces:
+      - /onboarding
+      - /
+      - /settings
+    assertions:
+      - Mesmo profile id e policy aparecem em todas as telas.
+      - Reload nao altera recomendacao.
+  - id: CONS-02
+    title: Fonte adicionada aparece igual em Sources, Settings e Home
+    status: active
+    spec: journeys/cross-screen-consistency.spec.ts
+    seed: workspace-provider-versioned-source
+    actors:
+      - workspace-admin
+    surfaces:
+      - /sources
+      - /settings
+      - /
+    assertions:
+      - Nome, provider, trust e limitations coincidem.
+      - Scan/freshness aparece de forma consistente.
+  - id: CONS-03
+    title: Integracao conectada aparece igual no hub, Settings e sugestoes
+    status: active
+    spec: journeys/cross-screen-consistency.spec.ts
+    seed: workspace-with-integration-statuses
+    actors:
+      - workspace-admin
+    surfaces:
+      - /integrations
+      - /settings
+      - /sources
+      - /results
+    assertions:
+      - Status efetivo do provider nao diverge.
+      - Sugestao contextual nao contradiz o hub.
+  - id: SEC-04
+    title: Event-log nao pode ser apagado ou reescrito sem quarantine
+    status: fixme
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: workspace-host-local
+    actors:
+      - workspace-admin
+      - security-owner
+    surfaces:
+      - /audit
+      - /console
+    assertions:
+      - Excluir ou truncar events.jsonl aparece como violacao bloqueante.
+      - Reescrita de evento existente exige recovery/quarantine antes de novas mutacoes.
+      - A UI mostra a quebra como integridade comprometida, nao como warning comum.
+  - id: SEC-05
+    title: Bump de confianca/sourceTrust exige evidencia independente
+    status: fixme
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: workspace-cloud-synced-folder
+    actors:
+      - workspace-admin
+      - security-owner
+    surfaces:
+      - /sources
+      - /settings
+    assertions:
+      - Fonte cloud-sync-unverified nao pode virar provider-audited por edicao manual.
+      - UI explica qual evidencia ou adapter faltou.
+      - Historico registra tentativa bloqueada ou rebaixada conforme perfil.
+  - id: SEC-06
+    title: Downgrade de classificacao exige autoridade separada e trilha visivel
+    status: fixme
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: workspace-controlled
+    actors:
+      - workspace-admin
+      - security-owner
+    surfaces:
+      - /settings
+      - /audit
+      - Cup
+    assertions:
+      - Restricted/confidential nao pode virar public por autodeclaracao simples.
+      - Aprovador separado e exigido quando policy do workspace pede.
+      - Cup/assistente recebe apenas contexto permitido pelo resultado da policy.
+  - id: SEC-07
+    title: Remover o ultimo admin/security-owner e bloqueado ou exige break-glass
+    status: fixme
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: workspace-shared-convites
+    actors:
+      - workspace-admin
+      - security-owner
+    surfaces:
+      - /settings
+    assertions:
+      - Workspace nao fica sem administrador ativo.
+      - Workspace controlado nao fica sem responsavel de seguranca quando esse papel e requerido.
+      - Break-glass registra motivo, TTL e revisao posterior.
+  - id: SEC-08
+    title: Outcome/rollup sem evidencia minima nao entra como resultado valido
+    status: active
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: acme-demo
+    actors:
+      - workspace-admin
+      - actual-attester
+    surfaces:
+      - /results
+      - /audit
+    assertions:
+      - Numero sem fonte/attester independente aparece como sem evidencia ou autodeclarado.
+      - Rollup primario nao soma outcome sem resolver valido.
+      - Dashboard aponta a pendencia acionavel.
+  - id: SEC-09
+    title: Integracao nao escreve estado autoritativo sem contrato explicito
+    status: active
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: workspace-with-integration-statuses
+    actors:
+      - workspace-admin
+      - security-owner
+    surfaces:
+      - /integrations
+      - /settings
+    assertions:
+      - Adapter read-only nunca aparece como capaz de gravar YAML governado.
+      - Adapter que pretende escrever exige contrato de mutacao e autoridade.
+      - Erro de segundo SSOT fica visivel antes da conexao.
+  - id: SEC-10
+    title: Break-glass nao vira porta permanente
+    status: fixme
+    deny: true
+    spec: journeys/security-authority.spec.ts
+    seed: workspace-compact-policy
+    actors:
+      - workspace-admin
+      - security-owner
+    surfaces:
+      - /settings
+      - /
+      - /audit
+    assertions:
+      - Toda excecao tem motivo, TTL e responsavel de revisao.
+      - Excecao vencida aparece em Home/Settings como pendencia de seguranca.
+      - Nova excecao nao apaga a anterior.
+  # Authority como mecanismo derivado (sem UI). surface `state` = estado
+  # derivado, nao tela. deny: true porque provam um bloqueio; ativos porque o
+  # mecanismo ja existe no dominio (resolveWorkspaceAuthority).
+  - id: SEC-11
+    title: Papel proposto nunca gera authority efetiva
+    status: active
+    deny: true
+    spec: journeys/authority-model.spec.ts
+    seed: workspace-authority-personas
+    actors:
+      - proposed-role
+    surfaces:
+      - state
+    assertions:
+      - Papel com status proposed nao aparece na authority efetiva da pessoa.
+      - Pessoa com apenas papel proposto tem zero grants.
+  - id: SEC-12
+    title: Papel aceito gera authority direta; sem aceite nao ha authority
+    status: active
+    deny: true
+    spec: journeys/authority-model.spec.ts
+    seed: workspace-authority-personas
+    actors:
+      - security-owner
+      - sponsor
+    surfaces:
+      - state
+    assertions:
+      - Papel accepted de outra pessoa gera grant com origin direct.
+      - Papel aceito nunca vira self-assigned indevidamente.
+  # Cadeia cross-feature: uma iniciativa rastreavel do planejamento ao audit.
+  # fixme porque as rotas /planning /intake /triage /gates /contracts /audit
+  # ainda nao existem; corpo escrito para orientar a implementacao.
+  - id: APP-33
+    title: Iniciativa rastreavel de planejamento ate audit
+    status: fixme
+    spec: journeys/lifecycle-chain.spec.ts
+    seed: workspace-planning-progressivo
+    actors:
+      - sponsor
+      - technical-owner
+      - auditor
+    surfaces:
+      - /planning
+      - /intake
+      - /triage
+      - /gates
+      - /work
+      - /contracts
+      - /results
+      - /audit
+    assertions:
+      - Objetivo/target criado em planning aparece em results sem actual ate haver outcome.
+      - Iniciativa de intake vira item de triage e decisao de gate.
+      - Outcome publicado em work/contracts aparece em results e tem evento correspondente em audit.
+      - O mesmo id de iniciativa/decisao e rastreavel ponta a ponta.
+  # Host embutido usa a seed workspace-host-embutido (antes ociosa).
+  - id: APP-34
+    title: Governance host embutido nao se confunde com sidecar do repo
+    status: active
+    spec: journeys/sources.spec.ts
+    seed: workspace-host-embutido
+    actors:
+      - workspace-admin
+    surfaces:
+      - /settings
+      - /console
+    assertions:
+      - Host embutido aparece como .governance-host, distinto do sidecar .governance.
+      - Warnings de CODEOWNERS/permissao do host embutido ficam visiveis.
+      - Console so abre quando o host embutido permite leitura segura.

@@ -1,0 +1,17 @@
+# registry/delivery.yml — acme-mfe-identity · índice kind=delivery (→ active-work).
+entries:
+  - id: deliv-120
+    title: telas de onboarding (MFE)
+    status: active
+    intent: intent-001
+    workspace: works/delivery_onboarding-screens/ # DENSO (tem brief próprio)
+    blocked-by: [acme-api/deliv-101] # espera a API de onboarding (um trabalho)
+    date: 2026-06-21
+  - id: deliv-220
+    title: login MFE
+    status: draft # bloqueada (blocked-by form+auth) → draft até destravar
+    intent: intent-004
+    workspace: works/delivery_login-mfe/ # DENSO
+    blocked-by: [acme-design-system/deliv-210, acme-api/deliv-201] # form + auth
+    coordinates-with: [acme-mfe-support/deliv-230] # contrato de evento login:step-failed
+    date: 2026-06-29

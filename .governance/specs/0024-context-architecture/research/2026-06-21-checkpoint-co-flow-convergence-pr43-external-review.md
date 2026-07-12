@@ -1,3 +1,8 @@
+---
+artifact-kind: delivery-review
+reviewer: external
+---
+
 # Revisao externa pre-Human Gate — PR #43 / CO-10.1..CO-10.7
 
 Data: 2026-06-21

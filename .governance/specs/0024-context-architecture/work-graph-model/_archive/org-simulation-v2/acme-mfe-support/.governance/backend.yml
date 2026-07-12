@@ -1,0 +1,7 @@
+# backend.yml — qual banco este repo usa (Lente 5: o repo é dono do seu dado; o backend é PLUGÁVEL).
+# Ausente OU kind: file  → backend de ARQUIVOS versionados (.governance/) — o default (dev solo).
+# kind: neo4j            → banco de GRAFOS (este repo). Sobe via ./docker-compose.yml.
+kind: neo4j
+uri: bolt://localhost:7687
+user: neo4j
+password: simsim123 # DEV/sim apenas

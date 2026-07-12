@@ -1,0 +1,1847 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spec 0024 — Mapa V3: Spec, Fase, Checkpoint, Etapa e Tarefa</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --panel: #171a23;
+        --panel-2: #1e2230;
+        --line: #2b3143;
+        --ink: #eef2ff;
+        --muted: #a4adbf;
+        --soft: #cbd5e1;
+        --spec: #60a5fa;
+        --spec-bg: rgba(96, 165, 250, 0.15);
+        --phase: #34d399;
+        --phase-bg: rgba(52, 211, 153, 0.13);
+        --checkpoint: #a78bfa;
+        --checkpoint-bg: rgba(167, 139, 250, 0.13);
+        --step: #fbbf24;
+        --step-bg: rgba(251, 191, 36, 0.13);
+        --task: #94a3b8;
+        --task-bg: rgba(148, 163, 184, 0.12);
+        --risk: #fb7185;
+        --risk-bg: rgba(251, 113, 133, 0.12);
+        --done: #34d399;
+        --active: #60a5fa;
+        --planned: #a78bfa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(96, 165, 250, 0.16), transparent 28rem),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      code {
+        background: rgba(255, 255, 255, 0.07);
+        color: #bfdbfe;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 6px;
+        padding: 1px 5px;
+      }
+
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 22px 72px;
+      }
+
+      .hero {
+        border: 1px solid var(--line);
+        background: rgba(23, 26, 35, 0.9);
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 18px;
+      }
+
+      .eyebrow {
+        color: var(--spec);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin: 0 0 8px;
+      }
+
+      h1 {
+        font-size: clamp(28px, 5vw, 48px);
+        line-height: 1.05;
+        margin: 0 0 12px;
+      }
+
+      h2 {
+        font-size: 23px;
+        margin: 0 0 8px;
+      }
+
+      h3 {
+        margin: 0 0 8px;
+      }
+
+      p {
+        color: var(--muted);
+      }
+
+      .lead {
+        max-width: 940px;
+        color: var(--soft);
+        font-size: 17px;
+        margin: 0;
+      }
+
+      .warning {
+        margin-top: 18px;
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        background: var(--step-bg);
+        color: #fde68a;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+
+      .nav {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 18px 0 24px;
+      }
+
+      .nav a {
+        text-decoration: none;
+        color: var(--soft);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 13px;
+      }
+
+      .section {
+        margin-top: 26px;
+      }
+
+      .section > p {
+        margin: 0 0 14px;
+        max-width: 920px;
+      }
+
+      .legend {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      @media (min-width: 900px) {
+        .legend {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+      }
+
+      .legend-card {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(15, 17, 23, 0.42);
+        padding: 12px;
+      }
+
+      .legend-card h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+      }
+
+      .legend-card p {
+        font-size: 13px;
+        margin: 0;
+      }
+
+      .status-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .status-legend strong {
+        color: var(--soft);
+      }
+
+      .rule-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      @media (min-width: 860px) {
+        .rule-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .rule {
+        background: rgba(23, 26, 35, 0.9);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 15px;
+      }
+
+      .rule p {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 16px;
+      }
+
+      .phase-card {
+        background: rgba(23, 26, 35, 0.92);
+        border: 1px solid var(--line);
+        border-left: 5px solid rgba(148, 163, 184, 0.28);
+        border-radius: 18px;
+        overflow: hidden;
+      }
+
+      .phase-card.active {
+        border-left-color: var(--active);
+        box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.24);
+      }
+
+      .phase-card.planned {
+        border-left-color: var(--planned);
+      }
+
+      .phase-card.integration {
+        border-left-color: #f59e0b;
+      }
+
+      .phase-head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(30, 34, 48, 0.82);
+      }
+
+      .phase-head h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 20px;
+      }
+
+      .phase-head p {
+        margin: 4px 0 0;
+        font-size: 13px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      .tag.done {
+        background: var(--phase-bg);
+        color: var(--phase);
+      }
+
+      .tag.active {
+        background: var(--spec-bg);
+        color: var(--active);
+      }
+
+      .tag.planned {
+        background: var(--checkpoint-bg);
+        color: var(--planned);
+      }
+
+      .tag.decision {
+        background: var(--step-bg);
+        color: var(--step);
+      }
+
+      .phase-body {
+        padding: 15px;
+      }
+
+      .checkpoint-grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      @media (min-width: 880px) {
+        .checkpoint-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .checkpoint-item {
+        border: 1px solid var(--line);
+        border-left: 4px solid rgba(148, 163, 184, 0.28);
+        border-radius: 14px;
+        padding: 12px;
+        background: rgba(15, 17, 23, 0.52);
+      }
+
+      .checkpoint-item.done {
+        border-left-color: var(--done);
+      }
+
+      .checkpoint-item.active {
+        border-left-color: var(--active);
+      }
+
+      .checkpoint-item.planned {
+        border-left-color: var(--planned);
+      }
+
+      .checkpoint-item h4 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 6px;
+        font-size: 15px;
+      }
+
+      .level-icon {
+        display: inline-grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        flex: 0 0 24px;
+        border: 1px solid rgba(203, 213, 225, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.045);
+        color: var(--soft);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.02em;
+      }
+
+      .legend-card h3::before,
+      .phase-head h3::before,
+      .checkpoint-item h4::before,
+      .step-pill.step::before {
+        display: inline-grid;
+        place-items: center;
+        border: 1px solid rgba(203, 213, 225, 0.28);
+        background: rgba(255, 255, 255, 0.045);
+        color: var(--soft);
+        font-weight: 900;
+      }
+
+      .legend-card h3::before,
+      .phase-head h3::before,
+      .checkpoint-item h4::before {
+        width: 24px;
+        height: 24px;
+        flex: 0 0 24px;
+        border-radius: 8px;
+        font-size: 11px;
+      }
+
+      .legend-card.spec h3::before {
+        content: "S";
+      }
+
+      .legend-card.phase h3::before,
+      .phase-head h3::before {
+        content: "F";
+      }
+
+      .legend-card.checkpoint h3::before,
+      .checkpoint-item h4::before {
+        content: "C";
+      }
+
+      .legend-card.step h3::before {
+        content: "E";
+      }
+
+      .legend-card.task h3::before {
+        content: "T";
+      }
+
+      .checkpoint-item p {
+        margin: 0;
+        font-size: 13px;
+      }
+
+      .checkpoint-details {
+        display: grid;
+        gap: 8px;
+        margin-top: 11px;
+      }
+
+      .detail-block {
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.025);
+        padding: 9px;
+      }
+
+      .detail-block strong {
+        display: block;
+        margin-bottom: 3px;
+        color: var(--ink);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .detail-block span,
+      .detail-block li {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .detail-block ul {
+        margin: 0;
+        padding-left: 17px;
+      }
+
+      .stage-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .stage-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 10px;
+        background: rgba(148, 163, 184, 0.08);
+        color: var(--soft);
+        padding: 5px 7px;
+        font-size: 11px;
+      }
+
+      .stage-pill::before {
+        content: "E";
+        display: inline-grid;
+        place-items: center;
+        width: 16px;
+        height: 16px;
+        border: 1px solid rgba(203, 213, 225, 0.24);
+        border-radius: 5px;
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 900;
+      }
+
+      .media-row {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      @media (min-width: 960px) {
+        .media-row {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .steps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .step-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        color: var(--soft);
+        padding: 3px 8px;
+        font-size: 11px;
+      }
+
+      .step-pill.step {
+        color: var(--soft);
+        background: rgba(148, 163, 184, 0.08);
+      }
+
+      .step-pill.step::before {
+        content: "T";
+        width: 14px;
+        height: 14px;
+        border-radius: 5px;
+        font-size: 8px;
+      }
+
+      .step-pill.pr {
+        color: #bfdbfe;
+        background: var(--spec-bg);
+      }
+
+      .step-pill.related {
+        color: #d8b4fe;
+        background: var(--checkpoint-bg);
+      }
+
+      .step-pill.evidence {
+        color: #bbf7d0;
+        background: var(--phase-bg);
+      }
+
+      .checkpoint-note {
+        margin-top: 10px;
+        border-top: 1px solid rgba(148, 163, 184, 0.16);
+        padding-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .asset-panel {
+        margin-top: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        overflow: hidden;
+      }
+
+      .asset-panel summary {
+        cursor: pointer;
+        padding: 9px 11px;
+        color: var(--soft);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .asset-panel figure {
+        margin: 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.18);
+      }
+
+      .asset-panel img {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: #fff;
+      }
+
+      .asset-panel figcaption {
+        padding: 8px 11px 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .progress-strip {
+        display: grid;
+        gap: 10px;
+      }
+
+      @media (min-width: 900px) {
+        .progress-strip {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .progress-card {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(23, 26, 35, 0.75);
+        padding: 13px;
+      }
+
+      .progress-card h3 {
+        font-size: 15px;
+      }
+
+      .progress-card p {
+        margin: 0;
+        font-size: 13px;
+      }
+
+      .translation {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .translation th,
+      .translation td {
+        border-bottom: 1px solid var(--line);
+        padding: 11px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 13px;
+      }
+
+      .translation th {
+        background: var(--panel-2);
+        color: var(--ink);
+      }
+
+      .translation td {
+        color: var(--muted);
+      }
+
+      .translation tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .callout {
+        border: 1px solid rgba(96, 165, 250, 0.35);
+        background: rgba(96, 165, 250, 0.1);
+        border-radius: 16px;
+        padding: 15px;
+      }
+
+      .callout p {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <p class="eyebrow">Mapa operacional experimental · não é SSOT</p>
+        <h1>Spec 0024 — mapa V3 por Fases, Checkpoints, Etapas e Tarefas</h1>
+        <p class="lead">
+          Este mapa mostra como acompanhar a Spec 0024 usando
+          <strong>Spec &gt; Fase &gt; Checkpoint &gt; Etapa &gt; Tarefa</strong>, separando valor
+          entregue, PR principal, PRs relacionados, evidências e imagens. Ele testa a linguagem
+          antes da DEC; em caso de divergência, continuam vencendo <code>state.yml</code>,
+          <code>tasks.md</code>, Git/GitHub e os comandos governados.
+        </p>
+        <div class="warning">
+          Intenção: provar se o mapa ajuda uma pessoa a saber onde a spec está, quais checkpoints
+          foram fechados, qual PR fechou cada entrega, quais PRs apenas se relacionam e onde estão
+          as imagens/evidências que explicam o trabalho.
+        </div>
+      </section>
+
+      <nav class="nav" aria-label="Seções do mapa V3">
+        <a href="#vocabulario">Vocabulário</a>
+        <a href="#regras">Regras de opcionalidade</a>
+        <a href="#prs">PRs e checkpoints</a>
+        <a href="#timeline">Spec 0024 em Fases</a>
+        <a href="#traducao">Tradução do legado</a>
+        <a href="#decisao">O que decidir</a>
+      </nav>
+
+      <section class="section" id="vocabulario">
+        <h2>1. Vocabulário testado</h2>
+        <p>
+          A hierarquia abaixo é de linguagem humana. Ela não exige que todos os níveis apareçam em
+          todos os casos. Letras identificam hierarquia; cores identificam apenas status.
+        </p>
+
+        <div class="legend">
+          <article class="legend-card spec">
+            <h3>Spec</h3>
+            <p>O objetivo completo de produto/arquitetura. Aqui: Spec 0024 inteira.</p>
+          </article>
+          <article class="legend-card phase">
+            <h3>Fase</h3>
+            <p>Grande frente sequencial da spec. Substitui a leitura humana de "nó topológico".</p>
+          </article>
+          <article class="legend-card checkpoint">
+            <h3>Checkpoint</h3>
+            <p>
+              Entrega governada e revisável. Normalmente tem PR próprio ou parte clara de um PR.
+            </p>
+          </article>
+          <article class="legend-card step">
+            <h3>Etapa</h3>
+            <p>Divisão opcional dentro de um checkpoint grande. Substitui "sub-checkpoint".</p>
+          </article>
+          <article class="legend-card task">
+            <h3>Tarefa</h3>
+            <p>Item executável ou evidência de conclusão. É folha, não camada de autoridade.</p>
+          </article>
+        </div>
+        <div class="status-legend" aria-label="Legenda de status">
+          <strong>Status por cor:</strong>
+          <span class="tag done">concluída</span>
+          <span class="tag active">ativa</span>
+          <span class="tag planned">planejada</span>
+          <span class="tag decision">terminal/decisão</span>
+        </div>
+      </section>
+
+      <section class="section" id="regras">
+        <h2>2. Regras de opcionalidade</h2>
+        <p>
+          A proposta precisa evitar burocracia: o vocabulário organiza o que existe, mas não força
+          uma profundidade fixa.
+        </p>
+
+        <div class="rule-grid">
+          <article class="rule">
+            <h3>Fase pode ser simples</h3>
+            <p>
+              Uma Fase pequena pode ter só tarefas ou um checkpoint único. Ela não precisa ter
+              etapas.
+            </p>
+          </article>
+          <article class="rule">
+            <h3>Checkpoint pode ter etapas</h3>
+            <p>
+              Quando a entrega é grande, o checkpoint pode ser dividido em Etapas para preservar
+              review e Human Gate sem perder contexto.
+            </p>
+          </article>
+          <article class="rule">
+            <h3>PR não é nível da hierarquia</h3>
+            <p>
+              PR é o contêiner de revisão no GitHub. O ideal é que cada checkpoint tenha um PR
+              principal claro; quando houver vários PRs, o mapa precisa explicar a relação.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="prs">
+        <h2>3. Como ler checkpoints com mais de um PR</h2>
+        <p>
+          O mapa separa o que fecha uma entrega do que apenas preparou, influenciou ou carregou
+          contexto histórico. Isso evita que o PR vire uma unidade de autoridade do lifecycle.
+        </p>
+
+        <div class="progress-strip">
+          <article class="progress-card">
+            <h3>PR principal</h3>
+            <p>
+              Contêiner onde o checkpoint foi ou será fechado. Deve concentrar revisão, evidência e
+              valor entregue daquela unidade.
+            </p>
+          </article>
+          <article class="progress-card">
+            <h3>PRs relacionados</h3>
+            <p>
+              PRs que prepararam, investigaram, migraram ou influenciaram o checkpoint. Eles ajudam
+              a entender a história, mas não fecham a entrega atual.
+            </p>
+          </article>
+          <article class="progress-card">
+            <h3>Sinal de checkpoint grande</h3>
+            <p>
+              Se um checkpoint precisa de muitos PRs para ser entendido, o próximo modelo deve
+              quebrá-lo em checkpoints menores ou promovê-lo a Fase.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="timeline">
+        <h2>4. Spec 0024 como se esse vocabulário existisse desde o começo</h2>
+        <p>
+          Esta leitura reagrupa a história real da Spec 0024 em Fases humanas. Os nomes internos
+          antigos aparecem apenas como ponte.
+        </p>
+
+        <div class="timeline">
+          <article class="phase-card">
+            <div class="phase-head">
+              <div>
+                <h3>Fase 0 · Instanciação, pesquisa e decisões iniciais</h3>
+                <p>Do bootstrap da spec ao gate inicial de research/decision brief.</p>
+              </div>
+              <span class="tag done">concluída</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Fundação da Spec 0024</h4>
+                  <p>
+                    Criação da spec, plano, tasks, decision brief e PR #32 como linha de integração.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Dar uma casa governada para a investigação de arquitetura contextual.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Spec materializada com plano, tarefas, decisão inicial e PR
+                        contêiner.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span
+                        ><code>spec.md</code>, <code>plan.md</code>, <code>tasks.md</code>, decision
+                        brief.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: setup inicial</span>
+                    <span class="stage-pill">Etapa: pesquisa e gate inicial</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #32</span>
+                    <span class="step-pill step"
+                      >Etapas legadas: 0.Setup · Stage 1 research/gate</span
+                    >
+                    <span class="step-pill evidence">evidência: spec/plan/tasks/brief</span>
+                  </div>
+                </article>
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Vocabulário inicial e topologia canônica</h4>
+                  <p>
+                    Aposentou "PR-N" como unidade interna e consolidou Checkpoint/Gate antes do V3.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Evitar que número de PR fosse confundido com unidade do trabalho
+                        governado.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Topologia e gates passaram a orientar a entrega, com PR como
+                        contêiner.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>DECs, ADRs e topologia canônica em <code>state.yml</code>.</span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: checkpoint 2</span>
+                    <span class="stage-pill">Etapa: checkpoint 2.1</span>
+                    <span class="stage-pill">Etapa: checkpoint 2.1a</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #32</span>
+                    <span class="step-pill related">relacionado: checkpoints 2 · 2.1 · 2.1a</span>
+                    <span class="step-pill evidence">evidência: DEC/ADR/topologia</span>
+                  </div>
+                  <p class="checkpoint-note">
+                    No V3, este checkpoint teria sido narrado como ajuste de vocabulário e
+                    topologia; a numeração histórica vira apenas ponte.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-card">
+            <div class="phase-head">
+              <div>
+                <h3>Fase 1 · Produtibilidade e revisão como artefato</h3>
+                <p>Transformou regras, topologia e reviews em superfícies verificáveis.</p>
+              </div>
+              <span class="tag done">concluída</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Ruleset e topologia como dados</h4>
+                  <p>
+                    Regras/produtibilidade, topologia e checks deixaram de depender de narrativa
+                    solta.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Transformar regras e topologia em dados verificáveis, não só instrução
+                        textual.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span>Ruleset e checks começaram a falsificar o estado governado.</span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>Rules, script contracts, topologia e validações versionadas.</span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: ruleset</span>
+                    <span class="stage-pill">Etapa: topologia como dados</span>
+                    <span class="stage-pill">Etapa: checks de coerência</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #33</span>
+                    <span class="step-pill related">etapas legadas: 2.2..2.3b</span>
+                    <span class="step-pill evidence">evidência: rules/checks/topology</span>
+                  </div>
+                </article>
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Review como artefato</h4>
+                  <p>
+                    Findings, resolutions, fingerprints e gates passaram a ser versionados e
+                    auditáveis.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Fazer revisão deixar rastro governado, com achados e resolução
+                        auditáveis.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Review virou artefato versionado, revisável e fechado por evidência.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>Arquivos de review, findings, resolutions, fingerprints e gates.</span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: findings</span>
+                    <span class="stage-pill">Etapa: resolutions</span>
+                    <span class="stage-pill">Etapa: gate verificável</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #33</span>
+                    <span class="step-pill related">etapas legadas: 2.4..2.4c</span>
+                    <span class="step-pill evidence">evidência: findings/resolutions/gates</span>
+                  </div>
+                  <p class="checkpoint-note">
+                    Este é um caso em que um mesmo PR carregou mais de um checkpoint coeso. O mapa
+                    mantém a separação por valor entregue, não por número do PR.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-card">
+            <div class="phase-head">
+              <div>
+                <h3>Fase 2 · Knowledge graph, registry e bootstrap da CLI</h3>
+                <p>Base para conhecimento governado, comandos reais e runtime distribuível.</p>
+              </div>
+              <span class="tag done">concluída</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Grafo e insights</h4>
+                  <p>
+                    KnowledgeRef, falsificação, grafo e capability de insights viraram base do
+                    framework.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Separar conhecimento governado de texto solto e permitir
+                        falsificação.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Modelo de referências, insights e grafo como base para decisões
+                        futuras.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span
+                        >KnowledgeRef, testes de falsificação e imagem de valor dos PRs
+                        #34/#37.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: referência governada</span>
+                    <span class="stage-pill">Etapa: falsificação</span>
+                    <span class="stage-pill">Etapa: grafo/insights</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #37</span>
+                    <span class="step-pill related">relacionado: #34</span>
+                    <span class="step-pill evidence">evidência: KnowledgeRef/falsificação</span>
+                  </div>
+                  <div class="media-row">
+                    <details class="asset-panel">
+                      <summary>Ver valor entregue — PR #37</summary>
+                      <figure>
+                        <img
+                          loading="lazy"
+                          src="./pr-value-images/pr-37.png"
+                          alt="Valor entregue do PR 37"
+                        />
+                        <figcaption>
+                          Fonte: <code>assets/pr-value-images/pr-37.png</code>.
+                        </figcaption>
+                      </figure>
+                    </details>
+                    <details class="asset-panel">
+                      <summary>Ver imagem de contexto</summary>
+                      <figure>
+                        <img
+                          loading="lazy"
+                          src="overview.png"
+                          alt="Infográfico da Spec 0024 sobre handoff como projeção do estado governado"
+                        />
+                        <figcaption>
+                          Fonte: <code>assets/overview.png</code>. Handoff como projeção, não fonte
+                          de verdade.
+                        </figcaption>
+                      </figure>
+                    </details>
+                  </div>
+                </article>
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Registry e bootstrap da CLI</h4>
+                  <p>
+                    O registry passou a governar comandos/help; o bootstrap ganhou empacotamento e
+                    contratos.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Evitar comandos divergentes entre registry, help, CLI e documentação.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span>Registry e bootstrap publicável com smoke real do pacote.</span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>Imagens dos PRs #35/#36/#38, registry, pacote e testes de smoke.</span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: registry</span>
+                    <span class="stage-pill">Etapa: bootstrap</span>
+                    <span class="stage-pill">Etapa: packaging smoke</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #38</span>
+                    <span class="step-pill related">relacionados: #35 · #36</span>
+                    <span class="step-pill evidence">evidência: registry/bootstrap/smoke</span>
+                  </div>
+                  <p class="checkpoint-note">
+                    Este é um exemplo de checkpoint que, no V3, provavelmente seria quebrado em
+                    checkpoints menores. Os PRs relacionados explicam a trajetória, não a
+                    autoridade.
+                  </p>
+                  <div class="media-row">
+                    <details class="asset-panel">
+                      <summary>Ver valor entregue — PR #35</summary>
+                      <figure>
+                        <img
+                          loading="lazy"
+                          src="./pr-value-images/pr-35.png"
+                          alt="Valor entregue do PR 35"
+                        />
+                        <figcaption>
+                          Fonte: <code>assets/pr-value-images/pr-35.png</code>.
+                        </figcaption>
+                      </figure>
+                    </details>
+                    <details class="asset-panel">
+                      <summary>Ver valor entregue — PR #38</summary>
+                      <figure>
+                        <img
+                          loading="lazy"
+                          src="./pr-value-images/pr-38.png"
+                          alt="Valor entregue do PR 38"
+                        />
+                        <figcaption>
+                          Fonte: <code>assets/pr-value-images/pr-38.png</code>.
+                        </figcaption>
+                      </figure>
+                    </details>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-card">
+            <div class="phase-head">
+              <div>
+                <h3>Fase 3 · Continuidade operacional</h3>
+                <p>Reduziu a dependência de memória humana entre retomadas, checks e runtime.</p>
+              </div>
+              <span class="tag done">concluída</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Toolchain e projeção situada</h4>
+                  <p>
+                    npm puro, PR body/checks, handoff situado e reviews opcionais/obrigatórios por
+                    policy.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Reduzir retomadas manuais e alinhar PR, checks, handoff e reviews.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Fluxo diário mais situado, com policy de reviews e body/checks mais
+                        governados.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>Imagens dos PRs #39/#41, body/checks e handoff situado.</span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: toolchain npm</span>
+                    <span class="stage-pill">Etapa: PR body/checks</span>
+                    <span class="stage-pill">Etapa: handoff situado</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #41</span>
+                    <span class="step-pill related">relacionado: #39</span>
+                    <span class="step-pill evidence">evidência: PR body/checks/handoff</span>
+                  </div>
+                  <div class="media-row">
+                    <details class="asset-panel">
+                      <summary>Ver valor entregue — PR #41</summary>
+                      <figure>
+                        <img
+                          loading="lazy"
+                          src="./pr-value-images/pr-41.png"
+                          alt="Valor entregue do PR 41"
+                        />
+                        <figcaption>
+                          Fonte: <code>assets/pr-value-images/pr-41.png</code>.
+                        </figcaption>
+                      </figure>
+                    </details>
+                    <details class="asset-panel">
+                      <summary>Ver imagem de apoio</summary>
+                      <figure>
+                        <img
+                          loading="lazy"
+                          src="vision-three-layers.png"
+                          alt="Infográfico sobre automação estrutural, governança operacional e julgamento humano"
+                        />
+                        <figcaption>
+                          Fonte: <code>assets/vision-three-layers.png</code>. Onde automação termina
+                          e decisão humana começa.
+                        </figcaption>
+                      </figure>
+                    </details>
+                  </div>
+                </article>
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Enforcement e colapso do runtime antigo</h4>
+                  <p>
+                    Constraints, receipts, runtime CLI em TypeScript e remoção da ponte legacy
+                    imediata.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Fazer enforcement vir antes da consciência humana e remover o runtime
+                        antigo.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >CLI/runtime TypeScript com constraints, receipts e checks coerentes.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>Imagem do PR #42, receipts, runtime e validações de enforcement.</span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: constraints</span>
+                    <span class="stage-pill">Etapa: receipts</span>
+                    <span class="stage-pill">Etapa: runtime TS</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #42</span>
+                    <span class="step-pill related">etapas legadas: CO-3.1..CO-3.5</span>
+                    <span class="step-pill evidence">evidência: receipts/runtime/checks</span>
+                  </div>
+                  <details class="asset-panel">
+                    <summary>Ver valor entregue — PR #42</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-42.png"
+                        alt="Valor entregue do PR 42"
+                      />
+                      <figcaption>Fonte: <code>assets/pr-value-images/pr-42.png</code>.</figcaption>
+                    </figure>
+                  </details>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-card">
+            <div class="phase-head">
+              <div>
+                <h3>Fase 4 · Convergência da experiência pública e do fluxo governado</h3>
+                <p>
+                  Modelou o lifecycle ponta a ponta e expôs a CLI pública como experiência guiada.
+                </p>
+              </div>
+              <span class="tag done">concluída</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Modelo canônico e correção dos gaps</h4>
+                  <p>
+                    Inventário real, confronto modelo × código, correções, dogfood e fluxo de time.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Parar de tratar bugs de lifecycle como casos isolados e modelar o fluxo
+                        ponta a ponta.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Modelo canônico confrontado com código real, com gaps corrigidos ou
+                        explicitados.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>Imagem do PR #43, inventário, dogfood, guards e revisão externa.</span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: inventário real</span>
+                    <span class="stage-pill">Etapa: confronto modelo × código</span>
+                    <span class="stage-pill">Etapa: correção de gaps</span>
+                    <span class="stage-pill">Etapa: dogfood</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #43</span>
+                    <span class="step-pill related">etapas legadas: CO-10.1..CO-10.6</span>
+                    <span class="step-pill evidence">evidência: modelo × código + dogfood</span>
+                  </div>
+                  <div class="media-row">
+                    <details class="asset-panel">
+                      <summary>Ver valor entregue — PR #43</summary>
+                      <figure>
+                        <img
+                          loading="lazy"
+                          src="./pr-value-images/pr-43.png"
+                          alt="Valor entregue do PR 43"
+                        />
+                        <figcaption>
+                          Fonte: <code>assets/pr-value-images/pr-43.png</code>.
+                        </figcaption>
+                      </figure>
+                    </details>
+                    <details class="asset-panel">
+                      <summary>Ver imagem de arquitetura da spec</summary>
+                      <figure>
+                        <img
+                          loading="lazy"
+                          src="overview-v2.png"
+                          alt="Infográfico da arquitetura da Spec 0024 e dos eixos operacionais"
+                        />
+                        <figcaption>
+                          Fonte: <code>assets/overview-v2.png</code>. Visão histórica da Spec 0024
+                          como arquitetura do lifecycle de work-items.
+                        </figcaption>
+                      </figure>
+                    </details>
+                  </div>
+                </article>
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · CLI pública e simulador</h4>
+                  <p>
+                    `npx ai-guidelines`, site/simulador, harness de consumidor e revisão externa
+                    pré-Human Gate.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Fazer o produto ser sentido pela experiência guiada, não por lista de
+                        comandos.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >CLI pública autoexplicável e site/simulador como projeção fiel do
+                        runtime.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span
+                        >Site, simulador, harness de consumidor, PR #43 e Human Gate aprovado.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: npx-first</span>
+                    <span class="stage-pill">Etapa: simulador/site</span>
+                    <span class="stage-pill">Etapa: harness consumidor</span>
+                    <span class="stage-pill">Etapa: revisão externa</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #43</span>
+                    <span class="step-pill related">etapa legada: CO-10.7</span>
+                    <span class="step-pill evidence">evidência: site/simulador/harness</span>
+                  </div>
+                  <p class="checkpoint-note">
+                    O PR #43 fechou dois checkpoints grandes porque era um recorte de convergência.
+                    No V3, isso continuaria possível, mas exigiria explicitar a fronteira de cada
+                    entrega no body e no mapa.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-card active">
+            <div class="phase-head">
+              <div>
+                <h3>Fase 5 · Continuação do fluxo e contrato de artefatos</h3>
+                <p>
+                  Onde estamos agora: dogfood de drift, decisão de modelo e implementação da
+                  taxonomia/model-review.
+                </p>
+              </div>
+              <span class="tag active">ativa</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Drift explicável e reparável</h4>
+                  <p>
+                    Governance Doctor, reparo seguro de branch stale, classificação dos demais
+                    desencontros e rota pública avançada.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >O dogfood mostrou que humanos não deveriam reconciliar drift
+                        manualmente.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Detecção/explicação de drifts e primeiro reparo seguro com preview e
+                        confirmação.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span
+                        >Comando <code>repair</code>, tracker, rota avançada e classificação dos 8
+                        drifts.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: diagnosticar</span>
+                    <span class="stage-pill">Etapa: reparar drift #1</span>
+                    <span class="stage-pill">Etapa: classificar #2..#8</span>
+                    <span class="stage-pill">Etapa: expor no site</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #44</span>
+                    <span class="step-pill step">drift #1..#8</span>
+                    <span class="step-pill evidence">evidência: repair + tracker</span>
+                  </div>
+                  <details class="asset-panel">
+                    <summary>Ver valor entregue e tracker de drifts</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-44.png"
+                        alt="Valor entregue do PR 44"
+                      />
+                      <figcaption>
+                        Fonte: <code>assets/pr-value-images/pr-44.png</code>. Para detalhe
+                        operacional, abrir <a href="drift-tracker.html">drift-tracker.html</a>.
+                      </figcaption>
+                    </figure>
+                  </details>
+                </article>
+                <article class="checkpoint-item done">
+                  <h4>Checkpoint · Decisão de modelo e inventário</h4>
+                  <p>
+                    DEC-0024-G21 e GG-0005: sem débito arquitetural silencioso; PR #44 fecha
+                    decisão, não implementação pesada.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Evitar que o mapa/research liderem a realidade sem decisão governada.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Recorte do #44 decidido, sem débito arquitetural silencioso e com mapa
+                        V2.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span
+                        ><code>DEC-0024-G21</code>, <code>GG-0005</code>, inventário e mapa
+                        V2.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: falsificação do mapa</span>
+                    <span class="stage-pill">Etapa: decisão G21</span>
+                    <span class="stage-pill">Etapa: recorte do PR seguinte</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #44</span>
+                    <span class="step-pill step">mapa V2</span>
+                    <span class="step-pill evidence">evidência: DEC-0024-G21 + GG-0005</span>
+                  </div>
+                  <details class="asset-panel">
+                    <summary>Ver mapa de decisão</summary>
+                    <figure>
+                      <figcaption>
+                        Abrir <a href="spec-0024-map-v2.html">spec-0024-map-v2.html</a>. O V2
+                        registrou a transição da decomposição antiga para checkpoints semânticos e o
+                        princípio de não deixar débito arquitetural silencioso.
+                      </figcaption>
+                    </figure>
+                  </details>
+                </article>
+                <article class="checkpoint-item active">
+                  <h4>Checkpoint · Taxonomia + model-review</h4>
+                  <p>
+                    PR #45. Antes da taxonomia: decidir vocabulário V3 e criar operação governada
+                    para abrir o próximo PR interno.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span
+                        >Implementar a taxonomia sem repetir a confusão entre pesquisa, decisão,
+                        review e projeção.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span
+                        >Artefatos com natureza explícita e contrato governado de revisão antes do
+                        código.</span
+                      >
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span
+                        >Body local do PR, imagem do PR #45, V3 e futuro comando de abertura
+                        interna.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: vocabulário V3</span>
+                    <span class="stage-pill">Etapa: comando próximo PR interno</span>
+                    <span class="stage-pill">Etapa: taxonomia de artefatos</span>
+                    <span class="stage-pill">Etapa: model-review</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: #45</span>
+                    <span class="step-pill step">Vocabulário V3</span>
+                    <span class="step-pill step">próximo PR interno</span>
+                    <span class="step-pill evidence"
+                      >evidência: body local + imagem versionada</span
+                    >
+                  </div>
+                  <details class="asset-panel">
+                    <summary>Ver visão pretendida do PR #45</summary>
+                    <figure>
+                      <img
+                        src="./pr-value-images/pr-45.png"
+                        alt="Infográfico da visão pretendida do PR 45 sobre taxonomia de artefatos e revisão antes do código"
+                      />
+                      <figcaption>
+                        Fonte: <code>assets/pr-value-images/pr-45.png</code>. Projeção visual do PR
+                        #45; não substitui <code>state.yml</code>, DEC, testes ou review.
+                      </figcaption>
+                    </figure>
+                  </details>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-card planned">
+            <div class="phase-head">
+              <div>
+                <h3>Fase 6 · Refactor interno e falsificação ampla</h3>
+                <p>
+                  Organizar o runtime e provar o lifecycle em jornadas reais antes do gate final.
+                </p>
+              </div>
+              <span class="tag planned">planejada</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item planned">
+                  <h4>Checkpoint · Arquitetura interna DDD/BDD</h4>
+                  <p>Reorganização behavior-preserving do runtime, testes e BDD visual.</p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span>
+                        Reduzir conflito entre runtime antigo, runtime novo e bounded contexts
+                        misturados.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span>
+                        Código reorganizado sem alterar comportamento, com testes e BDD visual para
+                        mantenedores.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>
+                        Diff behavior-preserving, suite verde, cenários BDD e revisão arquitetural.
+                      </span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: inventário de bounded contexts</span>
+                    <span class="stage-pill">Etapa: reorganização sem mudança funcional</span>
+                    <span class="stage-pill">Etapa: BDD visual para mantenedores</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: futuro</span>
+                    <span class="step-pill evidence"
+                      >evidência esperada: diff behavior-preserving</span
+                    >
+                  </div>
+                </article>
+                <article class="checkpoint-item planned">
+                  <h4>Checkpoint · Falsificação ampla + review/Human Gate</h4>
+                  <p>
+                    Jornadas completas, revisão independente e Human Gate da continuação do fluxo.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span>
+                        Provar que o modelo novo funciona em jornadas reais, inclusive caminhos de
+                        bloqueio.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span>
+                        Fluxos falsificados ponta a ponta, findings fechados e decisão humana
+                        preparada.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span
+                        >Jornadas reais, revisão independente, relatório de riscos e Human
+                        Gate.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: jornadas felizes</span>
+                    <span class="stage-pill">Etapa: jornadas bloqueadas</span>
+                    <span class="stage-pill">Etapa: revisão externa</span>
+                    <span class="stage-pill">Etapa: Human Gate</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: futuro</span>
+                    <span class="step-pill evidence"
+                      >evidência esperada: jornadas reais + review</span
+                    >
+                  </div>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-card planned">
+            <div class="phase-head">
+              <div>
+                <h3>Fase 7 · Colapso dual-root, captura, eventos e encerramento</h3>
+                <p>
+                  Após a continuação estar modelada e falsificada, remover pontes e automatizar.
+                </p>
+              </div>
+              <span class="tag planned">planejada</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item planned">
+                  <h4>Checkpoint · dualroot-collapse</h4>
+                  <p>
+                    Migrar `.specify` e `.ai-guidelines` para a estrutura canônica sem quebrar ADRs.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span>
+                        Eliminar a raiz legada e a dupla leitura que ainda confunde pesquisa,
+                        templates e runtime.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span>
+                        Uma raiz canônica, referências repontadas e pontes legadas removidas com
+                        segurança.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>
+                        Inventário de referências, migração física, checks de lookup e ADRs
+                        atualizadas.
+                      </span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: inventário de referências</span>
+                    <span class="stage-pill">Etapa: migração canônica</span>
+                    <span class="stage-pill">Etapa: remoção de ponte legada</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: futuro</span>
+                    <span class="step-pill related">fase topológica: dualroot-collapse</span>
+                  </div>
+                </article>
+                <article class="checkpoint-item planned">
+                  <h4>Checkpoint · captura, eventos e housekeeping</h4>
+                  <p>
+                    Captura contínua, dispatcher de eventos, remoção de legado e prontidão de
+                    conhecimento.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span>
+                        Automatizar eventos só depois que lifecycle, artefatos e raiz canônica
+                        estiverem estáveis.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span>
+                        Captura contínua, eventos delimitados, limpeza de legado e readiness de
+                        conhecimento.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span>
+                        Dispatcher, capturas, checks de housekeeping, mapa final e knowledge
+                        readiness.
+                      </span>
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: captura contínua</span>
+                    <span class="stage-pill">Etapa: dispatcher de eventos</span>
+                    <span class="stage-pill">Etapa: housekeeping</span>
+                    <span class="stage-pill">Etapa: knowledge readiness</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: futuro</span>
+                    <span class="step-pill related"
+                      >fases topológicas: co-capture · co-events · housekeeping</span
+                    >
+                  </div>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <article class="phase-card integration">
+            <div class="phase-head">
+              <div>
+                <h3>Fase final · Integração da Spec 0024</h3>
+                <p>Homologação final e merge único em main, depois dos gates humanos aplicáveis.</p>
+              </div>
+              <span class="tag decision">terminal</span>
+            </div>
+            <div class="phase-body">
+              <div class="checkpoint-grid">
+                <article class="checkpoint-item planned">
+                  <h4>Checkpoint · integration-final</h4>
+                  <p>
+                    Integração terminal da spec. Não substitui os Human Gates das fases anteriores e
+                    não autoriza merge antecipado.
+                  </p>
+                  <div class="checkpoint-details">
+                    <div class="detail-block">
+                      <strong>Por que existe</strong>
+                      <span>
+                        Encerrar a Spec 0024 como unidade, depois de todos os checkpoints e gates
+                        necessários.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Valor entregue</strong>
+                      <span>
+                        Revisão final, release log e integração única em main quando a spec estiver
+                        pronta.
+                      </span>
+                    </div>
+                    <div class="detail-block">
+                      <strong>Evidência / artefatos</strong>
+                      <span
+                        ><code>review.md</code>, <code>release-log.md</code>, CI final e gate
+                        terminal.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="stage-list">
+                    <span class="stage-pill">Etapa: revisão final da spec</span>
+                    <span class="stage-pill">Etapa: release log</span>
+                    <span class="stage-pill">Etapa: integração em main</span>
+                  </div>
+                  <div class="steps">
+                    <span class="step-pill pr">PR principal: integração final</span>
+                    <span class="step-pill step">review.md</span>
+                    <span class="step-pill step">release-log.md</span>
+                    <span class="step-pill step">merge final</span>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="traducao">
+        <h2>5. Tradução do vocabulário antigo para o V3</h2>
+        <p>
+          Esta tabela mostra como a linguagem antiga seria lida se o vocabulário final existisse
+          desde o começo.
+        </p>
+
+        <table class="translation">
+          <thead>
+            <tr>
+              <th>Termo usado historicamente</th>
+              <th>Leitura no V3</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>nó topológico / CO / frente macro</td>
+              <td><strong>Fase</strong></td>
+              <td>A topologia ainda vive em <code>state.yml</code>; "Fase" é o nome humano.</td>
+            </tr>
+            <tr>
+              <td>checkpoint semântico</td>
+              <td><strong>Checkpoint</strong></td>
+              <td>Entrega governada e revisável, normalmente com PR próprio ou fronteira clara.</td>
+            </tr>
+            <tr>
+              <td>sub-checkpoint / CO-10.7 / CO-3.5</td>
+              <td><strong>Etapa</strong></td>
+              <td>Usar só quando o checkpoint é grande demais para uma lista plana de tarefas.</td>
+            </tr>
+            <tr>
+              <td>item de checklist / validação / evidência</td>
+              <td><strong>Tarefa</strong></td>
+              <td>Folha executável ou comprovação; não deve carregar autoridade estrutural.</td>
+            </tr>
+            <tr>
+              <td>PR #N</td>
+              <td><strong>Contêiner de revisão</strong></td>
+              <td>Continua sendo GitHub PR real. Não é Fase, Checkpoint nem Etapa.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section" id="decisao">
+        <h2>6. O que este mapa ajuda a decidir</h2>
+        <div class="callout">
+          <p>
+            Se esta leitura fizer sentido, a DEC de vocabulário deve cravar que
+            <strong>Fase</strong> é o nome humano para a macro-sequência da spec,
+            <strong>Checkpoint</strong> é a entrega governada, <strong>Etapa</strong> é opcional
+            dentro de checkpoints grandes e <strong>Tarefa</strong> é folha. Também deve declarar
+            que PR continua sendo contêiner de revisão, não unidade de autoridade do lifecycle.
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

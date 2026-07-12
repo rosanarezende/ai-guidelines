@@ -1,0 +1,13 @@
+{
+  "name": "@acme-sim/acme-mfe-onboarding",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node ../../../tools/checks/check-code-fixtures.ts"
+  },
+  "dependencies": {
+    "@acme-sim/acme-analytics": "workspace:*",
+    "@acme-sim/acme-design-system": "workspace:*",
+    "@acme-sim/acme-identity": "workspace:*"
+  }
+}

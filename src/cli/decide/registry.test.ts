@@ -1,19 +1,19 @@
 import { DecisionRegistry, buildDecisionRegistry } from "./registry.js";
 import { CloseDispositionsDefinition } from "./closeDispositions.js";
-import { FinishSubcheckpointDefinition } from "./finishSubcheckpoint.js";
+import { FinishStepDefinition } from "./finishStep.js";
 import { MarkReadinessDefinition } from "./markReadiness.js";
 import { HumanGateDefinition } from "./humanGate.js";
-import { OpenNextNodeDefinition } from "./openNextNode.js";
+import { OpenNextTopologyNodeDefinition } from "./openNextTopologyNode.js";
 
 describe("DecisionRegistry [decide]", () => {
   it("[1] registry contém os tipos na ordem do ciclo de vida", () => {
     expect(buildDecisionRegistry().ids()).toEqual([
       "close-dispositions",
-      "finish-subcheckpoint",
+      "finish-step",
       "mark-readiness",
-      "advance-subcheckpoint",
+      "advance-step",
       "human-gate",
-      "open-next-node",
+      "open-next-topology-node",
     ]);
   });
 
@@ -30,20 +30,20 @@ describe("DecisionRegistry [decide]", () => {
         .map((d) => d.id)
     ).toEqual([
       "close-dispositions",
-      "finish-subcheckpoint",
+      "finish-step",
       "mark-readiness",
-      "advance-subcheckpoint",
+      "advance-step",
       "human-gate",
-      "open-next-node",
+      "open-next-topology-node",
     ]);
   });
 
   it("[3] resolve por id; desconhecido = undefined", () => {
     const r = buildDecisionRegistry();
-    expect(r.resolve("finish-subcheckpoint")).toBeInstanceOf(FinishSubcheckpointDefinition);
+    expect(r.resolve("finish-step")).toBeInstanceOf(FinishStepDefinition);
     expect(r.resolve("mark-readiness")).toBeInstanceOf(MarkReadinessDefinition);
     expect(r.resolve("human-gate")).toBeInstanceOf(HumanGateDefinition);
-    expect(r.resolve("open-next-node")).toBeInstanceOf(OpenNextNodeDefinition);
+    expect(r.resolve("open-next-topology-node")).toBeInstanceOf(OpenNextTopologyNodeDefinition);
     expect(r.resolve("nope")).toBeUndefined();
   });
 });

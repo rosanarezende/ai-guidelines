@@ -1,0 +1,13 @@
+# registry/delivery.yml — acme-design-system · índice kind=delivery (→ banco/active-work).
+entries:
+  - id: form-component_1
+    title: componente de formulário validado (DS)
+    status: active # @dev-ds assumiu + iniciou (era draft/ready); na execução levanta seu PRÓPRIO q/r/d (deliberation.yml)
+    assignee: "@dev-ds" # assumiu + iniciou
+    weight: M
+    intent: login_1
+    workspace: works/delivery/form-component_1/
+    coordinates-with: [form-component] # o CONTRATO que provê (declarado na intent); o login MFE consome
+    derives-from: [acme-design-system/exploration/form-validation_1] # PROVENIÊNCIA: nasceu do verdict de q1 (mesmo throwaway, sem POC). É o gate DERIVADO "aceito".
+    created-at: 2026-06-28
+    updated-at: 2026-06-28

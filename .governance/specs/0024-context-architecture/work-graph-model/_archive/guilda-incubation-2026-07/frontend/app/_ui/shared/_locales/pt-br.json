@@ -1,0 +1,17 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "common.continue": "Continuar",
+    "common.back": "Voltar",
+    "common.finish": "Concluir",
+    "common.configured": "Configurado",
+    "common.pending": "Pendente",
+    "common.optional": "Opcional",
+    "common.comingSoon": "Em breve",
+    "common.demo": "Demo"
+  },
+  "issueList": {
+    "empty": "Sem issues neste recorte.",
+    "more": "+{count} issue(s)"
+  }
+}

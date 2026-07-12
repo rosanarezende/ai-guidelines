@@ -1,0 +1,8 @@
+# registry/experiment.yml — acme-mfe-growth · índice kind=experiment (→ active-work).
+entries:
+  - id: exp-140
+    title: UI de billing por uso (A/B atrás de flag)
+    status: active
+    intent: intent-002
+    coordinates-with: [acme-api/deliv-050] # contrato de eventos de uso (entre repos)
+    date: 2026-06-22

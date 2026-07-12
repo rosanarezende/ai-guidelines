@@ -1,0 +1,48 @@
+{
+  "locale": "pt-br",
+  "title": "Trabalho",
+  "subtitle": "Lista operacional derivada: iniciativas, propostas, trabalhos avulsos e metas que precisam de acompanhamento.",
+  "loading": "Carregando lista operacional...",
+  "error": "Não foi possível carregar o trabalho.",
+  "emptyTitle": "Ainda não há trabalho governado neste workspace",
+  "emptyBody": "Conecte um host de governança e publique contextos para operar trabalho por aqui.",
+  "queryKey": "queryKey",
+  "sourceRevision": "revisão",
+  "derived": "derivado",
+  "search": "Buscar por título, dono, repo ou status",
+  "allKinds": "Todos os tipos",
+  "allConfidence": "Todas as confianças",
+  "blockedFilter": "Bloqueados/atenção",
+  "rows": "linhas",
+  "openEvidence": "Ver evidência",
+  "evidenceTitle": "Evidência do trabalho",
+  "columns": {
+    "kind": "Tipo",
+    "title": "Trabalho",
+    "owner": "Dono",
+    "status": "Status",
+    "confidence": "Confiança",
+    "risk": "Risco",
+    "nextStep": "Próximo passo",
+    "evidence": "Evidência"
+  },
+  "kind": {
+    "intent": "iniciativa",
+    "proposal": "proposta",
+    "standalone": "avulso",
+    "target": "meta"
+  },
+  "confidence": {
+    "verified": "válido",
+    "pending": "pendente",
+    "no-evidence": "sem evidência",
+    "self-declared": "auto-declarado",
+    "break-glass": "exceção",
+    "stale": "desatualizado"
+  },
+  "risk": {
+    "low": "baixo",
+    "attention": "atenção",
+    "high": "alto"
+  }
+}

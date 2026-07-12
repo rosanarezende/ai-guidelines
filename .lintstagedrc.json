@@ -1,3 +1,9 @@
 {
-  "**/*.{ts,mjs,js,cjs,md,json,yml,yaml}": ["prettier --write"]
+  "**/*.{ts,mjs,js,cjs,md,json,yml,yaml}": ["prettier --write"],
+  "**/_org-simulation-v2/**/*.{yml,md}": [
+    "node .governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v2/_lib/freshness.ts"
+  ],
+  "**/_org-simulation-v2/**/{manifest.yml,package.json}": [
+    "node .governance/specs/0024-context-architecture/work-graph-model/_org-simulation-v2/_lib/manifest-check.ts"
+  ]
 }

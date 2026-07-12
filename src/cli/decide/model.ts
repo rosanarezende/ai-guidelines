@@ -100,7 +100,7 @@ export interface DecisionChoiceParams {
 /**
  * Plano de alteração derivado de (briefing elegível + escolha). Contém o que
  * será escrito, o que será preservado e preconditions anti-TOCTOU suficientes
- * para detectar mudança entre o briefing e a confirmação (Etapa 11).
+ * para detectar mudança entre o briefing e a confirmação (regra 11).
  */
 export interface DecisionPlan {
   readonly type: string;

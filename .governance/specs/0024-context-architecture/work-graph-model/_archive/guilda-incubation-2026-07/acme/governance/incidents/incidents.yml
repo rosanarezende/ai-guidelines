@@ -1,0 +1,18 @@
+# incidents.yml — instrumentos reativos coordenados pelo host.
+# Follow-ups executáveis moram nos repos; proposal/register continuam no intake.
+incidents:
+  - id: incidente-checkout
+    kind: incident-response # reativo — nasce de ALERTA com telemetria verificável, nunca de abordagem
+    repo: acme-checkout-api
+    origin: "alerta do acme-obs-stack às 22:14 — checkout fora do ar (sev alta)"
+    severity: alta
+    mttr: 43min
+    postmortem: blameless
+    follow-ups:
+      - ref: standalone:fix-checkout-timeout
+        kind: fix
+        reason: "ajustar timeouts que agravaram a mitigação"
+      - ref: proposal:prop-checkout-hardening
+        kind: proposal
+        reason: "avaliar hardening planejado pós-postmortem"
+    placar: "operational-bucket + MTTR"

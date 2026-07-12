@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Modelo Conceitual
 
 - **Implementação:** É a alteração de código ou especificação proposta (commit ou PR). Sempre existe. O artefato canônico da implementação é o próprio diff/commit, versionado no repositório (SSOT do projeto). Ele documenta _o quê_ foi mudado e gera automaticamente informações como arquivos alterados, linhas adicionadas/removidas, etc. Em outras palavras, a implementação é o ponto de partida – as mudanças de fato – e vive no repositório de código (por exemplo, no branch do PR).

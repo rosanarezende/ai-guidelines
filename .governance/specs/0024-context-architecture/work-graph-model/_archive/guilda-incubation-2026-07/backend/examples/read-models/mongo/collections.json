@@ -1,0 +1,26 @@
+{
+  "schema": "acme.mongo-backend-example/v1",
+  "database": "acme_governance_read_model",
+  "collections": [
+    {
+      "name": "nodes",
+      "key": "id",
+      "indexes": ["type", "dataHash"]
+    },
+    {
+      "name": "edges",
+      "key": "id",
+      "indexes": ["source", "target", "type"]
+    },
+    {
+      "name": "issues",
+      "key": "id",
+      "indexes": ["level", "rule", "node"]
+    },
+    {
+      "name": "projection_metadata",
+      "key": "contentHash",
+      "indexes": []
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "acme-governance-mock-api",
+  "private": true,
+  "type": "module",
+  "description": "Mock API local (Hono + lowdb) da governance-demo: valida EXPERIENCIA, nao governanca. Mesmo contrato de comandos do backend real via reducer puro do dominio.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "node src/server.ts",
+    "reset": "node src/reset.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test:api": "node --test \"tests/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@demo/contracts": "*",
+    "@demo/domain": "*",
+    "@demo/test-fixtures": "*",
+    "@hono/node-server": "^1.13.7",
+    "hono": "^4.6.14",
+    "lowdb": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.2",
+    "typescript": "^6.0.3"
+  }
+}

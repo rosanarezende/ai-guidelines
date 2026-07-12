@@ -18,7 +18,8 @@ function readyStatus(
   typeId: string,
   requirement: "disabled" | "optional" | "recommended" | "required",
   state: "missing" | "current" | "stale" | "in-progress",
-  decision: string | null = null
+  decision: string | null = null,
+  options: { readonly blocking?: boolean; readonly notes?: readonly string[] } = {}
 ) {
   return {
     typeId,
@@ -26,8 +27,11 @@ function readyStatus(
     requirement,
     state,
     decision,
-    blocking: requirement === "required" && !(state === "current" && decision === "approved"),
+    blocking:
+      options.blocking ??
+      (requirement === "required" && !(state === "current" && decision === "approved")),
     source: "repo-default",
+    notes: options.notes ?? [],
     errors: [] as string[],
   };
 }
@@ -52,6 +56,7 @@ function validSnapshot(overrides: Partial<ReadyCheckSnapshot> = {}): ReadyCheckS
       { name: "governance-pr-check", bucket: "pass" },
     ],
     readyBodyContractReasons: [],
+    versionedPrBodyReasons: [],
     localHeadSha: SHA,
     workingTreeClean: true,
     smokeTestsSuspended: false,
@@ -89,6 +94,18 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
     );
     expect(result.ok).toBe(false);
     expect(result.failures.some((f) => f.startsWith("contrato Ready do body:"))).toBe(true);
+  });
+
+  it("DADO body publicado divergente do body versionado QUANDO avalia ENTÃO falha", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        versionedPrBodyReasons: [
+          "body publicado do PR #39 diverge do body versionado (.governance/specs/0024-x/pull-requests/pr-39/body.md); rode pr-body:pull ou pr-body:publish antes de Ready.",
+        ],
+      })
+    );
+    expect(result.ok).toBe(false);
+    expect(result.failures.some((f) => f.startsWith("sincronia do PR body:"))).toBe(true);
   });
 
   it("DADO Valor entregue só com placeholder QUANDO avalia ENTÃO falha", () => {
@@ -264,6 +281,28 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
       },
     });
     expect(current.ok).toBe(true);
+  });
+
+  it("DADO review obrigatório stale+approved com revalidação dispensada QUANDO avalia ENTÃO avisa sem bloquear", () => {
+    const snapshot = validSnapshot();
+    const result = evaluateReadyPreconditions({
+      ...snapshot,
+      checkpoint: {
+        ...snapshot.checkpoint!,
+        reviewStatuses: [
+          readyStatus("technical_audit", "required", "stale", "approved", {
+            blocking: false,
+            notes: [
+              "revalidation waived by owner: cleanup low/advisory já coberto por testes e CI.",
+            ],
+          }),
+        ],
+      },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.failures).toEqual([]);
+    expect(result.warnings.join(" ")).toContain("revalidação foi dispensada");
+    expect(result.warnings.join(" ")).toContain("technical_audit");
   });
 
   it("optional/recommended stale ou missing NÃO bloqueiam Ready; recommended vira advisory", () => {
@@ -476,7 +515,7 @@ describe("CLI — pr-ready:check · saída e semântica [BR-PR-READY-CHECK]", ()
     });
     expect(code).toBe(1);
     expect(lines.join("\n")).toContain(
-      "PR body final → CI verde no HEAD final → Draft → Ready → Human Gate"
+      "plano situado de revisões decidido → PR body final → CI verde no HEAD final → reviews obrigatórios current+approved → Draft → Ready → Human Gate"
     );
   });
 

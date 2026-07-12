@@ -1,0 +1,26 @@
+{
+  "repo": "acme-design-system",
+  "works": [
+    {
+      "ref": "acme-design-system/delivery/form-component_1",
+      "status": "active",
+      "intent": "login_1",
+      "coordinatesWith": ["form-component"],
+      "derivesFrom": ["acme-design-system/exploration/form-validation_1"]
+    }
+  ],
+  "answers": [
+    {
+      "exploration": "acme-design-system/exploration/form-validation_1",
+      "point": "acme-governance/intents/login_1#e1",
+      "verdict": "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente",
+      "fate": "throwaway"
+    },
+    {
+      "exploration": "acme-design-system/exploration/captcha-spike_1",
+      "point": "acme-governance/intents/login_1#e3",
+      "verdict": "viável, mas serviço externo (hCaptcha/Turnstile) cobre melhor com menos custo — NÃO construir no DS agora",
+      "fate": "throwaway"
+    }
+  ]
+}

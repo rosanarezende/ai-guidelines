@@ -1,0 +1,10 @@
+# registry/delivery.yml — acme-mfe-support · índice kind=delivery (→ active-work).
+entries:
+  - id: deliv-230
+    title: MFE de ajuda/suporte (sob demanda)
+    status: draft # bloqueada (blocked-by form) → draft até destravar
+    intent: intent-004
+    workspace: works/delivery_help-on-demand/ # DENSO
+    blocked-by: [acme-design-system/deliv-210] # consome o DS
+    derives-from: [acme-mfe-support/exploration-302] # productiza a POC do listener
+    date: 2026-06-29

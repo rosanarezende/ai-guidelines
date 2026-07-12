@@ -1,0 +1,14 @@
+repo: acme-identity
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-identity"
+  dependencies: []
+  exports:
+    - getSession
+    - getUserContext
+    - requireScope
+    - updateConsent
+  sourceHash: b161a1646dad

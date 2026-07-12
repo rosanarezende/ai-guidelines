@@ -1,3 +1,7 @@
+---
+artifact-kind: inventory
+---
+
 # PR #44 — Modelo de checkpoints, PRs e mapa visual da Spec 0024
 
 Data: 2026-06-22  

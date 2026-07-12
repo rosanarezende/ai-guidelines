@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "title": "Mapa Vivo do Trabalho Governado",
+  "subtitle": "Context Architecture / 0024",
+  "source": {
+    "statePath": ".governance/specs/0024-context-architecture/state.yml",
+    "sourceKind": "derived-projection",
+    "authority": "state-yml-topology"
+  },
+  "stage": "implementation",
+  "gateStatus": "closed",
+  "cursor": {
+    "pr": "artifact-taxonomy-and-model-review-contract",
+    "checkpoint": "checkpoint-artifact-taxonomy-and-model-review-contract"
+  },
+  "counts": {
+    "concluded": 12,
+    "active": 1,
+    "planned": 6,
+    "checkpoints": 45
+  },
+  "focus": [
+    "RECONCILIACAO 2026-06-03 ([DEC-0024-G08], owner): G03 (promotion pipeline) / G04 (casa unica/tri-root) / G05 (projecoes) foram REABERTOS. Os eixos deixados em aberto no Stage 1 mostraram-se necessarios para problemas reais observados no uso (mis-binding da retomada, recuperabilidade, 'a resposta estava num ADR esquecido'). A 0024 VOLTOU A TRATAR MODELAGEM nesses eixos -- isto e DECISAO, nao drift. Direcao assumida: arquitetura orientada a grafo (entidades + relacoes navegaveis KnowledgeRef + projecoes derivadas). NAO ha 0025 independente (o split foi superado no Checkpoint 2; o trabalho mapeia em G03/G04/G05 + candidatas Grupo B). O kernel Knowledge + KnowledgeGraph nucleo + capability Insights JA materializados (PR #34). Motivacao persistida como Insights (PIT-0004..0006).",
+    "0024 em ABSORCAO OPERACIONAL (pesquisa encerrada). Problema = falta de absorcao, nao falta de decisao: decisoes convergidas ainda nao alteraram o comportamento do sistema ('arquitetura converge enquanto codigo diverge'). Backlog = relatorio de auditoria do Codex (divergencias decisao<->codigo).",
+    "Plano executavel CANONICO no repo: plan.md secoes 'Sequencia de Checkpoints' + 'Topologia operacional'. VOCABULARIO (Checkpoint 2.1): PR/#N = Pull Request real do GitHub; Checkpoint N = unidade de implementacao da spec; Gate = ritual de validacao (Technical Audit -> Architectural Review -> Human).",
+    "TOPOLOGIA CANONICA (corrigida no Checkpoint 2.1a; modelo da 0023 / ADR 0020 + 0024 / DEC-0023-M01): #32 = PR de governanca/bootstrap + LINHA DE INTEGRACAO da spec; NAO mergeia cedo, e a BASE DA STACK. Checkpoint 3+ = PR real proprio STACKED sobre a linha da spec (NAO off-main, NAO independente). Modo UNIT: merge em main e evento UNICO ao fim (veiculo = PR terminal de implementacao; #32 + intermediarios + Integration PR via landed-via reconciliation; 1 SHA canonico), apos review.md R8. Integration PR = homologacao antes do merge (NAO veiculo).",
+    "Decisoes cravadas (NAO reabrir): G00/G02/G06; Open abolido/DEC nasce Pendente/Deferred canonico; brief por estado; GG-0001 interno (DOGFOOD-*); WorkflowType removido; proveniencia runtime-scoped (role livre, espinha impl+gate derivada, projecao NAO governanca); GG-0002 antes da remocao.",
+    "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim.",
+    "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
+  ],
+  "next": [
+    "canonical-next: artifact-taxonomy-and-model-review-contract. PR #43 (co-flow-convergence / seq 10) e PR #44 (co-flow-continuation / seq 11) CONCLUIDOS-NA-STACK por Human Gate approved; modo unit, SEM merge isolado em main. No ATIVO = artifact-taxonomy-and-model-review-contract (seq 12, checkpoint-artifact-taxonomy-and-model-review-contract; PR #45 stacked sobre #44). Primeira fatia obrigatoria deste recorte: fechar o dogfood da propria abertura do PR #45 — visao pretendida via .governance/visual-prompts, operacao governada para preparar o proximo PR interno e decisao de vocabulario humano do lifecycle. Depois: implementar a taxonomia de artefatos e o contrato de review pre-codificacao/model-review definidos por DEC-0024-G21/GG-0005; em seguida refactor DDD/BDD, falsificacao ampla e review/Human Gate da continuacao. NAO implementar dualroot-collapse, co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
+  ],
+  "nodes": [
+    {
+      "id": "base-governance",
+      "status": "concluded",
+      "githubPr": 32,
+      "role": "governance",
+      "terminal": false,
+      "sequence": null,
+      "checkpoints": ["checkpoint-1", "checkpoint-2", "checkpoint-2.1", "checkpoint-2.1a"],
+      "isCursor": false
+    },
+    {
+      "id": "ruleset-producibility",
+      "status": "concluded",
+      "githubPr": 33,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 1,
+      "checkpoints": [
+        "checkpoint-2.2",
+        "checkpoint-2.2b",
+        "checkpoint-2.3",
+        "checkpoint-2.3a",
+        "checkpoint-2.3b",
+        "checkpoint-2.4",
+        "checkpoint-2.4a",
+        "checkpoint-2.4b",
+        "checkpoint-2.4c",
+        "checkpoint-2.4d"
+      ],
+      "isCursor": false
+    },
+    {
+      "id": "insights-in-flight",
+      "status": "concluded",
+      "githubPr": 34,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 2,
+      "checkpoints": [
+        "checkpoint-insights",
+        "checkpoint-knowledge-kernel",
+        "checkpoint-graph-core"
+      ],
+      "isCursor": false
+    },
+    {
+      "id": "pr-cli-cutover",
+      "status": "concluded",
+      "githubPr": 35,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 3,
+      "checkpoints": ["checkpoint-cli-cutover"],
+      "isCursor": false
+    },
+    {
+      "id": "co-reconcile",
+      "status": "concluded",
+      "githubPr": 36,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 4,
+      "checkpoints": ["checkpoint-co-reconcile"],
+      "isCursor": false
+    },
+    {
+      "id": "co-knowledge",
+      "status": "concluded",
+      "githubPr": 37,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 5,
+      "checkpoints": [
+        "checkpoint-co-knowledge",
+        "checkpoint-co-knowledge-backfill",
+        "checkpoint-script-contracts",
+        "checkpoint-runtime-bootstrap-readiness",
+        "checkpoint-runtime-ledger-partition",
+        "checkpoint-review-policy-events"
+      ],
+      "isCursor": false
+    },
+    {
+      "id": "bootstrap-compiler",
+      "status": "concluded",
+      "githubPr": 38,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 6,
+      "checkpoints": ["checkpoint-compiler-ts", "checkpoint-bootstrap-registry"],
+      "isCursor": false
+    },
+    {
+      "id": "toolchain-simplification",
+      "status": "concluded",
+      "githubPr": 39,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 7,
+      "checkpoints": ["checkpoint-npm-toolchain"],
+      "isCursor": false
+    },
+    {
+      "id": "co-projection",
+      "status": "concluded",
+      "githubPr": 41,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 8,
+      "checkpoints": ["checkpoint-co-projection"],
+      "isCursor": false
+    },
+    {
+      "id": "co-enforcement",
+      "status": "concluded",
+      "githubPr": 42,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 9,
+      "checkpoints": ["checkpoint-co-enforcement"],
+      "isCursor": false
+    },
+    {
+      "id": "co-flow-convergence",
+      "status": "concluded",
+      "githubPr": 43,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 10,
+      "checkpoints": ["checkpoint-co-flow-convergence"],
+      "isCursor": false
+    },
+    {
+      "id": "co-flow-continuation",
+      "status": "concluded",
+      "githubPr": 44,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 11,
+      "checkpoints": ["checkpoint-co-flow-continuation"],
+      "isCursor": false
+    },
+    {
+      "id": "artifact-taxonomy-and-model-review-contract",
+      "status": "active",
+      "githubPr": 45,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 12,
+      "checkpoints": ["checkpoint-artifact-taxonomy-and-model-review-contract"],
+      "isCursor": true
+    },
+    {
+      "id": "dualroot-collapse",
+      "status": "planned",
+      "githubPr": null,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 13,
+      "checkpoints": ["checkpoint-dualroot-collapse"],
+      "isCursor": false
+    },
+    {
+      "id": "co-capture",
+      "status": "planned",
+      "githubPr": null,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 14,
+      "checkpoints": ["checkpoint-co-capture"],
+      "isCursor": false
+    },
+    {
+      "id": "co-events",
+      "status": "planned",
+      "githubPr": null,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 15,
+      "checkpoints": ["checkpoint-co-events"],
+      "isCursor": false
+    },
+    {
+      "id": "housekeeping",
+      "status": "planned",
+      "githubPr": null,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 16,
+      "checkpoints": [
+        "checkpoint-taxonomy-removal",
+        "checkpoint-agents-sync",
+        "checkpoint-gg-0002",
+        "checkpoint-decouple-brief",
+        "checkpoint-doc-cleanup"
+      ],
+      "isCursor": false
+    },
+    {
+      "id": "knowledge-readiness",
+      "status": "planned",
+      "githubPr": null,
+      "role": "execution",
+      "terminal": false,
+      "sequence": 17,
+      "checkpoints": [
+        "checkpoint-knowledge-health",
+        "checkpoint-knowledge-backfill-wide",
+        "checkpoint-co-knowledge-promotion"
+      ],
+      "isCursor": false
+    },
+    {
+      "id": "integration-final",
+      "status": "planned",
+      "githubPr": null,
+      "role": "integration",
+      "terminal": true,
+      "sequence": null,
+      "checkpoints": ["review-and-merge"],
+      "isCursor": false
+    }
+  ]
+}

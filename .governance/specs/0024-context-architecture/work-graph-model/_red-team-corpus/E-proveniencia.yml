@@ -1,0 +1,60 @@
+# Red-team corpus — família E · PROVENIÊNCIA DE PROJEÇÃO
+# Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
+# O1: attack-by ≠ expected-by ≠ approval.
+
+family: proveniencia
+attack-by: codex
+
+fixtures:
+  - id: E1
+    title: context.json assinado-mas-mentiroso
+    priority: P0 # subido de P1 no round 2 (conteúdo org-wide)
+    verdicts: [MANTER-mecanismo, ADICIONAR]
+    verdict-note: "MANTER provenance/origem; ADICIONAR invariantes de conteúdo (cross-check)."
+    targets:
+      lens: L9
+      control: "trusted-producers/provenance (features.md:40) + invariantes de conteúdo"
+    attack: |
+      # projeção publicada por produtor COMPROMETIDO — envelope/hash VÁLIDOS
+      producer: acme-payments-builder
+      hash: <ok>
+      schema-version: 2
+      # conteúdo mentiroso no context.json:
+      status: stable          # na verdade experimental
+      consumes: []            # OMITE risk-api
+      # --- FONTE do repo que o runner compara (evidência concreta) ---
+      # src/charge.ts:  import { charge } from '@acme/risk-api'
+      # contrato real:  consumes: [risk-api]
+    attacker-goal: >
+      o host deriva um grafo FALSO e autoriza uma iniciativa incompatível — tudo com assinatura
+      válida (mentira bem-formada).
+    expected-outcome: >
+      MANTÉM: provenance/trusted-producer valida a ORIGEM. ADICIONA: invariantes de CONTEÚDO — o
+      snapshot é cruzado com código/contratos; divergência ESPECÍFICA detectada (context.json
+      consumes:[] × código importa risk-api) → snapshot vai para QUARENTENA, não deriva o grafo.
+      Provenance prova origem, não verdade.
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
+
+  - id: E2
+    title: produtor confiável aposentado (revogação/namespace)
+    priority: P1
+    verdicts: [ADICIONAR]
+    targets:
+      lens: L7+L9
+      control: "revogação/expiração de trusted-producer + tombstone/GlobalRef"
+    attack: |
+      # acme-checkout foi ARQUIVADO; o atacante publica context.json assinado com a CHAVE ANTIGA.
+      # um novo repo usa namespace parecido: acme-checkout-v2
+    attacker-goal: >
+      reviver autoridade morta e poluir matches/contracts; confundir o resolver por namespace-reuse.
+    expected-outcome: >
+      o trust store EXPIRA/REVOGA produtores: repo arquivado → tombstone + chave revogada; snapshot
+      de produtor morto/revogado → REJEITADO; namespace-reuse (checkout vs checkout-v2) é detectado
+      pelo resolver (GlobalRef), sem colisão silenciosa.
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending

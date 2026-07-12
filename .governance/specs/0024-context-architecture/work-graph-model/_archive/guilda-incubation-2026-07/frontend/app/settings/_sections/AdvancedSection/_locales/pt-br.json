@@ -1,0 +1,8 @@
+{
+  "title": "Avançado · Console técnico",
+  "subtitle": "Grafo, event-log, comandos, resolver e exceções (break-glass). Para administradores e auditores.",
+  "openConsole": "Abrir console",
+  "graphStats": "{nodes} nós · {edges} arestas",
+  "revision": "revision {revision}",
+  "issues": "{errors} erro(s) · {warnings} aviso(s)"
+}

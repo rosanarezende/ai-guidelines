@@ -1,0 +1,45 @@
+<svg viewBox="0 0 720 300" width="720" height="300" xmlns="http://www.w3.org/2000/svg" role="img" font-family="ui-sans-serif, system-ui, sans-serif">
+  <title>Paralelização do login entre 3 devs com a intent declarando contratos upfront (anonimizado)</title>
+  <desc>Linha do tempo. No t0 a intent declara os contratos (api, eventos, componentes), o que destrava os 3 devs em paralelo. Dev 1: api (auth) t0-t2, depois espera e faz o wire no shell t3-t4 — caminho crítico. Dev 2: mfe-identity t0-t3 (scaffold, integra com a api em t2) — caminho crítico. Dev 3: design-system t0-t1 e depois mfe-support t1-t3. api e identity formam o caminho crítico; o shell é a cauda.</desc>
+
+  <rect x="0" y="0" width="720" height="300" fill="#ffffff"/>
+
+  <line x1="120" y1="40" x2="120" y2="250" stroke="#534AB7" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="124" y="36" font-size="11" fill="#3C3489">t0 · a intent declara os contratos (api · eventos · componentes)</text>
+
+  <g stroke="#E2E0D8" stroke-width="1">
+    <line x1="240" y1="46" x2="240" y2="250"/>
+    <line x1="360" y1="46" x2="360" y2="250"/>
+    <line x1="480" y1="46" x2="480" y2="250"/>
+    <line x1="600" y1="46" x2="600" y2="250"/>
+  </g>
+
+  <text x="36" y="86" font-size="12" font-weight="600" fill="#0f172a">dev 1</text>
+  <text x="36" y="136" font-size="12" font-weight="600" fill="#0f172a">dev 2</text>
+  <text x="36" y="186" font-size="12" font-weight="600" fill="#0f172a">dev 3</text>
+
+  <rect x="120" y="70" width="240" height="30" rx="6" fill="#FAECE7" stroke="#D85A30" stroke-width="1.6"/>
+  <text x="240" y="89" text-anchor="middle" font-size="11" fill="#993C1D">api · auth endpoints</text>
+  <rect x="360" y="70" width="120" height="30" rx="6" fill="#F1EFE8" stroke="#B4B2A9" stroke-dasharray="4 3"/>
+  <text x="420" y="89" text-anchor="middle" font-size="10.5" fill="#5F5E5A">espera os MFEs</text>
+  <rect x="480" y="70" width="120" height="30" rx="6" fill="#FAECE7" stroke="#D85A30" stroke-width="1.6"/>
+  <text x="540" y="89" text-anchor="middle" font-size="11" fill="#993C1D">shell · wire</text>
+
+  <rect x="120" y="120" width="360" height="30" rx="6" fill="#FAECE7" stroke="#D85A30" stroke-width="1.6"/>
+  <text x="270" y="139" text-anchor="middle" font-size="11" fill="#993C1D">mfe-identity · login MFE (scaffold → integra c/ api em t2)</text>
+
+  <rect x="120" y="170" width="120" height="30" rx="6" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="180" y="189" text-anchor="middle" font-size="11" fill="#0F6E56">design-system</text>
+  <rect x="240" y="170" width="240" height="30" rx="6" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="360" y="189" text-anchor="middle" font-size="11" fill="#0F6E56">mfe-support (coordena c/ identity via contrato de eventos)</text>
+
+  <g font-size="10.5" fill="#5F5E5A" text-anchor="middle">
+    <text x="120" y="266">t0</text>
+    <text x="240" y="266">t1</text>
+    <text x="360" y="266">t2</text>
+    <text x="480" y="266">t3</text>
+    <text x="600" y="266">t4</text>
+  </g>
+
+  <text x="36" y="288" font-size="11" fill="#5F5E5A">borda vermelha = caminho crítico (api → identity → shell) · verde = paralelo · tracejado = espera</text>
+</svg>

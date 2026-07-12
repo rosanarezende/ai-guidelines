@@ -1,0 +1,9 @@
+work: dogfood-g25 # antes "spec: 0024 / dogfood-g25"
+kind: delivery
+stage: deciding # Stage 1 convergido (9/9); Stage 2 (quebrar tarefas) não se aplica ao sandbox
+cursor: # foco único ativo + o sub-ponto (retomada específica)
+  node: dec-001
+  note: "9/9 convergido — aguardando CRAVE (Human Gate da DEC-0024-G25), autorização separada"
+topology: [] # Stage 2 não começou
+next: cravar DEC-0024-G25 no decision-brief.md real (Human Gate — fora desta rodada / autorização à parte)
+# decisões abertas NÃO ficam aqui — DERIVADAS (decision-brief.yml; agora 0 abertas, dec-001 resolved-não-cravada).

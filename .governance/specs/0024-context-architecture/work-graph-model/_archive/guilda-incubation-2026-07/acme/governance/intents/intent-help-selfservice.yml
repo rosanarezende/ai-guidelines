@@ -1,0 +1,31 @@
+# intent-help-selfservice — a área de CX servindo o objetivo de EFICIÊNCIA (área N:N)
+id: intent-help-selfservice
+title: "autoatendimento: central de ajuda que resolve sem ticket"
+team: time-support
+authorized-by: obj-efficiency
+primary-target: tgt-support-cost
+thesis: tese-self-service
+approach: direct
+signal: none
+contracts-consumed: [acme-events-schema]
+works:
+  - id: base-conhecimento
+    repo: acme-help-center
+    purpose: create
+    desc: "base de conhecimento estruturada + busca"
+    review: interno
+  - id: chatbot-deflexao
+    repo: acme-help-center
+    purpose: create
+    desc: "chatbot de deflexão (responde antes de abrir ticket)"
+    delivery-after: [base-conhecimento]
+    review: interno
+  - id: eventos-deflexao
+    repo: acme-analytics
+    purpose: operate
+    desc: "mede deflexão × custo por ticket (consome o schema existente)"
+    review: "externo: time-data"
+next:
+  - { when: "base no ar", then: "chatbot entra por cima; deflexão medida por coorte" }
+  - { when: "custo por ticket caiu R%", then: "outcome sobe no placar de eficiência" }
+  - { when: "satisfação caiu junto", then: "escala: vira experimento (validate-first) de formato" }

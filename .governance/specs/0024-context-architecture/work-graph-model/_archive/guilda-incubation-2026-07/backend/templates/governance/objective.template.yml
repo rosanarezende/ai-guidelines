@@ -1,0 +1,9 @@
+# TEMPLATE business-objective (recursivo: company | area | team-priority via targets)
+# Rascunho v3 — segue a P12 (proposed); vira canônico quando a P12 passar no gate.
+id: obj-<slug>
+level: company # company | area (áreas moram em areas.yml com cascades-from)
+title: "<compromisso de negócio, em linguagem de negócio>"
+period: "<ciclo: 2027 | 2027-H1>"
+owner: <quem responde por ele>
+status: active # proposed | active | closed | superseded | dropped (G8)
+# continues-from: <obj do ciclo anterior>   # virada de ciclo: novo objective, nunca edição

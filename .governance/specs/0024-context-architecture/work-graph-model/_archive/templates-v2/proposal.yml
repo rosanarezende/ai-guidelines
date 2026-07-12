@@ -1,0 +1,21 @@
+# registry/proposal.yml — intake (FERRAMENTA, não um tipo): ideias/problemas levantados durante o trabalho.
+# Proposal NÃO é trabalho (não entra no banco de works) — alimenta o backlog → vira trabalho quando priorizada.
+entries: []
+# exemplo:
+#   - id: prop-001
+#     what: "<a ideia ou problema — 1-2 linhas, acionável>"
+#     raised-by: <repo>/<work-id> # de onde surgiu (exploration/delivery/…): a proveniência
+#     owner: "<@quem TRIA — o responsável por decidir promover/descartar; papel ou pessoa>"
+#     status: <open | promoted | dismissed> # disposição OBRIGATÓRIA (não fica em aberto em silêncio)
+#     # --- ajuda a TRIAGEM / priorização (estilo ICE) ---
+#     tags: [<área/keyword>, …] # ex.: growth · onboarding · segurança — agrupa e filtra
+#     impact: <low | medium | high> # ganho esperado
+#     confidence: <low | medium | high> # quão certa é a aposta
+#     effort: <low | medium | high> # custo estimado
+#     evidence: [<link/ref>, …] # dado/print/doc que sustenta a ideia
+#     # --- na disposição ---
+#     promote-to: <delivery | maintenance | experiment | exploration> # se promovida, o membro que vira (PromotableMember; incident NÃO — é reativo)
+#     opens-intent: <intent-id> # se promove pra experiment/objetivo → a intent aberta (às vezes paralela)
+#     discard-reason: "<se descartada, por quê>"
+#     created-at: <YYYY-MM-DD>
+#     updated-at: <YYYY-MM-DD> # última mutação (status/disposição)

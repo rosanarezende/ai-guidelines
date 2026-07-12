@@ -1,3 +1,10 @@
+---
+artifact-kind: pre-coding-review
+subject: "semente de falsificacao ampla do fluxo CO-10.7 antes da execucao"
+date: 2026-06-18
+disposition: evidence
+---
+
 # CO-10.7 — falsificacao ampla do fluxo (seed)
 
 > Spec 0024 · PR #43 · `checkpoint-co-flow-convergence`.

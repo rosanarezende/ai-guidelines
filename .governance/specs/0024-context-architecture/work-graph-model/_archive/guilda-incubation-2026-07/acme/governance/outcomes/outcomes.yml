@@ -1,0 +1,59 @@
+outcomes:
+  - id: out-cta-upgrade-2027q1
+    emitted-by: intent-cta-upgrade
+    source: acme-analytics/conversion-rate@warehouse-rev42
+    window:
+      start: 2027-01-01
+      end: 2027-03-31
+    metric: conversion-rate
+    value: +2.4 %
+    aggregation: avg
+    attested-by: acme-analytics
+    revision: warehouse@rev42
+    contract-revisions: []
+    contributes-to: tgt-billing-conv
+    envelope:
+      actor: ana-dev
+      authority: pm-growth
+      issued-at: 2027-04-02
+      idempotency-key: out-cta-upgrade-2027q1
+      nonce: nonce-out-cta-upgrade-2027q1
+  - id: out-checkout-stack-2027h2
+    emitted-by: intent-checkout-stack
+    source: acme-data-pipeline/cost-to-serve@warehouse-rev77
+    window:
+      start: 2027-07-01
+      end: 2027-12-31
+    metric: cost-to-serve
+    value: -11.8 R$/pedido
+    aggregation: avg
+    attested-by: acme-data-pipeline
+    revision: warehouse@rev77
+    contract-revisions:
+      - acme-user-context@v4
+    contributes-to: tgt-checkout-stack
+    envelope:
+      actor: tool:r4-second-outcome
+      authority: head-platform
+      issued-at: 2027-10-20
+      idempotency-key: out-checkout-stack-2027h2
+      nonce: nonce-out-checkout-stack-2027h2
+  - id: out-fix-checkout-timeout-2027h1
+    emitted-by: fix-checkout-timeout
+    source: acme-obs-stack/incident-count@obs-rev19
+    window:
+      start: 2027-04-01
+      end: 2027-04-30
+    metric: incident-count
+    value: -1 incidentes/mês
+    aggregation: sum
+    attested-by: acme-obs-stack
+    revision: obs@rev19
+    contract-revisions: []
+    contributes-to: tgt-sre-incidents
+    envelope:
+      actor: tool:r5-operational-outcome
+      authority: lead-sre
+      issued-at: 2027-04-10
+      idempotency-key: out-fix-checkout-timeout-2027h1
+      nonce: nonce-out-fix-checkout-timeout-2027h1

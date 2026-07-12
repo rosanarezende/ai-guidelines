@@ -1,0 +1,6 @@
+# gate — fecho de delivery (eixo Autoridade). Evidência = trabalho mergeado (capacidade entregue).
+checkpoint: oauth-endpoints
+actor: "@rosanarezende"
+decision: approved
+note: "fluxo OAuth verde em staging; coordenado com frontend/deliv-001. Capacidade entregue."
+date: 2026-06-24

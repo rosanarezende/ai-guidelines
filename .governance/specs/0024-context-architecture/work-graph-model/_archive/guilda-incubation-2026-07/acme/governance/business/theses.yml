@@ -1,0 +1,35 @@
+# theses.yml — thesis (P9): a HIPÓTESE CAUSAL de negócio. Um objetivo pode ter VÁRIAS teses
+# (ângulos de ataque diferentes); a tese não é compromisso (objetivo) nem hipótese tática (experimento).
+theses:
+  # obj-revenue — 2 ângulos
+  - id: tese-cross-sell
+    frames: obj-revenue
+    says: "ofertar o produto B à base do produto A, evidenciando o uso conjunto, move a conversão"
+    owner: head-growth
+  - id: tese-pricing-anual
+    frames: obj-revenue
+    says: "planos anuais com desconto aumentam a receita por cliente e antecipam caixa"
+    owner: head-growth
+  # obj-retention — 2 ângulos
+  - id: tese-onboarding-retencao
+    frames: obj-retention
+    says: "cliente ativado na primeira semana cancela muito menos — ativação precoce é retenção"
+    owner: head-growth
+  - id: tese-suporte-retencao
+    frames: obj-retention
+    says: "resolver rápido no suporte reduz churn — tempo de resolução prevê cancelamento"
+    owner: head-cx
+  # obj-efficiency — 2 ângulos
+  - id: tese-eficiencia
+    frames: obj-efficiency
+    says: "padronizar o stack e endurecer a plataforma derrubam o custo por pedido"
+    owner: head-platform
+  - id: tese-self-service
+    frames: obj-efficiency
+    says: "autoatendimento bem feito derruba o custo por ticket sem piorar a satisfação"
+    owner: head-cx
+  # obj-trust — 1 ângulo (nem todo objetivo precisa de várias)
+  - id: tese-privacidade
+    frames: obj-trust
+    says: "minimizar dados coletados e dar controle ao cliente reduz risco e constrói confiança"
+    owner: head-platform

@@ -10,7 +10,7 @@ import {
   DecisionFinding,
   DecisionReviewLane,
   DecisionSnapshot,
-  DecisionSubCheckpoint,
+  DecisionStep,
 } from "../cli/decide/snapshot.js";
 import {
   HumanDecisionPolicy,
@@ -81,7 +81,7 @@ export function makeHandoffFacts(over: Partial<HandoffFacts> = {}): HandoffFacts
       gateDecision: null,
     },
     tasks: [],
-    subCheckpoints: [],
+    steps: [],
     insights: [],
     driftWarnings: [],
     sources: [{ id: "pull-request", origin: "gh", status: "fresh", fingerprint: "x" }],
@@ -138,7 +138,7 @@ export function makeLane(over: Partial<DecisionReviewLane> = {}): DecisionReview
   };
 }
 
-export function makeSubCheckpoints(): DecisionSubCheckpoint[] {
+export function makeSteps(): DecisionStep[] {
   return [
     { id: "CO-3.1", title: "Constraint + EnforcementBinding", state: "in-progress", line: 101 },
     { id: "CO-3.2", title: "knowledge:compile", state: "pending", line: 102 },
@@ -192,8 +192,8 @@ export function makeDecisionSnapshot(over: Partial<DecisionSnapshot> = {}): Deci
     lanes: over.lanes ?? [makeLane()],
     gateExists: false,
     gateFile: null,
-    subCheckpoints: over.subCheckpoints ?? makeSubCheckpoints(),
-    subCheckpointDeliveryEvidence: {
+    steps: over.steps ?? makeSteps(),
+    stepDeliveryEvidence: {
       status: "present",
       activeId: "CO-3.1",
       activationCommit: "aaaaaaa",

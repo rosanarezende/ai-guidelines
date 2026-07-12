@@ -1,0 +1,7 @@
+# registry/patch.yml — acme-mfe-platform · índice kind=patch (→ active-work).
+entries:
+  - id: patch-330
+    title: bump do runtime loader (segurança)
+    status: done
+    intent: null # rotina/standalone
+    date: 2026-06-11

@@ -1,0 +1,11 @@
+# state — SSOT estrutural (progresso/topologia). Mutado por comando governado, NÃO à mão.
+# (timestamps no próprio arquivo; arquivo único por trabalho, sem NNN.)
+work: <id-do-trabalho> # antes "spec"; o trabalho é um delivery/experiment/spike/incident
+kind: delivery
+stage: deciding # deciding (Stage 1: question→research→decision) | executing (Stage 2: tasks)
+cursor: # foco ÚNICO ativo + o sub-ponto (retomada específica)
+  node: <q-NNN aberta | checkpoint ativo>
+  note: "<o sub-ponto em discussão agora — uma linha>"
+topology: [] # Stage 2: checkpoints com status; vazia enquanto `deciding`
+next: <próximo movimento governado>
+# decisões abertas = DERIVADAS (decision-brief.yml lista as draft/partial); NÃO ficam aqui (podem ser 0/1/N).

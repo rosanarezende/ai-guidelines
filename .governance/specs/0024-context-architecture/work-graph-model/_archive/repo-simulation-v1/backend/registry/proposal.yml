@@ -1,0 +1,22 @@
+# registry/proposal.yml — backend (acme-api). Virtual: a entrada É o trabalho (sem workspace, durável no repo).
+works:
+  - id: prop-001
+    kind: proposal
+    title: adicionar login social (OAuth)
+    status: accepted
+    intent: "oferecer login via provedores OAuth para reduzir fricção de cadastro"
+    alternatives: "manter só e-mail/senha; magic-link"
+    recommendation: "OAuth (Google+GitHub) — promove a delivery nos 2 repos"
+    promotes-to: deliv-001
+    coordinates-with: frontend/deliv-001 # a UI é o par desta API
+    date: 2026-06-24
+  - id: prop-002
+    kind: proposal
+    title: checkout em 1 clique
+    status: accepted
+    intent: "reduzir abandono com compra em 1 clique (multi-repo: api + web)"
+    alternatives: "manter checkout multi-etapa; só otimizar o atual"
+    recommendation: "1-clique — promove a delivery COORDENADA nos 2 repos"
+    promotes-to: deliv-002
+    coordinates-with: frontend/deliv-003 # fan-out: 1 proposta → 2 deliveries coordenadas
+    date: 2026-06-25

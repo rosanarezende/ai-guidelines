@@ -1,0 +1,25 @@
+{
+  "heading": {
+    "title": "Conectar fontes de trabalho",
+    "lead": "De onde vem o trabalho que você quer provar? Sem uma fonte, dá para planejar e registrar intenções — mas não provar execução, contratos ou resultados."
+  },
+  "flow": {
+    "local": {
+      "title": "Projeto local",
+      "body": "Está na sua máquina, em um repo local, monorepo, pasta em andamento ou pasta sincronizada."
+    },
+    "cloud": {
+      "title": "Projeto na nuvem",
+      "body": "Está em GitHub, GitLab, Bitbucket, Drive, Figma ou outro provider."
+    },
+    "localQuestion": "Para projeto local, o app precisa saber se já existe Git, se é pasta sem histórico ou se é uma pasta que ainda será criada.",
+    "localGit": "Com Git: melhor evidência local, com revisão, sujeira e hash.",
+    "localFolder": "Sem Git: começa por snapshot e fica com confiança rebaixada.",
+    "localGovernance": "A pasta de governança continua separada: ela guarda decisões; a fonte guarda o trabalho que será provado.",
+    "cloudQuestion": "Para nuvem, o caminho feliz é conectar o provider com permissões explícitas.",
+    "cloudGithub": "GitHub entra por integração/OAuth; o app não pede token cru nem trata URL solta como prova forte."
+  },
+  "success": "Evidência automática habilitada para {count} tipo(s) de fonte. Execução, contratos e resultados poderão ser provados, não só declarados.",
+  "successDemoSuffix": "Na demo, {connected} de {total} fontes já publicam contexto.",
+  "warningSuffix": "Dá para conectar depois."
+}

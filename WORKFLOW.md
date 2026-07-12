@@ -132,6 +132,8 @@ O `governance-pr-check` valida o body conforme o **tipo** do PR — derivado do 
 
 Baselines preservadas pelo `npm run pr-body:update`: `## Visão pretendida` (execution), `## Visão de valor` e `## Arquitetura pretendida` (governance) — mudanças entram como atualização complementar, nunca apagando o original.
 
+Quando o body do PR precisa ser versionado no trabalho governado, a casa canônica é `.governance/specs/<id>-<slug>/pull-requests/pr-<n>/body.md`. A pasta do PR também é o lugar previsto para assets específicos e pacotes de continuação (`continuations/`), sem transformar o PR em fonte de autoridade da topologia.
+
 ---
 
 ## Fechamento de PR (sequência canônica)
@@ -139,8 +141,10 @@ Baselines preservadas pelo `npm run pr-body:update`: `## Visão pretendida` (exe
 Cada PR de execução fecha nesta ordem — as precondições são verificáveis com `npm run pr-ready:check -- --pr <n>` (read-only; não converte nada):
 
 ```text
-PR body final (Valor entregue preenchido; Visão pretendida intacta)
+plano situado de revisões decidido em state.yml (sem owner_decision=pending)
+→ PR body final (Valor entregue preenchido; Visão pretendida intacta)
 → CI verde no HEAD final
+→ reviews obrigatórios do plano/política current+approved
 → encerrar findings revalidados (npm run guidelines -- decide --type close-dispositions)
 → Draft → Ready (ato da owner; NÃO autoriza merge — ADR 0024)
 → Human Gate da owner (npm run guidelines -- decide --type human-gate; decide o próximo movimento)
@@ -160,6 +164,7 @@ Distinções que a sequência preserva:
 
 - **Draft/Ready é estado nativo do GitHub** — o flag `draft` é a fonte única consumida por `governance-pr-check` (que também roda na conversão, via `ready_for_review`) e pelo merge.
 - **Ready ≠ merge**: a conversão apenas apresenta o PR para decisão humana. Em stack modo `unit`, Human Gate intermediário não mergeia isolado em `main` — o merge é evento único no fim da stack.
+- **Review plan ≠ obrigação automática**: o framework recomenda revisões por risco/complexidade, mas a owner decide no `state.yml` se cada tipo fica `required`, `recommended`, `optional` ou `waived`. `pending` bloqueia Ready porque o PR ainda não diz a verdade sobre o gate.
 - **O gate artifact nasce DEPOIS da decisão humana** sobre o PR em Ready; registrá-lo antes é inconsistência (o `pr-ready:check` falha).
 - **Atualizações de body** usam `npm run pr-body:update` (preserva `## Visão pretendida` como baseline; `## Valor entregue` só com flag explícita).
 - **O próximo checkpoint/PR só abre após o gate aprovado e registrado** (a narrativa `canonical-next` do `state.yml` é guardada por `reconcile:check`).

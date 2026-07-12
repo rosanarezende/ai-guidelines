@@ -1,0 +1,123 @@
+// OllamaMatcher.ts — adapter de Matcher por EMBEDDINGS num modelo LOCAL (Ollama, API em localhost). Tier 1 do espectro.
+// Vetoriza o `need` e cada capability (POST /api/embeddings) → cosine → ranqueia. Soberania de dados: nada sai da máquina.
+// É a MESMA porta `Matcher` do léxico — trocar é 1 linha (loadMatcher via matcher.yml). Ver MATCHER.md.
+import type { Match, MatchCandidate, Matcher } from "../../domain/routing.ts";
+
+const cosine = (a: number[], b: number[]): number => {
+  let dot = 0;
+  let na = 0;
+  let nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i]! * b[i]!;
+    na += a[i]! ** 2;
+    nb += b[i]! ** 2;
+  }
+  return na && nb ? dot / (Math.sqrt(na) * Math.sqrt(nb)) : 0;
+};
+
+export class OllamaEmbedMatcher implements Matcher {
+  #endpoint: string;
+  #model: string;
+  #cache = new Map<string, number[]>(); // o mesmo texto não re-embeda (need/capabilities repetem entre intents)
+
+  constructor(endpoint: string, model: string) {
+    this.#endpoint = endpoint.replace(/\/$/, "");
+    this.#model = model;
+  }
+
+  async #embed(text: string): Promise<number[]> {
+    const hit = this.#cache.get(text);
+    if (hit) return hit;
+    const res = await fetch(`${this.#endpoint}/api/embeddings`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ model: this.#model, prompt: text }),
+    });
+    if (!res.ok)
+      throw new Error(
+        `Ollama ${res.status} em ${this.#endpoint} — o Ollama está no ar e o modelo "${this.#model}" foi puxado? (ollama pull ${this.#model})`
+      );
+    const json = (await res.json()) as { embedding: number[] };
+    this.#cache.set(text, json.embedding);
+    return json.embedding;
+  }
+
+  async rank(need: string, candidates: MatchCandidate[]): Promise<Match[]> {
+    const nv = await this.#embed(need);
+    const out: Match[] = [];
+    for (const c of candidates) {
+      let best = 0;
+      let bestText = "";
+      for (const cap of c.capabilities) {
+        const sim = cosine(nv, await this.#embed(cap.text));
+        if (sim > best) {
+          best = sim;
+          bestText = cap.text;
+        }
+      }
+      out.push({
+        repo: c.repo,
+        score: Math.round(best * 100), // cosine 0..1 → 0..100 (comparável visualmente ao léxico)
+        why: bestText ? `~ "${bestText.slice(0, 40)}…" (cos ${best.toFixed(2)})` : "sem capability",
+      });
+    }
+    return out.sort((a, b) => b.score - a.score);
+  }
+}
+
+// ─── tier 2: GENERATIVO — o modelo LÊ o need + as capabilities e devolve um ranking + o "porquê" (JSON). ───
+export class OllamaGenerateMatcher implements Matcher {
+  #endpoint: string;
+  #model: string;
+
+  constructor(endpoint: string, model: string) {
+    this.#endpoint = endpoint.replace(/\/$/, "");
+    this.#model = model;
+  }
+
+  async rank(need: string, candidates: MatchCandidate[]): Promise<Match[]> {
+    const repos = candidates
+      .map((c) => `- ${c.repo}: ${c.capabilities.map((cap) => cap.text).join("; ")}`)
+      .join("\n");
+    const prompt =
+      `NEED: ${need}\n\nREPOS (nome: capabilities):\n${repos}\n\n` +
+      `Ranqueie os repos pelo quão bem as capabilities atendem o NEED. Responda APENAS JSON: ` +
+      `{"ranked":[{"repo":"<nome EXATO da lista>","score":<0-100>,"why":"<curto>"}]} — melhor primeiro, TODOS os repos.`;
+    const res = await fetch(`${this.#endpoint}/api/generate`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: this.#model,
+        prompt,
+        stream: false,
+        format: "json", // saída JSON estruturada (Ollama)
+        options: { temperature: 0 }, // determinístico-o-possível
+      }),
+    });
+    if (!res.ok)
+      throw new Error(
+        `Ollama ${res.status} em ${this.#endpoint} — o modelo "${this.#model}" foi puxado? (ollama pull ${this.#model})`
+      );
+    const data = (await res.json()) as { response: string };
+    const valid = new Set(candidates.map((c) => c.repo));
+    let ranked: Match[] = [];
+    try {
+      const parsed = JSON.parse(data.response) as {
+        ranked?: { repo: string; score?: number; why?: string }[];
+      };
+      ranked = (parsed.ranked ?? [])
+        .filter((r) => valid.has(r.repo))
+        .map((r) => ({
+          repo: r.repo,
+          score: typeof r.score === "number" ? r.score : 0,
+          why: r.why ?? "",
+        }));
+    } catch {
+      ranked = []; // modelo pequeno às vezes devolve JSON inválido → conta como "não ranqueou" (parte da viabilidade)
+    }
+    for (const c of candidates)
+      if (!ranked.some((r) => r.repo === c.repo))
+        ranked.push({ repo: c.repo, score: 0, why: "(não ranqueado pelo modelo)" });
+    return ranked.sort((a, b) => b.score - a.score);
+  }
+}

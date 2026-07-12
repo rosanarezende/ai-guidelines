@@ -1,0 +1,59 @@
+# Red-team corpus — família B · INTEGRIDADE DE CAPABILITY
+# Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
+# O1: attack-by ≠ expected-by ≠ approval.
+
+family: capability
+attack-by: codex
+
+fixtures:
+  - id: B1
+    title: capability inflada / envenenada
+    priority: P0
+    verdicts: [ADICIONAR, REBAIXAR]
+    verdict-note: "ADICIONAR o dente de evidência mínima; REBAIXAR só a verdade semântica (advisory + drift)."
+    targets:
+      lens: L9
+      control: "capability evidence / owner-attested-by / observed-from / last-verified"
+    attack: |
+      # acme-mfe-growth/.governance/manifest.yml (envenenado)
+      capabilities:
+        - text: "owns payment authorization UX and PCI-ready checkout routing"
+          evidence: "adr/2019-generic-frontend.md" # ADR genérica e antiga
+      # sem owner-attested-by independente; observed-from ausente
+    attacker-goal: >
+      atrair iniciativas de pagamento e ganhar influência/capacidade indevida — a auto-declaração
+      é aceita com o mesmo peso de uma capability real.
+    expected-outcome: >
+      a VERDADE semântica da capability é inenforcável → tratada como advisory + drift (observed-from);
+      MAS há dente barato e REAL: sem owner-attested-by INDEPENDENTE + evidence (GlobalRef resolvível) +
+      observed-from fresco → a capability é EXCLUÍDA do match ou cai para 'unknown' (não usada com peso
+      igual à atestada). Não perseguir "prova de verdade" (seria o teatro).
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
+
+  - id: B2
+    title: capability subdeclarada (omissão)
+    priority: P1
+    verdicts: [ADICIONAR]
+    targets:
+      lens: L9
+      control: "observed-from × provides/consumes/código (detecção de AUSÊNCIA)"
+    attack: |
+      # acme-payments/.governance/manifest.yml — REMOVE a capability real p/ fugir de carga
+      capabilities:
+        - text: "checkout session management"
+      # porém o código/contrato ainda expõem:
+      #   provides: [refund-api]  (refund orchestration existe de fato)
+    attacker-goal: >
+      fugir de ownership/carga — incidentes e iniciativas de refund caem em outro time porque o
+      manifest "não sabe" da capability que o código provê.
+    expected-outcome: >
+      o modelo não confia só na auto-declaração: observed-from/provides/código são COMPARADOS ao
+      manifest; capability provida pelo código mas OMITIDA no manifest → flag + owner alertado
+      (ausência suspeita); o roteamento considera o observado, não só o declarado.
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending

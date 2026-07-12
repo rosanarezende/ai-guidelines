@@ -1,0 +1,52 @@
+<svg viewBox="0 0 760 460" width="760" height="460" xmlns="http://www.w3.org/2000/svg" role="img" font-family="ui-sans-serif, system-ui, sans-serif">
+  <title>Feature de login numa arquitetura multi-repo de micro-frontends (anonimizado)</title>
+  <desc>A tarefa de login se quebra em 5 deliveries: acme-api (auth endpoints), acme-design-system (componentes), acme-mfe-identity (login MFE), acme-mfe-support (ajuda sob demanda + proativa) e acme-shell (rota + mount + contexto). O login MFE coordinates-with o support MFE (emite sinais de falha → suporte proativo). O shell depends-on os dois MFEs; ambos consomem o design system; o identity depends-on a api. acme-mfe-platform é o substrato (plataforma de MFEs) sob todos. A feature é uma view derivada das 5 deliveries.</desc>
+
+  <defs>
+    <marker id="dep2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#888780"/></marker>
+    <marker id="co2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#D85A30"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="760" height="460" fill="#ffffff"/>
+
+  <g stroke="#888780" stroke-width="1.4" fill="none">
+    <line x1="360" y1="92" x2="300" y2="148" marker-end="url(#dep2)"/>
+    <line x1="416" y1="92" x2="500" y2="148" marker-end="url(#dep2)"/>
+    <line x1="232" y1="202" x2="150" y2="266" marker-end="url(#dep2)"/>
+    <line x1="330" y1="202" x2="510" y2="266" marker-end="url(#dep2)"/>
+    <line x1="540" y1="202" x2="566" y2="266" marker-end="url(#dep2)"/>
+  </g>
+
+  <line x1="372" y1="176" x2="418" y2="176" stroke="#D85A30" stroke-width="1.7" stroke-dasharray="5 3" marker-start="url(#co2)" marker-end="url(#co2)"/>
+  <text x="395" y="226" text-anchor="middle" font-size="11" fill="#993C1D">coordinates-with · login emite falhas → suporte proativo</text>
+
+  <rect x="16" y="24" width="196" height="50" rx="8" fill="#EEEDFE" stroke="#7F77DD" stroke-dasharray="4 3"/>
+  <text x="30" y="45" font-size="12" font-weight="600" fill="#3C3489">feature: login system</text>
+  <text x="30" y="63" font-size="11" fill="#534AB7">view derivada — breaks-into 5</text>
+
+  <rect x="288" y="40" width="200" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="388" y="62" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">acme-shell · host</text>
+  <text x="388" y="80" text-anchor="middle" font-size="11" fill="#1D9E75">delivery: rota + mount + contexto</text>
+
+  <rect x="180" y="150" width="190" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="275" y="172" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">acme-mfe-identity</text>
+  <text x="275" y="190" text-anchor="middle" font-size="11" fill="#1D9E75">delivery: login MFE</text>
+
+  <rect x="420" y="150" width="200" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="520" y="172" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">acme-mfe-support</text>
+  <text x="520" y="190" text-anchor="middle" font-size="11" fill="#1D9E75">delivery: ajuda (sob demanda + proativa)</text>
+
+  <rect x="40" y="266" width="190" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="135" y="288" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">acme-api · backend</text>
+  <text x="135" y="306" text-anchor="middle" font-size="11" fill="#1D9E75">delivery: auth endpoints</text>
+
+  <rect x="448" y="266" width="210" height="52" rx="8" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="553" y="288" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">acme-design-system</text>
+  <text x="553" y="306" text-anchor="middle" font-size="11" fill="#1D9E75">componentes (consumido pelos 2 MFEs)</text>
+
+  <rect x="36" y="364" width="688" height="48" rx="8" fill="#F1EFE8" stroke="#B4B2A9"/>
+  <text x="52" y="386" font-size="12" font-weight="600" fill="#444441">acme-mfe-platform · registry + runtime</text>
+  <text x="52" y="403" font-size="11" fill="#5F5E5A">substrato — todos rodam sobre ela (acme-mfe-growth e outros não tocados)</text>
+
+  <text x="36" y="438" font-size="11" fill="#5F5E5A">→ depends-on · ⇠coral⇢ coordinates-with · cinza = substrato · tracejado = view derivada</text>
+</svg>

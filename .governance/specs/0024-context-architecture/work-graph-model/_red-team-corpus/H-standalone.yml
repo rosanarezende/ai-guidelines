@@ -1,0 +1,78 @@
+# Red-team corpus — família H · STANDALONE (nenhuma família cobre)
+# Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
+# O1: attack-by ≠ expected-by ≠ approval.
+
+family: standalone
+attack-by: codex
+
+fixtures:
+  - id: H1
+    title: segredo colado + reclassificação tardia
+    priority: P0
+    verdicts: [MANTER-mecanismo, ADICIONAR]
+    verdict-note: "MANTER retenção/purge; ADICIONAR a prevenção pre-commit (a defesa real)."
+    targets:
+      lens: L9
+      control: "secret-scan pre-commit/pre-receive + quarantine + purge (features.md:43 é só na publicação)"
+    attack: |
+      # register.yml — details cola um segredo e PII fictícia:
+      details: |
+        deploy usa ACME_FAKE_TOKEN=sk_test_acme_123
+        contato: CPF 000.000.000-00
+      # o commit entra; DEPOIS mudam classification: restricted
+    attacker-goal: >
+      o segredo já está em git, archive, cache, context (e talvez em prompts) — a reclassificação
+      tardia não desfaz o vazamento.
+    expected-outcome: >
+      a defesa REAL é a PREVENÇÃO antes da entrada: secret-scan pre-commit/pre-receive + quarantine
+      (features.md só cobre scan na publicação do contexto — tarde demais). Reclassificar depois NÃO
+      recupera → purge-redaction-event + invalidação das projeções que já ingeriram. Impedir a
+      entrada, não reclassificar.
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
+
+  - id: H2
+    title: policy drift (decisão antiga fica válida)
+    priority: P1
+    verdicts: [ADICIONAR]
+    targets:
+      lens: L8
+      control: "invalidates inclui policy-revision (não só base-revision de dados)"
+    attack: |
+      # uma triage antiga usou a API externa (Gemini) quando a egress-policy permitia 'confidential'.
+      # a policy v3 passa a PROIBIR isso.
+      # o gate continua VÁLIDO porque o base-revision do register não mudou.
+    attacker-goal: >
+      manter ativa uma decisão contaminada por uma política que já foi revogada.
+    expected-outcome: >
+      invalidates depende TAMBÉM da policy-revision: uma decisão que dependeu da política X fica
+      STALE quando X muda → exige re-triagem/revalidação. A validade não é só função dos dados de
+      negócio. (Lei da dependência verificável.)
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
+
+  - id: H3
+    title: migração de schema (migrador como SSOT implícita)
+    priority: P2
+    verdicts: [ADICIONAR]
+    targets:
+      lens: L8
+      control: "migrator-registry determinístico + fail-closed + log de perda semântica"
+    attack: |
+      # context.json v2 assinado usa kind: fix.
+      # v3 colapsa fix → maintenance (dimensão maintenance-mode).
+      # o migrador converte fix → maintenance-mode: corrective SEM registrar a perda de semântica.
+    attacker-goal: >
+      o migrador vira autoridade silenciosa e reescreve a história (semântica perdida sem rastro).
+    expected-outcome: >
+      migrator-registry determinístico + fail-CLOSED quando não há migrador para o schema-version;
+      toda conversão registra a transformação (log de perda semântica). O migrador não é autoridade
+      silenciosa. (forward-looking: nem o código está no v2 ainda.)
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending

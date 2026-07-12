@@ -1,0 +1,9 @@
+# gate — a DECISÃO de ativação da candidata. É DECISÃO, não deliberação (a intent não delibera; tem um gate).
+# promoted  → consolida em intents/<id>/intent.yml + move a candidata p/ archived/ (ciclo fechado).
+# discarded → move p/ archived/ (nada nasce em intents/); distingue inviabilidade × repriorização pelo rationale.
+node: gate
+outcome: # promoted | discarded
+decided-by: # quem decidiu (eng/owner)
+decided-at: 2026-NN-NN
+rationale: # o porquê da decisão
+viability: # resumo da viabilidade que a embasou

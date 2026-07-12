@@ -19,7 +19,7 @@ export const WORK_MODES = [
   "blocked",
   "resolve_findings",
   "await_revalidation",
-  "prepare_subcheckpoint_transition",
+  "prepare_step_transition",
   "implement_checkpoint",
   "prepare_close",
   "current",

@@ -1,0 +1,21 @@
+{
+  "repo": "acme-mfe-support",
+  "works": [
+    {
+      "ref": "acme-mfe-support/delivery/help-on-demand_1",
+      "status": "draft",
+      "intent": "login_1",
+      "coordinatesWith": ["failure-event"],
+      "blockedBy": ["acme-design-system/delivery/form-component_1"],
+      "derivesFrom": ["acme-mfe-support/exploration/proactive-support_1"]
+    }
+  ],
+  "answers": [
+    {
+      "exploration": "acme-mfe-support/exploration/proactive-support_1",
+      "point": "acme-governance/intents/login_1#e2",
+      "verdict": "viável (pub/sub conta as falhas e dispara após N); SE proativo AJUDA é hipótese de produto → experiment dedicado",
+      "fate": "promoted"
+    }
+  ]
+}

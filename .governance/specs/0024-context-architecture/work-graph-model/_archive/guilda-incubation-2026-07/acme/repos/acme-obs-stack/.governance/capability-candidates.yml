@@ -1,0 +1,14 @@
+repo: acme-obs-stack
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-obs-stack"
+  dependencies: []
+  exports:
+    - incidentAlert
+    - p99Latency
+    - recordTrace
+    - sloSnapshot
+  sourceHash: 06ed6090ba30

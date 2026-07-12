@@ -1,0 +1,55 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "onboarding.account.title": "Quem está configurando?",
+    "onboarding.workspace.title": "Qual organização ou projeto você quer governar?",
+    "onboarding.profile.title": "Como sua organização decide hoje?",
+    "onboarding.people.title": "Quem participa e quais papéis acumula?",
+    "onboarding.sources.title": "Quais fontes de trabalho podem provar execução?",
+    "onboarding.assistant.title": "Quer um assistente? É opcional.",
+    "onboarding.integrations.title": "Integrações potencializam — não são requisito.",
+    "onboarding.review.title": "Pronto. Eis o retrato honesto."
+  },
+  "shell": {
+    "subtitle": "Configuração inicial",
+    "saveForLater": "Salvar e continuar depois"
+  },
+  "stepper": {
+    "privacyNotice": "Cada passo vira um arquivo seu — por comando governado, em fatia futura. Nada é enviado para fora."
+  },
+  "actions": {
+    "back": "Voltar",
+    "next": "Continuar"
+  },
+  "summary": {
+    "works": {
+      "profile": "Perfil: {profile} — cerimônia ajustada à sua realidade",
+      "soloRoles": "Papéis: você em todos, registrado como self-governed",
+      "declaredRoles": "Papéis: contrato de responsabilidade declarado por autoridade resolvível",
+      "planning": "Planejar ciclos, registrar iniciativas e acompanhar metas",
+      "auditTrail": "Trilha de auditoria completa, em arquivos seus",
+      "sources": "Evidência automática a partir de {count} tipo(s) de fonte de trabalho",
+      "localAssistant": "Assistente local (Ollama) — sem saída de dados",
+      "conflict": "Acúmulo de papéis sensíveis: {label} — {review}"
+    },
+    "pending": {
+      "noSources": "Nenhuma fonte de trabalho — execução, contratos e resultados só com evidência manual/declarada",
+      "noIntegrations": "Nenhuma integração conectada — o framework funciona sem, mas a evidência fica manual",
+      "roleAcceptance": "Aceite/convite dos papéis ainda não é mecanismo — fica como risco pendente"
+    },
+    "risks": {
+      "full": [
+        "Nenhum acúmulo de papéis é aceito em silêncio. Exceções só entram via break-glass — ficam registradas, com prazo de revisão.",
+        "Assistente em nuvem, se escolhido, exige aprovação explícita de egress/security."
+      ],
+      "solo": [
+        "Você governa a si mesma(o). O app não finge independência; tudo fica marcado como self-governed.",
+        "Sem fontes de trabalho, resultados dependem de evidência manual."
+      ],
+      "default": [
+        "Acúmulos de papéis aparecem como auto-declarados ou revisão conjunta, dependendo da regra escolhida.",
+        "Sem fontes de trabalho, resultados dependem de evidência manual."
+      ]
+    }
+  }
+}

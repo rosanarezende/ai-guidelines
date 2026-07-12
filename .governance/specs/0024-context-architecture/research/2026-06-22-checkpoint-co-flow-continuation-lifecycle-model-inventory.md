@@ -1,3 +1,7 @@
+---
+artifact-kind: inventory
+---
+
 # PR #44 — Inventario do lifecycle ponta a ponta
 
 Data: 2026-06-22  

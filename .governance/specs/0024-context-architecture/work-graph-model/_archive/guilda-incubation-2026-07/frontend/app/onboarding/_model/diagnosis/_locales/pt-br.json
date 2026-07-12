@@ -1,0 +1,150 @@
+{
+  "stepLabels": [
+    "Diagnóstico da organização",
+    "Papéis e responsáveis",
+    "Fontes de trabalho",
+    "Assistente",
+    "Integrações",
+    "Revisão"
+  ],
+  "sizeChoices": [
+    {
+      "id": "one",
+      "label": "Só eu",
+      "description": "Uma pessoa decide, executa e confirma a maior parte do trabalho."
+    },
+    {
+      "id": "small",
+      "label": "Até 5 pessoas",
+      "description": "Time pequeno, com decisões próximas e papéis frequentemente acumulados."
+    },
+    {
+      "id": "medium",
+      "label": "6 a 20 pessoas",
+      "description": "Já existem responsáveis distintos, mas nem toda decisão tem par independente."
+    },
+    {
+      "id": "large",
+      "label": "Mais de 20 pessoas",
+      "description": "Há espaço para separar aprovação, execução, segurança, dados e sponsorship."
+    }
+  ],
+  "responsibilityChoices": [
+    {
+      "id": "collapsed",
+      "label": "Quase tudo fica nas mesmas pessoas",
+      "description": "Quem decide também costuma executar, configurar e confirmar o resultado."
+    },
+    {
+      "id": "tracks",
+      "label": "Há frentes de negócio, produto/design e engenharia",
+      "description": "As responsabilidades existem por frente, mesmo que uma pessoa acumule mais de uma."
+    },
+    {
+      "id": "separated",
+      "label": "Papéis críticos costumam ser separados",
+      "description": "Objetivo, aprovação, execução, segurança e atestação podem ter donos diferentes."
+    }
+  ],
+  "conflictChoices": [
+    {
+      "id": "record",
+      "label": "Registrar com transparência",
+      "description": "Quando faltar separação de papéis, deixar claro no histórico e seguir."
+    },
+    {
+      "id": "warn",
+      "label": "Avisar e revisar depois",
+      "description": "Deixar o trabalho andar, mas abrir revisão para decisões sensíveis."
+    },
+    {
+      "id": "block",
+      "label": "Bloquear até outra pessoa aprovar",
+      "description": "Impedir decisões sensíveis quando a independência mínima não existir."
+    }
+  ],
+  "conflictPolicies": {
+    "record": {
+      "label": "Registrar com transparência",
+      "summary": "O perfil recomendado não muda, mas a configuração fica mais leve: acúmulo sensível não bloqueia e não abre revisão automática.",
+      "effect": "Cada acúmulo entra no histórico como auto-declarado. O dashboard mostra a limitação, e a responsabilidade fica explícita.",
+      "review": "Sem revisão automática; a revisão futura é manual ou por auditoria.",
+      "appWill": [
+        "registrar o acúmulo sensível como auto-declarado",
+        "mostrar no dashboard que a confirmação não é independente",
+        "deixar o trabalho seguir quando não houver par disponível"
+      ],
+      "appWillNot": [
+        "abrir revisão automática para cada acúmulo",
+        "tratar auto-declaração como evidência forte"
+      ],
+      "visibleRisks": [
+        "o risco fica documentado, mas pode ficar sem segunda leitura",
+        "auditoria futura vê a limitação; o app não corrige sozinho"
+      ],
+      "ceremony": ["Auto-declarado visível", "Sem revisão automática", "Segue com registro"],
+      "enforcement": {
+        "verb": "Registra",
+        "text": "acúmulos sensíveis passam como declaração explícita. O app não bloqueia e não agenda revisão sozinho; ele preserva a evidência de que faltou independência.",
+        "severity": "info"
+      },
+      "severity": "info"
+    },
+    "warn": {
+      "label": "Avisar e revisar depois",
+      "summary": "O perfil recomendado não muda, mas a configuração fica mais ativa: acúmulo sensível gera aviso e revisão em cadência.",
+      "effect": "O trabalho pode seguir, mas o app cria uma pendência de revisão para a dupla confirmar ou corrigir depois.",
+      "review": "Revisão conjunta em cadência para decisões sensíveis.",
+      "appWill": [
+        "registrar o acúmulo sensível e abrir pendência de revisão",
+        "permitir que o trabalho siga antes da segunda leitura",
+        "destacar revisões pendentes na Home e na auditoria"
+      ],
+      "appWillNot": [
+        "bloquear por padrão quando faltar par",
+        "tratar a confirmação como evidência forte antes da revisão"
+      ],
+      "visibleRisks": [
+        "decisões seguem com pendência aberta até a revisão",
+        "se a cadência de revisão não acontecer, o risco fica acumulado"
+      ],
+      "ceremony": ["Aviso visível", "Revisão em cadência", "Segue com pendência"],
+      "enforcement": {
+        "verb": "Avisa",
+        "text": "acúmulos sensíveis viram aviso e pendência de revisão. O trabalho pode seguir, mas a limitação continua visível até alguém revisar.",
+        "severity": "warning"
+      },
+      "severity": "warning"
+    },
+    "block": {
+      "label": "Bloquear até outra pessoa aprovar",
+      "summary": "Aqui a recomendação muda para responsabilidade separada, porque você pediu bloqueio quando faltar independência.",
+      "effect": "A mutação sensível só passa com outra autoridade resolvida ou com break-glass registrado e revisável.",
+      "review": "Bloqueio forte, com exceção apenas por break-glass.",
+      "appWill": [
+        "exigir outra autoridade para aprovar decisões sensíveis",
+        "bloquear autoaprovação quando a independência mínima faltar",
+        "permitir exceção apenas com break-glass registrado e revisável"
+      ],
+      "appWillNot": [
+        "deixar mutação sensível passar como aviso simples",
+        "esconder bloqueio ou exceção do histórico"
+      ],
+      "visibleRisks": [
+        "mais fricção operacional quando papéis ainda não estão configurados",
+        "pode exigir convite ou autoridade resolvida antes de seguir"
+      ],
+      "ceremony": ["Bloqueio forte", "Par independente", "Break-glass revisável"],
+      "enforcement": {
+        "verb": "Bloqueia",
+        "text": "mutações sensíveis não passam com a mesma pessoa nos dois papéis. Para seguir sem par, só com break-glass registrado e prazo de revisão.",
+        "severity": "error"
+      },
+      "severity": "error"
+    }
+  },
+  "effectiveRecommendation": {
+    "fullWithBlock": "Você escolheu uma regra forte para acúmulos sensíveis. O app recomenda responsabilidades separadas: decisões sensíveis precisam de par independente ou break-glass rastreável.",
+    "profileWithPolicy": "Você está escolhendo {profile} com uma regra específica para acúmulos sensíveis: {policy}."
+  }
+}

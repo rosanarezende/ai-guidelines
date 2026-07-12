@@ -1,3 +1,7 @@
+---
+artifact-kind: prompt
+---
+
 # Prompt — revisão externa do PR #43 antes do Human Gate
 
 > Escopo: Spec 0024 · nó `co-flow-convergence` · PR #43 · recorte CO-10.1..CO-10.7.

@@ -1,0 +1,40 @@
+# manifest.yml — acme-mfe-support (camada EXTERNA).
+node: manifest
+repo: acme-mfe-support
+role: "MFE de suporte — ajuda ao usuário (sob demanda e, em experimento, proativa)"
+owner: team-support
+domain: engagement
+
+provides:
+  - name: help-on-demand
+    kind: component
+    description: "painel de ajuda acionado pelo usuário"
+    status: beta
+
+consumes:
+  - contract: acme-design-system/form-component
+    awaits: ">=1.0"
+  - contract: acme-mfe-identity/failure-event
+    awaits: ">=1.0"
+
+capabilities:
+  - { text: "conteúdo de ajuda contextual", tags: [support, help, ui] }
+  - {
+      text: "suporte proativo após N falhas de login (em experimento)",
+      tags: [support, proactive, auth, login, observability],
+    }
+
+architecture:
+  stack: [react, typescript]
+  patterns: [microfrontend, event-listener]
+
+references:
+  - {
+      type: intent,
+      label: "iniciativa login",
+      url: "acme-governance/intents/login_1",
+      note: "consome o form do DS e ouve a falha de login da identidade",
+    }
+
+created-at: 2026-06-28
+updated-at: 2026-06-29

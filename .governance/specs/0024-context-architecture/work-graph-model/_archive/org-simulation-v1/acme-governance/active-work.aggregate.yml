@@ -1,0 +1,35 @@
+# active-work.aggregate.yml — o BANCO (DERIVADO, regenerável): união cross-repo dos grafos publicados.
+# ids namespaceados <repo>/<id>. Inclui TODOS os trabalhos — com ou sem intent. NÃO é SSOT (os repos são).
+# ⚠️ PROVISÓRIO: mistura intent+works num arquivo só — não escala. Será redesenhado na rodada de system design dos
+# bancos (separar intents/works · banco de proposals na governança · grafos que se comunicam → bancos derivados).
+
+intents:
+  - { id: intent-001, title: Revamp do onboarding, status: active }
+  - { id: intent-002, title: Testar novo billing, status: active, bu: monetizacao } # derivado da pasta
+  - { id: intent-003, title: Design tokens v2, status: done }
+  - { id: intent-004, title: Sistema de login, status: active }
+
+works: # todos os trabalhos publicados pelos repos
+  # --- sob uma intent (objetivo) ---
+  - { id: acme-api/deliv-101, kind: delivery, status: done, intent: intent-001 }
+  - { id: acme-shell/deliv-110, kind: delivery, status: draft, intent: intent-001 } # bloqueada
+  - { id: acme-mfe-identity/deliv-120, kind: delivery, status: active, intent: intent-001 }
+  - { id: acme-api/deliv-050, kind: delivery, status: active, intent: intent-002 }
+  - { id: acme-mfe-growth/exp-140, kind: experiment, status: active, intent: intent-002 }
+  - { id: acme-design-system/deliv-130, kind: delivery, status: done, intent: intent-003 }
+  # --- intent-004 (login system) — explorations PRIMEIRO; deliveries entram pós-retroalimentação ---
+  - { id: acme-design-system/exploration-301, kind: exploration, status: done, intent: intent-004 }
+  - { id: acme-mfe-support/exploration-302, kind: exploration, status: done, intent: intent-004 }
+  - { id: acme-design-system/deliv-210, kind: delivery, status: active, intent: intent-004 }
+  - { id: acme-api/deliv-201, kind: delivery, status: active, intent: intent-004 }
+  - { id: acme-mfe-identity/deliv-220, kind: delivery, status: draft, intent: intent-004 } # bloqueada
+  - { id: acme-mfe-support/deliv-230, kind: delivery, status: draft, intent: intent-004 } # bloqueada
+  - { id: acme-shell/deliv-240, kind: delivery, status: draft, intent: intent-004 } # bloqueada
+  # --- standalone (reativo/rotina, SEM intent — aparece no banco mesmo assim) ---
+  - { id: acme-api/fix-201, kind: fix, status: done, intent: null }
+  - { id: acme-mfe-identity/fix-210, kind: fix, status: done, intent: null }
+  - { id: acme-design-system/patch-310, kind: patch, status: done, intent: null }
+  - { id: acme-mfe-growth/patch-320, kind: patch, status: done, intent: null }
+  - { id: acme-mfe-platform/patch-330, kind: patch, status: done, intent: null }
+
+# views derivadas (ex.: por intent, por repo, por kind, por status) — calculadas daqui pro dashboard.

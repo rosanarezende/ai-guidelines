@@ -1,0 +1,140 @@
+{
+  "intents": [
+    {
+      "id": "login_1",
+      "title": "Sistema de login (multi-repo)",
+      "objective": "novo fluxo de login, com ajuda sob demanda e proativa — navegável atrás de flag",
+      "details": "Feature cross-repo. As deliveries só nascem depois que as open-questions forem respondidas pelas explorations.",
+      "owner": "@ana-pm",
+      "status": "active",
+      "references": [
+        {
+          "label": "modelagem do login (produto)",
+          "url": "https://docs.acme.example/login-modeling"
+        }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "question": "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?"
+        },
+        {
+          "id": "q2",
+          "question": "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "d1",
+          "decides": ["q1"],
+          "status": "accepted",
+          "rationale": "verdict claro: o DS não tem form validado → criar o componente",
+          "at": "2026-06-27"
+        },
+        {
+          "id": "d2",
+          "decides": ["q2"],
+          "status": "accepted",
+          "rationale": "viável; a ajuda sob demanda absorve a POC (o proativo A/B vira experiment dedicado, via proposal)",
+          "at": "2026-06-27"
+        }
+      ],
+      "contracts": [
+        { "name": "form-component", "awaits": "q1" },
+        { "name": "failure-event", "awaits": "q2" }
+      ],
+      "createdAt": "2026-06-27",
+      "updatedAt": "2026-06-28"
+    }
+  ],
+  "explorations": [
+    {
+      "id": "form-validation_1",
+      "repo": "acme-design-system",
+      "answers": "login_1#q1",
+      "status": "done",
+      "assignee": "@dev-ds",
+      "fate": "throwaway",
+      "verdict": "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente",
+      "createdAt": "2026-06-27",
+      "updatedAt": "2026-06-27"
+    },
+    {
+      "id": "proactive-support_1",
+      "repo": "acme-mfe-support",
+      "answers": "login_1#q2",
+      "status": "done",
+      "assignee": "@dev-support",
+      "fate": "promoted",
+      "verdict": "viável (pub/sub conta as falhas e dispara após N); SE proativo AJUDA é hipótese de produto → experiment dedicado",
+      "createdAt": "2026-06-26",
+      "updatedAt": "2026-06-27"
+    }
+  ],
+  "proposals": [
+    {
+      "id": "prop-001",
+      "what": "testar se o suporte proativo (abordar após N falhas de login) melhora a conclusão do login, ou atrapalha",
+      "raisedFrom": "login_1#q2",
+      "owner": "@produto-growth",
+      "status": "open",
+      "tags": ["growth", "login", "suporte-proativo"],
+      "impact": "high",
+      "confidence": "medium",
+      "effort": "medium",
+      "promoteTo": "experiment",
+      "createdAt": "2026-06-27",
+      "updatedAt": "2026-06-27"
+    }
+  ],
+  "works": [
+    {
+      "id": "form-component_1",
+      "intent": "login_1",
+      "kind": "delivery",
+      "title": "Componente de formulário validado (no design system)",
+      "weight": "M",
+      "repo": "acme-design-system",
+      "blockedBy": [],
+      "coordinatesWith": ["form-component"],
+      "status": "draft",
+      "assignee": null,
+      "questions": [],
+      "decisions": [],
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-28"
+    },
+    {
+      "id": "login-mfe_1",
+      "intent": "login_1",
+      "kind": "delivery",
+      "title": "Tela de login (MFE) consumindo o form",
+      "weight": "L",
+      "repo": "acme-mfe-identity",
+      "blockedBy": ["form-component_1"],
+      "coordinatesWith": ["form-component"],
+      "status": "draft",
+      "assignee": null,
+      "questions": [],
+      "decisions": [],
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-28"
+    },
+    {
+      "id": "help-on-demand_1",
+      "intent": "login_1",
+      "kind": "delivery",
+      "title": "Ajuda sob demanda (absorve a POC do listener)",
+      "weight": "L",
+      "repo": "acme-mfe-support",
+      "blockedBy": ["form-component_1"],
+      "coordinatesWith": ["failure-event"],
+      "status": "draft",
+      "assignee": null,
+      "questions": [],
+      "decisions": [],
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-28"
+    }
+  ]
+}

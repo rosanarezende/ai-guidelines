@@ -1,0 +1,61 @@
+# Red-team corpus — X · SEPARAÇÃO DE DEVERES + O1 · ATAQUE AO ORÁCULO (a Lei da independência)
+# Ver ../deliberation/2026-07-01-adversarial-simulation-red-team-deliberation.md
+# O1: attack-by ≠ expected-by ≠ approval. (Esta família É a lei que o corpus dogfooda.)
+
+family: independencia
+attack-by: codex
+
+fixtures:
+  - id: X
+    title: separação de deveres (o mesmo principal faz tudo)
+    priority: P0 # headline
+    verdicts: [ADICIONAR]
+    targets:
+      lens: L9
+      control: "authority carrega independência de 1ª classe (requester ≠ approver ≠ owner-attester)"
+    attack: |
+      # principal: ana@acme  — sozinha, na cadeia inteira:
+      #   registra a candidata
+      #   define classification: public
+      #   atesta a capability do próprio repo
+      #   aprova o gate
+      #   promove a intent
+      # tudo assinado; todos os campos corretos; NADA é tecnicamente falso.
+    attacker-goal: >
+      captura da governança por autocertificação completa — a "auditoria de mentiras bem-formadas"
+      no seu extremo: um único ator fecha o ciclo sozinho.
+    expected-outcome: >
+      authority carrega INDEPENDÊNCIA de 1ª classe: para ações sensíveis (classificar/atestar/
+      aprovar/promover), requester ≠ approver ≠ owner-attester. Um único principal em toda a cadeia
+      → RECUSADO; exige um segundo ator independente. Papel nominal não basta.
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending
+
+  - id: O1
+    title: ataque ao oráculo (a prova governada por quem ela julga)
+    priority: P0 # meta — a maior classe (achado bônus do Codex)
+    verdicts: [ADICIONAR]
+    targets:
+      lens: L9-meta
+      control: "independência do policy-pack / red-team-corpus / expected-outcomes"
+    attack: |
+      # o red-team-corpus/, o policy-catalog e os expected-outcomes são governados pelo MESMO fluxo
+      # e pelo MESMO principal que eles julgam. O atacante então:
+      #   - suaviza uma fixture (enfraquece o attack)
+      #   - marca um expected-outcome como "advisory"
+      #   - move um controle para "policy opcional"
+      # não ataca o modelo de trabalho — ataca a PROVA que decide se o modelo presta.
+    attacker-goal: >
+      neutralizar a forcing function por dentro: se a prova é editável por quem ela avalia, todo o
+      red-team vira teatro.
+    expected-outcome: >
+      a prova é INDEPENDENTE dos atores que julga: alterar corpus/policy/expected exige autoria +
+      aprovação SEPARADAS (o X no meta-nível); o policy-pack é versionado e sua mudança é auditável e
+      aprovada por quem NÃO é o alvo do controle. O oráculo não é editável por quem ele avalia.
+      # dogfood: este próprio corpus carrega attack-by ≠ expected-by ≠ approval-role.
+    expected-by: claude
+    approved-by: null
+    approval-role: owner
+    approval-status: pending

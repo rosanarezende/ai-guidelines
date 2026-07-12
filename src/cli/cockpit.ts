@@ -51,11 +51,11 @@ export interface CockpitModel {
 function commandForDecision(id: string, mutating: boolean): string {
   if (!mutating) return `npm run flow -- decide --type ${id} --brief-only`;
   const decision =
-    id === "finish-subcheckpoint"
+    id === "finish-step"
       ? "finish"
       : id === "mark-readiness"
         ? "mark-ready"
-        : id === "advance-subcheckpoint"
+        : id === "advance-step"
           ? "advance"
           : id === "close-dispositions"
             ? "accept-all"
@@ -70,9 +70,9 @@ function recommendedDecision(model: CockpitModel): CockpitDecisionItem | null {
   const byId = new Map(model.decisions.map((d) => [d.id, d]));
   const preferred = [
     "close-dispositions",
-    "finish-subcheckpoint",
+    "finish-step",
     "mark-readiness",
-    "advance-subcheckpoint",
+    "advance-step",
     "human-gate",
   ];
   for (const id of preferred) {
@@ -151,10 +151,10 @@ export function renderCockpit(model: CockpitModel): string {
   lines.push(
     `- ${COCKPIT_COPY.checkpoint}: ${brief.checkpoint ?? "(sem cursor)"} · ${COCKPIT_COPY.mode}: ${brief.mode}`
   );
-  if (brief.object.subCheckpoint) {
-    const sub = brief.object.subCheckpoint;
+  if (brief.object.step) {
+    const sub = brief.object.step;
     lines.push(
-      `- ${COCKPIT_COPY.activeSubcheckpoint}: ${sub.id} — ${sub.title} (tasks.md linha ${sub.line})`
+      `- ${COCKPIT_COPY.activeStep}: ${sub.id} — ${sub.title} (tasks.md linha ${sub.line})`
     );
   } else if (brief.object.transition) {
     const transition = brief.object.transition;

@@ -1,9 +1,9 @@
-import { parseSubCheckpoints, runPrReadyExternalCheck } from "./snapshot.js";
+import { parseSteps, runPrReadyExternalCheck } from "./snapshot.js";
 
 const TASKS = `
 - [x] **Checkpoint co-projection** (nó \`co-projection\`) — concluído.
 - [/] **Checkpoint co-enforcement** (nó \`co-enforcement\`, seq 9 / CO-3) — em execução.
-  - **Sub-checkpoints internos (CO-3, PR #42; Gate único ao fim):**
+  - **Etapas internos (CO-3, PR #42; Gate único ao fim):**
     - [/] **CO-3.1 — Constraint + EnforcementBinding** (modelo): EM EXECUÇÃO.
     - [ ] **CO-3.2 — knowledge:compile + manifesto/paridade**: entrypoint humano.
     - [ ] **CO-3.3 — migração e remoção do substrato legacy**: port TS.
@@ -12,9 +12,9 @@ const TASKS = `
   - [ ] **CO-5.1 — não deve aparecer** (outro checkpoint).
 `;
 
-describe("parseSubCheckpoints [decide]", () => {
-  it("extrai sub-checkpoints do checkpoint do cursor com estado correto", () => {
-    const subs = parseSubCheckpoints(TASKS, "checkpoint-co-enforcement");
+describe("parseSteps [decide]", () => {
+  it("extrai etapas do checkpoint do cursor com estado correto", () => {
+    const subs = parseSteps(TASKS, "checkpoint-co-enforcement");
     expect(subs.map((s) => `${s.id}:${s.state}`)).toEqual([
       "CO-3.1:in-progress",
       "CO-3.2:pending",
@@ -23,13 +23,13 @@ describe("parseSubCheckpoints [decide]", () => {
     ]);
   });
 
-  it("não vaza sub-checkpoints de outro checkpoint", () => {
-    const subs = parseSubCheckpoints(TASKS, "checkpoint-co-enforcement");
+  it("não vaza etapas de outro checkpoint", () => {
+    const subs = parseSteps(TASKS, "checkpoint-co-enforcement");
     expect(subs.find((s) => s.id === "CO-5.1")).toBeUndefined();
   });
 
   it("checkpoint inexistente → vazio", () => {
-    expect(parseSubCheckpoints(TASKS, "checkpoint-inexistente")).toEqual([]);
+    expect(parseSteps(TASKS, "checkpoint-inexistente")).toEqual([]);
   });
 });
 

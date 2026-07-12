@@ -1,0 +1,5 @@
+work: spike-001
+kind: spike
+stage: closed
+closes-with: learning-record
+resolves: backend/deliv-001 # a resposta destrava a decisão do delivery (mesmo repo)

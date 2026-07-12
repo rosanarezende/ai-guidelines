@@ -1,0 +1,676 @@
+# Requisitos do App de Governança Ponta-a-Ponta
+
+> **Status:** proposta de requisitos para a próxima fatia de backend/frontend da Spec 0024.
+> **Autoridade:** o modelo tipado continua em [`model.yml`](model.yml). Este documento traduz o modelo para requisitos de produto, dados, arquitetura e robustez do app.
+> **Contexto:** a v2 provou lib, portas, adapters e app de autoria. A v3/governance-demo já provou o substrato repo-first, resolvers fail-closed, red-team, runtime file-first, exemplos multi-backend e uma primeira superfície React/Next + Material UI. O app alvo deve unir esses aprendizados sem reintroduzir taxonomia antiga nem controles cerimoniais.
+
+## 1. Objetivo
+
+Construir uma aplicação utilizável de ponta a ponta por stakeholders, lideranças, produto, engenharia e donos de plataforma para governar o trabalho como grafo tipado, mantendo o repo como memória portável e permitindo assistência por IA em cada etapa sem delegar decisão à IA.
+
+O app deve cobrir a cadeia:
+
+```text
+business-objective → target → intake → triage → gate → intent → execution-unit
+→ repo-work/repo-ack → contract/outcome/incident → dashboard/verdict
+```
+
+O app não é um substituto genérico de Jira/Linear/BI. Ele é a superfície operacional do modelo file-first: escreve comandos governados, valida invariantes, deriva projeções e mostra onde a evidência é forte, fraca, stale ou ausente.
+
+## 2. Princípios obrigatórios
+
+1. **File-first, database-derived:** YAML/JSON governado é SSOT. Bancos e dashboards são projeções derivadas.
+2. **Comando antes de mutação:** a UI nunca edita YAML diretamente; ela envia comandos com envelope.
+3. **Resolver antes de exibir como verdade:** número, status, match, capability, contrato e decisão só aparecem como "válidos" depois de resolver fail-closed.
+4. **IA como canal assistivo:** IA sugere, resume, detecta drift e monta rascunhos. Humano confirma, edita ou rejeita.
+5. **Confiança visível:** self-attested, collapsed SoD, break-glass, stale, unverified e unknown aparecem no dashboard; nunca são escondidos.
+6. **Escala colapsável:** o mesmo produto deve servir full-team, compact e solo por perfil de governança, sem impor cerimônia inútil nem permitir bypass silencioso.
+7. **Sem segundo SSOT:** Neo4j/SQLite/Mongo/search index nunca viram fonte autoritativa de ação. Toda ação relê a revisão fonte antes de escrever.
+8. **Contrato tipado antes da tela:** novos fluxos de produto nascem no domínio TypeScript compartilhado antes de virar estado local de React. A UI não pode inventar entidade ou enum que o backend/runtime não conhece.
+9. **Internacionalização por contrato:** textos de produto ficam em `locales/<locale>.json` colocalizado com a feature/view/shell que usa a string; backend/domínio emite `messageKey` + `params`. Componentes não carregam copy longa hardcoded quando a string pertence à experiência de produto.
+
+## 3. Personas e permissões
+
+| Persona                      | Precisa fazer                                                                    | Precisa ver                                                 | Não deve poder fazer sozinha                             |
+| ---------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| Stakeholder executivo        | acompanhar objetivos, targets, outcomes, riscos e badges de confiança            | dashboard agregado, narrativa, decisões perigosas pendentes | alterar actual, capability, contrato ou verdict          |
+| Liderança de produto/negócio | criar objectives/targets, autorizar intake, aprovar gate de intent               | funil, allocation, aging, impacto no target                 | atestar actual se também definiu target                  |
+| PM/Owner de intent           | registrar problema, consolidar intent, aceitar verdict                           | triage, breakdown, outcome, blockers                        | substituir evidência técnica por texto                   |
+| Tech Lead/Principal          | triagem, matcher, breakdown, contratos, review de risco                          | capacidades, contratos, dependências cross-repo             | aprovar sozinho mutação ruler-authority em perfil full   |
+| Dev/Time de repo             | publicar manifest/context, reconhecer repo-work, evidenciar done/blocked/dropped | peças do repo, contratos consumidos/providos, drift         | mudar breakdown central sem comando no host              |
+| Dono de contrato             | revisar revision proposal, compatibility-window, consumers                       | fila de contenção e impacto                                 | aceitar revisão com consumers omitidos                   |
+| Dados/Analytics              | definir metric-definition, atestar actual/outcome                                | fontes, revisions, rollup                                   | atestar target próprio sem collapse logado               |
+| SRE/Ops                      | declarar incidente, severidade, mitigação, follow-up                             | SLO, incidentes, operational bucket                         | usar incident para furar fila sem telemetria verificável |
+| Auditor/Segurança            | revisar envelopes, policies, egress, red-team                                    | trilha append-only, diffs, badges, break-glass              | editar o fato auditado que está revisando                |
+
+## 4. Modelo de dados operacional
+
+### 4.1 Entidades autoritativas
+
+O backend deve modelar, no mínimo:
+
+- `BusinessObjective`: objetivo recursivo com `level`, `period`, `owner`, `status`, `continues-from`, `cascades-to`.
+- `MetricDefinition`: definição estável de métrica, fonte, unidade, agregação e owner.
+- `Target`: binding de métrica, período, expected, definer, attester, status e colapso de atestação quando houver.
+- `Thesis` e `OpportunityArea`: contexto causal e área opcional de ataque.
+- `Proposal` e `Register`: intake pré-intent com `authorized-by` ou `standalone` declarado.
+- `Triage`: itens, disposição, matcher-run, contratos relevantes, gaps de informação e viabilidade.
+- `GateDecision`: decisão append-only de ativar/descartar/reverter.
+- `Intent`: objetivo de trabalho ativado, `approach`, `signal`, `primary-target`, thesis, decision-rule e vínculos.
+- `ExecutionUnit`: unidade cross-repo com kind final do `model.yml`, lifecycle próprio e verdict quando aplicável.
+- `RepoWork`: peça executável por repo, com `purpose`, dimensões, status e vínculos.
+- `RepoWorkAck`: publicação repo-local de reconhecimento, lifecycle e evidência.
+- `Contract`: nó versionado com owner, consumers, interface, revision proposals e compatibility-window.
+- `Outcome`: evento governado que alimenta actual apenas se resolver válido.
+- `Incident`: instrumento reativo central com severidade, telemetria, postmortem e follow-ups.
+- `Deliberation`: q/r/d anexável a qualquer nó, com decisions supersedíveis.
+- `Authority`, `ProfileDeclaration`, `TrustPolicy`: autoridade resolvível, perfil, egress, ACL, revogação, quarantine e oráculo.
+- `RepoContext`: publicação por repo com capabilities, contracts, consumers, freshness, producer e evidence.
+- `AssistantSuggestion`: saída de IA/matcher, sempre versionada com input, policy, evidence, score, unknown e decisão humana posterior.
+
+### 4.2 Entidades derivadas/read-models
+
+O backend deve gerar projeções, não persistir como verdade:
+
+- `GraphReadModel`: nós e arestas tipadas para navegação.
+- `DashboardReadModel`: objectives, targets, actuals, confidence badges, allocation e operational bucket.
+- `QueueReadModel`: intake, triage, gates, contract contentions, incidents, break-glass reviews e stale publications.
+- `RepoReadModel`: visão por repo de work, contracts, capability drift e evidence gaps.
+- `TimelineReadModel`: histórico append-only de comandos, decisions, reversals e generated projections.
+- `AssistantAuditReadModel`: sugestões aceitas/rejeitadas, overrides, prompt/egress policy e unknowns.
+
+### 4.3 Identidade e referências
+
+- Todo nó usa `GlobalRef family:namespace/id#anchor@revision` quando cruza fronteira.
+- Toda deleção lógica gera tombstone.
+- Reparenting, promote/discard, fork, split/merge e yearly rollover são comandos idempotentes, não renome manual.
+- Ref resolvível é pré-condição para comando que dependa dela.
+
+## 5. Arquitetura backend
+
+### 5.0 Adoption shell, conta e workspaces
+
+Antes do grafo de trabalho existe uma camada de adoção do produto:
+
+```text
+account/user → workspace/organization → governance-host → work-sources → grafo governado
+```
+
+Essa camada resolve três problemas de produto e segurança:
+
+- uma mesma pessoa pode governar múltiplas organizações/projetos/clientes;
+- `acme-*` é apenas demo/seed, não identidade implícita do app;
+- onboarding, perfil, pessoas, papéis, fontes de trabalho e assistente são escopados por workspace.
+
+Requisitos:
+
+- `Account` guarda identidade local/preferência de locale, mas não substitui `Authority` do workspace.
+- `Workspace` guarda `name`, `kind`, `governanceHost`, `workSources`, `memberships` e `onboardingStatus`.
+- `GovernanceHost` é obrigatório para governança real: repo dedicado, pasta local ou pasta dentro de repo existente. Sem host, o app só pode operar em demo/rascunho local.
+- `WorkSource` não deve ser descrita como "opcional" sem qualificação. Sem fonte, o framework ainda planeja/registra, mas execução, contratos e outcomes ficam rebaixados para evidência manual/declarada.
+- Membership é pessoa → N papéis. A UI não deve começar por lista de papéis soltos.
+- `ProfileDeclaration` deriva do diagnóstico e da política escolhida para acúmulo sensível; o usuário pode ajustar, mas o ajuste altera claramente o enforcement/risco visível.
+
+### 5.0.1 Contrato TypeScript e i18n
+
+O backend/runtime ativo da sim v3 é TypeScript strict em `backend/src/` (Node ≥ 22.18 roda `.ts` nativo); `.mjs` sobrevive apenas como shim de compatibilidade/CLI de check, nunca como caminho principal:
+
+```text
+governance-demo/backend/src/domain/**       # entidades, policies, validador, comandos, grafo (puro)
+governance-demo/backend/src/ports/**        # GovernanceRepository/EventLog, GraphReadModelSource, IntegrationAdapter, AssistantProvider
+governance-demo/backend/src/adapters/**     # file, repo-first, graph-memory, integrations (IO mora aqui)
+governance-demo/backend/src/application/**  # runtime, snapshot, graph queries, egress/redaction, integrações
+governance-demo/backend/src/api/**          # schemas tipados + contrato verificável + handlers agnósticos
+governance-demo/frontend/app/<route>/_view/<View>/_locales/pt-br.json
+governance-demo/frontend/app/<route>/_steps/<Step>/_locales/pt-br.json
+governance-demo/frontend/app/<route>/_sections/<Section>/_locales/pt-br.json
+governance-demo/frontend/app/<route>/_components/<Component>/_locales/pt-br.json
+governance-demo/frontend/app/_components/<area>/_locales/pt-br.json
+```
+
+O app consome exclusivamente o SDK `@demo/backend` (server-side) e `@demo/backend/domain` (browser-safe); import solto de módulo interno/`.mjs` do backend é barrado pelo guard do app.
+
+Critérios:
+
+- `GovernanceSnapshot`, comandos, adoption shell, integrações e mensagens de erro são tipos compartilhados, não duplicados em `lib/types.ts` do app.
+- O frontend pode ter view-models, mas eles derivam dos tipos de domínio.
+- Rotas do App Router (`app/*/page.tsx`) ficam finas e só carregam dados + delegam para `app/features/<feature>`.
+- Experiências de produto vivem por feature: `home`, `onboarding`, `settings`, `console`; passos/seções/componentes específicos ficam dentro da pasta da própria feature.
+- `app/ui/` guarda apenas shell, tema e componentes realmente compartilhados. Não deve conter views de produto.
+- Novas strings de tela entram no locale do menor dono estável da copy: view, step, section, componente compartilhado, subdomínio ou shell. Exceções são labels técnicos curtos ou dados vindos do snapshot.
+- O diretório global `governance-demo/frontend/locales/` e locales amplos por feature são legado proibido; eles tornam manutenção e ownership de copy difusos.
+- Domínio/backend deve preferir `{ messageKey, params }` para erro/aviso, permitindo UI traduzir sem perder auditoria.
+
+### 5.1 Camadas
+
+```text
+UI / API
+  → Command handlers
+  → Domain model + policies + resolvers
+  → Ports
+      HostGovernanceRepository
+      ProductRepoProjectionRepository
+      PublishedProjectionStore
+      EventLogStore
+      ReadModelStore
+      AssistantGateway
+      PolicyStore
+  → Adapters
+      file
+      sqlite
+      neo4j
+      mongo
+      local-llm
+      external-llm
+```
+
+### 5.2 Command pipeline
+
+Todo comando passa pela mesma esteira:
+
+1. Parse + schema fechado.
+2. Envelope obrigatório: actor, authority, base-revision, idempotency-key, nonce, issued-at, classification, source-commit quando aplicável.
+3. Authorization e SoD.
+4. Resolver de refs e policy.
+5. Invariantes de domínio.
+6. Dry-run com diff humano.
+7. Escrita append-only ou arquivo canônico.
+8. Rebuild de read-model afetado.
+9. Auditoria e emissão de notifications.
+
+Comando sem tipo conhecido, sem ref resolvível, com base stale ou com authority revogada falha fechado.
+
+### 5.3 Portas mínimas
+
+```ts
+interface HostGovernanceRepository {
+  loadNode(ref: GlobalRef): Promise<Node | null>;
+  listNodes(query: NodeQuery): Promise<Node[]>;
+  appendCommand(command: GovernedCommand): Promise<CommandReceipt>;
+  writeCanonicalNode(node: Node, receipt: CommandReceipt): Promise<void>;
+  tombstone(ref: GlobalRef, receipt: CommandReceipt): Promise<void>;
+}
+
+interface ProductRepoProjectionRepository {
+  listRepos(): Promise<RepoSummary[]>;
+  loadManifest(repo: RepoId): Promise<Manifest>;
+  loadContext(repo: RepoId): Promise<RepoContext>;
+  loadRepoWorkAcks(repo: RepoId): Promise<RepoWorkAck[]>;
+  loadRepoContracts(repo: RepoId): Promise<RepoContract[]>;
+}
+
+interface ReadModelStore {
+  rebuild(scope: ProjectionScope): Promise<ProjectionReceipt>;
+  getGraph(scope: GraphScope): Promise<GraphReadModel>;
+  getDashboard(scope: DashboardScope): Promise<DashboardReadModel>;
+  getQueues(scope: QueueScope): Promise<QueueReadModel>;
+}
+
+interface AssistantGateway {
+  suggest(request: AssistantRequest): Promise<AssistantSuggestion>;
+}
+```
+
+### 5.4 Backends plugáveis
+
+| Backend | Uso correto                                                       | Restrições                                                 |
+| ------- | ----------------------------------------------------------------- | ---------------------------------------------------------- |
+| File    | modo solo/local, PR review, bootstrap, testes determinísticos     | lock curto, merge conflict visível, read-model pequeno     |
+| SQLite  | app local/team pequeno, transações reais, fila e projection cache | ainda deriva de arquivos/event-log, não vira SSOT          |
+| Neo4j   | consulta de grafo, impacto cross-repo, dashboards complexos       | read-only por padrão; comandos relêem fonte file/event-log |
+| Mongo   | event/read-model flexível para artefatos heterogêneos             | schema versionado e migrations fail-closed                 |
+
+O domínio não pode depender do adapter. Trocar backend não pode alterar o resultado dos resolvers nem os comandos aceitos.
+
+### 5.5 Event-log e arquivos canônicos
+
+O app deve manter dois planos:
+
+- **Arquivos canônicos:** estado materializado legível no repo (`governance-demo/acme/governance/*`, `governance-demo/acme/repos/<repo>/.governance/*`).
+- **Event-log semântico:** comandos append-only que explicam por que o arquivo mudou.
+
+Git sozinho não basta como log transacional: ele registra bytes, não intenção de domínio. O event-log é obrigatório para idempotência, replay, reversão de gate, auditoria e conflito concorrente.
+
+## 6. Experiência de Produto e Informação
+
+### 6.1 Porta de entrada
+
+Antes da Home existe o **shell de adoção**: um usuário novo cria identidade local
+(`local-principal`; honesto — não é auth cloud), cria ou escolhe uma **organização/workspace**
+(multi-organização com contexto separado; a `acme-*` entra como fixture demo, nunca como a
+realidade do usuário) e faz o onboarding daquela organização. Só então chega à
+**Home de Adoção/Governança** da organização atual. Ela não começa pelo grafo, por YAML,
+por event-log nem por taxonomia interna. Ela começa por intenção humana:
+
+```text
+O que você quer governar hoje?
+```
+
+A tela deve responder, sem exigir vocabulário técnico:
+
+- o que já está configurado;
+- o que precisa de atenção;
+- qual é o próximo passo seguro;
+- quais ações estão bloqueadas por falta de evidência, autoridade ou configuração.
+
+O grafo, os comandos, os arquivos, os resolvers e o event-log continuam visíveis, mas como detalhe
+técnico progressivo. Eles não são a navegação principal para stakeholder, owner, sponsor, payer ou
+adoption-admin.
+
+### 6.2 Atalhos primários
+
+A Home deve oferecer atalhos orientados a tarefa:
+
+1. **Configurar organização:** perfil de governança, papéis críticos, autoridade, pagador/sponsor e
+   política de assistente.
+2. **Conectar repos existentes:** adoção repo-first, manifests, context freshness, capabilities e
+   contratos publicados.
+3. **Planejar ciclo:** objectives, targets, allocation, período e continuidade anual.
+4. **Registrar iniciativa:** proposal/register, anexos, classificação, business-link e triage.
+5. **Acompanhar resultados:** targets, outcomes, verdicts, badges de confiança e rollup narrativo.
+6. **Resolver pendências:** gates, blockers, stale refs, self-attestation, break-glass, contract
+   contention e warnings de política.
+7. **Auditar decisões:** envelopes, event-log, dangerous mutations, authority registry e evidências.
+
+### 6.3 Camadas de informação
+
+O app deve separar três camadas, sem misturá-las na primeira tela:
+
+- **Home humana:** linguagem de produto, estado da adoção, decisões pendentes e próximos passos.
+- **Workspaces operacionais:** telas por papel e jornada para owner, tech lead, SRE, adoption-admin,
+  auditor e stakeholder.
+- **Console técnico:** grafo completo, refs, YAML/JSON, event-log, comandos, resolvers e debug de
+  projeções.
+
+Uma mesma pessoa pode acessar mais de uma camada conforme autoridade, mas a navegação não deve
+assumir que todo usuário entende ou precisa ver o modelo interno.
+
+### 6.4 Progressive disclosure
+
+Detalhes técnicos devem aparecer sob demanda:
+
+- `GlobalRef`, ids e paths aparecem em "ver detalhe técnico".
+- Evidência aparece em "ver prova" ou "por que este badge existe?".
+- YAML/JSON e event-log aparecem em "abrir console técnico".
+- Resolver failure aparece como mensagem acionável: o que está faltando, quem pode resolver e qual
+  comando seria necessário.
+
+O app nunca deve esconder a verdade do modelo, mas também não deve usar a estrutura interna como
+copy primária para usuários leigos.
+
+### 6.5 Linguagem e labels
+
+Labels de produto vêm antes dos nomes do modelo:
+
+| Conceito do modelo | Label primário sugerido                     |
+| ------------------ | ------------------------------------------- |
+| business-objective | Objetivo                                    |
+| target             | Meta mensurável                             |
+| proposal/register  | Ideia ou solicitação                        |
+| intent             | Iniciativa ativada                          |
+| execution-unit     | Frente coordenada                           |
+| repo-work          | Peça por repositório                        |
+| outcome            | Resultado medido                            |
+| authority          | Pessoa/papel com autorização                |
+| resolver           | Verificação automática                      |
+| event-log          | Trilha de decisões e comandos               |
+| self-attested      | Atestado pelo próprio responsável           |
+| break-glass        | Exceção emergencial com revisão obrigatória |
+
+O termo técnico pode aparecer como subtítulo, tooltip ou detalhe de auditoria, mas não deve ser a
+única forma de entender a tela.
+
+### 6.6 Critérios de aceite UX
+
+A primeira implementação do app só é aceitável se:
+
+- um stakeholder entende em até 30 segundos quais objetivos estão saudáveis, frágeis ou sem medição;
+- um adoption-admin sabe qual configuração vem a seguir antes de habilitar assistente ou integração;
+- um owner registra uma iniciativa sem conhecer YAML, `GlobalRef` ou event-log;
+- um tech lead entende qual evidência bloqueia outcome, contrato ou repo-work;
+- um auditor consegue perfurar até o console técnico sem poluir a home dos demais perfis;
+- nenhuma tela vende como "válido" algo que o resolver só marcou como warning, collapsed, unverified
+  ou unknown.
+
+## 7. Arquitetura frontend
+
+### 7.1 Estrutura de produto
+
+O app deve ter módulos navegáveis por audiência:
+
+1. **Executive Dashboard:** objectives, targets, actuals, confidence badges, allocation, operational bucket e narrative rollup.
+2. **Portfolio Planning:** criação/revisão de objectives, targets, theses, opportunity areas, allocation e yearly rollover.
+3. **Intake Workspace:** proposal/register, anexos, business-link, perguntas abertas e autoria assistida.
+4. **Triage Workspace:** itens, matcher, capabilities, contracts, dispositions, needs-info e viabilidade.
+5. **Gate & Activation:** diff de promoção/descarte, decision append-only, rationale, override de matcher e SoD.
+6. **Breakdown Planner:** execution-units, repo-works, dependencies, contract touches, release/rollback, ownership e collapse/reparent.
+7. **Repo Work Board:** visão por repo/time, lifecycle, evidence, done/blocked/dropped e stale acks.
+8. **Contract Coordination:** fila de contentions, revision proposals, compatibility windows, consumers e approvals.
+9. **Experiment/Outcome Center:** verdicts, decision-rule, guardrails, outcomes, target contribution e forks.
+10. **Incident/Ops Center:** incidents, telemetry refs, mitigations, postmortems, follow-ups e operational bucket.
+11. **Capability & Adoption Center:** repos existentes, scaffold, capability extraction, context freshness e owner attestation.
+12. **Policy/Audit Center:** authority registry, profile declarations, break-glass, egress, red-team, replay/nonce e dangerous-unreviewed.
+
+### 7.2 UX por perfil de governança
+
+- **Full:** mostra SoD completo, filas separadas e blockers normativos.
+- **Compact:** colapsa papéis com badges e revisão retroativa em cadência.
+- **Solo:** reduz cerimônia para self-log, mas preserva histórico, badges e warnings.
+
+O perfil muda a obrigatoriedade e o bloqueio, não o modelo de dados.
+
+### 7.3 Estados visuais obrigatórios
+
+Cada tela que mostra resultado derivado deve distinguir:
+
+- valid
+- warning
+- stale
+- blocked
+- invalid
+- self-attested
+- collapsed
+- break-glass
+- unknown
+- unverified
+
+Não pode haver card verde para dado que o resolver marcou como fraco.
+
+## 8. Assistência por IA
+
+### 8.1 Regras globais
+
+- Toda assistência é opcional.
+- Toda saída de IA é `AssistantSuggestion`, não mutação.
+- Toda sugestão carrega input hash, model/provider/locality, policy, classification, evidence, confidence, unknown e expires-at.
+- Prompt injection é esperado; texto de usuário, capability e anexo são input hostil.
+- Egress externo só recebe fatias aprovadas por policy; fallback local/manual é rastreável.
+- Aceitar sugestão cria comando humano com referência à sugestão aceita.
+
+### 8.2 Assistências por etapa
+
+| Etapa                   | Assistência permitida                                                              | Dente obrigatório                                         |
+| ----------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Planejamento            | sugerir estrutura de objective/target/thesis a partir de texto livre               | humano define; IA alerta drift, não bloqueia              |
+| Métrica                 | detectar unidade/agregação incompatível, fonte ausente, target sem attester        | resolver de metric-definition/target                      |
+| Intake                  | transformar descrição em register/proposal, extrair dúvidas, sugerir authorized-by | business-link validado no gate                            |
+| Triage                  | matcher de repos/contratos/capabilities                                            | score, unknown, evidence, freshness, threshold            |
+| Investigation/discovery | sugerir pergunta falsificável, timebox, stop-rule                                  | fate obrigatório e loop-budget                            |
+| Breakdown               | sugerir execution-units/repo-works/owners/deps                                     | humano confirma; refs e owners resolvem                   |
+| Contract impact         | detectar consumers, breaking change e compatibility-window                         | owner do contrato aprova revision proposal                |
+| Repo adoption           | extrair capabilities de código/docs                                                | owner-attested-by independente ou capability vira unknown |
+| Outcome                 | checar janela, fonte, unidade, aggregation e contrato derivado                     | outcome resolver fail-closed                              |
+| Incident                | sugerir timeline/postmortem/follow-ups                                             | telemetria ref verificável e severidade não textual       |
+| Dashboard               | gerar narrativa executiva                                                          | narrativa não altera actual nem rollup                    |
+| Q/R/D                   | rascunhar research/decision                                                        | decision humana append-only                               |
+
+## 9. Requisitos funcionais
+
+### 9.1 Planejamento e dashboard
+
+- Criar, revisar, fechar e versionar objectives por ciclo.
+- Criar targets com metric-definition, expected, attester e allocation.
+- Visualizar rollup por objective, com actual derivado apenas de outcomes válidos.
+- Mostrar continuidade anual (`continues-from`, split, merge) sem migrar schema.
+- Mostrar operational bucket para trabalho sem objective.
+
+### 9.2 Intake até gate
+
+- Criar proposal/register com `authorized-by` ou `standalone`.
+- Permitir anexos com classificação, scan e política de egress.
+- Gerar triage items a partir de dúvidas do negócio e itens de engenharia.
+- Rodar matcher em modo lexical/local/external conforme policy.
+- Registrar se o gate seguiu ou contrariou matcher, com rationale.
+- Promover/descartar por comando idempotente e append-only.
+
+### 9.3 Breakdown e execução
+
+- Criar execution-unit quando a scaling-law exigir.
+- Colapsar/reabrir unit de forma reversível.
+- Gerar repo-work por repo, purpose e dimensões.
+- Publicar repo-work-ack nos repos e detectar stale/missing/open/dropped.
+- Bloquear outcome quando peça necessária não estiver `done`.
+
+### 9.4 Contratos
+
+- Listar contratos providos/consumidos por repo.
+- Detectar quando uma intent toca contrato.
+- Criar revision proposal quando houver contenção ou breaking change.
+- Validar consumers, owner approval e compatibility-window.
+- Projetar impacto cross-intent por contrato compartilhado.
+
+### 9.5 Outcomes e verdicts
+
+- Publicar outcome com fonte, janela, métrica, value, aggregation, attester, revision, contracts e envelope.
+- Resolver outcome antes de somar em target.
+- Aceitar verdict de experiment-run apenas com outcome válido ou override perigoso.
+- Criar forks `graduation`, `cleanup` ou novo `experiment/discovery` conforme verdict.
+
+### 9.6 Incidentes e operação
+
+- Declarar incident apenas com telemetria/severidade verificável.
+- Acompanhar declarar → mitigar → resolver → postmortem.
+- Gerar follow-ups para standalone/proposal com referência reversa.
+- Mostrar custo/risco operacional no dashboard.
+
+### 9.7 Adoção de repos existentes
+
+- Descobrir repos e criar sidecar mínimo sem sobrescrever.
+- Gerar pacote de capability review.
+- Permitir patch assistido por IA para manifest, nunca aplicar sem owner.
+- Publicar context.json com freshness e producer.
+- Detectar capability inflada, omitida ou stale por evidência estática e histórico.
+
+## 10. Requisitos não funcionais
+
+### 10.1 Segurança e privacidade
+
+- Classificação obrigatória em nós sensíveis e anexos.
+- Secret scanning antes de persistir/publicar.
+- ACL por edge/query no host, não só egress externo.
+- Policy de egress por taint/classification.
+- Agent delegation com principal humano, workload-id, escopo, TTL, max-mutations e revogação.
+- Nenhum token/chave em YAML versionado.
+
+### 10.2 Concorrência e consistência
+
+- Todo comando exige `base-revision`.
+- Conflito concorrente falha com diff de rebase humano.
+- Idempotency-key e nonce impedem replay.
+- Read-model deve declarar source revision.
+- Ação a partir de dashboard stale é bloqueada até reler fonte.
+
+### 10.3 Auditabilidade
+
+- Dangerous mutations aparecem em fila própria.
+- q/r/d é alerta/soft-mandatory conforme perfil, não decoração.
+- Break-glass tem TTL, reviewer e retro-review.
+- Toda assistência aceita/rejeitada é rastreável.
+- Export de auditoria por nó, por comando e por target.
+
+### 10.4 Performance e escala
+
+- Modo local deve abrir rápido em file backend.
+- Host enterprise deve indexar N repos incrementalmente por content hash.
+- Projeções devem ser reconstruídas por escopo afetado, não por full scan obrigatório.
+- Matcher deve suportar cache por context revision e policy revision.
+- Graph UI deve paginar/agrupar por objective, repo, contract e risk.
+
+### 10.5 Operabilidade
+
+- Health checks de adapters, policy store, read-model freshness e assistant gateways.
+- Migrations versionadas e fail-closed.
+- Backup/replay do event-log.
+- Observabilidade de comandos: latency, validation failures, stale rate, matcher unknown rate, assistant acceptance rate.
+
+## 11. API mínima
+
+### 11.1 Commands
+
+- `POST /commands/objective.create`
+- `POST /commands/target.define`
+- `POST /commands/intake.register`
+- `POST /commands/triage.save`
+- `POST /commands/gate.decide`
+- `POST /commands/intent.activate`
+- `POST /commands/breakdown.apply`
+- `POST /commands/repo-work.ack`
+- `POST /commands/standalone.complete`
+- `POST /commands/contract.propose-revision`
+- `POST /commands/outcome.publish`
+- `POST /commands/verdict.accept`
+- `POST /commands/incident.declare`
+- `POST /commands/policy.break-glass`
+
+Cada resposta retorna `CommandReceipt`, arquivos/projeções afetados e warnings/blocks.
+
+### 11.2 Queries
+
+- `GET /graph`
+- `GET /dashboards/company`
+- `GET /dashboards/objective/:id`
+- `GET /queues/intake`
+- `GET /queues/triage`
+- `GET /queues/contracts`
+- `GET /queues/incidents`
+- `GET /repos/:id`
+- `GET /nodes/:globalRef`
+- `GET /audit/:globalRef`
+
+### 11.3 Assistant
+
+- `POST /assist/objective`
+- `POST /assist/intake`
+- `POST /assist/triage-match`
+- `POST /assist/breakdown`
+- `POST /assist/capability-extraction`
+- `POST /assist/contract-impact`
+- `POST /assist/outcome-check`
+- `POST /assist/dashboard-narrative`
+
+Endpoints de assistência nunca escrevem estado. Eles retornam `AssistantSuggestion`.
+
+## 12. Critérios de aceite da primeira implementação
+
+### Slice 1 — runtime v3
+
+- Domínio v3 tipado sem `WorkKind` antigo.
+- Portas v3 implementadas com adapter file.
+- Comando com envelope, base-revision, idempotency e nonce.
+- Reuso dos resolvers da v3 atual como biblioteca, não scripts soltos.
+- `validate.mjs` e red-team continuam passando.
+
+### Slice 2 — authoring app
+
+- UI cria proposal/register, triage, gate, intent e breakdown sem editar YAML direto.
+- Matcher lexical/local funcionando com contrato `score/unknown/evidence/freshness`.
+- Dry-run de gate mostra arquivos e projeções afetadas.
+- Rejeita comando stale ou sem authority resolvida.
+
+### Slice 3 — dashboards
+
+- Dashboard mostra objective → target → actual derivado.
+- Outcome inválido/stale/self-attested não soma, mas aparece com badge.
+- Operational bucket mostra standalone e incidents.
+- Ação iniciada no dashboard relê source revision antes de escrever.
+
+### Slice 4 — repo adoption
+
+- App conduz adoção de repo existente.
+- Capability extraction gera sugestão revisável.
+- Owner attestation vira comando.
+- Context freshness e repo-work/contract publication aparecem por repo.
+
+### Slice 5 — backend plugável
+
+- SQLite implementa as mesmas portas e passa a mesma suíte.
+- Neo4j é read-model de grafo ou adapter explícito, sem virar SSOT de ação.
+- Mongo/event-store opcional só entra com migration registry e fail-closed.
+
+## 13. Falsificações obrigatórias
+
+Antes de considerar o app robusto, a suíte deve provar que:
+
+- YAML com chave desconhecida falha.
+- Ação via read-model stale falha.
+- IA sugere repo sem evidence e a ação não passa.
+- Capability inflada não atestada vira unknown.
+- Registro com prompt injection não altera policy/classification.
+- Outcome sem revision ou com aggregation divergente não soma.
+- Self-attested target sem colapso logado falha.
+- Break-glass vencido continua bloqueando.
+- Contract contention sem decision não deixa rollout seguir.
+- Standalone fora do repo correto falha.
+- Agent delegation revogada não executa comando.
+- External LLM proibido por classification exige fallback rastreável.
+
+## 14. Fora de escopo inicial
+
+- Substituir Jira/Linear como tracker universal.
+- BI genérico com exploração livre de dados.
+- Editor visual completo de graph schema.
+- Automação que fecha gate sem humano.
+- Escrita direta em repo de produto sem PR/hook/policy.
+- Treinar modelo próprio de IA.
+
+## 15. Decisões fechadas e perguntas remanescentes
+
+### Decisões fechadas
+
+1. **App operacional:** fica incubado dentro da sim/spec por enquanto. Só vira pacote do framework quando provar jornadas adicionais, backend transacional mínimo e authoring básico desacoplado de `acme-*`.
+2. **Primeiro backend transacional:** `file + event-log/lock` já é o primeiro dente. SQLite vem depois como adapter local, não como atalho para resolver consistência.
+3. **Neo4j:** read-model derivado por padrão. Pode consultar impacto/grafo/dashboard; comando governado relê YAML/event-log autoritativo antes de agir.
+4. **Authoring:** começa no app web React/Next + Material UI. CLI/TUI fica como suporte operacional e automação.
+5. **Perfil compact:** detecta mutações dangerous, registra justificativa append-only e exige revisão retroativa em cadência; hard-block só entra por decisão futura explícita.
+6. **Capability extraction:** é assistência de adoção/manutenção de manifesto. Análise estática profunda entra por adapter/plugin externo.
+7. **Integrações externas:** opcionais, versionadas em [`integration-catalog.yml`](integration-catalog.yml), sempre como evidência/importação/projeção. Não substituem SSOT file-first; assistentes locais/cloud e canais de coding agent são plugáveis, enquanto gateways agentivos amplos ficam adiados até delegação/sandbox/auditoria.
+8. **Primeira tela do app:** a entrada padrão é a Home de Adoção/Governança orientada a tarefa humana. Grafo, comandos, JSON/YAML, resolvers e event-log ficam no console técnico ou em disclosure progressivo, não como navegação principal.
+
+### Perguntas remanescentes
+
+1. Quais adapters externos entram no primeiro spike: contracts, CI, observabilidade, ownership, assistant runtime ou deploy evidence?
+2. Quando o app incubado deixa de ser sim avançada e vira pacote distribuível do framework?
+3. Qual primeira tela write-capable do app deve sair do modo demo para fluxo de trabalho real depois
+   da Home de Adoção/Governança?
+
+## 16. Estado da decisão Opção A
+
+Decisão executada na base da v3: portar os aprendizados da `_archive/org-simulation-v2/_lib` para uma runtime DDD em `governance-demo/backend/` antes
+de iniciar UI/API nova.
+
+- **Opção A adotada:** `governance-demo/backend/` agora contém domínio/validador,
+  `FileGovernanceRepository`, command dry-run e read-model de grafo.
+- **Opção B:** criar backend HTTP fino sobre os scripts v3 atuais e refatorar depois.
+- **Motivo:** a opção B acelera tela, mas cristaliza scripts como domínio e repete o erro que a v3
+  acabou de expor: texto/projeção parecendo mecanismo.
+- **Estado complementar:** `governance-demo/examples/backends/` agora contém exemplos derivados
+  nos quatro formatos (`file`, `neo4j`, `sqlite`, `mongo`), gerados por runtime e verificados por
+  `export-backend-examples --check`.
+- **Estado complementar 2:** `check-backend-examples.mjs` valida hash, refs, event-log, cobertura
+  Neo4j e contrato de ação; `load-neo4j-example.mjs --dry-run` prova o plano de carga sem rede e
+  `--apply` exige `--source-hash` + credenciais explícitas.
+- **Estado complementar 3:** `governance-demo/frontend/` implementa a superfície operacional React/Next +
+  Material UI v2 em TypeScript strict, como npm workspace com dependências explícitas no package do app.
+  O app lê snapshot derivado da runtime, separa navegação por
+  audiência (stakeholder, owner, tech lead, operação, admin de adoção, auditoria, admin), expõe tabs ponta-a-ponta e
+  chama API routes para `proposal.create`, `triage.save`, `gate.decide`, `intent.activate`, `breakdown.apply`,
+  `repo-work.ack`, `standalone.complete`, `contract.propose-revision`, `outcome.publish`,
+  `verdict.accept`, `incident.declare` e `policy.break-glass` com dry-run/execute.
+- **Estado complementar 3b:** a aba `Configuracoes` projeta o catálogo versionado de integrações e
+  prototipa o onboarding inicial de adoção: perfil da organização, separação admin/payer/sponsor,
+  assistente local/cloud (com Ollama como primeira opção local) e tags `em breve` para adapters sem
+  mecanismo. Ainda é UX/projeção: persistência futura precisa entrar como comando governado com
+  resolver de authority, billing role, egress/classification e policy revision.
+- **Estado complementar 3c:** a revisão de produto decidiu que a primeira tela do app deve ser a
+  Home de Adoção/Governança, orientada a tarefa humana e adoção progressiva. A próxima fatia de UI
+  deve refletir a seção 6 antes de ampliar authoring ou persistir configurações.
+- **Estado complementar 4:** a runtime file-first já executa esses comandos mínimos com
+  `base-revision`, authority resolvida, idempotency, nonce, lock global por comando, escrita YAML
+  atômica, marker de recovery e event-log append-only. `currentRevision()` inclui triages e
+  sidecars repo-local publicados, para que repo-work/contract não virem mutações invisíveis ao
+  stale-check. Ainda não há backend transacional SQLite/Neo4j/Mongo write-capable.
+- **Estado complementar 5:** `fix-checkout-timeout` fechou o primeiro caminho operacional sem
+  intent: `standalone.complete` grava evidence/verification no repo e `outcome.publish` soma em
+  `tgt-sre-incidents` com self-attestation visível.
+- **Próxima decisão:** escolher o primeiro adapter externo ou a primeira tela write-capable real,
+  sem transformar banco/read-model em SSOT.

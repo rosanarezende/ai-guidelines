@@ -32,7 +32,7 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
     pullRequest: null,
     lifecycle: null,
     tasks: [],
-    subCheckpoints: [],
+    steps: [],
     insights: [],
     driftWarnings: [],
     sources: [

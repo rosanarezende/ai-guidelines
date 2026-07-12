@@ -1,0 +1,14 @@
+# registry/proposal.yml — acme-mfe-support · intake (ideias/problemas levantados durante o trabalho).
+# Proposal NÃO é trabalho (não entra no banco active-work) — é intake que alimenta o backlog.
+entries:
+  - id: prop-001
+    what: "testar se o suporte proativo (abordar após N falhas de login) melhora a conclusão do login vs atrapalha"
+    raised-by: acme-mfe-support/exploration-302 # surgiu do exploration de viabilidade
+    owner: "@produto-growth"
+    status: open # disposição obrigatória (não fica em aberto em silêncio)
+    tags: [growth, login, suporte-proativo]
+    impact: high # menos abandono no login
+    confidence: medium # viável (exploration), mas o efeito de abordar proativamente é incerto
+    effort: medium
+    promote-to: experiment # quando priorizada (decisão de negócio) → abre uma intent PRÓPRIA pro experiment
+    date: 2026-06-28

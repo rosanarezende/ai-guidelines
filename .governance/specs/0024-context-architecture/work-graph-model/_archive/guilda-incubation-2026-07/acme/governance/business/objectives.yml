@@ -1,0 +1,27 @@
+# objectives.yml — business-objective RECURSIVO, nível company (as áreas cascateiam em areas.yml).
+# Versionado por ciclo: novo ano = novos objectives (continues-from), nunca mudança de schema.
+objectives:
+  - id: obj-revenue
+    level: company
+    title: "crescer receita via cross-sell"
+    period: "2027"
+    owner: sponsor-acme
+    status: active
+  - id: obj-efficiency
+    level: company
+    title: "reduzir o custo de servir"
+    period: "2027"
+    owner: sponsor-acme
+    status: active
+  - id: obj-retention
+    level: company
+    title: "reter clientes (derrubar o churn)"
+    period: "2027"
+    owner: sponsor-acme
+    status: active
+  - id: obj-trust
+    level: company
+    title: "confiança: privacidade e conformidade por padrão"
+    period: "2027"
+    owner: sponsor-acme
+    status: active

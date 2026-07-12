@@ -1,0 +1,29 @@
+import { redirect } from "next/navigation";
+import { loadGovernanceSnapshot } from "@demo/backend";
+import { entryRedirect, resolveAdoptionGate } from "@/server/adoption/gate";
+import AuditPlaceholderView from "./_view/AuditPlaceholderView";
+
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const gate = await resolveAdoptionGate();
+  const target = entryRedirect(gate);
+  if (target) redirect(target);
+  const workspace = gate.currentWorkspace;
+  if (!workspace || !gate.principal) redirect("/organizations");
+  const snapshot = gate.isDemo ? await loadGovernanceSnapshot() : null;
+
+  return (
+    <AuditPlaceholderView
+      workspace={{
+        id: workspace.id,
+        name: workspace.name,
+        demo: gate.isDemo,
+        hasGovernanceHost: Boolean(workspace.governanceHost),
+      }}
+      accountId={gate.principal.id}
+      snapshot={snapshot}
+      localDecisions={workspace.triage?.decisions || []}
+    />
+  );
+}

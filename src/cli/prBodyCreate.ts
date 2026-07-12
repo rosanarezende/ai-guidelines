@@ -91,6 +91,53 @@ function hasNextNodeContext(input: PrBodyCreateInput): boolean {
   );
 }
 
+const INTENDED_VISION_PROMPT_PATH = ".governance/visual-prompts/pr-intended-vision.prompt.md";
+
+function buildExecutionVisionBrief(input: {
+  readonly specId: string;
+  readonly currentNodeId: string;
+  readonly nextNodeId: string;
+  readonly nextCheckpoint: string;
+  readonly baseBranch: string;
+  readonly headBranch: string;
+}): string {
+  return [
+    "MODO CLI DIRETA: este bloco não é um prompt final para gerador de imagem.",
+    `Cole este briefing em uma IA com acesso ao projeto e peça para ela aplicar o template versionado ${INTENDED_VISION_PROMPT_PATH}.`,
+    "",
+    "Substituições para o prompt versionado:",
+    `{{context}} = PR governado ${input.nextNodeId} da Spec ${input.specId}`,
+    "",
+    "{{localContext}} =",
+    `  spec: ${input.specId}`,
+    `  currentNodeId: ${input.currentNodeId}`,
+    `  nextNodeId: ${input.nextNodeId}`,
+    `  nextCheckpoint: ${input.nextCheckpoint}`,
+    `  baseBranch: ${input.baseBranch}`,
+    `  headBranch: ${input.headBranch}`,
+    "  sourceOfTruth:",
+    "    - state.yml",
+    "    - tasks.md",
+    "    - decision-brief.md",
+    "    - ADRs e DECs aplicáveis",
+    "  evidence:",
+    "    - research/dogfood/reviews/testes relevantes",
+    "  projections:",
+    "    - mapas, site, imagens e prompts visuais",
+    "  humanDecisions:",
+    "    - Ready",
+    "    - Human Gate",
+    "    - merge",
+    "    - mudança estrutural de escopo",
+    "  hardLimits:",
+    "    - Não executar Human Gate automaticamente.",
+    "    - Não avançar para outro checkpoint sem decisão humana.",
+    "    - Não usar imagem ou mapa como fonte da verdade.",
+    "",
+    "Quando houver IA auxiliando diretamente o preenchimento do PR, substitua este briefing por um bloco `Prompt final — visão pretendida` já pronto para qualquer gerador de imagem. Se a visão mudar por decisão humana, adicione um prompt complementar preservando este baseline.",
+  ].join("\n");
+}
+
 function executionTemplateValues(input: PrBodyCreateInput): Readonly<Record<string, string>> {
   const specId = valueOrPlaceholder(input.specId, "spec");
   const currentNodeId = valueOrPlaceholder(input.currentNodeId, "nó anterior");
@@ -114,13 +161,24 @@ function executionTemplateValues(input: PrBodyCreateInput): Readonly<Record<stri
 
   if (!hasNextNodeContext(input)) return defaultValues;
 
+  const visionPrompt = buildExecutionVisionBrief({
+    specId,
+    currentNodeId,
+    nextNodeId,
+    nextCheckpoint,
+    baseBranch,
+    headBranch,
+  });
+
   return {
     ...defaultValues,
-    AI_GUIDELINES_EXECUTION_VISION_TEXT: `Abrir ${nextNodeId} como próximo PR stacked da Spec ${specId}, a partir do nó aprovado ${currentNodeId}, sem merge isolado em main.`,
+    AI_GUIDELINES_EXECUTION_VISION_TEXT: visionPrompt,
     AI_GUIDELINES_EXECUTION_SUMMARY: [
-      `Este PR abre o próximo nó governado da Spec ${specId}: \`${nextNodeId}\`.`,
+      `Este PR inicia a entrega governada \`${nextNodeId}\` da Spec ${specId}.`,
       "",
-      `Ele nasce depois do Human Gate aprovado de \`${currentNodeId}\` e mantém o trabalho limitado ao checkpoint \`${nextCheckpoint}\`.`,
+      "Reescreva este resumo em linguagem humana antes da revisão: explique qual problema o PR pretende resolver, por que importa e qual fluxo humano/agente melhora.",
+      "",
+      `Contexto estrutural: nasce depois do Human Gate aprovado de \`${currentNodeId}\` e mantém o trabalho limitado a \`${nextCheckpoint}\`.`,
     ].join("\n"),
     AI_GUIDELINES_EXECUTION_SCOPE_IN: [
       `- Materializar o checkpoint \`${nextCheckpoint}\`.`,

@@ -1,0 +1,18 @@
+schema: acme.repo-contract/v1
+id: acme-design-tokens
+revision: v2
+ownerRepo: acme-design-system
+consumers:
+  - acme-mfe-billing
+  - acme-mfe-onboarding
+  - acme-checkout
+compatibilityWindow: null
+interface: null
+revisionProposals: []
+source:
+  kind: central-contract
+  file: acme/governance/contracts/contracts.yml
+  contractHash: a99d3b5a3b91
+code:
+  touchpoints:
+    - src/index.mjs

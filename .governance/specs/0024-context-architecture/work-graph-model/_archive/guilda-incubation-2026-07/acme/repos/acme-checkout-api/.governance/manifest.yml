@@ -1,0 +1,21 @@
+repo: acme-checkout-api
+role: backend-service
+owner: time-checkout
+domain: checkout
+provides:
+  - { name: checkout-order-api, kind: api, status: active }
+  - { name: freight-api, kind: api, status: active }
+  - { name: coupon-api, kind: api, status: active }
+consumes:
+  - { contract: acme-core-api/legacy-orders-api, why: create-order-and-reserve-inventory }
+  - { contract: acme-core-api/legacy-accounts-api, why: account-status }
+  - { contract: acme-analytics/acme-events-schema, why: checkout-api-events }
+capabilities:
+  - text: "Checkout order API, payment token seam and freight calculation."
+    tags: [pedidos, pagamento, frete-api]
+  - text: "Coupon calculation and pricing guardrails."
+    tags: [cupom, frete]
+architecture:
+  stack: [node, javascript]
+  patterns: [backend-api, legacy-adapter]
+  boundaries: [checkout-domain]

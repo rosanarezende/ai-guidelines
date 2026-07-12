@@ -10,11 +10,11 @@ focus:
   - "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: co-flow-continuation. PR #43 (co-flow-convergence / seq 10) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-21; modo unit, SEM merge isolado em main. No ATIVO = co-flow-continuation (seq 11, checkpoint-co-flow-continuation; PR #44 stacked sobre #43). Recorte revisado por DEC-0024-G21: PR #44 fecha decisao/inventario/dogfood da continuacao, incluindo Governance Doctor/drift repair, mapa V2, inventario de lifecycle, taxonomia de artefatos, revisoes de falsificacao e guardrail GG-0005 contra debito arquitetural silencioso. Proximo movimento esperado apos este recorte: PR governado para artifact-taxonomy-and-model-review-contract, implementando a taxonomia/review pre-codificacao com enforcement real; depois refactor DDD/BDD, falsificacao ampla e review/Human Gate da continuacao. NAO implementar dualroot-collapse, co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
+  - "canonical-next: artifact-taxonomy-and-model-review-contract. PR #43 (co-flow-convergence / seq 10) e PR #44 (co-flow-continuation / seq 11) CONCLUIDOS-NA-STACK por Human Gate approved; modo unit, SEM merge isolado em main. No ATIVO = artifact-taxonomy-and-model-review-contract (seq 12, checkpoint-artifact-taxonomy-and-model-review-contract; PR #45 stacked sobre #44). Primeira fatia obrigatoria deste recorte: fechar o dogfood da propria abertura do PR #45 — visao pretendida via .governance/visual-prompts, operacao governada para preparar o proximo PR interno e decisao de vocabulario humano do lifecycle. Depois: implementar a taxonomia de artefatos e o contrato de review pre-codificacao/model-review definidos por DEC-0024-G21/GG-0005; em seguida refactor DDD/BDD, falsificacao ampla e review/Human Gate da continuacao. NAO implementar dualroot-collapse, co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
 topology:
   cursor:
-    pr: co-flow-continuation
-    checkpoint: checkpoint-co-flow-continuation
+    pr: artifact-taxonomy-and-model-review-contract
+    checkpoint: checkpoint-artifact-taxonomy-and-model-review-contract
   prs:
     concluded:
       - id: base-governance
@@ -179,8 +179,6 @@ topology:
         sequence: 10
         checkpoints:
           - checkpoint-co-flow-convergence # convergencia do fluxo ponta a ponta; modelo canonico + invariantes + jornadas
-
-    active:
       # CO-FLOW-CONTINUATION — continuacao do fluxo governado apos o recorte aprovado no PR #43.
       # PR #44 stacked sobre #43; modo unit, NAO mergeia isolado em main.
       # DEC-0024-G21 substitui CO-10.8.* como nomenclatura operacional por checkpoints
@@ -196,6 +194,46 @@ topology:
         sequence: 11
         checkpoints:
           - checkpoint-co-flow-continuation # PR #44: decisao/inventario/dogfood; continuacao segue por checkpoints semanticos definidos em DEC-0024-G21
+
+    active:
+      # #45 e o NO TOPOLOGICO ATIVO (sequence: 12) que materializa o checkpoint semantico
+      # artifact-taxonomy-and-model-review-contract da continuacao, STACKED sobre
+      # co-flow-continuation (#44, seq 11). NAO reabre dualroot-collapse. Os checkpoints
+      # semanticos restantes da continuacao (internal-architecture-refactor-ddd-bdd,
+      # broad-flow-falsification, continuation-review-human-gate) seguem como PRs governados
+      # futuros. Tensao reconciliada por DEC-0024-G22: "Frente" e leitura HUMANA DERIVADA
+      # destes nos (nao campo do state.yml); esta topologia continua a SSOT estrutural.
+      - id: artifact-taxonomy-and-model-review-contract
+        github_pr: 45
+        role: execution
+        terminal: false
+        sequence: 12
+        checkpoints:
+          - checkpoint-artifact-taxonomy-and-model-review-contract # PR #45: taxonomia de artefatos + contrato de model-review/pre-coding review
+        review_plan:
+          technical_audit:
+            system_recommendation: recommended
+            owner_decision: required
+            actor: owner
+            reason: "PR #45 altera taxonomia, review, readiness e preservacao da incubacao Guilda; a Technical Audit foi solicitada e deve estar current+approved antes de Ready/Human Gate."
+            revalidation:
+              owner_decision: waived
+              actor: owner
+              reason: "As correcoes posteriores a TA/AR fecham cleanup low/advisory com testes e CI; nova rodada completa de TA para esse delta seria ritual, nao controle adicional. A review permanece stale na leitura historica, mas nao bloqueia Ready por decisao situada."
+          architectural_review:
+            system_recommendation: recommended
+            owner_decision: required
+            actor: owner
+            reason: "PR #45 altera arquitetura de governanca, mapa vivo, casa de PR e contrato de revisao; Architectural Review deve validar a direcao antes do Human Gate."
+            revalidation:
+              owner_decision: waived
+              actor: owner
+              reason: "As correcoes posteriores a AR sao limpeza/adaptacao de findings low e nao alteram a tese arquitetural aprovada; nova AR completa para esse delta seria ritual, nao controle adicional. A review permanece stale na leitura historica, mas nao bloqueia Ready por decisao situada."
+          security_review:
+            system_recommendation: optional
+            owner_decision: waived
+            actor: owner
+            reason: "Escopo atual e governanca/processo/documentacao, sem nova superficie de runtime de auth, secrets ou dados de usuario; TA/AR podem reabrir risco se encontrarem evidencia."
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
@@ -220,7 +258,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 12
+        sequence: 13
         checkpoints:
           - checkpoint-dualroot-collapse # colapso do dual-root; migracao .specify + .ai-guidelines (test:smoke gateia)
 
@@ -232,7 +270,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 13
+        sequence: 14
         checkpoints:
           - checkpoint-co-capture # captura na formacao + espinha de ciclo de vida; dissolve NEXT.md (U5)
 
@@ -243,7 +281,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 14
+        sequence: 15
         checkpoints:
           - checkpoint-co-events # dispatcher de eventos / disparo automatico (U6)
 
@@ -253,7 +291,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 15
+        sequence: 16
         checkpoints:
           - checkpoint-taxonomy-removal # ex-7 (CRITICO/P0): remove taxonomia evidence-driven/deterministic/mixed + ex-10 (tasks boilerplate)
           - checkpoint-agents-sync # ex-5: AGENTS sync (agents:build + agents:check)
@@ -270,7 +308,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 16
+        sequence: 17
         checkpoints:
           - checkpoint-knowledge-health # dossie de saude do grafo + candidatos semanticos p/ decisao humana
           - checkpoint-knowledge-backfill-wide # backfill amplo P0/P1 antes da integracao

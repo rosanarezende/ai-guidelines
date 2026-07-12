@@ -1,0 +1,36 @@
+# manifest.yml — acme-design-system (camada EXTERNA: o que o repo publica pra governança).
+node: manifest
+repo: acme-design-system
+role: "design system — componentes de UI compartilhados (form, inputs, tema) consumidos pelos MFEs"
+owner: team-design-system
+domain: foundations
+
+provides:
+  - name: form-component
+    kind: component
+    description: "componente de formulário com validação declarativa + acessibilidade"
+    status: stable
+    # owner herda team-design-system
+
+consumes: []
+
+capabilities:
+  - { text: "validação de formulários (declarativa + imperativa)", tags: [forms, validation] }
+  - { text: "acessibilidade (a11y / leitor de tela)", tags: [a11y, accessibility] }
+  - { text: "tema e design tokens compartilhados", tags: [theming, design-tokens] }
+
+architecture:
+  stack: [react, typescript, styled-components]
+  patterns: [headless-components, design-tokens]
+  boundaries: ["base: não importa de acme-mfe-* (o DS é fundação, não consome MFEs)"]
+
+references:
+  - {
+      type: intent,
+      label: "iniciativa login",
+      url: "acme-governance/intents/login_1",
+      note: "provê o form usado no login",
+    }
+
+created-at: 2026-06-28
+updated-at: 2026-06-29

@@ -1,14 +1,14 @@
 import { deriveWorkBrief } from "../workBrief.js";
 import { deriveHandoff } from "../handoffFacts.js";
-import { AdvanceSubcheckpointDefinition } from "../decide/advanceSubcheckpoint.js";
-import { FinishSubcheckpointDefinition } from "../decide/finishSubcheckpoint.js";
+import { AdvanceStepDefinition } from "../decide/advanceStep.js";
+import { FinishStepDefinition } from "../decide/finishStep.js";
 import { HumanGateDefinition } from "../decide/humanGate.js";
 import { MarkReadinessDefinition } from "../decide/markReadiness.js";
-import { OpenNextNodeDefinition } from "../decide/openNextNode.js";
+import { OpenNextTopologyNodeDefinition } from "../decide/openNextTopologyNode.js";
 import { deriveGovernedFlow, derivePrReadyFlow } from "./GovernedFlow.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 import { parseWorkPolicy } from "../../infrastructure/yaml/workPolicyReader.js";
-import type { HandoffFacts, HandoffSubCheckpoint } from "../handoffFacts.js";
+import type { HandoffFacts, HandoffStep } from "../handoffFacts.js";
 import type { DecisionSnapshot } from "../decide/snapshot.js";
 import type { DecisionAvailability } from "../decide/model.js";
 
@@ -28,7 +28,7 @@ modes:
     pr_body_editable: true
     stop_conditions: ["done"]
     report_sections: ["Retomada"]
-  prepare_subcheckpoint_transition:
+  prepare_step_transition:
     purpose: "Transicao."
     allowed_actions: []
     forbidden_actions: ["human-gate", "merge"]
@@ -141,7 +141,7 @@ function coFlowFacts(over: Partial<HandoffFacts> = {}): HandoffFacts {
       baseRefName: "feat/spec-0024-co-enforcement",
     },
     lifecycle: SETTLED,
-    subCheckpoints: [
+    steps: [
       { id: "CO-10.1", title: "inventario real + modelo canonico", state: "done", line: 109 },
       { id: "CO-10.2", title: "convergencia coesa inicial", state: "done", line: 110 },
       { id: "CO-10.3", title: "correcao integral dos gaps", state: "done", line: 111 },
@@ -156,32 +156,32 @@ function coFlowFacts(over: Partial<HandoffFacts> = {}): HandoffFacts {
 function snapshot(
   over: {
     readonly facts?: HandoffFacts;
-    readonly subCheckpoints?: readonly HandoffSubCheckpoint[];
+    readonly steps?: readonly HandoffStep[];
     readonly workingTreeState?: DecisionSnapshot["workingTreeState"];
     readonly gateExists?: boolean;
     readonly prReady?: DecisionSnapshot["prReady"];
     readonly gateDecidability?: DecisionSnapshot["gateDecidability"];
-    readonly subCheckpointDeliveryEvidence?: DecisionSnapshot["subCheckpointDeliveryEvidence"];
+    readonly stepDeliveryEvidence?: DecisionSnapshot["stepDeliveryEvidence"];
   } = {}
 ): DecisionSnapshot {
   const facts = over.facts ?? coFlowFacts();
-  const active = facts.subCheckpoints.find((item) => item.state === "in-progress");
+  const active = facts.steps.find((item) => item.state === "in-progress");
   return makeDecisionSnapshot({
     facts,
     specId: "0024",
     checkpoint: "checkpoint-co-flow-convergence",
     openFindings: [],
     lanes: [],
-    subCheckpoints: over.subCheckpoints ?? facts.subCheckpoints,
+    steps: over.steps ?? facts.steps,
     workingTreeState: over.workingTreeState ?? "clean",
     gateExists: over.gateExists ?? false,
     prReady: over.prReady ?? null,
     gateDecidability: over.gateDecidability ?? null,
-    subCheckpointDeliveryEvidence: over.subCheckpointDeliveryEvidence ?? {
+    stepDeliveryEvidence: over.stepDeliveryEvidence ?? {
       status: "missing",
       activeId: active?.id ?? "(sem ativo)",
       activationCommit: "54da3bb",
-      reason: `${active?.id ?? "sub-checkpoint"} acabou de ser ativado e ainda não há commit de entrega depois da ativação.`,
+      reason: `${active?.id ?? "etapa"} acabou de ser ativado e ainda não há commit de entrega depois da ativação.`,
     },
   });
 }
@@ -195,20 +195,15 @@ function deriveWorkFor(snapshotValue: DecisionSnapshot) {
     policy: POLICY,
     workingTreeState: snapshotValue.workingTreeState,
     authorization: null,
-    advanceEligibility: new AdvanceSubcheckpointDefinition().detect(snapshotValue),
-    finishSubcheckpointEligibility: new FinishSubcheckpointDefinition().detect(snapshotValue),
+    advanceEligibility: new AdvanceStepDefinition().detect(snapshotValue),
+    finishStepEligibility: new FinishStepDefinition().detect(snapshotValue),
     markReadinessEligibility: new MarkReadinessDefinition().detect(snapshotValue),
   });
 }
 
 function actionStatus(
   snapshotValue: DecisionSnapshot,
-  id:
-    | "finish-subcheckpoint"
-    | "mark-readiness"
-    | "advance-subcheckpoint"
-    | "human-gate"
-    | "open-next-node"
+  id: "finish-step" | "mark-readiness" | "advance-step" | "human-gate" | "open-next-topology-node"
 ): DecisionAvailability["status"] {
   const action = deriveGovernedFlow(snapshotValue).actions.find((item) => item.id === id);
   if (!action) throw new Error(`acao ausente: ${id}`);
@@ -218,7 +213,7 @@ function actionStatus(
 describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => {
   it("estado recém-ativado: flow, work e decide concordam que CO-10.6 deve ser implementado", () => {
     const s = snapshot({
-      subCheckpoints: coFlowFacts().subCheckpoints,
+      steps: coFlowFacts().steps,
     });
 
     const flow = deriveGovernedFlow(s);
@@ -229,7 +224,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     expect(flow.recommended).toBeNull();
     expect(flow.humanSummary.nextAction).toBe("Nenhuma decisão mutante está disponível agora.");
     expect(work.mode).toBe("implement_checkpoint");
-    expect(work.object.subCheckpoint?.id).toBe("CO-10.6");
+    expect(work.object.step?.id).toBe("CO-10.6");
     expect(work.nextAction.decisionType).toBeNull();
     expect(markReadiness.status).toBe("blocked");
     expect(markReadiness.reasons.join(" ")).toMatch(/não há commit de entrega depois da ativação/);
@@ -239,11 +234,11 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
 
   it("CO-10.6 entregue mas sem readiness: a única ação recomendada vira declarar readiness terminal", () => {
     const s = snapshot({
-      subCheckpoints: coFlowFacts().subCheckpoints,
+      steps: coFlowFacts().steps,
     });
     const withDelivery = makeDecisionSnapshot({
       ...s,
-      subCheckpointDeliveryEvidence: {
+      stepDeliveryEvidence: {
         status: "present",
         activeId: "CO-10.6",
         activationCommit: "54da3bb",
@@ -257,14 +252,14 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     expect(flow.recommended?.id).toBe("mark-readiness");
     expect(flow.humanSummary.nextAction).toBe("Declarar que CO-10.6 está pronto para transição.");
     expect(work.nextAction.decisionType).toBe("mark-readiness");
-    expect(actionStatus(withDelivery, "advance-subcheckpoint")).toBe("not-applicable");
+    expect(actionStatus(withDelivery, "advance-step")).toBe("not-applicable");
     expect(actionStatus(withDelivery, "human-gate")).toBe("blocked");
   });
 
   it("readiness terminal + PR Draft: work e decide bloqueiam Human Gate por Ready, não por advance interno", () => {
     const terminalReady = coFlowFacts({
-      subCheckpoints: [
-        ...coFlowFacts().subCheckpoints.slice(0, 5),
+      steps: [
+        ...coFlowFacts().steps.slice(0, 5),
         {
           id: "CO-10.6",
           title: "falsificacao + Human Gate",
@@ -274,11 +269,11 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         },
       ],
     });
-    const s = snapshot({ facts: terminalReady, subCheckpoints: terminalReady.subCheckpoints });
+    const s = snapshot({ facts: terminalReady, steps: terminalReady.steps });
 
     const flow = deriveGovernedFlow(s);
     const work = deriveWorkFor(s);
-    const advance = new AdvanceSubcheckpointDefinition().detect(s);
+    const advance = new AdvanceStepDefinition().detect(s);
     const humanGate = new HumanGateDefinition().detect(s);
 
     expect(advance.status).toBe("not-applicable");
@@ -294,7 +289,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     ]);
     expect(humanGate.status).toBe("blocked");
     expect(humanGate.reasons.join(" ")).toMatch(/PR #43 continua Draft/);
-    expect(humanGate.reasons.join(" ")).not.toMatch(/advance-subcheckpoint/);
+    expect(humanGate.reasons.join(" ")).not.toMatch(/advance-step/);
   });
 
   it("PR Ready + readiness terminal + checks verdes: Human Gate fica disponível e pr-ready compartilha CI/tree/reviews", () => {
@@ -304,8 +299,8 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         isDraft: false,
         checks: { pass: 4, fail: 0, pending: 0 },
       },
-      subCheckpoints: [
-        ...coFlowFacts().subCheckpoints.slice(0, 5),
+      steps: [
+        ...coFlowFacts().steps.slice(0, 5),
         {
           id: "CO-10.6",
           title: "falsificacao + Human Gate",
@@ -317,7 +312,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     });
     const s = snapshot({
       facts: readyFacts,
-      subCheckpoints: readyFacts.subCheckpoints,
+      steps: readyFacts.steps,
       prReady: { ok: true, summary: "verde" },
       gateDecidability: { ok: true, summary: "verde" },
     });
@@ -380,8 +375,8 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         isDraft: false,
         checks: { pass: 4, fail: 0, pending: 0 },
       },
-      subCheckpoints: [
-        ...coFlowFacts().subCheckpoints.slice(0, 5),
+      steps: [
+        ...coFlowFacts().steps.slice(0, 5),
         {
           id: "CO-10.6",
           title: "falsificacao + Human Gate",
@@ -392,7 +387,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     });
     const s = snapshot({
       facts: readyFacts,
-      subCheckpoints: readyFacts.subCheckpoints,
+      steps: readyFacts.steps,
       prReady: { ok: true, summary: "verde" },
       gateDecidability: { ok: true, summary: "verde" },
     });
@@ -421,7 +416,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     });
     const s = snapshot({
       facts: unsafeFacts,
-      subCheckpoints: unsafeFacts.subCheckpoints,
+      steps: unsafeFacts.steps,
       workingTreeState: "functional-dirty",
       prReady: { ok: false, summary: "vermelho" },
       gateDecidability: { ok: false, summary: "vermelho" },
@@ -469,8 +464,8 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         isDraft: false,
         checks: { pass: 4, fail: 0, pending: 0 },
       },
-      subCheckpoints: [
-        ...coFlowFacts().subCheckpoints.slice(0, 5),
+      steps: [
+        ...coFlowFacts().steps.slice(0, 5),
         {
           id: "CO-10.6",
           title: "falsificacao + Human Gate",
@@ -481,18 +476,18 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     });
     const s = snapshot({
       facts: postGateFacts,
-      subCheckpoints: postGateFacts.subCheckpoints,
+      steps: postGateFacts.steps,
       gateExists: true,
     });
 
     const flow = deriveGovernedFlow(s);
     const work = deriveWorkFor(s);
-    const openNext = new OpenNextNodeDefinition().detect(s);
+    const openNext = new OpenNextTopologyNodeDefinition().detect(s);
 
     expect(openNext.status).toBe("available");
-    expect(flow.recommended?.id).toBe("open-next-node");
+    expect(flow.recommended?.id).toBe("open-next-topology-node");
     expect(work.mode).toBe("blocked");
-    expect(work.nextAction.decisionType).toBe("open-next-node");
+    expect(work.nextAction.decisionType).toBe("open-next-topology-node");
     expect(flow.recommended?.effect).toEqual(
       expect.arrayContaining([
         "cria branch, PR Draft e reconcilia state/active/tasks",
@@ -500,7 +495,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
       ])
     );
     expect(work.nextAction.stillForbidden).toEqual(
-      expect.arrayContaining(["Fazer merge", "Implementar o próximo nó"])
+      expect.arrayContaining(["Fazer merge", "Implementar o próximo nó da topologia"])
     );
   });
 
@@ -518,12 +513,12 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     );
     expect(receivedFlow.humanSummary.missing.join(" ")).toMatch(/não há commit de entrega/);
     expect(receivedWork.mode).toBe("implement_checkpoint");
-    expect(receivedWork.object.subCheckpoint?.id).toBe("CO-10.6");
+    expect(receivedWork.object.step?.id).toBe("CO-10.6");
     expect(receivedWork.nextAction.decisionType).toBeNull();
 
     const delivered = makeDecisionSnapshot({
       ...receivedTask,
-      subCheckpointDeliveryEvidence: {
+      stepDeliveryEvidence: {
         status: "present",
         activeId: "CO-10.6",
         activationCommit: "54da3bb",
@@ -541,11 +536,11 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
       "npm run flow -- decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm"
     );
     expect(deliveredWork.nextAction.decisionType).toBe("mark-readiness");
-    expect(actionStatus(delivered, "advance-subcheckpoint")).toBe("not-applicable");
+    expect(actionStatus(delivered, "advance-step")).toBe("not-applicable");
 
     const terminalReadyDraftFacts = coFlowFacts({
-      subCheckpoints: [
-        ...coFlowFacts().subCheckpoints.slice(0, 5),
+      steps: [
+        ...coFlowFacts().steps.slice(0, 5),
         {
           id: "CO-10.6",
           title: "falsificacao + Human Gate",
@@ -557,7 +552,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     });
     const terminalReadyDraft = snapshot({
       facts: terminalReadyDraftFacts,
-      subCheckpoints: terminalReadyDraftFacts.subCheckpoints,
+      steps: terminalReadyDraftFacts.steps,
     });
     const terminalDraftWork = deriveWorkFor(terminalReadyDraft);
     const terminalDraftGate = new HumanGateDefinition().detect(terminalReadyDraft);
@@ -567,7 +562,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     expect(terminalDraftWork.nextAction.commands[0]?.command).toBe(
       "npm run flow -- decide --type human-gate --brief-only"
     );
-    expect(actionStatus(terminalReadyDraft, "advance-subcheckpoint")).toBe("not-applicable");
+    expect(actionStatus(terminalReadyDraft, "advance-step")).toBe("not-applicable");
     expect(terminalDraftGate.status).toBe("blocked");
     expect(terminalDraftGate.reasons.join(" ")).toMatch(/continua Draft/);
 
@@ -577,11 +572,11 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         isDraft: false,
         checks: { pass: 4, fail: 0, pending: 0 },
       },
-      subCheckpoints: terminalReadyDraftFacts.subCheckpoints,
+      steps: terminalReadyDraftFacts.steps,
     });
     const readyForGate = snapshot({
       facts: readyFacts,
-      subCheckpoints: readyFacts.subCheckpoints,
+      steps: readyFacts.steps,
       prReady: { ok: true, summary: "verde" },
       gateDecidability: { ok: true, summary: "verde" },
     });
@@ -606,7 +601,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     });
     const unsafe = snapshot({
       facts: unsafeFacts,
-      subCheckpoints: unsafeFacts.subCheckpoints,
+      steps: unsafeFacts.steps,
       workingTreeState: "functional-dirty",
     });
     const unsafeFlow = deriveGovernedFlow(unsafe);
@@ -620,7 +615,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     expect(unsafeMark.reasons.join(" ")).toMatch(/atrás do remoto/);
     expect(unsafeMark.reasons.join(" ")).toMatch(/pendente/);
 
-    const terminalDoneSubCheckpoints = terminalReadyDraftFacts.subCheckpoints.map((item) => ({
+    const terminalDoneSteps = terminalReadyDraftFacts.steps.map((item) => ({
       id: item.id,
       title: item.title,
       state: "done" as const,
@@ -633,23 +628,23 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         isDraft: false,
         checks: { pass: 4, fail: 0, pending: 0 },
       },
-      subCheckpoints: terminalDoneSubCheckpoints,
+      steps: terminalDoneSteps,
     });
     const postGate = snapshot({
       facts: postGateFacts,
-      subCheckpoints: postGateFacts.subCheckpoints,
+      steps: postGateFacts.steps,
       gateExists: true,
     });
     const postGateFlow = deriveGovernedFlow(postGate);
     const postGateWork = deriveWorkFor(postGate);
 
-    expect(postGateFlow.recommended?.id).toBe("open-next-node");
+    expect(postGateFlow.recommended?.id).toBe("open-next-topology-node");
     expect(postGateFlow.recommended?.command).toBe(
-      "npm run flow -- decide --type open-next-node --brief-only"
+      "npm run flow -- decide --type open-next-topology-node --brief-only"
     );
-    expect(postGateWork.nextAction.decisionType).toBe("open-next-node");
+    expect(postGateWork.nextAction.decisionType).toBe("open-next-topology-node");
     expect(postGateWork.nextAction.stillForbidden).toEqual(
-      expect.arrayContaining(["Fazer merge", "Implementar o próximo nó"])
+      expect.arrayContaining(["Fazer merge", "Implementar o próximo nó da topologia"])
     );
   });
 });

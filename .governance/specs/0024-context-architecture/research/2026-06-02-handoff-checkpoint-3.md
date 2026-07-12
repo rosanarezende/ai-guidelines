@@ -1,3 +1,7 @@
+---
+artifact-kind: handoff-legacy
+---
+
 > ⚠️ **HISTÓRICO — NÃO USAR PARA RETOMADA (marcado em 2026-06-11).** Snapshot pós-2.4d;
 > superseded por `2026-06-03-handoff-convergence-reopened.md` (o "Checkpoint 3 (GG-0003)"
 > planejado aqui foi reescrito e landou como #36 `co-reconcile`). Retomada atual:

@@ -1,0 +1,32 @@
+# registry/exploration.yml — acme-design-system · índice das explorations deste repo (a GOVERNANÇA do trabalho).
+entries:
+  - id: form-validation_1
+    title: "o DS tem form validado? (investigação)"
+    explores: "o DS tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?" # o SUBJECT (na ferramenta)
+    assignee: "@dev-ds" # quem assumiu + iniciou (hoje done — passou por active com este dono)
+    status: done # FECHOU (era active) — DISPARA por derivação: q1 resolved → contrato form-component known → deliveries destravam
+    # ===== A AMARRA (a comunicação intent ↔ exploration) =====
+    answers: acme-governance/intents/login_1#e1 # back-ref TIPADO: esta exploration responde ao e1 da intent
+    # (anota-se 1 lado: a exploration declara `answers`; a intent DERIVA "e1 answered-by form-validation_1")
+    workspace: explorations/form-validation_1/
+    # ===== FECHO (simples: só a resposta, sem POC) =====
+    fate: throwaway # só análise, sem código durável (destinos: throwaway | promoted | parked)
+    closed-by: explorations/form-validation_1/exploration-answer.md # o verdict (CONTEÚDO) mora aqui; o registry só REFERENCIA
+    closed-at: 2026-06-27
+    created-at: 2026-06-27
+    updated-at: 2026-06-27
+
+  # ===== a SPIKE rejeitada (teste: a ausência de deliberation se sustenta?) =====
+  - id: captcha-spike_1
+    title: "captcha no DS? (spike — rejeitada)"
+    explores: "captcha/anti-bot no login: o DS provê um componente, ou usamos serviço externo?" # o SUBJECT
+    assignee: "@dev-ds"
+    status: done # explorou e fechou (devolveu verdict)
+    answers: acme-governance/intents/login_1#e3 # responde ao e3 da intent
+    workspace: explorations/captcha-spike_1/
+    fate: throwaway # serviço externo cobre melhor → não construir no DS (output jogado fora — IGUAL ao form-validation, mas este foi REJEITADO)
+    closed-by: explorations/captcha-spike_1/exploration-answer.md
+    closed-at: 2026-06-29
+    created-at: 2026-06-29
+    updated-at: 2026-06-29
+    # REJEITADA: NENHUMA delivery `derives-from` esta exploration → o gate DERIVADO marca q3 como rejected (sem deliberation)

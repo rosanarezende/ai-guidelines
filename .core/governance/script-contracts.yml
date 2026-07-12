@@ -109,6 +109,18 @@ profiles:
         mutates: false
         consumers: [human]
         description: Cobertura combinada das suites mjs e Jest.
+      - name: supply-chain:check
+        command: node tools/supply-chain/supply-chain-advisory.ts --dry-run
+        category: security
+        mutates: false
+        consumers: [human, script]
+        description: Verifica offline que o package-lock e legivel para o advisory OSV/deps.dev.
+      - name: supply-chain:advisory
+        command: node tools/supply-chain/supply-chain-advisory.ts --output .tmp/supply-chain/advisory-report.json
+        category: security
+        mutates: true
+        consumers: [human]
+        description: Consulta OSV.dev e deps.dev e grava relatorio consultivo de supply-chain.
       - name: living-docs:generate
         command: npm run build && node dist/cli/bin.js living-docs generate
         category: docs
@@ -211,6 +223,30 @@ profiles:
         mutates: true
         consumers: [script]
         description: Advisory de continuidade operacional/canonical-next.
+      - name: research-index:check
+        command: npm run build && node dist/cli/bin.js research-index-check
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Falha se research consolidada em research-library/ nao estiver indexada no research-index.md, ou se um link do indice apontar para arquivo inexistente.
+      - name: artifact-kind:check
+        command: npm run build && node dist/cli/bin.js artifact-kind-check
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Brando; valida artifact-kind/disposition declarados em artefatos research/assets contra artifact-taxonomy.yml e exige subject/date em pre-coding-review. Cobertura advisory, nao bloqueia legados nao marcados.
+      - name: governed-work-map:build
+        command: npm run build && node dist/cli/bin.js governed-work-map build
+        category: governance
+        mutates: true
+        consumers: [script, human]
+        description: Regenera a projeção viva do trabalho governado a partir de state.yml (JSON + HTML derivados; nao-SSOT).
+      - name: governed-work-map:check
+        command: npm run build && node dist/cli/bin.js governed-work-map check
+        category: governance
+        mutates: true
+        consumers: [script, workflow, human]
+        description: Falha se a projeção viva do trabalho governado estiver stale em relação a state.yml.
       - name: handoff:check
         command: npm run build && node dist/cli/bin.js handoff-check
         category: governance
@@ -336,13 +372,49 @@ profiles:
         category: governance
         mutates: true
         consumers: [human]
-        description: Cria PR body inicial a partir do perfil/template governado; open-next-node delega para esta fabrica.
+        description: Cria PR body inicial a partir do perfil/template governado; ao versionar, use pull-requests/pr-N/body.md.
+      - name: pr-body:check
+        command: npm run build && node dist/cli/bin.js pr-body-check
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Confirma que o body remoto do PR esta sincronizado com pull-requests/pr-N/body.md.
+      - name: pr-body:publish
+        command: npm run build && node dist/cli/bin.js pr-body-publish
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Publica no GitHub o body versionado em pull-requests/pr-N/body.md e confirma por releitura.
+      - name: pr-body:pull
+        command: npm run build && node dist/cli/bin.js pr-body-pull
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Importa o body remoto do GitHub para pull-requests/pr-N/body.md com preview e confirmacao explicita.
       - name: pr-ready:check
         command: npm run build && node dist/cli/bin.js pr-ready-check
         category: governance
         mutates: true
         consumers: [human]
-        description: Valida precondicoes da conversao Draft->Ready (FU-2); read-only, nao converte.
+        description: "Valida precondicoes da conversao Draft->Ready (FU-2): plano situado de revisoes decidido, reviews obrigatorios current+approved, PR body e demais gates; read-only, nao converte."
+      - name: continuation:check
+        command: npm run build && node dist/cli/bin.js continuation-check
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Verifica a casa versionada do PR e pacotes de continuacao sem escrever nem criar PR.
+      - name: continuation:prepare
+        command: npm run build && node dist/cli/bin.js continuation-prepare
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Prepara pacote versionado de continuacao em pull-requests/pr-N/continuations sem criar PR remoto.
+      - name: continuation:create-pr
+        command: npm run build && node dist/cli/bin.js continuation-create-pr
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Cria Draft PR a partir de pacote de continuacao somente com confirmacao explicita.
       - name: validate:changed
         command: npm run build && node dist/cli/main.js validate changed
         category: aggregate
@@ -350,7 +422,7 @@ profiles:
         consumers: [hook, workflow, human]
         description: Validacao intermediaria orientada ao diff; usada no pre-push diario. Com --fix pode formatar somente arquivos alterados.
       - name: validate
-        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run drift:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
+        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run research-index:check && npm run artifact-kind:check && npm run governed-work-map:check && npm run drift:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate
         mutates: true
         consumers: [workflow, human]

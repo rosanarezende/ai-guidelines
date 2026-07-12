@@ -1,0 +1,31 @@
+<svg viewBox="0 0 760 360" width="760" height="360" xmlns="http://www.w3.org/2000/svg" role="img" font-family="ui-sans-serif, system-ui, sans-serif">
+  <title>Os knobs do backend de governança são independentes e componíveis, não uma escada presa ao tamanho</title>
+  <desc>Sobre o invariante (forma da intent, publicar, banco derivado), o backend tem três knobs independentes: onde as intents moram (pasta no repo, meta-repo git, store/serviço), como o banco é computado (script local, gerado no CI, serviço ao vivo) e o dashboard (nenhum, gerado periódico, ao vivo). Qualquer combinação é válida. Exemplo: um dev solo com 2 repos pode escolher meta-repo, banco gerado no CI e dashboard gerado — mesmo sendo solo. Os knobs não são amarrados ao tamanho.</desc>
+
+  <rect x="0" y="0" width="760" height="360" fill="#ffffff"/>
+
+  <rect x="24" y="16" width="712" height="40" rx="10" fill="#F5F3FF" stroke="#7F77DD"/>
+  <text x="380" y="41" text-anchor="middle" font-size="12" font-weight="600" fill="#3C3489">invariante: forma da intent + publicar + banco = derivado — só o BACKEND varia, e seus knobs são INDEPENDENTES</text>
+
+  <text x="28" y="100" font-size="11.5" fill="#0f172a">onde as intents moram</text>
+  <rect x="180" y="84" width="168" height="30" rx="15" fill="#FFFFFF" stroke="#B4B2A9"/><text x="264" y="103" text-anchor="middle" font-size="10.5" fill="#5F5E5A">pasta no repo</text>
+  <rect x="360" y="84" width="168" height="30" rx="15" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.8"/><text x="444" y="103" text-anchor="middle" font-size="10.5" fill="#0F6E56">meta-repo (git)</text>
+  <rect x="540" y="84" width="196" height="30" rx="15" fill="#FFFFFF" stroke="#B4B2A9"/><text x="638" y="103" text-anchor="middle" font-size="10.5" fill="#5F5E5A">store / serviço</text>
+
+  <text x="28" y="156" font-size="11.5" fill="#0f172a">como o banco é computado</text>
+  <rect x="180" y="140" width="168" height="30" rx="15" fill="#FFFFFF" stroke="#B4B2A9"/><text x="264" y="159" text-anchor="middle" font-size="10.5" fill="#5F5E5A">script local</text>
+  <rect x="360" y="140" width="168" height="30" rx="15" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.8"/><text x="444" y="159" text-anchor="middle" font-size="10.5" fill="#0F6E56">gerado no CI</text>
+  <rect x="540" y="140" width="196" height="30" rx="15" fill="#FFFFFF" stroke="#B4B2A9"/><text x="638" y="159" text-anchor="middle" font-size="10.5" fill="#5F5E5A">serviço ao vivo</text>
+
+  <text x="28" y="212" font-size="11.5" fill="#0f172a">dashboard</text>
+  <rect x="180" y="196" width="168" height="30" rx="15" fill="#FFFFFF" stroke="#B4B2A9"/><text x="264" y="215" text-anchor="middle" font-size="10.5" fill="#5F5E5A">nenhum</text>
+  <rect x="360" y="196" width="168" height="30" rx="15" fill="#E1F5EE" stroke="#1D9E75" stroke-width="1.8"/><text x="444" y="215" text-anchor="middle" font-size="10.5" fill="#0F6E56">gerado (periódico)</text>
+  <rect x="540" y="196" width="196" height="30" rx="15" fill="#FFFFFF" stroke="#B4B2A9"/><text x="638" y="215" text-anchor="middle" font-size="10.5" fill="#5F5E5A">ao vivo (serviço)</text>
+
+  <rect x="24" y="250" width="712" height="68" rx="10" fill="#E1F5EE" stroke="#1D9E75"/>
+  <text x="40" y="272" font-size="11.5" font-weight="600" fill="#0F6E56">destacado = uma combinação (dev solo, 2 repos): meta-repo + banco no CI + dashboard gerado</text>
+  <text x="40" y="292" font-size="11" fill="#0F6E56">→ solo NÃO obriga "arquivos"; os 3 knobs são independentes (escolhe por necessidade, não por tamanho).</text>
+  <text x="40" y="309" font-size="10.5" fill="#1D9E75">CI = gera/atualiza o banco + dashboard periódico · "ao vivo" real-time é que pede serviço.</text>
+
+  <text x="24" y="344" font-size="11" fill="#5F5E5A">cada linha é um knob · qualquer combinação vale · verde = a combinação descrita pelo exemplo</text>
+</svg>

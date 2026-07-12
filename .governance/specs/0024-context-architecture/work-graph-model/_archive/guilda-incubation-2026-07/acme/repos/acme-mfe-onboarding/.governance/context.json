@@ -1,0 +1,62 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-mfe-onboarding",
+  "owner": "time-onboarding",
+  "role": "microfrontend",
+  "domain": "onboarding",
+  "modules": [],
+  "provides": [
+    {
+      "name": "onboarding-checklist-ui",
+      "kind": "ui-surface",
+      "status": "active"
+    }
+  ],
+  "consumes": [
+    {
+      "contract": "acme-design-system/acme-design-tokens",
+      "why": "visual-contract"
+    },
+    {
+      "contract": "acme-design-system/onboarding-components",
+      "why": "onboarding-step"
+    },
+    {
+      "contract": "acme-identity/consent-api",
+      "why": "analytics-consent"
+    },
+    {
+      "contract": "acme-web-host/acme-user-context",
+      "why": "account-context"
+    },
+    {
+      "contract": "acme-analytics/acme-events-schema",
+      "why": "activation-measurement"
+    }
+  ],
+  "capabilities": [
+    {
+      "text": "Onboarding checklist, activation tour and consent-aware first-week flows.",
+      "tags": ["onboarding", "ativacao", "tours"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript", "html"],
+    "patterns": ["microfrontend", "activation-checklist", "experiment-ui"],
+    "boundaries": ["onboarding-ui"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-mfe-onboarding",
+    "dependencies": [
+      "@acme-sim/acme-analytics",
+      "@acme-sim/acme-design-system",
+      "@acme-sim/acme-identity"
+    ]
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": ["completeOnboardingStep", "renderOnboardingTour"],
+    "sourceHash": "dc7e442aeb05"
+  },
+  "contentHash": "8c5deda8131b"
+}

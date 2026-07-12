@@ -1,3 +1,7 @@
+---
+artifact-kind: inventory
+---
+
 # PR #44 — Inventario de taxonomia de artefatos da Spec 0024
 
 Data: 2026-06-22  

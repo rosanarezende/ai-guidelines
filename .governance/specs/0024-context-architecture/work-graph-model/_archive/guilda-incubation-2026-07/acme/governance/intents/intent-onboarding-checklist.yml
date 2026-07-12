@@ -1,0 +1,39 @@
+# intent-onboarding-checklist — a área de growth servindo o objetivo de RETENÇÃO (área N:N)
+id: intent-onboarding-checklist
+title: "checklist guiado de ativação na primeira semana"
+team: time-onboarding
+authorized-by: obj-retention
+primary-target: tgt-onboarding-churn
+thesis: tese-onboarding-retencao
+approach: validate-first
+hypothesis: "um checklist guiado na 1ª semana aumenta a ativação e derruba o churn em P p.p."
+decision-rule: "roda 6 semanas; ganha se churn dos expostos cair P p.p. sem queda de NPS"
+signal: none
+contracts-consumed: [acme-events-schema]
+works:
+  - id: flag-checklist
+    repo: acme-mfe-onboarding
+    purpose: create
+    desc: "checklist guiado atrás da flag (coorte da 1ª semana)"
+    review: interno
+  - id: baseline-ativacao
+    repo: acme-analytics
+    purpose: operate
+    desc: "coortes de ativação × churn (consome o schema existente); pronto antes da flag"
+    review: "externo: time-data"
+next:
+  - {
+      when: "veredito: ganhou",
+      then: "graduation — checklist vira padrão do onboarding",
+      gate: accept-verdict,
+    }
+  - {
+      when: "veredito: perdeu",
+      then: "cleanup — remove flag; aprendizado registrado",
+      gate: accept-verdict,
+    }
+  - {
+      when: "veredito: inconclusivo",
+      then: "refina coorte OU vira descoberta",
+      gate: accept-verdict,
+    }

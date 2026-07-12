@@ -1,0 +1,12 @@
+work: deliv-002
+kind: delivery
+stage: executing
+promoted-from: prop-002
+coordinates-with: frontend/deliv-003 # CROSS-REPO
+topology:
+  cursor: { checkpoint: cp-payment }
+  checkpoints:
+    - { id: cp-payment, owner: "@dev-a", status: in-progress } # Frente A
+    - { id: cp-orders, owner: "@dev-c", status: in-progress } # Frente C — PARALELO (sem dependência interna)
+# Frente = group-by(owner) → {"@dev-a": [cp-payment], "@dev-c": [cp-orders]} — lente DERIVADA, não nível fixo (§D5).
+# gate continua POR checkpoint (cada dev fecha o seu); a Frente só agrupa/navega.

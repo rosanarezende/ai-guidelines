@@ -1,0 +1,19 @@
+node: work-brief
+kind: delivery
+id: form-component_1
+intent: login_1
+sealed: true
+references: []
+
+objective:
+  goal: componente de formulário validado no design system (email/site/telefone), reusável pelos MFEs
+  approach: componente no acme-design-system com validação declarativa; os MFEs consomem em vez de reimplementar
+  done-when: componente publicado no DS, validado e consumível pelo login MFE; o contrato form-component cumprido
+
+context: q1 (decisão d1) — o DS não tinha form validado, cada MFE reimplementava → criar o componente
+out-of-scope: a tela de login (login-mfe_1) e a lógica de auth (acme-api) — esta delivery é só o componente
+requirements: validação declarativa por schema; acessível; expõe o contrato form-component que o login MFE consome
+
+details: |
+  Nasceu da decisão d1 da intent login_1, que aceitou o verdict da form-validation_1.
+  A exploration foi throwaway (sem POC durável) → sem derives-from.

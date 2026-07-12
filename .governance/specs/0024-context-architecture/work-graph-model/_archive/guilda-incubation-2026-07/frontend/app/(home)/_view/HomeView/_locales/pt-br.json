@@ -1,0 +1,74 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "home.title": "O que você quer governar hoje?",
+    "home.loading.title": "Verificando configuração local",
+    "home.loading.body": "Se este navegador ainda não concluiu o onboarding, você será levado para a configuração inicial."
+  },
+  "title": "O que você quer governar hoje?",
+  "loading": {
+    "title": "Verificando configuração local",
+    "body": "Se este navegador ainda não concluiu o onboarding, você será levado para a configuração inicial."
+  },
+  "cycleSummary": "Ciclo {cycle} em andamento. {done} de {total} passos de adoção configurados — {pending} item(ns) esperam por alguém.",
+  "roleNotices": {
+    "compact": "Perfil compact: acúmulos de papel são detectados e revisados em cadência — aparecem no placar, não somem.",
+    "trio": "Onde a mesma pessoa define e confirma, o app registra o selo Auto-declarado — visível para todos e para auditoria futura.",
+    "solo": "Você ocupa todos os papéis. O app não bloqueia — registra. Uma auditoria futura vê exatamente o que aconteceu."
+  },
+  "demoBanner": "Você está vendo a organização demo/sandbox acme. Estes dados são fictícios e não serão tratados como dados da sua organização real.",
+  "onboarding": {
+    "partialLabel": "Onboarding em andamento",
+    "partialTitle": "Termine a configuração inicial",
+    "partialBody": "Você já começou neste navegador. Enquanto não concluir, a Home continua útil, mas perfil, papéis, fontes de trabalho e assistente ainda podem estar só parcialmente configurados.",
+    "continue": "Continuar onboarding",
+    "settings": "Abrir configurações"
+  },
+  "shortcuts": {
+    "configureOrg": {
+      "title": "Configurar organização",
+      "sub": "Papéis, aprovações e perfil da sua org ({profile})"
+    },
+    "connectSources": {
+      "title": "Conectar fontes de trabalho",
+      "sub": "Git, pastas, serviços ou módulos — de onde vem o trabalho"
+    },
+    "planCycle": {
+      "title": "Planejar ciclo",
+      "sub": "Objetivos e metas do período"
+    },
+    "registerIntent": {
+      "title": "Registrar iniciativa",
+      "sub": "Uma aposta ou ideia que vira trabalho"
+    },
+    "results": {
+      "title": "Acompanhar resultados",
+      "sub": "O que as metas dizem hoje"
+    },
+    "pending": {
+      "title": "Resolver pendências",
+      "sub": "Itens que esperam por alguém"
+    },
+    "audit": {
+      "title": "Auditar decisões",
+      "sub": "Quem decidiu o quê, e quando"
+    }
+  },
+  "attention": {
+    "title": "Precisa de atenção",
+    "subtitle": "Derivado do resolver e do estado atual — nada aqui é preenchido à mão.",
+    "action": "Ver todas as pendências",
+    "footer": "Outros {count} itens estão válidos neste snapshot e não precisam de você."
+  },
+  "assistant": {
+    "title": "Assistente",
+    "optional": "(opcional)",
+    "body": "Explica termos e sugere próximos passos em linguagem simples. Rode local com Ollama — nada sai da sua máquina — ou conecte um provedor de nuvem com aprovação e egress explícitos conforme o perfil.",
+    "configure": "Configurar",
+    "dismiss": "Agora não"
+  },
+  "snapshot": {
+    "revision": "revision {revision}",
+    "issues": "{errors} erro(s) · {warnings} aviso(s)"
+  }
+}

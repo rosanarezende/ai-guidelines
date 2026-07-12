@@ -1,0 +1,32 @@
+{
+  "messages": {
+    "login.title": "Entrar no Guilda Governance",
+    "login.lead": "Use um provedor ou um link mágico por e-mail. O app não precisa guardar senha sua para identificar quem está usando o workspace.",
+    "login.hero.title": "Pessoas decidem. O sistema apoia.",
+    "login.hero.lead": "Decisões, evidências e responsabilidades conectadas para times que precisam coordenar trabalho sem transformar governança em burocracia.",
+    "login.hero.decisions": "Decisões humanas com contexto claro.",
+    "login.hero.evidence": "Evidências conectadas ao que importa.",
+    "login.hero.responsibility": "Responsabilidades visíveis em cada etapa.",
+    "login.identity.title": "Entrar ou criar conta sem senha",
+    "login.name.label": "Seu nome",
+    "login.name.help": "Opcional; usado quando este e-mail ainda não tem conta.",
+    "login.email.label": "E-mail",
+    "login.email.help": "Enviamos um link de acesso. Em dev/test, o link fica no outbox local.",
+    "login.magic.cta": "Enviar link mágico",
+    "login.magic.busy": "Enviando...",
+    "login.magic.sent": "Link gerado. Abra o e-mail para continuar. Em desenvolvimento/teste, ele fica registrado no outbox local.",
+    "login.magic.notConfigured": "Entrega de e-mail ainda não configurada neste ambiente.",
+    "login.github": "Entrar com GitHub",
+    "login.google": "Entrar com Google",
+    "login.provider.unavailable": "Configure as credenciais do provedor no ambiente para habilitar.",
+    "login.demo.title": "Experimentar sem conta",
+    "login.demo.body": "Abra a sandbox Acme sem conta. Você navega por dados de demonstração, sem criar usuário de portal e sem autoridade sobre workspaces reais.",
+    "login.demo.cta": "Experimentar demo sem conta",
+    "login.demo.busy": "Abrindo demo...",
+    "login.honesty.title": "Separação importante",
+    "login.honesty.identity": "Login identifica a pessoa; não concede papel nem autoridade governada.",
+    "login.honesty.governance": "Papéis, convites, host, fontes e decisões continuam no shell/governance host.",
+    "login.honesty.password": "Senha não é caminho suportado do produto. Provedores e link mágico reduzem nossa responsabilidade operacional.",
+    "login.error.generic": "Não foi possível continuar. Detalhe: {error}"
+  }
+}

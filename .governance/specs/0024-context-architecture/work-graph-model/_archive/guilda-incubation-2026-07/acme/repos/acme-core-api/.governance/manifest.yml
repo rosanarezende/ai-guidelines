@@ -1,0 +1,34 @@
+repo: acme-core-api
+role: legacy-monolith
+owner: area-platform
+domain: legacy-core
+provides:
+  - { name: legacy-billing-api, kind: api, status: active, owner: time-billing }
+  - { name: legacy-orders-api, kind: api, status: active, owner: time-checkout }
+  - { name: legacy-accounts-api, kind: api, status: active, owner: time-identity }
+  - { name: legacy-reports-api, kind: api, status: active, owner: time-data }
+consumes: []
+modules:
+  - id: mod-billing
+    owner: time-billing
+    capabilities:
+      - { text: "Legacy billing and invoices.", tags: [cobranca-legada, notas-fiscais] }
+  - id: mod-orders
+    owner: time-checkout
+    capabilities:
+      - { text: "Legacy orders and inventory reservations.", tags: [pedidos-legados, estoque] }
+  - id: mod-accounts
+    owner: time-identity
+    capabilities:
+      - { text: "Legacy accounts and permissions.", tags: [contas, permissoes-legadas] }
+  - id: mod-reports
+    owner: time-data
+    capabilities:
+      - { text: "Legacy reports and CSV exports.", tags: [relatorios-legados] }
+capabilities:
+  - text: "Legacy API seams used by migration waves and strangler work."
+    tags: [api-legada, integracoes]
+architecture:
+  stack: [node, javascript]
+  patterns: [modular-monolith, strangler-seam]
+  boundaries: [module-owner-overrides, platform-custodian]

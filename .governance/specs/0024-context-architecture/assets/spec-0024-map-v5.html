@@ -1,0 +1,1333 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mapa Vivo do Trabalho Governado — Context Architecture / 0024</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f3ea;
+        --panel: #fffdf8;
+        --panel-strong: #f0eadf;
+        --ink: #17211d;
+        --muted: #66736d;
+        --soft: #87928b;
+        --line: #ded7ca;
+        --green: #0b3d33;
+        --green-2: #155f4d;
+        --sage: #8aa091;
+        --brass: #bd8b3c;
+        --orange: #c46f2d;
+        --red: #a94b57;
+        --blue: #315d78;
+        --shadow: 0 22px 70px rgba(42, 35, 23, 0.12);
+        --radius: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 10% 0%, rgba(189, 139, 60, 0.14), transparent 34rem),
+          linear-gradient(180deg, #fbf8f1 0%, var(--bg) 44%, #efe8dc 100%);
+        color: var(--ink);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: var(--green-2);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      code {
+        border: 1px solid rgba(11, 61, 51, 0.12);
+        background: rgba(11, 61, 51, 0.06);
+        border-radius: 7px;
+        color: #543916;
+        font-size: 0.92em;
+        padding: 1px 5px;
+      }
+
+      .wrap {
+        max-width: 1260px;
+        margin: 0 auto;
+        padding: 28px 20px 76px;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(11, 61, 51, 0.16);
+        border-radius: 24px;
+        background:
+          linear-gradient(120deg, rgba(255, 253, 248, 0.97), rgba(255, 253, 248, 0.85)),
+          radial-gradient(circle at 95% 8%, rgba(11, 61, 51, 0.16), transparent 26rem);
+        box-shadow: var(--shadow);
+        padding: clamp(22px, 4vw, 42px);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: auto -70px -140px auto;
+        width: 420px;
+        height: 420px;
+        border: 1px dashed rgba(11, 61, 51, 0.14);
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .hero-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.7fr);
+        gap: 28px;
+      }
+
+      .eyebrow {
+        color: var(--brass);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.12em;
+        margin: 0 0 10px;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        color: var(--green);
+        font-size: clamp(32px, 6vw, 62px);
+        line-height: 0.98;
+        letter-spacing: 0;
+        margin-bottom: 18px;
+      }
+
+      h2 {
+        color: var(--green);
+        font-size: clamp(22px, 3vw, 32px);
+        line-height: 1.08;
+        margin-bottom: 10px;
+      }
+
+      h3 {
+        color: var(--ink);
+        font-size: 17px;
+        margin-bottom: 8px;
+      }
+
+      .lead {
+        color: #34423b;
+        font-size: 17px;
+        max-width: 760px;
+      }
+
+      .authority-note {
+        border-left: 4px solid var(--brass);
+        background: rgba(189, 139, 60, 0.1);
+        border-radius: 12px;
+        color: #463b2a;
+        padding: 14px 16px;
+      }
+
+      .hero-aside {
+        border: 1px solid rgba(11, 61, 51, 0.12);
+        background: rgba(255, 253, 248, 0.74);
+        border-radius: 18px;
+        padding: 18px;
+      }
+
+      .source-list {
+        display: grid;
+        gap: 10px;
+        margin: 14px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .source-list li {
+        display: grid;
+        grid-template-columns: 10px 1fr;
+        gap: 10px;
+        align-items: start;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .dot {
+        width: 9px;
+        height: 9px;
+        margin-top: 7px;
+        border-radius: 50%;
+        background: var(--brass);
+      }
+
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 12;
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        margin: 18px 0;
+        border: 1px solid rgba(11, 61, 51, 0.13);
+        background: rgba(247, 243, 234, 0.92);
+        backdrop-filter: blur(14px);
+        border-radius: 18px;
+        padding: 12px;
+      }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+
+      .search span {
+        color: var(--soft);
+      }
+
+      input[type="search"] {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--ink);
+        font: inherit;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      button {
+        min-height: 36px;
+        border: 1px solid rgba(11, 61, 51, 0.16);
+        background: var(--panel);
+        border-radius: 999px;
+        color: var(--green);
+        cursor: pointer;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 760;
+        padding: 8px 12px;
+      }
+
+      button[aria-pressed="true"] {
+        border-color: var(--green);
+        background: var(--green);
+        color: #fffdf8;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        gap: 18px;
+        align-items: start;
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      .lanes {
+        display: grid;
+        gap: 14px;
+      }
+
+      .lane {
+        border: 1px solid rgba(11, 61, 51, 0.12);
+        background: rgba(255, 253, 248, 0.84);
+        border-radius: var(--radius);
+        padding: 16px;
+      }
+
+      .lane-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: baseline;
+        margin-bottom: 12px;
+      }
+
+      .lane-title {
+        color: var(--green);
+        font-size: 18px;
+        font-weight: 860;
+      }
+
+      .lane-subtitle {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        position: relative;
+        min-height: 172px;
+        border: 1px solid rgba(11, 61, 51, 0.12);
+        background: var(--panel);
+        border-radius: 14px;
+        cursor: pointer;
+        padding: 15px;
+        text-align: left;
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          box-shadow 160ms ease;
+      }
+
+      .card:hover,
+      .card:focus-visible,
+      .card.selected {
+        border-color: rgba(189, 139, 60, 0.9);
+        box-shadow: 0 14px 36px rgba(42, 35, 23, 0.12);
+        transform: translateY(-2px);
+      }
+
+      .card .kicker,
+      .detail-kicker {
+        color: var(--brass);
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .card h3 {
+        margin-top: 8px;
+      }
+
+      .card p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+
+      .meta-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: 1px solid rgba(11, 61, 51, 0.12);
+        background: rgba(11, 61, 51, 0.06);
+        border-radius: 999px;
+        color: var(--green);
+        font-size: 12px;
+        font-weight: 760;
+        padding: 4px 8px;
+      }
+
+      .pill.done {
+        background: rgba(11, 95, 77, 0.1);
+        color: var(--green-2);
+      }
+
+      .pill.active {
+        background: rgba(196, 111, 45, 0.12);
+        color: #7a3b10;
+      }
+
+      .pill.risk {
+        background: rgba(169, 75, 87, 0.12);
+        color: var(--red);
+      }
+
+      .pill.next {
+        background: rgba(49, 93, 120, 0.12);
+        color: var(--blue);
+      }
+
+      .side {
+        position: sticky;
+        top: 90px;
+        border: 1px solid rgba(11, 61, 51, 0.14);
+        background: rgba(255, 253, 248, 0.95);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 18px;
+      }
+
+      .detail-title {
+        color: var(--green);
+        font-size: 25px;
+        line-height: 1.08;
+        margin: 8px 0 12px;
+      }
+
+      .detail-section {
+        border-top: 1px solid var(--line);
+        margin-top: 14px;
+        padding-top: 14px;
+      }
+
+      .detail-section strong {
+        color: var(--ink);
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .detail-section ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+      }
+
+      .detail-section li + li {
+        margin-top: 4px;
+      }
+
+      .matrix {
+        overflow: auto;
+        border: 1px solid rgba(11, 61, 51, 0.12);
+        background: var(--panel);
+        border-radius: var(--radius);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 860px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: rgba(11, 61, 51, 0.06);
+        color: var(--green);
+        font-size: 12px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      td {
+        color: #34423b;
+        font-size: 14px;
+      }
+
+      .flow {
+        display: grid;
+        gap: 14px;
+      }
+
+      .flow-step {
+        display: grid;
+        grid-template-columns: 46px 1fr;
+        gap: 14px;
+        border: 1px solid rgba(11, 61, 51, 0.12);
+        background: var(--panel);
+        border-radius: var(--radius);
+        padding: 16px;
+      }
+
+      .flow-number {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--green);
+        color: white;
+        font-weight: 900;
+      }
+
+      .flow-step h3 {
+        color: var(--green);
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .empty {
+        display: none;
+        border: 1px dashed var(--line);
+        border-radius: var(--radius);
+        color: var(--muted);
+        padding: 28px;
+        text-align: center;
+      }
+
+      .empty.active {
+        display: block;
+      }
+
+      @media (max-width: 980px) {
+        .hero-grid,
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .side,
+        .toolbar {
+          position: static;
+        }
+
+        .toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .buttons {
+          justify-content: flex-start;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .wrap {
+          padding: 14px 12px 52px;
+        }
+
+        .cards {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          border-radius: 18px;
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Context Architecture / 0024 · projeção visual · não-SSOT</p>
+            <h1>Mapa Vivo do Trabalho Governado</h1>
+            <p class="lead">
+              Este mapa reorganiza a leitura do PR #45 depois do dogfood de
+              <code>work-graph-model</code>: o checkpoint ativo entrega contratos do framework
+              <code>ai-guidelines</code>, enquanto Guilda passa a ser produto vivo em repositório
+              irmão e permanece aqui como evidência histórica.
+            </p>
+            <p class="authority-note">
+              Regra de leitura: se houver divergência, vencem <code>state.yml</code>,
+              <code>tasks.md</code>, <code>decision-brief.md</code>, reviews/gates e Git/GitHub.
+              Este HTML é uma projeção para humanos.
+            </p>
+          </div>
+          <aside class="hero-aside" aria-label="Fontes lidas pelo mapa">
+            <h2>Fontes do mapa</h2>
+            <ul class="source-list">
+              <li>
+                <span class="dot"></span><span><code>state.yml</code> — cursor/topologia.</span>
+              </li>
+              <li>
+                <span class="dot"></span><span><code>tasks.md</code> — checklist vigente.</span>
+              </li>
+              <li>
+                <span class="dot"></span
+                ><span><code>decision-brief.md</code> — DEC-0024-G22/G23/G24.</span>
+              </li>
+              <li>
+                <span class="dot"></span
+                ><span><code>.core/governance/artifact-taxonomy.yml</code> — contrato.</span>
+              </li>
+              <li>
+                <span class="dot"></span
+                ><span><code>work-graph-model/*</code> — modelo e evidência preservada.</span>
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </header>
+
+      <section class="toolbar" aria-label="Controles do mapa">
+        <label class="search">
+          <span aria-hidden="true">⌕</span>
+          <input id="search" type="search" placeholder="Buscar por decisão, artefato, risco..." />
+        </label>
+        <div class="buttons" aria-label="Filtros">
+          <button data-filter="all" aria-pressed="true">Tudo</button>
+          <button data-filter="checkpoint">Checkpoint</button>
+          <button data-filter="taxonomy">Taxonomia</button>
+          <button data-filter="workgraph">Work graph</button>
+          <button data-filter="guilda">Guilda</button>
+          <button data-filter="risk">Riscos</button>
+          <button data-filter="next">Próximos</button>
+        </div>
+        <div class="buttons" aria-label="Modo de visualização">
+          <button data-view="map" aria-pressed="true">Mapa</button>
+          <button data-view="matrix" aria-pressed="false">Matriz</button>
+          <button data-view="flow" aria-pressed="false">Fluxo</button>
+        </div>
+      </section>
+
+      <main class="layout">
+        <div>
+          <section id="mapView" class="view active" aria-label="Mapa por frentes">
+            <div id="lanes" class="lanes"></div>
+            <div id="emptyMap" class="empty">Nenhum item encontrado para o filtro atual.</div>
+          </section>
+
+          <section id="matrixView" class="view" aria-label="Matriz de cobertura">
+            <div class="matrix">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Natureza</th>
+                    <th>Autoridade</th>
+                    <th>Disposição</th>
+                    <th>Próxima ação</th>
+                  </tr>
+                </thead>
+                <tbody id="matrixRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="flowView" class="view" aria-label="Fluxo causal">
+            <div class="flow">
+              <article class="flow-step">
+                <div class="flow-number">1</div>
+                <div>
+                  <h3>Trabalho governado 0024 cria a pergunta de arquitetura</h3>
+                  <p>
+                    O framework precisa transformar contexto humano em governança executável. A
+                    partir disso, surgem topologia, gates, reviews, handoff, flow e taxonomia de
+                    artefatos.
+                  </p>
+                </div>
+              </article>
+              <article class="flow-step">
+                <div class="flow-number">2</div>
+                <div>
+                  <h3>work-graph-model vira laboratório governado</h3>
+                  <p>
+                    O modelo testa trabalho como grafo tipado: objetivos, decisões, evidências,
+                    responsabilidades, contratos, outcomes, repos e trust boundaries.
+                  </p>
+                </div>
+              </article>
+              <article class="flow-step">
+                <div class="flow-number">3</div>
+                <div>
+                  <h3>Guilda nasce do dogfood e sai do repo</h3>
+                  <p>
+                    A incubação provou valor de produto, mas também mostrou o risco de confundir
+                    app, pesquisa, screenshots, testes, prompts e decisões com autoridade do
+                    framework.
+                  </p>
+                </div>
+              </article>
+              <article class="flow-step">
+                <div class="flow-number">4</div>
+                <div>
+                  <h3>Checkpoint #45 fecha contratos de artefato</h3>
+                  <p>
+                    O resultado correto para <code>ai-guidelines</code> é
+                    <code>artifact-kind</code>, <code>disposition</code>,
+                    <code>pre-coding-review</code>, índice de research e fronteira explícita de
+                    autoridade.
+                  </p>
+                </div>
+              </article>
+              <article class="flow-step">
+                <div class="flow-number">5</div>
+                <div>
+                  <h3>Próximas frentes retomam o grafo derivado</h3>
+                  <p>
+                    O próximo trabalho do framework pode usar o aprendizado da Guilda para
+                    reorganizar arquitetura, falsificar jornadas e criar snapshot de grafo derivado
+                    sem transformar projeção em SSOT.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <aside class="side" aria-live="polite">
+          <p class="detail-kicker" id="detailKicker">Selecione um item</p>
+          <h2 id="detailTitle" class="detail-title">Mapa Vivo</h2>
+          <p id="detailSummary">
+            Clique em um cartão para ver fonte, autoridade, disposição e próxima ação. Use a busca
+            para localizar riscos, decisões ou artefatos específicos.
+          </p>
+          <div class="meta-row" id="detailMeta"></div>
+          <div class="detail-section">
+            <strong>Evidência</strong>
+            <ul id="detailEvidence"></ul>
+          </div>
+          <div class="detail-section">
+            <strong>Próxima ação</strong>
+            <p id="detailNext"></p>
+          </div>
+          <div class="detail-section">
+            <strong>Links locais</strong>
+            <ul id="detailLinks"></ul>
+          </div>
+        </aside>
+      </main>
+
+      <p class="footer-note">
+        Mapa gerado manualmente como projeção visual do trabalho governado 0024 após a extração de
+        Guilda. Ele não altera topologia, tasks, DEC, reviews, gates ou readiness.
+      </p>
+    </div>
+
+    <script>
+      const lanes = [
+        {
+          id: "checkpoint",
+          title: "1. Checkpoint ativo",
+          subtitle: "O que o PR #45 realmente precisa entregar no framework.",
+        },
+        {
+          id: "taxonomy",
+          title: "2. Contratos de artefato",
+          subtitle: "Natureza, disposição, autoridade e review pré-codificação.",
+        },
+        {
+          id: "workgraph",
+          title: "3. Work graph preservado",
+          subtitle: "Modelo conceitual e aprendizados que continuam úteis para a 0024.",
+        },
+        {
+          id: "guilda",
+          title: "4. Guilda extraída",
+          subtitle: "Produto vivo fora deste repo; evidência histórica dentro do recorte 0024.",
+        },
+        {
+          id: "risk",
+          title: "5. Riscos que o v5 explicita",
+          subtitle: "Confusões que não podem voltar a ser débito silencioso.",
+        },
+        {
+          id: "next",
+          title: "6. Próximas frentes",
+          subtitle: "Trabalho posterior, sem declarar Ready/Human Gate agora.",
+        },
+      ];
+
+      const nodes = [
+        {
+          id: "active-checkpoint",
+          lane: "checkpoint",
+          filter: "checkpoint",
+          status: "active",
+          title: "artifact-taxonomy-and-model-review-contract",
+          kicker: "nó topológico ativo · PR #45",
+          kind: "checkpoint",
+          authority: "state.yml + tasks.md",
+          disposition: "living",
+          summary:
+            "O checkpoint ativo materializa a taxonomia de artefatos e o contrato de pre-coding-review. Ele não é validação final do produto Guilda.",
+          evidence: [
+            "state.yml declara o nó ativo com sequence 12 e GitHub PR #45.",
+            "tasks.md marca o checkpoint como aberto e descreve escopo robusto, não prova mínima.",
+            "DEC-0024-G24 declara que Ready/Human Gate não estão sendo executados.",
+          ],
+          next: "Manter o PR #45 focado no framework: artifact-kind, disposition, pre-coding-review, research-index e PR body reconciliado.",
+          links: [
+            ["state.yml", "../state.yml"],
+            ["tasks.md", "../tasks.md"],
+            ["decision-brief.md", "../decision-brief.md"],
+          ],
+          tags: ["checkpoint", "pr45", "ready", "human gate"],
+        },
+        {
+          id: "authority-order",
+          lane: "checkpoint",
+          filter: "checkpoint",
+          status: "done",
+          title: "Ordem de autoridade",
+          kicker: "repo vence projeção",
+          kind: "governance contract",
+          authority: "artifact-taxonomy.yml",
+          disposition: "living",
+          summary:
+            "A ordem canônica separa SSOT estrutural, decisões, reviews/gates, Git/GitHub, assets e research. Mapas ficam abaixo de Git/GitHub e nunca governam.",
+          evidence: [
+            "artifact-taxonomy.yml declara authority_order.",
+            "DEC-0024-G24 reforça que mapas/assets não viram SSOT.",
+            "O v5 usa essa ordem para organizar todos os cartões.",
+          ],
+          next: "Usar esta ordem nos próximos reviews e no PR body para evitar que HTML ou research substituam state/tasks/DEC.",
+          links: [["artifact-taxonomy.yml", "../../../../.core/governance/artifact-taxonomy.yml"]],
+          tags: ["authority", "ssot", "projection"],
+        },
+        {
+          id: "artifact-kind",
+          lane: "taxonomy",
+          filter: "taxonomy",
+          status: "done",
+          title: "artifact-kind fechado",
+          kicker: "natureza do documento",
+          kind: "taxonomy",
+          authority: ".core/governance/artifact-taxonomy.yml",
+          disposition: "living",
+          summary:
+            "A taxonomia fecha um conjunto de naturezas para research/assets: research, pre-coding-review, delivery-review, dogfood, inventory, gap, prompt, projection e handoff-legacy.",
+          evidence: [
+            "O conjunto é fechado: item novo exige DEC.",
+            "Aplica-se a artefatos research/assets, não a state.yml, tasks.md, reviews ou gates.",
+            "Evita que cada documento novo invente autoridade própria.",
+          ],
+          next: "Classificar lote relevante sem exigir cobertura universal de todos os legados.",
+          links: [["GOVERNANCE-CATALOG.md", "../../../../.core/governance/GOVERNANCE-CATALOG.md"]],
+          tags: ["artifact-kind", "taxonomy", "research", "assets"],
+        },
+        {
+          id: "disposition",
+          lane: "taxonomy",
+          filter: "taxonomy",
+          status: "done",
+          title: "disposition ortogonal",
+          kicker: "papel atual do artefato",
+          kind: "taxonomy metadata",
+          authority: "DEC-0024-G24",
+          disposition: "living",
+          summary:
+            "disposition não cria uma nova natureza; ela diz se um artefato é living, evidence, legacy ou open. Isso foi a chave para preservar Guilda sem reativá-la.",
+          evidence: [
+            "DEC-0024-G24 aceita disposition como dimensão ortogonal.",
+            "GUILDA-QRD-PRESERVATION-MATRIX usa essa lógica para separar produto vivo e evidência.",
+            "artifact-kind:check valida valores declarados contra o conjunto fechado.",
+          ],
+          next: "Aplicar disposition nos artefatos relevantes que hoje geram ambiguidade operacional.",
+          links: [
+            [
+              "GUILDA-QRD-PRESERVATION-MATRIX.md",
+              "../work-graph-model/GUILDA-QRD-PRESERVATION-MATRIX.md",
+            ],
+          ],
+          tags: ["disposition", "legacy", "evidence"],
+        },
+        {
+          id: "pre-coding-review",
+          lane: "taxonomy",
+          filter: "taxonomy",
+          status: "active",
+          title: "pre-coding-review",
+          kicker: "model-review antes de codar",
+          kind: "artifact-kind",
+          authority: "artifact-taxonomy.yml + check",
+          disposition: "living",
+          summary:
+            "O review pré-codificação avalia modelo, direção, arquitetura, mapa, taxonomia ou decomposição antes da implementação. É advisory até findings virarem DEC/task/review governado.",
+          evidence: [
+            "DEC-0024-G24 exige subject e date em pre-coding-review.",
+            "artifact-kind:check falha quando esses campos faltam.",
+            "O aprendizado veio das rodadas adversariais antes de implementar Guilda.",
+          ],
+          next: "Garantir template/exemplo/docs suficientes para que o tipo seja usado por humanos e agentes sem ambiguidade.",
+          links: [["docs/scripts.md", "../../../../docs/scripts.md"]],
+          tags: ["pre-coding-review", "model-review", "review"],
+        },
+        {
+          id: "research-index",
+          lane: "taxonomy",
+          filter: "taxonomy",
+          status: "next",
+          title: "research-index e research-library",
+          kicker: "pesquisa reaproveitável",
+          kind: "index",
+          authority: "research-index:check",
+          disposition: "open",
+          summary:
+            "O checkpoint ainda precisa distinguir research madura, research histórica, evidência de dogfood e biblioteca reutilizável. Nem toda QRD da Guilda deve virar library.",
+          evidence: [
+            "GUILDA-QRD-PRESERVATION-MATRIX diz que QRDs de produto ficam como histórico ou vão para Guilda.",
+            "tasks.md inclui reparar/verificar research-index e promover artefatos maduros.",
+            "DEC-0024-G24 rejeita classificação universal obrigatória de todos os legados.",
+          ],
+          next: "Promover apenas artefatos maduros por domínio; manter o resto como evidence/legacy/open conforme o caso.",
+          links: [
+            [
+              "GUILDA-EXTRACTION-DISPOSITION.md",
+              "../work-graph-model/GUILDA-EXTRACTION-DISPOSITION.md",
+            ],
+          ],
+          tags: ["research", "library", "index"],
+        },
+        {
+          id: "model-yml",
+          lane: "workgraph",
+          filter: "workgraph",
+          status: "done",
+          title: "model.yml normativo v3",
+          kicker: "modelo conceitual",
+          kind: "model",
+          authority: "work-graph-model/model.yml",
+          disposition: "living",
+          summary:
+            "O modelo limpo preserva o contrato conceitual do work graph: camadas, nós, arestas, estados, gates, políticas, perfis e regras de escala.",
+          evidence: [
+            "meta.status = normative.",
+            "O histórico deliberativo foi separado em archive.",
+            "O produto extraído é referenciado como origem, não como app vivo deste repo.",
+          ],
+          next: "Usar como fonte conceitual para os próximos trabalhos de grafo derivado no framework.",
+          links: [["model.yml", "../work-graph-model/model.yml"]],
+          tags: ["model", "work graph", "normative"],
+        },
+        {
+          id: "tracker-features",
+          lane: "workgraph",
+          filter: "workgraph",
+          status: "done",
+          title: "tracker e features",
+          kicker: "lentes e roadmap",
+          kind: "supporting context",
+          authority: "embasamento, não SSOT",
+          disposition: "living",
+          summary:
+            "O tracker explica as nove lentes do modelo; features separa o que foi provado, arquivado e ainda falta mecanizar. Ambos apoiam, mas não substituem state/tasks/DEC.",
+          evidence: [
+            "tracker.md declara explicitamente que é embasamento.",
+            "features.md marca Guilda como extraída e a incubação como histórica.",
+            "Ambos preservam o porquê do work-graph-model existir no trabalho governado 0024.",
+          ],
+          next: "Referenciar em reviews e próximos checkpoints sem transformá-los em fila viva.",
+          links: [
+            ["tracker.md", "../work-graph-model/tracker.md"],
+            ["features.md", "../work-graph-model/features.md"],
+          ],
+          tags: ["tracker", "features", "lenses"],
+        },
+        {
+          id: "derived-graph",
+          lane: "workgraph",
+          filter: "workgraph",
+          status: "next",
+          title: "Grafo derivado, nunca SSOT",
+          kicker: "DEC-0024-G23",
+          kind: "projection contract",
+          authority: "decision-brief.md",
+          disposition: "living",
+          summary:
+            "O aprendizado da Guilda reforça que graph snapshot, bancos e dashboards são projeções derivadas: úteis para consulta, impacto e visualização, mas incapazes de autorizar mutação sozinhos.",
+          evidence: [
+            "DEC-0024-G23 roteia graph snapshot derivado para próximos checkpoints.",
+            "work-graph-model testou file-first com read-models derivados.",
+            "Guilda continuará a materializar produto; ai-guidelines materializa contrato de framework.",
+          ],
+          next: "Na frente internal-architecture-refactor-ddd-bdd, definir contrato do snapshot derivado sem criar segunda SSOT.",
+          links: [["decision-brief.md", "../decision-brief.md"]],
+          tags: ["graph", "derived", "snapshot", "read-model"],
+        },
+        {
+          id: "guilda-extraction",
+          lane: "guilda",
+          filter: "guilda",
+          status: "done",
+          title: "Guilda extraída",
+          kicker: "produto vivo fora do PR #45",
+          kind: "disposition",
+          authority: "GUILDA-EXTRACTION-DISPOSITION.md",
+          disposition: "evidence",
+          summary:
+            "Guilda deixou de ser workspace vivo do ai-guidelines. O produto segue no repo irmão; o histórico fica aqui para explicar a taxonomia e o model-review.",
+          evidence: [
+            "A disposição registra repo vivo git@github.com:rosanarezende/guilda.git.",
+            "governance-demo virou tombstone.",
+            "O archive preserva QRDs, spikes, testes, assets e app incubado.",
+          ],
+          next: "Não rodar build/testes de Guilda neste repo; usar o arquivo como evidência de por que a taxonomia existe.",
+          links: [
+            [
+              "GUILDA-EXTRACTION-DISPOSITION.md",
+              "../work-graph-model/GUILDA-EXTRACTION-DISPOSITION.md",
+            ],
+          ],
+          tags: ["guilda", "extraction", "archive"],
+        },
+        {
+          id: "qrd-preservation",
+          lane: "guilda",
+          filter: "guilda",
+          status: "done",
+          title: "QRD preservation matrix",
+          kicker: "decisões preservadas sem reativar produto",
+          kind: "inventory",
+          authority: "matriz de ponte",
+          disposition: "evidence",
+          summary:
+            "A matriz conecta QRDs da incubação Guilda aos objetivos do checkpoint: quais decisões alimentam model.yml/tracker/features e quais migraram para o produto.",
+          evidence: [
+            "QRDs 01-53 estão mapeadas por tema, autoridade atual e ação.",
+            "A seção 6 define o que significa fechar o checkpoint.",
+            "A seção 7 dá plano robusto sem confundir readiness de produto.",
+          ],
+          next: "Usar a matriz para revisar PR body, tasks e research-index antes de pedir readiness.",
+          links: [
+            [
+              "GUILDA-QRD-PRESERVATION-MATRIX.md",
+              "../work-graph-model/GUILDA-QRD-PRESERVATION-MATRIX.md",
+            ],
+          ],
+          tags: ["qrd", "guilda", "preservation", "matrix"],
+        },
+        {
+          id: "archive",
+          lane: "guilda",
+          filter: "guilda",
+          status: "done",
+          title: "Archive como evidência, não fonte viva",
+          kicker: "_archive/guilda-incubation-2026-07",
+          kind: "archive",
+          authority: "disposition",
+          disposition: "legacy",
+          summary:
+            "O archive pode conter caminhos, scripts e docs antigos. Ele existe para rastreabilidade, não para dirigir desenvolvimento do framework ou da Guilda.",
+          evidence: [
+            "GUILDA-EXTRACTION-DISPOSITION define a ordem de leitura em caso de conflito.",
+            "features.md declara que a app extraída pertence ao repo Guilda.",
+            "A matriz QRD separa ações no ai-guidelines e no guilda.",
+          ],
+          next: "Evitar links operacionais para scripts do archive; citar apenas como evidência histórica.",
+          links: [["archive", "../work-graph-model/_archive/guilda-incubation-2026-07/"]],
+          tags: ["archive", "legacy", "tombstone"],
+        },
+        {
+          id: "product-readiness-risk",
+          lane: "risk",
+          filter: "risk",
+          status: "risk",
+          title: "Readiness de Guilda ≠ readiness do trabalho governado 0024",
+          kicker: "risco central",
+          kind: "risk",
+          authority: "DEC-0024-G24",
+          disposition: "open",
+          summary:
+            "O PR #45 ficou grande porque o dogfood virou produto. O mapa v5 precisa impedir a leitura de que a Guilda foi validada como v1 só porque a taxonomia do framework avançou.",
+          evidence: [
+            "DEC-0024-G24 diz explicitamente que não declara Ready/Human Gate.",
+            "GUILDA-EXTRACTION-DISPOSITION diz que PR #45 não deve declarar readiness do app Guilda.",
+            "tasks.md mantém próximos checkpoints separados.",
+          ],
+          next: "Ao atualizar PR body, declarar escopo real: framework pronto para taxonomia/model-review, produto Guilda fora do escopo.",
+          links: [["PR #45 body", "../pull-requests/pr-45/body.md"]],
+          tags: ["readiness", "guilda", "scope", "risk"],
+        },
+        {
+          id: "gap-b",
+          lane: "enforcement",
+          filter: "enforcement",
+          status: "done",
+          title: "Gap B e PRs grandes",
+          kicker: "continuação governada",
+          kind: "enforcement",
+          authority: "DEC-0024-G24 + DEC-0024-G27",
+          disposition: "living",
+          summary:
+            "O protocolo interino deixou de ser só documentação: agora há fluxo continuation:check -> continuation:prepare -> continuation:create-pr para preparar pacotes versionados sem capturar decisão humana.",
+          evidence: [
+            "DEC-0024-G24 preservou o protocolo interino para PRs grandes.",
+            "DEC-0024-G26 criou pull-requests/pr-N como casa canônica.",
+            "DEC-0024-G27 materializa check/prepare/create-pr sem Ready, Human Gate, merge ou avanço automático.",
+          ],
+          next: "Usar continuation:prepare para gerar pacote de continuação quando o PR precisar ser fatiado; criar Draft PR só com confirmação explícita.",
+          links: [
+            ["pr-continuation-protocol.md", "../research/2026-07-07-pr-continuation-protocol.md"],
+            ["PR #45 continuations", "../pull-requests/pr-45/continuations/"],
+          ],
+          tags: ["gap b", "pr", "automation", "risk"],
+        },
+        {
+          id: "projection-risk",
+          lane: "risk",
+          filter: "risk",
+          status: "risk",
+          title: "Projeção visual não governa",
+          kicker: "este próprio HTML",
+          kind: "projection",
+          authority: "assets/ nível 6",
+          disposition: "living",
+          summary:
+            "Mapas ajudam humanos a retomar o sistema, mas não alteram cursor, checklist, DEC, reviews, gates ou Git. O v5 precisa ser bom sem parecer fonte da verdade.",
+          evidence: [
+            "artifact-taxonomy.yml classifica projection como authority none.",
+            "authority_order põe assets abaixo de Git/GitHub.",
+            "O footer e a hero explicitam não-SSOT.",
+          ],
+          next: "Se o mapa contradisser state/tasks/DEC, corrigir o mapa ou abrir DEC; não corrigir a realidade pelo mapa.",
+          links: [["spec-0024-map-v4.html", "./spec-0024-map-v4.html"]],
+          tags: ["projection", "html", "map", "risk"],
+        },
+        {
+          id: "next-refactor",
+          lane: "next",
+          filter: "next",
+          status: "next",
+          title: "internal-architecture-refactor-ddd-bdd",
+          kicker: "próximo checkpoint semântico",
+          kind: "planned checkpoint",
+          authority: "tasks.md + state.yml planned",
+          disposition: "open",
+          summary:
+            "Depois da taxonomia, o framework precisa reorganizar runtime/testes e decidir a forma do grafo operacional derivado.",
+          evidence: [
+            "tasks.md lista o checkpoint planejado.",
+            "DEC-0024-G23 adiciona critérios de graph snapshot derivado.",
+            "O seed antecipado não compete com o PR #44/#45.",
+          ],
+          next: "Só iniciar após o checkpoint atual fechar o contrato de artefatos e a owner autorizar nova frente.",
+          links: [["tasks.md", "../tasks.md"]],
+          tags: ["refactor", "ddd", "bdd", "next"],
+        },
+        {
+          id: "next-falsification",
+          lane: "next",
+          filter: "next",
+          status: "next",
+          title: "broad-flow-falsification",
+          kicker: "prova de valor e jornadas",
+          kind: "planned checkpoint",
+          authority: "tasks.md",
+          disposition: "open",
+          summary:
+            "A falsificação ampla deve transformar invariantes em checks/testes e provar valor entregue, não apenas transição válida.",
+          evidence: [
+            "DEC-0024-G23 cita fronteira dogfood-humano × fixtures.",
+            "tasks.md define contrato de journeys e unificação de fontes paralelas.",
+            "O aprendizado de Guilda mostrou que cobertura sem produto validado pode confundir readiness.",
+          ],
+          next: "Preparar depois do refactor, com fixtures/journeys canônicas e sem reabrir Guilda dentro deste repo.",
+          links: [["tasks.md", "../tasks.md"]],
+          tags: ["falsification", "tests", "journeys", "next"],
+        },
+        {
+          id: "map-v5",
+          lane: "next",
+          filter: "next",
+          status: "done",
+          title: "Mapa Vivo do Trabalho Governado",
+          kicker: "projeção otimizada",
+          kind: "projection",
+          authority: "none",
+          disposition: "living",
+          summary:
+            "Este HTML aplica os aprendizados de UX do work-graph-model: busca, filtros, matriz, fluxo causal, painel de detalhe e separação forte entre fonte autoritativa e projeção.",
+          evidence: [
+            "V4 era uma narrativa longa por frentes/checkpoints.",
+            "V5 adiciona uma matriz de natureza/autoridade/disposição.",
+            "V5 explicita Guilda como evidência extraída, não app vivo.",
+          ],
+          next: "Usar como apoio de leitura e revisar quando state/tasks/DEC mudarem.",
+          links: [["spec-0024-map-v5.html", "./spec-0024-map-v5.html"]],
+          tags: ["map", "v5", "projection", "ux"],
+        },
+      ];
+
+      const statusLabel = {
+        done: "feito",
+        active: "ativo",
+        risk: "risco",
+        next: "próximo",
+      };
+
+      let currentFilter = "all";
+      let currentView = "map";
+      let selectedId = "active-checkpoint";
+
+      const searchInput = document.querySelector("#search");
+      const laneRoot = document.querySelector("#lanes");
+      const emptyMap = document.querySelector("#emptyMap");
+      const matrixRows = document.querySelector("#matrixRows");
+      const detailKicker = document.querySelector("#detailKicker");
+      const detailTitle = document.querySelector("#detailTitle");
+      const detailSummary = document.querySelector("#detailSummary");
+      const detailMeta = document.querySelector("#detailMeta");
+      const detailEvidence = document.querySelector("#detailEvidence");
+      const detailNext = document.querySelector("#detailNext");
+      const detailLinks = document.querySelector("#detailLinks");
+
+      function matches(node) {
+        const query = searchInput.value.trim().toLowerCase();
+        const filterOk = currentFilter === "all" || node.filter === currentFilter;
+        const haystack = [
+          node.title,
+          node.kicker,
+          node.kind,
+          node.authority,
+          node.disposition,
+          node.summary,
+          node.next,
+          ...(node.tags || []),
+          ...(node.evidence || []),
+        ]
+          .join(" ")
+          .toLowerCase();
+        return filterOk && (query === "" || haystack.includes(query));
+      }
+
+      function pill(text, tone = "") {
+        return `<span class="pill ${tone}">${text}</span>`;
+      }
+
+      function renderMap() {
+        const visible = nodes.filter(matches);
+        laneRoot.innerHTML = lanes
+          .map((lane) => {
+            const laneNodes = visible.filter((node) => node.lane === lane.id);
+            if (laneNodes.length === 0) return "";
+            return `
+              <section class="lane">
+                <div class="lane-head">
+                  <div>
+                    <div class="lane-title">${lane.title}</div>
+                    <div class="lane-subtitle">${lane.subtitle}</div>
+                  </div>
+                  ${pill(`${laneNodes.length} item(ns)`)}
+                </div>
+                <div class="cards">
+                  ${laneNodes
+                    .map(
+                      (node) => `
+                    <article class="card ${node.id === selectedId ? "selected" : ""}" tabindex="0" role="button" data-id="${node.id}">
+                      <div class="kicker">${node.kicker}</div>
+                      <h3>${node.title}</h3>
+                      <p>${node.summary}</p>
+                      <div class="meta-row">
+                        ${pill(statusLabel[node.status], node.status)}
+                        ${pill(node.kind)}
+                        ${pill(node.disposition)}
+                      </div>
+                    </article>
+                  `
+                    )
+                    .join("")}
+                </div>
+              </section>
+            `;
+          })
+          .join("");
+        emptyMap.classList.toggle("active", visible.length === 0);
+        document.querySelectorAll(".card").forEach((card) => {
+          card.addEventListener("click", () => selectNode(card.dataset.id));
+          card.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              selectNode(card.dataset.id);
+            }
+          });
+        });
+      }
+
+      function renderMatrix() {
+        const visible = nodes.filter(matches);
+        matrixRows.innerHTML = visible
+          .map(
+            (node) => `
+          <tr>
+            <td><strong>${node.title}</strong><br /><span class="detail-kicker">${node.kicker}</span></td>
+            <td>${node.kind}<br />${pill(statusLabel[node.status], node.status)}</td>
+            <td>${node.authority}</td>
+            <td>${node.disposition}</td>
+            <td>${node.next}</td>
+          </tr>
+        `
+          )
+          .join("");
+      }
+
+      function selectNode(id) {
+        selectedId = id;
+        const node = nodes.find((item) => item.id === id) || nodes[0];
+        detailKicker.textContent = node.kicker;
+        detailTitle.textContent = node.title;
+        detailSummary.textContent = node.summary;
+        detailMeta.innerHTML = [
+          pill(statusLabel[node.status], node.status),
+          pill(node.kind),
+          pill(`authority: ${node.authority}`),
+          pill(`disposition: ${node.disposition}`),
+        ].join("");
+        detailEvidence.innerHTML = node.evidence.map((item) => `<li>${item}</li>`).join("");
+        detailNext.textContent = node.next;
+        detailLinks.innerHTML = node.links
+          .map(([label, href]) => `<li><a href="${href}">${label}</a></li>`)
+          .join("");
+        renderMap();
+      }
+
+      function render() {
+        renderMap();
+        renderMatrix();
+      }
+
+      document.querySelectorAll("[data-filter]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentFilter = button.dataset.filter;
+          document
+            .querySelectorAll("[data-filter]")
+            .forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-view]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentView = button.dataset.view;
+          document
+            .querySelectorAll("[data-view]")
+            .forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+          document
+            .querySelectorAll(".view")
+            .forEach((view) => view.classList.toggle("active", view.id === `${currentView}View`));
+        });
+      });
+
+      searchInput.addEventListener("input", render);
+
+      selectNode(selectedId);
+      render();
+    </script>
+  </body>
+</html>

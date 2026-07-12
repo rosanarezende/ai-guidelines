@@ -7,6 +7,7 @@ Templates de prompts versionados invocados pelo **wizard CLI** (opção "Gerar p
 | Slug                                | Variáveis                         | Foco da investigação                                                |
 | ----------------------------------- | --------------------------------- | ------------------------------------------------------------------- |
 | `architecture-end-to-end.prompt.md` | (nenhuma)                         | Estrutura arquitetural do repositório atual (camadas, componentes). |
+| `pr-intended-vision.prompt.md`      | `{{context}}`, `{{localContext}}` | Baseline visual pretendido de um Draft PR, antes da implementação.  |
 | `value-delivered.prompt.md`         | `{{context}}`, `{{localContext}}` | Comparativo antes/depois de um PR ou spec específica.               |
 
 > **Prompts editoriais específicos do framework `ai-guidelines`** (capa do README, capas DX) vivem em [`docs/editorial/`](../../docs/editorial/) — gênero distinto (prompts diretos para gerador de imagem, não briefings dirigidos a IA conversacional); não invocáveis via wizard.
@@ -27,6 +28,17 @@ wizard → escolha o tipo de prompt visual
 ```
 
 Os templates aqui são **briefings dirigidos a IA conversacional**, não prompts diretos para gerador de imagem. A IA é quem investiga e produz o prompt final — o template apenas estrutura o que ela deve fazer e que forma o output deve ter.
+
+## Dois modos de uso em PRs
+
+- **CLI direta, sem IA acompanhando o preenchimento do PR**: `pr-body:create`
+  injeta no body um `Briefing para IA — visão pretendida`. O humano leva esse
+  briefing a uma IA com contexto do projeto, que então aplica o template
+  versionado e devolve o prompt final para gerador de imagem.
+- **Humano trabalhando com uma IA na sessão atual**: a IA deve aplicar o template
+  versionado imediatamente e preencher o body com `Prompt final — visão
+pretendida`, já autocontido e pronto para qualquer gerador de imagem. Nesse
+  modo, o prompt final não deve depender de o gerador conhecer o repositório.
 
 ## Modo automático (em breve)
 

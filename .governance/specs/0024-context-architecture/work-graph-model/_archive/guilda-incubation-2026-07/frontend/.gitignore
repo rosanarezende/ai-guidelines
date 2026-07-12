@@ -1,0 +1,8 @@
+# Estado LOCAL do shell de adoção (local-principal/organizações/sessão).
+# É estado do usuário desta máquina, nunca versionado.
+.local-state/
+
+# Artefatos de build
+.next/
+next-env.d.ts
+tsconfig.tsbuildinfo

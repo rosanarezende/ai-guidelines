@@ -41,6 +41,48 @@ Os 7 pilares são **mutuamente exclusivos e coletivamente exaustivos**. Todo tra
 
 ---
 
+## 1.A — Classes de artefato (`artifact-kind`)
+
+> Os 7 pilares (§1) classificam **unidades de trabalho** (`WorkItemKind`, ADR 0010). Esta seção classifica a **natureza de um documento/artefato** — eixo e sujeito diferentes. Mecanismo análogo (`kind` como natureza governada), **mas não é `WorkItemKind` nem MECE-de-trabalho**.
+
+Aplica-se a artefatos de classe **`research/` e `assets/`**. Artefatos governados (`decision-brief.md`, `reviews/`, `gates/`, `tasks.md`, `state.yml`, ADRs) derivam a natureza do **lar canônico** — não carregam `artifact-kind`. Conjunto **fechado** (item que não cabe ⇒ abrir DEC, não criar `kind` de oportunidade).
+
+**Contrato de enforcement (máquina, canônico):** `.core/governance/artifact-taxonomy.yml`. A tabela abaixo é a leitura humana; em divergência, vence o YAML.
+
+| `artifact-kind`     | O que é                                                                                                                | Autoridade                                          |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
+| `research`          | investigação exploratória / comparativo / direção que alimenta decisão                                                 | nenhuma                                             |
+| `pre-coding-review` | revisão/falsificação **pré-codificação** de um modelo/direção/arquitetura/mapa/taxonomia/decomposição (antes de codar) | advisory — findings viram DEC/task/review governado |
+| `delivery-review`   | parecer sobre uma fatia entregue/PR antes do gate, quando **não** é review de gate (TA/AR/Security em `reviews/`)      | advisory                                            |
+| `dogfood`           | experiência situada / status datado / aprendizado de uso                                                               | nenhuma                                             |
+| `inventory`         | mapa de conceitos/transições/fontes/gaps de um modelo                                                                  | nenhuma                                             |
+| `gap`               | lacuna/backlog candidato não promovido a task/DEC/PIT                                                                  | nenhuma                                             |
+| `prompt`            | prompt operacional/visual (ex.: pedido de review externo, imagem de mapa)                                              | nenhuma                                             |
+| `projection`        | mapa/HTML/asset visual derivável; ajuda humana, nunca SSOT                                                             | nenhuma                                             |
+| `handoff-legacy`    | handoff/snapshot antigo preservado como evidência datada; não é contrato atual                                         | nenhuma                                             |
+
+**Metadado ortogonal (não cria `kind`):** `reviewer: internal|external` (Codex/Antigravity/Gemini = `external`) e `method: falsification|assessment`. Por isso "external review" e "falsification review" **não** são kinds — são atributos: um `pre-coding-review` pode ser `external` e por `falsification`.
+
+**Disposição ortogonal (não cria `kind`):** `disposition: living|evidence|legacy|open`. Ela descreve o papel atual do artefato no repositório sem conceder autoridade. `living` = ainda usado como contexto operacional; `evidence` = evidência histórica preservada; `legacy` = snapshot/legado sem contrato atual; `open` = lacuna/questão ainda não promovida a DEC/task/review.
+
+**Por que `pre-coding-review` (e não "model-review"):** o eixo distintivo é o **tempo** (antes de codar) e o **sujeito** (um modelo/desenho, **não** modelo/LLM nem a entrega). Materializa o "review pré-codificação/model-review" nomeado por `[DEC-0024-G21]` e pela etapa `artifact-taxonomy-and-model-review-contract`.
+
+**Schema mínimo de `pre-coding-review`:** todo artefato com `artifact-kind: pre-coding-review` deve declarar no frontmatter `subject` (modelo/direção/arquitetura/taxonomia revisada) e `date` (`YYYY-MM-DD`). O check `artifact-kind:check` valida isso. Findings desse artefato são advisory até virarem DEC/task/review governado.
+
+### Ordem de autoridade canônica (mantenedor)
+
+Em divergência sobre estado/processo/decisão, vence o nível mais alto. **Fonte única** — `research/README.md` e inventários **apontam** para cá, não restabelecem ordem própria:
+
+1. `state.yml` — topologia, cursor, próximo movimento estrutural.
+2. `tasks.md` — checkpoint/etapa e checklist vigente.
+3. `decision-brief.md` — decisões humanas (DEC).
+4. `reviews/` + `gates/` — findings, dispositions, Human Gate.
+5. Git/GitHub — branch, PR, commits, CI.
+6. `assets/` — projeção visual; nunca SSOT.
+7. `research/` (com `artifact-kind` acima) — contexto datado; nunca contrato atual.
+
+---
+
 ## 2 — Paths canônicos
 
 A política é **bilateral**: o repo do mantenedor (este) e o repo do consumidor (projeto que adota o framework) têm topologias distintas. O catálogo descreve as duas; a CLI traduz uma na outra.
@@ -92,19 +134,19 @@ Reservas materializadas idempotentemente por `AdoptWorkspace.execute`; declaraç
 
 ### 3.1 No mantenedor (este repo)
 
-| Pergunta                                              | Fonte canônica                                                                          |
-| :---------------------------------------------------- | :-------------------------------------------------------------------------------------- |
-| Qual o estado de uma spec em andamento?               | `.specify/specs/<spec-id>/tasks.md` + `NEXT.md`                                         |
-| Quais specs estão abertas / fechadas?                 | `.specify/specs/roadmap/backlog.md` + `historico.md` (visão narrativa)                  |
-| Qual o processo de abertura e ciclo de vida?          | `.core/process/governance-foundation.md`                                                |
-| Qual o threshold de cobertura e exceções honestas?    | `.core/process/test-coverage-policy.md` (operacionaliza ADR 0003)                       |
-| Quais decisões arquiteturais estáveis guiam o design? | `.core/governance/adrs/` (canônico) — `/adrs/` legado migra em 4.B.5                    |
-| Quais regras o agente IA recebe?                      | `AGENTS.md` → bloco `<AI_GUIDELINES>` compilado                                         |
-| Quais regras são **fonte** (editáveis)?               | `.core/rules/{top,center,base,adapters}/` — `_meta/` é derivado                         |
-| Como montar artefatos de spec novos?                  | `.core/governance/recipes/` + `templates/partials/` (PR3); cutover em 4.C.0             |
-| Qual a arquitetura macro da CLI re-arquitetada?       | `.core/governance/ARCHITECTURE.md` (entrada lean) + `ARCHITECTURE-REFERENCE.md` (denso) |
-| Qual o roadmap operacional de uma spec específica?    | `.specify/specs/<spec-id>/tasks.md`                                                     |
-| Onde ficam pesquisas internas?                        | `.specify/specs/researchs/{architecture,governance,oss}/`                               |
+| Pergunta                                              | Fonte canônica                                                                                                                             |
+| :---------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| Qual o estado de uma spec em andamento?               | `.specify/specs/<spec-id>/tasks.md` + `NEXT.md`                                                                                            |
+| Quais specs estão abertas / fechadas?                 | `.specify/specs/roadmap/backlog.md` + `historico.md` (visão narrativa)                                                                     |
+| Qual o processo de abertura e ciclo de vida?          | `.core/process/governance-foundation.md`                                                                                                   |
+| Qual o threshold de cobertura e exceções honestas?    | `.core/process/test-coverage-policy.md` (operacionaliza ADR 0003)                                                                          |
+| Quais decisões arquiteturais estáveis guiam o design? | `.core/governance/adrs/` (canônico) — `/adrs/` legado migra em 4.B.5                                                                       |
+| Quais regras o agente IA recebe?                      | `AGENTS.md` → bloco `<AI_GUIDELINES>` compilado                                                                                            |
+| Quais regras são **fonte** (editáveis)?               | `.core/rules/{top,center,base,adapters}/` — `_meta/` é derivado                                                                            |
+| Como montar artefatos de spec novos?                  | `.core/governance/recipes/` + `templates/partials/` (PR3); cutover em 4.C.0                                                                |
+| Qual a arquitetura macro da CLI re-arquitetada?       | `.core/governance/ARCHITECTURE.md` (entrada lean) + `ARCHITECTURE-REFERENCE.md` (denso)                                                    |
+| Qual o roadmap operacional de uma spec específica?    | `.specify/specs/<spec-id>/tasks.md`                                                                                                        |
+| Onde ficam pesquisas internas?                        | `.governance/specs/research-library/{architecture,governance,oss}/` (canônico, ADR 0019) — `.specify/specs/researchs/` é legado só-leitura |
 
 ### 3.2 No consumidor
 

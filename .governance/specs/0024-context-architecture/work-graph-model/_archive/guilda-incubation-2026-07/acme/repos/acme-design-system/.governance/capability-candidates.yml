@@ -1,0 +1,17 @@
+repo: acme-design-system
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-design-system"
+  dependencies: []
+  exports:
+    - Button
+    - CheckoutSummary
+    - ConsentBanner
+    - OnboardingStep
+    - PlanCard
+    - renderDesignSystemCatalog
+    - tokens
+  sourceHash: 3b9d3ed058b5

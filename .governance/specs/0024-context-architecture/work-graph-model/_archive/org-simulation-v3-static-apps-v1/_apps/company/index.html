@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'"
+    />
+    <title>acme — visão da empresa (por perfil de governança)</title>
+    <style>
+      :root {
+        --bg: #faf9f6;
+        --card: #ffffff;
+        --ink: #23231f;
+        --ink2: #5f5e58;
+        --line: #e4e1d7;
+        --accent: #0c447c;
+        --orange-bg: #faeeda;
+        --orange-tx: #633806;
+        --orange-ln: #ba7517;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #23231f;
+          --card: #2f2e2a;
+          --ink: #eceae0;
+          --ink2: #b9b7ad;
+          --line: #45443e;
+          --accent: #cfe3fa;
+          --orange-bg: #4d3007;
+          --orange-tx: #fae3bd;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          14px/1.6 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 24px 18px 60px;
+      }
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 4px;
+      }
+      .muted {
+        color: var(--ink2);
+        font-size: 13px;
+      }
+      .tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+      }
+      .tab {
+        font: inherit;
+        font-size: 13px;
+        padding: 6px 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--ink2);
+        cursor: pointer;
+      }
+      .tab.on {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--card);
+        padding: 13px 15px;
+        margin: 10px 0;
+      }
+      .card.orange {
+        background: var(--orange-bg);
+        border-color: var(--orange-ln);
+        color: var(--orange-tx);
+      }
+      .card.orange .muted,
+      .card.orange li {
+        color: var(--orange-tx);
+      }
+      .card h2 {
+        font-size: 14px;
+        margin: 0 0 6px;
+      }
+      .kv {
+        font-size: 13px;
+        margin: 3px 0;
+      }
+      .kv b {
+        color: var(--ink2);
+      }
+      ul {
+        margin: 6px 0 0;
+        padding-left: 18px;
+      }
+      li {
+        font-size: 13px;
+        color: var(--ink2);
+        margin: 3px 0;
+      }
+      .pill {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        margin-left: 6px;
+        color: var(--ink2);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 10px;
+      }
+      .card.click {
+        cursor: pointer;
+      }
+      .card.click:hover {
+        border-color: var(--accent);
+      }
+      .big {
+        font-size: 24px;
+        font-weight: 600;
+        margin-right: 6px;
+      }
+      .crumb {
+        font-size: 12px;
+        color: var(--accent);
+        cursor: pointer;
+        margin-bottom: 8px;
+        display: inline-block;
+      }
+      .row {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 10px;
+        margin: 6px 0;
+        font-size: 13px;
+        background: var(--card);
+      }
+      .row.click {
+        cursor: pointer;
+      }
+      .row.click:hover {
+        border-color: var(--accent);
+      }
+      .st {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        margin-left: 6px;
+      }
+      .st.blocked {
+        background: #fcebeb;
+        color: #a32d2d;
+      }
+      .st.waiting {
+        background: #faeeda;
+        color: #854f0b;
+      }
+      .st.free {
+        background: #e1f5ee;
+        color: #0f6e56;
+      }
+      .st.ext {
+        background: #eeedfe;
+        color: #3c3489;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="../vendor/react.production.min.js"></script>
+    <script src="../vendor/react-dom.production.min.js"></script>
+    <script src="../vendor/htm.umd.js"></script>
+    <script src="../graph.js"></script>
+    <script src="company-app.js"></script>
+  </body>
+</html>

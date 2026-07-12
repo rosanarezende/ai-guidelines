@@ -1,0 +1,18 @@
+repo: acme-help-center
+role: support-application
+owner: time-support
+domain: customer-support
+provides:
+  - { name: help-center-ui, kind: ui-surface, status: active }
+  - { name: ticket-api, kind: api, status: active }
+  - { name: chatbot-api, kind: api, status: active }
+consumes:
+  - { contract: acme-web-host/acme-user-context, why: account-bound-support }
+  - { contract: acme-analytics/acme-events-schema, why: deflection-measurement }
+capabilities:
+  - text: "Help articles, ticket creation and chatbot self-service."
+    tags: [ajuda, tickets, chatbot, self-service]
+architecture:
+  stack: [node, javascript]
+  patterns: [support-portal, self-service]
+  boundaries: [support-domain]

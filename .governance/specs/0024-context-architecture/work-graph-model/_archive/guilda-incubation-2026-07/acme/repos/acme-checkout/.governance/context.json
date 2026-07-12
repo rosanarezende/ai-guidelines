@@ -1,0 +1,71 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-checkout",
+  "owner": "time-checkout",
+  "role": "microfrontend",
+  "domain": "checkout",
+  "modules": [],
+  "provides": [
+    {
+      "name": "checkout-ui",
+      "kind": "ui-surface",
+      "status": "active"
+    }
+  ],
+  "consumes": [
+    {
+      "contract": "acme-design-system/acme-design-tokens",
+      "why": "visual-contract"
+    },
+    {
+      "contract": "acme-design-system/checkout-components",
+      "why": "checkout-summary"
+    },
+    {
+      "contract": "acme-web-host/acme-user-context",
+      "why": "recurring-customer-context"
+    },
+    {
+      "contract": "acme-checkout-api/checkout-order-api",
+      "why": "submit-checkout"
+    },
+    {
+      "contract": "acme-checkout-api/freight-api",
+      "why": "freight-preview"
+    },
+    {
+      "contract": "acme-checkout-api/coupon-api",
+      "why": "coupon-validation"
+    },
+    {
+      "contract": "acme-analytics/acme-events-schema",
+      "why": "funnel-measurement"
+    }
+  ],
+  "capabilities": [
+    {
+      "text": "Checkout UI, cart flow, coupon handling and freight preview.",
+      "tags": ["checkout-ui", "carrinho", "cupom", "frete"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript", "html"],
+    "patterns": ["microfrontend", "checkout-flow", "progressive-rollout"],
+    "boundaries": ["checkout-ui"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-checkout",
+    "dependencies": [
+      "@acme-sim/acme-analytics",
+      "@acme-sim/acme-checkout-api",
+      "@acme-sim/acme-design-system",
+      "@acme-sim/acme-web-host"
+    ]
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": ["renderCheckout", "submitCheckout"],
+    "sourceHash": "bd9092274529"
+  },
+  "contentHash": "15fce85abf5e"
+}

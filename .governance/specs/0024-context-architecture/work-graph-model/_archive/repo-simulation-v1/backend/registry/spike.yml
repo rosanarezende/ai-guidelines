@@ -1,0 +1,8 @@
+# registry/spike.yml — backend (acme-api). Dense: indexa o workspace.
+works:
+  - id: spike-001
+    kind: spike
+    title: qual lib OAuth no backend?
+    status: closed
+    workspace: works/spike_oauth-lib/
+    date: 2026-06-24

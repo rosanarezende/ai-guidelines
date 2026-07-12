@@ -1,0 +1,21 @@
+{
+  "name": "acme-mfe-support",
+  "private": true,
+  "description": "Repo simulado — MFE de suporte. Backend: Neo4j (banco de GRAFOS, via Docker). Sobe o próprio banco.",
+  "scripts": {
+    "dev": "npm run db:up && npm run seed && npm run dashboard",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:nuke": "docker compose down -v",
+    "seed": "node ../_lib/seed.ts acme-mfe-support",
+    "build": "node ../_lib/build.ts",
+    "dashboard": "node ../_lib/build.ts && npm --prefix ../_viewer run dashboards"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

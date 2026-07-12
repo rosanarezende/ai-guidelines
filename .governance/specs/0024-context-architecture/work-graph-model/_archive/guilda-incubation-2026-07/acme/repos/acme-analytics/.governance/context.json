@@ -1,0 +1,57 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-analytics",
+  "owner": "time-data",
+  "role": "event-platform",
+  "domain": "measurement",
+  "modules": [],
+  "provides": [
+    {
+      "name": "acme-events-schema",
+      "kind": "event-schema",
+      "status": "active"
+    },
+    {
+      "name": "experiment-event-source",
+      "kind": "event-sink",
+      "status": "active"
+    },
+    {
+      "name": "conversion-metrics-source",
+      "kind": "metric-source",
+      "status": "active"
+    }
+  ],
+  "consumes": [],
+  "capabilities": [
+    {
+      "text": "Event schema, event collection and experiment exposure tracking.",
+      "tags": ["eventos", "experimentos-fonte"]
+    },
+    {
+      "text": "Conversion and activation measurement inputs for business outcomes.",
+      "tags": ["metricas", "conversao", "ativacao"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript"],
+    "patterns": ["event-schema", "in-memory-event-sink"],
+    "boundaries": ["metric-source", "schema-owner"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-analytics",
+    "dependencies": []
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": [
+      "conversionEvent",
+      "eventSchema",
+      "experimentExposure",
+      "inMemoryEventSink",
+      "track"
+    ],
+    "sourceHash": "d24ebece413a"
+  },
+  "contentHash": "a4f3ff8ec2d5"
+}

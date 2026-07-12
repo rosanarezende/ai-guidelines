@@ -1,3 +1,7 @@
+---
+artifact-kind: inventory
+---
+
 # CO-10.8 — Inventário de arquitetura interna, organização DDD e BDD visual
 
 > Spec: 0024-context-architecture  

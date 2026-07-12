@@ -1,0 +1,11 @@
+{
+  "name": "@acme-sim/acme-api-billing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke": "node ../../../tools/checks/check-code-fixtures.ts"
+  },
+  "dependencies": {
+    "@acme-sim/acme-core-api": "workspace:*"
+  }
+}

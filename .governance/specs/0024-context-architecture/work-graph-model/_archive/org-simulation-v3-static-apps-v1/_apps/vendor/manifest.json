@@ -1,0 +1,25 @@
+{
+  "generatedFrom": "pinned public CDN artifacts; apps load local files only",
+  "files": [
+    {
+      "file": "react.production.min.js",
+      "source": "https://unpkg.com/react@18.3.1/umd/react.production.min.js",
+      "sha256": "d949f1c3687aedadcedac85261865f29b17cd273997e7f6b2bfc53b2f9d4c4dd"
+    },
+    {
+      "file": "react-dom.production.min.js",
+      "source": "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js",
+      "sha256": "35f4f974f4b2bcd44da73963347f8952e341f83909e4498227d4e26b98f66f0d"
+    },
+    {
+      "file": "htm.umd.js",
+      "source": "https://unpkg.com/htm@3.1.1/dist/htm.umd.js",
+      "sha256": "53ad0a526e9beb876941ca881ba331b03a2b0e936d75d617b8107db7f551e131"
+    },
+    {
+      "file": "cytoscape.min.js",
+      "source": "https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js",
+      "sha256": "83e8c54a6bec655bfd81df07df605649c268af69aeca67a5ea2da54ea42dac81"
+    }
+  ]
+}

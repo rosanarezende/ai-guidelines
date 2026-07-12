@@ -4,8 +4,9 @@
  * A sequência canônica de fechamento de PR não pode depender da memória do
  * agente (PIT-0010):
  *
- *   PR body final → CI verde no HEAD final → Draft → Ready → Human Gate da
- *   owner → registro do gate artifact → próximo checkpoint.
+ *   plano situado de revisões decidido → PR body final → CI verde no HEAD final
+ *   → reviews obrigatórios current+approved → Draft → Ready → Human Gate da owner
+ *   → registro do gate artifact → próximo checkpoint.
  *
  * Este comando é READ-ONLY: valida as precondições ANTES da conversão e nunca
  * converte o PR — o ato Draft → Ready e o Human Gate seguem sendo atos
@@ -24,6 +25,7 @@ import { parse as parseYaml } from "yaml";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { runGovernancePrCheck } from "./governance-pr-check.js";
+import { normalizePrBody, resolveVersionedPrBodyPath } from "./prBodyVersioned.js";
 import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
 import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
 import { collectFunctionalFreshness } from "./reviewFreshness.js";
@@ -55,6 +57,7 @@ export interface ReadyCheckReviewStatus {
   readonly decision: string | null;
   readonly blocking: boolean;
   readonly source: string;
+  readonly notes?: ReadonlyArray<string>;
   /** Conflitos de policy (mesma prioridade, valores incompatíveis) — falham o check. */
   readonly errors: ReadonlyArray<string>;
 }
@@ -65,6 +68,8 @@ export interface ReadyCheckCheckpoint {
   readonly gateDecision: "approved" | "changes_requested" | null;
   readonly openBlockingCount: number;
   readonly reviewDecisions: ReadonlyArray<{ readonly role: string; readonly decision: string }>;
+  /** Decisões humanas pendentes no plano situado de reviews do PR. */
+  readonly reviewPlanDecisionReasons?: ReadonlyArray<string>;
   readonly reviewStatuses: ReadonlyArray<ReadyCheckReviewStatus>;
 }
 
@@ -82,6 +87,8 @@ export interface ReadyCheckSnapshot {
   readonly checks: ReadonlyArray<{ readonly name: string; readonly bucket: string }>;
   /** Razões de falha do contrato READY do body (governance-pr-check com isDraft=false). */
   readonly readyBodyContractReasons: ReadonlyArray<string>;
+  /** Razões de divergência entre o body publicado no GitHub e o body versionado no repo. */
+  readonly versionedPrBodyReasons?: ReadonlyArray<string>;
   /** SHA do HEAD local (null = indisponível). */
   readonly localHeadSha: string | null;
   /** Working tree local limpa (null = indisponível). */
@@ -148,6 +155,44 @@ export function normalizeCheckRuns(
 export function evaluateReadyPreconditions(snapshot: ReadyCheckSnapshot): ReadyCheckResult {
   const result = derivePrReadyFlow(prReadyFlowFactsFromReadySnapshot(snapshot));
   return { ok: result.failures.length === 0, failures: result.failures, warnings: result.warnings };
+}
+
+function collectVersionedPrBodyReasons(input: {
+  readonly repoRoot: string;
+  readonly pr: ReadyCheckPr;
+}): string[] {
+  const parsed = parseSpecBranch(input.pr.headRefName);
+  if (!parsed) return [];
+
+  let file: string;
+  try {
+    file = resolveVersionedPrBodyPath({
+      repoRoot: input.repoRoot,
+      prNumber: input.pr.number,
+      specId: parsed.specId,
+    });
+  } catch (error) {
+    return [
+      `body versionado do PR #${input.pr.number} não pôde ser localizado: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    ];
+  }
+
+  if (!fs.existsSync(file)) {
+    return [`body versionado do PR #${input.pr.number} não encontrado: ${file}.`];
+  }
+
+  const local = normalizePrBody(fs.readFileSync(file, "utf8"));
+  const remote = normalizePrBody(input.pr.body);
+  if (local === remote) return [];
+
+  return [
+    `body publicado do PR #${input.pr.number} diverge do body versionado (${path.relative(
+      input.repoRoot,
+      file
+    )}); rode pr-body:pull ou pr-body:publish antes de Ready.`,
+  ];
 }
 
 // ── Coleta do snapshot (gh + git + artefatos locais) ─────────────────────────
@@ -366,7 +411,15 @@ function collectCheckpoint(
       labels: prLabels,
       changedPaths,
     },
-    ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+    ...(nodeCtx?.overrides || nodeCtx?.reviewPlanOverrides
+      ? {
+          nodeOverrides: {
+            ...(nodeCtx.overrides ?? {}),
+            ...(nodeCtx.reviewPlanOverrides ?? {}),
+          },
+        }
+      : {}),
+    ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
     observed: observedReviewStates(artifacts, cursor),
     functionalHead: freshness.effectiveFunctionalHead,
   });
@@ -376,6 +429,7 @@ function collectCheckpoint(
     gateDecision: entry?.gate?.decision ?? null,
     openBlockingCount: entry?.openBlocking.length ?? 0,
     reviewDecisions: entry?.reviewDecisions ?? [],
+    reviewPlanDecisionReasons: nodeCtx?.reviewPlanIssues ?? [],
     reviewStatuses: statuses.map((s) => ({
       typeId: s.typeId,
       applicability: s.applicability,
@@ -384,6 +438,7 @@ function collectCheckpoint(
       decision: s.decision,
       blocking: s.blocking,
       source: s.requirementSource,
+      notes: s.notes,
       errors: s.errors,
     })),
   };
@@ -480,12 +535,14 @@ export class GhSnapshotCollector implements SnapshotCollector {
       new NodeWorkflowFileSystem(repoRoot)
     );
     const readyBodyContractReasons = bodyResult.kind === "fail" ? bodyResult.reasons : [];
+    const versionedPrBodyReasons = collectVersionedPrBodyReasons({ repoRoot, pr });
 
     const status = gitOrNull(repoRoot, ["status", "--porcelain"]);
     return {
       pr,
       checks,
       readyBodyContractReasons,
+      versionedPrBodyReasons,
       localHeadSha: gitOrNull(repoRoot, ["rev-parse", "HEAD"]),
       workingTreeClean: status === null ? null : status === "",
       checkpoint: collectCheckpoint(repoRoot, pr.headRefName, pr.labels, changedPaths),
@@ -546,7 +603,7 @@ export function main(argv: ReadonlyArray<string> = [], options: MainOptions = {}
     logger.error(`❌ pr-ready:check — PR #${pr} NÃO está pronto para Ready:`);
     for (const failure of result.failures) logger.error(`   - ${failure}`);
     logger.error(
-      `\nSequência canônica: PR body final → CI verde no HEAD final → Draft → Ready → Human Gate → registro do gate → próximo checkpoint.`
+      `\nSequência canônica: plano situado de revisões decidido → PR body final → CI verde no HEAD final → reviews obrigatórios current+approved → Draft → Ready → Human Gate → registro do gate → próximo checkpoint.`
     );
     return 1;
   }

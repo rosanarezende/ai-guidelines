@@ -1,0 +1,30 @@
+node: intent
+sealed: false
+created-at: 2026-06-17
+
+id: intent-001
+title: Revamp do fluxo de onboarding
+status: active
+
+objective:
+  goal: reduzir o abandono de novos usuários no onboarding
+  success-signal: queda na taxa de abandono do fluxo
+  out-of-scope: não mexe em billing
+
+target-repos:
+  - acme-api
+  - acme-shell
+  - acme-mfe-identity
+
+contracts:
+  known:
+    - "api de onboarding (schema dos passos + eventos) — acme-api"
+
+breaks-into:
+  done:
+    - acme-api/deliv-101
+  active:
+    - acme-mfe-identity/deliv-120
+  draft:
+    - work: acme-shell/deliv-110
+      blocked-by: [acme-mfe-identity/deliv-120]

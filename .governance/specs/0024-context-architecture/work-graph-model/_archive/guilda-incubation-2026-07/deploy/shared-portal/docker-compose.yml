@@ -1,0 +1,24 @@
+name: governance-demo-shared-portal
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: governance-demo-shared-portal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-governance_portal}
+      POSTGRES_USER: ${POSTGRES_USER:-governance}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local}
+    ports:
+      - "${GOVERNANCE_PORTAL_POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - governance-portal-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+volumes:
+  governance-portal-postgres-data:

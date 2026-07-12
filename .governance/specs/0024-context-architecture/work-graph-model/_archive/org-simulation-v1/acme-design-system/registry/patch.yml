@@ -1,0 +1,7 @@
+# registry/patch.yml — acme-design-system · índice kind=patch (→ active-work).
+entries:
+  - id: patch-310
+    title: corrige lint + bump do build tooling
+    status: done
+    intent: null # rotina/standalone
+    date: 2026-06-08

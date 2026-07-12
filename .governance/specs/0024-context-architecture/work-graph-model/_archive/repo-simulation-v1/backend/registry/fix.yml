@@ -1,0 +1,9 @@
+# registry/fix.yml — backend (acme-api). Virtual: a entrada É o trabalho (sem workspace).
+works:
+  - id: fix-001
+    kind: fix
+    title: tornar refresh de token robusto a clock-skew
+    status: done
+    intent: "errado: refresh falhava com clock-skew · correção: tolerância de 60s · verifiquei: teste novo verde"
+    spawned-by: inc-001
+    date: 2026-06-24

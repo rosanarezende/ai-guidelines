@@ -1,0 +1,33 @@
+{
+  "locale": "pt-br",
+  "noSourceDowngrade": "Sem fonte de trabalho: dá para planejar ciclos e registrar intenções (intake), mas execução, contratos e resultados ficam rebaixados a evidência manual/declarada — e isso aparece no placar.",
+  "kinds": [
+    {
+      "id": "git",
+      "name": "Repositório Git",
+      "desc": "GitHub, GitLab ou um clone local."
+    },
+    {
+      "id": "local",
+      "name": "Pasta local",
+      "desc": "Uma pasta no seu computador, sem Git."
+    },
+    {
+      "id": "mono",
+      "name": "Monorepo / módulo",
+      "desc": "Um módulo dentro de um repositório maior."
+    },
+    {
+      "id": "svc",
+      "name": "Serviço ou pacote",
+      "desc": "Algo publicado que você mantém."
+    },
+    {
+      "id": "ext",
+      "name": "Ferramenta externa",
+      "desc": "Jira, Linear, Notion… entra pelo catálogo de adapters.",
+      "disabled": true,
+      "tag": "Adapter futuro"
+    }
+  ]
+}

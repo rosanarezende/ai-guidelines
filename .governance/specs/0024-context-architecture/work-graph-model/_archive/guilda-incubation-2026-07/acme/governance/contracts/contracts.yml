@@ -1,0 +1,49 @@
+# contracts.yml — contratos vivos. Um contrato NASCE quando um repo publica interface que outros consomem.
+# MUDA por revisão (review do owner); revisão com QUEBRA abre a janela de compatibilidade (mora AQUI).
+contracts:
+  - id: acme-user-context
+    revision: v3
+    owner-repo: acme-web-host
+    consumers: [acme-mfe-billing, acme-mfe-onboarding, acme-checkout]
+    compatibility-window: null # abre quando a v4 (com quebra) publicar — ver intent-checkout-stack
+    interface:
+      kind: object
+      version: v3
+      fields:
+        - { name: sessionId, type: string, required: true }
+        - { name: accountId, type: string, required: true }
+        - { name: userContextVersion, type: string, required: true }
+        - { name: entitlements, type: "string[]", required: true }
+    revision-proposals:
+      - id: acme-user-context-v4-coordenada
+        revision: v4
+        breaking: true
+        intents: [intent-checkout-stack, intent-consent-center]
+        consumers: [acme-mfe-billing, acme-mfe-onboarding, acme-checkout]
+        owner-approval: head-platform
+        decision: single-revision
+        compatibility-window: "v3+v4 até consumidores migrarem; janela revisada no release-rollout"
+  - id: acme-design-tokens
+    revision: v2
+    owner-repo: acme-design-system
+    consumers: [acme-mfe-billing, acme-mfe-onboarding, acme-checkout]
+    compatibility-window: null
+  - id: acme-events-schema
+    revision: v1
+    owner-repo: acme-analytics
+    consumers: [acme-mfe-billing, acme-mfe-onboarding, acme-checkout, acme-checkout-api]
+    compatibility-window: null
+    interface:
+      kind: event-schema
+      version: v1
+      fields:
+        - { name: name, type: string, required: true }
+        - { name: accountId, type: string, required: true }
+        - { name: occurredAt, type: iso-date-time, required: true }
+        - { name: properties, type: object, required: false }
+      events:
+        - billing_upgrade_viewed
+        - checkout_started
+        - checkout_completed
+        - onboarding_step_seen
+        - experiment_exposure

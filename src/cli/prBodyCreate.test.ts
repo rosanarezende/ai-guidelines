@@ -54,7 +54,7 @@ describe("CLI — pr-body:create [BR-PR-BODY-CREATE]", () => {
     ]);
   });
 
-  it("gera execution body contextual por slots do template para open-next-node", () => {
+  it("gera execution body contextual por slots do template para open-next-topology-node", () => {
     const body = buildNextNodePrBody({
       specId: "0024",
       currentNodeId: "co-flow-convergence",
@@ -70,10 +70,22 @@ describe("CLI — pr-body:create [BR-PR-BODY-CREATE]", () => {
     expect(body).toContain("<summary><strong>Escopo técnico e limites</strong></summary>");
     expect(body).toContain("### Dentro do escopo");
     expect(body).toContain("### Fora do escopo");
-    expect(body).toContain("Abrir co-flow-continuation como próximo PR stacked da Spec 0024");
+    expect(body).toContain(".governance/visual-prompts/pr-intended-vision.prompt.md");
+    expect(body).toContain("{{context}} = PR governado co-flow-continuation da Spec 0024");
+    expect(body).toContain("{{localContext}} =");
+    expect(body).toContain("sourceOfTruth:");
     expect(body).toContain(
-      "Este PR abre o próximo nó governado da Spec 0024: `co-flow-continuation`."
+      "MODO CLI DIRETA: este bloco não é um prompt final para gerador de imagem."
     );
+    expect(body).toContain(
+      "substitua este briefing por um bloco `Prompt final — visão pretendida`"
+    );
+    expect(body).not.toContain('FAIXA 1 — "Hoje"');
+    expect(body).not.toContain("TRILHO DE AUTORIDADE");
+    expect(body).toContain(
+      "Este PR inicia a entrega governada `co-flow-continuation` da Spec 0024."
+    );
+    expect(body).toContain("Reescreva este resumo em linguagem humana antes da revisão");
     expect(body).toContain("co-flow-continuation");
     expect(body).toContain("checkpoint-co-flow-continuation");
     expect(body).toContain("## Valor entregue");

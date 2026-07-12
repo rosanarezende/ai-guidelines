@@ -1,0 +1,20 @@
+schema_version: 1
+kind: pr-continuation-package
+prepared_at: 2026-07-11
+source:
+  spec: "0024"
+  pr: 45
+  body: ../../body.md
+continuation:
+  slug: internal-architecture-refactor-ddd-bdd
+  title: Internal architecture refactor DDD BDD
+  target: internal-architecture-refactor-ddd-bdd
+  base: feat/spec-0024-artifact-taxonomy-and-model-review-contract
+  head: feat/spec-0024-internal-architecture-refactor-ddd-bdd
+  body_file: body.md
+guardrails:
+  creates_pr_without_confirm: false
+  marks_ready: false
+  records_human_gate: false
+  merges: false
+  advances_topology: false

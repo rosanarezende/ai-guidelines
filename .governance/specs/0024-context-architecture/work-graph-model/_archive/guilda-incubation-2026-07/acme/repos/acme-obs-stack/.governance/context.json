@@ -1,0 +1,46 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-obs-stack",
+  "owner": "time-sre",
+  "role": "observability-platform",
+  "domain": "reliability",
+  "modules": [],
+  "provides": [
+    {
+      "name": "slo-snapshots",
+      "kind": "metric-source",
+      "status": "active"
+    },
+    {
+      "name": "incident-alerts",
+      "kind": "telemetry-source",
+      "status": "active"
+    }
+  ],
+  "consumes": [],
+  "capabilities": [
+    {
+      "text": "Alerts, SLOs, tracing and p99 snapshots.",
+      "tags": ["alertas", "slo", "tracing"]
+    },
+    {
+      "text": "Operational outcome attestation for latency and incident-count metrics.",
+      "tags": ["atesta-outcomes", "observabilidade"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript"],
+    "patterns": ["telemetry-source", "slo-snapshot"],
+    "boundaries": ["incident-source", "operational-attester"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-obs-stack",
+    "dependencies": []
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": ["incidentAlert", "p99Latency", "recordTrace", "sloSnapshot"],
+    "sourceHash": "06ed6090ba30"
+  },
+  "contentHash": "ef01ac401036"
+}

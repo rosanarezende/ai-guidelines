@@ -1,3 +1,10 @@
+---
+artifact-kind: pre-coding-review
+subject: "falsificacao pre-implementacao do modelo de mapa e inventario do PR 44"
+date: 2026-06-22
+disposition: evidence
+---
+
 # PR #44 — Revisão de falsificação pré-implementação do modelo de mapa/inventário
 
 Data: 2026-06-22

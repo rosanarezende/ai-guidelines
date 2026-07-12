@@ -1,3 +1,7 @@
+---
+artifact-kind: handoff-legacy
+---
+
 > ⚠️ **HISTÓRICO — NÃO USAR PARA RETOMADA (marcado em 2026-06-11).** Snapshot do estado de
 > 2026-06-07 (abertura do CO-1→CO-2). Sucedido na prática por
 > `2026-06-07-checkpoint-handoff-co-2.md` (também histórico). A retomada atual é derivada:

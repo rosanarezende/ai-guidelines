@@ -1,3 +1,10 @@
+---
+artifact-kind: pre-coding-review
+subject: "falsificacao da hipotese de decomposicao do PR 44"
+date: 2026-06-22
+disposition: evidence
+---
+
 # PR #44 — Revisão de falsificação da hipótese de decomposição (decidir agora, migrar depois)
 
 Data: 2026-06-22

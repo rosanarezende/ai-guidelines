@@ -1,0 +1,14 @@
+# registry/delivery.yml — acme-design-system · índice kind=delivery (→ active-work).
+entries:
+  - id: deliv-130
+    title: tokens v2 (cores + tipografia)
+    status: done
+    intent: intent-003
+    date: 2026-06-10
+  - id: deliv-210
+    title: componente de formulário validado (login)
+    status: active
+    intent: intent-004
+    workspace: works/delivery_login-form/ # denso
+    # destravada por q1/exploration-301 (sem derives-from: exploration-301 foi throwaway, sem POC)
+    date: 2026-06-29

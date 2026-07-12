@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-22 — **`[DEC-0024-G21]` registrada**: o dogfood do PR #44 substitui a leitura `CO-10.8.*` por checkpoints semânticos, registra o guardrail de "sem débito arquitetural silencioso" e define que a próxima implementação deve materializar a taxonomia de artefatos e o review pré-codificação como contrato real, sem mover `.specify` fora do `dualroot-collapse`.
+> Última atualização: 2026-07-12 — **`[DEC-0024-G30]` registrada**: reviews obrigatórias já aprovadas podem ter revalidação dispensada por decisão humana situada quando um delta posterior é apenas cleanup/advisory; a lane continua `stale` como fato histórico, mas deixa de bloquear Ready com warning explícito. Antes — **`[DEC-0024-G29]` registrada**: eventos de verificação `scope: findings` podem resolver a decisão efetiva de uma lane de review quando cobrem todos os findings emitidos por aquela lane, sem reescrever o review original.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -603,17 +603,302 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G22] Vocabulário de modelagem: Spec › Frente › Checkpoint › Etapa › Tarefa
+
+**Pergunta:** Como nomear, de forma humana e estável, o nível de agrupamento acima de checkpoint — sem reusar "nó" (confunde com grafo/topologia) nem "Fase" (colide com usos legados em `tasks.md`) — e como resolver a tensão estrutural do #45?
+
+**Modo de gate:** `aceitação` <!-- decisão de vocabulário da owner, 2026-06-22, após mapa V4 e investigação empírica de colisão (`research/2026-06-22-checkpoint-artifact-taxonomy-map-v4-nomenclature-review.md`). -->
+
+**Contexto:** A V3/V4 testaram um vocabulário humano para acompanhar a spec. A revisão de confronto da V4 mediu a colisão empírica dos candidatos (`git grep` em `.md/.yml/.html`): `bloco` 1058, `fase` 543 (incl. `Fase de Absorção/Review/Encerramento` no próprio `tasks.md`), `camada` 201, `frente` 42 (quase tudo o idioma "à frente"). "Frente" tem a menor colisão real entre os nomes com sentido de _span_ e já é usado informalmente no repo (`Frente C+D`). A V4 também expôs uma incoerência: o nó `artifact-taxonomy-and-model-review-contract` (#45) tem `sequence: 12` em `state.yml § topology`, mas um comentário dizia que "não é um novo nó topológico".
+
+**Decisão (Resolved):**
+
+- Adotar o vocabulário humano de modelagem: **Spec › Frente › Checkpoint › Etapa › Tarefa**.
+- **Frente** = termo humano para um agrupamento de trabalho maior que checkpoint. É **projeção/leitura derivada** de um conjunto ordenado de nós/checkpoints de `state.yml § topology` — **não** é nova SSOT, nem novo campo obrigatório de `state.yml`, nem segunda topologia.
+- **Rejeitar `Fase`** para esse uso, por colisão forte com os usos legados em `tasks.md` (Setup/Absorção/Review/Encerramento, que são **estágios de lifecycle** — sentido diferente). Os headers históricos permanecem como registro; o termo humano para agrupamento passa a ser "Frente".
+- **Checkpoint** = entrega governada e revisável (normalmente com PR principal claro). **Etapa** = subdivisão opcional dentro de checkpoint grande (ex-"sub-checkpoint"). **Tarefa** = folha executável ou evidência, sem autoridade. **PR** = contêiner de revisão no GitHub, **não** unidade de autoridade do lifecycle (ADR 0025).
+- **Níveis intermediários são opcionais:** nem toda Frente precisa de Checkpoints+Etapas+Tarefas; a profundidade acompanha o tamanho real do trabalho.
+- **Como gaps entram no modelo (via `GG-0005`, sem débito silencioso):** (a) absorver no checkpoint atual; (b) virar etapa explícita; (c) virar checkpoint novo; (d) virar frente futura; (e) rejeitar por DEC. Gap sem uma dessas disposições registrada na casa governada = débito silencioso, vetado.
+- **Resolver a tensão do #45:** `artifact-taxonomy-and-model-review-contract` **é** um nó topológico ativo (`sequence: 12`, `github_pr: 45`), _stacked_ sobre `co-flow-continuation` (#44, seq 11). O comentário que dizia "não é um novo nó" foi removido de `state.yml`, que segue a SSOT estrutural. "Frente" não vira campo de `state.yml`; permanece como leitura derivada (V4 + este DEC).
+
+**Impacto esperado:**
+
+- Acompanhamento humano da spec ganha vocabulário estável e de baixa colisão, sem criar segunda fonte de verdade.
+- `state.yml` fica honesto sobre o #45 (estrutura e comentário concordam).
+- A V4 (`assets/spec-0024-map-v4.html`) deixa de ser "experimental" e passa a projetar uma decisão governada — continuando projeção, não SSOT.
+
+**O que NÃO está sendo decidido:** implementar a taxonomia de artefatos ou o tipo governado `model-review`; criar campo `frente` em `state.yml`; renomear os headers históricos de `tasks.md`; alterar sequência/ordem/cursor da topologia; executar Ready, Human Gate, merge, `advance-subcheckpoint`, `finish-subcheckpoint` ou `mark-readiness`.
+
+**Status:** Resolved (2026-06-22) / @rosanarezende — adoção do vocabulário de modelagem e reconciliação da tensão estrutural do #45.
+
+---
+
+### [DEC-0024-G23] Extensão de G08: grafo de governança derivado, entrega incremental e camada de consulta
+
+**Pergunta:** A dor de "prova de valor só no fim" + as hipóteses de grafo de governança operacional, graph snapshot derivado e banco orientado a grafo (compilado `research/2026-06-23-governance-graph-incremental-delivery-and-query-layer-direction.md`) exigem nova spec/frente/repo, ou cabem na 0024 estendendo `[DEC-0024-G08]`?
+
+**Modo de gate:** `aceitação` <!-- decisão de direção da owner, 2026-06-23, após auditoria decidido-vs-aberto (`research/2026-06-23-governance-model-question-audit.md`) e três revisões externas registradas no compilado. -->
+
+**Contexto:** `[DEC-0024-G08]` (2026-06-03) já fixou que a direção orientada a grafo vive DENTRO da 0024 e rejeitou uma 0025 independente, reabrindo G03/G04/G05 para modelagem. O compilado de 2026-06-23 levanta três dimensões adicionais — (H1) grafo de **governança operacional** (distinto do `KnowledgeGraph`, hoje knowledge-only em `src/app/projections/`); (H3) **entrega incremental com prova de valor** (a etapa ativa diz "Não é prova mínima" = ausência de conceito governado); (H4) **camada de consulta** (graph snapshot derivado e, no futuro, banco orientado a grafo para site/simulador/dashboards/cross-repo). A auditoria mostrou que essas dimensões ou já têm casa nas etapas planejadas ou são lacunas novas roteáveis — nenhuma exige nova spec.
+
+**Decisão (Resolved):**
+
+- **Estender o envelope de `[DEC-0024-G08]`, sem superseder:** H1/H3/H4 permanecem DENTRO da 0024. **Sem spec/frente/repo novo** (o mérito não atinge o limiar de reabrir G08).
+- **Derived-only / sem 2ª SSOT (invariante dura):** grafo de governança, **graph snapshot** e qualquer **banco orientado a grafo** são **projeções estritamente derivadas e regeneráveis** do repo versionado (`state.yml`/`tasks.md`/`decision-brief.md`/reviews/gates/Git). O repo permanece SSOT; banco/snapshot **não decidem** e **não governam** (reafirma `[DEC-0024-G07]` "projeção NÃO governança", `research/2026-06-08-graph-store-options.md` e `GG-0005`). Adoção concreta de banco fica deferida ao spike `knowledge-graph-store-spike`.
+- **Roteamento por etapa (critérios de aceite, não nova topologia):**
+  - `internal-architecture-refactor-ddd-bdd` decide a **forma do grafo operacional** (estender `KnowledgeGraph` × novo bounded context × read-model acima de contexts) e o **contrato do graph snapshot derivado** (nodes/edges/source-refs/hashes, determinístico, regenerável, offline).
+  - `broad-flow-falsification` é dona do contrato `fixtures/journeys`, da unificação das fontes paralelas e da **falsificação de prova de valor** (a journey afirma _valor entregue_, não só _transição válida_), além da fronteira dogfood-humano × fixtures.
+  - `artifact-taxonomy-and-model-review-contract` (#45) mantém o escopo atual; ao materializar `kind`, projeta a taxonomia como **semente compatível com tipos de nó do grafo** (uma taxonomia, não duas) e fecha Decision/Review/Finding **no nível de taxonomia** (papel de nó/aresta deferido).
+- **Entrega incremental / prova de valor (H3)** é lacuna nova **sem casa de implementação ainda**: começa como modelagem leve (esta DEC + a falsificação de valor acima). Só vira **etapa própria** (`incremental-delivery-and-proof-of-value-model`, entre refactor e falsification) **se** um follow-up concluir que precisa de implementação dedicada — gate explícito, **sem reordenar** a sequência atual.
+- **Sequência preservada, modelagem aditiva:** _"modelar = adicionar projeção + contrato, não reescrever a árvore Markdown"_. G00/G02/G06/G07 seguem cravados; G01/G03/G04/G05 seguem as casas abertas/reabertas (o 7-MECE permanece em G01/`F-AG01`).
+
+**Impacto esperado:**
+
+- O modelo nasce preparado para exportação cross-repo (empresas/dashboards) **sem** nascer local demais e **sem** adotar banco agora.
+- A lacuna de prova de valor ganha rastreabilidade governada (não vira débito silencioso) sem inflar o #45.
+- As três etapas seguintes recebem critérios de aceite explícitos, mantendo a ordem.
+
+**O que NÃO está sendo decidido:** a forma concreta do grafo operacional (deferida a `internal-…-refactor`); adotar Neo4j ou qualquer banco (deferido ao spike); o schema final de prova de valor; identidade/segurança cross-repo (futuro); abrir nova spec/frente/repo; superseder G08, G22 ou qualquer eixo cravado; executar Ready, Human Gate, merge, advance, `mark-readiness` ou abrir PR.
+
+**Status:** Resolved (2026-06-23) / @rosanarezende — estende o envelope de G08 para grafo derivado + entrega incremental + camada de consulta, derived-only e sem 2ª SSOT.
+
+---
+
+### [DEC-0024-G24] Contrato de artifact-kind, disposição e pre-coding-review
+
+**Pergunta:** Como fechar o checkpoint `artifact-taxonomy-and-model-review-contract` sem transformar pesquisa, assets, handoffs ou a incubação Guilda em segunda fonte de autoridade, e sem perder o raciocínio produzido durante a tentativa de chegar à taxonomia proposta?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-07-10, após extração da Guilda para repositório irmão e reconciliação do work-graph-model como evidência da taxonomia. -->
+
+**Contexto:** O checkpoint #45 nasceu para materializar a taxonomia de artefatos e o contrato de review pré-codificação/model-review. Durante a execução, o `work-graph-model` incubou a Guilda Governance até ela ser extraída para repo próprio, produzindo QRDs, assets, testes, seeds, frontend/backend e documentação de produto. Esse volume ampliou o PR e expôs uma tensão: preservar a informação valiosa sem deixar que demos, projeções, assets ou arquivos legados pareçam estado vivo da Spec 0024. A revisão `research/2026-06-24-artifact-taxonomy-and-folder-model-review.md` já convergiu a distinção entre `artifact-kind` e uma dimensão de **disposição**; a matriz `work-graph-model/GUILDA-QRD-PRESERVATION-MATRIX.md` mapeia como as decisões da Guilda alimentam, mas não substituem, os objetivos do checkpoint.
+
+**Decisão (Resolved):**
+
+- `artifact-kind` permanece um conjunto fechado para artefatos de classe `research/` e `assets/`, distinto de `WorkItemKind` e da topologia da spec.
+- `disposition: living|evidence|legacy|open` vira dimensão ortogonal em `.core/governance/artifact-taxonomy.yml`. Ela descreve o papel atual do artefato no repositório, **sem conceder autoridade**.
+- `artifact-kind:check` continua brando para cobertura: arquivo sem `artifact-kind` não bloqueia. Mas qualquer artefato em `research/` ou `assets/` que declare `artifact-kind` ou `disposition` passa a ser validado contra o conjunto fechado.
+- `pre-coding-review` exige frontmatter mínimo `subject` e `date` (`YYYY-MM-DD`). O artefato continua advisory; findings só governam quando promovidos a DEC/task/review/gate.
+- A incubação Guilda fica arquivada em `work-graph-model/_archive/guilda-incubation-2026-07/` e a antiga pasta `governance-demo/` vira tombstone. Isso preserva histórico, QRDs, testes e assets como evidência/legado, não como produto vivo dentro deste repo.
+- O mapeamento `GUILDA-QRD-PRESERVATION-MATRIX.md` é aceito como ponte de preservação: ele mostra quais decisões alimentam `model.yml`, `tracker.md`, `features.md`, `integration-catalog.*` e quais foram migradas para o repo Guilda.
+- A reorganização física ampla sugerida no model-review (`falsifications/`, `evidence/`, `legacy/`) fica deferida. A disposição no frontmatter é o contrato mínimo do #45 para evitar débito silencioso sem mover toda a árvore agora.
+- O antigo Gap B ("comando para abrir próximo PR interno") fica diferido como automação futura; o protocolo interino em `research/2026-07-07-pr-continuation-protocol.md` é o contrato humano até o comando existir.
+
+**O que NÃO está sendo decidido:** declarar Ready; exercer Human Gate; fazer merge; fechar PR #45; abrir o próximo PR automaticamente; transformar a Guilda em produto vivo dentro de `ai-guidelines`; reverter a extração para repo irmão; exigir classificação universal de todos os Markdown legados; mover `research/` para `falsifications/`/`evidence/`/`legacy/`; transformar assets/projeções em SSOT.
+
+**Impacto esperado:**
+
+- O checkpoint passa a ter enforcement mecânico para kind inválido, disposição inválida e `pre-coding-review` incompleto.
+- A história da Guilda permanece auditável dentro da Spec 0024, mas claramente separada do produto ativo e da autoridade do framework `ai-guidelines`.
+- O próximo ciclo pode retomar o objetivo original do checkpoint com menos ambiguidade: taxonomia, model-review e preservação do aprendizado, não validação final do app Guilda.
+
+**Status:** Resolved (2026-07-10) / @rosanarezende — contrato de artifact-kind/disposition/pre-coding-review e disposição da incubação Guilda dentro do checkpoint #45.
+
+---
+
+### [DEC-0024-G25] Linguagem viva: trabalho governado e work graph
+
+**Pergunta:** Como nomear os mapas e projeções vivas depois dos aprendizados do `work-graph-model`, sem manter "spec" como centro conceitual e sem perder o identificador histórico `0024-context-architecture`?
+
+**Modo de gate:** `aceitação` <!-- decisão de linguagem/modelagem da owner, 2026-07-10, após revisão do mapa V5 e identificação de que "spec" confundia o entendimento da taxonomia. -->
+
+**Contexto:** `[DEC-0024-G22]` adotou o vocabulário humano **Spec › Frente › Checkpoint › Etapa › Tarefa** para resolver a leitura do mapa V4 e reduzir colisões com "Fase". Depois, o `work-graph-model` amadureceu: `model.yml` passou a ser o SSOT normativo do work graph, Guilda foi extraída para repo próprio e `[DEC-0024-G24]` separou `artifact-kind`, `disposition`, evidência histórica e produto vivo. Nesse ponto, continuar nomeando novas projeções como "mapa da spec" reforça uma leitura errada: a taxonomia não é "da spec"; é uma taxonomia de artefatos/evidências dentro de um **trabalho governado**.
+
+**Decisão (Resolved):**
+
+- **"Spec" permanece como invólucro histórico e caminho físico**, por compatibilidade com `.governance/specs/0024-context-architecture/`, PRs/branches existentes e documentação antiga.
+- **A linguagem viva para novas projeções, geradores e documentação operacional passa a ser "trabalho governado" e "work graph".**
+- Mapas futuros devem nomear o objeto como **Mapa Vivo do Trabalho Governado**, preservando `0024` apenas como identificador do recorte histórico: `Context Architecture / 0024`.
+- Scripts/geradores futuros devem preferir nomes como `governed-work-map:build` e `governed-work-map:check`, não `spec-map:*`.
+- `artifact-kind` é a taxonomia dos **artefatos** (`research/` e `assets/`), distinta de `WorkItemKind`, da topologia e do work graph.
+- `[DEC-0024-G22]` não é apagada: ela continua válida como decisão histórica do V4 e como explicação da transição. A partir desta DEC, porém, "Spec" não deve ser usado como centro conceitual das projeções vivas.
+
+**Consequências práticas:**
+
+- O `spec-0024-map-v5.html` passa a se apresentar como **Mapa Vivo do Trabalho Governado — Context Architecture / 0024**.
+- O eventual gerador vivo deve seguir o fluxo `SSOT governada -> modelo tipado -> projection`, sem criar segunda fonte de verdade.
+- O fluxo diário de PR deve proteger essa projeção: quando o diff tocar `state.yml`, o gerador `governedWorkMap.ts` ou os artefatos `assets/governed-work-map-*`, `validate:changed` deve executar `governed-work-map:check`.
+- O PR #45 continua sendo checkpoint de framework (`artifact-kind`, `disposition`, `pre-coding-review`, research-index e reconciliação), não readiness do produto Guilda.
+
+**O que NÃO está sendo decidido:** renomear fisicamente `.governance/specs/`; migrar todo histórico para outro diretório; abrir nova spec; alterar `state.yml`; declarar Ready/Human Gate; mudar a taxonomia fechada de `artifact-kind`.
+
+**Status:** Resolved (2026-07-10) / @rosanarezende — linguagem viva das projeções passa de "spec" para "trabalho governado" + "work graph", mantendo `0024` como identificador histórico.
+
+---
+
+### [DEC-0024-G26] Artefatos de Pull Request sob `pull-requests/pr-N/`
+
+**Pergunta:** `pr-bodies/` deve continuar como pasta isolada, enquanto continuações e assets específicos de PR nascem em outros lugares, ou o framework deve ter uma casa canônica por Pull Request para reunir body versionado, assets e pacotes de continuação?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-07-10, após QRD sobre PRs grandes, continuação governada e aprendizado do work-graph-model. -->
+
+**Contexto:** O PR #45 mostrou que PRs longos não são apenas problema de texto: eles precisam de um contêiner versionado para o que pertence ao PR, sem transformar GitHub em memória e sem espalhar `body`, assets e propostas de continuação por pastas paralelas. `pr-bodies/` nasceu dentro da Spec 0024 para resolver o body como fonte versionada, mas o próprio dogfood revelou uma organização melhor: o PR é uma superfície de revisão/projeção; portanto, seus artefatos devem ficar juntos por número de PR.
+
+**Decisão (Resolved):**
+
+- A casa canônica de artefatos versionados de PR passa a ser `pull-requests/pr-<n>/` dentro do trabalho governado.
+- O body versionado do PR passa a ser `pull-requests/pr-<n>/body.md`; a pasta isolada `pr-bodies/` deixa de ser o padrão.
+- Futuras automações de continuação devem usar o mesmo contêiner, por exemplo `pull-requests/pr-<n>/continuations/<date>-<slug>/`.
+- Assets específicos de PR devem ficar em `pull-requests/pr-<n>/assets/`; assets de valor geral continuam em `assets/` conforme `artifact-kind`/`disposition`.
+- O contêiner de PR é **projeção/evidência/revisão**, não autoridade de topologia. `state.yml`, `tasks.md`, `decision-brief.md`, reviews e gates continuam sendo as fontes governadas do trabalho.
+- Scripts `pr-body:check`, `pr-body:publish` e `pr-body:pull`, quando chamados com `--spec` + `--pr`, devem derivar o caminho `pull-requests/pr-<n>/body.md`.
+
+**Consequências práticas:**
+
+- O body do PR #45 migra de `pr-bodies/pr-45.md` para `pull-requests/pr-45/body.md`.
+- O mapa vivo e a documentação operacional passam a apontar para a nova casa.
+- A futura sequência `continuation:check -> continuation:prepare -> continuation:create-pr` deve produzir pacotes versionáveis sob `pull-requests/pr-N/continuations/`, com decisão humana explícita antes de qualquer criação de PR.
+
+**O que NÃO está sendo decidido:** criar automações de continuação nesta fatia; converter PR #45 para Ready; executar Human Gate; alterar a topologia; criar ou publicar novo PR; mover todo histórico antigo fora do PR #45; transformar o diretório de PR em SSOT do trabalho.
+
+**Status:** Resolved (2026-07-10) / @rosanarezende — pasta canônica de PR definida como `pull-requests/pr-N/`, com body versionado em `body.md` e espaço reservado para assets/continuations.
+
+---
+
+### [DEC-0024-G27] Fluxo governado de continuação de PR
+
+**Pergunta:** Depois de criar a casa `pull-requests/pr-N/`, o framework deve continuar dependendo apenas de um protocolo humano para PRs grandes, ou deve entregar um fluxo completo para diagnosticar, preparar e criar continuações de PR sem capturar decisões humanas?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-07-11, após concordância explícita com a sequência check/prepare/create-pr e com a regra de que a automação prepara/verifica, mas não decide Ready, Human Gate, merge ou avanço. -->
+
+**Contexto:** O PR #45 mostrou dois aprendizados simultâneos. Primeiro, PR grande precisa de um protocolo honesto para não misturar escopo, readiness e validação de produto. Segundo, apenas avisar o humano que há continuação pendente não é suficiente: sem pacote versionado, body inicial, briefing, branch proposta e cross-ref, o alerta vira trabalho manual solto. `[DEC-0024-G24]` aceitou um protocolo interino; `[DEC-0024-G26]` definiu a casa `pull-requests/pr-N/`. Esta DEC transforma o protocolo em automação segura.
+
+**Decisão (Resolved):**
+
+- Criar uma família de scripts `continuation:*` para PRs grandes e continuações governadas.
+- `continuation:check` é read-only no efeito governado: verifica se o PR tem casa versionada, body versionado, protocolo de continuidade e pacotes de continuação válidos. Ele não escreve, não cria branch e não cria PR.
+- `continuation:prepare` cria um pacote versionado sob `pull-requests/pr-<n>/continuations/<date>-<slug>/`, contendo `manifest.yml`, `body.md`, `briefing.md` e `commands.md`.
+- `continuation:create-pr` consome um pacote preparado. Sem `--confirm`, apenas imprime o comando de criação. Com `--confirm`, cria no máximo um **Draft PR** via `gh pr create --draft`.
+- Nenhum comando `continuation:*` pode declarar Ready, registrar Human Gate, fazer merge, alterar topologia ou avançar estado governado.
+- O pacote de continuação é evidência/projeção operacional, não SSOT. `state.yml`, `tasks.md`, `decision-brief.md`, reviews e gates continuam governando o trabalho.
+
+**Consequências práticas:**
+
+- O antigo Gap B deixa de ser apenas protocolo interino: passa a ter caminho executável, auditável e versionado.
+- PRs longos passam a ter uma forma segura de gerar a próxima superfície de revisão sem depender de memória de chat.
+- A owner ainda decide se quer criar o PR, quando criar e se a continuação deve avançar.
+
+**O que NÃO está sendo decidido:** converter PR #45 para Ready; exercer Human Gate; fazer merge; abrir PR automaticamente sem confirmação; alterar `state.yml`; criar nova frente/checkpoint; substituir `flow -- decide`; criar automação de merge/advance; transformar pacotes de continuação em autoridade de topologia.
+
+**Status:** Resolved (2026-07-11) / @rosanarezende — sequência `continuation:check -> continuation:prepare -> continuation:create-pr` adotada como fluxo completo e seguro para continuação governada de PR.
+
+---
+
+### [DEC-0024-G28] Disposição dos temas estruturais residuais antes do Ready do PR #45
+
+**Pergunta:** Como o checkpoint `artifact-taxonomy-and-model-review-contract` pode seguir para readiness sem fingir que resolveu todos os temas estruturais antigos (`G01`, `G03`, `G05`, `F-014`) e sem deixar dívida arquitetural silenciosa para os próximos checkpoints?
+
+**Modo de gate:** `aceitação` <!-- decisão de escopo/continuidade da owner, 2026-07-11, após revisão dos temas antigos ainda abertos no decision-brief e confirmação de que eles precisam ser roteados explicitamente antes do Ready do PR #45. -->
+
+**Contexto:** O PR #45 amadureceu a taxonomia de artefatos, a separação entre framework `ai-guidelines` e produto Guilda, a casa versionada de PRs e o fluxo governado de continuação. Mesmo assim, o `decision-brief` ainda listava como abertos ou residuais: estrutura/gramática (`G01`), pipeline de promoção (`G03`), projeções por consumidor (`G05`) e explicação do comportamento não-linear (`F-014`). O risco não é técnico imediato, mas de leitura: declarar readiness do PR #45 poderia parecer fechamento global desses temas, quando o PR atual só fecha a parte de taxonomia/contrato de artefatos.
+
+**Decisão (Resolved):**
+
+- O PR #45 fecha apenas a **gramática de artefatos e evidências**: `artifact-kind`, `disposition`, autoridade por domínio, projeções como não-autoridade, `pre-coding-review`/model-review e casa versionada de PRs.
+- O PR #45 **não** fecha a gramática completa do modelo operacional, o pipeline completo de promoção de work-items, todas as projeções por consumidor, nem a explicação final do comportamento não-linear.
+- `G01` fica dividido:
+  - gramática de artefatos/evidências: fechada neste PR;
+  - gramática operacional do work graph/runtime: critério explícito de `internal-architecture-refactor-ddd-bdd`.
+- `G03` passa a ser critério explícito de `broad-flow-falsification`: o próximo fluxo de falsificação deve provar quando um work-item muda de estado, quando uma promoção é apenas contextual/projetada e quando autoridade humana é exigida.
+- `G05` fica dividido:
+  - regras de projeção como não-autoridade: fechadas neste PR;
+  - contrato do graph snapshot derivado: critério explícito de `internal-architecture-refactor-ddd-bdd`;
+  - projeções por consumidor real (CLI, site, PR body, checks, mapas, jornadas): critério explícito de `broad-flow-falsification`.
+- `F-014` não bloqueia o PR #45, mas deixa de ser invisível: a explicação do comportamento não-linear deve aparecer como projeção viva/mapa ou como jornada falsificada em `broad-flow-falsification`; se continuar opcional, precisa ser rebaixada explicitamente por revisão final, não por esquecimento.
+- A matriz `work-graph-model/GUILDA-QRD-PRESERVATION-MATRIX.md` vira insumo obrigatório dos próximos checkpoints da continuação: ela não reativa o produto Guilda dentro deste repositório, mas registra quais aprendizados do incubador (`model.yml`, `tracker.md`, `features.md`, QRDs, seeds/fixtures, contratos, adapters e separação identity/governance/content) precisam ser aplicados, migrados ao repo Guilda, arquivados como evidência ou rebaixados explicitamente.
+- `continuation-review-human-gate` deve verificar se essas disposições foram cumpridas, rebaixadas por decisão explícita ou ainda bloqueiam o fechamento da continuação.
+
+**Consequências práticas:**
+
+- O `Valor entregue` do PR #45 deve declarar que a taxonomia/contrato de artefatos foi entregue sem validar o app Guilda e sem fechar toda a gramática operacional.
+- O pacote de continuação para `internal-architecture-refactor-ddd-bdd` deve tratar `G01/G05` como entradas explícitas do refactor, não como contexto solto.
+- O pacote de continuação para `internal-architecture-refactor-ddd-bdd` deve listar como leituras obrigatórias `work-graph-model/model.yml`, `work-graph-model/tracker.md`, `work-graph-model/features.md` e `work-graph-model/GUILDA-QRD-PRESERVATION-MATRIX.md`, usando-os para a gramática operacional e para o contrato do graph snapshot derivado.
+- `broad-flow-falsification` deve carregar `G03/G05/F-014` e as categorias da matriz da Guilda como critérios de falsificação, reduzindo o risco de uma suíte que só prove transições felizes.
+- A revisão final `continuation-review-human-gate` deve produzir uma disposição explícita para os aprendizados relevantes da matriz: aplicado no framework, migrado ao repo Guilda, preservado como legado/evidência ou rebaixado com justificativa.
+- A readiness do PR #45 passa a depender de honestidade de escopo, não de resolver todos os temas estruturais históricos.
+
+**O que NÃO está sendo decidido:** implementar o graph snapshot agora; reescrever `src/cli`; criar nova spec; declarar Ready; exercer Human Gate; fechar `G03/G05/F-014` por declaração; transformar o mapa visual em SSOT; promover automaticamente qualquer work-item; criar adapter de banco/grafo.
+
+**Status:** Resolved (2026-07-11) / @rosanarezende — temas estruturais residuais roteados explicitamente para PR #45, `internal-architecture-refactor-ddd-bdd`, `broad-flow-falsification` e `continuation-review-human-gate`.
+
+---
+
+### [DEC-0024-G29] Decisão efetiva de review após verificação completa de findings
+
+**Pergunta:** Quando uma Technical Audit ou Architectural Review emite `changes_requested`, e depois um evento de verificação `scope: findings` aprova todos os achados daquela lane sem novo delta funcional, o framework deve exigir um novo evento `scope: review` apenas para mudar a decisão efetiva, ou pode derivar a aprovação da lane a partir da cobertura completa dos findings?
+
+**Modo de gate:** `aceitação` <!-- decisão de processo/review da owner, 2026-07-11, após a revalidação da Technical Audit do PR #45 expor deadlock entre review append-only, findings verificados e Ready check. -->
+
+**Contexto:** A revalidação da Technical Audit do PR #45 criou um evento `scope: findings`, `decision: approved`, cobrindo F1-F5. Esse evento provava que os achados foram corrigidos e mantinha a lane `current`, mas a decisão efetiva permanecia `changes_requested` porque o código só aceitava `scope: review` para substituir a decisão do review original. Isso criava um deadlock: a auditoria estava revalidada, não havia novo delta funcional a auditar, mas o Ready continuaria bloqueado até um novo evento de review inteiro, mesmo sem trabalho novo.
+
+**Decisão (Resolved):**
+
+- O artefato de review original permanece imutável e histórico: sua decisão declarada não é reescrita.
+- A decisão **efetiva** usada por `review:check`/`pr-ready:check` pode ser derivada por eventos posteriores.
+- Um evento `scope: review` continua substituindo diretamente a decisão efetiva da lane, desde que seu `subject_ref` esteja current.
+- Um evento `scope: findings`, `decision: approved`, substitui a decisão efetiva da lane para `approved` **somente quando a verificação mais recente de cada finding emitido pelo review original também estiver approved**.
+- Um evento `scope: findings` parcial não aprova a lane inteira.
+- Um evento `scope: findings` posterior com decisão não-aprovada sobre qualquer finding daquela lane reabre a decisão efetiva da lane.
+- Reviews sem findings emitidos não podem ser aprovados por `scope: findings`; nesses casos, a única forma de substituir a decisão efetiva é `scope: review`.
+- Essa regra é derivação de estado observado, não mutação do ledger: events continuam append-only.
+
+**Consequências práticas:**
+
+- Uma auditoria com `changes_requested` pode ser fechada honestamente por uma rodada de verificação de achados, sem exigir um review inteiro artificial quando não há novo delta funcional.
+- `pr-ready:check` deixa de criar deadlock quando todos os findings de uma lane obrigatória foram verificados e aprovados.
+- Revalidações parciais continuam seguras: elas atualizam cobertura/freshness, mas não removem o bloqueio de decisão enquanto existir finding daquela lane sem aprovação efetiva.
+- Uma regressão encontrada numa verificação posterior volta a bloquear a lane, sem apagar o histórico aprovado anterior.
+
+**O que NÃO está sendo decidido:** pular Technical Audit ou Architectural Review obrigatórias; transformar eventos de findings em Human Gate; reescrever reviews selados; declarar Ready; registrar aprovação humana; criar review sem artefato; permitir que verificação parcial destrave uma lane inteira.
+
+**Status:** Resolved (2026-07-11) / @rosanarezende — `scope: findings` aprovado e completo passa a poder resolver a decisão efetiva da lane, com regressão posterior reabrindo o bloqueio.
+
+---
+
+### [DEC-0024-G30] Dispensa governada de revalidação para review obrigatória stale+approved
+
+**Pergunta:** Quando uma Technical Audit ou Architectural Review obrigatória já está efetivamente `approved`, mas um delta posterior de baixa criticidade deixa a lane `stale`, o framework deve exigir sempre uma nova rodada completa de review, ou a owner pode dispensar a revalidação daquele delta com justificativa explícita?
+
+**Modo de gate:** `aceitação` <!-- decisão de processo/review da owner, 2026-07-12, após a própria higienização de findings low/advisory do PR #45 expor excesso de ritual em revalidar TA/AR completas sem novo risco proporcional. -->
+
+**Contexto:** A TA e a AR do PR #45 cumpriram seu papel: emitiram achados, os achados foram corrigidos/verificados, e a tese arquitetural foi aprovada. Em seguida, a própria limpeza de pontos low/advisory e a melhoria da máquina de review avançaram a cabeça funcional. Pela regra anterior, qualquer avanço funcional tornava reviews obrigatórias `stale` e bloqueava Ready até nova TA/AR, mesmo quando o delta posterior era explicitamente aceito pela owner como baixo risco e coberto por testes/CI. Isso transformava o controle em ritual: correto na forma, mas pouco útil na substância.
+
+**Decisão (Resolved):**
+
+- O fato histórico não é alterado: uma review que ficou `stale` continua sendo reportada como `stale`.
+- A decisão declarada no review original continua append-only e imutável.
+- `state.yml § topology.prs.active[].review_plan.<type>.revalidation` passa a modelar a decisão humana situada sobre revalidar ou não uma lane obrigatória já aprovada.
+- `revalidation.owner_decision` aceita `pending`, `waived` ou `required`.
+- `pending` bloqueia Ready por honestidade: se a owner ainda não decidiu se precisa revalidar, o PR não deve seguir.
+- `waived` exige `actor` e `reason`; sem ambos, o estado é inválido.
+- `waived` só remove o bloqueio quando a lane é `required`, está `stale` e a decisão efetiva observada é `approved`.
+- `waived` **não** remove bloqueio de review ausente, review `changes_requested`, review `blocked`, erro de policy ou finding critical/high sem disposição.
+- `required` preserva o bloqueio normal: se a owner decide que aquele delta precisa nova TA/AR, `pr-ready:check` continua exigindo revalidação.
+- `pr-ready:check` deve emitir warning quando um review obrigatório stale+approved foi dispensado, para o PR não mentir que a lane está current.
+
+**Consequências práticas:**
+
+- O framework passa a distinguir controle real de cerimônia: deltas low/advisory podem ser aceitos por decisão humana explícita sem reabrir uma auditoria inteira.
+- A trilha continua auditável: quem dispensou, por quê, e qual review ficou stale permanecem no estado governado.
+- O Human Gate continua informado: a ausência de bloqueio não apaga o warning nem transforma stale em current.
+- Reviews obrigatórias continuam fortes para riscos reais: falta de review, decisão não aprovada e achados bloqueantes seguem impedindo Ready.
+
+**O que NÃO está sendo decidido:** pular TA/AR obrigatórias iniciais; permitir que agente dispense revisão sozinho; transformar `waived` em aprovação técnica; esconder stale; reduzir exigência para critical/high; declarar Ready; exercer Human Gate; fazer merge.
+
+**Status:** Resolved (2026-07-12) / @rosanarezende — revalidação de review obrigatória stale+approved pode ser dispensada por decisão humana situada, com warning e sem fingir freshness.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
 
-| Tema                                            | Finding            | Por que ainda é pesquisa                                                                          |
-| :---------------------------------------------- | :----------------- | :------------------------------------------------------------------------------------------------ |
-| Estrutura/gramática (ex-`G01`)                  | `F-AG01` / `F-003` | pilares MECE vs reframe _estados > entidade_; `terminus` não falsificado — alternativas vivas     |
-| Pipeline de promoção (ex-`G03`)                 | `F-AG03`           | reconciliar promoção de work-item (ADR 0010) × promoção contextual — desenho em aberto            |
-| Contrato de boilerplate / casa única (ex-`G04`) | `F-AG04`           | modelo de fonte única (tri-root → SSOT) em aberto; o **drift-guard** já vira enforcement (§ 4)    |
-| Projeções por consumidor (ex-`G05`, resíduo)    | `F-AG05`           | modelo de N projeções da SSOT; a projeção _gate-ready_ já **saiu daqui** (virou GG-0001, § 3/§ 4) |
-| Explicação do comportamento não-linear          | `F-014`            | 3 explicações concorrentes, nenhuma decidida — **opcional, baixa prioridade**                     |
+| Tema                                            | Finding            | Por que ainda é pesquisa                                                                                                        |
+| :---------------------------------------------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| Estrutura/gramática (ex-`G01`)                  | `F-AG01` / `F-003` | artefatos/evidências fecham no #45; gramática operacional vai para `internal-architecture-refactor-ddd-bdd` por G28             |
+| Pipeline de promoção (ex-`G03`)                 | `F-AG03`           | reconciliar promoção de work-item (ADR 0010) × promoção contextual — critério de `broad-flow-falsification` por G28             |
+| Contrato de boilerplate / casa única (ex-`G04`) | `F-AG04`           | modelo de fonte única (tri-root → SSOT) em aberto; o **drift-guard** já vira enforcement (§ 4)                                  |
+| Projeções por consumidor (ex-`G05`, resíduo)    | `F-AG05`           | projeções como não-autoridade fecham no #45; graph snapshot vai para refactor; consumidores reais vão para falsificação por G28 |
+| Explicação do comportamento não-linear          | `F-014`            | baixa prioridade, mas com casa explícita: mapa/projeção viva ou jornada em `broad-flow-falsification` por G28                   |
 
 ---
 
@@ -654,30 +939,39 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 > Os IDs `[DEC-0024-G##]` permanecem **âncoras estáveis** (citados em findings, ADRs, git, handoffs) — mas **não organizam mais a leitura**. Mapa de equivalência:
 
-| ID histórico | Tema                                                        | Estado atual                                                                                                                                              |
-| :----------- | :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `G00`        | identidade (transformação)                                  | **Decidido** — § 1 (Resolved 2026-05-31)                                                                                                                  |
-| `G01`        | estrutura/gramática                                         | **Aberto** — § 2 (`F-AG01`)                                                                                                                               |
-| `G02`        | taxonomia → bloco + propriedade                             | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                                                                |
-| `G03`        | promotion pipeline                                          | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`                                              |
-| `G04`        | contrato de boilerplate / casa única                        | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                                                       |
-| `G05`        | projeções / decision-session                                | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph                                                        |
-| `G06`        | contrato da cadeia                                          | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                                                              |
-| `G07`        | topologia-as-data + enforcement L4                          | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                                                             |
-| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo       | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente                                                     |
-| `G09`        | eliminação integral de `/cli` (→ CO-3.5)                    | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada                                               |
-| `G10`        | `co-flow-convergence` antes de `co-capture`                 | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo                                                      |
-| `G11`        | suspensão temporária de smoke durante co-flow               | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                                                                 |
-| `G12`        | CO-10.2 entrega convergência coesa inicial                  | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes                                                 |
-| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack                | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                                                                 |
-| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs            | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15/G16 subdividem o fechamento antes do Gate                                                            |
-| `G15`        | CLI pública autoexplicável como porta de entrada            | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final                                    |
-| `G16`        | arquitetura interna, organização DDD e BDD visual           | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                                                          |
-| `G17`        | reabrir CO-10.7 antes de retomar CO-10.8                    | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                                                                  |
-| `G18`        | antecipar `dualroot-collapse`                               | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6                                       |
-| `G19`        | recorte do PR #43 + revisão externa antes do Gate           | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR                                     |
-| `G20`        | ancorar continuação CO-10.8..CO-10.10 na topologia          | **Decidido** — § 1 (Resolved 2026-06-21, owner); nó `co-flow-continuation` seq 11 antes de `dualroot-collapse`                                            |
-| `G21`        | checkpoints semânticos + sem débito arquitetural silencioso | **Decidido** — § 1 (Resolved 2026-06-22, owner); PR #44 fecha decisão/inventário e próximo PR implementa taxonomia/review pré-codificação com enforcement |
+| ID histórico | Tema                                                                       | Estado atual                                                                                                                                                                                 |
+| :----------- | :------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `G00`        | identidade (transformação)                                                 | **Decidido** — § 1 (Resolved 2026-05-31)                                                                                                                                                     |
+| `G01`        | estrutura/gramática                                                        | **Aberto** — § 2 (`F-AG01`)                                                                                                                                                                  |
+| `G02`        | taxonomia → bloco + propriedade                                            | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                                                                                                   |
+| `G03`        | promotion pipeline                                                         | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`                                                                                 |
+| `G04`        | contrato de boilerplate / casa única                                       | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                                                                                          |
+| `G05`        | projeções / decision-session                                               | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph                                                                                           |
+| `G06`        | contrato da cadeia                                                         | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                                                                                                 |
+| `G07`        | topologia-as-data + enforcement L4                                         | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                                                                                                |
+| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo                      | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente                                                                                        |
+| `G09`        | eliminação integral de `/cli` (→ CO-3.5)                                   | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada                                                                                  |
+| `G10`        | `co-flow-convergence` antes de `co-capture`                                | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo                                                                                         |
+| `G11`        | suspensão temporária de smoke durante co-flow                              | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                                                                                                    |
+| `G12`        | CO-10.2 entrega convergência coesa inicial                                 | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes                                                                                    |
+| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack                               | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                                                                                                    |
+| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs                           | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15/G16 subdividem o fechamento antes do Gate                                                                                               |
+| `G15`        | CLI pública autoexplicável como porta de entrada                           | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final                                                                       |
+| `G16`        | arquitetura interna, organização DDD e BDD visual                          | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                                                                                             |
+| `G17`        | reabrir CO-10.7 antes de retomar CO-10.8                                   | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                                                                                                     |
+| `G18`        | antecipar `dualroot-collapse`                                              | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6                                                                          |
+| `G19`        | recorte do PR #43 + revisão externa antes do Gate                          | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR                                                                        |
+| `G20`        | ancorar continuação CO-10.8..CO-10.10 na topologia                         | **Decidido** — § 1 (Resolved 2026-06-21, owner); nó `co-flow-continuation` seq 11 antes de `dualroot-collapse`                                                                               |
+| `G21`        | checkpoints semânticos + sem débito arquitetural silencioso                | **Decidido** — § 1 (Resolved 2026-06-22, owner); PR #44 fecha decisão/inventário e próximo PR implementa taxonomia/review pré-codificação com enforcement                                    |
+| `G22`        | vocabulário Spec›Frente›Checkpoint›Etapa›Tarefa + tensão #45               | **Decidido** — § 1 (Resolved 2026-06-22, owner); `Frente` (rejeita `Fase`) como agrupamento derivado/não-SSOT; #45 reconciliado como nó topológico ativo (seq 12)                            |
+| `G23`        | extensão de G08: grafo derivado + entrega incremental + camada de consulta | **Decidido** — § 1 (Resolved 2026-06-23, owner); H1/H3/H4 dentro da 0024 como projeção derivada (sem 2ª SSOT, sem spec nova); roteado a `internal-…-refactor`/`broad-flow-falsification`/#45 |
+| `G24`        | artifact-kind, disposição e contrato pre-coding-review                     | **Decidido** — § 1 (Resolved 2026-07-10, owner); `disposition` ortogonal, `pre-coding-review` com `subject`+`date`, Guilda preservada como evidência/legado sem virar app vivo               |
+| `G25`        | linguagem viva: trabalho governado + work graph                            | **Decidido** — § 1 (Resolved 2026-07-10, owner); "Spec" fica como invólucro histórico/caminho físico; novas projeções falam em trabalho governado e work graph                               |
+| `G26`        | artefatos versionados de PR sob `pull-requests/pr-N/`                      | **Decidido** — § 1 (Resolved 2026-07-10, owner); PR body, assets e continuações específicas passam a morar no contêiner versionado do PR, sem virar SSOT de topologia                        |
+| `G27`        | fluxo governado de continuação de PR                                       | **Decidido** — § 1 (Resolved 2026-07-11, owner); `continuation:check -> continuation:prepare -> continuation:create-pr`, com confirmação humana antes de Draft PR                            |
+| `G28`        | disposição de temas estruturais residuais                                  | **Decidido** — § 1 (Resolved 2026-07-11, owner); `G01/G03/G05/F-014` roteados explicitamente para #45, refactor, falsificação e revisão final sem debt silencioso                            |
+| `G29`        | decisão efetiva de lane por verificação completa de findings               | **Decidido** — § 1 (Resolved 2026-07-11, owner); eventos `scope: findings` aprovados e completos podem resolver a decisão efetiva sem reescrever o review original                           |
+| `G30`        | dispensa governada de revalidação de review stale+approved                 | **Decidido** — § 1 (Resolved 2026-07-12, owner); `review_plan.<type>.revalidation` permite `pending/waived/required` com actor+reason e warning no Ready check                               |
 
 ---
 
@@ -703,6 +997,15 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G19]` — Resolved 2026-06-20 / @rosanarezende
 - [x] `[DEC-0024-G20]` — Resolved 2026-06-21 / @rosanarezende
 - [x] `[DEC-0024-G21]` — Resolved 2026-06-22 / @rosanarezende
+- [x] `[DEC-0024-G22]` — Resolved 2026-06-22 / @rosanarezende
+- [x] `[DEC-0024-G23]` — Resolved 2026-06-23 / @rosanarezende
+- [x] `[DEC-0024-G24]` — Resolved 2026-07-10 / @rosanarezende
+- [x] `[DEC-0024-G25]` — Resolved 2026-07-10 / @rosanarezende
+- [x] `[DEC-0024-G26]` — Resolved 2026-07-10 / @rosanarezende
+- [x] `[DEC-0024-G27]` — Resolved 2026-07-11 / @rosanarezende
+- [x] `[DEC-0024-G28]` — Resolved 2026-07-11 / @rosanarezende
+- [x] `[DEC-0024-G29]` — Resolved 2026-07-11 / @rosanarezende
+- [x] `[DEC-0024-G30]` — Resolved 2026-07-12 / @rosanarezende
 
 ---
 

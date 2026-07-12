@@ -1,0 +1,30 @@
+schema: acme.repo-work/v1
+id: intent-cta-upgrade::api-elegibilidade
+intent: intent-cta-upgrade
+work: api-elegibilidade
+repo: acme-api-billing
+purpose: create
+desc: "elegibilidade + endpoint (o fate do spike decide: reusar × construir)"
+review: interno
+status: done
+source:
+  kind: central-breakdown
+  file: acme/governance/intents/intent-cta-upgrade.yml
+  breakdownHash: 6a62facbd48d
+code:
+  touchpoints:
+    - src/index.mjs
+owner: lead-billing
+started-at: 2027-01-06
+base-revision: acme-api-billing@ctx-v1
+completed-at: 2027-01-12
+source-commit: git:api-billing-eligibility-001
+evidence:
+  kind: code-fixture
+  command: node tools/checks/check-code-fixtures.ts
+  result: passed
+  files:
+    - src/index.mjs
+verification:
+  checked-by: lead-billing
+  result: endpoint de elegibilidade coberto pela fixture de billing

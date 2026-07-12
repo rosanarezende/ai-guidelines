@@ -1,0 +1,7 @@
+# registry/fix.yml — acme-mfe-identity · índice kind=fix (→ active-work).
+entries:
+  - id: fix-210
+    title: corrige máscara de CPF no formulário
+    status: done
+    intent: null # reativo/standalone
+    date: 2026-06-12

@@ -1,0 +1,15 @@
+repo: acme-mfe-onboarding
+status: draft-review-required
+generatedBy: adopt-existing-repos.mjs
+note: Weak deterministic extraction. Use as input for human/AI assisted
+  authoring; do not treat as attested truth.
+evidence:
+  package: "@acme-sim/acme-mfe-onboarding"
+  dependencies:
+    - "@acme-sim/acme-analytics"
+    - "@acme-sim/acme-design-system"
+    - "@acme-sim/acme-identity"
+  exports:
+    - completeOnboardingStep
+    - renderOnboardingTour
+  sourceHash: dc7e442aeb05

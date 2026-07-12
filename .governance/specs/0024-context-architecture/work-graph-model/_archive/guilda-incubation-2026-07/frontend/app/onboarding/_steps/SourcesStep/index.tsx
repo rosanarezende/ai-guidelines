@@ -1,0 +1,112 @@
+import { Alert, Box, Chip, Typography } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import { useState } from "react";
+import { Flex, ResponsiveGrid } from "@/app/_ui/shared";
+import { NO_SOURCE_DOWNGRADE, SOURCE_KINDS } from "@/app/_domain/adoption/model";
+import { OptionCard, StepHeading } from "../../_components";
+import { useOnboarding } from "../../_state/OnboardingContext";
+import copy from "./_locales/pt-br.json";
+
+export function SourcesStep() {
+  const { adoption, selectedSourceCount, sourceKinds, toggleSource } = useOnboarding();
+  const [location, setLocation] = useState<"local" | "cloud" | null>(null);
+  return (
+    <>
+      <StepHeading step={3} title={copy.heading.title} lead={copy.heading.lead} />
+      <ResponsiveGrid min={280} gap={1.5}>
+        <OptionCard selected={location === "local"} onClick={() => setLocation("local")}>
+          <Box data-testid="source-kind-local">
+            <Typography variant="body2" sx={{ fontWeight: 750 }}>
+              {copy.flow.local.title}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {copy.flow.local.body}
+            </Typography>
+          </Box>
+        </OptionCard>
+        <OptionCard selected={location === "cloud"} onClick={() => setLocation("cloud")}>
+          <Box data-testid="source-kind-cloud">
+            <Typography variant="body2" sx={{ fontWeight: 750 }}>
+              {copy.flow.cloud.title}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {copy.flow.cloud.body}
+            </Typography>
+          </Box>
+        </OptionCard>
+      </ResponsiveGrid>
+
+      {location === "local" ? (
+        <Alert data-testid="local-source-project-state" severity="info">
+          <Typography variant="subtitle2">{copy.flow.localQuestion}</Typography>
+          <Box component="ul" sx={{ m: 0.75, pl: 2.5 }}>
+            <li data-testid="local-source-git-state">
+              <Typography variant="body2">{copy.flow.localGit}</Typography>
+            </li>
+            <li>
+              <Typography variant="body2">{copy.flow.localFolder}</Typography>
+            </li>
+            <li>
+              <Typography variant="body2">{copy.flow.localGovernance}</Typography>
+            </li>
+          </Box>
+        </Alert>
+      ) : null}
+
+      {location === "cloud" ? (
+        <Alert data-testid="cloud-provider-github" severity="warning">
+          <Typography variant="subtitle2">{copy.flow.cloudQuestion}</Typography>
+          <Typography variant="body2">{copy.flow.cloudGithub}</Typography>
+        </Alert>
+      ) : null}
+
+      <ResponsiveGrid min={280} gap={1.5}>
+        {SOURCE_KINDS.map((kind) => {
+          const selected = !kind.disabled && sourceKinds[kind.id];
+          return (
+            <OptionCard
+              key={kind.id}
+              selected={selected}
+              disabled={kind.disabled}
+              onClick={kind.disabled ? undefined : () => toggleSource(kind.id)}
+            >
+              <Flex gap={1.5} align="flex-start">
+                {selected ? (
+                  <CheckCircleIcon color="primary" fontSize="small" sx={{ mt: 0.25 }} />
+                ) : (
+                  <RadioButtonUncheckedIcon fontSize="small" sx={{ mt: 0.25, color: "#c2c9c2" }} />
+                )}
+                <Box>
+                  <Flex align="center" gap={1} wrap>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {kind.name}
+                    </Typography>
+                    {kind.tag ? <Chip size="small" variant="outlined" label={kind.tag} /> : null}
+                  </Flex>
+                  <Typography variant="caption" color="text.secondary">
+                    {kind.desc}
+                  </Typography>
+                </Box>
+              </Flex>
+            </OptionCard>
+          );
+        })}
+      </ResponsiveGrid>
+      {selectedSourceCount > 0 ? (
+        <Alert severity="success">
+          {copy.success.replace("{count}", String(selectedSourceCount))}
+          {adoption
+            ? ` ${copy.successDemoSuffix
+                .replace("{connected}", String(adoption.sourcesConnected))
+                .replace("{total}", String(adoption.sources.length))}`
+            : ""}
+        </Alert>
+      ) : (
+        <Alert severity="warning">
+          {NO_SOURCE_DOWNGRADE} {copy.warningSuffix}
+        </Alert>
+      )}
+    </>
+  );
+}

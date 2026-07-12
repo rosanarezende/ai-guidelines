@@ -1,0 +1,29 @@
+{
+  "locale": "pt-br",
+  "messages": {
+    "workspaceHome.title": "{name}",
+    "workspaceHome.lead": "Organização recém-criada. O retrato abaixo é honesto: nada aqui é inventado — o que não foi configurado aparece como pendente.",
+    "workspaceHome.complete": "Onboarding concluído",
+    "workspaceHome.partial.title": "Onboarding em andamento",
+    "workspaceHome.partial.body": "Você começou a configurar esta organização. Dá para continuar de onde parou.",
+    "workspaceHome.partial.cta": "Continuar onboarding",
+    "workspaceHome.checklist.title": "O que esta organização já tem",
+    "workspaceHome.checklist.profile": "Perfil de governança",
+    "workspaceHome.checklist.profile.missing": "definido no onboarding",
+    "workspaceHome.checklist.host": "Repositório/pasta de governança",
+    "workspaceHome.checklist.host.missing": "sem host vinculado — decisões ainda não têm onde morar",
+    "workspaceHome.checklist.sources": "Fontes de trabalho",
+    "workspaceHome.checklist.sources.missing": "nenhuma conectada — execução/contratos/resultados só com evidência manual/declarada",
+    "workspaceHome.checklist.done": "configurado",
+    "workspaceHome.profile.title": "Perfil de governança",
+    "workspaceHome.profile.policy": "regra de acúmulo sensível",
+    "workspaceHome.profile.missing": "Perfil ainda não definido. Conclua o onboarding antes de tratar esta organização como governada.",
+    "workspaceHome.sources.title": "Fontes de trabalho",
+    "workspaceHome.sources.empty": "Nenhuma fonte cadastrada. O app ainda pode planejar, mas execução e resultados ficam como declaração.",
+    "workspaceHome.next.title": "Próximo passo",
+    "workspaceHome.next.onboarding": "Completar o onboarding define perfil, papéis e fontes — em arquivos seus.",
+    "workspaceHome.next.cta": "Abrir onboarding",
+    "workspaceHome.console.note": "Console técnico indisponível até configurar uma pasta ou repositório de governança. Sem esse host, ainda não há grafo para mostrar — isso é honesto, não um erro.",
+    "workspaceHome.demo.hint": "Quer ver o produto cheio de dados? Abra a organização demo acme em Organizações."
+  }
+}

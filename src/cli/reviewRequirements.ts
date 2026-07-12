@@ -1,5 +1,5 @@
 /**
- * Governança de reviews em QUATRO conceitos independentes (CO-4, rodada 8):
+ * Governança de reviews em CINCO conceitos independentes (CO-4, rodada 8):
  *
  *   1. CATÁLOGO  — `review_types`: o que cada review É (identidade, aliases,
  *      objetivo, vetores, template). Capacidade disponível ≠ obrigação.
@@ -8,9 +8,12 @@
  *      `unknown` (nunca `false` silencioso).
  *   3. REQUISITO — disabled | optional | recommended | required, resolvido por
  *      defaults → regras do repo (prioridade; conflito de mesma prioridade =
- *      ERRO, nunca escolha arbitrária) → override situado do nó (tightening/
+ *      ERRO, nunca escolha arbitrária) → decisão situada do nó (tightening/
  *      relaxation governados pela policy, com actor+reason).
- *   4. ESTADO — missing | current | stale | in-progress (freshness do artefato
+ *   4. PLANO SITUADO — `state.yml § topology...review_plan`: sistema recomenda,
+ *      owner decide. Decisão pending bloqueia Ready por honestidade; decisão
+ *      final projeta requisito efetivo sem reescrever a policy global.
+ *   5. ESTADO — missing | current | stale | in-progress (freshness do artefato
  *      contra a cabeça FUNCIONAL). Freshness NÃO cria obrigação.
  *
  * SOMENTE `requirement = required` + `state != current` (ou decisão ≠ approved)
@@ -25,6 +28,11 @@ import {
   ReviewRequirementLevel,
   REQUIREMENT_LEVELS,
 } from "../infrastructure/yaml/reviewPolicyReader.js";
+import type {
+  NodeReviewPlanDecision,
+  NodeReviewPlanEntry,
+  NodeReviewRequirementOverride,
+} from "../domain/workflow/WorkflowState.js";
 
 // ── Catálogo ─────────────────────────────────────────────────────────────────
 
@@ -375,6 +383,67 @@ export interface NodeReviewOverride {
   readonly actor?: string;
 }
 
+const PLAN_DECISION_TO_REQUIREMENT: Partial<
+  Readonly<Record<NodeReviewPlanDecision, ReviewRequirementLevel>>
+> = {
+  waived: "optional",
+  optional: "optional",
+  recommended: "recommended",
+  required: "required",
+};
+
+export interface ReviewPlanDecisionIssue {
+  readonly typeId: string;
+  readonly message: string;
+}
+
+export function reviewPlanToNodeOverrides(
+  plan?: Readonly<Record<string, NodeReviewPlanEntry>>
+): Record<string, NodeReviewOverride> {
+  const overrides: Record<string, NodeReviewOverride> = {};
+  for (const [typeId, entry] of Object.entries(plan ?? {})) {
+    const requirement = PLAN_DECISION_TO_REQUIREMENT[entry.owner_decision];
+    if (!requirement) continue;
+    overrides[typeId] = {
+      requirement,
+      ...(entry.reason ? { reason: entry.reason } : {}),
+      ...(entry.actor ? { actor: entry.actor } : {}),
+    };
+  }
+  return overrides;
+}
+
+export function reviewPlanDecisionIssues(
+  plan?: Readonly<Record<string, NodeReviewPlanEntry>>
+): readonly ReviewPlanDecisionIssue[] {
+  const issues: ReviewPlanDecisionIssue[] = [];
+  for (const [typeId, entry] of Object.entries(plan ?? {})) {
+    if (entry.owner_decision === "pending") {
+      issues.push({
+        typeId,
+        message: `${typeId}: decisão humana pendente (sistema recomendou ${entry.system_recommendation}).`,
+      });
+    }
+    if (entry.revalidation?.owner_decision === "pending") {
+      issues.push({
+        typeId,
+        message: `${typeId}: decisão humana de revalidação pendente (review já planejada como ${entry.owner_decision}).`,
+      });
+    }
+  }
+  return issues;
+}
+
+export function effectiveNodeReviewOverrides(input: {
+  readonly reviewRequirements?: Readonly<Record<string, NodeReviewRequirementOverride>>;
+  readonly reviewPlan?: Readonly<Record<string, NodeReviewPlanEntry>>;
+}): Readonly<Record<string, NodeReviewOverride>> {
+  return {
+    ...(input.reviewRequirements ?? {}),
+    ...reviewPlanToNodeOverrides(input.reviewPlan),
+  };
+}
+
 export interface ResolvedRequirement {
   readonly typeId: string;
   readonly level: ReviewRequirementLevel;
@@ -604,6 +673,8 @@ export interface EffectiveReviewStatus {
   readonly decision: string | null;
   /** true ⟺ requirement=required E (state≠current OU decision≠approved). */
   readonly blocking: boolean;
+  /** true quando a owner dispensou explicitamente a revalidação de review stale+approved. */
+  readonly revalidationWaived: boolean;
   readonly notes: readonly string[];
   readonly errors: readonly string[];
 }
@@ -613,6 +684,8 @@ export interface EffectiveStatusInput {
   readonly policy: ReviewPolicy | null;
   readonly ctx: ApplicabilityContext;
   readonly nodeOverrides?: Readonly<Record<string, NodeReviewOverride>>;
+  /** Plano situado completo do nó; usado para decisões de revalidação. */
+  readonly reviewPlan?: Readonly<Record<string, NodeReviewPlanEntry>>;
   /** Estado observado por tipo (reviews/events da lane no checkpoint). */
   readonly observed: Readonly<
     Record<string, { latestSubjectRef: string | null; decision: string | null }>
@@ -645,8 +718,29 @@ export function deriveEffectiveReviewStatuses(
     });
     // Não aplicável ⇒ requirement não opera (disabled-equivalente no contexto).
     const effectiveLevel = applicability.value === "no" ? "disabled" : requirement.level;
-    const blocking =
-      effectiveLevel === "required" && !(state === "current" && observed.decision === "approved");
+    const revalidationDecision = input.reviewPlan?.[type.id]?.revalidation;
+    const revalidationWaived =
+      effectiveLevel === "required" &&
+      state === "stale" &&
+      observed.decision === "approved" &&
+      revalidationDecision?.owner_decision === "waived";
+    const notes = [...requirement.notes];
+    if (revalidationWaived) {
+      notes.push(
+        `revalidation waived${revalidationDecision.actor ? ` by ${revalidationDecision.actor}` : ""}: ${revalidationDecision.reason ?? "sem motivo declarado"}`
+      );
+    } else if (
+      effectiveLevel === "required" &&
+      state === "stale" &&
+      observed.decision === "approved" &&
+      revalidationDecision?.owner_decision === "required"
+    ) {
+      notes.push(
+        `revalidation required${revalidationDecision.actor ? ` by ${revalidationDecision.actor}` : ""}: ${revalidationDecision.reason ?? "sem motivo declarado"}`
+      );
+    }
+    const requiredSatisfied = state === "current" && observed.decision === "approved";
+    const blocking = effectiveLevel === "required" && !requiredSatisfied && !revalidationWaived;
     statuses.push({
       typeId: type.id,
       title: type.title,
@@ -659,7 +753,8 @@ export function deriveEffectiveReviewStatuses(
       state,
       decision: observed.decision,
       blocking,
-      notes: requirement.notes,
+      revalidationWaived,
+      notes,
       errors: requirement.errors,
     });
   }

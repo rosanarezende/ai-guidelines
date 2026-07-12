@@ -1,7 +1,7 @@
 /**
- * Decisão `mark-readiness` — declara, de forma governada, que o sub-checkpoint
- * ativo satisfez seus critérios de saída. Não avança marcador, não abre o
- * próximo sub-checkpoint e não exerce Human Gate.
+ * Decisão `mark-readiness` — declara, de forma governada, que a etapa
+ * ativa satisfez seus critérios de saída. Não avança marcador, não abre a
+ * próxima etapa e não exerce Human Gate.
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -18,12 +18,7 @@ import {
   HumanDecisionTechnicalDetail,
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import {
-  HandoffSubCheckpoint,
-  parseSubCheckpoints,
-  resolveSubCheckpointWork,
-  SUBCHECKPOINT_READINESS,
-} from "../handoffFacts.js";
+import { HandoffStep, parseSteps, resolveStepWork, STEP_READINESS } from "../handoffFacts.js";
 import {
   deriveMarkReadinessAvailability,
   markReadinessFactsFromDecisionSnapshot,
@@ -54,7 +49,7 @@ function escapeRe(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function activeSubCheckpoint(subs: readonly HandoffSubCheckpoint[]): HandoffSubCheckpoint | null {
+function activeStep(subs: readonly HandoffStep[]): HandoffStep | null {
   const active = subs.filter((s) => s.state === "in-progress");
   return active.length === 1 ? active[0] : null;
 }
@@ -64,7 +59,7 @@ export function markReadinessMarker(
   activeId: string
 ): { text: string; ok: boolean; error: string | null } {
   const lineRe = new RegExp(
-    `(^[ \\t]*-[ \\t]*\\[/\\][ \\t]*\\*\\*${escapeRe(activeId)}\\b[^\\n]*?\\*\\*)([^\\n]*)$`,
+    `(^[ \\t]*-[ \\t]*\\[/\\][ \\t]*\\*\\*(?:Checkpoint[ \\t]+)?${escapeRe(activeId)}\\b[^\\n]*?\\*\\*)([^\\n]*)$`,
     "m"
   );
   const match = lineRe.exec(tasksMd);
@@ -82,13 +77,13 @@ export function markReadinessMarker(
       error: `${activeId} já possui readiness declarada.`,
     };
   }
-  const replacement = `${match[1]} \`readiness: ${SUBCHECKPOINT_READINESS}\`${match[2]}`;
+  const replacement = `${match[1]} \`readiness: ${STEP_READINESS}\`${match[2]}`;
   return { text: tasksMd.replace(lineRe, replacement), ok: true, error: null };
 }
 
 export class MarkReadinessDefinition implements HumanDecisionDefinition {
   readonly id = MARK_READINESS_ID;
-  readonly title = "Declarar readiness do sub-checkpoint ativo";
+  readonly title = "Declarar readiness da etapa ativa";
 
   private policyOf(snapshot: DecisionSnapshot): HumanDecisionTypePolicy | undefined {
     return snapshot.policy ? findDecisionType(snapshot.policy, this.id) : undefined;
@@ -113,9 +108,9 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
   buildBrief(snapshot: DecisionSnapshot, opts: { technical: boolean }): HumanDecisionBrief {
     const policy = this.policyOf(snapshot)!;
     const availability = this.detect(snapshot);
-    const active = activeSubCheckpoint(snapshot.subCheckpoints);
+    const active = activeStep(snapshot.steps);
     const next = active
-      ? snapshot.subCheckpoints.find((s) => s.state === "pending" && s.line > active.line)
+      ? snapshot.steps.find((s) => s.state === "pending" && s.line > active.line)
       : null;
     const node = nodeLabel(snapshot);
     const pr = snapshot.facts.pullRequest;
@@ -123,14 +118,14 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
     const summary =
       availability.status === "available" && active
         ? `Declarar readiness de ${active.id} no checkpoint ${node}.`
-        : `Readiness do sub-checkpoint ativo ainda não pode ser declarada.`;
+        : `Readiness da etapa ativa ainda não pode ser declarada.`;
     const whyNow =
-      "Readiness é o sinal explícito de que o sub-checkpoint ativo satisfez seus critérios de saída; sem ele, `advance-subcheckpoint` deve continuar bloqueado.";
+      "Readiness é o sinal explícito de que a etapa ativa satisfez seus critérios de saída; sem ele, `advance-step` deve continuar bloqueado.";
 
     const bodyByKey: Record<string, readonly string[]> = {
       active_scope: active
         ? [`${active.id} — ${active.title} continua [/] em tasks.md.`]
-        : ["(nenhum sub-checkpoint ativo inequívoco)"],
+        : ["(nenhuma etapa ativa inequívoca)"],
       exit_criteria: [
         snapshot.openFindings.length === 0
           ? "Findings do checkpoint estão fechados."
@@ -144,8 +139,8 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
       ],
       next_decision: next
         ? [
-            `Após a readiness, a decisão aplicável será advance-subcheckpoint: ${active?.id} → ${next.id}.`,
-            "O próximo sub-checkpoint NÃO será ativado por esta decisão.",
+            `Após a readiness, a decisão aplicável será advance-step: ${active?.id} → ${next.id}.`,
+            "A próxima etapa NÃO será ativada por esta decisão.",
           ]
         : [
             "Após a readiness terminal, o próximo movimento será fechamento do checkpoint/Ready/Human Gate.",
@@ -211,7 +206,7 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
         ...base,
         mutating: false,
         changes: [],
-        preserved: ["tasks.md inalterado", "sub-checkpoint atual permanece sem readiness nova"],
+        preserved: ["tasks.md inalterado", "etapa atual permanece sem readiness nova"],
         commitMessage: null,
         preconditions: [],
         nextHuman: [],
@@ -220,7 +215,7 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
       };
     }
 
-    const active = activeSubCheckpoint(snapshot.subCheckpoints);
+    const active = activeStep(snapshot.steps);
     if (!active) {
       return {
         ...base,
@@ -230,7 +225,7 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
         commitMessage: null,
         preconditions: [],
         nextHuman: [],
-        note: ["Não há sub-checkpoint ativo inequívoco."],
+        note: ["Não há etapa ativa inequívoca."],
         payload: null,
       };
     }
@@ -247,12 +242,12 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
       changes: [
         {
           path: tasksFile,
-          description: `${active.id}: adiciona readiness ${SUBCHECKPOINT_READINESS}`,
+          description: `${active.id}: adiciona readiness ${STEP_READINESS}`,
         },
       ],
       preserved: [
-        "marcador [/] do sub-checkpoint ativo",
-        "marcadores dos demais sub-checkpoints",
+        "marcador [/] da etapa ativa",
+        "marcadores das demais etapas",
         "state.yml e active.yml",
         "reviews e gates",
         "topologia",
@@ -267,7 +262,7 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
       ],
       nextHuman: [
         "`npm run flow -- work` passará a projetar a próxima decisão governada.",
-        "A readiness NÃO avançou sub-checkpoint, NÃO criou gate e NÃO autorizou Ready/Human Gate/merge.",
+        "A readiness NÃO avançou etapa, NÃO criou gate e NÃO autorizou Ready/Human Gate/merge.",
       ],
       note: [],
       payload,
@@ -304,10 +299,10 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
       };
     }
 
-    const newSubs = parseSubCheckpoints(edited.text, payload.checkpoint);
+    const newSubs = parseSteps(edited.text, payload.checkpoint);
     const active = newSubs.filter((s) => s.state === "in-progress");
     const current = active.find((s) => s.id === payload.activeId);
-    if (active.length !== 1 || !current || current.readiness !== SUBCHECKPOINT_READINESS) {
+    if (active.length !== 1 || !current || current.readiness !== STEP_READINESS) {
       return {
         ok: false,
         committed: null,
@@ -315,8 +310,8 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
         messages: ["Simulação falhou: readiness não ficou no único [/] ativo."],
       };
     }
-    const projected = resolveSubCheckpointWork({
-      subCheckpoints: newSubs,
+    const projected = resolveStepWork({
+      steps: newSubs,
       lifecycle: {
         reviewDecisions: [],
         requiredReviewRoles: [],

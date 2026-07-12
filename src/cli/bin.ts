@@ -9,6 +9,7 @@ import { main as runCoKnowledgeInventory } from "./coKnowledgeInventoryCheck.js"
 import { main as runConstraintsCheck } from "./constraintsCheck.js";
 import { main as runDisclosure } from "./disclosureRender.js";
 import { main as runGateDecidability } from "./gateDecidabilityCheck.js";
+import { main as runGovernedWorkMap } from "./governedWorkMap.js";
 import { main as runHandoffCheck } from "./handoffCheck.js";
 import { main as runInsightsCheck } from "./insightsCheck.js";
 import { main as runIntentCheck } from "./intentCheck.js";
@@ -18,9 +19,21 @@ import {
   runGenerate as runLivingDocsGenerate,
 } from "./livingDocs.js";
 import { main as runPrBodyCreate } from "./prBodyCreate.js";
+import {
+  mainCheck as runPrBodyCheck,
+  mainPublish as runPrBodyPublish,
+  mainPull as runPrBodyPull,
+} from "./prBodyVersioned.js";
+import {
+  mainCheck as runContinuationCheck,
+  mainCreatePr as runContinuationCreatePr,
+  mainPrepare as runContinuationPrepare,
+} from "./prContinuation.js";
 import { main as runPrBodyUpdate } from "./prBodyUpdate.js";
 import { main as runPrReadyCheck } from "./prReadyCheck.js";
+import { main as runArtifactKindCheck } from "./artifactKindCheck.js";
 import { main as runReconcileCheck } from "./reconcileCheck.js";
+import { main as runResearchIndexCheck } from "./researchIndexCheck.js";
 import { main as runReviewCheck } from "./reviewCheck.js";
 import { main as runReviewPublish } from "./reviewPublish.js";
 import { sealReview } from "./reviewSeal.js";
@@ -42,11 +55,12 @@ function usage(): string {
     "Uso: node dist/cli/bin.js <script> [args]",
     "",
     "Scripts: build-rules, living-docs, state-yml-check, active-specs-check,",
-    "reconcile-check, handoff-check, co-knowledge-check, co-knowledge-inventory,",
+    "reconcile-check, research-index-check, artifact-kind-check, handoff-check, co-knowledge-check, co-knowledge-inventory,",
     "constraints-check, knowledge-compile, script-contracts, runtime-bootstrap,",
-    "gate-decidability-check, ruleset-check, review-check, insights-check,",
+    "gate-decidability-check, governed-work-map, ruleset-check, review-check, insights-check,",
     "intent-check, disclosure-render, review-publish, review-seal,",
-    "pr-body-create, pr-body-update, pr-ready-check, site-flow-copy, site-scenarios,",
+    "pr-body-create, pr-body-update, pr-body-check, pr-body-publish, pr-body-pull, pr-ready-check, site-flow-copy, site-scenarios,",
+    "continuation-check, continuation-prepare, continuation-create-pr,",
     "site-prompts, consumer-journey",
   ].join("\n");
 }
@@ -79,6 +93,10 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runActiveSpecsCheck(root);
     case "reconcile-check":
       return runReconcileCheck(root);
+    case "research-index-check":
+      return runResearchIndexCheck(root);
+    case "artifact-kind-check":
+      return runArtifactKindCheck(root);
     case "handoff-check":
       return runHandoffCheck(root, args);
     case "co-knowledge-check":
@@ -103,6 +121,8 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runRuntimeBootstrap([...args], root);
     case "gate-decidability-check":
       return runGateDecidability(root);
+    case "governed-work-map":
+      return runGovernedWorkMap(args, root);
     case "ruleset-check": {
       const mode = args.includes("--parity") ? "parity" : "producibility";
       const liveIdx = args.indexOf("--live");
@@ -153,8 +173,20 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runPrBodyCreate(args);
     case "pr-body-update":
       return runPrBodyUpdate(args);
+    case "pr-body-check":
+      return runPrBodyCheck(args, { repoRoot: root });
+    case "pr-body-publish":
+      return runPrBodyPublish(args, { repoRoot: root });
+    case "pr-body-pull":
+      return runPrBodyPull(args, { repoRoot: root });
     case "pr-ready-check":
       return runPrReadyCheck(args, { repoRoot: root });
+    case "continuation-check":
+      return runContinuationCheck(args, { repoRoot: root });
+    case "continuation-prepare":
+      return runContinuationPrepare(args, { repoRoot: root });
+    case "continuation-create-pr":
+      return runContinuationCreatePr(args, { repoRoot: root });
     default:
       process.stderr.write(`${usage()}\n`);
       return 2;

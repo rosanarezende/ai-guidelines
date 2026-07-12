@@ -1,0 +1,35 @@
+# register — CANDIDATA à intent (face de NEGÓCIO). Vive em acme-governance/registers/candidates/<id>/.
+# Fluxo: registrada (aqui) → triagem/investigação (eng, ver triage.yml) → ativada (vira intent.yml, em intents/).
+# Shape: research/2026-06-30-intent-authoring-shape-deliberation.md (D7/D9). A intent NÃO delibera.
+node: register
+id: <slug>_<rand> # GERADO no registro (não editável): slug do título + _num random ~16-bit (chave estável)
+title: <título curto>
+description: <a descrição da iniciativa — junto do título, o parâmetro mais importante>
+status: registrada # registrada | triagem | investigacao (a CANDIDATA; quando ativada vira um Intent)
+created-at: 2026-NN-NN
+updated-at: 2026-NN-NN
+
+# ===== pessoas =====
+registered-by: # quem CADASTROU (negócio)
+owner: # o ACCOUNTABLE — quem RESPONDE (pessoa OU papel/time; solo = você). A BU/time é a PASTA, não o campo.
+stakeholders:
+  - { role: <papel>, who: <pessoa/time> }
+
+# ===== enquadramento (negócio) =====
+problem:
+  business: # o problema de NEGÓCIO
+  customer: # o problema do CLIENTE
+business-connection:
+  driver: # driver estratégico da empresa
+  metric: # métrica/indicador de negócio impactado
+details: | # opcional: contexto, premissas
+  <prosa livre>
+references: # links/anexos — type: modeling | spec | design | benchmark | dashboard | alignment | other
+  - { type: modeling, label: "<doc>", url: "<link>", note: "<nuance que sobrevive ao link>" }
+
+# ===== dúvidas do NEGÓCIO (em linguagem de negócio) =====
+# NÃO são explore-points técnicos nem contratos: são as incertezas que o negócio enxerga. A ENGENHARIA,
+# na triagem (triage.yml), dispõe cada uma (→ exploration / responde-direto / falta-info) e roda o matcher
+# pra sugerir/validar os contratos. Contratos NÃO se digitam aqui.
+open-questions:
+  - { id: <rand>, question: "<a dúvida, em linguagem de negócio>" }

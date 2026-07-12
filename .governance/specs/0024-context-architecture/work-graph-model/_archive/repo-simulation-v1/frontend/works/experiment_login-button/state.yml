@@ -1,0 +1,6 @@
+work: exp-001
+kind: experiment
+stage: closed
+outcome: won
+closes-with: learning-record
+informs: frontend/deliv-001 # a UI adota a posição vencedora (mesmo repo)

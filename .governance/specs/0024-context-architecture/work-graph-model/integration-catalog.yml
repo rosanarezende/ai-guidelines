@@ -1,0 +1,469 @@
+schema: work-graph.integration-catalog/v1
+status: proposed
+authority: "model.yml continua sendo SSOT do modelo; este catalogo enumera adapters opcionais."
+principle: >
+  O framework funciona sem integracoes externas. Integracoes reduzem preenchimento
+  manual, trazem evidencia independente e conectam o grafo governado ao ecossistema
+  existente da empresa. Nenhuma integracao substitui o SSOT file-first nem autoriza
+  mutacao sem comando governado.
+
+# local-adapter: quando presente, indica adapter local que foi EXECUTAVEL durante
+# a incubacao Guilda arquivada em _archive/guilda-incubation-2026-07. O codigo
+# vivo do produto segue no repo Guilda; este catalogo conserva a classificacao
+# conceitual dos adapters opcionais.
+# Entradas sem local-adapter continuam catalogadas, nao mecanizadas.
+
+adapter-kinds:
+  evidence-provider:
+    purpose: "coleta sinais externos normalizados como evidencia governada"
+    may-write-authoritative-state: false
+  work-importer:
+    purpose: "importa backlog/itens existentes como proposta, register ou link de origem"
+    may-write-authoritative-state: "somente via comando governado aprovado"
+  identity-provider:
+    purpose: "resolve pessoas, times, grupos, authority e SoD"
+    may-write-authoritative-state: false
+  metric-provider:
+    purpose: "fornece fonte, janela, revision e valor para outcome/actual"
+    may-write-authoritative-state: false
+  contract-provider:
+    purpose: "extrai interfaces, revisoes, providers, consumers e breaking-change evidence"
+    may-write-authoritative-state: false
+  read-model-exporter:
+    purpose: "publica grafo/dashboard derivado para consulta externa"
+    may-write-authoritative-state: false
+  assistant-provider:
+    purpose: "gera sugestoes assistivas com score, unknown, evidence e policy"
+    may-write-authoritative-state: false
+  assistant-runtime:
+    purpose: "executa modelos locais/cloud por politica de egress para matcher, resumo e extraction assistiva"
+    may-write-authoritative-state: false
+  knowledge-assistant:
+    purpose: "indexa e busca conhecimento existente para anexos, contexto e sinais de stale-doc"
+    may-write-authoritative-state: false
+  coding-agent-channel:
+    purpose: "canal opcional para agentes/CLIs de codigo proporem patches ou revisoes"
+    may-write-authoritative-state: false
+  agent-gateway:
+    purpose: "gateway agentivo amplo; classe adiada/risk-gated por ampliar superficie de autoridade e egress"
+    may-write-authoritative-state: false
+  journey-analytics:
+    purpose: "mede uso do app e funil de adocao sem receber conteudo governado"
+    may-write-authoritative-state: false
+
+common-contract:
+  required-fields:
+    - provider
+    - adapter-kind
+    - collected-at
+    - source-revision
+    - subject
+    - evidence
+    - confidence
+    - policy
+  fail-closed-when:
+    - source-revision-mismatch
+    - provider-untrusted
+    - policy-revision-stale
+    - classification-egress-denied
+    - subject-unresolvable
+  never:
+    - "fechar gate"
+    - "aceitar verdict"
+    - "alterar actual"
+    - "editar manifest silenciosamente"
+    - "promover capability sem owner/attestation"
+    - "autorizar mutacao a partir de read-model stale"
+
+app-projection:
+  first-release-cloud-integration:
+    id: git-provider
+    system: github
+    role: work-source/repo-provider
+    reason: >
+      Conecta o grafo ao codigo real, repos, PRs, checks, CODEOWNERS e revisoes.
+      Login GitHub continua separado de GitHub como fonte de trabalho.
+    required-capabilities:
+      - list-authorized-repositories
+      - select-repositories
+      - read-default-branch
+      - read-commits
+      - read-pull-requests
+      - read-checks
+      - read-codeowners
+      - read-governance-folder
+      - publish-sourceTrust-provider-versioned
+    must-not:
+      - "criar authority automaticamente a partir do login"
+      - "escrever estado autoritativo sem comando governado"
+      - "tratar GitHub Issues como SSOT sem contrato de sync"
+
+  ui-alerts:
+    available-now:
+      - assistant-runtime-local-cloud
+      - git-provider
+      - ci-status
+      - code-quality
+      - observability
+      - graph-export
+    first-release:
+      - git-provider:github
+      - assistant-runtime-local-cloud:ollama
+      - assistant-runtime-local-cloud:openai-compatible
+      - graph-export:neo4j
+    coming-soon:
+      - api-schema
+      - test-reports
+      - analytics-warehouse
+      - git-provider:gitlab
+      - git-provider:bitbucket
+      - identity-directory
+      - backlog-import
+      - deploy-release-evidence
+      - feature-flags
+      - incident-management
+      - code-security
+      - service-catalog
+      - finops-cost
+      - product-analytics
+      - journey-analytics
+      - knowledge-assistant
+      - design-system
+      - knowledge-base
+    deferred:
+      - agent-gateway-deferred
+
+  integration-points:
+    onboarding:
+      purpose: "reduzir atrito de adocao e explicar o que sera manual vs integrado"
+      high-value:
+        - git-provider
+        - identity-directory
+        - assistant-runtime-local-cloud
+        - service-catalog
+        - journey-analytics
+      ui-copy: "Integracoes disponiveis em breve: GitLab, Bitbucket, Google Workspace/Okta, Backstage/OpsLevel."
+    work-sources:
+      purpose: "descobrir repos, pastas, ownership, capabilities e source revisions"
+      high-value:
+        - git-provider
+        - codeowners
+        - service-catalog
+        - knowledge-base
+      ui-copy: "Em breve: GitLab, Bitbucket, Gitea, Backstage, Google Drive/SharePoint com revision."
+    assistant-and-matcher:
+      purpose: "sugerir matches, perguntas de triagem, resumos e explicacoes de policy"
+      high-value:
+        - assistant-runtime-local-cloud
+        - knowledge-assistant
+        - coding-agent-channel
+      ui-copy: "Em breve: LM Studio, LiteLLM, Onyx/Open WebUI e canais Claude Code/Codex CLI."
+    planning-and-outcomes:
+      purpose: "provar actual, target, janela, aggregation e attester"
+      high-value:
+        - analytics-warehouse
+        - product-analytics
+        - finops-cost
+        - observability
+      ui-copy: "Em breve: BigQuery/Snowflake/dbt, PostHog/Amplitude, cloud billing e Prometheus/Grafana."
+    execution-evidence:
+      purpose: "provar done, testes, qualidade, deploy, rollout e rollback"
+      high-value:
+        - ci-status
+        - test-reports
+        - code-quality
+        - code-security
+        - deploy-release-evidence
+      ui-copy: "Em breve: GitHub Actions, JUnit/Playwright, CodeQL/Semgrep e Argo/GitHub Deployments."
+    contracts:
+      purpose: "materializar interfaces versionadas e compatibilidade provider/consumer"
+      high-value:
+        - api-schema
+        - contract-testing
+      ui-copy: "Em breve: OpenAPI, GraphQL, protobuf, AsyncAPI e Pact."
+    incidents-and-ops:
+      purpose: "declarar incidentes com evento, severidade, timeline e follow-up verificaveis"
+      high-value:
+        - observability
+        - incident-management
+      ui-copy: "Em breve: PagerDuty/Opsgenie/incident.io integrados a SLO e follow-ups."
+    backlog-and-intake:
+      purpose: "importar trabalho existente sem criar segundo SSOT"
+      high-value:
+        - backlog-import
+        - knowledge-base
+      ui-copy: "Em breve: Jira, Linear, Azure DevOps e GitHub Issues como origem importada."
+    governance-graph:
+      purpose: "explorar impacto e dependencia sem transformar read-model em SSOT"
+      high-value:
+        - graph-export
+      ui-copy: "Disponivel como read-model opcional: Neo4j; em breve, Graphistry/custom graph API."
+
+integrations:
+  - id: git-provider
+    category: repo-adoption
+    systems: [github, gitlab, bitbucket]
+    adapter-kind: evidence-provider
+    feeds: [repo-context, source-revision, ownership-hints, pull-request-evidence]
+    framework-works-without-it: true
+    value-add: "descobre repos, commits, PRs, paths tocados e evidencia basica sem preenchimento manual"
+    authority: "observa codigo e metadata; nao decide ownership nem readiness"
+    priority: P0
+    local-adapter: git-local
+
+  - id: codeowners
+    category: repo-adoption
+    systems: [github-codeowners, gitlab-codeowners]
+    adapter-kind: evidence-provider
+    feeds: [owner-candidate, review-derivation, module-owner-hints]
+    framework-works-without-it: true
+    value-add: "aproveita ownership por path/modulo para routing, review externo e monolitos"
+    authority: "sugere owner; authority registry confirma"
+    priority: P0
+
+  - id: service-catalog
+    category: repo-adoption
+    systems: [backstage, opslevel, cortex]
+    adapter-kind: evidence-provider
+    feeds: [repo-context, capability-candidates, owner-candidate, system-boundaries]
+    framework-works-without-it: true
+    value-add: "reusa catalogo interno como fonte inicial de ownership, sistemas e APIs"
+    authority: "catalogo externo vira hint/evidencia, nao SSOT do grafo"
+    priority: P1
+
+  - id: api-schema
+    category: contracts
+    systems: [openapi, graphql-schema, protobuf, grpc, asyncapi]
+    adapter-kind: contract-provider
+    feeds: [contract.interface, contract.revision, breaking-change-evidence, consumer-provider-map]
+    framework-works-without-it: true
+    value-add: "transforma contrato em interface versionada verificavel, nao label textual"
+    authority: "schema observado alimenta revision proposal; owner do contrato aprova"
+    priority: P0
+
+  - id: contract-testing
+    category: contracts
+    systems: [pact, schemathesis, dredd]
+    adapter-kind: evidence-provider
+    feeds: [contract-compatibility, consumer-impact, release-rollout-guardrail]
+    framework-works-without-it: true
+    value-add: "prova compatibilidade provider/consumer antes de rollout"
+    authority: "resultado de teste informa decision-point; nao aprova contrato sozinho"
+    priority: P1
+
+  - id: ci-status
+    category: execution-evidence
+    systems: [github-actions, gitlab-ci, jenkins, circleci, buildkite]
+    adapter-kind: evidence-provider
+    feeds: [repo-work.done.evidence, source-revision, build-status, deploy-status]
+    framework-works-without-it: true
+    value-add: "usa evidencia real de CI em vez de prova manual"
+    authority: "CI atesta execucao; owner ainda assina done quando exigido"
+    priority: P0
+    local-adapter: ci-local
+
+  - id: test-reports
+    category: execution-evidence
+    systems: [junit, coverage, playwright-report, vitest, jest]
+    adapter-kind: evidence-provider
+    feeds: [repo-work.verification, quality-signal, regression-evidence]
+    framework-works-without-it: true
+    value-add: "liga status de repo-work a testes e cobertura por source revision"
+    authority: "relatorio faltante/stale bloqueia evidence, nao edita work"
+    priority: P0
+
+  - id: deploy-release-evidence
+    category: execution-evidence
+    systems: [argo-rollouts, argo-cd, flux, github-deployments, gitlab-environments, spinnaker]
+    adapter-kind: evidence-provider
+    feeds: [release-rollout, canary-state, rollback-evidence, deploy-revision, guardrail-status]
+    framework-works-without-it: true
+    value-add: "prova rollout, canary e rollback com revisao observada em vez de texto no gate"
+    authority: "deploy observado alimenta decision-point; release-rollout continua governado pelo framework"
+    priority: P1
+
+  - id: code-quality
+    category: quality-security
+    systems: [sonarqube, sonarcloud, semgrep, eslint, biome]
+    adapter-kind: evidence-provider
+    feeds: [quality-signal, maintenance-candidate, capability-evidence, risk-badge]
+    framework-works-without-it: true
+    value-add: "traz sinais de qualidade/manutencao para priorizacao e evidence"
+    authority: "sinal externo nao cria trabalho sozinho; sugere maintenance/proposal"
+    priority: P1
+    local-adapter: code-quality
+
+  - id: code-security
+    category: quality-security
+    systems: [osv-scanner, osv-dev, deps-dev, codeql, semgrep, snyk, dependency-track, trivy]
+    adapter-kind: evidence-provider
+    feeds: [security-signal, patch-candidate, dependency-risk, policy-alert]
+    framework-works-without-it: true
+    value-add: "conecta vulnerabilidades, dependencias, licencas e sinais de supply-chain a maintenance/patch com evidencia"
+    authority: "finding precisa de triagem/owner; severidade externa nao fecha gate"
+    priority: P1
+    local-adapter: code-security
+
+  - id: observability
+    category: metrics-incident
+    systems: [opentelemetry, prometheus, grafana, datadog, new-relic]
+    adapter-kind: metric-provider
+    feeds: [metric-source, actual-attestation, slo-signal, incident-trigger]
+    framework-works-without-it: true
+    value-add: "dente real para SLO, outcome operacional e incidentes"
+    authority: "fonte pode atestar actual somente se producer/owner for independente ou colapso for logado"
+    priority: P0
+    local-adapter: observability
+
+  - id: analytics-warehouse
+    category: metrics-outcomes
+    systems: [bigquery, snowflake, redshift, postgres, dbt]
+    adapter-kind: metric-provider
+    feeds: [outcome.source, metric-revision, aggregation-evidence, target-actual]
+    framework-works-without-it: true
+    value-add: "fecha outcome/actual com fonte e revisao verificaveis"
+    authority: "valor so soma se metric-definition, janela, unidade, aggregation e attester resolverem"
+    priority: P0
+
+  - id: finops-cost
+    category: metrics-outcomes
+    systems: [cloud-billing-export, aws-cost-explorer, azure-cost-management, gcp-billing, kubecost]
+    adapter-kind: metric-provider
+    feeds: [cost-to-serve, ticket-cost, budget-burn, allocation-actual, operational-target]
+    framework-works-without-it: true
+    value-add: "fecha metas de custo e budgets com fonte financeira observada, sem planilha autodeclarada"
+    authority: "custo observado so vira actual se metric-definition, janela, unidade e attester resolverem"
+    priority: P1
+
+  - id: product-analytics
+    category: metrics-outcomes
+    systems: [segment, amplitude, mixpanel, google-analytics, posthog]
+    adapter-kind: metric-provider
+    feeds: [experiment-exposure, conversion-event, funnel-signal, outcome-evidence]
+    framework-works-without-it: true
+    value-add: "conecta experimentos e jornadas de produto a outcomes reais"
+    authority: "analytics externo nao aceita verdict; verdict depende de outcome resolvido"
+    priority: P1
+
+  - id: journey-analytics
+    category: product-experience
+    systems: [posthog, plausible, matomo, umami, google-analytics, segment, amplitude, mixpanel]
+    adapter-kind: journey-analytics
+    feeds: [signup-step, demo-start, onboarding-step, workspace-created, activation-funnel]
+    framework-works-without-it: true
+    value-add: "mostra onde usuarios abandonam ou travam na adocao do app"
+    authority: "telemetria de jornada nao recebe YAML, conteudo governado, secrets nem concede authority"
+    priority: P1
+
+  - id: feature-flags
+    category: experiments-release
+    systems: [launchdarkly, growthbook, statsig, optimizely, unleash]
+    adapter-kind: evidence-provider
+    feeds: [experiment-run.exposure, guardrail, release-rollout, cleanup-required]
+    framework-works-without-it: true
+    value-add: "traz exposure/guardrails/rollout para experiment-run e release-rollout"
+    authority: "flag state informa; accept-verdict e rollout seguem decision-point humano"
+    priority: P1
+
+  - id: incident-management
+    category: incident-ops
+    systems: [pagerduty, opsgenie, incident-io, statuspage]
+    adapter-kind: evidence-provider
+    feeds: [incident.declare, severity-evidence, timeline, postmortem-ref, follow-up-candidate]
+    framework-works-without-it: true
+    value-add: "evita incidente textual sem telemetria e liga follow-ups ao fluxo"
+    authority: "alerta/severidade observados; follow-up vira standalone/proposal por comando"
+    priority: P1
+
+  - id: backlog-import
+    category: work-import
+    systems: [jira, linear, azure-devops, github-issues]
+    adapter-kind: work-importer
+    feeds: [proposal, register, source-link, imported-status, ssot-conflict]
+    framework-works-without-it: true
+    value-add: "reduz atrito de adocao em empresas com backlog existente"
+    authority: "importa como proposal/register ou link; nao cria segundo SSOT sem contrato explicito"
+    priority: P1
+
+  - id: identity-directory
+    category: authority
+    systems: [okta, entra-id, google-workspace, github-teams]
+    adapter-kind: identity-provider
+    feeds: [authority, team-membership, approver-validity, sod-check]
+    framework-works-without-it: true
+    value-add: "resolve pessoas/times e reduz authority textual"
+    authority: "diretorio externo prova membership; policy do framework decide SoD"
+    priority: P1
+
+  - id: design-system
+    category: product-design
+    systems: [figma, storybook, chromatic, npm-registry]
+    adapter-kind: evidence-provider
+    feeds: [design-contract, component-usage, visual-regression, release-evidence]
+    framework-works-without-it: true
+    value-add: "liga contratos de UI/design system a repo-work e release"
+    authority: "design evidence informa; owner/reviewer confirma contrato"
+    priority: P2
+
+  - id: knowledge-base
+    category: knowledge
+    systems: [confluence, notion, google-drive, sharepoint]
+    adapter-kind: evidence-provider
+    feeds: [attachment-ref, decision-support, stale-doc-warning, classification-risk]
+    framework-works-without-it: true
+    value-add: "aproveita docs existentes sem colar conteudo sensivel no YAML"
+    authority: "documento externo e anexo/evidencia, nao decision append-only"
+    priority: P2
+
+  - id: assistant-runtime-local-cloud
+    category: ai-assistance
+    systems:
+      [ollama, lm-studio, localai, llama-cpp-server, vllm, openai-compatible, anthropic-compatible]
+    adapter-kind: assistant-runtime
+    feeds: [matcher-suggestion, capability-extraction, summary-draft, triage-question-candidate]
+    framework-works-without-it: true
+    value-add: "permite que a organizacao escolha assistente local/cloud por politica de classificacao e egress"
+    authority: "gera sugestao com score/unknown/evidence/policy; humano confirma e resolver valida refs"
+    priority: P0
+    local-adapter: assistant-ollama
+
+  - id: knowledge-assistant
+    category: ai-assistance
+    systems: [onyx, open-webui, anythingllm, dify, khoj]
+    adapter-kind: knowledge-assistant
+    feeds:
+      [attachment-ref, context-candidate, stale-doc-warning, decision-support, classification-risk]
+    framework-works-without-it: true
+    value-add: "aproveita busca/RAG corporativo para contexto sem copiar conteudo sensivel para YAML"
+    authority: "resultado e candidato/anexo; nao define target, gate, verdict nem actual"
+    priority: P1
+
+  - id: coding-agent-channel
+    category: ai-assistance
+    systems: [opencode, claude-code, codex-cli, aider]
+    adapter-kind: coding-agent-channel
+    feeds: [patch-plan, implementation-suggestion, review-evidence, work-log]
+    framework-works-without-it: true
+    value-add: "acomoda times que preferem terminal/agent CLI sem tornar o agente autoridade do grafo"
+    authority: "patch/review entram como proposta ou evidencia; mutacao governada exige comando, authority e base-revision"
+    priority: P1
+
+  - id: agent-gateway-deferred
+    category: ai-assistance
+    systems: [openclaw]
+    adapter-kind: agent-gateway
+    feeds: [delegated-task-candidate, agent-activity-log]
+    framework-works-without-it: true
+    value-add: "registrar classe de risco sem habilitar cedo demais gateways agentivos amplos"
+    authority: "ADIADO: nao habilitar ate existir delegacao formal, sandbox, secrets isolation, TTL, max-mutations, human approval e auditoria"
+    priority: deferred
+
+  - id: graph-export
+    category: read-model
+    systems: [neo4j, graphistry, graphile, custom-graph-api]
+    adapter-kind: read-model-exporter
+    feeds: [graph-read-model, impact-query, dependency-map, risk-path]
+    framework-works-without-it: true
+    value-add: "potencializa exploracao do grafo sem virar SSOT"
+    authority: "read-model e derivado; comando relê YAML/event-log autoritativo"
+    priority: P0

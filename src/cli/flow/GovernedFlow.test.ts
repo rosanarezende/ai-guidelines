@@ -1,13 +1,13 @@
 import { deriveWorkBrief } from "../workBrief.js";
 import { deriveGovernedFlow, derivePrReadyFlow } from "./GovernedFlow.js";
-import { FinishSubcheckpointDefinition } from "../decide/finishSubcheckpoint.js";
+import { FinishStepDefinition } from "../decide/finishStep.js";
 import { MarkReadinessDefinition } from "../decide/markReadiness.js";
-import { AdvanceSubcheckpointDefinition } from "../decide/advanceSubcheckpoint.js";
+import { AdvanceStepDefinition } from "../decide/advanceStep.js";
 import { HumanGateDefinition } from "../decide/humanGate.js";
-import { OpenNextNodeDefinition } from "../decide/openNextNode.js";
+import { OpenNextTopologyNodeDefinition } from "../decide/openNextTopologyNode.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 import { parseWorkPolicy } from "../../infrastructure/yaml/workPolicyReader.js";
-import { deriveNextAction } from "../handoffFacts.js";
+import { STEP_READINESS, deriveNextAction } from "../handoffFacts.js";
 import type { DecisionAvailability } from "../decide/model.js";
 
 const POLICY = parseWorkPolicy(`
@@ -26,7 +26,7 @@ modes:
     pr_body_editable: true
     stop_conditions: ["done"]
     report_sections: ["Retomada"]
-  prepare_subcheckpoint_transition:
+  prepare_step_transition:
     purpose: "Transição."
     allowed_actions: []
     forbidden_actions: ["human-gate", "merge"]
@@ -145,9 +145,15 @@ function coFlowFacts(over: Partial<ReturnType<typeof makeHandoffFacts>> = {}) {
       baseRefName: "feat/spec-0024-co-enforcement",
     },
     lifecycle: GREEN,
-    subCheckpoints: [
+    steps: [
       { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
-      { id: "CO-10.2", title: "confronto modelo x codigo", state: "in-progress", line: 101 },
+      {
+        id: "CO-10.2",
+        title: "confronto modelo x codigo",
+        state: "in-progress",
+        readiness: STEP_READINESS,
+        line: 101,
+      },
       { id: "CO-10.3", title: "correcao integral", state: "pending", line: 102 },
     ],
     ...over,
@@ -155,13 +161,13 @@ function coFlowFacts(over: Partial<ReturnType<typeof makeHandoffFacts>> = {}) {
 }
 
 describe("GovernedFlow", () => {
-  it("cockpit/work/decide concordam que finish-subcheckpoint é a próxima ação interna disponível", () => {
+  it("cockpit/work/decide concordam que finish-step é a próxima ação interna disponível", () => {
     const facts = coFlowFacts();
     const snapshot = makeDecisionSnapshot({
       facts,
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
       workingTreeState: "clean",
       gateExists: false,
     });
@@ -175,11 +181,11 @@ describe("GovernedFlow", () => {
       workingTreeState: "clean",
       authorization: null,
       advanceEligibility: blockedNoReadiness,
-      finishSubcheckpointEligibility: available,
+      finishStepEligibility: available,
       markReadinessEligibility: available,
     });
 
-    expect(flow.recommended?.id).toBe("finish-subcheckpoint");
+    expect(flow.recommended?.id).toBe("finish-step");
     expect(flow.humanSummary.nextAction).toBe("Encerrar CO-10.2 e iniciar CO-10.3.");
     expect(flow.humanSummary.missing).toContain(
       "Falta registrar a decisão governada que encerra CO-10.2 e ativa CO-10.3."
@@ -191,15 +197,15 @@ describe("GovernedFlow", () => {
         "CI 5 ok, 0 falha(s), 0 pendente(s).",
       ])
     );
-    expect(work.nextAction.decisionType).toBe("finish-subcheckpoint");
-    expect(new FinishSubcheckpointDefinition().detect(snapshot).status).toBe("available");
-    expect(new MarkReadinessDefinition().detect(snapshot).status).toBe("available");
-    expect(new AdvanceSubcheckpointDefinition().detect(snapshot).status).toBe("blocked");
+    expect(work.nextAction.decisionType).toBe("finish-step");
+    expect(new FinishStepDefinition().detect(snapshot).status).toBe("available");
+    expect(new MarkReadinessDefinition().detect(snapshot).status).toBe("blocked");
+    expect(new AdvanceStepDefinition().detect(snapshot).status).toBe("available");
   });
 
-  it("HumanSummary explica o escopo do objeto atual e do proximo sub-checkpoint", () => {
+  it("HumanSummary explica o escopo do objeto atual e do proxima etapa", () => {
     const facts = coFlowFacts({
-      subCheckpoints: [
+      steps: [
         { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
         {
           id: "CO-10.2",
@@ -221,7 +227,7 @@ describe("GovernedFlow", () => {
       facts,
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
       workingTreeState: "clean",
       gateExists: false,
     });
@@ -262,7 +268,7 @@ describe("GovernedFlow", () => {
       facts,
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
       workingTreeState: "clean",
       gateExists: false,
     });
@@ -276,9 +282,9 @@ describe("GovernedFlow", () => {
     expect(action?.availability.hint).toContain("1 percepção");
   });
 
-  it("bloqueia readiness quando o sub-checkpoint ativo não tem commit de entrega após ativação", () => {
+  it("bloqueia readiness quando a etapa ativa não tem commit de entrega após ativação", () => {
     const facts = coFlowFacts({
-      subCheckpoints: [
+      steps: [
         { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
         { id: "CO-10.2", title: "confronto modelo x codigo", state: "done", line: 101 },
         { id: "CO-10.3", title: "correcao integral", state: "in-progress", line: 102 },
@@ -288,10 +294,10 @@ describe("GovernedFlow", () => {
       facts,
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
       workingTreeState: "clean",
       gateExists: false,
-      subCheckpointDeliveryEvidence: {
+      stepDeliveryEvidence: {
         status: "missing",
         activeId: "CO-10.3",
         activationCommit: "bc9278b",
@@ -311,15 +317,26 @@ describe("GovernedFlow", () => {
     ).toMatch(/CO-10\.3 acabou de ser ativado/);
   });
 
-  it("work e decide bloqueiam advance sem readiness", () => {
-    const facts = coFlowFacts();
+  it("work continua implementação quando etapa ativa ainda não declarou readiness", () => {
+    const facts = coFlowFacts({
+      steps: [
+        { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
+        {
+          id: "CO-10.2",
+          title: "confronto modelo x codigo",
+          state: "in-progress",
+          line: 101,
+        },
+        { id: "CO-10.3", title: "correcao integral", state: "pending", line: 102 },
+      ],
+    });
     const snapshot = makeDecisionSnapshot({
       facts,
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
     });
-    const advance = new AdvanceSubcheckpointDefinition().detect(snapshot);
+    const advance = new AdvanceStepDefinition().detect(snapshot);
     const work = deriveWorkBrief({
       facts,
       nextAction: deriveNextAction(facts),
@@ -332,9 +349,11 @@ describe("GovernedFlow", () => {
     });
 
     expect(advance.status).toBe("blocked");
-    expect(work.nextAction.decisionType).toBe("advance-subcheckpoint");
-    expect(work.nextAction.commands).toHaveLength(1);
-    expect(work.nextAction.commands[0].role).toBe("read-only");
+    expect(work.nextAction.decisionType).toBeNull();
+    expect(work.nextAction.description).toBe(
+      "Implementar o checkpoint ativo CO-10.2 — confronto modelo x codigo."
+    );
+    expect(work.nextAction.commands).toHaveLength(0);
   });
 
   it("findings abertos e CI pendente bloqueiam readiness pela fonte comum", () => {
@@ -359,7 +378,7 @@ describe("GovernedFlow", () => {
           verified: false,
         },
       ],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
     });
     const action = deriveGovernedFlow(snapshot).actions.find((a) => a.id === "mark-readiness")!;
 
@@ -382,7 +401,7 @@ describe("GovernedFlow", () => {
       facts,
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
       workingTreeState: "clean",
     });
 
@@ -392,19 +411,62 @@ describe("GovernedFlow", () => {
     expect(summary.missing).toContain("A CI tem 3 check(s) pendente(s).");
   });
 
-  it("Human Gate fica bloqueado antes de Ready e sem readiness terminal", () => {
+  it("Human Gate fica bloqueado antes de Ready, mas não por etapas futuras pendentes", () => {
     const facts = coFlowFacts();
     const snapshot = makeDecisionSnapshot({
       facts,
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
     });
     const gate = new HumanGateDefinition().detect(snapshot);
 
     expect(gate.status).toBe("blocked");
-    expect(gate.reasons.join(" ")).toMatch(/CO-10\.3 ainda está aberto/);
+    expect(gate.reasons.join(" ")).not.toMatch(/CO-10\.3 ainda está aberto/);
     expect(gate.reasons.join(" ")).toMatch(/PR #43 continua Draft/);
+  });
+
+  it("Human Gate fica disponível quando o checkpoint atual está pronto mesmo com próximos checkpoints pendentes", () => {
+    const facts = coFlowFacts({
+      pullRequest: {
+        ...makeHandoffFacts().pullRequest!,
+        number: 45,
+        isDraft: false,
+        checks: { pass: 12, fail: 0, pending: 0 },
+        headRefOid: "abc1234",
+      },
+      steps: [
+        { id: "drift-diagnosis-and-repair", title: "diagnóstico", state: "done", line: 126 },
+        {
+          id: "artifact-taxonomy-and-model-review-contract",
+          title: "taxonomia",
+          state: "in-progress",
+          readiness: STEP_READINESS,
+          line: 128,
+        },
+        {
+          id: "internal-architecture-refactor-ddd-bdd",
+          title: "DDD/BDD",
+          state: "pending",
+          line: 129,
+        },
+      ],
+    });
+    const snapshot = makeDecisionSnapshot({
+      facts,
+      checkpoint: "checkpoint-co-flow-continuation",
+      openFindings: [],
+      lanes: [],
+      steps: facts.steps,
+      workingTreeState: "clean",
+      prReady: { ok: true, summary: "verde" },
+      gateDecidability: { ok: true, summary: "verde" },
+    });
+
+    const flow = deriveGovernedFlow(snapshot);
+
+    expect(flow.recommended?.id).toBe("human-gate");
+    expect(flow.recommended?.availability.status).toBe("available");
   });
 
   it("PR Ready usa o mesmo fluxo para CI, tree, reviews e smoke suspension", () => {
@@ -431,9 +493,36 @@ describe("GovernedFlow", () => {
     expect(result.failures.join(" ")).toMatch(/working tree/);
   });
 
-  it("último sub-checkpoint pronto não recomenda advance-subcheckpoint", () => {
+  it("PR Ready bloqueia quando o plano situado de reviews ainda tem decisão humana pendente", () => {
+    const result = derivePrReadyFlow({
+      prNumber: 45,
+      prState: "OPEN",
+      prDraft: true,
+      readyBodyContractReasons: [],
+      smokeTestsSuspended: false,
+      smokeRequired: false,
+      checks: [{ name: "validate", bucket: "pass" }],
+      localHeadSha: "abc1234",
+      prHeadRefOid: "abc1234",
+      workingTreeClean: true,
+      checkpoint: {
+        id: "checkpoint-artifact-taxonomy-and-model-review-contract",
+        gateDecision: null,
+        openBlockingCount: 0,
+        reviewPlanDecisionReasons: [
+          "technical_audit: decisão humana pendente (sistema recomendou recommended).",
+        ],
+        reviewStatuses: [],
+      },
+    });
+
+    expect(result.failures.join(" ")).toContain("plano de revisão do PR");
+    expect(result.failures.join(" ")).toContain("technical_audit");
+  });
+
+  it("última etapa pronta não recomenda advance-step", () => {
     const facts = coFlowFacts({
-      subCheckpoints: [
+      steps: [
         { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
         {
           id: "CO-10.2",
@@ -448,14 +537,14 @@ describe("GovernedFlow", () => {
       facts,
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
     });
 
-    expect(new AdvanceSubcheckpointDefinition().detect(snapshot).status).toBe("not-applicable");
-    expect(deriveGovernedFlow(snapshot).recommended?.id).not.toBe("advance-subcheckpoint");
+    expect(new AdvanceStepDefinition().detect(snapshot).status).toBe("not-applicable");
+    expect(deriveGovernedFlow(snapshot).recommended?.id).not.toBe("advance-step");
   });
 
-  it("pós-Human Gate recomenda open-next-node pela mesma fonte que decide", () => {
+  it("pós-Human Gate recomenda open-next-topology-node pela mesma fonte que decide", () => {
     const facts = coFlowFacts({
       lifecycle: { ...GREEN, gateDecision: "approved" },
       pullRequest: {
@@ -473,7 +562,7 @@ describe("GovernedFlow", () => {
         sequence: 11,
         terminal: false,
       },
-      subCheckpoints: [
+      steps: [
         { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
         { id: "CO-10.2", title: "confronto", state: "done", line: 101 },
         { id: "CO-10.3", title: "correções", state: "done", line: 102 },
@@ -484,19 +573,19 @@ describe("GovernedFlow", () => {
       checkpoint: "checkpoint-co-flow-convergence",
       openFindings: [],
       lanes: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
       gateExists: true,
       workingTreeState: "clean",
     });
 
     const flow = deriveGovernedFlow(snapshot);
-    const decide = new OpenNextNodeDefinition().detect(snapshot);
+    const decide = new OpenNextTopologyNodeDefinition().detect(snapshot);
 
     expect(decide.status).toBe("available");
-    expect(flow.recommended?.id).toBe("open-next-node");
+    expect(flow.recommended?.id).toBe("open-next-topology-node");
     expect(flow.recommended?.availability).toEqual(decide);
     expect(flow.recommended?.mutatingCommand).toContain(
-      "--type open-next-node --decision open-node"
+      "--type open-next-topology-node --decision open-node"
     );
   });
 
@@ -518,7 +607,7 @@ describe("GovernedFlow", () => {
         sequence: 12,
         terminal: false,
       },
-      subCheckpoints: [
+      steps: [
         { id: "drift-diagnosis-and-repair", title: "Governance Doctor", state: "done", line: 126 },
         {
           id: "lifecycle-model-and-artifact-taxonomy-decision",
@@ -539,18 +628,18 @@ describe("GovernedFlow", () => {
       checkpoint: "checkpoint-co-flow-continuation",
       openFindings: [],
       lanes: [],
-      subCheckpoints: facts.subCheckpoints,
+      steps: facts.steps,
       gateExists: true,
       workingTreeState: "clean",
     });
 
     const flow = deriveGovernedFlow(snapshot);
-    const decide = new OpenNextNodeDefinition().detect(snapshot);
-    const plan = new OpenNextNodeDefinition().plan(snapshot, "open-node");
+    const decide = new OpenNextTopologyNodeDefinition().detect(snapshot);
+    const plan = new OpenNextTopologyNodeDefinition().plan(snapshot, "open-node");
 
     expect(decide.status).toBe("blocked");
     expect(decide.reasons.join(" ")).toContain("artifact-taxonomy-and-model-review-contract");
-    expect(flow.recommended?.id).not.toBe("open-next-node");
+    expect(flow.recommended?.id).not.toBe("open-next-topology-node");
     expect(plan.mutating).toBe(false);
     expect(plan.note.join(" ")).toContain("artifact-taxonomy-and-model-review-contract");
   });

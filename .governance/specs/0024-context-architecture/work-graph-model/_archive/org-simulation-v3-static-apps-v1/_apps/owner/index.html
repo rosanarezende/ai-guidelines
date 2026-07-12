@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'"
+    />
+    <title>acme — grafo da org (app da owner)</title>
+    <style>
+      :root {
+        --bg: #faf9f6;
+        --card: #ffffff;
+        --ink: #23231f;
+        --ink2: #5f5e58;
+        --line: #e4e1d7;
+        --accent: #0c447c;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #23231f;
+          --card: #2f2e2a;
+          --ink: #eceae0;
+          --ink2: #b9b7ad;
+          --line: #45443e;
+          --accent: #cfe3fa;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          14px/1.5 system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #root {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .toolbar h1 {
+        font-size: 15px;
+        margin: 0 10px 0 0;
+      }
+      .btn {
+        font: inherit;
+        font-size: 12px;
+        padding: 4px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--ink2);
+        cursor: pointer;
+      }
+      .btn.on {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .main {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+      }
+      #cy {
+        flex: 1;
+        min-width: 0;
+      }
+      .panel {
+        width: 380px;
+        border-left: 1px solid var(--line);
+        overflow-y: auto;
+        padding: 12px 14px;
+      }
+      .panel h2 {
+        font-size: 14px;
+        margin: 0 0 4px;
+      }
+      .muted {
+        color: var(--ink2);
+        font-size: 12px;
+      }
+      .kv {
+        font-size: 12px;
+        margin: 2px 0;
+      }
+      .kv b {
+        color: var(--ink2);
+        font-weight: 600;
+      }
+      .row {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 8px;
+        margin: 6px 0;
+        font-size: 12px;
+        cursor: pointer;
+        background: var(--card);
+      }
+      .err {
+        border-left: 3px solid #e24b4a;
+      }
+      .wrn {
+        border-left: 3px solid #ef9f27;
+      }
+      input.search {
+        font: inherit;
+        font-size: 12px;
+        padding: 4px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--ink);
+        width: 180px;
+      }
+      .legend {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        color: var(--ink2);
+        margin-right: 6px;
+      }
+      .sw {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="../vendor/react.production.min.js"></script>
+    <script src="../vendor/react-dom.production.min.js"></script>
+    <script src="../vendor/htm.umd.js"></script>
+    <script src="../vendor/cytoscape.min.js"></script>
+    <script src="../graph.js"></script>
+    <script src="owner-app.js"></script>
+  </body>
+</html>

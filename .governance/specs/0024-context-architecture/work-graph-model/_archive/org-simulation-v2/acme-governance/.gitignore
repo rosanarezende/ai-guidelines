@@ -1,0 +1,8 @@
+# governança da ORG — read-models derivados (regeneráveis)
+.cache/
+# config LOCAL do matcher (opt-in; default = léxico, sem arquivo). O versionado é o matcher.yml.example.
+/matcher.yml
+# produto/host
+node_modules/
+dist/
+build/

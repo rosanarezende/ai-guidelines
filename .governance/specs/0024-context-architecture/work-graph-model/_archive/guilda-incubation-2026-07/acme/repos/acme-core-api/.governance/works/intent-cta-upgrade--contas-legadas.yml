@@ -1,0 +1,31 @@
+schema: acme.repo-work/v1
+id: intent-cta-upgrade::contas-legadas
+intent: intent-cta-upgrade
+work: contas-legadas
+repo: acme-core-api
+purpose: sustain
+desc: "expõe leitura de contas legadas p/ a elegibilidade — MONOLITO: o dono é o do MÓDULO"
+review: "externo: time-identity"
+status: done
+source:
+  kind: central-breakdown
+  file: acme/governance/intents/intent-cta-upgrade.yml
+  breakdownHash: 56cab9e860e6
+code:
+  touchpoints:
+    - src/modules/accounts.mjs
+module: mod-accounts
+owner: lead-identity
+started-at: 2027-01-05
+base-revision: acme-core-api@ctx-v1
+completed-at: 2027-01-11
+source-commit: git:core-api-accounts-seam-001
+evidence:
+  kind: code-fixture
+  command: node tools/checks/check-code-fixtures.ts
+  result: passed
+  files:
+    - src/modules/accounts.mjs
+verification:
+  checked-by: lead-identity
+  result: seam de contas legado exposto sem mover ownership do modulo

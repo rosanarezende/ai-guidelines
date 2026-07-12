@@ -1,0 +1,41 @@
+{
+  "title": "Papéis e autoridade",
+  "lead": "Papéis não são login. Uma atribuição proposta só vira autoridade quando a pessoa ou grupo aceita; autoridade efetiva é sempre derivada.",
+  "assignTitle": "Atribuir papel",
+  "subjectLabel": "Pessoa, time ou grupo",
+  "selectPersonCta": "Selecionar pessoa convidada",
+  "roleLabel": "Papel",
+  "reasonLabel": "Motivo opcional",
+  "assignCta": "Propor papel",
+  "assignSelfCta": "Registrar papel",
+  "assignments": "Atribuições",
+  "authority": "Autoridade efetiva",
+  "accumulations": "Acúmulos sensíveis",
+  "noAssignments": "Nenhum papel atribuído.",
+  "noAuthority": "Nenhuma autoridade efetiva derivada.",
+  "noAccumulations": "Nenhum acúmulo sensível detectado.",
+  "accept": "Aceitar",
+  "reject": "Rejeitar",
+  "revoke": "Revogar",
+  "status": "status",
+  "origin": "origem",
+  "roles": {
+    "workspace-admin": "Admin do workspace",
+    "sponsor": "Sponsor",
+    "cost-owner": "Responsável financeiro",
+    "security-owner": "Responsável por segurança",
+    "technical-owner": "Owner técnico",
+    "source-owner": "Owner de fontes",
+    "target-definer": "Define metas",
+    "actual-attester": "Atesta resultados",
+    "auditor": "Auditoria"
+  },
+  "subjectKinds": {
+    "person": "Pessoa",
+    "team": "Time",
+    "group": "Grupo",
+    "service-account": "Service account",
+    "external-group": "Grupo externo"
+  },
+  "error": "Não foi possível concluir. Detalhe: {error}"
+}

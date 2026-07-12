@@ -3,7 +3,7 @@
  * pronto. O gate artifact nasce DEPOIS da decisão. Registrar o gate NÃO executa
  * transição/merge/abertura de PR (Etapa 10). Zero LLM (ADR 0018).
  *
- * Nesta sessão a decisão real está BLOQUEADA (PR Draft + sub-checkpoints abertos):
+ * Nesta sessão a decisão real está BLOQUEADA (PR Draft + etapas abertos):
  * o briefing explica o bloqueio em linguagem humana; o efeito está implementado
  * e testado, mas não é exercido.
  */
@@ -27,7 +27,7 @@ import {
   findDecisionType,
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
-import { SUBCHECKPOINT_READINESS } from "../handoffFacts.js";
+import { STEP_READINESS } from "../handoffFacts.js";
 import {
   deriveHumanGateAvailability,
   humanGateFactsFromDecisionSnapshot,
@@ -95,12 +95,10 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
       "O Human Gate é a decisão da owner sobre concluir o checkpoint; " +
       "o gate é registrado DEPOIS da decisão e não executa transição automática.";
 
-    const doneSubs = snapshot.subCheckpoints.filter((s) => s.state === "done");
-    const terminalReadySub = snapshot.subCheckpoints.find((s) => {
-      if (s.state !== "in-progress" || s.readiness !== SUBCHECKPOINT_READINESS) return false;
-      return !snapshot.subCheckpoints.some(
-        (other) => other.state === "pending" && other.line > s.line
-      );
+    const doneSubs = snapshot.steps.filter((s) => s.state === "done");
+    const terminalReadySub = snapshot.steps.find((s) => {
+      if (s.state !== "in-progress" || s.readiness !== STEP_READINESS) return false;
+      return !snapshot.steps.some((other) => other.state === "pending" && other.line > s.line);
     });
     const deliveredSubs = [
       ...doneSubs.map((s) => `Concluído: ${s.id} — ${s.title}`),

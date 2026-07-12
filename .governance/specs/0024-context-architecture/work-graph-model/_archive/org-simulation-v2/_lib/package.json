@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "mongodb": "^7.4.0",
+    "neo4j-driver": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.0"
+  }
+}

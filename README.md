@@ -159,7 +159,7 @@ A partir da `1.1.0`, a CLI ganha um conjunto de comandos para **operar o ciclo d
 
 - **`npx ai-guidelines`** — wizard situado: mostra cockpit, próxima ação, decisões disponíveis, bloqueios e operações avançadas sem executar mutação sem confirmação.
 - **`npx ai-guidelines work [--authorization explicit-work-request]`** — briefing da spec ativa com modo, escopo, autoridade, validações, critérios de parada e contrato de relatório.
-- **`npx ai-guidelines decide --brief-only`** — briefing das decisões reservadas à owner, incluindo readiness, avanço de sub-checkpoint e Human Gate quando aplicável.
+- **`npx ai-guidelines decide --brief-only`** — briefing das decisões reservadas à owner, incluindo readiness, avanço de Etapa e Human Gate quando aplicável.
 
 **Contexto pronto para colar na IA externa.** A CLI não embute LLM: ela lê o estado da spec e monta um bloco de contexto estruturado que você **cola na sua IA** (Claude, Cursor, Codex…). A conversa acontece na IA; a CLI só prepara o contexto e aplica os gates determinísticos.
 
@@ -207,6 +207,18 @@ Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guideline
 > 🔧 **Distribuição configurada:** provider entrypoint gerado conforme contrato documentado da IA; comportamento ponta-a-ponta com a IA real ainda não foi testado.
 >
 > Contribuições com evidência de uso real são bem-vindas.
+
+## Supply-chain
+
+O próprio repositório usa OSV/deps.dev como evidência consultiva de dependências:
+
+```bash
+npm run supply-chain:check     # offline: valida package-lock e contrato do advisory
+npm run supply-chain:advisory  # live: consulta OSV.dev + deps.dev e grava em .tmp/
+```
+
+O GitHub Actions também roda OSV-Scanner em PRs e em varredura agendada. Esses sinais não fecham
+gate sozinhos: vulnerabilidade externa vira evidência para triagem, patch e decisão governada.
 
 ## Documentação & contribuição
 

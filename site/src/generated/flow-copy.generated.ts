@@ -427,21 +427,21 @@ export const AI_GUIDELINES_FLOW_COPY = {
     {
       "name": "decide",
       "aliases": [],
-      "description": "Decisões reservadas ao humano (close-dispositions, finish-subcheckpoint, mark-readiness, advance-subcheckpoint, human-gate, open-next-node): briefing humano → escolha → prévia → confirmação → registro governado. Zero LLM.",
+      "description": "Decisões reservadas ao humano (close-dispositions, finish-step, mark-readiness, advance-step, human-gate, open-next-topology-node): briefing humano → escolha → prévia → confirmação → registro governado. Zero LLM.",
       "usage": [
         "decide",
         "decide --brief-only",
-        "decide --type finish-subcheckpoint --brief-only",
+        "decide --type finish-step --brief-only",
         "decide --type mark-readiness --brief-only",
         "decide --type close-dispositions --brief-only",
-        "decide --type advance-subcheckpoint --brief-only",
+        "decide --type advance-step --brief-only",
         "decide --type human-gate --brief-only",
-        "decide --type open-next-node --brief-only",
+        "decide --type open-next-topology-node --brief-only",
         "decide --type close-dispositions --technical",
-        "decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm",
+        "decide --type finish-step --decision finish --authorization explicit-human-decision --confirm",
         "decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm",
         "decide --type close-dispositions --decision accept-all --authorization explicit-human-decision --confirm",
-        "decide --type open-next-node --decision open-node --authorization explicit-human-decision --confirm"
+        "decide --type open-next-topology-node --decision open-node --authorization explicit-human-decision --confirm"
       ],
       "subcommands": []
     },
@@ -614,24 +614,24 @@ export const AI_GUIDELINES_FLOW_COPY = {
       "title": "Encerrar problemas revalidados da auditoria técnica"
     },
     {
-      "id": "finish-subcheckpoint",
-      "title": "Concluir ponto atual e iniciar o próximo"
+      "id": "finish-step",
+      "title": "Concluir etapa atual e iniciar a próxima"
     },
     {
       "id": "mark-readiness",
-      "title": "Declarar readiness do sub-checkpoint ativo"
+      "title": "Declarar readiness da etapa ativa"
     },
     {
-      "id": "advance-subcheckpoint",
-      "title": "Iniciar o próximo sub-checkpoint"
+      "id": "advance-step",
+      "title": "Iniciar a próxima etapa"
     },
     {
       "id": "human-gate",
       "title": "Decidir o avanço do checkpoint (Human Gate)"
     },
     {
-      "id": "open-next-node",
-      "title": "Abrir o próximo nó planejado"
+      "id": "open-next-topology-node",
+      "title": "Abrir o próximo nó da topologia"
     }
   ],
   "intents": [

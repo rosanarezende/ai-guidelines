@@ -1,0 +1,19 @@
+# registry/delivery.yml — backend (acme-api). Dense: indexa o workspace (detalhe no intent-brief).
+works:
+  - id: deliv-001
+    kind: delivery
+    title: endpoints OAuth (api)
+    status: active
+    workspace: works/delivery_oauth-api/
+    promoted-from: prop-001
+    coordinates-with: frontend/deliv-001
+    date: 2026-06-24
+  - id: deliv-002
+    kind: delivery
+    title: API de checkout 1-clique
+    status: active
+    workspace: works/delivery_checkout-api/
+    promoted-from: prop-002
+    coordinates-with: frontend/deliv-003
+    team: ["@dev-a (cp-payment)", "@dev-c (cp-orders)"] # 2 frentes paralelas (derivadas de owner)
+    date: 2026-06-25

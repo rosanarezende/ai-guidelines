@@ -1,0 +1,23 @@
+node: work-brief
+kind: delivery
+id: deliv-210
+intent: intent-004
+sealed: true
+references:
+  - type: design
+    label: "protótipo do login"
+    url: "https://design.acme.example/login"
+    note: "estados de erro do formulário (email/site/telefone)"
+
+objective:
+  goal: um componente de formulário com validação (email, site, telefone) no design system
+  approach: novo componente reusável no acme-design-system, consumido pelos MFEs
+  done-when: publicado + documentado + consumido pelo login MFE atrás de flag; valida email/site/telefone
+
+context: o DS não tinha formulário validado (q1/exploration-301 confirmou) — cada MFE reimplementava
+out-of-scope: não cobre captcha nem máscaras de pagamento
+requirements: implementa o contrato "componente de formulário validado — acme-design-system"; expõe estados de erro consumíveis (pro suporte proativo)
+
+details: |
+  Nasce do contrato que a q1/exploration-301 tornou `known`. Consumido por acme-mfe-identity (login) e,
+  indiretamente, alimenta o suporte proativo (os estados de erro viram `login:step-failed`).

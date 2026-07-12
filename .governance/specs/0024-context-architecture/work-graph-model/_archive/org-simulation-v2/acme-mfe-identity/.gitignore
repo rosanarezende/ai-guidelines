@@ -1,0 +1,7 @@
+# governança — derivados regeneráveis (a FONTE é o .governance/ source; o context.json é VERSIONADO = contrato)
+.governance/.cache/
+.governance/*.db
+# produto
+node_modules/
+dist/
+build/

@@ -1,0 +1,49 @@
+// /spikes/control-plane-portal — bancada interna do spike S1 (QRD-36/41).
+// Prova a separacao: portal/control plane para conta/convite; governance host
+// Git-backed como SSOT/auditoria; authority sempre fora do control plane.
+import {
+  comparePortalStoreCandidates,
+  createGovernanceProposal,
+  runPortalSpikeFlow,
+} from "@demo/domain";
+import {
+  evaluateBetterAuthPortalStoreProfiles,
+  runBetterAuthPostgresPortalLiveSpike,
+  runBetterAuthSQLiteInviteAcceptHttpSpike,
+  runBetterAuthSQLitePortalHttpSpike,
+} from "@demo/backend";
+import { describeBetterAuthCandidate } from "./_model/better-auth-candidate";
+import ControlPlanePortalSpikeView from "./_view/ControlPlanePortalSpikeView";
+
+export const dynamic = "force-dynamic";
+
+export default async function ControlPlanePortalSpikePage() {
+  const flow = runPortalSpikeFlow();
+  const storeReport = await evaluateBetterAuthPortalStoreProfiles();
+  const sqliteHttpReport = await runBetterAuthSQLitePortalHttpSpike();
+  const inviteAcceptReport = await runBetterAuthSQLiteInviteAcceptHttpSpike();
+  const postgresLiveReport = await runBetterAuthPostgresPortalLiveSpike();
+  const staleProposal = createGovernanceProposal(flow.acceptedState, {
+    workspaceId: "ws-acme-honey",
+    actorAccountId: "acct-business",
+    sourceRevision: "rev-stale",
+    targetPath: "intents/intent-new-market.yml",
+  });
+
+  return (
+    <ControlPlanePortalSpikeView
+      auth={describeBetterAuthCandidate()}
+      projection={flow.publicProjection}
+      proposal={flow.proposalResult}
+      bridgeDryRun={flow.bridgeDryRun}
+      persistedSnapshot={flow.persistedSnapshot}
+      staleProposal={staleProposal}
+      secretLeakCount={flow.secretLeaks.length}
+      storeCandidates={comparePortalStoreCandidates()}
+      storeReport={storeReport}
+      sqliteHttpReport={sqliteHttpReport}
+      inviteAcceptReport={inviteAcceptReport}
+      postgresLiveReport={postgresLiveReport}
+    />
+  );
+}

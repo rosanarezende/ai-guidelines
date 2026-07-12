@@ -1,0 +1,11 @@
+# DERIVADO de decisions/*.md — não editar à mão (índice k/N por decisão).
+decisions:
+  - id: dec-001
+    title: lib OAuth + armazenamento de token
+    status: resolved
+    questions:
+      resolved: [q-001]
+      open: []
+    progress: "1/1"
+    owner: null
+    date: null

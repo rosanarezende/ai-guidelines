@@ -1,0 +1,101 @@
+{
+  "attention": {
+    "verdictPending": {
+      "title": "Resultado de {emitter} aguarda aceite de veredito",
+      "hint": "A evidência já passou na verificação automática; falta o gate accept-verdict registrar a decisão.",
+      "action": "Abrir comandos"
+    },
+    "outcomeInvalid": {
+      "title": "Resultado {id} não soma no placar",
+      "fallbackHint": "A verificação automática recusou a evidência.",
+      "action": "Ver detalhes"
+    },
+    "proposal": {
+      "title": "Ideia \"{title}\" aguarda triagem e gate",
+      "hint": "Registrada no intake; pode virar iniciativa ativada ou ser descartada — a decisão fica registrada.",
+      "action": "Abrir comandos"
+    },
+    "breakGlass": {
+      "title": "Exceção {id} aberta ({mutation})",
+      "hint": "Uma regra foi contornada com justificativa. Revisar até {reviewAt}.",
+      "action": "Revisar"
+    },
+    "selfAttested": {
+      "title": "Meta {node} é atestada pela própria equipe",
+      "hint": "Colapso aprovado e registrado; o placar mantém o selo Auto-declarado em vez de fingir independência.",
+      "action": "Ver no placar"
+    },
+    "warning": {
+      "title": "{node}: aviso do resolver",
+      "action": "Ver auditoria"
+    },
+    "error": {
+      "title": "{node}: erro bloqueante ({rule})",
+      "action": "Ver auditoria"
+    },
+    "missingContext": {
+      "title": "Fonte {repo} sem contexto publicado",
+      "hint": "Sem context.json publicado, o trabalho desta fonte só entra como evidência manual/declarada.",
+      "action": "Ver fontes"
+    }
+  },
+  "sources": {
+    "kind": "Fonte de trabalho · repositório · owner {owner}",
+    "published": "contexto publicado · {works} peça(s) reconhecida(s) · {contracts} contrato(s)",
+    "missing": "sem contexto publicado — evidência manual/declarada"
+  },
+  "checklist": {
+    "profile": {
+      "label": "Perfil da governança",
+      "detail": "{profile} · aprovado por {approver} · revisão {reviewAt}",
+      "unresolved": "não resolvido",
+      "noDate": "sem data"
+    },
+    "roles": {
+      "label": "Papéis e responsáveis",
+      "tag": "aceite pendente",
+      "detail": "{count} autoridade(s) declarada(s) como contrato de responsabilidade — aceite/convite ainda não é mecanismo"
+    },
+    "cycle": {
+      "label": "Ciclo {period}",
+      "noPeriod": "sem período",
+      "detail": "{objectives} objetivos · {targets} metas · períodos {periods}",
+      "noPeriods": "—"
+    },
+    "sources": {
+      "label": "Fontes de trabalho",
+      "tag": "para evidência automática",
+      "allConnected": "{connected} de {total} com contexto publicado",
+      "partial": "{connected} de {total} com contexto publicado — sem contexto, a evidência é manual/declarada"
+    },
+    "assistant": {
+      "label": "Assistente",
+      "tag": "opcional",
+      "detail": "Local (Ollama) primeiro; nuvem exige aprovação e egress explícito conforme o perfil"
+    }
+  },
+  "nextStep": {
+    "verdictPending": {
+      "body": "A evidência já foi validada pela verificação automática. Aceitar o veredito registra a decisão em trilha append-only — fica registrado e é corrigível por nova decisão.",
+      "meta": "~2 min · fica registrado"
+    },
+    "invalid": {
+      "meta": "corrigível por nova decisão"
+    },
+    "sources": {
+      "title": "Conectar as fontes de trabalho restantes",
+      "body": "{connected} de {total} fontes publicam contexto hoje. Sem contexto publicado, execução, contratos e resultados ficam só com evidência manual/declarada.",
+      "cta": "Ver fontes",
+      "meta": "planejamento e intake seguem liberados"
+    },
+    "fallback": {
+      "meta": "fica registrado"
+    },
+    "healthy": {
+      "title": "Acompanhar resultados do ciclo",
+      "body": "Nenhuma pendência aberta neste snapshot. Os placares derivam só de evidência validada.",
+      "cta": "Abrir resultados",
+      "meta": "leitura, sem mutação"
+    }
+  }
+}

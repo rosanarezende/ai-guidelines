@@ -1,0 +1,17 @@
+node: work-brief
+kind: delivery
+id: <slug>_<num>
+sealed: true
+references: []
+
+objective:
+  goal: # a capacidade que o sistema passa a ter
+  approach: # como (a abordagem)
+  done-when: # critério de aceite / pronto (merge + critérios)
+
+context: # problema / contexto que motiva
+out-of-scope: # o que NÃO faz (limite)
+requirements: # comportamento esperado / o que deve fazer
+
+details: |
+  <nuance opcional>

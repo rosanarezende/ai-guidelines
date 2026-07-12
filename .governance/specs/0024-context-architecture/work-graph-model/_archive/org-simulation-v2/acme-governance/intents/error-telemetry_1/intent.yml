@@ -1,0 +1,20 @@
+# error-telemetry_1 — intent SIMPLES (criada p/ dar volume ao grafo da org). A intent NÃO delibera:
+# só declara o que EXPLORAR (explores) + os contratos que coordena. Quem responde/resolve = DERIVADO.
+node: intent
+id: error-telemetry_1
+status: active
+owner: "@caio-platform"
+created-at: 2026-06-30
+updated-at: 2026-06-30
+
+title: Telemetria de falhas unificada
+objective:
+  goal: padronizar os eventos de falha/observabilidade entre os MFEs
+  success-signal: um schema único de evento de falha, consumível pelo suporte
+
+explores:
+  - id: e1
+    subject: "como padronizar os eventos de observabilidade/falha entre os micro-frontends?"
+
+contracts:
+  - { name: failure-event, awaits: e1 }

@@ -1,3 +1,10 @@
+---
+artifact-kind: pre-coding-review
+subject: "falsificacao do padrao confirmOrAbort/confirm-in-run antes de extrair abstracao"
+date: 2026-06-06
+disposition: evidence
+---
+
 # Falsificação — `confirmOrAbort` (confirm-in-run): a extração mínima NÃO se justifica
 
 > Auditoria adversarial (a pedido) sobre a **única** extração candidata do padrão

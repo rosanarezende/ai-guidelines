@@ -41,9 +41,12 @@ import {
   ReviewTypeRegistry,
   availableTypesLine,
   buildReviewTypeRegistry,
+  reviewPlanDecisionIssues,
+  reviewPlanToNodeOverrides,
   resolveRequirement,
 } from "./reviewRequirements.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
+import type { NodeReviewPlanEntry } from "../domain/workflow/WorkflowState.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -62,6 +65,10 @@ export interface CheckpointTopologyContext {
   readonly nodeId: string;
   readonly nodeRole: string;
   readonly overrides?: Readonly<Record<string, NodeReviewOverride>>;
+  /** Decisões humanas do plano situado do PR; aplicadas somente no Ready check. */
+  readonly reviewPlan?: Readonly<Record<string, NodeReviewPlanEntry>>;
+  readonly reviewPlanOverrides?: Readonly<Record<string, NodeReviewOverride>>;
+  readonly reviewPlanIssues?: readonly string[];
 }
 
 export interface SpecArtifacts {
@@ -172,6 +179,11 @@ function parseEventSequence(eventId: string): number | undefined {
 export interface ConsolidatedCheckpoint {
   readonly checkpoint: string;
   readonly reviewDecisions: ReadonlyArray<{ role: string; decision: string }>;
+  readonly effectiveReviewDecisions?: ReadonlyArray<{
+    role: string;
+    declared: string;
+    effective: string | null;
+  }>;
   readonly reviewEventCount: number;
   /** Eventos scope=review (verification do review inteiro contra novo subject). */
   readonly reviewScopeVerifications: number;
@@ -390,9 +402,16 @@ export function consolidate(artifacts: SpecArtifacts): {
       );
     }
 
+    const observed = observedReviewStates(artifacts, cp);
+
     byCheckpoint.push({
       checkpoint: cp,
       reviewDecisions: reviews.map((r) => ({ role: r.role, decision: r.decision })),
+      effectiveReviewDecisions: reviews.map((r) => ({
+        role: r.role,
+        declared: r.decision,
+        effective: observed[r.role]?.decision ?? r.decision,
+      })),
       reviewEventCount: reviewEvents.length,
       reviewScopeVerifications,
       openBlocking,
@@ -417,8 +436,21 @@ export function observedReviewStates(
 ): Record<string, { latestSubjectRef: string | null; decision: string | null }> {
   const norm = normalizeCheckpoint(checkpoint);
   const observed: Record<string, { latestSubjectRef: string | null; decision: string | null }> = {};
+  const reviewsByRole = new Map<string, ReviewArtifact>();
+  const latestFindingEventsByRole = new Map<string, Map<string, ReviewEventArtifact>>();
+
+  function allReviewFindingsApproved(review: ReviewArtifact): boolean {
+    if (review.findings.length === 0) return false;
+    const latest = latestFindingEventsByRole.get(review.role);
+    if (!latest) return false;
+    return review.findings.every(
+      (f) => latest.get(`${review.role}#${f.id}`)?.decision === "approved"
+    );
+  }
+
   for (const r of artifacts.reviews) {
     if (normalizeCheckpoint(r.checkpoint) !== norm) continue;
+    reviewsByRole.set(r.role, r);
     observed[r.role] = {
       latestSubjectRef: r.subjectRef ?? null,
       decision: r.decision,
@@ -430,11 +462,31 @@ export function observedReviewStates(
     if (normalizeCheckpoint(e.checkpoint) !== norm) continue;
     if (!e.subjectRef) continue;
     const current = observed[e.role];
+    const review = reviewsByRole.get(e.role);
     if (current) {
+      let decision = current.decision;
+      if (e.scope === "review") {
+        decision = e.decision;
+      } else if (review) {
+        const latest =
+          latestFindingEventsByRole.get(e.role) ?? new Map<string, ReviewEventArtifact>();
+        const findingIds = new Set(review.findings.map((f) => `${review.role}#${f.id}`));
+        let touchedReviewFinding = false;
+        for (const ref of e.verifies) {
+          latest.set(ref, e);
+          if (findingIds.has(ref)) touchedReviewFinding = true;
+        }
+        latestFindingEventsByRole.set(e.role, latest);
+        if (allReviewFindingsApproved(review)) {
+          decision = "approved";
+        } else if (touchedReviewFinding && e.decision !== "approved") {
+          decision = e.decision;
+        }
+      }
       observed[e.role] = {
         ...current,
         latestSubjectRef: e.subjectRef,
-        ...(e.scope === "review" ? { decision: e.decision } : {}),
+        decision,
       };
     }
   }
@@ -473,10 +525,15 @@ export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: 
               ...topology.prs.active,
               ...topology.prs.planned,
             ]) {
+              const reviewPlanOverrides = reviewPlanToNodeOverrides(node.review_plan);
+              const planIssues = reviewPlanDecisionIssues(node.review_plan).map((i) => i.message);
               const nodeContext: CheckpointTopologyContext = {
                 nodeId: node.id,
                 nodeRole: node.role,
                 ...(node.review_requirements ? { overrides: node.review_requirements } : {}),
+                ...(node.review_plan ? { reviewPlan: node.review_plan } : {}),
+                ...(Object.keys(reviewPlanOverrides).length > 0 ? { reviewPlanOverrides } : {}),
+                ...(planIssues.length > 0 ? { reviewPlanIssues: planIssues } : {}),
               };
               const requiredRoles = requiredRolesForNode(
                 { role: node.role, overrides: node.review_requirements },
@@ -567,8 +624,21 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
   const { byCheckpoint, violations } = consolidate(artifacts);
 
   for (const c of byCheckpoint) {
+    const reviewDecisions =
+      c.effectiveReviewDecisions ??
+      c.reviewDecisions.map((d) => ({
+        role: d.role,
+        declared: d.decision,
+        effective: d.decision,
+      }));
     const decs =
-      c.reviewDecisions.map((d) => `${d.role}=${d.decision}`).join(" · ") || "(sem reviews)";
+      reviewDecisions
+        .map((d) =>
+          d.effective && d.effective !== d.declared
+            ? `${d.role}=${d.declared} (effective=${d.effective})`
+            : `${d.role}=${d.declared}`
+        )
+        .join(" · ") || "(sem reviews)";
     const gate = c.gate ? c.gate.decision : "pending";
     logger.info(
       `• checkpoint ${c.checkpoint}: reviews [${decs}] · events ${c.reviewEventCount}${c.reviewScopeVerifications > 0 ? ` (${c.reviewScopeVerifications} review-verification)` : ""} · findings ${c.totalOpen} open / ${c.totalClosed} closed · gate ${gate}`

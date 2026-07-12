@@ -52,12 +52,12 @@ function workBrief(over: Partial<WorkBrief> = {}): CollectedWorkBrief {
     effectiveFunctionalHead: "681ca2a",
     workingTreeState: "clean",
     mode: "implement_checkpoint",
-    purpose: "Implementar o sub-checkpoint ativo.",
+    purpose: "Implementar a etapa ativa.",
     modeBasis: ["CO-10.1 ativo sem readiness"],
     degraded: [],
     object: {
       checkpoint: "checkpoint-co-flow-convergence",
-      subCheckpoint: {
+      step: {
         id: "CO-10.1",
         title: "inventário real + modelo canônico",
         line: 42,
@@ -96,16 +96,16 @@ function workBrief(over: Partial<WorkBrief> = {}): CollectedWorkBrief {
 }
 
 describe("cockpit situado", () => {
-  it("prioriza finish-subcheckpoint quando o encerramento interno está disponível", () => {
+  it("prioriza finish-step quando o encerramento interno está disponível", () => {
     const out = renderCockpit({
       work: workBrief(),
       decisions: [
-        decision("finish-subcheckpoint", "Concluir ponto atual e iniciar o próximo", {
+        decision("finish-step", "Concluir ponto atual e iniciar o próximo", {
           status: "available",
           reasons: [],
           hint: "CO-10.1 satisfaz readiness; CO-10.2 será ativado sem commit intermediário",
         }),
-        decision("mark-readiness", "Declarar readiness do sub-checkpoint ativo", {
+        decision("mark-readiness", "Declarar readiness da etapa ativa", {
           status: "available",
           reasons: [],
         }),
@@ -114,13 +114,13 @@ describe("cockpit situado", () => {
 
     expect(out).toMatch(/Próxima ação recomendada\n- Concluir ponto atual e iniciar o próximo/);
     expect(out).toContain(
-      "- Recomendada — Concluir ponto atual e iniciar o próximo: `npm run flow -- decide --type finish-subcheckpoint --brief-only`"
+      "- Recomendada — Concluir ponto atual e iniciar o próximo: `npm run flow -- decide --type finish-step --brief-only`"
     );
     expect(out).toContain(
-      "- Alternativa — Declarar readiness do sub-checkpoint ativo: `npm run flow -- decide --type mark-readiness --brief-only`"
+      "- Alternativa — Declarar readiness da etapa ativa: `npm run flow -- decide --type mark-readiness --brief-only`"
     );
     expect(out).toMatch(
-      /npm run flow -- decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm/
+      /npm run flow -- decide --type finish-step --decision finish --authorization explicit-human-decision --confirm/
     );
   });
 
@@ -128,12 +128,12 @@ describe("cockpit situado", () => {
     const out = renderCockpit({
       work: workBrief(),
       decisions: [
-        decision("mark-readiness", "Declarar readiness do sub-checkpoint ativo", {
+        decision("mark-readiness", "Declarar readiness da etapa ativa", {
           status: "available",
           reasons: [],
           hint: "CO-10.1 pronto para declarar readiness",
         }),
-        decision("advance-subcheckpoint", "Avançar sub-checkpoint", {
+        decision("advance-step", "Avançar etapa", {
           status: "blocked",
           reasons: ["CO-10.1 ainda não declarou seus critérios de saída."],
         }),
@@ -171,8 +171,8 @@ describe("cockpit situado", () => {
             output: null,
           },
           ready: ["A CI esta verde."],
-          missing: ["Falta declarar readiness do sub-checkpoint ativo."],
-          nextAction: "Declarar readiness do sub-checkpoint ativo",
+          missing: ["Falta declarar readiness da etapa ativa."],
+          nextAction: "Declarar readiness da etapa ativa",
           command: "npm run flow -- decide --type mark-readiness --brief-only",
           forbidden: ["Fazer merge"],
         },
@@ -186,8 +186,8 @@ describe("cockpit situado", () => {
     expect(out).toContain("    - Entrega esperada: Inventário falsificável do fluxo.");
     expect(out).toContain("  - Depois: CO-10.2 — confronto modelo × código");
     expect(out).toContain("    - Objetivo: Comparar o modelo com os comandos vivos.");
-    expect(out).toContain("- Próximo passo: Declarar readiness do sub-checkpoint ativo");
-    expect(out).toContain("Falta declarar readiness do sub-checkpoint ativo.");
+    expect(out).toContain("- Próximo passo: Declarar readiness da etapa ativa");
+    expect(out).toContain("Falta declarar readiness da etapa ativa.");
     expect(out.indexOf("## Resumo simples")).toBeLessThan(out.indexOf("## Estado atual"));
   });
 
@@ -195,7 +195,7 @@ describe("cockpit situado", () => {
     const out = renderCockpit({
       work: workBrief(),
       decisions: [
-        decision("mark-readiness", "Declarar readiness do sub-checkpoint ativo", {
+        decision("mark-readiness", "Declarar readiness da etapa ativa", {
           status: "blocked",
           reasons: ["A integração contínua ainda tem 2 verificação(ões) pendente(s)."],
         }),
@@ -224,7 +224,7 @@ describe("cockpit situado", () => {
           status: "available",
           reasons: [],
         }),
-        decision("mark-readiness", "Declarar readiness do sub-checkpoint ativo", {
+        decision("mark-readiness", "Declarar readiness da etapa ativa", {
           status: "available",
           reasons: [],
         }),

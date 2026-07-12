@@ -1,0 +1,9 @@
+{
+  "name": "@acme-sim/acme-analytics",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test.mjs",
+    "smoke": "node ../../../tools/checks/check-code-fixtures.ts"
+  }
+}

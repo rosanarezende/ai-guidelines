@@ -1,0 +1,12 @@
+{
+  "title": "Organização",
+  "subtitle": "Perfil atual: {profile} · {tradeoff}",
+  "changeTooltip": "Mudar perfil é a mutação governada profile-change — ainda não mecanizada no app",
+  "changeCta": "Mudar perfil",
+  "scopeLabel": "scope {scope}",
+  "approvedByLabel": "aprovado por {approver}",
+  "unresolved": "não resolvido",
+  "reviewLabel": "revisão {date}",
+  "noDate": "sem data",
+  "profileChangeNote": "Mudar o perfil muda a cerimônia dali em diante. A mudança fica registrada — com quem aprovou e quando — e é corrigível por nova decisão."
+}

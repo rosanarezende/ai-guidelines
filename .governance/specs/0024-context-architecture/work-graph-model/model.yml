@@ -1,0 +1,554 @@
+# model.yml — SSOT normativo do work graph
+#
+# Este arquivo e a versao limpa do modelo conceitual. Ele contem apenas o
+# contrato normativo atual: camadas, nos, arestas, estados, gates, politicas,
+# perfis, regras de escala e exemplos minimos. O historico deliberativo da v2
+# foi arquivado em `_archive/model-v2-history-2026-07-05/model.yml`.
+#
+# Naming: ids em EN; labels/descricoes em PT; exemplos anonimizados acme-*.
+
+meta:
+  version: 3
+  status: normative
+  supersedes: _archive/model-v2-history-2026-07-05/model.yml
+  grounded-by: tracker.md
+  artifact: _map/model-map.html
+  product-extraction: GUILDA-EXTRACTION-DISPOSITION.md
+  qrd-preservation: GUILDA-QRD-PRESERVATION-MATRIX.md
+  historical-demo: _archive/guilda-incubation-2026-07/
+  note: "Modelo conceitual do framework; o produto que nasceu como governance-demo foi extraido para o repo irmao Guilda."
+
+adoption-shell:
+  status: applied-in-app
+  scope: "camada de produto acima do grafo governado; permite conta local, multi-workspace e onboarding"
+  account:
+    is: "identidade local do app; pode participar de varios workspaces"
+    fields: [id, display-name, email, preferred-locale]
+    authority: "nunca concede governanca sozinha; authority e resolvida no workspace"
+  workspace:
+    is: "organizacao/projeto governado selecionavel"
+    examples: [empresa, projeto-pessoal, cliente, sandbox-demo]
+    fields: [id, name, kind, governance-host, work-sources, memberships, onboarding-status, locale]
+    governance-host:
+      is: "local do SSOT file-first da governanca do workspace"
+      options: [repo-dedicado, pasta-local, pasta-em-repo-existente]
+      invariant: "host e obrigatorio para governanca real; sem host, a UI fica degradada ou sandbox"
+    work-sources:
+      is: "fontes adotadas que publicam contexto, evidencia ou importam propostas"
+      examples: [git-repo, pasta-local, monorepo-module, service-catalog, backlog-tool]
+      invariant: "sem fonte confiavel, execucao/outcomes/contratos ficam como evidencia manual ou declarada"
+    memberships:
+      is: "pessoas/times/grupos com papeis; role atribuido a outro sujeito nasce proposed ate aceite"
+  onboarding:
+    order:
+      [
+        account-create-or-select,
+        workspace-create-or-select,
+        governance-host,
+        profile-diagnosis,
+        people-and-memberships,
+        work-sources,
+        assistant-runtime,
+        optional-integrations,
+        honest-review,
+      ]
+
+layers:
+  intent:
+    is: "objetivo de trabalho duravel, autorizado por negocio ou standalone; tem gate de ativacao"
+    owns: [enquadramento, objetivo, target-outcome, decision-gate]
+    approach: [validate-first, direct]
+    approach-note: "validate-first se a evidencia decide a mudanca permanente; direct se a mudanca ja esta decidida"
+    signal: [none, touches-contract, operational-target]
+    signal-note: "signal e derivado/confirmado no breakdown; acorda mecanismos, mas nao e menu de usuario"
+    breaks-into: [execution-unit, repo-work]
+
+  execution-unit:
+    is: "unidade coordenada cross-repo ou com lifecycle proprio"
+    optional: "colapsa no trivial; reversivel por mutacao governada"
+    collapse-rule: "existe se (>1 repo) OU kind com lifecycle proprio OU owner/cadencia propria; caso contrario intent liga direto a repo-work"
+    kinds:
+      experiment-run:
+        owns: [hypothesis, flag, exposure, metrics, guardrails, decision-rule, verdict]
+        verdict: [pending, won, lost, inconclusive]
+        fork: "won -> graduation/delivery-slice; lost -> cleanup; inconclusive -> novo experiment/discovery"
+      migration-wave:
+        owns: [from, to, compatibility-window]
+      delivery-slice:
+        owns: ["entrega coordenada cross-repo"]
+      incident-response:
+        owns: [severity, declare, mitigate, resolve, postmortem]
+        source: reactive
+      graduation:
+        owns: ["sistematizacao pos-veredito won"]
+      cleanup:
+        owns: ["remocao pos-veredito lost ou parcial"]
+      release-rollout:
+        owns: ["release, canary ou exposicao progressiva"]
+      discovery:
+        owns: ["pergunta falsificavel compartilhada", timebox, fate]
+        fate: [throwaway, promoted, parked]
+    breaks-into: [repo-work]
+
+  repo-work:
+    is: "peca executavel em um repo/fonte"
+    owns: [execucao, status-proprio]
+    purpose:
+      create: "cria capacidade nova"
+      sustain: "preserva, corrige ou adapta capacidade existente"
+      discover: "reduz incerteza sem shippar capacidade permanente"
+      operate: "rollout, monitoramento, instrumentacao ou baseline"
+
+support-nodes:
+  contract:
+    is: "no de coordenacao/versionamento dentro e entre iniciativas"
+    fields: [owner, provider, consumers, revision, compatibility-window, migrations]
+    invariant: "compatibility-window mora no contrato; nao e derivavel de repo-work"
+  deliberation:
+    is: "q/r/d anexavel a qualquer no governado"
+    attaches-to: [intent, execution-unit, repo-work, contract, business-objective]
+    enforcement: "opcional por padrao; mutacao dangerous exige alerta, justificativa ou par conforme governance-profile"
+  intake:
+    is: "funil pre-intent"
+    members: [proposal, register]
+    invariant: "proposal/register declara authorized-by business-objective ativo ou standalone"
+  assisted-authoring:
+    is: "IA sugere preenchimento/diagnostico; humano aceita, edita ou rejeita"
+    laws: [optional, advisory-only, no-silent-write]
+
+dimensions:
+  source: [planned, reactive]
+  visibility: [user-visible, internal, operator-visible, security-visible]
+  maintenance-mode: [corrective, adaptive, perfective, preventive]
+  change-class: [standard, normal, emergency]
+  service-class: [expedite, fixed-date, standard, intangible]
+  enforcement: "dimensao que nao afeta workflow/lint/dashboard e tag decorativa"
+  presets:
+    fix: { purpose: sustain, maintenance-mode: corrective, visibility: user-visible }
+    security-patch: { purpose: sustain, maintenance-mode: corrective, visibility: security-visible }
+    dep-bump: { purpose: sustain, maintenance-mode: adaptive, visibility: internal }
+
+edges:
+  - {
+      id: breaks-into,
+      from: intent,
+      to: [execution-unit, repo-work],
+      cardinality: "1:N",
+      category: estrutura,
+    }
+  - { id: contains, from: execution-unit, to: repo-work, cardinality: "1:N", category: estrutura }
+  - { id: coordinates-with, from: repo-work, to: contract, category: dependencia }
+  - { id: blocked-by, from: repo-work, to: repo-work, inverse: blocks, category: dependencia }
+  - { id: delivery-after, from: repo-work, to: repo-work, category: dependencia }
+  - {
+      id: results-in,
+      from: execution-unit,
+      to: execution-unit,
+      inverse: derives-from,
+      category: proveniencia,
+    }
+  - { id: raises, from: node, to: proposal, category: proveniencia }
+  - { id: answers, from: "repo-work(discover)", to: question, category: investigacao }
+  - { id: supported-by, from: decision, to: "research|discover", category: investigacao }
+  - { id: emits, from: [intent, execution-unit, repo-work], to: outcome, category: fecho }
+  - { id: closed-by, from: node, to: "answer|outcome|postmortem", category: fecho }
+  - { id: supersedes, from: decision, to: decision, category: historico }
+  - { id: occurred-during, from: incident-response, to: node, category: resposta }
+  - { id: caused-by, from: incident-response, to: node, category: resposta }
+  - { id: publishes-context, from: repo, to: repo-context, category: projecao }
+  - { id: acknowledges-work, from: repo-work-ack, to: repo-work, category: reconhecimento }
+  - { id: backs-contract, from: repo-contract, to: contract, category: reconhecimento }
+  - {
+      id: evidenced-by,
+      from: "repo-context|repo-work-ack|repo-contract",
+      to: code-touchpoint,
+      category: evidencia,
+    }
+
+states:
+  own: [draft, active, done]
+  repo-work-ack: [acknowledged, active, blocked, done, dropped]
+  business-tier: [proposed, active, closed, superseded, dropped]
+  derived: [blocked, paused, stale, invalid]
+
+envelope:
+  required: [actor, authority, base-revision, idempotency-key, nonce, issued-at, schema-version]
+  optional: [source-commit, producer, ttl, classification, visibility, access, invalidates]
+  mutation-types:
+    business-tier:
+      [
+        objective-create,
+        objective-close,
+        target-change,
+        actual-publish,
+        rollup-change,
+        allocation-change,
+        metric-definition-change,
+        aggregation-change,
+      ]
+    work-tier: [intent-activate, unit-fork, verdict-set, verdict-override, work-state-change]
+    intake: [business-link-change]
+    coordination: [contract-revision, compat-window-change]
+    governance: [profile-change, break-glass]
+    dangerous:
+      [
+        target-change,
+        rollup-change,
+        compat-window-change,
+        verdict-override,
+        break-glass,
+        profile-change,
+        metric-definition-change,
+        aggregation-change,
+        business-link-change,
+      ]
+    ruler-authority:
+      [metric-definition-change, aggregation-change, profile-change, verdict-override, break-glass]
+    unknown-mutation: fail-closed
+
+trust:
+  boundary: "matcher/agente/backend/API/produtor externo sao fronteiras de confianca"
+  policy-artifacts:
+    [
+      threat-model,
+      egress-policy,
+      agent-delegation-policy,
+      policy-catalog,
+      trust-policy,
+      red-team-corpus,
+    ]
+  laws:
+    - { id: fallback-break-glass, says: "todo bloqueio precisa de saida segura e rastreavel" }
+    - { id: independencia, says: "enforca-se quem verifica, nao a verdade de quem declara" }
+    - {
+        id: dependencia-verificavel,
+        says: "acao derivada exige validar revisoes de dados, politica, schema e projecao",
+      }
+
+flow:
+  - { phase: define-objective, tier: business, role: negocio }
+  - { phase: define-target, tier: business, role: "negocio + dados" }
+  - { phase: authorize-intake, tier: business, role: "owner do objective" }
+  - { phase: registro, role: negocio }
+  - { phase: triagem, role: eng, does: [itens, matcher-advisory, valida-contratos] }
+  - { phase: investigacao, does: ["discover roda; viabilidade testada"] }
+  - { phase: gate, role: humano, kind: append-only, note: "= decision-points.activate-intent" }
+  - { phase: ativacao, does: [consolida, "move para intents"] }
+  - { phase: breakdown, role: dono, emits: ["execution-units + repo-works"] }
+  - { phase: execucao }
+  - { phase: coordenacao }
+  - { phase: veredito }
+
+decision-points:
+  approve-objective:
+    is: "aprova/encerra business-objective do ciclo"
+    subject: business-objective
+    prerequisites: "target + metric-definition + allocation com unidade/periodo/owner"
+    evidence: "objective draft + targets propostos"
+    approver: "owner do nivel acima; no topo, sponsor"
+    on-block: "objective fica proposed"
+  activate-intent:
+    is: "promove candidata/proposal para intent"
+    subject: intent
+    prerequisites: "business-link validado ou standalone declarado"
+    evidence: "register + triagem + investigacao quando houver"
+    approver: "owner do objective autorizador; solo = self logado"
+    on-block: "candidata permanece no funil"
+  release-rollout:
+    is: "autoriza exposicao progressiva"
+    subject: "execution-unit(release-rollout)"
+    prerequisites: "guardrails + plano de reversao"
+    evidence: "baseline das metricas + flag/canary configurados"
+    approver: "dono da unit + owner do dominio exposto"
+    on-block: "sem exposicao; emergency passa por break-glass logado"
+  accept-verdict:
+    is: "aceita veredito do experiment-run e fork consequente"
+    subject: "execution-unit(experiment-run)"
+    prerequisites: "outcome valido pelo resolver"
+    evidence: "outcome publicado + decision-rule aplicada"
+    approver: "owner da intent + attester independente do actual"
+    on-block: "veredito segue pending; override = dangerous"
+
+physical:
+  status: historical-example
+  extraction: "A materializacao fisica Acme/Guilda saiu da superficie ativa deste repo; ver _archive/guilda-incubation-2026-07/ e GUILDA-EXTRACTION-DISPOSITION.md."
+  host-root: "_archive/guilda-incubation-2026-07/acme/governance/"
+  repos-root: "_archive/guilda-incubation-2026-07/acme/repos/<repo>/"
+  intake-proposals: "_archive/guilda-incubation-2026-07/acme/governance/intake/proposals.yml"
+  intake-triage: "_archive/guilda-incubation-2026-07/acme/governance/intake/triage/<proposal-id>.yml"
+  intents: "_archive/guilda-incubation-2026-07/acme/governance/intents/<id>.yml"
+  decisions: "_archive/guilda-incubation-2026-07/acme/governance/decisions/verdicts.yml"
+  events: "_archive/guilda-incubation-2026-07/acme/governance/events/events.jsonl"
+  incidents: "_archive/guilda-incubation-2026-07/acme/governance/incidents/incidents.yml"
+  por-repo: "_archive/guilda-incubation-2026-07/acme/repos/<repo>/.governance/{manifest.yml,context.json,works/*.yml,registry/contracts/*.yml}"
+  backend: [file, sqlite, neo4j, mongo]
+  backend-status: "file runtime transacional aplicado; sqlite/neo4j/mongo sao read-models derivados no primeiro release, nao SSOT de escrita"
+
+business-tier:
+  status: normative
+  core-idea: "business-objective recursivo; strategy/driver/priority sao niveis configuraveis do mesmo tipo"
+  nodes:
+    business-objective: "compromisso de negocio com level, period, owner, parent, status"
+    thesis: "hipotese causal de negocio"
+    opportunity-area: "espaco de ataque opcional"
+    intent: "primeira unidade governada de trabalho; ganha primary-target quando autorizada"
+    metric-definition: "definicao estavel da metrica: unidade, source, aggregation, owner"
+    target: "binding metrica + no + periodo + valor esperado; actual e derivado"
+    outcome: "resultado governado append-only; unico insumo de target.actual"
+    allocation: "budget/capacidade/limite; campo ou no conforme scaling-law"
+  edges:
+    - { id: cascades-to, from: business-objective, to: business-objective, cardinality: "N:N" }
+    - { id: continues-from, from: [business-objective, target], to: [business-objective, target] }
+    - { id: split-from, from: business-objective, to: business-objective }
+    - { id: merged-into, from: business-objective, to: business-objective }
+    - { id: framed-by, from: business-objective, to: thesis }
+    - { id: explores, from: thesis, to: opportunity-area }
+    - { id: authorizes, from: business-objective, to: intent }
+    - { id: measured-by, from: business-objective, to: target }
+    - { id: uses, from: target, to: metric-definition }
+    - { id: emits, from: [intent, execution-unit, repo-work], to: outcome }
+    - { id: contributes-to, from: outcome, to: target }
+    - { id: aligns-with, from: node, to: business-objective }
+  measurement-roles:
+    target-definer: "define target"
+    metric-owner: "dono da metric-definition"
+    actual-attester: "atesta outcome e fonte/revision"
+    dashboard-consumer: "le rollup"
+    sod: "target-definer nao pode ser o unico actual-attester"
+  rollup-mechanics:
+    primary-rollup: "cada outcome contribui para um target primario"
+    aligns-with: "narrativo; nunca soma"
+    valid-outcome-required: "actual so soma outcome valido pelo resolver"
+    target-closed: "target fechado nao recebe actual novo"
+    contract-revision-required: "outcome que depende de contrato cita revision valida"
+  example:
+    objective:
+      {
+        id: obj-revenue,
+        label: "crescer receita recorrente",
+        level: company-strategy,
+        period: 2027H1,
+      }
+    thesis: { id: thesis-upgrade, label: "experiencias contextuais aumentam upgrade" }
+    opportunities:
+      - { id: opp-checkout, label: "checkout e billing" }
+      - { id: opp-onboarding, label: "onboarding inicial" }
+    intent: { id: intent-cta-upgrade, approach: validate-first, primary-target: tgt-billing-conv }
+    unit: { id: unit-cta-upgrade-v1, kind: experiment-run, verdict: won }
+    works:
+      - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atras da flag" }
+      - { repo: acme-api-billing, purpose: create, desc: "elegibilidade + endpoint" }
+      - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline" }
+    outcome:
+      { id: out-cta-upgrade-2027q1, metric: billing-conversion, value: "+2.4pp", valid: true }
+    measurement: { definer: growth-owner, attester: acme-analytics, unit: percentage-point }
+    rollup: "outcome valido contribui para tgt-billing-conv; aligns-with nao soma"
+
+scaling-law:
+  says: "crie no separado so quando mudar owner, cadencia, target, allocation, lifecycle ou audiencia"
+  applies-to: [business-tier, execution-unit, deliberation, governance-profile, role]
+
+governance-profiles:
+  law: "cerimonia proporcional ao tamanho do trabalho e da organizacao"
+  profiles:
+    full:
+      for: "empresa/time completo"
+      nodes: "business-tier completo e SoD explicito"
+      gates: [approve-objective, activate-intent, release-rollout, accept-verdict]
+      sod: "requester != approver != owner-attester quando aplicavel"
+      required-fields: [sponsor, approver, attester, sourceRevision]
+      enforcement: "ruler-authority exige par ou break-glass logado"
+    compact:
+      for: "time pequeno com papeis acumulados"
+      nodes: "business-tier colapsavel"
+      gates: "detectar + revisar em cadencia; nao travar por falta de estrutura"
+      sod: "acumulos ficam visiveis"
+      required-fields: [owner, sourceRevision]
+      enforcement: "warning + revisao retroativa"
+    solo:
+      for: "uma pessoa ou projeto individual"
+      nodes: "minimo necessario"
+      gates: "self-log"
+      sod: "impossivel; dispensa explicita e visivel"
+      required-fields: [actor]
+      enforcement: "registro honesto, nao teatro"
+
+examples:
+  - id: experiment-cross-repo
+    label: "experimento cross-repo"
+    intent: { title: "aumentar conversao trial -> paid", approach: validate-first, signal: none }
+    execution-unit:
+      {
+        kind: experiment-run,
+        title: "CTA contextual v1",
+        owns: "hipotese, flag, metricas, guardrails, veredito",
+      }
+    repo-works:
+      - { repo: acme-mfe-billing, purpose: create, desc: "UI do CTA atras da flag" }
+      - { repo: acme-api-billing, purpose: create, desc: "elegibilidade + endpoint" }
+      - { repo: acme-analytics, purpose: operate, desc: "eventos + baseline" }
+      - { repo: acme-web-host, purpose: sustain, desc: "adaptar contexto/contrato" }
+    contract: "acme-user-context@v3"
+    note: "veredito mora na unit, nao por repo"
+  - id: redesign-misto
+    label: "redesign misto"
+    intent: { title: "redesign do checkout", approach: direct, signal: touches-contract }
+    execution-unit:
+      { kind: migration-wave, title: "checkout-ui v2", owns: "from legacy-stack -> to new-stack" }
+    repo-works:
+      - { repo: acme-checkout, purpose: sustain, desc: "portar fluxo existente" }
+      - { repo: acme-design-system, purpose: create, desc: "novos componentes" }
+      - { repo: "(spike)", purpose: discover, desc: "viabilidade da migracao" }
+      - { repo: acme-platform, purpose: sustain, desc: "adapta contrato compartilhado" }
+    contract: "acme-user-context@v3"
+    note: "pecas mistas sob a mesma wave"
+  - id: contrato-compartilhado
+    label: "contrato compartilhado"
+    contract:
+      id: "acme-user-context@v3"
+      owner: acme-platform
+      consumers: "acme-mfe-billing, acme-mfe-support"
+      compatibility-window: "v2, v3 ate 2026-08-15"
+    migrations:
+      - {
+          intent: redesign-checkout,
+          approach: direct,
+          signal: touches-contract,
+          does: "adapta contrato",
+        }
+      - { intent: growth-upgrade, approach: validate-first, signal: none, does: "consome contrato" }
+    note: "coordenacao entre iniciativas via contrato compartilhado"
+  - id: bug
+    label: "bug simples"
+    intent: null
+    execution-unit: null
+    repo-works:
+      - { repo: acme-checkout, purpose: sustain, desc: "corrige calculo do total" }
+    note: "standalone sustain; camadas colapsam"
+  - id: exploration-sem-intent
+    label: "discovery sem intent"
+    intent: null
+    execution-unit: null
+    repo-works:
+      - { repo: acme-platform, purpose: discover, desc: "spike timebox com pergunta falsificavel" }
+    note: "discover standalone; nao shippa"
+  - id: delivery-tradicional
+    label: "delivery tradicional"
+    intent: { title: "exportar relatorio em PDF", approach: direct, signal: none }
+    execution-unit: null
+    repo-works:
+      - { repo: acme-reports, purpose: create, desc: "botao + geracao do PDF" }
+    note: "feature comum; unit colapsa"
+
+simulation:
+  purpose: "estressa SoD/independencia e colapso de cerimonia"
+  phases:
+    [
+      define-objective,
+      define-target,
+      authorize-intake,
+      registro,
+      triagem,
+      investigacao,
+      gate,
+      ativacao,
+      breakdown,
+      execucao,
+      coordenacao,
+      veredito,
+    ]
+  orgs:
+    - id: full-team
+      label: "empresa com time completo"
+      roles: [PM, Design, Team-Lead, Principal, Tech-Lead, Devs]
+      participation:
+        define-objective: "sponsor/lideranca"
+        define-target: "PM + dados"
+        authorize-intake: "PM owner do objective"
+        registro: "PM/negocio"
+        triagem: "Tech Lead + Principal"
+        investigacao: "devs Sr/Tech Lead"
+        gate: "PM owner decide"
+        ativacao: "Team Lead + PM"
+        breakdown: "Tech Lead + Principal"
+        execucao: "devs"
+        coordenacao: "Principal / contract-owners"
+        veredito: "PM + dados"
+      sod: "HOLDS"
+      gaps: ["sobrecarga de Tech Lead", "owner de operate precisa ser explicito"]
+    - id: compact
+      label: "time pequeno"
+      roles: [Negocio, Produto-Design, Engenharia]
+      participation:
+        define-objective: "Negocio"
+        define-target: "Negocio + fonte"
+        authorize-intake: "Negocio"
+        registro: "Negocio"
+        triagem: "Engenharia"
+        investigacao: "Engenharia"
+        gate: "Negocio"
+        ativacao: "Negocio + Engenharia"
+        breakdown: "Engenharia"
+        execucao: "Engenharia"
+        coordenacao: "Engenharia"
+        veredito: "Negocio + Engenharia"
+      sod: "PARCIAL"
+      gaps: ["autocertificacao tecnica", "contrato sem revisao independente"]
+    - id: solo
+      label: "dev solo"
+      roles: [self]
+      participation:
+        define-objective: self
+        define-target: self
+        authorize-intake: self
+        registro: self
+        triagem: self
+        investigacao: self
+        gate: self
+        ativacao: self
+        breakdown: self
+        execucao: self
+        coordenacao: self
+        veredito: self
+      sod: "IMPOSSIVEL"
+      gaps: ["independencia colapsada; dashboard deve mostrar self-attested"]
+      degenerate-mode: "self-governed + trade-off logado"
+  finding:
+    id: F-governance-scaling
+    says: "governanca escala para baixo por role-collapse; nao deve virar teatro"
+    mechanized-by: "governance-profiles"
+
+approach-model:
+  status: applied
+  decision: approach-and-signal-model
+  approach:
+    validate-first: "a mudanca permanente depende da evidencia"
+    direct: "a mudanca ja esta decidida"
+  signals:
+    none: "sem mecanismo extra"
+    touches-contract: "review do owner do contrato"
+    operational-target: "placar operacional + guardrails"
+  review-rule: "approach e declarado pelo humano; signal e derivado/confirmado; drift vira alerta"
+  deps-rule: "blocked-by impede inicio; delivery-after permite paralelizar mas bloqueia entrega/ativacao"
+  example-org:
+    areas:
+      - { id: area-growth, objectives: [obj-revenue, obj-activation] }
+      - { id: area-platform, objectives: [obj-reliability, obj-cost] }
+  derivation:
+    execution-unit: "kind deriva de approach + signal + collapse-rule + lifecycle"
+  consequences:
+    validate-first: [experiment-run, verdict, graduation, cleanup]
+    direct: [delivery-slice, migration-wave, release-rollout]
+  no-approach-paths: [incident-response, standalone-fix, dep-bump]
+  renames:
+    strategy: approach
+    commit-direct: direct
+    feature-slice: delivery-slice
+    rollout-slice: release-rollout
+
+schema-policy:
+  runtime: "schemas executaveis do produto vivem no repo Guilda; este modelo registra a politica conceitual"
+  desired-library: zod
+  rule: "tipo TS apagado nao basta para fronteira de governanca; request/response publico deve ter validacao runtime compartilhada"
+
+open-questions: []

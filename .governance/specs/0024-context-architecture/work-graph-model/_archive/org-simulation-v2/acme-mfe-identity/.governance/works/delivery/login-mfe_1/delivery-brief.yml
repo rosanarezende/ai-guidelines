@@ -1,0 +1,18 @@
+node: work-brief
+kind: delivery
+id: login-mfe_1
+intent: login_1
+sealed: true
+references: []
+
+objective:
+  goal: a tela de login (MFE de identidade) que consome o componente de form do DS
+  approach: MFE em acme-mfe-identity; usa o form-component validado; integra o fluxo de login
+  done-when: login navegável atrás de flag, consumindo o form-component
+
+context: q1 (decisão d1) — o form validado vive no DS; o login-mfe o consome (blocked-by até o form ficar done)
+out-of-scope: o componente de form (é o form-component_1) e a lógica de auth (acme-api)
+requirements: consome o contrato form-component; emite o evento de falha que o suporte (help) escuta
+
+details: |
+  Nasceu da decisão d1 da intent login_1 (q1 destrava form + login-mfe). Espera o form-component_1.

@@ -1,0 +1,29 @@
+{
+  "messages": {
+    "public.eyebrow": "open-source · governança de trabalho",
+    "public.hero.title.people": "Pessoas decidem.",
+    "public.hero.title.system": "O sistema apoia.",
+    "public.hero.lead": "Guilda Governance conecta decisões, evidências e responsabilidades para equipes que precisam coordenar trabalho com clareza, sem entregar a governança para uma IA ou para um SaaS fechado.",
+    "public.hero.primary": "Começar agora",
+    "public.hero.secondary": "Experimentar demo sem conta",
+    "public.promise.decisions.title": "Decisões humanas",
+    "public.promise.decisions.body": "O sistema organiza contexto, mas a autoridade continua com pessoas e regras governadas.",
+    "public.promise.evidence.title": "Evidências conectadas",
+    "public.promise.evidence.body": "Fontes, repositórios, documentos e resultados entram como trilha verificável.",
+    "public.promise.responsibility.title": "Responsabilidade visível",
+    "public.promise.responsibility.body": "Papéis, pendências e riscos ficam explícitos em vez de virarem conversa perdida.",
+    "public.system.title": "Um ecossistema, várias superfícies",
+    "public.system.governance.title": "Guilda Governance",
+    "public.system.governance.body": "O portal visual para contas, workspaces, convites, fontes, iniciativas, resultados e mapas.",
+    "public.system.flow.title": "guilda flow",
+    "public.system.flow.body": "A CLI para devs, automações, repositórios e CI.",
+    "public.system.graph.title": "Guilda Workgraph",
+    "public.system.graph.body": "O grafo derivado que conecta objetivos, decisões, evidências, responsabilidades e execução.",
+    "public.system.host.title": "Guilda Host",
+    "public.system.host.body": "O arquivo Git-backed onde a governança mora sob controle do usuário.",
+    "public.system.cup.title": "Guilda Cup",
+    "public.system.cup.body": "O Contextual Work Partner que ajuda a entender cada decisão sem agir por conta própria.",
+    "public.error.generic": "Não foi possível abrir a demo. Detalhe: {error}",
+    "public.demo.busy": "Abrindo demo..."
+  }
+}

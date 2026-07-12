@@ -1,0 +1,53 @@
+// Leitura tipada do disco. O banco NÃO guarda estado derivado — recomputa do grafo a cada run.
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { parse } from "yaml";
+
+/** Raiz do _org-simulation-v2 (este arquivo vive em _org-simulation-v2/_banks/). */
+export const SIM_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+const abs = (relToSim: string): string => path.join(SIM_ROOT, relToSim);
+
+export function readYaml<T>(relToSim: string): T {
+  return parse(fs.readFileSync(abs(relToSim), "utf8")) as T;
+}
+
+/** Lê o frontmatter YAML de um `.md` (ex.: o `verdict` do exploration-answer — conteúdo). */
+export function readFrontmatter<T>(relToSim: string): T {
+  const text = fs.readFileSync(abs(relToSim), "utf8");
+  const match = text.match(/^---\n([\s\S]*?)\n---/);
+  return (match ? parse(match[1]) : {}) as T;
+}
+
+export function fileExists(relToSim: string): boolean {
+  return fs.existsSync(abs(relToSim));
+}
+
+/** Os repos da sim = pastas com `.governance/registry/` (exclui a governança e o tooling `_*`). */
+export function listRepos(): string[] {
+  return fs
+    .readdirSync(SIM_ROOT)
+    .filter((name) => !name.startsWith("_") && name !== "acme-governance")
+    .filter((name) => fileExists(`${name}/.governance/registry`));
+}
+
+/** As intents da governança = pastas em `acme-governance/intents/` com `intent.yml`. */
+export function listIntents(): string[] {
+  const dir = "acme-governance/intents";
+  if (!fileExists(dir)) return [];
+  return fs.readdirSync(abs(dir)).filter((name) => fileExists(`${dir}/${name}/intent.yml`));
+}
+
+/** O `deliberation.yml` de um work (q/r/d do nível-work), se existir. workRef = "<repo>/<kind>/<id>". */
+export function workDeliberationPath(workRef: string): string | null {
+  const [repo, kind, id] = workRef.split("/");
+  const rel = `${repo}/.governance/works/${kind}/${id}/deliberation.yml`;
+  return fileExists(rel) ? rel : null;
+}
+
+/** Lista os arquivos de uma pasta (relativa ao SIM_ROOT); [] se não existir. */
+export function listDir(relToSim: string): string[] {
+  if (!fileExists(relToSim)) return [];
+  return fs.readdirSync(abs(relToSim));
+}

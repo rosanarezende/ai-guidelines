@@ -1,30 +1,30 @@
 /**
- * Derivação ÚNICA da elegibilidade de `advance-subcheckpoint` (SSOT).
+ * Derivação ÚNICA da elegibilidade de `advance-step` (SSOT).
  *
- * Esta é a regra COMPARTILHADA de "o sub-checkpoint atual pode ser concluído e o
- * próximo ativado?". Tanto `decide` (`AdvanceSubcheckpointDefinition.detect`)
+ * Esta é a regra COMPARTILHADA de "a etapa atual pode ser concluído e o
+ * próximo ativado?". Tanto `decide` (`AdvanceStepDefinition.detect`)
  * quanto `work` (`deriveWorkBrief` → próxima ação) consomem ESTA função sobre o
  * MESMO snapshot factual (handoff). Antes vivia duplicada em três lugares com
  * regras divergentes — o dogfood expôs a inconsistência: `work` recomendava a
  * transição enquanto `decide` a ocultava do menu como `not-applicable`.
  *
  * Três estados (espelham o `DecisionAvailability` do modelo):
- *   - `not-applicable`: a ESTRUTURA não admite transição (sem sub-checkpoints,
+ *   - `not-applicable`: a ESTRUTURA não admite transição (sem etapas,
  *     nenhum em andamento, ou tipo não declarado na policy). Some do menu.
  *   - `blocked`: a estrutura admite transição, mas um CRITÉRIO de saída do atual
  *     não está satisfeito — cada requisito é NOMEADO (auditoria, review,
  *     CI, working tree, branch, gate). Aparece no menu como indisponível.
  *   - `available`: estrutura válida + critérios satisfeitos.
  *
- * Determinístico, puro, zero I/O e zero LLM (ADR 0018). Ter sub-checkpoints já
+ * Determinístico, puro, zero I/O e zero LLM (ADR 0018). Ter etapas já
  * concluídos (`[x]`) é o caso NORMAL de toda transição após a primeira — NÃO
  * torna a decisão `not-applicable` (esse era o bug estrutural).
  */
-import type { HandoffSubCheckpoint } from "../handoffFacts.js";
+import type { HandoffStep } from "../handoffFacts.js";
 import type { DecisionAvailability } from "./model.js";
 
 /** Id canônico da decisão (mora no módulo-folha para ambos os lados reusarem sem ciclo). */
-export const ADVANCE_SUBCHECKPOINT_ID = "advance-subcheckpoint";
+export const ADVANCE_STEP_ID = "advance-step";
 
 /**
  * Fatos MÍNIMOS para derivar a elegibilidade — projetáveis identicamente do
@@ -32,11 +32,11 @@ export const ADVANCE_SUBCHECKPOINT_ID = "advance-subcheckpoint";
  * mesma carga do handoff.
  */
 export interface AdvanceEligibilityFacts {
-  readonly subCheckpoints: readonly HandoffSubCheckpoint[];
+  readonly steps: readonly HandoffStep[];
   /** O tipo está declarado em `human-decision-policy.yml`? (false ⇒ not-applicable) */
   readonly policyDeclared: boolean;
   // NB: contagens de findings do checkpoint só BLOQUEIAM (quando abertas); a
-  // CONCLUSÃO vem do sinal de readiness do sub-checkpoint ativo, não delas.
+  // CONCLUSÃO vem do sinal de readiness da etapa ativa, não delas.
   readonly openFindings: number;
   readonly openBlocking: number;
   /** Há finding aberto com correção `fixed` ainda não revalidada por verificação? */
@@ -54,8 +54,8 @@ export interface AdvanceEligibilityFacts {
 
 /** Par (atual, próximo) quando a forma é exatamente UMA transição concluir+ativar. */
 export interface AdvanceTransitionPair {
-  readonly active: HandoffSubCheckpoint;
-  readonly next: HandoffSubCheckpoint;
+  readonly active: HandoffStep;
+  readonly next: HandoffStep;
 }
 
 /**
@@ -63,9 +63,7 @@ export interface AdvanceTransitionPair {
  * adiante (e nenhum pendente antes dele). Independe de quantos já estão `[x]`
  * (concluídos) — toda transição depois da primeira tem `done.length > 0`.
  */
-export function advanceTransitionPair(
-  subs: readonly HandoffSubCheckpoint[]
-): AdvanceTransitionPair | null {
+export function advanceTransitionPair(subs: readonly HandoffStep[]): AdvanceTransitionPair | null {
   const inProgress = subs.filter((s) => s.state === "in-progress");
   if (inProgress.length !== 1) return null;
   const active = inProgress[0];
@@ -76,7 +74,7 @@ export function advanceTransitionPair(
 }
 
 /**
- * Elegibilidade da transição de sub-checkpoint. Ordem: forma (estrutura) →
+ * Elegibilidade da transição de etapa. Ordem: forma (estrutura) →
  * critérios de saída do atual → guardas operacionais. Cada bloqueio é nomeado.
  */
 export function deriveAdvanceEligibility(f: AdvanceEligibilityFacts): DecisionAvailability {
@@ -86,53 +84,47 @@ export function deriveAdvanceEligibility(f: AdvanceEligibilityFacts): DecisionAv
       reasons: ["Tipo não declarado na human-decision-policy.yml."],
     };
   }
-  if (f.subCheckpoints.length === 0) {
-    return { status: "not-applicable", reasons: ["Este checkpoint não tem sub-checkpoints."] };
+  if (f.steps.length === 0) {
+    return { status: "not-applicable", reasons: ["Este checkpoint não tem etapas."] };
   }
-  const inProgress = f.subCheckpoints.filter((s) => s.state === "in-progress");
+  const inProgress = f.steps.filter((s) => s.state === "in-progress");
 
-  // ── Forma da ordem (estrutura dos sub-checkpoints) ──────────────────────────
+  // ── Forma da ordem (estrutura das etapas) ──────────────────────────
   if (inProgress.length === 0) {
     return {
       status: "not-applicable",
-      reasons: ["Nenhum sub-checkpoint está em andamento ([/])."],
+      reasons: ["Nenhuma etapa está em andamento ([/])."],
     };
   }
   if (inProgress.length > 1) {
     return {
       status: "blocked",
-      reasons: ["Mais de um sub-checkpoint em andamento ([/]) — ambiguidade na ordem."],
+      reasons: ["Mais de uma etapa em andamento ([/]) — ambiguidade na ordem."],
     };
   }
   const active = inProgress[0];
-  const pendingAfter = f.subCheckpoints.filter(
-    (s) => s.state === "pending" && s.line > active.line
-  );
-  const pendingBefore = f.subCheckpoints.filter(
-    (s) => s.state === "pending" && s.line < active.line
-  );
+  const pendingAfter = f.steps.filter((s) => s.state === "pending" && s.line > active.line);
+  const pendingBefore = f.steps.filter((s) => s.state === "pending" && s.line < active.line);
   if (pendingAfter.length === 0) {
     return {
       status: "not-applicable",
       reasons: [
-        `Não há próximo sub-checkpoint pendente após ${active.id}; a transição interna não se aplica ao terminal do checkpoint.`,
+        `Não há próxima etapa pendente após ${active.id}; a transição interna não se aplica ao terminal do checkpoint.`,
       ],
     };
   }
   if (pendingBefore.length > 0) {
     return {
       status: "blocked",
-      reasons: [
-        `Ordem ambígua: há sub-checkpoint pendente antes do ativo (${pendingBefore[0].id}).`,
-      ],
+      reasons: [`Ordem ambígua: há etapa pendente antes da ativa (${pendingBefore[0].id}).`],
     };
   }
 
   // ── Critério de SAÍDA do atual: READINESS EXPLÍCITA (NUNCA findings) ─────────
-  // Conclusão é DECLARADA pelo sinal de readiness do sub-checkpoint ATIVO. Jamais
+  // Conclusão é DECLARADA pelo sinal de readiness da etapa ATIVA. Jamais
   // inferida de contagens de findings/resolutions: esses números pertencem aos
   // reviews ACUMULADOS do checkpoint (p.ex. o audit do CO-3.1) e não provam que o
-  // sub-checkpoint atual terminou. Reviews/findings podem BLOQUEAR (logo abaixo,
+  // etapa atual terminou. Reviews/findings podem BLOQUEAR (logo abaixo,
   // quando abertos/required), nunca CONCLUIR. Zero findings é válido.
   const reasons: string[] = [];
   if (active.readiness !== "ready-for-transition") {

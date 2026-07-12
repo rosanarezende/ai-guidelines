@@ -1,0 +1,117 @@
+# Resoluções do implementador para o Technical Audit do checkpoint
+# artifact-taxonomy-and-model-review-contract. Lane separada da review: propõe
+# action, mas não fecha disposition nem destrava o gate por si só.
+checkpoint: checkpoint-artifact-taxonomy-and-model-review-contract
+by: codex-cli
+resolutions:
+  - finding: technical_audit#F1
+    action: fixed
+    ref: 9232885e
+    human_context:
+      resolution_summary: "O body versionado importou a imagem publicada no GitHub e voltou a ser a fonte reconciliada do PR #45."
+    evidence: >
+      `pr-body:pull --confirm` importou a imagem de Valor entregue que existia
+      apenas no GitHub, preservando a baseline publicada em
+      pull-requests/pr-45/body.md. O body também foi atualizado para refletir
+      que o Technical Audit já foi executado.
+    tests:
+      - "npm run pr-body:check -- --spec 0024 --pr 45"
+
+  - finding: technical_audit#F2
+    action: fixed
+    ref: 9232885e
+    human_context:
+      resolution_summary: "O pr-ready:check agora falha se o body publicado divergir do body versionado."
+    evidence: >
+      `pr-ready:check` passou a comparar o body publicado no GitHub com o
+      arquivo versionado resolvido por `pull-requests/pr-<n>/body.md`; qualquer
+      divergência entra em `versionedPrBodyReasons` e falha a precondição de
+      Ready como `sincronia do PR body`.
+    tests:
+      - "npm run test:ts -- prReadyCheck.test.ts"
+      - "npm run pr-ready:check -- --pr 45"
+
+  - finding: technical_audit#F3
+    action: fixed
+    ref: 9232885e
+    human_context:
+      resolution_summary: "As fixtures históricas foram anonimizadas para Acme Honey."
+    evidence: >
+      Ocorrências de `mundo-da-mel` e `Mundo da Mel` no arquivo da incubação
+      Guilda foram substituídas por nomes fictícios Acme, preservando a
+      utilidade técnica das fixtures sem versionar nome real de negócio.
+    tests:
+      - 'rg -n "mundo-da-mel|Mundo da Mel" .'
+
+  - finding: technical_audit#F4
+    action: fixed
+    ref: 9232885e
+    human_context:
+      resolution_summary: "O tracker deixou de se autodeclarar SSOT."
+    evidence: >
+      O cabeçalho de tracker.md agora declara explicitamente que o arquivo é
+      síntese viva e embasamento, não SSOT; a autoridade normativa continua
+      concentrada no model.yml.
+    tests:
+      - "npm run artifact-kind:check"
+
+  - finding: technical_audit#F5
+    action: fixed
+    ref: 2fe8ea54
+    human_context:
+      resolution_summary: "Reviews opcionais deixam de ser promessa implicita: cada PR pode registrar um plano situado, com recomendacao do sistema e decisao humana explicita."
+    evidence: >
+      `state.yml § topology` agora aceita `review_plan` por no de PR: o sistema
+      registra recomendacao (`not_needed|optional|recommended|required`) e a
+      owner registra decisao (`pending|waived|optional|recommended|required`)
+      com actor+reason quando final. Decisao `pending` bloqueia Ready por
+      honestidade; decisoes `required` viram requisito efetivo somente no
+      `pr-ready:check`, sem transformar `review:check` ou `validate` em bloqueio
+      prematuro durante Draft. O PR #45 declara TA e AR como required por
+      decisao da owner, e security_review como waived para este escopo.
+    tests:
+      - "npm run test:ts -- --runTestsByPath src/cli/prReadyCheck.test.ts src/infrastructure/yaml/workflowStateSerializer.test.ts src/cli/reviewRequirements.test.ts src/cli/flow/GovernedFlow.test.ts"
+      - "npm run review:check"
+      - "npm run validate"
+
+  - finding: architectural_review#F1
+    action: fixed
+    ref: 05d10119
+    human_context:
+      resolution_summary: "O guard que impede aprovacao por scope=findings em review sem findings voltou a ter regressao explicita."
+    evidence: >
+      `reviewCheckObserved.test.ts` agora cobre o caso em que um evento
+      `scope: findings` tenta aprovar uma lane cujo review original nao emitiu
+      findings. A decisao efetiva permanece `changes_requested`, preservando o
+      guard de DEC-0024-G29: verificacao por findings so pode aprovar quando ha
+      findings reais e todos foram verificados.
+    tests:
+      - "npm run test:ts -- --runTestsByPath src/cli/reviewCheckObserved.test.ts src/cli/reviewFreshness.test.ts src/cli/reviewCheck.test.ts"
+
+  - finding: architectural_review#F2
+    action: fixed
+    ref: 05d10119
+    human_context:
+      resolution_summary: "O resumo do review:check passou a expor decisao declarada e decisao efetiva quando elas divergem."
+    evidence: >
+      `consolidate()` agora projeta `effectiveReviewDecisions` por checkpoint, e
+      a saida humana do `review:check` imprime `role=declarada
+      (effective=derivada)` quando um ledger de eventos altera a decisao efetiva
+      sem reescrever o review original. Isso preserva o append-only e remove a
+      ambiguidade operacional apontada pela Architectural Review.
+    tests:
+      - "npm run test:ts -- --runTestsByPath src/cli/reviewCheckObserved.test.ts src/cli/reviewFreshness.test.ts src/cli/reviewCheck.test.ts"
+
+  - finding: architectural_review#F3
+    action: fixed
+    ref: 05d10119
+    human_context:
+      resolution_summary: "A regra de freshness que diferencia commit funcional de publicacao review-only ficou explicitamente protegida por regressao."
+    evidence: >
+      `reviewFreshness.test.ts` agora nomeia o caso estrutural da AR: um fix na
+      propria maquina de review, como `src/cli/reviewCheck.ts`, nao e
+      review-only e deve reabrir freshness; ja a publicacao posterior de
+      artefato em `reviews/` continua review-only e nao desloca a cabeca
+      funcional auditavel.
+    tests:
+      - "npm run test:ts -- --runTestsByPath src/cli/reviewCheckObserved.test.ts src/cli/reviewFreshness.test.ts src/cli/reviewCheck.test.ts"

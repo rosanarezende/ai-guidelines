@@ -1,0 +1,15 @@
+node: work-brief
+kind: incident
+id: <slug>_<num>
+severity: # low | medium | high | critical
+status: # mitigating | mitigated | resolved
+merge-priority-until: # data
+ci-bypass-until: # data (expira → sem débito, GG-0005)
+references: []
+
+# registro rápido (blameless)
+symptom: # o que quebrou
+impact: # impacto / afetados
+
+details: |
+  <nuance opcional>

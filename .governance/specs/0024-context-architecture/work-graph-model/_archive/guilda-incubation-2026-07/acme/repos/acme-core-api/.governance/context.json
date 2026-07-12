@@ -1,0 +1,110 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-core-api",
+  "owner": "area-platform",
+  "role": "legacy-monolith",
+  "domain": "legacy-core",
+  "modules": [
+    {
+      "id": "mod-billing",
+      "owner": "time-billing",
+      "capabilities": [
+        {
+          "text": "Legacy billing and invoices.",
+          "tags": ["cobranca-legada", "notas-fiscais"]
+        }
+      ]
+    },
+    {
+      "id": "mod-orders",
+      "owner": "time-checkout",
+      "capabilities": [
+        {
+          "text": "Legacy orders and inventory reservations.",
+          "tags": ["pedidos-legados", "estoque"]
+        }
+      ]
+    },
+    {
+      "id": "mod-accounts",
+      "owner": "time-identity",
+      "capabilities": [
+        {
+          "text": "Legacy accounts and permissions.",
+          "tags": ["contas", "permissoes-legadas"]
+        }
+      ]
+    },
+    {
+      "id": "mod-reports",
+      "owner": "time-data",
+      "capabilities": [
+        {
+          "text": "Legacy reports and CSV exports.",
+          "tags": ["relatorios-legados"]
+        }
+      ]
+    }
+  ],
+  "provides": [
+    {
+      "name": "legacy-billing-api",
+      "kind": "api",
+      "status": "active",
+      "owner": "time-billing"
+    },
+    {
+      "name": "legacy-orders-api",
+      "kind": "api",
+      "status": "active",
+      "owner": "time-checkout"
+    },
+    {
+      "name": "legacy-accounts-api",
+      "kind": "api",
+      "status": "active",
+      "owner": "time-identity"
+    },
+    {
+      "name": "legacy-reports-api",
+      "kind": "api",
+      "status": "active",
+      "owner": "time-data"
+    }
+  ],
+  "consumes": [],
+  "capabilities": [
+    {
+      "text": "Legacy API seams used by migration waves and strangler work.",
+      "tags": ["api-legada", "integracoes"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript"],
+    "patterns": ["modular-monolith", "strangler-seam"],
+    "boundaries": ["module-owner-overrides", "platform-custodian"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-core-api",
+    "dependencies": []
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": [
+      "addPermission",
+      "buildRevenueReport",
+      "canAccess",
+      "createInvoice",
+      "createLegacyOrder",
+      "exportCsv",
+      "getAccount",
+      "getLegacyOrder",
+      "legacyPlanForAccount",
+      "listInvoices",
+      "monolithModules",
+      "reserveInventory"
+    ],
+    "sourceHash": "c3804c97ad17"
+  },
+  "contentHash": "94535e6569b5"
+}

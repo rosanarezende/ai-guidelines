@@ -70,7 +70,7 @@ modes:
     forbidden_actions:
       - edit-review
       - close-dispositions
-      - start-next-subcheckpoint
+      - start-next-step
       - run-review
       - ready
       - human-gate
@@ -114,7 +114,7 @@ modes:
       - modify-functional-files-for-findings
       - create-resolutions
       - close-dispositions
-      - start-next-subcheckpoint
+      - start-next-step
       - run-review
       - ready
       - human-gate
@@ -137,18 +137,18 @@ modes:
       - Estado da lane
       - Próxima ação
 
-  prepare_subcheckpoint_transition:
+  prepare_step_transition:
     purpose: >
-      Um sub-checkpoint terminou (auditoria fechada/verificada, sem trabalho
+      Uma etapa terminou (auditoria fechada/verificada, sem trabalho
       executável aberto) mas o tasks.md ainda não reflete a transição. NÃO há
       objeto de implementação até a transição ser registrada. A conclusão de um
-      sub-checkpoint e a ativação do próximo são um ATO OPERACIONAL EXPLÍCITO e
+      etapa e a ativação da próxima são um ATO OPERACIONAL EXPLÍCITO e
       VISÍVEL em tasks.md — nunca um efeito colateral silencioso de fechar
-      dispositions. Marque o sub-checkpoint concluído e ative o próximo; só então
+      dispositions. Marque a etapa concluída e ative a próxima; só então
       o modo vira implement_checkpoint com objeto concreto.
     allowed_actions:
-      - mark-subcheckpoint-done
-      - activate-next-subcheckpoint
+      - mark-step-done
+      - activate-next-step
       - update-pr-body
       - reconcile-docs
     forbidden_actions:
@@ -169,12 +169,12 @@ modes:
     expects_resolutions: false
     pr_body_editable: true
     stop_conditions:
-      - tasks.md registra o sub-checkpoint concluído e o próximo ativado (ato visível)
+      - tasks.md registra a etapa concluída e a próxima ativada (ato visível)
       - nenhuma implementação funcional iniciada antes da transição
     report_sections:
       - Retomada
-      - Sub-checkpoint concluído
-      - Próximo sub-checkpoint ativado
+      - Etapa concluída
+      - Próxima etapa ativada
       - Próxima ação
 
   implement_checkpoint:
@@ -189,7 +189,7 @@ modes:
     forbidden_actions:
       - edit-review
       - close-dispositions
-      - start-next-subcheckpoint
+      - start-next-step
       - run-review
       - ready
       - human-gate
@@ -232,7 +232,7 @@ modes:
       - human-gate
       - gate-artifact
       - merge
-      - start-next-subcheckpoint
+      - start-next-step
     publication:
       commit: explicit-work-request
       push: explicit-work-request

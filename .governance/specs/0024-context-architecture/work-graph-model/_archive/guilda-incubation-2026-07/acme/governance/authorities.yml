@@ -1,0 +1,21 @@
+# authorities.yml — o REGISTRY de autoridades (bloco K da F5): quem aprova/define/lidera
+# precisa RESOLVER aqui — "approved-by: fulano" deixa de ser texto e vira referência.
+# kind: sponsor (FORA do escopo operacional — só ele aprova o perfil da org inteira) ·
+# role (pertence a uma área/time via "of" — dentro do escopo).
+authorities:
+  - {
+      id: sponsor-acme,
+      kind: sponsor,
+      note: "aprova perfil e objetivos company — fora da operação",
+    }
+  - { id: head-growth, kind: role, of: area-growth }
+  - { id: head-platform, kind: role, of: area-platform }
+  - { id: head-cx, kind: role, of: area-cx }
+  - { id: pm-growth, kind: role, of: area-growth }
+  - { id: lead-billing, kind: role, of: time-billing }
+  - { id: lead-onboarding, kind: role, of: time-onboarding }
+  - { id: lead-checkout, kind: role, of: time-checkout }
+  - { id: lead-data, kind: role, of: time-data }
+  - { id: lead-sre, kind: role, of: time-sre }
+  - { id: lead-identity, kind: role, of: time-identity }
+  - { id: lead-support, kind: role, of: time-support }

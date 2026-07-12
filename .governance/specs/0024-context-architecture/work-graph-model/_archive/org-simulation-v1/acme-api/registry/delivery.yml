@@ -1,0 +1,17 @@
+# registry/delivery.yml — acme-api · índice kind=delivery (→ active-work).
+entries:
+  - id: deliv-101
+    title: API de onboarding (passos + eventos)
+    status: done
+    intent: intent-001
+    date: 2026-06-20
+  - id: deliv-050
+    title: endpoints de billing por uso
+    status: active
+    intent: intent-002
+    date: 2026-06-19
+  - id: deliv-201
+    title: auth endpoints (sessão + token)
+    status: active
+    intent: intent-004 # login system (contrato known no t0)
+    date: 2026-06-29

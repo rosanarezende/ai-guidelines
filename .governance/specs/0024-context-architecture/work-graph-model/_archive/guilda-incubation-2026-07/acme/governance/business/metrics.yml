@@ -1,0 +1,34 @@
+# metrics.yml — metric-definition ≠ target: a definição ESTÁVEL (unidade · source · aggregation · owner)
+metrics:
+  - { id: conversion-rate, unit: "%", source: acme-analytics, aggregation: avg, owner: time-data }
+  - { id: activation-rate, unit: "%", source: acme-analytics, aggregation: avg, owner: time-data }
+  - { id: churn-rate, unit: "%/mês", source: acme-analytics, aggregation: avg, owner: time-data }
+  - {
+      id: cost-to-serve,
+      unit: "R$/pedido",
+      source: acme-data-pipeline,
+      aggregation: avg,
+      owner: time-data,
+    }
+  - {
+      id: ticket-cost,
+      unit: "R$/ticket",
+      source: acme-data-pipeline,
+      aggregation: avg,
+      owner: time-data,
+    }
+  - { id: p99-latency, unit: ms, source: acme-obs-stack, aggregation: p99, owner: time-sre }
+  - {
+      id: incident-count,
+      unit: incidentes/mês,
+      source: acme-obs-stack,
+      aggregation: sum,
+      owner: time-sre,
+    }
+  - {
+      id: consent-coverage,
+      unit: "% de dados com base legal",
+      source: acme-data-pipeline,
+      aggregation: avg,
+      owner: time-data,
+    }

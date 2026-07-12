@@ -1,12 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-import {
-  HandoffFacts,
-  deriveNextAction,
-  parseSubCheckpoints,
-  resolveSubCheckpointWork,
-} from "./handoffFacts.js";
+import { HandoffFacts, deriveNextAction, parseSteps, resolveStepWork } from "./handoffFacts.js";
 import { deriveWorkBrief } from "./workBrief.js";
 import { parseWorkPolicy } from "../infrastructure/yaml/workPolicyReader.js";
 
@@ -15,7 +10,7 @@ import { parseWorkPolicy } from "../infrastructure/yaml/workPolicyReader.js";
  *
  * Bug: com CO-3.3 `[/]` em tasks.md, o `handoff` declarava "não há tarefa
  * executável" enquanto o `work` identificava CO-3.3 — duas projeções da MESMA
- * fonte divergindo. Após unificar a derivação (`resolveSubCheckpointWork`),
+ * fonte divergindo. Após unificar a derivação (`resolveStepWork`),
  * ambos consomem a MESMA função e DEVEM nomear o mesmo objeto:
  *
  *   - se `work` deriva IMPLEMENT_CHECKPOINT com um objeto,
@@ -31,7 +26,7 @@ const TASKS_MD = [
   "## Execução",
   "",
   "- [/] **Checkpoint co-enforcement** (nó `co-enforcement`, seq 9 / CO-3)",
-  "  - **Sub-checkpoints internos (CO-3, PR #42):**",
+  "  - **Etapas internos (CO-3, PR #42):**",
   "    - [x] **CO-3.1 — Constraint + EnforcementBinding**: fatia vertical mínima.",
   "    - [x] **CO-3.2 — knowledge:compile + manifesto/paridade**: entrypoint humano.",
   "    - [/] **CO-3.3 — migração e remoção do substrato legacy**: port TS + reconexão.",
@@ -83,7 +78,7 @@ function facts(over: Partial<HandoffFacts> = {}): HandoffFacts {
       gateDecision: null,
     },
     tasks: [],
-    subCheckpoints: parseSubCheckpoints(TASKS_MD, "checkpoint-co-enforcement"),
+    steps: parseSteps(TASKS_MD, "checkpoint-co-enforcement"),
     insights: [],
     driftWarnings: [],
     sources: [{ id: "pull-request", origin: "gh", status: "fresh", fingerprint: "x" }],
@@ -91,9 +86,9 @@ function facts(over: Partial<HandoffFacts> = {}): HandoffFacts {
   };
 }
 
-describe("Invariante handoff ↔ work (projeção unificada de sub-checkpoint)", () => {
+describe("Invariante handoff ↔ work (projeção unificada de etapa)", () => {
   it("DADO tasks.md com CO-3.1/3.2 done, CO-3.3 [/], CO-3.4 [ ] QUANDO parseia ENTÃO reconhece os 4 estados", () => {
-    const subs = parseSubCheckpoints(TASKS_MD, "checkpoint-co-enforcement");
+    const subs = parseSteps(TASKS_MD, "checkpoint-co-enforcement");
     expect(subs.map((s) => [s.id, s.state])).toEqual([
       ["CO-3.1", "done"],
       ["CO-3.2", "done"],
@@ -107,7 +102,7 @@ describe("Invariante handoff ↔ work (projeção unificada de sub-checkpoint)",
 
     // handoff
     const next = deriveNextAction(f);
-    expect(next.kind).toBe("implement-subcheckpoint");
+    expect(next.kind).toBe("implement-step");
     expect(next.description).toContain("CO-3.3");
     expect(next.description).toContain("linha 7"); // linha do CO-3.3 no fixture
 
@@ -122,19 +117,19 @@ describe("Invariante handoff ↔ work (projeção unificada de sub-checkpoint)",
       advanceEligibility: { status: "available", reasons: [] },
     });
     expect(brief.mode).toBe("implement_checkpoint");
-    expect(brief.object.subCheckpoint?.id).toBe("CO-3.3");
+    expect(brief.object.step?.id).toBe("CO-3.3");
 
     // INVARIANTE: mesmo objeto factual dos dois lados.
-    const sub = resolveSubCheckpointWork(f);
+    const sub = resolveStepWork(f);
     expect(sub.kind).toBe("implement");
     if (sub.kind === "implement") {
-      expect(brief.object.subCheckpoint?.id).toBe(sub.subCheckpoint.id);
-      expect(brief.object.subCheckpoint?.line).toBe(sub.subCheckpoint.line);
-      expect(next.description).toContain(sub.subCheckpoint.id);
+      expect(brief.object.step?.id).toBe(sub.step.id);
+      expect(brief.object.step?.line).toBe(sub.step.line);
+      expect(next.description).toContain(sub.step.id);
     }
   });
 
-  it("DADO sub-checkpoint ativo QUANDO handoff/work derivam ENTÃO NENHUM declara zero tarefas", () => {
+  it("DADO etapa ativa QUANDO handoff/work derivam ENTÃO NENHUM declara zero tarefas", () => {
     const f = facts();
     const next = deriveNextAction(f);
     // handoff NÃO cai no fallback de investigação ("0 abertas executáveis").
@@ -154,16 +149,16 @@ describe("Invariante handoff ↔ work (projeção unificada de sub-checkpoint)",
     expect(brief.mode).not.toBe("blocked");
   });
 
-  it("DADO todos os sub-checkpoints concluídos QUANDO não há [/] nem pendente ENTÃO cai no fallback (sem objeto)", () => {
-    const allDone = parseSubCheckpoints(
+  it("DADO todos as etapas concluídos QUANDO não há [/] nem pendente ENTÃO cai no fallback (sem objeto)", () => {
+    const allDone = parseSteps(
       TASKS_MD.replace("[/] **CO-3.3", "[x] **CO-3.3").replace("[ ] **CO-3.4", "[x] **CO-3.4"),
       "checkpoint-co-enforcement"
     );
-    const f = facts({ subCheckpoints: allDone });
+    const f = facts({ steps: allDone });
     const next = deriveNextAction(f);
-    // Sem sub-checkpoint ativo nem pendente nem tarefa de topo: investigação.
+    // Sem etapa ativa nem pendente nem tarefa de topo: investigação.
     expect(next.kind).toBe("investigate-checkpoint");
-    expect(resolveSubCheckpointWork(f).kind).toBe("none");
+    expect(resolveStepWork(f).kind).toBe("none");
   });
 
   it("DADO o CO-3.3 [/] com readiness declarada QUANDO handoff e work derivam ENTÃO recomendam a transição e nomeiam o CO-3.3", () => {
@@ -172,12 +167,12 @@ describe("Invariante handoff ↔ work (projeção unificada de sub-checkpoint)",
       "[/] **CO-3.3 — migração e remoção do substrato legacy** `readiness: ready-for-transition`"
     );
     const f = facts({
-      subCheckpoints: parseSubCheckpoints(tasksReady, "checkpoint-co-enforcement"),
+      steps: parseSteps(tasksReady, "checkpoint-co-enforcement"),
     });
 
     // handoff
     const next = deriveNextAction(f);
-    expect(next.kind).toBe("advance-subcheckpoint-transition");
+    expect(next.kind).toBe("advance-step-transition");
     expect(next.description).toContain("CO-3.3");
 
     // work
@@ -190,12 +185,12 @@ describe("Invariante handoff ↔ work (projeção unificada de sub-checkpoint)",
       authorization: null,
       advanceEligibility: { status: "available", reasons: [] },
     });
-    expect(brief.mode).toBe("prepare_subcheckpoint_transition");
+    expect(brief.mode).toBe("prepare_step_transition");
     expect(brief.object.transition?.conclude?.id).toBe("CO-3.3");
     expect(brief.object.transition?.activate.id).toBe("CO-3.4");
 
     // Ambos nomeiam CO-3.3
-    const sub = resolveSubCheckpointWork(f);
+    const sub = resolveStepWork(f);
     expect(sub.kind).toBe("transition");
     if (sub.kind === "transition") {
       expect(sub.transition.conclude?.id).toBe("CO-3.3");

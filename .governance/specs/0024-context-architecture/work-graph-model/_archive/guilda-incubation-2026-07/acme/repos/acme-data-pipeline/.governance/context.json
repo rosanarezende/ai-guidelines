@@ -1,0 +1,55 @@
+{
+  "schema": "acme.repo-context/v1",
+  "repo": "acme-data-pipeline",
+  "owner": "time-data",
+  "role": "data-pipeline",
+  "domain": "warehouse-and-rollup",
+  "modules": [],
+  "provides": [
+    {
+      "name": "warehouse-metrics",
+      "kind": "metric-source",
+      "status": "active"
+    },
+    {
+      "name": "target-actuals",
+      "kind": "outcome-attestation",
+      "status": "active"
+    }
+  ],
+  "consumes": [
+    {
+      "contract": "acme-analytics/acme-events-schema",
+      "why": "materialize-daily-metrics"
+    },
+    {
+      "contract": "acme-analytics/experiment-event-source",
+      "why": "read-event-sink"
+    }
+  ],
+  "capabilities": [
+    {
+      "text": "ETL and warehouse materialization for target actuals.",
+      "tags": ["etl", "warehouse"]
+    },
+    {
+      "text": "Cost-to-serve, ticket-cost and consent coverage snapshots.",
+      "tags": ["metricas", "outcomes", "custo"]
+    }
+  ],
+  "architecture": {
+    "stack": ["node", "javascript"],
+    "patterns": ["etl", "derived-read-model"],
+    "boundaries": ["attestation-source", "warehouse"]
+  },
+  "package": {
+    "name": "@acme-sim/acme-data-pipeline",
+    "dependencies": ["@acme-sim/acme-analytics"]
+  },
+  "code": {
+    "entrypoint": "src/index.mjs",
+    "exports": ["materializeDailyMetrics", "targetActualSnapshot"],
+    "sourceHash": "2f540098d1be"
+  },
+  "contentHash": "ebb7734db1c8"
+}

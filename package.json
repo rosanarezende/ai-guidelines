@@ -49,6 +49,8 @@
     "consumer:journey:yalc": "npm run build && node dist/cli/bin.js consumer-journey yalc",
     "consumer:journey:verdaccio": "npm run build && node dist/cli/bin.js consumer-journey verdaccio",
     "test:coverage": "node --experimental-default-config-file --experimental-test-coverage --test \"tests/integration/**/*.test.mjs\" && jest --config ./.jest/jest.config.js --coverage",
+    "supply-chain:check": "node tools/supply-chain/supply-chain-advisory.ts --dry-run",
+    "supply-chain:advisory": "node tools/supply-chain/supply-chain-advisory.ts --output .tmp/supply-chain/advisory-report.json",
     "living-docs:generate": "npm run build && node dist/cli/bin.js living-docs generate",
     "living-docs:check": "npm run build && node dist/cli/bin.js living-docs check",
     "site:flow:sync": "npm run build && node dist/cli/bin.js site-flow-copy sync",
@@ -66,6 +68,10 @@
     "state-yml:check:all": "npm run build && node dist/cli/bin.js state-yml-check --all",
     "active-specs:check": "npm run build && node dist/cli/bin.js active-specs-check",
     "reconcile:check": "npm run build && node dist/cli/bin.js reconcile-check",
+    "research-index:check": "npm run build && node dist/cli/bin.js research-index-check",
+    "artifact-kind:check": "npm run build && node dist/cli/bin.js artifact-kind-check",
+    "governed-work-map:build": "npm run build && node dist/cli/bin.js governed-work-map build",
+    "governed-work-map:check": "npm run build && node dist/cli/bin.js governed-work-map check",
     "handoff:check": "npm run build && node dist/cli/bin.js handoff-check",
     "drift:check": "npm run build && node dist/cli/main.js drift --check",
     "co-knowledge:check": "npm run build && node dist/cli/bin.js co-knowledge-check",
@@ -87,9 +93,15 @@
     "review:seal": "npm run build && node dist/cli/bin.js review-seal",
     "pr-body:update": "npm run build && node dist/cli/bin.js pr-body-update",
     "pr-body:create": "npm run build && node dist/cli/bin.js pr-body-create",
+    "pr-body:check": "npm run build && node dist/cli/bin.js pr-body-check",
+    "pr-body:publish": "npm run build && node dist/cli/bin.js pr-body-publish",
+    "pr-body:pull": "npm run build && node dist/cli/bin.js pr-body-pull",
     "pr-ready:check": "npm run build && node dist/cli/bin.js pr-ready-check",
+    "continuation:check": "npm run build && node dist/cli/bin.js continuation-check",
+    "continuation:prepare": "npm run build && node dist/cli/bin.js continuation-prepare",
+    "continuation:create-pr": "npm run build && node dist/cli/bin.js continuation-create-pr",
     "validate:changed": "npm run build && node dist/cli/main.js validate changed",
-    "validate": "npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run drift:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check",
+    "validate": "npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run research-index:check && npm run artifact-kind:check && npm run governed-work-map:check && npm run drift:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check",
     "ci": "npm ci && npm run validate && npm run state-yml:check:all",
     "prepare": "husky",
     "prepack": "npm run build:all"
@@ -123,5 +135,9 @@
   "dependencies": {
     "@clack/prompts": "^1.5.1",
     "yaml": "^2.8.4"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "postcss": "8.5.15"
   }
 }

@@ -1,0 +1,16 @@
+schema: acme.repo-work/v1
+id: intent-consent-center::propagar-base-legal
+intent: intent-consent-center
+work: propagar-base-legal
+repo: acme-data-pipeline
+purpose: sustain
+desc: warehouse propaga a base legal por dado (consent-coverage nasce daqui)
+review: "externo: time-data"
+status: acknowledged
+source:
+  kind: central-breakdown
+  file: acme/governance/intents/intent-consent-center.yml
+  breakdownHash: b99fc5d63501
+code:
+  touchpoints:
+    - src/index.mjs
