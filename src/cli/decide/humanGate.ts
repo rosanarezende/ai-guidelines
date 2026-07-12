@@ -136,12 +136,31 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
       residual_risks: [
         "Riscos residuais registrados nos reviews e decisões governadas do checkpoint.",
       ],
-      next_node: snapshot.nextPlannedNode
-        ? [
-            `Próximo nó planejado: ${snapshot.nextPlannedNode.id}.`,
-            "Ele NÃO será iniciado automaticamente por esta decisão.",
-          ]
-        : ["Não há próximo nó planejado derivável; nada é iniciado automaticamente."],
+      // A Frente vem antes da topologia planejada: enquanto houver checkpoint
+      // pendente em tasks.md, o próximo passo humano é o próximo checkpoint da
+      // continuação — o nó planejado (ex.: dualroot-collapse) só abre depois
+      // que a Frente fechar (mesma regra de deriveNextAction/openNextTopologyNode).
+      next_node: (() => {
+        const pendingSteps = snapshot.steps.filter((s) => s.state === "pending");
+        if (pendingSteps.length > 0) {
+          const first = pendingSteps[0];
+          return [
+            `Próximo checkpoint da Frente: ${first.id} — ${first.title}.`,
+            ...(snapshot.nextPlannedNode
+              ? [
+                  `O nó topológico ${snapshot.nextPlannedNode.id} só abre depois que a Frente fechar (pendente(s): ${pendingSteps.map((s) => s.id).join(", ")}).`,
+                ]
+              : []),
+            "Nada será iniciado automaticamente por esta decisão.",
+          ];
+        }
+        return snapshot.nextPlannedNode
+          ? [
+              `Próximo nó planejado: ${snapshot.nextPlannedNode.id}.`,
+              "Ele NÃO será iniciado automaticamente por esta decisão.",
+            ]
+          : ["Não há próximo nó planejado derivável; nada é iniciado automaticamente."];
+      })(),
       consequences: policy.consequences,
       not_authorized: policy.notAuthorized,
     };

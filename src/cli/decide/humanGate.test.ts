@@ -362,6 +362,30 @@ describe("human-gate · briefing humano [decide]", () => {
     expect(text).toContain("Próximo nó planejado: co-flow-convergence.");
   });
 
+  it("Frente com checkpoints pendentes: próximo passo é o checkpoint da continuação, não o nó topológico", () => {
+    const s = readySnapshot({
+      steps: [
+        {
+          id: "internal-architecture-refactor-ddd-bdd",
+          title: "refactor",
+          state: "in-progress",
+          readiness: STEP_READINESS,
+          line: 1,
+        },
+        { id: "broad-flow-falsification", title: "falsificação ampla", state: "pending", line: 2 },
+        { id: "continuation-review-human-gate", title: "revisão final", state: "pending", line: 3 },
+      ],
+    });
+    const b = def.buildBrief(s, { technical: false });
+    const text = JSON.stringify(b.sections);
+    expect(text).toContain(
+      "Próximo checkpoint da Frente: broad-flow-falsification — falsificação ampla."
+    );
+    expect(text).toContain("só abre depois que a Frente fechar");
+    expect(text).toContain("broad-flow-falsification, continuation-review-human-gate");
+    expect(text).not.toContain("Próximo nó planejado: co-flow-convergence.");
+  });
+
   it("Human Gate mostra technical_audit current/approved quando verification aprovada é vigente", () => {
     const facts = makeHandoffFacts({
       pullRequest: { ...readySnapshot().facts.pullRequest! },
