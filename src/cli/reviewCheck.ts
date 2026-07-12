@@ -422,8 +422,21 @@ export function observedReviewStates(
 ): Record<string, { latestSubjectRef: string | null; decision: string | null }> {
   const norm = normalizeCheckpoint(checkpoint);
   const observed: Record<string, { latestSubjectRef: string | null; decision: string | null }> = {};
+  const reviewsByRole = new Map<string, ReviewArtifact>();
+  const latestFindingEventsByRole = new Map<string, Map<string, ReviewEventArtifact>>();
+
+  function allReviewFindingsApproved(review: ReviewArtifact): boolean {
+    if (review.findings.length === 0) return false;
+    const latest = latestFindingEventsByRole.get(review.role);
+    if (!latest) return false;
+    return review.findings.every(
+      (f) => latest.get(`${review.role}#${f.id}`)?.decision === "approved"
+    );
+  }
+
   for (const r of artifacts.reviews) {
     if (normalizeCheckpoint(r.checkpoint) !== norm) continue;
+    reviewsByRole.set(r.role, r);
     observed[r.role] = {
       latestSubjectRef: r.subjectRef ?? null,
       decision: r.decision,
@@ -435,11 +448,31 @@ export function observedReviewStates(
     if (normalizeCheckpoint(e.checkpoint) !== norm) continue;
     if (!e.subjectRef) continue;
     const current = observed[e.role];
+    const review = reviewsByRole.get(e.role);
     if (current) {
+      let decision = current.decision;
+      if (e.scope === "review") {
+        decision = e.decision;
+      } else if (review) {
+        const latest =
+          latestFindingEventsByRole.get(e.role) ?? new Map<string, ReviewEventArtifact>();
+        const findingIds = new Set(review.findings.map((f) => `${review.role}#${f.id}`));
+        let touchedReviewFinding = false;
+        for (const ref of e.verifies) {
+          latest.set(ref, e);
+          if (findingIds.has(ref)) touchedReviewFinding = true;
+        }
+        latestFindingEventsByRole.set(e.role, latest);
+        if (allReviewFindingsApproved(review)) {
+          decision = "approved";
+        } else if (touchedReviewFinding && e.decision !== "approved") {
+          decision = e.decision;
+        }
+      }
       observed[e.role] = {
         ...current,
         latestSubjectRef: e.subjectRef,
-        ...(e.scope === "review" ? { decision: e.decision } : {}),
+        decision,
       };
     }
   }

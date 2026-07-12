@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-07-11 — **`[DEC-0024-G28]` registrada**: temas estruturais antigos (`G01`, `G03`, `G05`, `F-014`) deixam de ficar implícitos e passam a ter disposição explícita entre o PR #45, `internal-architecture-refactor-ddd-bdd`, `broad-flow-falsification` e `continuation-review-human-gate`. Antes — **`[DEC-0024-G27]` registrada**: o protocolo interino de PR grande vira fluxo governado `continuation:check -> continuation:prepare -> continuation:create-pr`, preparando pacotes versionados em `pull-requests/pr-N/continuations/` e exigindo confirmação humana explícita antes de criar Draft PR. Não declara Ready/Human Gate.
+> Última atualização: 2026-07-11 — **`[DEC-0024-G29]` registrada**: eventos de verificação `scope: findings` podem resolver a decisão efetiva de uma lane de review quando cobrem todos os findings emitidos por aquela lane, sem reescrever o review original. Antes — **`[DEC-0024-G28]` registrada**: temas estruturais antigos (`G01`, `G03`, `G05`, `F-014`) deixam de ficar implícitos e passam a ter disposição explícita entre o PR #45, `internal-architecture-refactor-ddd-bdd`, `broad-flow-falsification` e `continuation-review-human-gate`.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -822,6 +822,38 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G29] Decisão efetiva de review após verificação completa de findings
+
+**Pergunta:** Quando uma Technical Audit ou Architectural Review emite `changes_requested`, e depois um evento de verificação `scope: findings` aprova todos os achados daquela lane sem novo delta funcional, o framework deve exigir um novo evento `scope: review` apenas para mudar a decisão efetiva, ou pode derivar a aprovação da lane a partir da cobertura completa dos findings?
+
+**Modo de gate:** `aceitação` <!-- decisão de processo/review da owner, 2026-07-11, após a revalidação da Technical Audit do PR #45 expor deadlock entre review append-only, findings verificados e Ready check. -->
+
+**Contexto:** A revalidação da Technical Audit do PR #45 criou um evento `scope: findings`, `decision: approved`, cobrindo F1-F5. Esse evento provava que os achados foram corrigidos e mantinha a lane `current`, mas a decisão efetiva permanecia `changes_requested` porque o código só aceitava `scope: review` para substituir a decisão do review original. Isso criava um deadlock: a auditoria estava revalidada, não havia novo delta funcional a auditar, mas o Ready continuaria bloqueado até um novo evento de review inteiro, mesmo sem trabalho novo.
+
+**Decisão (Resolved):**
+
+- O artefato de review original permanece imutável e histórico: sua decisão declarada não é reescrita.
+- A decisão **efetiva** usada por `review:check`/`pr-ready:check` pode ser derivada por eventos posteriores.
+- Um evento `scope: review` continua substituindo diretamente a decisão efetiva da lane, desde que seu `subject_ref` esteja current.
+- Um evento `scope: findings`, `decision: approved`, substitui a decisão efetiva da lane para `approved` **somente quando a verificação mais recente de cada finding emitido pelo review original também estiver approved**.
+- Um evento `scope: findings` parcial não aprova a lane inteira.
+- Um evento `scope: findings` posterior com decisão não-aprovada sobre qualquer finding daquela lane reabre a decisão efetiva da lane.
+- Reviews sem findings emitidos não podem ser aprovados por `scope: findings`; nesses casos, a única forma de substituir a decisão efetiva é `scope: review`.
+- Essa regra é derivação de estado observado, não mutação do ledger: events continuam append-only.
+
+**Consequências práticas:**
+
+- Uma auditoria com `changes_requested` pode ser fechada honestamente por uma rodada de verificação de achados, sem exigir um review inteiro artificial quando não há novo delta funcional.
+- `pr-ready:check` deixa de criar deadlock quando todos os findings de uma lane obrigatória foram verificados e aprovados.
+- Revalidações parciais continuam seguras: elas atualizam cobertura/freshness, mas não removem o bloqueio de decisão enquanto existir finding daquela lane sem aprovação efetiva.
+- Uma regressão encontrada numa verificação posterior volta a bloquear a lane, sem apagar o histórico aprovado anterior.
+
+**O que NÃO está sendo decidido:** pular Technical Audit ou Architectural Review obrigatórias; transformar eventos de findings em Human Gate; reescrever reviews selados; declarar Ready; registrar aprovação humana; criar review sem artefato; permitir que verificação parcial destrave uma lane inteira.
+
+**Status:** Resolved (2026-07-11) / @rosanarezende — `scope: findings` aprovado e completo passa a poder resolver a decisão efetiva da lane, com regressão posterior reabrindo o bloqueio.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -936,6 +968,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G26]` — Resolved 2026-07-10 / @rosanarezende
 - [x] `[DEC-0024-G27]` — Resolved 2026-07-11 / @rosanarezende
 - [x] `[DEC-0024-G28]` — Resolved 2026-07-11 / @rosanarezende
+- [x] `[DEC-0024-G29]` — Resolved 2026-07-11 / @rosanarezende
 
 ---
 
