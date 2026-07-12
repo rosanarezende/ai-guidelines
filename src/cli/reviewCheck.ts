@@ -177,6 +177,11 @@ function parseEventSequence(eventId: string): number | undefined {
 export interface ConsolidatedCheckpoint {
   readonly checkpoint: string;
   readonly reviewDecisions: ReadonlyArray<{ role: string; decision: string }>;
+  readonly effectiveReviewDecisions?: ReadonlyArray<{
+    role: string;
+    declared: string;
+    effective: string | null;
+  }>;
   readonly reviewEventCount: number;
   /** Eventos scope=review (verification do review inteiro contra novo subject). */
   readonly reviewScopeVerifications: number;
@@ -395,9 +400,16 @@ export function consolidate(artifacts: SpecArtifacts): {
       );
     }
 
+    const observed = observedReviewStates(artifacts, cp);
+
     byCheckpoint.push({
       checkpoint: cp,
       reviewDecisions: reviews.map((r) => ({ role: r.role, decision: r.decision })),
+      effectiveReviewDecisions: reviews.map((r) => ({
+        role: r.role,
+        declared: r.decision,
+        effective: observed[r.role]?.decision ?? r.decision,
+      })),
       reviewEventCount: reviewEvents.length,
       reviewScopeVerifications,
       openBlocking,
@@ -609,8 +621,21 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
   const { byCheckpoint, violations } = consolidate(artifacts);
 
   for (const c of byCheckpoint) {
+    const reviewDecisions =
+      c.effectiveReviewDecisions ??
+      c.reviewDecisions.map((d) => ({
+        role: d.role,
+        declared: d.decision,
+        effective: d.decision,
+      }));
     const decs =
-      c.reviewDecisions.map((d) => `${d.role}=${d.decision}`).join(" · ") || "(sem reviews)";
+      reviewDecisions
+        .map((d) =>
+          d.effective && d.effective !== d.declared
+            ? `${d.role}=${d.declared} (effective=${d.effective})`
+            : `${d.role}=${d.declared}`
+        )
+        .join(" · ") || "(sem reviews)";
     const gate = c.gate ? c.gate.decision : "pending";
     logger.info(
       `• checkpoint ${c.checkpoint}: reviews [${decs}] · events ${c.reviewEventCount}${c.reviewScopeVerifications > 0 ? ` (${c.reviewScopeVerifications} review-verification)` : ""} · findings ${c.totalOpen} open / ${c.totalClosed} closed · gate ${gate}`

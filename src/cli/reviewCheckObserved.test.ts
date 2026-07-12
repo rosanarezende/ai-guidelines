@@ -126,6 +126,24 @@ describe("reviewCheck · observedReviewStates", () => {
     });
   });
 
+  it("event scope=findings não aprova review sem findings emitidos", () => {
+    const findingsEvent = event({
+      scope: "findings",
+      verifies: [],
+    });
+    delete (findingsEvent as { reviewFingerprint?: string }).reviewFingerprint;
+    delete (findingsEvent as { previousSubjectRef?: string }).previousSubjectRef;
+    const observed = observedReviewStates(
+      artifacts([review({ findingsEmitted: 0, findings: [] })], [findingsEvent]),
+      "co-enforcement"
+    );
+
+    expect(observed.technical_audit).toEqual({
+      latestSubjectRef: "1e95474..17b04f9",
+      decision: "changes_requested",
+    });
+  });
+
   it("event scope=findings parcial não substitui a decisão do review inteiro", () => {
     const findingsEvent = event({ scope: "findings", verifies: ["technical_audit#F1"] });
     delete (findingsEvent as { reviewFingerprint?: string }).reviewFingerprint;
@@ -162,6 +180,29 @@ describe("reviewCheck · observedReviewStates", () => {
       latestSubjectRef: "17b04f9..700a00c",
       decision: "changes_requested",
     });
+  });
+
+  it("review:check consolida decisão declarada e decisão efetiva derivada", () => {
+    const result = consolidate(
+      artifacts(
+        [review()],
+        [
+          event({
+            eventId: "EV1",
+            scope: "findings",
+            verifies: ["technical_audit#F1", "technical_audit#F2"],
+          }),
+        ]
+      )
+    );
+
+    expect(result.byCheckpoint[0]?.effectiveReviewDecisions).toEqual([
+      {
+        role: "technical_audit",
+        declared: "changes_requested",
+        effective: "approved",
+      },
+    ]);
   });
 
   it("review:check consolida verification de review sem violação", () => {
