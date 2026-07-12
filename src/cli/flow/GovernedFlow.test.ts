@@ -7,7 +7,7 @@ import { HumanGateDefinition } from "../decide/humanGate.js";
 import { OpenNextTopologyNodeDefinition } from "../decide/openNextTopologyNode.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 import { parseWorkPolicy } from "../../infrastructure/yaml/workPolicyReader.js";
-import { STEP_READINESS, deriveNextAction } from "../handoffFacts.js";
+import { STEP_READINESS, deriveNextAction } from "../../app/handoff/handoffFacts.js";
 import type { DecisionAvailability } from "../decide/model.js";
 
 const POLICY = parseWorkPolicy(`

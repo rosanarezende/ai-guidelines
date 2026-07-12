@@ -1,5 +1,5 @@
-import type { HandoffStep } from "../handoffFacts.js";
-import { STEP_READINESS } from "../handoffFacts.js";
+import type { HandoffStep } from "../../app/handoff/handoffFacts.js";
+import { STEP_READINESS } from "../../app/handoff/handoffFacts.js";
 import type { DecisionAvailability } from "../decide/model.js";
 import type { DecisionSnapshot } from "../decide/snapshot.js";
 import { findDecisionType } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";

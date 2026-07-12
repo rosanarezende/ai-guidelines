@@ -6,7 +6,7 @@ import {
   ReviewArtifact,
   ResolutionArtifact,
 } from "../infrastructure/yaml/reviewArtifactsReader.js";
-import { HandoffFacts } from "./handoffFacts.js";
+import { HandoffFacts } from "../app/handoff/handoffFacts.js";
 import {
   ReviewBriefInput,
   collectReviewBrief,

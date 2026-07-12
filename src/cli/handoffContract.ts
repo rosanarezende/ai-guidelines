@@ -15,7 +15,7 @@
  * semântica ⇒ mesmo fingerprint; mudança real em regra/bootstrap/contrato ⇒
  * fingerprint diferente ⇒ selo muda ⇒ recibo anterior vira stale-sources.
  */
-import { ApplicableRuleFact, fingerprintSource } from "./handoffFacts.js";
+import { ApplicableRuleFact, fingerprintSource } from "../app/handoff/handoffFacts.js";
 
 const AI_GUIDELINES_OPEN = "<AI_GUIDELINES>";
 const AI_GUIDELINES_CLOSE = "</AI_GUIDELINES>";

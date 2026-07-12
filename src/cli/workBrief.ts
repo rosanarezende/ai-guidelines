@@ -31,7 +31,7 @@ import {
   StepRef,
   StepResolution,
   resolveStepWork,
-} from "./handoffFacts.js";
+} from "../app/handoff/handoffFacts.js";
 
 // Re-export da derivação compartilhada (fonte: handoffFacts) para consumidores
 // que historicamente a importavam de `workBrief` (advanceStep, testes).

@@ -5,7 +5,7 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { HandoffFacts } from "../cli/handoffFacts.js";
+import { HandoffFacts } from "../app/handoff/handoffFacts.js";
 import {
   DecisionFinding,
   DecisionReviewLane,

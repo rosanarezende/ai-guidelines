@@ -1,6 +1,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { HandoffFacts, NextAction, NextActionKind, deriveNextAction } from "./handoffFacts.js";
+import {
+  HandoffFacts,
+  NextAction,
+  NextActionKind,
+  deriveNextAction,
+} from "../app/handoff/handoffFacts.js";
 import {
   WorkBriefInput,
   WorkFinding,
@@ -9,7 +14,7 @@ import {
   renderWorkBrief,
   resolveStepWork,
 } from "./workBrief.js";
-import { HandoffStep } from "./handoffFacts.js";
+import { HandoffStep } from "../app/handoff/handoffFacts.js";
 import { WorkMode, WorkPolicy, parseWorkPolicy } from "../infrastructure/yaml/workPolicyReader.js";
 
 const POLICY: WorkPolicy = parseWorkPolicy(

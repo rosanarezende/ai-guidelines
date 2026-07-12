@@ -49,7 +49,7 @@ import {
   fingerprintSource,
   parseCheckpointTasks,
   parseSteps,
-} from "./handoffFacts.js";
+} from "../app/handoff/handoffFacts.js";
 import {
   extractAiGuidelinesBlock,
   parsePackageIdentity,

@@ -47,7 +47,7 @@ import {
   legacyDeprecationWarnings,
   resolveReviewType,
 } from "../app/reviews/reviewRequirements.js";
-import { HandoffFacts } from "./handoffFacts.js";
+import { HandoffFacts } from "../app/handoff/handoffFacts.js";
 import {
   HandoffLoadSnapshot,
   HandoffOptions,

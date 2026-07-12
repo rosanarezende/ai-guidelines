@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { HumanGateDefinition } from "./humanGate.js";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { deriveHandoff, STEP_READINESS } from "../handoffFacts.js";
+import { deriveHandoff, STEP_READINESS } from "../../app/handoff/handoffFacts.js";
 import { evaluateReadyPreconditions, ReadyCheckSnapshot } from "../prReadyCheck.js";
 import { deriveWorkBrief } from "../workBrief.js";
 import { parseGate } from "../../infrastructure/yaml/reviewArtifactsReader.js";

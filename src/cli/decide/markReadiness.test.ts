@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
 import { MarkReadinessDefinition, markReadinessMarker } from "./markReadiness.js";
-import { HandoffStep, resolveStepWork } from "../handoffFacts.js";
+import { HandoffStep, resolveStepWork } from "../../app/handoff/handoffFacts.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 
 const def = new MarkReadinessDefinition();

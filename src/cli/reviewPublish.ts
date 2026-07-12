@@ -22,7 +22,7 @@ import * as path from "node:path";
 import { execFileSync } from "node:child_process";
 import { parseReview, parseReviewEvent } from "../infrastructure/yaml/reviewArtifactsReader.js";
 import { consolidate, discover } from "./reviewCheck.js";
-import { HandoffFacts } from "./handoffFacts.js";
+import { HandoffFacts } from "../app/handoff/handoffFacts.js";
 import { HandoffOptions } from "./handoff.js";
 import {
   ReviewBrief,

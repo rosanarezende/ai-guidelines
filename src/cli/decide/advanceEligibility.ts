@@ -20,7 +20,7 @@
  * concluídos (`[x]`) é o caso NORMAL de toda transição após a primeira — NÃO
  * torna a decisão `not-applicable` (esse era o bug estrutural).
  */
-import type { HandoffStep } from "../handoffFacts.js";
+import type { HandoffStep } from "../../app/handoff/handoffFacts.js";
 import type { DecisionAvailability } from "./model.js";
 
 /** Id canônico da decisão (mora no módulo-folha para ambos os lados reusarem sem ciclo). */

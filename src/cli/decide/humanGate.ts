@@ -27,7 +27,7 @@ import {
   findDecisionType,
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
-import { STEP_READINESS } from "../handoffFacts.js";
+import { STEP_READINESS } from "../../app/handoff/handoffFacts.js";
 import {
   deriveHumanGateAvailability,
   humanGateFactsFromDecisionSnapshot,

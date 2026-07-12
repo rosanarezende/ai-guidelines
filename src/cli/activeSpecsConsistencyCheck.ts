@@ -49,7 +49,11 @@ import {
 } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
-import { checkStepCoherence, findCheckpointTaskLine, parseSteps } from "./handoffFacts.js";
+import {
+  checkStepCoherence,
+  findCheckpointTaskLine,
+  parseSteps,
+} from "../app/handoff/handoffFacts.js";
 
 interface Logger {
   info: (msg: string) => void;

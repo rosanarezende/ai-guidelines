@@ -1,5 +1,5 @@
 import { deriveWorkBrief } from "../workBrief.js";
-import { deriveHandoff } from "../handoffFacts.js";
+import { deriveHandoff } from "../../app/handoff/handoffFacts.js";
 import { AdvanceStepDefinition } from "../decide/advanceStep.js";
 import { FinishStepDefinition } from "../decide/finishStep.js";
 import { HumanGateDefinition } from "../decide/humanGate.js";
@@ -8,7 +8,7 @@ import { OpenNextTopologyNodeDefinition } from "../decide/openNextTopologyNode.j
 import { deriveGovernedFlow, derivePrReadyFlow } from "./GovernedFlow.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 import { parseWorkPolicy } from "../../infrastructure/yaml/workPolicyReader.js";
-import type { HandoffFacts, HandoffStep } from "../handoffFacts.js";
+import type { HandoffFacts, HandoffStep } from "../../app/handoff/handoffFacts.js";
 import type { DecisionSnapshot } from "../decide/snapshot.js";
 import type { DecisionAvailability } from "../decide/model.js";
 

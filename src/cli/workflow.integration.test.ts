@@ -10,7 +10,7 @@ import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { ConfirmOptions, InputOptions, Prompts, SelectOptions } from "../app/ports/Prompts.js";
 import { Logger, runAdvancedOps, runContinue, runPublishState } from "./workflow.js";
 import { collectHandoffFacts } from "./handoff.js";
-import { deriveHandoff } from "./handoffFacts.js";
+import { deriveHandoff } from "../app/handoff/handoffFacts.js";
 import { createLoadReceipt, writeReceipt, receiptPath } from "./handoffReceipt.js";
 
 const WORKFLOW_INTEGRATION_TIMEOUT_MS = 30_000;

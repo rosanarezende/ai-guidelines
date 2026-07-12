@@ -24,7 +24,7 @@
  * Zero LLM; zero persistência; stdout é a superfície.
  */
 import { HandoffOptions, collectHandoffFacts, ghRemotePrCollector } from "./handoff.js";
-import { HANDOFF_CONTRACT_VERSION, deriveHandoff } from "./handoffFacts.js";
+import { HANDOFF_CONTRACT_VERSION, deriveHandoff } from "../app/handoff/handoffFacts.js";
 import { readReceiptText, reloadCommand, validateLoadReceipt } from "./handoffReceipt.js";
 
 export interface Logger {

@@ -21,7 +21,7 @@ import {
 } from "../domain/workflow/WorkflowState.js";
 import { PR_BODY_PROFILES, PrProfileName } from "../domain/workflow/PrProfileContract.js";
 import { validateProfileBody } from "./governance-pr-check.js";
-import { parseSteps } from "./handoffFacts.js";
+import { parseSteps } from "../app/handoff/handoffFacts.js";
 
 const ACTIVE_INDEX_REL = ".governance/runtime/specs/active.yml";
 const HISTORY_INDEX_REL = ".governance/runtime/specs/history.yml";

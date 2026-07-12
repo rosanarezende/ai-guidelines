@@ -21,7 +21,7 @@ import {
   HandoffNodeFact,
   HandoffStep,
   parseSteps,
-} from "../handoffFacts.js";
+} from "../../app/handoff/handoffFacts.js";
 import {
   HandoffLoadSnapshot,
   HandoffOptions,
