@@ -218,8 +218,14 @@ review-event→finding/review) · `belongs-to` (finding→review) · `resolves`
   repo-relativo + content-hash) — análogo de `evidenced-by`/`code-touchpoint`;
   id estável inspirado em `GlobalRef` (`type:governed-work-id/node-id@rev`); o
   snapshot inteiro fecha com `snapshot_fingerprint` = hash de serialização
-  canônica (mesmo padrão de `review_fingerprint`), com `schema_version` +
-  `generated-at` + `source-commit` (envelope de `context.json`, L7).
+  canônica (mesmo padrão de `review_fingerprint`) + `schema_version`.
+  **Ajuste da implementação (PR #46):** `generated-at`/`source-commit` foram
+  OMITIDOS na v1 — quebrariam o determinismo do par build/check (todo commit
+  re-stale-aria o snapshot sem mudança de conteúdo); a rastreabilidade temporal
+  vem dos content-hashes de `source_refs` (equivalente determinístico do
+  envelope L7). `supersedes` (decision→decision) permanece tipo PERMITIDO com
+  emissão ADIADA: o decision-brief não tem marcador machine-readable confiável
+  (prosa contém negações como "sem superseder"); candidato a campo explícito.
 - **Fora do snapshot (política/conduta):** trust laws, egress/threat-model,
   mutation-types do envelope, assisted-authoring laws, schema-policy.
 - **Invariante dura:** derived-only e regenerável offline; nenhum comando

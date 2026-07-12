@@ -9,6 +9,7 @@ import { main as runCoKnowledgeInventory } from "./coKnowledgeInventoryCheck.js"
 import { main as runConstraintsCheck } from "./constraintsCheck.js";
 import { main as runDisclosure } from "./disclosureRender.js";
 import { main as runGateDecidability } from "./gateDecidabilityCheck.js";
+import { main as runGovernanceGraph } from "./governanceGraph.js";
 import { main as runGovernedWorkMap } from "./governedWorkMap.js";
 import { main as runHandoffCheck } from "./handoffCheck.js";
 import { main as runInsightsCheck } from "./insightsCheck.js";
@@ -123,6 +124,8 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runGateDecidability(root);
     case "governed-work-map":
       return runGovernedWorkMap(args, root);
+    case "governance-graph":
+      return runGovernanceGraph(args, root);
     case "ruleset-check": {
       const mode = args.includes("--parity") ? "parity" : "producibility";
       const liveIdx = args.indexOf("--live");
