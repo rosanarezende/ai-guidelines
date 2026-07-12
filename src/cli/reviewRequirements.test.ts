@@ -330,6 +330,86 @@ describe("review_plan — recomendação do sistema + decisão humana [CO-4 r9]"
     expect(reviewPlanToNodeOverrides(plan)).toEqual({});
     expect(reviewPlanDecisionIssues(plan)[0].message).toContain("decisão humana pendente");
   });
+
+  it("dispensa de revalidação libera somente review required stale+approved e mantém nota rastreável", () => {
+    const p = policy("");
+    const { registry } = buildReviewTypeRegistry(p);
+    const plan = {
+      technical_audit: {
+        system_recommendation: "recommended" as const,
+        owner_decision: "required" as const,
+        actor: "owner",
+        reason: "PR exigiu auditoria técnica.",
+        revalidation: {
+          owner_decision: "waived" as const,
+          actor: "owner",
+          reason: "Delta posterior só fecha cleanup low/advisory já coberto por testes.",
+        },
+      },
+    };
+    const statuses = deriveEffectiveReviewStatuses({
+      registry,
+      policy: p,
+      ctx: CTX,
+      nodeOverrides: reviewPlanToNodeOverrides(plan),
+      reviewPlan: plan,
+      observed: { technical_audit: { latestSubjectRef: "abc1111", decision: "approved" } },
+      functionalHead: "def2222",
+    });
+    const ta = statuses.find((s) => s.typeId === "technical_audit")!;
+    expect(ta.requirement).toBe("required");
+    expect(ta.state).toBe("stale");
+    expect(ta.revalidationWaived).toBe(true);
+    expect(ta.blocking).toBe(false);
+    expect(ta.notes.join(" ")).toContain("revalidation waived by owner");
+  });
+
+  it("dispensa de revalidação não libera review required stale com decisão não aprovada", () => {
+    const p = policy("");
+    const { registry } = buildReviewTypeRegistry(p);
+    const plan = {
+      technical_audit: {
+        system_recommendation: "recommended" as const,
+        owner_decision: "required" as const,
+        actor: "owner",
+        reason: "PR exigiu auditoria técnica.",
+        revalidation: {
+          owner_decision: "waived" as const,
+          actor: "owner",
+          reason: "Tentativa inválida: review ainda não aprovada.",
+        },
+      },
+    };
+    const statuses = deriveEffectiveReviewStatuses({
+      registry,
+      policy: p,
+      ctx: CTX,
+      nodeOverrides: reviewPlanToNodeOverrides(plan),
+      reviewPlan: plan,
+      observed: {
+        technical_audit: { latestSubjectRef: "abc1111", decision: "changes_requested" },
+      },
+      functionalHead: "def2222",
+    });
+    const ta = statuses.find((s) => s.typeId === "technical_audit")!;
+    expect(ta.revalidationWaived).toBe(false);
+    expect(ta.blocking).toBe(true);
+  });
+
+  it("revalidação pending aparece como pendência de Ready", () => {
+    const issues = reviewPlanDecisionIssues({
+      technical_audit: {
+        system_recommendation: "recommended",
+        owner_decision: "required",
+        actor: "owner",
+        reason: "Review obrigatória neste nó.",
+        revalidation: {
+          owner_decision: "pending",
+        },
+      },
+    });
+    expect(issues[0].message).toContain("decisão humana de revalidação pendente");
+  });
 });
 
 describe("perfis de colaboração ≠ reviews semânticos [CO-4 r8]", () => {

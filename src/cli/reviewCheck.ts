@@ -46,6 +46,7 @@ import {
   resolveRequirement,
 } from "./reviewRequirements.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
+import type { NodeReviewPlanEntry } from "../domain/workflow/WorkflowState.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -65,6 +66,7 @@ export interface CheckpointTopologyContext {
   readonly nodeRole: string;
   readonly overrides?: Readonly<Record<string, NodeReviewOverride>>;
   /** Decisões humanas do plano situado do PR; aplicadas somente no Ready check. */
+  readonly reviewPlan?: Readonly<Record<string, NodeReviewPlanEntry>>;
   readonly reviewPlanOverrides?: Readonly<Record<string, NodeReviewOverride>>;
   readonly reviewPlanIssues?: readonly string[];
 }
@@ -529,6 +531,7 @@ export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: 
                 nodeId: node.id,
                 nodeRole: node.role,
                 ...(node.review_requirements ? { overrides: node.review_requirements } : {}),
+                ...(node.review_plan ? { reviewPlan: node.review_plan } : {}),
                 ...(Object.keys(reviewPlanOverrides).length > 0 ? { reviewPlanOverrides } : {}),
                 ...(planIssues.length > 0 ? { reviewPlanIssues: planIssues } : {}),
               };

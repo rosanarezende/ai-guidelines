@@ -18,7 +18,8 @@ function readyStatus(
   typeId: string,
   requirement: "disabled" | "optional" | "recommended" | "required",
   state: "missing" | "current" | "stale" | "in-progress",
-  decision: string | null = null
+  decision: string | null = null,
+  options: { readonly blocking?: boolean; readonly notes?: readonly string[] } = {}
 ) {
   return {
     typeId,
@@ -26,8 +27,11 @@ function readyStatus(
     requirement,
     state,
     decision,
-    blocking: requirement === "required" && !(state === "current" && decision === "approved"),
+    blocking:
+      options.blocking ??
+      (requirement === "required" && !(state === "current" && decision === "approved")),
     source: "repo-default",
+    notes: options.notes ?? [],
     errors: [] as string[],
   };
 }
@@ -277,6 +281,28 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
       },
     });
     expect(current.ok).toBe(true);
+  });
+
+  it("DADO review obrigatório stale+approved com revalidação dispensada QUANDO avalia ENTÃO avisa sem bloquear", () => {
+    const snapshot = validSnapshot();
+    const result = evaluateReadyPreconditions({
+      ...snapshot,
+      checkpoint: {
+        ...snapshot.checkpoint!,
+        reviewStatuses: [
+          readyStatus("technical_audit", "required", "stale", "approved", {
+            blocking: false,
+            notes: [
+              "revalidation waived by owner: cleanup low/advisory já coberto por testes e CI.",
+            ],
+          }),
+        ],
+      },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.failures).toEqual([]);
+    expect(result.warnings.join(" ")).toContain("revalidação foi dispensada");
+    expect(result.warnings.join(" ")).toContain("technical_audit");
   });
 
   it("optional/recommended stale ou missing NÃO bloqueiam Ready; recommended vira advisory", () => {

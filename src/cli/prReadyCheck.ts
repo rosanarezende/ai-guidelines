@@ -57,6 +57,7 @@ export interface ReadyCheckReviewStatus {
   readonly decision: string | null;
   readonly blocking: boolean;
   readonly source: string;
+  readonly notes?: ReadonlyArray<string>;
   /** Conflitos de policy (mesma prioridade, valores incompatíveis) — falham o check. */
   readonly errors: ReadonlyArray<string>;
 }
@@ -418,6 +419,7 @@ function collectCheckpoint(
           },
         }
       : {}),
+    ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
     observed: observedReviewStates(artifacts, cursor),
     functionalHead: freshness.effectiveFunctionalHead,
   });
@@ -436,6 +438,7 @@ function collectCheckpoint(
       decision: s.decision,
       blocking: s.blocking,
       source: s.requirementSource,
+      notes: s.notes,
       errors: s.errors,
     })),
   };

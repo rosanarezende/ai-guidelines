@@ -424,6 +424,12 @@ export function reviewPlanDecisionIssues(
         message: `${typeId}: decisão humana pendente (sistema recomendou ${entry.system_recommendation}).`,
       });
     }
+    if (entry.revalidation?.owner_decision === "pending") {
+      issues.push({
+        typeId,
+        message: `${typeId}: decisão humana de revalidação pendente (review já planejada como ${entry.owner_decision}).`,
+      });
+    }
   }
   return issues;
 }
@@ -667,6 +673,8 @@ export interface EffectiveReviewStatus {
   readonly decision: string | null;
   /** true ⟺ requirement=required E (state≠current OU decision≠approved). */
   readonly blocking: boolean;
+  /** true quando a owner dispensou explicitamente a revalidação de review stale+approved. */
+  readonly revalidationWaived: boolean;
   readonly notes: readonly string[];
   readonly errors: readonly string[];
 }
@@ -676,6 +684,8 @@ export interface EffectiveStatusInput {
   readonly policy: ReviewPolicy | null;
   readonly ctx: ApplicabilityContext;
   readonly nodeOverrides?: Readonly<Record<string, NodeReviewOverride>>;
+  /** Plano situado completo do nó; usado para decisões de revalidação. */
+  readonly reviewPlan?: Readonly<Record<string, NodeReviewPlanEntry>>;
   /** Estado observado por tipo (reviews/events da lane no checkpoint). */
   readonly observed: Readonly<
     Record<string, { latestSubjectRef: string | null; decision: string | null }>
@@ -708,8 +718,29 @@ export function deriveEffectiveReviewStatuses(
     });
     // Não aplicável ⇒ requirement não opera (disabled-equivalente no contexto).
     const effectiveLevel = applicability.value === "no" ? "disabled" : requirement.level;
-    const blocking =
-      effectiveLevel === "required" && !(state === "current" && observed.decision === "approved");
+    const revalidationDecision = input.reviewPlan?.[type.id]?.revalidation;
+    const revalidationWaived =
+      effectiveLevel === "required" &&
+      state === "stale" &&
+      observed.decision === "approved" &&
+      revalidationDecision?.owner_decision === "waived";
+    const notes = [...requirement.notes];
+    if (revalidationWaived) {
+      notes.push(
+        `revalidation waived${revalidationDecision.actor ? ` by ${revalidationDecision.actor}` : ""}: ${revalidationDecision.reason ?? "sem motivo declarado"}`
+      );
+    } else if (
+      effectiveLevel === "required" &&
+      state === "stale" &&
+      observed.decision === "approved" &&
+      revalidationDecision?.owner_decision === "required"
+    ) {
+      notes.push(
+        `revalidation required${revalidationDecision.actor ? ` by ${revalidationDecision.actor}` : ""}: ${revalidationDecision.reason ?? "sem motivo declarado"}`
+      );
+    }
+    const requiredSatisfied = state === "current" && observed.decision === "approved";
+    const blocking = effectiveLevel === "required" && !requiredSatisfied && !revalidationWaived;
     statuses.push({
       typeId: type.id,
       title: type.title,
@@ -722,7 +753,8 @@ export function deriveEffectiveReviewStatuses(
       state,
       decision: observed.decision,
       blocking,
-      notes: requirement.notes,
+      revalidationWaived,
+      notes,
       errors: requirement.errors,
     });
   }

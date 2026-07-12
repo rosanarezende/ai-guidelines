@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-07-11 — **`[DEC-0024-G29]` registrada**: eventos de verificação `scope: findings` podem resolver a decisão efetiva de uma lane de review quando cobrem todos os findings emitidos por aquela lane, sem reescrever o review original. Antes — **`[DEC-0024-G28]` registrada**: temas estruturais antigos (`G01`, `G03`, `G05`, `F-014`) deixam de ficar implícitos e passam a ter disposição explícita entre o PR #45, `internal-architecture-refactor-ddd-bdd`, `broad-flow-falsification` e `continuation-review-human-gate`.
+> Última atualização: 2026-07-12 — **`[DEC-0024-G30]` registrada**: reviews obrigatórias já aprovadas podem ter revalidação dispensada por decisão humana situada quando um delta posterior é apenas cleanup/advisory; a lane continua `stale` como fato histórico, mas deixa de bloquear Ready com warning explícito. Antes — **`[DEC-0024-G29]` registrada**: eventos de verificação `scope: findings` podem resolver a decisão efetiva de uma lane de review quando cobrem todos os findings emitidos por aquela lane, sem reescrever o review original.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -854,6 +854,40 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G30] Dispensa governada de revalidação para review obrigatória stale+approved
+
+**Pergunta:** Quando uma Technical Audit ou Architectural Review obrigatória já está efetivamente `approved`, mas um delta posterior de baixa criticidade deixa a lane `stale`, o framework deve exigir sempre uma nova rodada completa de review, ou a owner pode dispensar a revalidação daquele delta com justificativa explícita?
+
+**Modo de gate:** `aceitação` <!-- decisão de processo/review da owner, 2026-07-12, após a própria higienização de findings low/advisory do PR #45 expor excesso de ritual em revalidar TA/AR completas sem novo risco proporcional. -->
+
+**Contexto:** A TA e a AR do PR #45 cumpriram seu papel: emitiram achados, os achados foram corrigidos/verificados, e a tese arquitetural foi aprovada. Em seguida, a própria limpeza de pontos low/advisory e a melhoria da máquina de review avançaram a cabeça funcional. Pela regra anterior, qualquer avanço funcional tornava reviews obrigatórias `stale` e bloqueava Ready até nova TA/AR, mesmo quando o delta posterior era explicitamente aceito pela owner como baixo risco e coberto por testes/CI. Isso transformava o controle em ritual: correto na forma, mas pouco útil na substância.
+
+**Decisão (Resolved):**
+
+- O fato histórico não é alterado: uma review que ficou `stale` continua sendo reportada como `stale`.
+- A decisão declarada no review original continua append-only e imutável.
+- `state.yml § topology.prs.active[].review_plan.<type>.revalidation` passa a modelar a decisão humana situada sobre revalidar ou não uma lane obrigatória já aprovada.
+- `revalidation.owner_decision` aceita `pending`, `waived` ou `required`.
+- `pending` bloqueia Ready por honestidade: se a owner ainda não decidiu se precisa revalidar, o PR não deve seguir.
+- `waived` exige `actor` e `reason`; sem ambos, o estado é inválido.
+- `waived` só remove o bloqueio quando a lane é `required`, está `stale` e a decisão efetiva observada é `approved`.
+- `waived` **não** remove bloqueio de review ausente, review `changes_requested`, review `blocked`, erro de policy ou finding critical/high sem disposição.
+- `required` preserva o bloqueio normal: se a owner decide que aquele delta precisa nova TA/AR, `pr-ready:check` continua exigindo revalidação.
+- `pr-ready:check` deve emitir warning quando um review obrigatório stale+approved foi dispensado, para o PR não mentir que a lane está current.
+
+**Consequências práticas:**
+
+- O framework passa a distinguir controle real de cerimônia: deltas low/advisory podem ser aceitos por decisão humana explícita sem reabrir uma auditoria inteira.
+- A trilha continua auditável: quem dispensou, por quê, e qual review ficou stale permanecem no estado governado.
+- O Human Gate continua informado: a ausência de bloqueio não apaga o warning nem transforma stale em current.
+- Reviews obrigatórias continuam fortes para riscos reais: falta de review, decisão não aprovada e achados bloqueantes seguem impedindo Ready.
+
+**O que NÃO está sendo decidido:** pular TA/AR obrigatórias iniciais; permitir que agente dispense revisão sozinho; transformar `waived` em aprovação técnica; esconder stale; reduzir exigência para critical/high; declarar Ready; exercer Human Gate; fazer merge.
+
+**Status:** Resolved (2026-07-12) / @rosanarezende — revalidação de review obrigatória stale+approved pode ser dispensada por decisão humana situada, com warning e sem fingir freshness.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -936,6 +970,8 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G26`        | artefatos versionados de PR sob `pull-requests/pr-N/`                      | **Decidido** — § 1 (Resolved 2026-07-10, owner); PR body, assets e continuações específicas passam a morar no contêiner versionado do PR, sem virar SSOT de topologia                        |
 | `G27`        | fluxo governado de continuação de PR                                       | **Decidido** — § 1 (Resolved 2026-07-11, owner); `continuation:check -> continuation:prepare -> continuation:create-pr`, com confirmação humana antes de Draft PR                            |
 | `G28`        | disposição de temas estruturais residuais                                  | **Decidido** — § 1 (Resolved 2026-07-11, owner); `G01/G03/G05/F-014` roteados explicitamente para #45, refactor, falsificação e revisão final sem debt silencioso                            |
+| `G29`        | decisão efetiva de lane por verificação completa de findings               | **Decidido** — § 1 (Resolved 2026-07-11, owner); eventos `scope: findings` aprovados e completos podem resolver a decisão efetiva sem reescrever o review original                           |
+| `G30`        | dispensa governada de revalidação de review stale+approved                 | **Decidido** — § 1 (Resolved 2026-07-12, owner); `review_plan.<type>.revalidation` permite `pending/waived/required` com actor+reason e warning no Ready check                               |
 
 ---
 
@@ -969,6 +1005,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G27]` — Resolved 2026-07-11 / @rosanarezende
 - [x] `[DEC-0024-G28]` — Resolved 2026-07-11 / @rosanarezende
 - [x] `[DEC-0024-G29]` — Resolved 2026-07-11 / @rosanarezende
+- [x] `[DEC-0024-G30]` — Resolved 2026-07-12 / @rosanarezende
 
 ---
 

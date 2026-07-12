@@ -50,6 +50,20 @@ export type NodeReviewPlanRecommendation = "not_needed" | "optional" | "recommen
 
 export type NodeReviewPlanDecision = "pending" | "waived" | "optional" | "recommended" | "required";
 
+export type NodeReviewRevalidationDecision = "pending" | "waived" | "required";
+
+/**
+ * Decisão SITUADA sobre revalidação quando uma review obrigatória já aprovada
+ * fica stale por um delta posterior. A dispensa nunca transforma stale em
+ * current; apenas declara que a owner aceitou não repetir a review inteira
+ * para aquele delta.
+ */
+export interface NodeReviewPlanRevalidation {
+  readonly owner_decision: NodeReviewRevalidationDecision;
+  readonly reason?: string;
+  readonly actor?: string;
+}
+
 /**
  * Plano SITUADO de review para um PR/nó. A automação recomenda; a owner decide.
  * A decisão é projetada para `review_requirements` efetivos, mas preserva a
@@ -60,6 +74,7 @@ export interface NodeReviewPlanEntry {
   readonly owner_decision: NodeReviewPlanDecision;
   readonly reason?: string;
   readonly actor?: string;
+  readonly revalidation?: NodeReviewPlanRevalidation;
 }
 
 export interface PrTopologyNode {

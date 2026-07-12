@@ -38,10 +38,13 @@ const ALLOWED_NODE_REVIEW_PLAN_KEYS = [
   "owner_decision",
   "reason",
   "actor",
+  "revalidation",
 ] as const;
+const ALLOWED_NODE_REVIEW_REVALIDATION_KEYS = ["owner_decision", "reason", "actor"] as const;
 const REQUIREMENT_LEVELS = ["disabled", "optional", "recommended", "required"] as const;
 const REVIEW_PLAN_RECOMMENDATIONS = ["not_needed", "optional", "recommended", "required"] as const;
 const REVIEW_PLAN_DECISIONS = ["pending", "waived", "optional", "recommended", "required"] as const;
+const REVIEW_PLAN_REVALIDATION_DECISIONS = ["pending", "waived", "required"] as const;
 
 /** Overrides situados por tipo de review do nó (CO-4, rodada 8). */
 function parseNodeReviewRequirements(
@@ -132,12 +135,59 @@ function parseNodeReviewPlan(raw: unknown, where: string): Record<string, NodeRe
         `${where}.${typeId}: owner_decision "${o.owner_decision}" requires actor and reason`
       );
     }
+    let revalidation: NodeReviewPlanEntry["revalidation"] | undefined;
+    if (o.revalidation !== undefined) {
+      if (
+        o.revalidation === null ||
+        typeof o.revalidation !== "object" ||
+        Array.isArray(o.revalidation)
+      ) {
+        throw new WorkflowStateParseError(`${where}.${typeId}.revalidation must be a mapping`);
+      }
+      const r = o.revalidation as Record<string, unknown>;
+      for (const key of Object.keys(r)) {
+        if (!(ALLOWED_NODE_REVIEW_REVALIDATION_KEYS as readonly string[]).includes(key)) {
+          throw new WorkflowStateParseError(
+            `${where}.${typeId}.revalidation: unexpected key "${key}" (allowed: ${ALLOWED_NODE_REVIEW_REVALIDATION_KEYS.join(", ")})`
+          );
+        }
+      }
+      if (
+        typeof r.owner_decision !== "string" ||
+        !(REVIEW_PLAN_REVALIDATION_DECISIONS as readonly string[]).includes(r.owner_decision)
+      ) {
+        throw new WorkflowStateParseError(
+          `${where}.${typeId}.revalidation.owner_decision must be one of: ${REVIEW_PLAN_REVALIDATION_DECISIONS.join("|")}`
+        );
+      }
+      if (r.reason !== undefined && typeof r.reason !== "string") {
+        throw new WorkflowStateParseError(
+          `${where}.${typeId}.revalidation.reason must be a string`
+        );
+      }
+      if (r.actor !== undefined && typeof r.actor !== "string") {
+        throw new WorkflowStateParseError(`${where}.${typeId}.revalidation.actor must be a string`);
+      }
+      if (r.owner_decision !== "pending" && (!r.actor || !r.reason)) {
+        throw new WorkflowStateParseError(
+          `${where}.${typeId}.revalidation: owner_decision "${r.owner_decision}" requires actor and reason`
+        );
+      }
+      revalidation = {
+        owner_decision: r.owner_decision as NonNullable<
+          NodeReviewPlanEntry["revalidation"]
+        >["owner_decision"],
+        ...(r.reason !== undefined ? { reason: r.reason } : {}),
+        ...(r.actor !== undefined ? { actor: r.actor } : {}),
+      };
+    }
     result[typeId] = {
       system_recommendation:
         o.system_recommendation as NodeReviewPlanEntry["system_recommendation"],
       owner_decision: o.owner_decision as NodeReviewPlanEntry["owner_decision"],
       ...(o.reason !== undefined ? { reason: o.reason } : {}),
       ...(o.actor !== undefined ? { actor: o.actor } : {}),
+      ...(revalidation ? { revalidation } : {}),
     };
   }
   return result;

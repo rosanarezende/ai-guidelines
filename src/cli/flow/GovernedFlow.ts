@@ -156,6 +156,7 @@ export interface PrReadyFlowFacts {
       readonly decision: string | null;
       readonly blocking: boolean;
       readonly source: string;
+      readonly notes?: ReadonlyArray<string>;
       readonly errors: ReadonlyArray<string>;
     }>;
   } | null;
@@ -715,6 +716,11 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
                 : s.state;
         failures.push(
           `review OBRIGATÓRIO "${s.typeId}" (${s.source}) ${why} no checkpoint "${checkpoint.id}".`
+        );
+      } else if (s.requirement === "required" && s.state === "stale" && s.decision === "approved") {
+        const note = (s.notes ?? []).find((n) => n.includes("revalidation waived"));
+        warnings.push(
+          `review obrigatório "${s.typeId}" está stale, mas a revalidação foi dispensada por decisão governada${note ? ` (${note})` : ""}; não bloqueia Ready/Human Gate.`
         );
       } else if (
         s.requirement === "recommended" &&

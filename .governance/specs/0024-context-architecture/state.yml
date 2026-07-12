@@ -216,11 +216,19 @@ topology:
             owner_decision: required
             actor: owner
             reason: "PR #45 altera taxonomia, review, readiness e preservacao da incubacao Guilda; a Technical Audit foi solicitada e deve estar current+approved antes de Ready/Human Gate."
+            revalidation:
+              owner_decision: waived
+              actor: owner
+              reason: "As correcoes posteriores a TA/AR fecham cleanup low/advisory com testes e CI; nova rodada completa de TA para esse delta seria ritual, nao controle adicional. A review permanece stale na leitura historica, mas nao bloqueia Ready por decisao situada."
           architectural_review:
             system_recommendation: recommended
             owner_decision: required
             actor: owner
             reason: "PR #45 altera arquitetura de governanca, mapa vivo, casa de PR e contrato de revisao; Architectural Review deve validar a direcao antes do Human Gate."
+            revalidation:
+              owner_decision: waived
+              actor: owner
+              reason: "As correcoes posteriores a AR sao limpeza/adaptacao de findings low e nao alteram a tese arquitetural aprovada; nova AR completa para esse delta seria ritual, nao controle adicional. A review permanece stale na leitura historica, mas nao bloqueia Ready por decisao situada."
           security_review:
             system_recommendation: optional
             owner_decision: waived
