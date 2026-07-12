@@ -1,0 +1,52 @@
+checkpoint: "checkpoint-artifact-taxonomy-and-model-review-contract"
+role: technical_audit
+event_id: EV2
+kind: verification
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+scope: findings
+verifies:
+  - technical_audit#F1
+  - technical_audit#F2
+  - technical_audit#F3
+  - technical_audit#F4
+  - technical_audit#F5
+subject_ref: "2fe8ea54..61951e30"
+audit_evidence:
+  coverage:
+    - src/cli/reviewCheck.ts
+    - src/cli/reviewCheckObserved.test.ts
+    - src/cli/changedValidation.ts
+    - src/cli/changedValidation.test.ts
+    - src/cli/governedWorkMap.ts
+    - .governance/specs/0024-context-architecture/assets/governed-work-map.html
+    - .governance/specs/0024-context-architecture/decision-brief.md
+  scope: "Revalidacao do delta funcional 2fe8ea54..61951e30 (o EV1 cobriu ate
+    2fe8ea54; a cabeca funcional avancou para 61951e30 via 3f89c2bd + 61951e30;
+    b7b579b5 e review-only e NAO avanca a cabeca funcional, confirmado pelo
+    briefing). Delta funcional: (a) 3f89c2bd fia governed-work-map:check no
+    changedValidation quando os inputs do mapa mudam; (b) 61951e30 registra
+    DEC-0024-G29 e implementa a decisao efetiva de lane por scope:findings em
+    observedReviewStates. Verificado por leitura dos diffs, execucao dos testes
+    alvo (jest reviewCheckObserved + changedValidation + reviewRequirements: 50
+    passed) e dos checks governados."
+  basis: "FATO: nenhum arquivo do delta toca body-sync (F1), collectVersionedPr
+    BodyReasons em prReadyCheck.ts (F2), o arquivo da incubacao (F3) ou
+    tracker.md (F4); os quatro fixes permanecem intactos (pr-body:check verde;
+    grep de anonimizacao limpo; tracker nao-SSOT). INTERPRETACAO: o delta
+    implementa a resolucao de F5 — DEC-0024-G29 fecha o deadlock que o proprio
+    plano situado de revisoes (F5) havia criado. A implementacao bate com a
+    decisao: allReviewFindings Approved exige TODOS os findings emitidos com
+    evento aprovado (cobertura parcial nao aprova; evento posterior nao-aprovado
+    reabre; review sem findings nao aprova por scope:findings via guard
+    findings.length===0; review original permanece imutavel — derivacao sobre
+    ledger append-only). Sem regressao: validate completo exit 0 na cabeca
+    funcional 61951e30 (rodada da AR), review:check integridade ok em 26 reviews
+    / 11 eventos, 50 testes alvo verdes. Ressalva reportada na AR (nao reaberta
+    aqui): o guard de review sem findings perdeu cobertura de teste dedicada
+    (AR#F1, low). Conclusao: os findings F1-F5 seguem resolvidos em 61951e30 e o
+    delta nao introduz regressao — TA revalidada e efetivamente approved
+    cobrindo a cabeca funcional atual."
+event_fingerprint: d8538041b9ba
