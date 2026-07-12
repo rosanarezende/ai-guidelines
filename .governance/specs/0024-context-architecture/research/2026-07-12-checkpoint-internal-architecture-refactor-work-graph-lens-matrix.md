@@ -243,3 +243,36 @@ review-event→finding/review) · `belongs-to` (finding→review) · `resolves`
 - **Invariante dura:** derived-only e regenerável offline; nenhum comando
   decisório LÊ o snapshot como fonte (DEC-G23; `governed-work-map:check` é o
   precedente do par build/check).
+
+## 9. Disposição item a item da matriz Guilda (QRD → estado atual)
+
+> Fecha a obrigação de `[DEC-0024-G28]` ANTES da review final: cada linha da
+> `GUILDA-QRD-PRESERVATION-MATRIX.md` com a "Ação no ai-guidelines" verificada.
+> Estados: **APLICADA** (contrato/código vivo) · **EVIDÊNCIA** (arquivo
+> histórico, sem ação pendente) · **ROTEADA** (casa explícita adiante) ·
+> **MIGRADA** (repo Guilda). A review final verifica esta tabela, não uma frase.
+
+| QRDs  | Ação pedida no ai-guidelines                                              | Estado              | Verificação                                                                                         |
+| ----- | ------------------------------------------------------------------------- | ------------------- | --------------------------------------------------------------------------------------------------- |
+| 01-07 | Evidência para kinds de review/dogfood/inventory + coverage advisory      | APLICADA            | kinds no `artifact-taxonomy.yml` (#45); cobertura advisory no `artifact-kind:check`                 |
+| 08-11 | Taxonomia separa fonte autoritativa/policy/projection/evidência           | APLICADA            | `authority_order` (#45); fronteiras por autoridade nos guards de camada (#46)                       |
+| 12-16 | Rotular mapas/assets como projection; derived-only como critério          | APLICADA            | rotulagem (#45); snapshot derived-only + `governance-graph:check` no validate (#46)                 |
+| 17-23 | `integration-catalog` como evidence/importer/projection/channel, sem SSOT | APLICADA            | catálogo versionado; nenhuma ferramenta externa promovida a SSOT                                    |
+| 24-26 | Kinds sem autoridade decisória para IA (prompt/research/gap/inventory)    | APLICADA            | kinds advisory (#45); lei assisted-authoring aplicada nos briefings (`flow` projeta; humano decide) |
+| 27-29 | Spikes/visual prompts classificados; asset visual nunca SSOT              | APLICADA            | `visual-prompts/` versionados; assets não-autoridade (#45)                                          |
+| 30-33 | Refinar catálogos de adapter-kind; presentation não altera modelo         | ROTEADA             | consumidores reais de projeção = critério de `broad-flow-falsification` (G05, DEC-G28)              |
+| 34-35 | Contratos de teste como evidência de lifecycle/coverage                   | APLICADA            | BDD de mantenedor no #46 (`LayerBoundaries`, `SurfaceParity`, conformance do snapshot)              |
+| 36-40 | Registrar disposição; research madura; grafos read-model; OSV evidence    | APLICADA            | DISPOSITION+matriz (#45); `research-library` + index; snapshot read-model; workflow OSV vivo        |
+| 41-46 | Separar identity/supply-chain/telemetry de governance artifacts           | APLICADA + ROTEADA  | separação conceitual no #45/§8.3 ("fora do snapshot: política"); input hostil → falsificação (L9)   |
+| 47    | Naming/marca como prompt/projection classificados                         | EVIDÊNCIA           | prompts/assets preservados com kind; marca vive no repo Guilda                                      |
+| 48    | Manter DISPOSITION/matriz/tombstone; remover build/testes Guilda          | APLICADA            | tombstone + archive + zero workspaces/scripts Guilda (auditado no TA do #45)                        |
+| 49    | Preservar GitHub-host no conceito; não implementar aqui                   | EVIDÊNCIA + ROTEADA | conceito no model.yml; cross-repo = spike futuro (DEC-G23)                                          |
+| 50    | Portal policy como caso de separação policy/identity × governança         | APLICADA            | §8.3 "fora do snapshot (política/conduta)"                                                          |
+| 51    | Dogfood da plataforma = trabalho NOVO, não continuação silenciosa         | ROTEADA             | nomeado aqui como trabalho futuro entre repos; não entra nos checkpoints da Frente atual            |
+| 52    | Impedir que tasks exijam validar desktop/v1                               | APLICADA            | tasks/body do #45-#46 negam readiness de produto; fronteira no tombstone                            |
+| 53    | Completar arquivo/tombstone/PR body/plano do corte                        | APLICADA            | fechado no #45 (Human Gate approved)                                                                |
+
+**Complementos por lente e por entidade normativa:** §2 (lentes L1-L9), §§5-7
+(model.yml v3). **G01 operacional:** disposição própria em
+[`2026-07-12-checkpoint-internal-architecture-refactor-g01-operational-grammar-disposition.md`](./2026-07-12-checkpoint-internal-architecture-refactor-g01-operational-grammar-disposition.md)
+(com minuta de DEC para a owner).
