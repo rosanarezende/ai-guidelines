@@ -2,7 +2,10 @@ import {
   ReviewArtifact,
   ReviewEventArtifact,
 } from "../infrastructure/yaml/reviewArtifactsReader.js";
-import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
+import {
+  buildReviewTypeRegistry,
+  deriveEffectiveReviewStatuses,
+} from "../app/reviews/reviewRequirements.js";
 import { consolidate, observedReviewStates, SpecArtifacts } from "./reviewCheck.js";
 
 function finding(id: string) {

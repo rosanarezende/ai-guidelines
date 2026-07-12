@@ -25,7 +25,7 @@ import {
   resolveRequirement,
   resolveReviewType,
   isRequirementLevel,
-} from "./reviewRequirements.js";
+} from "../app/reviews/reviewRequirements.js";
 import { loadReviewGovernance } from "./reviewBrief.js";
 import { discover, observedReviewStates } from "./reviewCheck.js";
 import { collectFunctionalFreshness } from "./reviewFreshness.js";

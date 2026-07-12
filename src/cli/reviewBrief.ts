@@ -46,7 +46,7 @@ import {
   deriveEffectiveReviewStatuses,
   legacyDeprecationWarnings,
   resolveReviewType,
-} from "./reviewRequirements.js";
+} from "../app/reviews/reviewRequirements.js";
 import { HandoffFacts } from "./handoffFacts.js";
 import {
   HandoffLoadSnapshot,

@@ -27,12 +27,12 @@ import {
   ReviewRequirementRule,
   ReviewRequirementLevel,
   REQUIREMENT_LEVELS,
-} from "../infrastructure/yaml/reviewPolicyReader.js";
+} from "../../infrastructure/yaml/reviewPolicyReader.js";
 import type {
   NodeReviewPlanDecision,
   NodeReviewPlanEntry,
   NodeReviewRequirementOverride,
-} from "../domain/workflow/WorkflowState.js";
+} from "../../domain/workflow/WorkflowState.js";
 
 // ── Catálogo ─────────────────────────────────────────────────────────────────
 

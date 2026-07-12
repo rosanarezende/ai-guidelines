@@ -28,7 +28,10 @@ import { isInsightGraduationCandidate } from "../domain/insight/InsightMaturatio
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
 import { GhSnapshotCollector, detectRepo } from "./prReadyCheck.js";
-import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
+import {
+  buildReviewTypeRegistry,
+  deriveEffectiveReviewStatuses,
+} from "../app/reviews/reviewRequirements.js";
 import { collectFunctionalFreshness } from "./reviewFreshness.js";
 import {
   HANDOFF_CONTRACT_VERSION,

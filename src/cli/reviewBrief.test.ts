@@ -14,7 +14,7 @@ import {
   normalizeRole,
   runReviewBrief,
 } from "./reviewBrief.js";
-import { buildReviewTypeRegistry } from "./reviewRequirements.js";
+import { buildReviewTypeRegistry } from "../app/reviews/reviewRequirements.js";
 
 // ── Fixture pura (estado análogo ao PR #41) ──────────────────────────────────
 

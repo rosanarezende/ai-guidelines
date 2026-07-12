@@ -18,7 +18,7 @@ import {
   reviewPlanDecisionIssues,
   reviewPlanToNodeOverrides,
 } from "./reviewRequirements.js";
-import { ReviewPolicy, parseReviewPolicy } from "../infrastructure/yaml/reviewPolicyReader.js";
+import { ReviewPolicy, parseReviewPolicy } from "../../infrastructure/yaml/reviewPolicyReader.js";
 
 const MINIMAL_PROFILES = `
 active_profile: solo

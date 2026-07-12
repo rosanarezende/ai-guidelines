@@ -27,7 +27,10 @@ import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflo
 import { runGovernancePrCheck } from "./governance-pr-check.js";
 import { normalizePrBody, resolveVersionedPrBodyPath } from "./prBodyVersioned.js";
 import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
-import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
+import {
+  buildReviewTypeRegistry,
+  deriveEffectiveReviewStatuses,
+} from "../app/reviews/reviewRequirements.js";
 import { collectFunctionalFreshness } from "./reviewFreshness.js";
 import { derivePrReadyFlow, prReadyFlowFactsFromReadySnapshot } from "./flow/GovernedFlow.js";
 
