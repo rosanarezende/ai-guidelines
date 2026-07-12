@@ -73,3 +73,45 @@ resolutions:
       - "npm run test:ts -- --runTestsByPath src/cli/prReadyCheck.test.ts src/infrastructure/yaml/workflowStateSerializer.test.ts src/cli/reviewRequirements.test.ts src/cli/flow/GovernedFlow.test.ts"
       - "npm run review:check"
       - "npm run validate"
+
+  - finding: architectural_review#F1
+    action: fixed
+    ref: 05d10119
+    human_context:
+      resolution_summary: "O guard que impede aprovacao por scope=findings em review sem findings voltou a ter regressao explicita."
+    evidence: >
+      `reviewCheckObserved.test.ts` agora cobre o caso em que um evento
+      `scope: findings` tenta aprovar uma lane cujo review original nao emitiu
+      findings. A decisao efetiva permanece `changes_requested`, preservando o
+      guard de DEC-0024-G29: verificacao por findings so pode aprovar quando ha
+      findings reais e todos foram verificados.
+    tests:
+      - "npm run test:ts -- --runTestsByPath src/cli/reviewCheckObserved.test.ts src/cli/reviewFreshness.test.ts src/cli/reviewCheck.test.ts"
+
+  - finding: architectural_review#F2
+    action: fixed
+    ref: 05d10119
+    human_context:
+      resolution_summary: "O resumo do review:check passou a expor decisao declarada e decisao efetiva quando elas divergem."
+    evidence: >
+      `consolidate()` agora projeta `effectiveReviewDecisions` por checkpoint, e
+      a saida humana do `review:check` imprime `role=declarada
+      (effective=derivada)` quando um ledger de eventos altera a decisao efetiva
+      sem reescrever o review original. Isso preserva o append-only e remove a
+      ambiguidade operacional apontada pela Architectural Review.
+    tests:
+      - "npm run test:ts -- --runTestsByPath src/cli/reviewCheckObserved.test.ts src/cli/reviewFreshness.test.ts src/cli/reviewCheck.test.ts"
+
+  - finding: architectural_review#F3
+    action: fixed
+    ref: 05d10119
+    human_context:
+      resolution_summary: "A regra de freshness que diferencia commit funcional de publicacao review-only ficou explicitamente protegida por regressao."
+    evidence: >
+      `reviewFreshness.test.ts` agora nomeia o caso estrutural da AR: um fix na
+      propria maquina de review, como `src/cli/reviewCheck.ts`, nao e
+      review-only e deve reabrir freshness; ja a publicacao posterior de
+      artefato em `reviews/` continua review-only e nao desloca a cabeca
+      funcional auditavel.
+    tests:
+      - "npm run test:ts -- --runTestsByPath src/cli/reviewCheckObserved.test.ts src/cli/reviewFreshness.test.ts src/cli/reviewCheck.test.ts"
