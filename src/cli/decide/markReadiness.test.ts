@@ -294,4 +294,18 @@ describe("mark-readiness · efeito governado [decide]", () => {
     expect(projected.kind).toBe("transition");
     if (projected.kind === "transition") expect(projected.transition.activate.id).toBe("CO-10.2");
   });
+
+  it("reconhece linha de checkpoint semântico com prefixo Checkpoint", () => {
+    const md = [
+      "- [/] **Checkpoint artifact-taxonomy-and-model-review-contract** — implementação robusta.",
+      "- [ ] **internal-architecture-refactor-ddd-bdd** — próximo.",
+    ].join("\n");
+
+    const edited = markReadinessMarker(md, "artifact-taxonomy-and-model-review-contract");
+
+    expect(edited.ok).toBe(true);
+    expect(edited.text).toContain(
+      "**Checkpoint artifact-taxonomy-and-model-review-contract** `readiness: ready-for-transition`"
+    );
+  });
 });

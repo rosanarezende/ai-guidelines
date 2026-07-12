@@ -59,7 +59,7 @@ export function markReadinessMarker(
   activeId: string
 ): { text: string; ok: boolean; error: string | null } {
   const lineRe = new RegExp(
-    `(^[ \\t]*-[ \\t]*\\[/\\][ \\t]*\\*\\*${escapeRe(activeId)}\\b[^\\n]*?\\*\\*)([^\\n]*)$`,
+    `(^[ \\t]*-[ \\t]*\\[/\\][ \\t]*\\*\\*(?:Checkpoint[ \\t]+)?${escapeRe(activeId)}\\b[^\\n]*?\\*\\*)([^\\n]*)$`,
     "m"
   );
   const match = lineRe.exec(tasksMd);
