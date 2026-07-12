@@ -255,6 +255,20 @@ topology:
         sequence: 13
         checkpoints:
           - checkpoint-internal-architecture-refactor-ddd-bdd # PR #46: refactor DDD/BDD behavior-preserving + gramatica operacional G01 + contrato do graph snapshot derivado
+        # Plano situado de revisoes (DEC-0024-G29): o sistema RECOMENDA; a decisao e
+        # da owner. `pending` bloqueia Ready por honestidade sem tornar nada
+        # obrigatorio automaticamente — a owner grava a decisao final (com
+        # actor+reason) quando escolher.
+        review_plan:
+          technical_audit:
+            system_recommendation: recommended
+            owner_decision: pending
+          architectural_review:
+            system_recommendation: recommended
+            owner_decision: pending
+          security_review:
+            system_recommendation: optional
+            owner_decision: pending
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
