@@ -260,3 +260,86 @@ describe("governanceGraphSnapshot · contrato §8", () => {
     }
   });
 });
+
+describe("governanceGraphSnapshot · fechamentos pós-implementação (§8.3)", () => {
+  const ACTIVE_YML = (updatedAt: string, branch = "feat/spec-0099-alpha-node"): string =>
+    [
+      "version: 1",
+      "active_specs:",
+      '  - id: "0099"',
+      `    branch: ${branch}`,
+      `    updated_at: ${updatedAt}`,
+    ].join("\n");
+
+  function inputWithActive(updatedAt: string, branch?: string): GovernanceGraphInput {
+    const base = makeInput();
+    const activePath = ".governance/runtime/specs/active.yml";
+    return {
+      ...base,
+      projections: [{ id: "active-specs", path: activePath }],
+      files: [...base.files, { path: activePath, content: ACTIVE_YML(updatedAt, branch) }],
+    };
+  }
+
+  it("churn: mudar SÓ updated_at do active.yml NÃO muda o fingerprint", () => {
+    const a = deriveGovernanceGraphSnapshot(inputWithActive("2026-07-12T10:00:00.000-03:00"));
+    const b = deriveGovernanceGraphSnapshot(inputWithActive("2026-07-12T23:59:59.999-03:00"));
+    expect(a.snapshot_fingerprint).toBe(b.snapshot_fingerprint);
+  });
+
+  it("drift real: mudar campo SEMÂNTICO do active.yml muda o fingerprint", () => {
+    const a = deriveGovernanceGraphSnapshot(inputWithActive("2026-07-12T10:00:00.000-03:00"));
+    const b = deriveGovernanceGraphSnapshot(
+      inputWithActive("2026-07-12T10:00:00.000-03:00", "feat/spec-0099-omega-node")
+    );
+    expect(a.snapshot_fingerprint).not.toBe(b.snapshot_fingerprint);
+  });
+
+  it("task ids são estáveis por conteúdo, não por linha", () => {
+    const withTasks = [
+      "- [/] **Checkpoint alpha-node** — etapa viva:",
+      "  - [ ] fechar contrato `checkpoint-alpha-node`",
+      "  - [x] materializar tarefa `checkpoint-alpha-node`",
+    ].join("\n");
+    const inputFor = (tasksMd: string): GovernanceGraphInput =>
+      makeInput({
+        tasksMd,
+        files: makeInput().files.map((f) =>
+          f.path === "gw/tasks.md" ? { ...f, content: tasksMd } : f
+        ),
+      });
+    const base = deriveGovernanceGraphSnapshot(inputFor(withTasks));
+    const baseTaskIds = base.nodes.filter((n) => n.type === "task").map((n) => n.id);
+    expect(baseTaskIds.length).toBe(2);
+    for (const id of baseTaskIds) expect(id).not.toMatch(/-L\d+$/);
+
+    // Inserir linha ANTES das tarefas desloca todas as linhas: ids não mudam.
+    const moved = deriveGovernanceGraphSnapshot(
+      inputFor(`# comentário novo no topo\n${withTasks}`)
+    );
+    const movedTaskIds = moved.nodes.filter((n) => n.type === "task").map((n) => n.id);
+    expect(movedTaskIds).toEqual(baseTaskIds);
+    // O fingerprint MUDA (conteúdo do arquivo mudou) — identidade ≠ selo.
+    expect(moved.snapshot_fingerprint).not.toBe(base.snapshot_fingerprint);
+  });
+
+  it("tarefas com texto idêntico no mesmo checkpoint recebem ordinal (sem colisão de id)", () => {
+    const duplicated = [
+      "- [/] **Checkpoint alpha-node** — etapa viva:",
+      "  - [ ] repetida `checkpoint-alpha-node`",
+      "  - [ ] repetida `checkpoint-alpha-node`",
+    ].join("\n");
+    const snapshot = deriveGovernanceGraphSnapshot(
+      makeInput({
+        tasksMd: duplicated,
+        files: makeInput().files.map((f) =>
+          f.path === "gw/tasks.md" ? { ...f, content: duplicated } : f
+        ),
+      })
+    );
+    const taskIds = snapshot.nodes.filter((n) => n.type === "task").map((n) => n.id);
+    expect(taskIds.length).toBe(2);
+    expect(new Set(taskIds).size).toBe(2);
+    expect(taskIds[1]).toMatch(/-2$/);
+  });
+});

@@ -219,13 +219,25 @@ review-event→finding/review) · `belongs-to` (finding→review) · `resolves`
   id estável inspirado em `GlobalRef` (`type:governed-work-id/node-id@rev`); o
   snapshot inteiro fecha com `snapshot_fingerprint` = hash de serialização
   canônica (mesmo padrão de `review_fingerprint`) + `schema_version`.
-  **Ajuste da implementação (PR #46):** `generated-at`/`source-commit` foram
-  OMITIDOS na v1 — quebrariam o determinismo do par build/check (todo commit
-  re-stale-aria o snapshot sem mudança de conteúdo); a rastreabilidade temporal
-  vem dos content-hashes de `source_refs` (equivalente determinístico do
-  envelope L7). `supersedes` (decision→decision) permanece tipo PERMITIDO com
-  emissão ADIADA: o decision-brief não tem marcador machine-readable confiável
-  (prosa contém negações como "sem superseder"); candidato a campo explícito.
+  **Políticas v1 FECHADAS (PR #46 — decisão, não adiamento):**
+  (a) `generated-at`/`source-commit` FICAM FORA do snapshot **por design**:
+  quebrariam o determinismo do par build/check (todo commit re-stale-aria o
+  snapshot sem mudança de conteúdo). A rastreabilidade vem de
+  `source_refs + content-hashes + snapshot_fingerprint` — não de timestamp/HEAD
+  (equivalente determinístico do envelope L7; quem precisa do instante/commit
+  usa o próprio git do artefato versionado).
+  (b) **Fontes voláteis são normalizadas antes do hash**: o campo de relógio
+  `updated_at` do `active.yml` (projeção runtime) é excluído do conteúdo hashado
+  (`normalizeSourceContentForHash`) — publish-state não gera churn de
+  fingerprint; qualquer campo SEMÂNTICO (branch, stage, status) segue hashado e
+  muda o selo. Testado nos dois sentidos.
+  (c) **Task ids são estáveis por CONTEÚDO** (`sha12` do texto normalizado +
+  ordinal por ocorrência para duplicatas), não por número de linha — mover a
+  tarefa no arquivo preserva a identidade; `line` permanece como atributo
+  humano. Testado (deslocamento de linhas não muda ids).
+  `supersedes` (decision→decision) permanece tipo PERMITIDO com emissão ADIADA:
+  o decision-brief não tem marcador machine-readable confiável (prosa contém
+  negações como "sem superseder"); candidato a campo explícito.
 - **Fora do snapshot (política/conduta):** trust laws, egress/threat-model,
   mutation-types do envelope, assisted-authoring laws, schema-policy.
 - **Invariante dura:** derived-only e regenerável offline; nenhum comando

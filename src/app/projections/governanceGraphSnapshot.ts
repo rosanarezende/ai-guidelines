@@ -189,6 +189,22 @@ function sha12(text: string): string {
   return createHash("sha256").update(text).digest("hex").slice(0, 12);
 }
 
+/**
+ * Normalização de fontes VOLÁTEIS antes do hash (§8.3): campo de relógio de
+ * projeção runtime (`updated_at` do active.yml) não é mudança semântica do
+ * grafo — excluí-lo evita churn de fingerprint a cada publish-state. Qualquer
+ * OUTRO campo (branch, stage, status…) segue hashado: mudança real muda o selo.
+ */
+export function normalizeSourceContentForHash(path: string, content: string): string {
+  if (path.endsWith("runtime/specs/active.yml")) {
+    return content
+      .split(/\r?\n/)
+      .filter((line) => !/^\s*updated_at:/.test(line))
+      .join("\n");
+  }
+  return content;
+}
+
 function normalizeCheckpoint(slug: string): string {
   return slug.replace(/^checkpoint-/, "");
 }
@@ -256,7 +272,9 @@ export function deriveGovernanceGraphSnapshot(
   input: GovernanceGraphInput
 ): GovernanceGraphSnapshot {
   const gw = input.governedWork;
-  const hashes = new Map(input.files.map((f) => [f.path, sha12(f.content)]));
+  const hashes = new Map(
+    input.files.map((f) => [f.path, sha12(normalizeSourceContentForHash(f.path, f.content))])
+  );
   const refOf = (path: string): GraphSourceRef => {
     const hash = hashes.get(path);
     if (!hash) throw new Error(`source_ref sem conteúdo para hash (path fora de files[]): ${path}`);
@@ -365,12 +383,20 @@ export function deriveGovernanceGraphSnapshot(
         });
         addEdge(cpId, "contains", stepId);
       }
+      // Tarefas ancoram no checkpoint hoje (tasks.md); step→task quando materializar.
+      // Id ESTÁVEL por conteúdo (hash do texto normalizado), não por linha (§8.3):
+      // mover a tarefa no arquivo preserva a identidade; texto duplicado no mesmo
+      // checkpoint recebe ordinal por ocorrência. `line` fica como atributo humano.
+      const taskOccurrences = new Map<string, number>();
       for (const task of parseCheckpointTasks(input.tasksMd, {
         pr: node.id,
         checkpoint,
       })) {
-        // Tarefas ancoram no checkpoint hoje (tasks.md); step→task quando materializar.
-        const taskId = nid("task", `${normalizeCheckpoint(checkpoint)}-L${task.line}`);
+        const contentKey = sha12(task.text.replace(/\s+/g, " ").trim());
+        const seen = taskOccurrences.get(contentKey) ?? 0;
+        taskOccurrences.set(contentKey, seen + 1);
+        const ordinal = seen === 0 ? "" : `-${seen + 1}`;
+        const taskId = nid("task", `${normalizeCheckpoint(checkpoint)}-${contentKey}${ordinal}`);
         addNode({
           id: taskId,
           type: "task",

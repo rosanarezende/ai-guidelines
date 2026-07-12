@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "9f8e447d1572",
+  "snapshot_fingerprint": "1389e5f90614",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -126,7 +126,7 @@
     },
     {
       "path": ".governance/runtime/specs/active.yml",
-      "hash": "b8e58702c153"
+      "hash": "c08e154937e8"
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
@@ -510,7 +510,7 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md",
-      "hash": "6d052f314987"
+      "hash": "31cb97f4d315"
     },
     {
       "path": ".governance/specs/0024-context-architecture/research/findings.md",
@@ -2758,7 +2758,7 @@
       },
       "source_ref": {
         "path": ".governance/runtime/specs/active.yml",
-        "hash": "b8e58702c153"
+        "hash": "c08e154937e8"
       }
     },
     {
@@ -3674,7 +3674,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md",
-        "hash": "6d052f314987"
+        "hash": "31cb97f4d315"
       }
     },
     {
@@ -4539,7 +4539,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/1-L68",
+      "id": "task:0024-context-architecture/1-17df538ac9a9",
       "type": "task",
       "label": "**Checkpoint 1** — `active-specs.yml` lista a 0024 (Codex A3). ✅ feito + gated (`87865ca`); Gate completo no **#32**.",
       "attributes": {
@@ -4552,7 +4552,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/2-L69",
+      "id": "task:0024-context-architecture/2-9ef3790022df",
       "type": "task",
       "label": "**Checkpoint 2** — reframe `spec/plan/tasks/NEXT` → absorção + dobrar a sequência no `plan.md` (Codex A2/P1/P2). ✅ feito",
       "attributes": {
@@ -4565,7 +4565,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/2.1-L70",
+      "id": "task:0024-context-architecture/2.1-4da27e741f37",
       "type": "task",
       "label": "**Checkpoint 2.1** — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023. ✅ feito + gated ",
       "attributes": {
@@ -4578,7 +4578,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/2.1a-L71",
+      "id": "task:0024-context-architecture/2.1a-71f8c53450df",
       "type": "task",
       "label": "**Checkpoint 2.1a** — **correção arquitetural pós-dogfooding**: substitui a topologia incorreta do 2.1 pela canônica da ",
       "attributes": {
@@ -4591,7 +4591,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/2.2-L72",
+      "id": "task:0024-context-architecture/2.2-b9b1cee8a621",
       "type": "task",
       "label": "**Checkpoint 2.2** — **correção estrutural pós-dogfooding (precede o 3)**: `ruleset:check` — **producibilidade** (PRIMÁR",
       "attributes": {
@@ -4604,7 +4604,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/2.2b-L73",
+      "id": "task:0024-context-architecture/2.2b-1713d42926c9",
       "type": "task",
       "label": "**Checkpoint 2.2b** — **correção da fronteira mecânica (achado Codex no PR #33)**: extração de gatilhos-base (`on: [pull",
       "attributes": {
@@ -4617,7 +4617,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/2.3-L74",
+      "id": "task:0024-context-architecture/2.3-692abf720f13",
       "type": "task",
       "label": "**Checkpoint 2.3** — **Governance Topology as Data**: topologia como dado (SSOT) no `state.yml` + `governance-pr-check` ",
       "attributes": {
@@ -4630,7 +4630,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/artifact-taxonomy-and-model-review-contract-L130",
+      "id": "task:0024-context-architecture/artifact-taxonomy-and-model-review-contract-bdc763f80722",
       "type": "task",
       "label": "**Checkpoint artifact-taxonomy-and-model-review-contract** — ✅ **CONCLUÍDO + gated** (Human Gate approved 2026-07-12, `g",
       "attributes": {
@@ -4643,7 +4643,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/co-enforcement-L101",
+      "id": "task:0024-context-architecture/co-enforcement-e4052d458b2a",
       "type": "task",
       "label": "**Checkpoint co-enforcement** (nó `co-enforcement`, seq 9 / CO-3, **PR #42**) — ✅ **CONCLUÍDO + gated** (Human Gate appr",
       "attributes": {
@@ -4656,7 +4656,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/co-flow-convergence-L110",
+      "id": "task:0024-context-architecture/co-flow-convergence-0d823e657d6f",
       "type": "task",
       "label": "**Checkpoint co-flow-convergence** (nó `co-flow-convergence`, seq 10) — **ativo após Human Gate do `co-enforcement` e pl",
       "attributes": {
@@ -4669,7 +4669,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/co-projection-L100",
+      "id": "task:0024-context-architecture/co-projection-6de02c1e4153",
       "type": "task",
       "label": "**Checkpoint co-projection** (nó `co-projection`, seq 8 / CO-4, **PR #41**) — ✅ **CONCLUÍDO + gated** (Human Gate approv",
       "attributes": {
@@ -4682,7 +4682,7 @@
       }
     },
     {
-      "id": "task:0024-context-architecture/npm-toolchain-L99",
+      "id": "task:0024-context-architecture/npm-toolchain-69d7ca5af6e8",
       "type": "task",
       "label": "**Checkpoint npm-toolchain** (nó `toolchain-simplification`, seq 7, **PR #39**) — ✅ **CONCLUÍDO + gated** (Human Gate ap",
       "attributes": {
@@ -5039,32 +5039,32 @@
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-1",
       "type": "contains",
-      "to": "task:0024-context-architecture/1-L68"
+      "to": "task:0024-context-architecture/1-17df538ac9a9"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-2.1",
       "type": "contains",
-      "to": "task:0024-context-architecture/2.1-L70"
+      "to": "task:0024-context-architecture/2.1-4da27e741f37"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-2.1a",
       "type": "contains",
-      "to": "task:0024-context-architecture/2.1a-L71"
+      "to": "task:0024-context-architecture/2.1a-71f8c53450df"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-2.2",
       "type": "contains",
-      "to": "task:0024-context-architecture/2.2-L72"
+      "to": "task:0024-context-architecture/2.2-b9b1cee8a621"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-2.2b",
       "type": "contains",
-      "to": "task:0024-context-architecture/2.2b-L73"
+      "to": "task:0024-context-architecture/2.2b-1713d42926c9"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-2.3",
       "type": "contains",
-      "to": "task:0024-context-architecture/2.3-L74"
+      "to": "task:0024-context-architecture/2.3-692abf720f13"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-2.4d",
@@ -5074,7 +5074,7 @@
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-2",
       "type": "contains",
-      "to": "task:0024-context-architecture/2-L69"
+      "to": "task:0024-context-architecture/2-9ef3790022df"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-artifact-taxonomy-and-model-review-contract",
@@ -5114,7 +5114,7 @@
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-artifact-taxonomy-and-model-review-contract",
       "type": "contains",
-      "to": "task:0024-context-architecture/artifact-taxonomy-and-model-review-contract-L130"
+      "to": "task:0024-context-architecture/artifact-taxonomy-and-model-review-contract-bdc763f80722"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-bootstrap-registry",
@@ -5159,7 +5159,7 @@
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-co-enforcement",
       "type": "contains",
-      "to": "task:0024-context-architecture/co-enforcement-L101"
+      "to": "task:0024-context-architecture/co-enforcement-e4052d458b2a"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-co-flow-continuation",
@@ -5239,7 +5239,7 @@
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-co-flow-convergence",
       "type": "contains",
-      "to": "task:0024-context-architecture/co-flow-convergence-L110"
+      "to": "task:0024-context-architecture/co-flow-convergence-0d823e657d6f"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-co-projection",
@@ -5249,7 +5249,7 @@
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-co-projection",
       "type": "contains",
-      "to": "task:0024-context-architecture/co-projection-L100"
+      "to": "task:0024-context-architecture/co-projection-6de02c1e4153"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-co-reconcile",
@@ -5299,7 +5299,7 @@
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-npm-toolchain",
       "type": "contains",
-      "to": "task:0024-context-architecture/npm-toolchain-L99"
+      "to": "task:0024-context-architecture/npm-toolchain-69d7ca5af6e8"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-review-policy-events",
