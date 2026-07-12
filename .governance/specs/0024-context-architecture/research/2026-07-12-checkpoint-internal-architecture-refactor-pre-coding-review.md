@@ -101,6 +101,10 @@ lentes do tracker (macro→micro; aplicada/roteada/migrada/evidência/rebaixada,
 com destino no snapshot e na falsificação) vive em
 [`2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md`](./2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md)
 — critério de saída do checkpoint, verificado na `continuation-review-human-gate`.
+A matriz também rastreia o **`model.yml` v3 (SSOT normativo)** entidade a
+entidade/aresta a aresta (§§5-7) e consolida em **§8 o contrato implementável do
+graph snapshot** — nós, arestas, atributos derivados, source_ref/fingerprint e o
+que fica fora por ser política. A fatia 4 deste plano implementa CONTRA o §8.
 
 ## 6. Fatias propostas (ordem de execução)
 

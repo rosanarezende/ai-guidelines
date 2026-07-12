@@ -90,3 +90,94 @@ Colunas: **Perguntava** (no work-graph-model) · **Informa** (parte do framework
 - **LENS-F3 (baixo):** `descriptionFromRawText` (GovernedFlow) usa marcador
   ingênuo com fallback gracioso (= PCR-F3 do pre-coding-review; degrada só
   cosmético). Absorver na fatia da família flow.
+
+## 5. Alinhamento normativo com o `model.yml` v3 — ENTIDADES
+
+> O tracker é embasamento; o **`model.yml` v3 limpo é o SSOT normativo do
+> modelo**. Esta seção rastreia entidade a entidade (não "inspirado em"). O
+> snapshot do PR #46 projeta **o trabalho governado do próprio framework**
+> (state.yml/tasks/DECs/reviews/gates), tipado de forma COMPATÍVEL com o
+> modelo (DEC-G23: uma taxonomia, não duas) — ele NÃO implementa o grafo
+> org-scale, que é produto Guilda.
+
+Colunas: **Contraparte no framework** · **Snapshot?** (agora/depois/nunca) ·
+**Lente** · **Disposição**.
+
+| Entidade normativa (`model.yml`)                                                                               | Contraparte no framework                                                                   | Snapshot?                                                        | Lente | Disposição                                                                |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ----- | ------------------------------------------------------------------------- |
+| `intent` (approach/signal/gate de ativação)                                                                    | Spec (objetivo durável com gate de research/ativação em `state.yml § gate`)                | **AGORA** — nó `spec`                                            | L2    | Aplicada como contraparte; semântica approach/signal = conceito (§7)      |
+| `execution-unit` (8 kinds, collapse-rule)                                                                      | Nó topológico/PR (`state.yml § topology.prs[]` — unidade com lifecycle próprio)            | **AGORA** — nó `topology-node` (PR)                              | L2/L6 | Aplicada; kinds ricos (experiment-run etc.) = conceito → G03/falsificação |
+| `repo-work` (purpose: create/sustain/discover/operate)                                                         | Checkpoint/Etapa (peça executável; `tasks.md` steps)                                       | **AGORA** — nós `checkpoint` e `step`                            | L2/L5 | Aplicada; `purpose` 4-valores = conceito compatível com WorkItemKind      |
+| `contract` (nó versionado; compatibility-window)                                                               | Contratos operacionais do framework: `script-contracts.yml`, `PrProfileContract`, policies | **DEPOIS** — quando o snapshot cobrir contratos operacionais     | L6/L7 | Roteada (pós-#46); nó versionado como conceito aplicado nos contracts     |
+| `deliberation` (q/r/d anexável)                                                                                | `decision-brief.md` (DEC) + `research/` (q/r/d é o coração do framework)                   | **AGORA** — nós `decision` e `research-artifact` (com kind)      | L3    | Aplicada                                                                  |
+| `intake` (proposal/register)                                                                                   | `roadmap/backlog` + insights (PIT) + continuação (`continuations/`)                        | **AGORA** parcial — nó `insight` e `continuation-package`        | L2    | Aplicada (parcial); funil rico de register/triagem = Guilda               |
+| `assisted-authoring` (advisory-only, no-silent-write)                                                          | Briefings `flow work/review/decide` (projetam contrato; humano confirma)                   | NÃO (é lei de conduta, não nó)                                   | L1    | Aplicada como lei das superfícies                                         |
+| `business-objective` recursivo · `thesis` · `opportunity-area` · `metric-definition` · `target` · `allocation` | Sem contraparte no framework hoje (prova de valor ainda não modelada)                      | **DEPOIS** — só se a prova de valor (DEC-G23/H3) virar entidade  | L1    | Roteada → `broad-flow-falsification` decide se materializa                |
+| `outcome` (append-only; único insumo de actual)                                                                | Gate decision + release-log (resultado governado append-only)                              | **AGORA** — nó `gate`; release-log DEPOIS (encerramento da spec) | L2/L5 | Aplicada (gate)                                                           |
+| `repo` · `repo-context` (`publishes-context`)                                                                  | O próprio repositório + projeções publicadas (`active.yml`, `governed-work-map`, handoff)  | **AGORA** — nó `projection` (derivado, nunca SSOT)               | L7    | Aplicada                                                                  |
+| `repo-work-ack` · `repo-contract` · `code-touchpoint`                                                          | Sem contraparte multi-repo hoje; `code-touchpoint` ≈ `source_ref` do snapshot              | `source_ref` **AGORA**; acks cross-repo = spike futuro (DEC-G23) | L7    | Roteada (source_ref neste PR) + evidência (acks provados na incubação)    |
+| Reviews/findings/gates do framework (sem par no model)                                                         | `reviews/*.yml`, findings, resolutions, events, `gates/*.yml`                              | **AGORA** — nós `review`/`finding`/`resolution`/`review-event`   | L8    | Aplicada (já existem com selos; o snapshot os projeta)                    |
+
+## 6. Alinhamento normativo — ARESTAS
+
+| Aresta (`model.yml`)                                                                   | Contraparte no framework (aresta do snapshot)                                      | Snapshot?                                               | Lente | Disposição                                        |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------- | ----- | ------------------------------------------------- |
+| `breaks-into` (intent → unit/repo-work)                                                | `spec —contains→ topology-node`                                                    | **AGORA**                                               | L6    | Aplicada                                          |
+| `contains` (unit → repo-work)                                                          | `topology-node —contains→ checkpoint —contains→ step`                              | **AGORA**                                               | L6    | Aplicada                                          |
+| `delivery-after` (paraleliza, bloqueia entrega)                                        | Stack de PRs (`sequence` contígua; base/head) — entrega só no terminal (modo unit) | **AGORA** — `topology-node —stacked-on→ topology-node`  | L6    | Aplicada                                          |
+| `blocked-by`/`blocks`                                                                  | `frenteProgression` (derivado de steps) + findings bloqueantes                     | **AGORA** como aresta **DERIVADA**                      | L5/L6 | Aplicada (derivada, nunca gravada)                |
+| `coordinates-with` (→ contract)                                                        | Consumo de script-contracts/policies                                               | DEPOIS (junto do nó contract)                           | L6    | Roteada pós-#46                                   |
+| `results-in`/`derives-from` · `raises`                                                 | Continuação governada (PR #45 →continuation→ PR #46); insight →raises→ trabalho    | **AGORA** — `continues-from` entre nós; `raises` DEPOIS | L2    | Aplicada (continuação)                            |
+| `answers` · `supported-by`                                                             | q/r/d: research →supports→ DEC (`decision-brief` cita research)                    | **AGORA** — `decision —supported-by→ research-artifact` | L3    | Aplicada                                          |
+| `emits` (→ outcome) · `closed-by`                                                      | `checkpoint —closed-by→ gate`; review-event fecha lane (DEC-G29)                   | **AGORA**                                               | L5/L8 | Aplicada                                          |
+| `supersedes` (decision→decision, append-only)                                          | DECs supersedem DECs (ex.: G25 sobre G22); events append-only                      | **AGORA** — `decision —supersedes→ decision`            | L6    | Aplicada                                          |
+| `occurred-during` · `caused-by` (incident)                                             | Sem incidente modelado no framework hoje                                           | NUNCA neste PR                                          | L3    | Rebaixada p/ framework (produto/ops = Guilda)     |
+| `publishes-context` (repo → repo-context)                                              | `state.yml —projects→ {governed-work-map, active.yml, handoff, snapshot}`          | **AGORA** — aresta `derived-from`                       | L7    | Aplicada (é a definição do próprio snapshot)      |
+| `acknowledges-work` · `backs-contract` · `evidenced-by`                                | `evidenced-by` ≈ `source_ref` (path+hash) de cada nó do snapshot                   | `source_ref` **AGORA**; acks = spike                    | L7/L8 | Roteada (source_ref) + evidência histórica (acks) |
+| Business: `authorizes`/`measured-by`/`contributes-to`/`cascades-to`/`aligns-with` etc. | Sem contraparte (prova de valor não modelada)                                      | DEPOIS (se H3 materializar)                             | L1    | Roteada → falsificação decide                     |
+
+## 7. Conceitos normativos recentes (fechados no v3)
+
+| Conceito                                                                            | Situação no framework                                                                                                                                             | Disposição                                                                                                                      |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `intent.approach = validate-first \| direct`                                        | Conceito compatível com spike/experiment × implementação direta (WorkItemKind); não vira campo do snapshot agora                                                  | Conceito aplicável; materialização → G03/falsificação                                                                           |
+| `signal = none \| touches-contract \| operational-target`                           | Análogo aos triggers de smoke/consumer-paths do `pr-ready` (mudança que toca contrato exige validação extra) — já aplicado em espírito                            | Aplicada (análogo); campo formal = depois                                                                                       |
+| `execution-unit` kinds finais + `discovery` (fate)                                  | Kinds ricos pertencem ao trabalho org-scale; `discovery` ≈ spike/research com fate (throwaway/promoted/parked) ≈ promoção de research (PR #45)                    | Conceito; pipeline de promoção → `broad-flow-falsification`                                                                     |
+| `collapse-rule` (unit colapsa no trivial)                                           | Aplicada estruturalmente: checkpoint sem etapas; PR único sem sub-decomposição; `scaling-law` ≈ "cerimônia proporcional" (perfis solo/contributor/team)           | **Aplicada** (scaling-law ≙ review-policy profiles)                                                                             |
+| Estados derivados `blocked/paused/stale/invalid`                                    | JÁ APLICADO: stale de reviews/receitas, blocked derivado (`frenteProgression`), invalid = seal quebrado (`review:check`)                                          | **Aplicada** — snapshot os expõe como atributos DERIVADOS                                                                       |
+| Envelope `actor/authority/base-revision/idempotency/nonce/issued-at/schema-version` | Parcial: reviews/gates têm executor/actor, subject_ref (≈base-revision), fingerprints (≈idempotency), date, schema_version. **nonce**: só no runtime da incubação | Aplicada (parcial); nonce+mutation-types = evidência histórica (runtime Guilda); forma do `snapshot_fingerprint` herda o padrão |
+| `unknown-mutation: fail-closed`                                                     | Aplicado como postura (checks fail-closed; degradação explícita)                                                                                                  | **Aplicada**                                                                                                                    |
+| `trust` (boundary, 3 laws) · `policy-artifacts`                                     | "Independência: enforça-se quem verifica" = SoD do review (reviewer ≠ implementer; disposition só reviewer/owner) — APLICADO. Artefatos de política = produto     | Aplicada (SoD) + migrada (policy-artifacts) + evidência (red-team-corpus)                                                       |
+| `governance-profiles` (full/compact/solo)                                           | **Contraparte direta**: `review-policy.yml § profiles` (team/contributor/solo) — mesma lei de cerimônia proporcional                                              | **Aplicada** (mapeamento 1:1 já existente)                                                                                      |
+| `decision-points` (approve/activate/rollout/verdict)                                | Human Gate + `flow decide` (briefing → confirmação → registro; append-only)                                                                                       | **Aplicada** (gate genérico; points ricos = Guilda)                                                                             |
+| `schema-policy` (zod; validação runtime em fronteira pública)                       | O próprio model.yml manda: "schemas executáveis do produto vivem no repo Guilda"                                                                                  | **Migrada (Guilda)** por decisão do SSOT                                                                                        |
+
+## 8. Contrato do graph snapshot — consolidado implementável
+
+Derivado dos §§5-7 (implementável sem voltar à conversa):
+
+- **Nós (agora):** `spec` · `topology-node` (PR; status concluded/active/planned)
+  · `checkpoint` · `step` · `decision` (DEC) · `adr` · `guardrail` (GG) ·
+  `insight` (PIT) · `review` · `finding` · `resolution` · `review-event` ·
+  `gate` · `continuation-package` · `research-artifact` (com `artifact-kind`) ·
+  `projection`.
+- **Arestas (agora):** `contains` (spec→node→checkpoint→step) · `stacked-on`
+  (node→node, base da stack) · `continues-from` (node→node via continuação) ·
+  `verifies` (review→checkpoint; event→finding/review) · `belongs-to`
+  (finding→review) · `resolves` (resolution→finding) · `closed-by`
+  (checkpoint→gate) · `supersedes` (decision→decision) · `supported-by`
+  (decision→research-artifact) · `derived-from` (projection→spec/state).
+- **Atributos derivados (nunca gravados):** saídas da `frenteProgression`
+  (frenteComplete, nextTopologyExecutable, activeStepReady), freshness
+  (current/stale), decisão efetiva de lane (DEC-G29), blocked/paused.
+- **`source_ref`/hash/fingerprint:** cada nó carrega `source_ref` (path
+  repo-relativo + content-hash) — análogo de `evidenced-by`/`code-touchpoint`;
+  id estável inspirado em `GlobalRef` (`kind:spec/id@rev`); o snapshot inteiro
+  fecha com `snapshot_fingerprint` = hash de serialização canônica (mesmo
+  padrão de `review_fingerprint`), com `schema_version` + `generated-at` +
+  `source-commit` (envelope de `context.json`, L7).
+- **Fora do snapshot (política/conduta):** trust laws, egress/threat-model,
+  mutation-types do envelope, assisted-authoring laws, schema-policy.
+- **Invariante dura:** derived-only e regenerável offline; nenhum comando
+  decisório LÊ o snapshot como fonte (DEC-G23; `governed-work-map:check` é o
+  precedente do par build/check).
