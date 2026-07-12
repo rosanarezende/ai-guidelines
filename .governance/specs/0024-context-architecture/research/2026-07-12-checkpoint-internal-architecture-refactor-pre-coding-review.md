@@ -35,14 +35,18 @@ checkpoint por `[DEC-0024-G23]`/`[DEC-0024-G28]`:
   use-cases/workflow) e `src/infrastructure` (adapters por tecnologia) **já
   existem** e estão razoavelmente coesas. O débito de legibilidade está
   concentrado na superfície `src/cli`.
-- **Violações de fronteira hoje (baseline factual):** 4 arquivos de camadas
-  internas importam de `src/cli` —
-  `app/constraints/RegistryCommandSurfaceResolver.ts` (produção; importa
+- **Violações de fronteira hoje (baseline factual, corrigida pelo próprio guard
+  da fatia 1):** 7 entradas em 6 arquivos —
+  `app/constraints/RegistryCommandSurfaceResolver.ts -> cli` (produção; importa
   `RegistryCommandDescriptor` de `cli/registry/describeCommands`),
-  `app/constraints/compileConstraints.test.ts`,
-  `app/constraints/surfaceResolvers.test.ts` e
-  `infrastructure/ast/SkipGuard.test.ts` (importa `discoverTestFiles` de
-  `cli/livingDocs`). Não há guard automatizado de camadas hoje (só
+  `app/constraints/compileConstraints.test.ts -> cli`,
+  `app/constraints/surfaceResolvers.test.ts -> cli`,
+  `infrastructure/ast/SkipGuard.test.ts -> cli` (importa `discoverTestFiles` de
+  `cli/livingDocs`), `domain/templates/TasksEvidenceDrivenEquivalence.test.ts ->
+app` e `-> infrastructure`, e `domain/workspace/WorkspaceDiscovery.test.ts ->
+app`. As três últimas só apareceram quando o guard automatizado rodou —
+  evidência direta de PCR-F2 (a fronteira sobrevivia por disciplina; o grep
+  manual inicial só cobria `→ cli`). Não havia guard de camadas antes (só
   `NoMonolithResidue`).
 - Consumidores rígidos da estrutura atual: `package.json#bin → dist/cli/main.js`,
   script-contracts (`node dist/cli/bin.js …`), pointers `.mjs` que importam
