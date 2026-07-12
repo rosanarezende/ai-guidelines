@@ -27,7 +27,7 @@ import {
   ReviewRequirementRule,
   ReviewRequirementLevel,
   REQUIREMENT_LEVELS,
-} from "../../infrastructure/yaml/reviewPolicyReader.js";
+} from "../../domain/policy/reviewPolicy.js";
 import type {
   NodeReviewPlanDecision,
   NodeReviewPlanEntry,
