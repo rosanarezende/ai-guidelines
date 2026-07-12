@@ -1,5 +1,5 @@
 import { deriveWorkBrief } from "../workBrief.js";
-import { deriveGovernedFlow, derivePrReadyFlow } from "./GovernedFlow.js";
+import { deriveGovernedFlow, derivePrReadyFlow, descriptionFromRawText } from "./GovernedFlow.js";
 import { FinishStepDefinition } from "../decide/finishStep.js";
 import { MarkReadinessDefinition } from "../decide/markReadiness.js";
 import { AdvanceStepDefinition } from "../decide/advanceStep.js";
@@ -642,5 +642,37 @@ describe("GovernedFlow", () => {
     expect(flow.recommended?.id).not.toBe("open-next-topology-node");
     expect(plan.mutating).toBe(false);
     expect(plan.note.join(" ")).toContain("artifact-taxonomy-and-model-review-contract");
+  });
+});
+
+describe("descriptionFromRawText · marcador tolerante (LENS-F3)", () => {
+  const step = (text: string) => ({
+    id: "internal-architecture-refactor-ddd-bdd",
+    title: "reorganização behavior-preserving do runtime/testes",
+    state: "in-progress" as const,
+    line: 1,
+    text,
+  });
+
+  it("formato clássico **id — título** segue extraindo a descrição", () => {
+    const d = descriptionFromRawText(
+      step(
+        "- [/] **internal-architecture-refactor-ddd-bdd — reorganização behavior-preserving do runtime/testes**: reorganizar estruturalmente o runtime."
+      )
+    );
+    expect(d).toBeTruthy();
+    expect(d).not.toContain("**");
+    expect(d?.toLowerCase()).toContain("reorganizar estruturalmente");
+  });
+
+  it("formato **Checkpoint id** — com sufixo livre no negrito — não vaza o marcador", () => {
+    const d = descriptionFromRawText(
+      step(
+        "- [/] **Checkpoint internal-architecture-refactor-ddd-bdd** — reorganização behavior-preserving do runtime/testes (EM EXECUÇÃO — PR #46): reorganizar estruturalmente o runtime."
+      )
+    );
+    expect(d).toBeTruthy();
+    expect(d).not.toContain("Checkpoint internal-architecture");
+    expect(d?.toLowerCase()).toContain("reorganizar estruturalmente");
   });
 });

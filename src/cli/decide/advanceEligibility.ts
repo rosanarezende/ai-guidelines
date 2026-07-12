@@ -21,6 +21,7 @@
  * torna a decisão `not-applicable` (esse era o bug estrutural).
  */
 import type { HandoffStep } from "../../app/handoff/handoffFacts.js";
+import { deriveFrenteProgression } from "../../app/workflow/frenteProgression.js";
 import type { DecisionAvailability } from "./model.js";
 
 /** Id canônico da decisão (mora no módulo-folha para ambos os lados reusarem sem ciclo). */
@@ -62,15 +63,17 @@ export interface AdvanceTransitionPair {
  * Par de transição inequívoco: EXATAMENTE um `[/]` (ativo) com um `[ ]` logo
  * adiante (e nenhum pendente antes dele). Independe de quantos já estão `[x]`
  * (concluídos) — toda transição depois da primeira tem `done.length > 0`.
+ * Regra CANÔNICA em frenteProgression (LENS-F1); este export preserva a API.
  */
 export function advanceTransitionPair(subs: readonly HandoffStep[]): AdvanceTransitionPair | null {
-  const inProgress = subs.filter((s) => s.state === "in-progress");
-  if (inProgress.length !== 1) return null;
-  const active = inProgress[0];
-  const pendingAfter = subs.filter((s) => s.state === "pending" && s.line > active.line);
-  const pendingBefore = subs.filter((s) => s.state === "pending" && s.line < active.line);
-  if (pendingAfter.length === 0 || pendingBefore.length > 0) return null;
-  return { active, next: pendingAfter[0] };
+  const progression = deriveFrenteProgression({
+    steps: subs,
+    nextPlannedNode: null,
+    gateApproved: false,
+  });
+  if (!progression.advanceTransition) return null;
+  // Estruturalmente compatíveis: FrenteStepFact ⊆ HandoffStep; os objetos vêm de `subs`.
+  return progression.advanceTransition as AdvanceTransitionPair;
 }
 
 /**
@@ -87,25 +90,27 @@ export function deriveAdvanceEligibility(f: AdvanceEligibilityFacts): DecisionAv
   if (f.steps.length === 0) {
     return { status: "not-applicable", reasons: ["Este checkpoint não tem etapas."] };
   }
-  const inProgress = f.steps.filter((s) => s.state === "in-progress");
 
-  // ── Forma da ordem (estrutura das etapas) ──────────────────────────
-  if (inProgress.length === 0) {
+  // ── Forma da ordem (estrutura das etapas) — derivação CANÔNICA (LENS-F1) ────
+  const progression = deriveFrenteProgression({
+    steps: f.steps,
+    nextPlannedNode: null,
+    gateApproved: false,
+  });
+  if (progression.inProgressSteps.length === 0) {
     return {
       status: "not-applicable",
       reasons: ["Nenhuma etapa está em andamento ([/])."],
     };
   }
-  if (inProgress.length > 1) {
+  if (progression.inProgressSteps.length > 1) {
     return {
       status: "blocked",
       reasons: ["Mais de uma etapa em andamento ([/]) — ambiguidade na ordem."],
     };
   }
-  const active = inProgress[0];
-  const pendingAfter = f.steps.filter((s) => s.state === "pending" && s.line > active.line);
-  const pendingBefore = f.steps.filter((s) => s.state === "pending" && s.line < active.line);
-  if (pendingAfter.length === 0) {
+  const active = progression.activeStep as HandoffStep;
+  if (progression.pendingAfterActive.length === 0) {
     return {
       status: "not-applicable",
       reasons: [
@@ -113,12 +118,15 @@ export function deriveAdvanceEligibility(f: AdvanceEligibilityFacts): DecisionAv
       ],
     };
   }
-  if (pendingBefore.length > 0) {
+  if (progression.pendingBeforeActive.length > 0) {
     return {
       status: "blocked",
-      reasons: [`Ordem ambígua: há etapa pendente antes da ativa (${pendingBefore[0].id}).`],
+      reasons: [
+        `Ordem ambígua: há etapa pendente antes da ativa (${progression.pendingBeforeActive[0].id}).`,
+      ],
     };
   }
+  const pendingAfter = progression.pendingAfterActive;
 
   // ── Critério de SAÍDA do atual: READINESS EXPLÍCITA (NUNCA findings) ─────────
   // Conclusão é DECLARADA pelo sinal de readiness da etapa ATIVA. Jamais

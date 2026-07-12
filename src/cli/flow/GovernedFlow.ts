@@ -862,11 +862,19 @@ function extractBetween(value: string, start: string, ends: readonly string[]): 
   return extracted.length > 0 ? extracted : null;
 }
 
-function descriptionFromRawText(sub: HandoffStep): string | null {
+function escapeRe(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function descriptionFromRawText(sub: HandoffStep): string | null {
   if (!sub.text) return null;
-  const marker = `**${sub.id} — ${sub.title}**`;
-  const markerIndex = sub.text.indexOf(marker);
-  const afterMarker = markerIndex >= 0 ? sub.text.slice(markerIndex + marker.length) : sub.text;
+  // Marcador tolerante ao mesmo contrato do parseSteps (LENS-F3): prefixo
+  // `Checkpoint ` opcional, título inline opcional e fechamento do negrito
+  // com sufixos livres (ex.: "(EM EXECUÇÃO …)") — não um literal ingênuo.
+  const markerRe = new RegExp(`\\*\\*(?:Checkpoint\\s+)?${escapeRe(sub.id)}\\b[^*]*\\*\\*`);
+  const match = markerRe.exec(sub.text);
+  const afterMarker =
+    match && match.index >= 0 ? sub.text.slice(match.index + match[0].length) : sub.text;
   const afterColon = afterMarker.replace(/^[:\s]+/, "");
   const objective = extractBetween(afterColon, "", ["**Entradas:**", "**Saída:**"]);
   const cleaned = stripLeadingDecisionClause(objective);

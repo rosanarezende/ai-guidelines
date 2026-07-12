@@ -73,6 +73,72 @@ describe("frenteProgression · derivação canônica", () => {
     expect(p.topologyBlockedSentence).toBeNull();
   });
 
+  it("semântica POSICIONAL (LENS-F1): pendente antes × depois da ativa", () => {
+    const p = deriveFrenteProgression({
+      steps: [
+        step({ id: "pulada-atras", state: "pending", line: 1 }),
+        step({ id: "ativa-agora", state: "in-progress", line: 2 }),
+        step({ id: "proxima", state: "pending", line: 3 }),
+      ],
+      nextPlannedNode: null,
+      gateApproved: false,
+    });
+    expect(p.pendingBeforeActive.map((s) => s.id)).toEqual(["pulada-atras"]);
+    expect(p.pendingAfterActive.map((s) => s.id)).toEqual(["proxima"]);
+    expect(p.pendingSteps.map((s) => s.id)).toEqual(["pulada-atras", "proxima"]);
+    // Ordem ambígua (pendente antes) ⇒ SEM par de avanço inequívoco.
+    expect(p.advanceTransition).toBeNull();
+  });
+
+  it("advanceTransition: par inequívoco só com UMA ativa + pendente adiante + nada antes", () => {
+    const ok = deriveFrenteProgression({
+      steps: [
+        step({ id: "feita", state: "done", line: 1 }),
+        step({ id: "ativa-agora", state: "in-progress", line: 2 }),
+        step({ id: "proxima", state: "pending", line: 3 }),
+      ],
+      nextPlannedNode: null,
+      gateApproved: false,
+    });
+    expect(ok.advanceTransition).toEqual({
+      active: expect.objectContaining({ id: "ativa-agora" }),
+      next: expect.objectContaining({ id: "proxima" }),
+    });
+
+    const terminal = deriveFrenteProgression({
+      steps: [step({ id: "ativa-agora", state: "in-progress", line: 1 })],
+      nextPlannedNode: null,
+      gateApproved: false,
+    });
+    expect(terminal.advanceTransition).toBeNull();
+
+    const duasAtivas = deriveFrenteProgression({
+      steps: [
+        step({ id: "ativa-um", state: "in-progress", line: 1 }),
+        step({ id: "ativa-dois", state: "in-progress", line: 2 }),
+        step({ id: "proxima", state: "pending", line: 3 }),
+      ],
+      nextPlannedNode: null,
+      gateApproved: false,
+    });
+    expect(duasAtivas.advanceTransition).toBeNull();
+    expect(duasAtivas.inProgressSteps.length).toBe(2);
+  });
+
+  it("sem ativa, todas as pendentes contam como 'depois' (retomada do zero)", () => {
+    const p = deriveFrenteProgression({
+      steps: [
+        step({ id: "primeira", state: "pending", line: 1 }),
+        step({ id: "segunda", state: "pending", line: 2 }),
+      ],
+      nextPlannedNode: null,
+      gateApproved: false,
+    });
+    expect(p.pendingAfterActive.map((s) => s.id)).toEqual(["primeira", "segunda"]);
+    expect(p.pendingBeforeActive).toEqual([]);
+    expect(p.nextSemanticStep?.id).toBe("primeira");
+  });
+
   it("readiness da etapa ativa é derivada, não inferida por CI/tree", () => {
     const semReadiness = deriveFrenteProgression({
       steps: [step({ id: "ativa-agora", state: "in-progress" })],

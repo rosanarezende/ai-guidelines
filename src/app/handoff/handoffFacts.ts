@@ -438,11 +438,16 @@ export function resolveStepWork(facts: HandoffFacts): StepResolution {
     title: s.title,
     line: s.line,
   });
-  const inProgress = subs.filter((s) => s.state === "in-progress");
-  const pending = subs.filter((s) => s.state === "pending");
-  if (inProgress.length >= 1) {
-    const active = inProgress[0];
-    const pendingAfter = pending.filter((s) => s.line > active.line);
+  // Derivação CANÔNICA (LENS-F2): mesma fonte posicional do advance/humanGate.
+  const progression = deriveFrenteProgression({
+    steps: subs,
+    nextPlannedNode: null,
+    gateApproved: false,
+  });
+  const pending = progression.pendingSteps;
+  if (progression.activeStep) {
+    const active = progression.activeStep;
+    const pendingAfter = progression.pendingAfterActive;
     if (active.readiness === STEP_READINESS && pendingAfter.length >= 1) {
       return {
         kind: "transition",

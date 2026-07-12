@@ -34,16 +34,33 @@ export interface FrenteNodeFact {
   readonly sequence: number | null;
 }
 
+/** Par (atual, próximo) quando a forma admite exatamente UMA transição concluir+ativar. */
+export interface FrenteAdvanceTransition {
+  readonly active: FrenteStepFact;
+  readonly next: FrenteStepFact;
+}
+
 export interface FrenteProgression {
-  /** A etapa `[/]` ativa, se houver (no máximo uma por invariante do parser). */
+  /** A PRIMEIRA etapa `[/]`; a invariante "no máximo uma" é reportada via inProgressSteps. */
   readonly activeStep: FrenteStepFact | null;
-  /** Etapas `[ ]` — o que vem DEPOIS da ativa; não bloqueia o gate da ativa. */
+  /** Todas as etapas `[/]` (>1 = incoerência de estado; superfícies decidem como reportar). */
+  readonly inProgressSteps: readonly FrenteStepFact[];
+  /** Todas as etapas `[ ]`, na ordem do arquivo. */
+  readonly pendingSteps: readonly FrenteStepFact[];
+  /** Etapas `[ ]` ANTES da ativa (linha menor) — ordem ambígua para avanço. */
+  readonly pendingBeforeActive: readonly FrenteStepFact[];
+  /** Etapas `[ ]` DEPOIS da ativa; sem ativa, todas as pendentes. */
   readonly pendingAfterActive: readonly FrenteStepFact[];
   /** Etapas não concluídas (inclui a ativa) — a Frente só fecha quando vazio. */
   readonly unfinishedSteps: readonly FrenteStepFact[];
   readonly frenteComplete: boolean;
-  /** Próximo movimento semântico da Frente (primeira pendente), se houver. */
+  /** Próximo movimento semântico da Frente (primeira pendente após a ativa). */
   readonly nextSemanticStep: FrenteStepFact | null;
+  /**
+   * Par de avanço inequívoco (regra canônica do advance-step): EXATAMENTE uma
+   * `[/]` ativa, com pendente adiante e NENHUMA pendente antes dela.
+   */
+  readonly advanceTransition: FrenteAdvanceTransition | null;
   readonly nextTopologyNode: FrenteNodeFact | null;
   /** O nó topológico só é executável com gate aprovado E Frente completa. */
   readonly nextTopologyExecutable: boolean;
@@ -58,27 +75,45 @@ export function deriveFrenteProgression(input: {
   readonly nextPlannedNode: FrenteNodeFact | null;
   readonly gateApproved: boolean;
 }): FrenteProgression {
-  const activeStep = input.steps.find((s) => s.state === "in-progress") ?? null;
-  const pendingAfterActive = input.steps.filter((s) => s.state === "pending");
+  const inProgressSteps = input.steps.filter((s) => s.state === "in-progress");
+  const activeStep = inProgressSteps[0] ?? null;
+  const pendingSteps = input.steps.filter((s) => s.state === "pending");
+  const pendingBeforeActive = activeStep
+    ? pendingSteps.filter((s) => s.line < activeStep.line)
+    : [];
+  const pendingAfterActive = activeStep
+    ? pendingSteps.filter((s) => s.line > activeStep.line)
+    : pendingSteps;
   const unfinishedSteps = input.steps.filter((s) => s.state !== "done");
   const frenteComplete = unfinishedSteps.length === 0;
   const nextSemanticStep = pendingAfterActive[0] ?? null;
+  const advanceTransition =
+    inProgressSteps.length === 1 &&
+    activeStep !== null &&
+    pendingAfterActive.length > 0 &&
+    pendingBeforeActive.length === 0
+      ? { active: activeStep, next: pendingAfterActive[0] }
+      : null;
   const nextTopologyNode = input.nextPlannedNode;
   const nextTopologyExecutable = input.gateApproved && frenteComplete;
 
   const topologyBlockedSentence =
     nextTopologyNode && !frenteComplete
-      ? `O nó topológico ${nextTopologyNode.id} só abre depois que a Frente fechar (pendente(s): ${pendingAfterActive
+      ? `O nó topológico ${nextTopologyNode.id} só abre depois que a Frente fechar (pendente(s): ${pendingSteps
           .map((s) => s.id)
           .join(", ")}).`
       : null;
 
   return {
     activeStep,
+    inProgressSteps,
+    pendingSteps,
+    pendingBeforeActive,
     pendingAfterActive,
     unfinishedSteps,
     frenteComplete,
     nextSemanticStep,
+    advanceTransition,
     nextTopologyNode,
     nextTopologyExecutable,
     topologyBlockedSentence,
