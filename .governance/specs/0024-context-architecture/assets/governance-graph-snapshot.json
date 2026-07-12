@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "1389e5f90614",
+  "snapshot_fingerprint": "3ccc59bd217c",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -510,7 +510,7 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md",
-      "hash": "31cb97f4d315"
+      "hash": "7d5d3460dedf"
     },
     {
       "path": ".governance/specs/0024-context-architecture/research/findings.md",
@@ -3674,7 +3674,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md",
-        "hash": "31cb97f4d315"
+        "hash": "7d5d3460dedf"
       }
     },
     {
