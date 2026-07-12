@@ -1,0 +1,55 @@
+checkpoint: "checkpoint-artifact-taxonomy-and-model-review-contract"
+role: architectural_review
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+findings_emitted: 3
+subject_ref: "origin/feat/spec-0024-co-flow-continuation..61951e30"
+review_fingerprint: aa1876c3f636
+findings:
+  - id: F1
+    severity: low
+    location: "src/cli/reviewCheckObserved.test.ts#L28-L34"
+    description: "FATO: o commit 61951e30 trocou a fixture-base review() de
+      findingsEmitted:0/findings:[] para 2 findings, removendo o unico teste que
+      exercia o guard `if (review.findings.length === 0) return false` em
+      allReviewFindingsApproved. INTERPRETACAO: a regra da DEC-0024-G29 'reviews
+      sem findings emitidos nao podem ser aprovados por scope:findings' passa a
+      nao ter teste que a fixe. CENARIO: um refactor que remova o guard deixaria
+      um review findingsEmitted:0 ser derivado como approved por um evento
+      scope:findings, e nenhum teste falharia. CORRECAO MINIMA: adicionar
+      regressao com findingsEmitted:0 provando que scope:findings nao aprova."
+    disposition: open
+    fingerprint: 8bd484be8172
+  - id: F2
+    severity: low
+    location: "src/cli/reviewCheck.ts#L360-L408"
+    description: "FATO: o resumo humano de review:check imprime a decisao DECLARADA
+      e imutavel da lane (technical_audit=changes_requested), enquanto
+      pr-ready:check usa a decisao EFETIVA derivada dos eventos (approved,
+      pendente so de freshness). INTERPRETACAO: a superficie consolidada
+      human-facing nao expoe a decisao efetiva derivada por DEC-0024-G29; quem
+      le review:check isolado conclui que a TA ainda pede mudancas. CENARIO: um
+      mantenedor decide o proximo passo com base no review:check e nao percebe
+      que a lane ja esta efetivamente approved (so stale). CORRECAO MINIMA:
+      superficiar a decisao efetiva derivada ao lado da declarada no
+      consolidado. Nao bloqueia: pr-ready:check e a superficie autoritativa de
+      readiness."
+    disposition: open
+    fingerprint: c87a20e3e244
+  - id: F3
+    severity: low
+    location: "src/cli/reviewFreshness.ts#L81-L93"
+    description: "FATO: o commit de fix do deadlock (61951e30) altera
+      src/cli/reviewCheck.ts (caminho funcional), avancando a cabeca funcional
+      alem do intervalo coberto pelo EV1 da TA (..2fe8ea54); pr-ready:check hoje
+      bloqueia a TA como stale. INTERPRETACAO: e comportamento correto de
+      freshness, mas estruturalmente corrigir a maquina de review em resposta a
+      findings da propria review re-stale-a a review. CENARIO: o caminho para
+      Ready exige mais um evento de verificacao da TA cobrindo 61951e30; como
+      commit review-only nao avanca a cabeca funcional, esse evento consegue
+      cobrir a cabeca atual. Nao e defeito do PR; e nota de sequenciamento de
+      readiness. Sem correcao de codigo exigida."
+    disposition: open
+    fingerprint: 9e8cd7ac4fbb
