@@ -2,10 +2,10 @@ version: 1
 active_specs:
   - id: "0024"
     slug: context-architecture
-    branch: feat/spec-0024-artifact-taxonomy-and-model-review-contract
+    branch: feat/spec-0024-internal-architecture-refactor-ddd-bdd
     stage: implementation
     status: active
     spec_path: .governance/specs/0024-context-architecture
     source_state_path: .governance/specs/0024-context-architecture/state.yml
-    updated_at: 2026-06-22T18:44:58.360-03:00
+    updated_at: 2026-07-12T11:35:40.974-03:00
     updated_by: "@rosanarezende"

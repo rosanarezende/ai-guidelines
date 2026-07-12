@@ -295,17 +295,17 @@
             concluídos, o checkpoint ativo e a cauda planejada sem substituir o contrato governado.
           </p>
           <div class="metrics" aria-label="Resumo da topologia">
-            <div class="metric"><strong>12</strong><span>nós concluídos</span></div>
-            <div class="metric"><strong>1</strong><span>nó ativo</span></div>
-            <div class="metric"><strong>6</strong><span>nós planejados</span></div>
-            <div class="metric"><strong>45</strong><span>checkpoints</span></div>
+            <div class="metric"><strong>13</strong><span>nós concluídos</span></div>
+            <div class="metric"><strong>0</strong><span>nó ativo</span></div>
+            <div class="metric"><strong>7</strong><span>nós planejados</span></div>
+            <div class="metric"><strong>46</strong><span>checkpoints</span></div>
           </div>
         </section>
         <aside class="panel">
           <h2>Cursor atual</h2>
           <p>
-            <strong>artifact-taxonomy-and-model-review-contract</strong
-            ><br />checkpoint-artifact-taxonomy-and-model-review-contract
+            <strong>internal-architecture-refactor-ddd-bdd</strong
+            ><br />checkpoint-internal-architecture-refactor-ddd-bdd
           </p>
           <p>Stage: <strong>implementation</strong><br />Gate: <strong>closed</strong></p>
           <p>Fonte: <code>.governance/specs/0024-context-architecture/state.yml</code></p>
@@ -380,19 +380,24 @@
           <h2>O que o trabalho governado aponta agora</h2>
           <ul class="live-list">
             <li>
-              canonical-next: artifact-taxonomy-and-model-review-contract. PR #43
-              (co-flow-convergence / seq 10) e PR #44 (co-flow-continuation / seq 11)
-              CONCLUIDOS-NA-STACK por Human Gate approved; modo unit, SEM merge isolado em main. No
-              ATIVO = artifact-taxonomy-and-model-review-contract (seq 12,
-              checkpoint-artifact-taxonomy-and-model-review-contract; PR #45 stacked sobre #44).
-              Primeira fatia obrigatoria deste recorte: fechar o dogfood da propria abertura do PR
-              #45 — visao pretendida via .governance/visual-prompts, operacao governada para
-              preparar o proximo PR interno e decisao de vocabulario humano do lifecycle. Depois:
-              implementar a taxonomia de artefatos e o contrato de review
-              pre-codificacao/model-review definidos por DEC-0024-G21/GG-0005; em seguida refactor
-              DDD/BDD, falsificacao ampla e review/Human Gate da continuacao. NAO implementar
-              dualroot-collapse, co-capture, co-events, Ready/Human Gate automatico, merge em main
-              ou movimentacao fisica de .specify neste PR.
+              canonical-next: internal-architecture-refactor-ddd-bdd. PR #45
+              (artifact-taxonomy-and-model-review-contract / seq 12) CONCLUIDO-NA-STACK por Human
+              Gate approved (gates/c-artifact-taxonomy-and-model-review-contract.yml, 2026-07-12);
+              modo unit, SEM merge isolado em main. No ATIVO =
+              internal-architecture-refactor-ddd-bdd (seq 13,
+              checkpoint-internal-architecture-refactor-ddd-bdd; PR de continuacao stacked sobre
+              #45, aberto via continuation:create-pr conforme DEC-0024-G27). Escopo do recorte:
+              reorganizacao behavior-preserving de src/cli e testes; fechar/dispositionar a
+              gramatica operacional remanescente de G01; definir o contrato do graph snapshot
+              derivado (nodes/edges/source-refs/hashes; deterministico, regeneravel, offline;
+              derived-only, sem 2a SSOT) e explicitar quais projecoes de G05 o snapshot atende
+              (DEC-0024-G23/G28). Insumos obrigatorios antes de fechar gramatica/snapshot:
+              work-graph-model/model.yml, tracker.md, features.md e
+              GUILDA-QRD-PRESERVATION-MATRIX.md (aprendizados estruturais apenas; produto Guilda
+              permanece no repo irmao). Depois: broad-flow-falsification e
+              continuation-review-human-gate. NAO implementar dualroot-collapse (agora seq 14),
+              co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao
+              fisica de .specify neste PR.
             </li>
           </ul>
         </article>
@@ -428,10 +433,10 @@
         "stage": "implementation",
         "gateStatus": "closed",
         "cursor": {
-          "pr": "artifact-taxonomy-and-model-review-contract",
-          "checkpoint": "checkpoint-artifact-taxonomy-and-model-review-contract"
+          "pr": "internal-architecture-refactor-ddd-bdd",
+          "checkpoint": "checkpoint-internal-architecture-refactor-ddd-bdd"
         },
-        "counts": { "concluded": 12, "active": 1, "planned": 6, "checkpoints": 45 },
+        "counts": { "concluded": 13, "active": 0, "planned": 7, "checkpoints": 46 },
         "focus": [
           "RECONCILIACAO 2026-06-03 ([DEC-0024-G08], owner): G03 (promotion pipeline) / G04 (casa unica/tri-root) / G05 (projecoes) foram REABERTOS. Os eixos deixados em aberto no Stage 1 mostraram-se necessarios para problemas reais observados no uso (mis-binding da retomada, recuperabilidade, 'a resposta estava num ADR esquecido'). A 0024 VOLTOU A TRATAR MODELAGEM nesses eixos -- isto e DECISAO, nao drift. Direcao assumida: arquitetura orientada a grafo (entidades + relacoes navegaveis KnowledgeRef + projecoes derivadas). NAO ha 0025 independente (o split foi superado no Checkpoint 2; o trabalho mapeia em G03/G04/G05 + candidatas Grupo B). O kernel Knowledge + KnowledgeGraph nucleo + capability Insights JA materializados (PR #34). Motivacao persistida como Insights (PIT-0004..0006).",
           "0024 em ABSORCAO OPERACIONAL (pesquisa encerrada). Problema = falta de absorcao, nao falta de decisao: decisoes convergidas ainda nao alteraram o comportamento do sistema ('arquitetura converge enquanto codigo diverge'). Backlog = relatorio de auditoria do Codex (divergencias decisao\u003c->codigo).",
@@ -442,7 +447,7 @@
           "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
         ],
         "next": [
-          "canonical-next: artifact-taxonomy-and-model-review-contract. PR #43 (co-flow-convergence / seq 10) e PR #44 (co-flow-continuation / seq 11) CONCLUIDOS-NA-STACK por Human Gate approved; modo unit, SEM merge isolado em main. No ATIVO = artifact-taxonomy-and-model-review-contract (seq 12, checkpoint-artifact-taxonomy-and-model-review-contract; PR #45 stacked sobre #44). Primeira fatia obrigatoria deste recorte: fechar o dogfood da propria abertura do PR #45 — visao pretendida via .governance/visual-prompts, operacao governada para preparar o proximo PR interno e decisao de vocabulario humano do lifecycle. Depois: implementar a taxonomia de artefatos e o contrato de review pre-codificacao/model-review definidos por DEC-0024-G21/GG-0005; em seguida refactor DDD/BDD, falsificacao ampla e review/Human Gate da continuacao. NAO implementar dualroot-collapse, co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
+          "canonical-next: internal-architecture-refactor-ddd-bdd. PR #45 (artifact-taxonomy-and-model-review-contract / seq 12) CONCLUIDO-NA-STACK por Human Gate approved (gates/c-artifact-taxonomy-and-model-review-contract.yml, 2026-07-12); modo unit, SEM merge isolado em main. No ATIVO = internal-architecture-refactor-ddd-bdd (seq 13, checkpoint-internal-architecture-refactor-ddd-bdd; PR de continuacao stacked sobre #45, aberto via continuation:create-pr conforme DEC-0024-G27). Escopo do recorte: reorganizacao behavior-preserving de src/cli e testes; fechar/dispositionar a gramatica operacional remanescente de G01; definir o contrato do graph snapshot derivado (nodes/edges/source-refs/hashes; deterministico, regeneravel, offline; derived-only, sem 2a SSOT) e explicitar quais projecoes de G05 o snapshot atende (DEC-0024-G23/G28). Insumos obrigatorios antes de fechar gramatica/snapshot: work-graph-model/model.yml, tracker.md, features.md e GUILDA-QRD-PRESERVATION-MATRIX.md (aprendizados estruturais apenas; produto Guilda permanece no repo irmao). Depois: broad-flow-falsification e continuation-review-human-gate. NAO implementar dualroot-collapse (agora seq 14), co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
         ],
         "nodes": [
           {
@@ -589,12 +594,22 @@
           },
           {
             "id": "artifact-taxonomy-and-model-review-contract",
-            "status": "active",
+            "status": "concluded",
             "githubPr": 45,
             "role": "execution",
             "terminal": false,
             "sequence": 12,
             "checkpoints": ["checkpoint-artifact-taxonomy-and-model-review-contract"],
+            "isCursor": false
+          },
+          {
+            "id": "internal-architecture-refactor-ddd-bdd",
+            "status": "planned",
+            "githubPr": null,
+            "role": "execution",
+            "terminal": false,
+            "sequence": 13,
+            "checkpoints": ["checkpoint-internal-architecture-refactor-ddd-bdd"],
             "isCursor": true
           },
           {
@@ -603,7 +618,7 @@
             "githubPr": null,
             "role": "execution",
             "terminal": false,
-            "sequence": 13,
+            "sequence": 14,
             "checkpoints": ["checkpoint-dualroot-collapse"],
             "isCursor": false
           },
@@ -613,7 +628,7 @@
             "githubPr": null,
             "role": "execution",
             "terminal": false,
-            "sequence": 14,
+            "sequence": 15,
             "checkpoints": ["checkpoint-co-capture"],
             "isCursor": false
           },
@@ -623,7 +638,7 @@
             "githubPr": null,
             "role": "execution",
             "terminal": false,
-            "sequence": 15,
+            "sequence": 16,
             "checkpoints": ["checkpoint-co-events"],
             "isCursor": false
           },
@@ -633,7 +648,7 @@
             "githubPr": null,
             "role": "execution",
             "terminal": false,
-            "sequence": 16,
+            "sequence": 17,
             "checkpoints": [
               "checkpoint-taxonomy-removal",
               "checkpoint-agents-sync",
@@ -649,7 +664,7 @@
             "githubPr": null,
             "role": "execution",
             "terminal": false,
-            "sequence": 17,
+            "sequence": 18,
             "checkpoints": [
               "checkpoint-knowledge-health",
               "checkpoint-knowledge-backfill-wide",
