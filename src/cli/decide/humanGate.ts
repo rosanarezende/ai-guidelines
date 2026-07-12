@@ -28,6 +28,7 @@ import {
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 import { STEP_READINESS } from "../../app/handoff/handoffFacts.js";
+import { deriveFrenteProgression } from "../../app/workflow/frenteProgression.js";
 import {
   deriveHumanGateAvailability,
   humanGateFactsFromDecisionSnapshot,
@@ -136,27 +137,28 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
       residual_risks: [
         "Riscos residuais registrados nos reviews e decisões governadas do checkpoint.",
       ],
-      // A Frente vem antes da topologia planejada: enquanto houver checkpoint
-      // pendente em tasks.md, o próximo passo humano é o próximo checkpoint da
-      // continuação — o nó planejado (ex.: dualroot-collapse) só abre depois
-      // que a Frente fechar (mesma regra de deriveNextAction/openNextTopologyNode).
+      // Renderização da derivação CANÔNICA da Frente (frenteProgression):
+      // com checkpoints pendentes, o próximo passo humano é o próximo checkpoint
+      // da continuação — nunca o nó topológico planejado.
       next_node: (() => {
-        const pendingSteps = snapshot.steps.filter((s) => s.state === "pending");
-        if (pendingSteps.length > 0) {
-          const first = pendingSteps[0];
+        const progression = deriveFrenteProgression({
+          steps: snapshot.steps,
+          nextPlannedNode: snapshot.nextPlannedNode
+            ? { id: snapshot.nextPlannedNode.id, sequence: snapshot.nextPlannedNode.sequence }
+            : null,
+          gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
+        });
+        if (progression.nextSemanticStep) {
+          const first = progression.nextSemanticStep;
           return [
             `Próximo checkpoint da Frente: ${first.id} — ${first.title}.`,
-            ...(snapshot.nextPlannedNode
-              ? [
-                  `O nó topológico ${snapshot.nextPlannedNode.id} só abre depois que a Frente fechar (pendente(s): ${pendingSteps.map((s) => s.id).join(", ")}).`,
-                ]
-              : []),
+            ...(progression.topologyBlockedSentence ? [progression.topologyBlockedSentence] : []),
             "Nada será iniciado automaticamente por esta decisão.",
           ];
         }
-        return snapshot.nextPlannedNode
+        return progression.nextTopologyNode
           ? [
-              `Próximo nó planejado: ${snapshot.nextPlannedNode.id}.`,
+              `Próximo nó planejado: ${progression.nextTopologyNode.id}.`,
               "Ele NÃO será iniciado automaticamente por esta decisão.",
             ]
           : ["Não há próximo nó planejado derivável; nada é iniciado automaticamente."];

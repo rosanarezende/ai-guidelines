@@ -38,6 +38,8 @@ import {
   type ReadyCheckSmokePolicy,
   type SmokeNodeFact,
 } from "../app/readiness/readiness.js";
+import { parseSteps } from "../app/handoff/handoffFacts.js";
+import { deriveFrenteProgression } from "../app/workflow/frenteProgression.js";
 import { collectFunctionalFreshness } from "./reviewFreshness.js";
 import { derivePrReadyFlow, prReadyFlowFactsFromReadySnapshot } from "./flow/GovernedFlow.js";
 
@@ -80,6 +82,8 @@ export interface ReadyCheckCheckpoint {
   readonly reviewDecisions: ReadonlyArray<{ readonly role: string; readonly decision: string }>;
   /** Decisões humanas pendentes no plano situado de reviews do PR. */
   readonly reviewPlanDecisionReasons?: ReadonlyArray<string>;
+  /** Etapa `[/]` ativa do checkpoint (frenteProgression); undefined = fato não observável. */
+  readonly activeStep?: { readonly id: string; readonly readiness: string | null } | null;
   readonly reviewStatuses: ReadonlyArray<ReadyCheckReviewStatus>;
 }
 
@@ -268,6 +272,17 @@ function collectCheckpoint(
   if (!cursorMatch) return null;
   const cursor = cursorMatch[1];
 
+  // Etapa ativa via derivação CANÔNICA da Frente (frenteProgression + parseSteps):
+  // Ready não pode parecer semanticamente concluído com a etapa em implementação.
+  const tasksPath = fs.resolveAbsolute(`.governance/specs/${specDir}/tasks.md`);
+  const activeStep = fs.fileExists(tasksPath)
+    ? deriveFrenteProgression({
+        steps: parseSteps(fs.readTextFile(tasksPath), cursor),
+        nextPlannedNode: null,
+        gateApproved: false,
+      }).activeStep
+    : null;
+
   const { artifacts } = discover(repoRoot);
   const { byCheckpoint } = consolidate(artifacts);
   const entry = byCheckpoint.find(
@@ -307,6 +322,7 @@ function collectCheckpoint(
     openBlockingCount: entry?.openBlocking.length ?? 0,
     reviewDecisions: entry?.reviewDecisions ?? [],
     reviewPlanDecisionReasons: nodeCtx?.reviewPlanIssues ?? [],
+    activeStep: activeStep ? { id: activeStep.id, readiness: activeStep.readiness ?? null } : null,
     reviewStatuses: statuses.map((s) => ({
       typeId: s.typeId,
       applicability: s.applicability,

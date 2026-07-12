@@ -1,5 +1,6 @@
 import type { HandoffStep } from "../../app/handoff/handoffFacts.js";
 import { STEP_READINESS } from "../../app/handoff/handoffFacts.js";
+import { deriveFrenteProgression } from "../../app/workflow/frenteProgression.js";
 import type { DecisionAvailability } from "../decide/model.js";
 import type { DecisionSnapshot } from "../decide/snapshot.js";
 import { findDecisionType } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
@@ -148,6 +149,8 @@ export interface PrReadyFlowFacts {
     readonly gateDecision: "approved" | "changes_requested" | null;
     readonly openBlockingCount: number;
     readonly reviewPlanDecisionReasons?: ReadonlyArray<string>;
+    /** Etapa `[/]` ativa do checkpoint (derivação canônica da Frente); undefined = fato não observável. */
+    readonly activeStep?: { readonly id: string; readonly readiness: string | null } | null;
     readonly reviewStatuses: ReadonlyArray<{
       readonly typeId: string;
       readonly requirement: "disabled" | "optional" | "recommended" | "required";
@@ -462,7 +465,13 @@ export function openNextTopologyNodeFactsFromDecisionSnapshot(
       snapshot.policy !== null &&
       findDecisionType(snapshot.policy, OPEN_NEXT_TOPOLOGY_NODE_ID) !== undefined,
     gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
-    pendingSteps: snapshot.steps.filter((item) => item.state !== "done").map((item) => item.id),
+    // Derivação CANÔNICA da Frente (frenteProgression): unfinishedSteps decide
+    // se o próximo nó topológico é executável — mesma fonte do handoff/humanGate.
+    pendingSteps: deriveFrenteProgression({
+      steps: snapshot.steps,
+      nextPlannedNode: next ? { id: next.id, sequence: next.sequence } : null,
+      gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
+    }).unfinishedSteps.map((item) => item.id),
     activeNode: active
       ? {
           id: active.id,
@@ -709,6 +718,14 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
     }
     for (const reason of checkpoint.reviewPlanDecisionReasons ?? []) {
       failures.push(`plano de revisão do PR: ${reason}`);
+    }
+    // Paridade semântica com humanGate/decide (frenteProgression): Ready não é
+    // conclusão só porque CI/tree estão verdes — a etapa ativa precisa ter
+    // declarado readiness de transição.
+    if (checkpoint.activeStep && checkpoint.activeStep.readiness !== STEP_READINESS) {
+      failures.push(
+        `etapa ativa "${checkpoint.activeStep.id}" ainda não declarou readiness "${STEP_READINESS}" em tasks.md — o trabalho do checkpoint segue em implementação; CI/tree verdes não concluem a Frente.`
+      );
     }
     for (const s of checkpoint.reviewStatuses) {
       for (const e of s.errors) failures.push(`policy de reviews inválida: ${e}`);

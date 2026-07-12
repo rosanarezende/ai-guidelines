@@ -22,6 +22,7 @@
  * EXIBIDO no stdout, nunca persistido como entidade (ADR 0026).
  */
 import { createHash } from "node:crypto";
+import { deriveFrenteProgression } from "../workflow/frenteProgression.js";
 
 /**
  * Versão do contrato derivação+renderer — entra no selo (mudou contrato ⇒ muda
@@ -696,13 +697,18 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
   }
 
   // 6 — gate do checkpoint aprovado e nó ainda ativo: concluir/abrir o próximo.
+  // Derivação CANÔNICA da progressão da Frente (fonte única; superfícies só rendem).
   if (lifecycle?.gateDecision === "approved" && facts.activeNode) {
-    const next = facts.nextPlannedNode;
-    const pendingSteps = facts.steps.filter((s) => s.state !== "done");
+    const progression = deriveFrenteProgression({
+      steps: facts.steps,
+      nextPlannedNode: facts.nextPlannedNode,
+      gateApproved: true,
+    });
+    const next = progression.nextTopologyNode;
 
-    if (pendingSteps.length > 0) {
-      const first = pendingSteps[0];
-      const pendingStepIds = pendingSteps.map((s) => s.id).join(", ");
+    if (!progression.frenteComplete) {
+      const first = progression.unfinishedSteps[0];
+      const pendingStepIds = progression.unfinishedSteps.map((s) => s.id).join(", ");
       return {
         kind: "conclude-node-open-next",
         description: next
