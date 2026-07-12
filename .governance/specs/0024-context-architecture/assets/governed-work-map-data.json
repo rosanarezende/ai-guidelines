@@ -15,8 +15,8 @@
   },
   "counts": {
     "concluded": 13,
-    "active": 0,
-    "planned": 7,
+    "active": 1,
+    "planned": 6,
     "checkpoints": 46
   },
   "focus": [
@@ -29,7 +29,7 @@
     "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
   ],
   "next": [
-    "canonical-next: internal-architecture-refactor-ddd-bdd. PR #45 (artifact-taxonomy-and-model-review-contract / seq 12) CONCLUIDO-NA-STACK por Human Gate approved (gates/c-artifact-taxonomy-and-model-review-contract.yml, 2026-07-12); modo unit, SEM merge isolado em main. No ATIVO = internal-architecture-refactor-ddd-bdd (seq 13, checkpoint-internal-architecture-refactor-ddd-bdd; PR de continuacao stacked sobre #45, aberto via continuation:create-pr conforme DEC-0024-G27). Escopo do recorte: reorganizacao behavior-preserving de src/cli e testes; fechar/dispositionar a gramatica operacional remanescente de G01; definir o contrato do graph snapshot derivado (nodes/edges/source-refs/hashes; deterministico, regeneravel, offline; derived-only, sem 2a SSOT) e explicitar quais projecoes de G05 o snapshot atende (DEC-0024-G23/G28). Insumos obrigatorios antes de fechar gramatica/snapshot: work-graph-model/model.yml, tracker.md, features.md e GUILDA-QRD-PRESERVATION-MATRIX.md (aprendizados estruturais apenas; produto Guilda permanece no repo irmao). Depois: broad-flow-falsification e continuation-review-human-gate. NAO implementar dualroot-collapse (agora seq 14), co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
+    "canonical-next: internal-architecture-refactor-ddd-bdd. PR #45 (artifact-taxonomy-and-model-review-contract / seq 12) CONCLUIDO-NA-STACK por Human Gate approved (gates/c-artifact-taxonomy-and-model-review-contract.yml, 2026-07-12); modo unit, SEM merge isolado em main. No ATIVO = internal-architecture-refactor-ddd-bdd (seq 13, checkpoint-internal-architecture-refactor-ddd-bdd; PR #46 Draft stacked sobre #45, aberto via continuation:create-pr conforme DEC-0024-G27). Escopo do recorte: reorganizacao behavior-preserving de src/cli e testes; fechar/dispositionar a gramatica operacional remanescente de G01; definir o contrato do graph snapshot derivado (nodes/edges/source-refs/hashes; deterministico, regeneravel, offline; derived-only, sem 2a SSOT) e explicitar quais projecoes de G05 o snapshot atende (DEC-0024-G23/G28). Insumos obrigatorios antes de fechar gramatica/snapshot: work-graph-model/model.yml, tracker.md, features.md e GUILDA-QRD-PRESERVATION-MATRIX.md (aprendizados estruturais apenas; produto Guilda permanece no repo irmao). Depois: broad-flow-falsification e continuation-review-human-gate. NAO implementar dualroot-collapse (agora seq 14), co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
   ],
   "nodes": [
     {
@@ -186,8 +186,8 @@
     },
     {
       "id": "internal-architecture-refactor-ddd-bdd",
-      "status": "planned",
-      "githubPr": null,
+      "status": "active",
+      "githubPr": 46,
       "role": "execution",
       "terminal": false,
       "sequence": 13,

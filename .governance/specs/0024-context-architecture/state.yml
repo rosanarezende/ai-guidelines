@@ -10,7 +10,7 @@ focus:
   - "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: internal-architecture-refactor-ddd-bdd. PR #45 (artifact-taxonomy-and-model-review-contract / seq 12) CONCLUIDO-NA-STACK por Human Gate approved (gates/c-artifact-taxonomy-and-model-review-contract.yml, 2026-07-12); modo unit, SEM merge isolado em main. No ATIVO = internal-architecture-refactor-ddd-bdd (seq 13, checkpoint-internal-architecture-refactor-ddd-bdd; PR de continuacao stacked sobre #45, aberto via continuation:create-pr conforme DEC-0024-G27). Escopo do recorte: reorganizacao behavior-preserving de src/cli e testes; fechar/dispositionar a gramatica operacional remanescente de G01; definir o contrato do graph snapshot derivado (nodes/edges/source-refs/hashes; deterministico, regeneravel, offline; derived-only, sem 2a SSOT) e explicitar quais projecoes de G05 o snapshot atende (DEC-0024-G23/G28). Insumos obrigatorios antes de fechar gramatica/snapshot: work-graph-model/model.yml, tracker.md, features.md e GUILDA-QRD-PRESERVATION-MATRIX.md (aprendizados estruturais apenas; produto Guilda permanece no repo irmao). Depois: broad-flow-falsification e continuation-review-human-gate. NAO implementar dualroot-collapse (agora seq 14), co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
+  - "canonical-next: internal-architecture-refactor-ddd-bdd. PR #45 (artifact-taxonomy-and-model-review-contract / seq 12) CONCLUIDO-NA-STACK por Human Gate approved (gates/c-artifact-taxonomy-and-model-review-contract.yml, 2026-07-12); modo unit, SEM merge isolado em main. No ATIVO = internal-architecture-refactor-ddd-bdd (seq 13, checkpoint-internal-architecture-refactor-ddd-bdd; PR #46 Draft stacked sobre #45, aberto via continuation:create-pr conforme DEC-0024-G27). Escopo do recorte: reorganizacao behavior-preserving de src/cli e testes; fechar/dispositionar a gramatica operacional remanescente de G01; definir o contrato do graph snapshot derivado (nodes/edges/source-refs/hashes; deterministico, regeneravel, offline; derived-only, sem 2a SSOT) e explicitar quais projecoes de G05 o snapshot atende (DEC-0024-G23/G28). Insumos obrigatorios antes de fechar gramatica/snapshot: work-graph-model/model.yml, tracker.md, features.md e GUILDA-QRD-PRESERVATION-MATRIX.md (aprendizados estruturais apenas; produto Guilda permanece no repo irmao). Depois: broad-flow-falsification e continuation-review-human-gate. NAO implementar dualroot-collapse (agora seq 14), co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
 topology:
   cursor:
     pr: internal-architecture-refactor-ddd-bdd
@@ -236,33 +236,27 @@ topology:
             actor: owner
             reason: "Escopo atual e governanca/processo/documentacao, sem nova superficie de runtime de auth, secrets ou dados de usuario; TA/AR podem reabrir risco se encontrarem evidencia."
 
-    # Janela de transicao pos-Human Gate do #45 (2026-07-12): nenhum PR em voo neste
-    # instante — o no da continuacao esta em planned (github_pr: null) e promove a
-    # active com o numero factual assim que o Draft PR existir (nós em active exigem
-    # PR real; guard do nó-fantasma, Checkpoint 2.3b).
-    active: []
-
-    planned:
-      # PROXIMO NO DA FRENTE (sequence: 13): materializa o checkpoint semantico
+    active:
+      # #46 e o NO TOPOLOGICO ATIVO (sequence: 13): materializa o checkpoint semantico
       # internal-architecture-refactor-ddd-bdd da continuacao (DEC-0024-G21), STACKED
       # sobre artifact-taxonomy-and-model-review-contract (#45, seq 12). Aberto pos-Human
-      # Gate do #45 conforme a proxima acao derivada do handoff (a Frente ainda tem
-      # checkpoints pendentes; dualroot-collapse segue bloqueado ate a Frente fechar).
+      # Gate do #45 via continuation:create-pr --confirm (DEC-0024-G27), conforme a
+      # proxima acao derivada do handoff (a Frente ainda tem checkpoints pendentes;
+      # dualroot-collapse segue bloqueado ate a Frente fechar).
       # Escopo: reorganizacao behavior-preserving de src/cli e testes; gramatica
       # operacional remanescente de G01 e contrato do graph snapshot derivado
       # (DEC-0024-G23/G28), derived-only, sem 2a SSOT. Insumos obrigatorios: model.yml,
       # tracker.md, features.md e GUILDA-QRD-PRESERVATION-MATRIX.md do work-graph-model
       # (aprendizados estruturais apenas; produto Guilda permanece no repo irmao).
-      # Promove a `active` com o numero factual do GitHub assim que o Draft PR de
-      # continuacao existir (continuation:create-pr --confirm; DEC-0024-G27).
       - id: internal-architecture-refactor-ddd-bdd
-        github_pr: null
+        github_pr: 46
         role: execution
         terminal: false
         sequence: 13
         checkpoints:
-          - checkpoint-internal-architecture-refactor-ddd-bdd # refactor DDD/BDD behavior-preserving + gramatica operacional G01 + contrato do graph snapshot derivado
+          - checkpoint-internal-architecture-refactor-ddd-bdd # PR #46: refactor DDD/BDD behavior-preserving + gramatica operacional G01 + contrato do graph snapshot derivado
 
+    planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
       # A investigacao da 0024 expos que persistir conhecimento NAO basta: falta
       # absorcao/reconciliacao/projecao/enforcement (o humano virava o reconciliador).
