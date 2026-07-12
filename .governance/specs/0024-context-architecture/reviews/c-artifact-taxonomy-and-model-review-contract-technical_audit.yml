@@ -67,5 +67,5 @@ findings:
       com a policy deliberada (catalogo separado de obrigatoriedade, PIT-0012),
       mas nao enforcado para este checkpoint; se a owner quiser o bloqueio
       mecanico, o override por no existe."
-    disposition: open
+    disposition: accepted
     fingerprint: a7425a877940

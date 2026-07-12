@@ -20,7 +20,7 @@ findings:
       um review findingsEmitted:0 ser derivado como approved por um evento
       scope:findings, e nenhum teste falharia. CORRECAO MINIMA: adicionar
       regressao com findingsEmitted:0 provando que scope:findings nao aprova."
-    disposition: open
+    disposition: accepted
     fingerprint: 8bd484be8172
   - id: F2
     severity: low
@@ -36,7 +36,7 @@ findings:
       superficiar a decisao efetiva derivada ao lado da declarada no
       consolidado. Nao bloqueia: pr-ready:check e a superficie autoritativa de
       readiness."
-    disposition: open
+    disposition: accepted
     fingerprint: c87a20e3e244
   - id: F3
     severity: low
@@ -51,5 +51,5 @@ findings:
       commit review-only nao avanca a cabeca funcional, esse evento consegue
       cobrir a cabeca atual. Nao e defeito do PR; e nota de sequenciamento de
       readiness. Sem correcao de codigo exigida."
-    disposition: open
+    disposition: accepted
     fingerprint: 9e8cd7ac4fbb
