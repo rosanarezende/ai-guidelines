@@ -698,6 +698,30 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
   // 6 — gate do checkpoint aprovado e nó ainda ativo: concluir/abrir o próximo.
   if (lifecycle?.gateDecision === "approved" && facts.activeNode) {
     const next = facts.nextPlannedNode;
+    const pendingSteps = facts.steps.filter((s) => s.state !== "done");
+
+    if (pendingSteps.length > 0) {
+      const first = pendingSteps[0];
+      const pendingStepIds = pendingSteps.map((s) => s.id).join(", ");
+      return {
+        kind: "conclude-node-open-next",
+        description: next
+          ? `Human Gate aprovado para ${facts.cursor?.checkpoint ?? "?"}, mas a Frente ainda tem checkpoint(s) pendente(s): ${pendingStepIds}. Abra o próximo PR governado da continuação antes de abrir o nó topológico ${next.id} (seq ${next.sequence ?? "?"}).`
+          : `Human Gate aprovado para ${facts.cursor?.checkpoint ?? "?"}, mas a Frente ainda tem checkpoint(s) pendente(s): ${pendingStepIds}. Abra o próximo PR governado da continuação antes de concluir a topologia.`,
+        basis: [
+          `gate do checkpoint ${facts.cursor?.checkpoint ?? "?"} = approved`,
+          `nó ${facts.activeNode.id} ainda em topology.prs.active`,
+          `checkpoint pendente em tasks.md linha ${first.line}: ${first.id} — ${first.title}`,
+          ...(next
+            ? [
+                `próximo nó topológico bloqueado enquanto a Frente não fecha: ${next.id} (seq ${next.sequence ?? "?"})`,
+              ]
+            : []),
+        ],
+        blocking: true,
+      };
+    }
+
     return {
       kind: "conclude-node-open-next",
       description: next

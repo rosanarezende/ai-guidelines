@@ -278,6 +278,57 @@ describe("deriveNextAction · precedência [CO-4]", () => {
     expect(action.basis.join(" ")).toContain("approved");
   });
 
+  it("6b — gate aprovado + Frente pendente bloqueia abertura do próximo nó topológico", () => {
+    const action = deriveNextAction(
+      facts({
+        cursor: {
+          pr: "artifact-taxonomy-and-model-review-contract",
+          checkpoint: "checkpoint-artifact-taxonomy-and-model-review-contract",
+        },
+        activeNode: {
+          id: "artifact-taxonomy-and-model-review-contract",
+          githubPr: 45,
+          sequence: 12,
+          terminal: false,
+        },
+        nextPlannedNode: {
+          id: "dualroot-collapse",
+          githubPr: null,
+          sequence: 13,
+          terminal: false,
+        },
+        tasks: [{ ...OPEN_TASK, done: true }],
+        lifecycle: {
+          ...LIFECYCLE_REQUIRED_SATISFIED,
+          gateDecision: "approved",
+        },
+        steps: [
+          {
+            id: "artifact-taxonomy-and-model-review-contract",
+            title: "taxonomia de artefatos",
+            state: "in-progress",
+            readiness: "ready-for-transition",
+            line: 130,
+          },
+          {
+            id: "internal-architecture-refactor-ddd-bdd",
+            title: "reorganização behavior-preserving",
+            state: "pending",
+            line: 131,
+          },
+        ],
+      })
+    );
+
+    expect(action.kind).toBe("conclude-node-open-next");
+    expect(action.blocking).toBe(true);
+    expect(action.description).toContain("continuação");
+    expect(action.description).toContain("internal-architecture-refactor-ddd-bdd");
+    expect(action.description).toContain("dualroot-collapse");
+    expect(action.description).not.toContain("abrir o próximo PR autorizado");
+    expect(action.basis.join(" ")).toContain("tasks.md linha 130");
+  });
+
   it("7 — tarefa aberta do checkpoint → primeira tarefa aberta (descrição derivada do escopo real)", () => {
     const action = deriveNextAction(facts());
     expect(action.kind).toBe("execute-task");
