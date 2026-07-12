@@ -96,6 +96,12 @@ evidence/importer/projection (QRDs 17-23/30-33) → ports em `app/ports`;
 contratos de teste guiando estrutura (QRDs 34-35) → BDD de mantenedor por
 família movida. Fora (repo Guilda): UX/app/desktop/portal/auth/branding/matcher.
 
+**Rastreabilidade lente a lente (não narrativa):** a disposição completa das 9
+lentes do tracker (macro→micro; aplicada/roteada/migrada/evidência/rebaixada,
+com destino no snapshot e na falsificação) vive em
+[`2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md`](./2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md)
+— critério de saída do checkpoint, verificado na `continuation-review-human-gate`.
+
 ## 6. Fatias propostas (ordem de execução)
 
 1. **Guard de fronteira de camadas** (esta rodada): teste arquitetural que
