@@ -19,8 +19,18 @@ export type StepDeliveryEvidence =
       readonly reason: string;
     };
 
-function markerFor(id: string, state: "[/]" | "[ ]" | "[x]"): string {
-  return `${state} **${id}`;
+/**
+ * O título da etapa em tasks.md pode vir com o prefixo `Checkpoint ` quando a
+ * etapa É o checkpoint semântico do nó (formato exigido pelo active-specs:check)
+ * — mesmo contrato do parser canônico (`parseSteps`) e do markReadiness.
+ */
+function markerVariantsFor(id: string, state: "[/]" | "[ ]" | "[x]"): readonly string[] {
+  return [`${state} **${id}`, `${state} **Checkpoint ${id}`];
+}
+
+function hasStepMarker(content: string | null, id: string, state: "[/]" | "[ ]" | "[x]"): boolean {
+  if (!content) return false;
+  return markerVariantsFor(id, state).some((marker) => content.includes(marker));
 }
 
 function git(repoRoot: string, args: readonly string[]): string {
@@ -67,11 +77,11 @@ export function findStepActivationCommit(
 
   for (const commit of commits) {
     const current = showFile(repoRoot, commit, tasksPath);
-    if (!current?.includes(markerFor(activeId, "[/]"))) continue;
+    if (!hasStepMarker(current, activeId, "[/]")) continue;
 
     const parent = firstParent(repoRoot, commit);
     const previous = parent ? showFile(repoRoot, parent, tasksPath) : null;
-    if (!previous?.includes(markerFor(activeId, "[/]"))) return commit;
+    if (!hasStepMarker(previous, activeId, "[/]")) return commit;
   }
   return null;
 }
