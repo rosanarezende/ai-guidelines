@@ -192,6 +192,21 @@ function blockingReviews(snapshot: DecisionSnapshot): readonly {
     .map((s) => ({ typeId: s.typeId, state: s.state }));
 }
 
+function reviewRevalidationWaived(snapshot: DecisionSnapshot, role: string): boolean {
+  const status = snapshot.facts.lifecycle?.reviewStatuses.find((item) => item.typeId === role);
+  return (status?.notes ?? []).some((note) => note.includes("revalidation waived"));
+}
+
+function findingCanClose(
+  snapshot: DecisionSnapshot,
+  finding: DecisionSnapshot["openFindings"][number]
+): boolean {
+  if (!finding.resolution || finding.resolution.action !== "fixed") return false;
+  if (finding.refValid === false) return false;
+  if (finding.verified) return true;
+  return !finding.blocking && reviewRevalidationWaived(snapshot, finding.role);
+}
+
 function advisoryReviewAvailability(snapshot: DecisionSnapshot): DecisionAvailability {
   if (snapshot.gateExists || snapshot.facts.lifecycle?.gateDecision === "approved") {
     return {
@@ -487,18 +502,10 @@ export function deriveHumanGateAvailability(f: HumanGateFacts): DecisionAvailabi
     };
   }
   const reasons: string[] = [];
-  for (const sc of f.steps) {
-    if (sc.state === "pending") reasons.push(`${sc.id} ainda está aberto.`);
-  }
   const activeSub = f.steps.find((s) => s.state === "in-progress");
   if (activeSub) {
-    const pendingAfter = f.steps.filter((s) => s.state === "pending" && s.line > activeSub.line);
     if (activeSub.readiness !== STEP_READINESS) {
       reasons.push(`${activeSub.id} ainda não declarou readiness "${STEP_READINESS}".`);
-    } else if (pendingAfter.length > 0) {
-      reasons.push(
-        `${activeSub.id} declarou readiness, mas ${pendingAfter[0].id} ainda precisa ser ativado por advance-step.`
-      );
     }
   }
   if (f.openFindings > 0) {
@@ -1008,9 +1015,7 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   const advisoryReview = advisoryReviewAvailability(snapshot);
   const closeDispositions: DecisionAvailability =
     snapshot.openFindings.length > 0 &&
-    snapshot.openFindings.every(
-      (f) => f.resolution?.action === "fixed" && f.refValid !== false && f.verified
-    )
+    snapshot.openFindings.every((f) => findingCanClose(snapshot, f))
       ? { status: "available", reasons: [], hint: "findings revalidados podem ser encerrados" }
       : snapshot.openFindings.length > 0
         ? {
@@ -1060,10 +1065,10 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   ];
   const priority: GovernedFlowActionId[] = [
     "close-dispositions",
+    "human-gate",
     "finish-step",
     "mark-readiness",
     "advance-step",
-    "human-gate",
     "open-next-topology-node",
   ];
   const available = actions.filter((a) => a.availability.status === "available");

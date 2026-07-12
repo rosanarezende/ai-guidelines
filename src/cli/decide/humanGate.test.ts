@@ -132,21 +132,25 @@ function readyPreconditionsSnapshot(over: Partial<ReadyCheckSnapshot> = {}): Rea
 }
 
 describe("human-gate · elegibilidade [decide]", () => {
-  it("[6][33] Draft + etapas pendentes ⇒ blocked, explicado em linguagem humana", () => {
+  it("[6][33] Draft + etapa ativa sem readiness ⇒ blocked, explicado em linguagem humana", () => {
     const av = def.detect(makeDecisionSnapshot());
     expect(av.status).toBe("blocked");
     const reasons = av.reasons.join(" ");
-    expect(reasons).toMatch(/CO-3\.2 ainda está aberto/);
-    expect(reasons).toMatch(/CO-3\.3 ainda está aberto/);
-    expect(reasons).toMatch(/CO-3\.4 ainda está aberto/);
+    expect(reasons).toMatch(/CO-3\.1 ainda não declarou readiness/);
     expect(reasons).toMatch(/Draft/);
   });
 
-  it("[34] etapa (tarefa) pendente bloqueia", () => {
+  it("[34] etapas futuras pendentes não bloqueiam o gate do checkpoint atual", () => {
     const s = readySnapshot({
-      steps: [{ id: "CO-3.4", title: "x", state: "pending", line: 1 }],
+      steps: [
+        { id: "CO-3.4", title: "x", state: "in-progress", readiness: STEP_READINESS, line: 1 },
+        { id: "CO-3.5", title: "y", state: "pending", line: 2 },
+      ],
     });
-    expect(def.detect(s).status).toBe("blocked");
+    const av = def.detect(s);
+
+    expect(av.status).toBe("available");
+    expect(av.reasons.join(" ")).not.toMatch(/CO-3\.5/);
   });
 
   it("[34b] etapa ativa sem readiness bloqueia o gate", () => {

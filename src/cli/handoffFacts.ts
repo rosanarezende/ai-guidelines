@@ -127,6 +127,8 @@ export interface HandoffReviewStatusFact {
   readonly blocking: boolean;
   /** Origem da decisão de requirement (repo default, rule:<id>, node-override). */
   readonly source: string;
+  /** Notas derivadas do plano situado, por exemplo dispensa governada de revalidação. */
+  readonly notes?: ReadonlyArray<string>;
 }
 
 export interface HandoffLifecycleFact {

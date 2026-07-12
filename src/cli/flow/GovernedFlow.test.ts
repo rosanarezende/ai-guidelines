@@ -411,7 +411,7 @@ describe("GovernedFlow", () => {
     expect(summary.missing).toContain("A CI tem 3 check(s) pendente(s).");
   });
 
-  it("Human Gate fica bloqueado antes de Ready e sem readiness terminal", () => {
+  it("Human Gate fica bloqueado antes de Ready, mas não por etapas futuras pendentes", () => {
     const facts = coFlowFacts();
     const snapshot = makeDecisionSnapshot({
       facts,
@@ -422,8 +422,51 @@ describe("GovernedFlow", () => {
     const gate = new HumanGateDefinition().detect(snapshot);
 
     expect(gate.status).toBe("blocked");
-    expect(gate.reasons.join(" ")).toMatch(/CO-10\.3 ainda está aberto/);
+    expect(gate.reasons.join(" ")).not.toMatch(/CO-10\.3 ainda está aberto/);
     expect(gate.reasons.join(" ")).toMatch(/PR #43 continua Draft/);
+  });
+
+  it("Human Gate fica disponível quando o checkpoint atual está pronto mesmo com próximos checkpoints pendentes", () => {
+    const facts = coFlowFacts({
+      pullRequest: {
+        ...makeHandoffFacts().pullRequest!,
+        number: 45,
+        isDraft: false,
+        checks: { pass: 12, fail: 0, pending: 0 },
+        headRefOid: "abc1234",
+      },
+      steps: [
+        { id: "drift-diagnosis-and-repair", title: "diagnóstico", state: "done", line: 126 },
+        {
+          id: "artifact-taxonomy-and-model-review-contract",
+          title: "taxonomia",
+          state: "in-progress",
+          readiness: STEP_READINESS,
+          line: 128,
+        },
+        {
+          id: "internal-architecture-refactor-ddd-bdd",
+          title: "DDD/BDD",
+          state: "pending",
+          line: 129,
+        },
+      ],
+    });
+    const snapshot = makeDecisionSnapshot({
+      facts,
+      checkpoint: "checkpoint-co-flow-continuation",
+      openFindings: [],
+      lanes: [],
+      steps: facts.steps,
+      workingTreeState: "clean",
+      prReady: { ok: true, summary: "verde" },
+      gateDecidability: { ok: true, summary: "verde" },
+    });
+
+    const flow = deriveGovernedFlow(snapshot);
+
+    expect(flow.recommended?.id).toBe("human-gate");
+    expect(flow.recommended?.availability.status).toBe("available");
   });
 
   it("PR Ready usa o mesmo fluxo para CI, tree, reviews e smoke suspension", () => {

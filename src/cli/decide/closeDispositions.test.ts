@@ -5,7 +5,12 @@ import { CloseDispositionsDefinition } from "./closeDispositions.js";
 import { DecisionGitOps } from "./model.js";
 import { sealReview } from "../reviewSeal.js";
 import { parseReview } from "../../infrastructure/yaml/reviewArtifactsReader.js";
-import { makeDecisionSnapshot, makeFinding, makeLane } from "../../test-utils/decisionFixtures.js";
+import {
+  makeDecisionSnapshot,
+  makeFinding,
+  makeHandoffFacts,
+  makeLane,
+} from "../../test-utils/decisionFixtures.js";
 
 const def = new CloseDispositionsDefinition();
 
@@ -60,6 +65,43 @@ describe("close-dispositions · elegibilidade [decide]", () => {
       lanes: [makeLane({ current: false })],
     });
     expect(def.detect(s).status).toBe("blocked");
+  });
+
+  it("finding não bloqueante com correção válida pode ser fechado quando revalidação foi dispensada", () => {
+    const facts = makeHandoffFacts({
+      lifecycle: {
+        ...makeHandoffFacts().lifecycle!,
+        reviewStatuses: [
+          {
+            typeId: "technical_audit",
+            applicability: "yes",
+            requirement: "required",
+            state: "stale",
+            decision: "approved",
+            blocking: false,
+            source: "review-plan",
+            notes: ["revalidation waived by owner: low/advisory cleanup já coberto."],
+          },
+        ],
+        openFindings: 1,
+        openBlocking: 0,
+      },
+    });
+    const s = makeDecisionSnapshot({
+      facts,
+      openFindings: [
+        makeFinding({
+          localId: "F5",
+          qualified: "technical_audit#F5",
+          severity: "low",
+          blocking: false,
+          verified: false,
+        }),
+      ],
+      lanes: [makeLane({ current: false })],
+    });
+
+    expect(def.detect(s).status).toBe("available");
   });
 
   it("[20] ref de correção inválida (stale) bloqueia", () => {

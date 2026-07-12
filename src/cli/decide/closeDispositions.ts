@@ -54,6 +54,18 @@ function nextPendingStep(snapshot: DecisionSnapshot): string | null {
   return pending ? pending.id : null;
 }
 
+function reviewRevalidationWaived(snapshot: DecisionSnapshot, role: string): boolean {
+  const status = snapshot.facts.lifecycle?.reviewStatuses.find((item) => item.typeId === role);
+  return (status?.notes ?? []).some((note) => note.includes("revalidation waived"));
+}
+
+function findingCanClose(snapshot: DecisionSnapshot, finding: DecisionFinding): boolean {
+  if (!finding.resolution || finding.resolution.action !== "fixed") return false;
+  if (finding.refValid === false) return false;
+  if (finding.verified) return true;
+  return !finding.blocking && reviewRevalidationWaived(snapshot, finding.role);
+}
+
 export class CloseDispositionsDefinition implements HumanDecisionDefinition {
   readonly id = CLOSE_DISPOSITIONS_ID;
   readonly title = "Encerrar problemas revalidados da auditoria técnica";
@@ -82,9 +94,16 @@ export class CloseDispositionsDefinition implements HumanDecisionDefinition {
         `Os artefatos de review têm erro de integridade: ${snapshot.consolidation.errors[0]}`
       );
     }
-    // Cada lane com findings abertos precisa estar CURRENT (revalidada no HEAD).
+    // Cada lane com findings abertos precisa estar CURRENT (revalidada no HEAD),
+    // salvo findings não bloqueantes já corrigidos cuja revalidação foi
+    // explicitamente dispensada pela owner no plano situado de revisão.
     for (const lane of snapshot.lanes) {
-      if (!lane.current) {
+      const laneOpenFindings = snapshot.openFindings.filter((f) => f.role === lane.role);
+      const laneClosableByWaiver =
+        reviewRevalidationWaived(snapshot, lane.role) &&
+        laneOpenFindings.length > 0 &&
+        laneOpenFindings.every((f) => findingCanClose(snapshot, f));
+      if (!lane.current && !laneClosableByWaiver) {
         reasons.push(
           `A auditoria "${lane.role.replace(/_/g, " ")}" ainda não foi revalidada no estado atual — ` +
             `falta verificação aprovada cobrindo a cabeça funcional.`
@@ -102,7 +121,7 @@ export class CloseDispositionsDefinition implements HumanDecisionDefinition {
         reasons.push(
           `O problema ${f.localId} aponta uma correção que não está no histórico atual.`
         );
-      } else if (!f.verified) {
+      } else if (!findingCanClose(snapshot, f)) {
         reasons.push(
           `O problema ${f.localId} ainda não foi revalidado por verificação independente.`
         );
