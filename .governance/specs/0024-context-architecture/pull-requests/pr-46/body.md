@@ -96,6 +96,7 @@ Os aprendizados do incubador `work-graph-model` (`model.yml`, `tracker.md`, `fea
 - **G01 fechado no framework:** `[DEC-0024-G31]` registra a gramática operacional materializada; resíduos de escala consumidor, promoção/projeções e `terminus` permanecem roteados, sem encerramento global por decreto.
 - **Publicação de reviews sem deadlock:** `review:publish` passou a publicar o artefato canônico e o `governance-graph-snapshot.json` sincronizado no mesmo envelope atômico declarado pela policy. O commit continua isolado, rejeita qualquer path arbitrário e não avança a cabeça funcional usada pela freshness da própria review.
 - **Findings arquiteturais corrigidos no código:** o briefing de review agora consome o mesmo `review_plan` situado que `pr-ready` e `handoff`; os guards compartilham um grafo de dependências que cobre imports, reexports, imports dinâmicos e `require`; e a garantia offline do graph snapshot percorre todo o fechamento transitivo da derivação.
+- **Revalidação assistida, não automática:** `flow -- decide --type review-revalidation` analisa o delta de reviews obrigatórias stale, classifica riscos e recomenda dispensar ou repetir; a owner confirma ou substitui a recomendação. A decisão fica limitada ao HEAD analisado, preserva o fato `stale` e é invalidada por qualquer mudança funcional posterior.
 
 <details>
 <summary><strong>Prompt final — valor entregue</strong></summary>
@@ -165,6 +166,7 @@ npm run artifact-kind:check
 npm run research-index:check
 npm run test:ts -- --runInBand src/app/reviews/reviewPublicationPolicy.test.ts src/app/reviews/reviewRequirements.test.ts src/cli/reviewFreshness.test.ts src/cli/reviewPublish.test.ts
 npm run test:ts -- --runInBand src/cli/reviewBrief.test.ts src/test-utils/sourceDependencyGraph.test.ts src/test-utils/Boundaries.test.ts src/test-utils/LayerBoundaries.test.ts src/app/projections/governanceGraphSnapshot.test.ts
+npm run test:ts -- --runInBand src/app/reviews/reviewRevalidation.test.ts src/cli/decide/reviewRevalidation.test.ts src/cli/reviewFreshness.test.ts src/app/reviews/reviewRequirements.test.ts
 ```
 
 Refactor behavior-preserving: cada movimentação estrutural deve manter os testes existentes verdes; comportamento só muda com teste e justificativa registrada.
@@ -173,8 +175,8 @@ Refactor behavior-preserving: cada movimentação estrutural deve manter os test
 
 ### Evidências e gates
 
-- Technical Audit: **required**; aprovada e revalidada até a cabeça funcional `b4d0c834`. O delta final que corrige os findings arquiteturais exige verificação técnica direcionada antes de Ready/Human Gate.
-- Architectural Review: **required**; aprovada sobre `b4d0c834`, com três findings não bloqueantes. Os três foram corrigidos no delta funcional final e exigem verificação arquitetural direcionada antes de Ready/Human Gate.
+- Technical Audit: **required**; aprovada e revalidada até `b4d0c834`. Para o delta posterior registrado em `state.yml`, o sistema recomendou repetir por tocar a política e o fluxo de decisão; a owner dispensou explicitamente a revalidação. A dispensa é situada no HEAD analisado e não transforma a lane stale em current.
+- Architectural Review: **required**; aprovada sobre `b4d0c834`, com três findings não bloqueantes já corrigidos. Para o delta posterior registrado em `state.yml`, o sistema recomendou repetir; a owner dispensou explicitamente a revalidação, limitada ao mesmo HEAD analisado.
 - Security Review: **waived** por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.
 - Human Gate: pendente — decisão reservada à owner; não é autorização de merge.
 - Merge: fora do escopo deste PR individual; a stack segue em modo unit.
