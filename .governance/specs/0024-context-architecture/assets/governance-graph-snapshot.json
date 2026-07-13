@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "a999101d2c57",
+  "snapshot_fingerprint": "8e2a5ee659fa",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -623,6 +623,10 @@
     {
       "path": ".governance/specs/0024-context-architecture/reviews/c-graph-core-technical_audit.yml",
       "hash": "62ace879cf98"
+    },
+    {
+      "path": ".governance/specs/0024-context-architecture/reviews/c-internal-architecture-refactor-ddd-bdd-architectural_review.yml",
+      "hash": "2a626fdfe92d"
     },
     {
       "path": ".governance/specs/0024-context-architecture/reviews/c-internal-architecture-refactor-ddd-bdd-technical_audit.yml",
@@ -2374,6 +2378,45 @@
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/reviews/c-co-reconcile-technical_audit.yml",
         "hash": "d33d711442e7"
+      }
+    },
+    {
+      "id": "finding:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review-F1",
+      "type": "finding",
+      "label": "architectural_review#F1 · internal-architecture-refactor-ddd-bdd",
+      "attributes": {
+        "severity": "medium",
+        "disposition": "accepted"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/reviews/c-internal-architecture-refactor-ddd-bdd-architectural_review.yml",
+        "hash": "2a626fdfe92d"
+      }
+    },
+    {
+      "id": "finding:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review-F2",
+      "type": "finding",
+      "label": "architectural_review#F2 · internal-architecture-refactor-ddd-bdd",
+      "attributes": {
+        "severity": "low",
+        "disposition": "accepted"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/reviews/c-internal-architecture-refactor-ddd-bdd-architectural_review.yml",
+        "hash": "2a626fdfe92d"
+      }
+    },
+    {
+      "id": "finding:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review-F3",
+      "type": "finding",
+      "label": "architectural_review#F3 · internal-architecture-refactor-ddd-bdd",
+      "attributes": {
+        "severity": "low",
+        "disposition": "accepted"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/reviews/c-internal-architecture-refactor-ddd-bdd-architectural_review.yml",
+        "hash": "2a626fdfe92d"
       }
     },
     {
@@ -4289,6 +4332,19 @@
       }
     },
     {
+      "id": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review",
+      "type": "review",
+      "label": "architectural_review · internal-architecture-refactor-ddd-bdd",
+      "attributes": {
+        "role": "architectural_review",
+        "decision": "approved"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/reviews/c-internal-architecture-refactor-ddd-bdd-architectural_review.yml",
+        "hash": "2a626fdfe92d"
+      }
+    },
+    {
       "id": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-technical_audit",
       "type": "review",
       "label": "technical_audit · internal-architecture-refactor-ddd-bdd",
@@ -5635,6 +5691,21 @@
       "to": "review:0024-context-architecture/co-reconcile-technical_audit"
     },
     {
+      "from": "finding:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review-F1",
+      "type": "belongs-to",
+      "to": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review"
+    },
+    {
+      "from": "finding:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review-F2",
+      "type": "belongs-to",
+      "to": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review"
+    },
+    {
+      "from": "finding:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review-F3",
+      "type": "belongs-to",
+      "to": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review"
+    },
+    {
       "from": "finding:0024-context-architecture/npm-toolchain-architectural_review-F1",
       "type": "belongs-to",
       "to": "review:0024-context-architecture/npm-toolchain-architectural_review"
@@ -6278,6 +6349,11 @@
       "from": "review:0024-context-architecture/graph-core-technical_audit",
       "type": "verifies",
       "to": "checkpoint:0024-context-architecture/checkpoint-graph-core"
+    },
+    {
+      "from": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-architectural_review",
+      "type": "verifies",
+      "to": "checkpoint:0024-context-architecture/checkpoint-internal-architecture-refactor-ddd-bdd"
     },
     {
       "from": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-technical_audit",
