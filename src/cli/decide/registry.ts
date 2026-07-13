@@ -14,6 +14,7 @@ import { MarkReadinessDefinition } from "./markReadiness.js";
 import { AdvanceStepDefinition } from "./advanceStep.js";
 import { HumanGateDefinition } from "./humanGate.js";
 import { OpenNextTopologyNodeDefinition } from "./openNextTopologyNode.js";
+import { ReviewRevalidationDefinition } from "./reviewRevalidation.js";
 
 export class DecisionRegistry {
   private readonly byId = new Map<string, HumanDecisionDefinition>();
@@ -51,6 +52,7 @@ export class DecisionRegistry {
 export function buildDecisionRegistry(): DecisionRegistry {
   const registry = new DecisionRegistry();
   registry.register(new CloseDispositionsDefinition());
+  registry.register(new ReviewRevalidationDefinition());
   registry.register(new FinishStepDefinition());
   registry.register(new MarkReadinessDefinition());
   registry.register(new AdvanceStepDefinition());

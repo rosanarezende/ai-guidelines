@@ -4,11 +4,13 @@ import { FinishStepDefinition } from "./finishStep.js";
 import { MarkReadinessDefinition } from "./markReadiness.js";
 import { HumanGateDefinition } from "./humanGate.js";
 import { OpenNextTopologyNodeDefinition } from "./openNextTopologyNode.js";
+import { ReviewRevalidationDefinition } from "./reviewRevalidation.js";
 
 describe("DecisionRegistry [decide]", () => {
   it("[1] registry contém os tipos na ordem do ciclo de vida", () => {
     expect(buildDecisionRegistry().ids()).toEqual([
       "close-dispositions",
+      "review-revalidation",
       "finish-step",
       "mark-readiness",
       "advance-step",
@@ -30,6 +32,7 @@ describe("DecisionRegistry [decide]", () => {
         .map((d) => d.id)
     ).toEqual([
       "close-dispositions",
+      "review-revalidation",
       "finish-step",
       "mark-readiness",
       "advance-step",
@@ -44,6 +47,7 @@ describe("DecisionRegistry [decide]", () => {
     expect(r.resolve("mark-readiness")).toBeInstanceOf(MarkReadinessDefinition);
     expect(r.resolve("human-gate")).toBeInstanceOf(HumanGateDefinition);
     expect(r.resolve("open-next-topology-node")).toBeInstanceOf(OpenNextTopologyNodeDefinition);
+    expect(r.resolve("review-revalidation")).toBeInstanceOf(ReviewRevalidationDefinition);
     expect(r.resolve("nope")).toBeUndefined();
   });
 });

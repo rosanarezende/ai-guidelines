@@ -14,6 +14,7 @@ import type { StepDeliveryEvidence } from "./stepDeliveryEvidence.js";
 
 export type GovernedFlowActionId =
   | "close-dispositions"
+  | "review-revalidation"
   | "finish-step"
   | "mark-readiness"
   | "advance-step"
@@ -739,7 +740,10 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
                 ? `com decisão "${s.decision}" (precisa de approved)`
                 : s.state;
         failures.push(
-          `review OBRIGATÓRIO "${s.typeId}" (${s.source}) ${why} no checkpoint "${checkpoint.id}".`
+          `review OBRIGATÓRIO "${s.typeId}" (${s.source}) ${why} no checkpoint "${checkpoint.id}".` +
+            (s.state === "stale" && s.decision === "approved"
+              ? " Antes de repetir a review, rode `npm run flow -- decide --type review-revalidation --brief-only` para ver a recomendação calculada; a decisão final continua humana."
+              : "")
         );
       } else if (s.requirement === "required" && s.state === "stale" && s.decision === "approved") {
         const note = (s.notes ?? []).find((n) => n.includes("revalidation waived"));
@@ -774,11 +778,13 @@ function commandFor(id: GovernedFlowActionId, mutating: boolean): string {
           ? "advance"
           : id === "close-dispositions"
             ? "accept-all"
-            : id === "human-gate"
-              ? "approve"
-              : id === "open-next-topology-node"
-                ? "open-node"
-                : "<choice>";
+            : id === "review-revalidation"
+              ? "accept-recommendations"
+              : id === "human-gate"
+                ? "approve"
+                : id === "open-next-topology-node"
+                  ? "open-node"
+                  : "<choice>";
   return `npm run flow -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
 }
 
@@ -955,6 +961,10 @@ function deriveHumanSummary(
     missing.push("Falta abrir governadamente o proximo no planejado.");
   } else if (flow.recommended?.id === "close-dispositions") {
     missing.push("Falta fechar findings revalidados.");
+  } else if (flow.recommended?.id === "review-revalidation") {
+    missing.push(
+      "Falta a owner decidir, após a recomendação do sistema, se reviews stale serão revalidados."
+    );
   } else if (flow.blocked.length > 0) {
     const blockedReasons = flow.blocked
       .slice(0, 2)
@@ -1005,6 +1015,8 @@ function humanNextAction(
   if (recommendedId === "open-next-topology-node")
     return "Abrir governadamente o próximo nó da topologia.";
   if (recommendedId === "close-dispositions") return "Fechar findings revalidados.";
+  if (recommendedId === "review-revalidation")
+    return "Avaliar a recomendação do sistema sobre revalidação das reviews stale.";
   if (snapshot.workingTreeState !== "clean")
     return "Finalizar as mudanças locais e deixar a working tree limpa.";
   if (ciPending) return "Aguardar a CI terminar.";
@@ -1048,11 +1060,31 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
             reasons: ["Há finding aberto sem resolução fixed revalidada."],
           }
         : { status: "not-applicable", reasons: ["Não há findings abertos."] };
+  const reviewRevalidation: DecisionAvailability =
+    snapshot.reviewRevalidations.length > 0
+      ? {
+          status: "available",
+          reasons: [],
+          hint: `${snapshot.reviewRevalidations.length} review(s) stale aguardam decisão humana assistida.`,
+        }
+      : {
+          status: "not-applicable",
+          reasons: ["Não há review stale+approved aguardando decisão de revalidação."],
+        };
 
   const actions = [
     action("close-dispositions", "Fechar findings revalidados", closeDispositions, [
       "altera artefato de review/resolution conforme decisão humana",
     ]),
+    action(
+      "review-revalidation",
+      "Decidir se reviews stale precisam de revalidação",
+      reviewRevalidation,
+      [
+        "o sistema recomenda a partir do delta e dos findings",
+        "a owner confirma; nenhuma dispensa é automática",
+      ]
+    ),
     action("finish-step", "Concluir etapa atual e iniciar a próxima", finish, [
       "altera somente marcadores de etapas em tasks.md",
       "valida readiness sem exigir commit intermediário",
@@ -1090,6 +1122,7 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   ];
   const priority: GovernedFlowActionId[] = [
     "close-dispositions",
+    "review-revalidation",
     "human-gate",
     "finish-step",
     "mark-readiness",

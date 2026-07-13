@@ -269,6 +269,7 @@ function derivedValidations(specId: string, object: WorkObject): WorkValidation[
 type DecisionType =
   | "advance-step"
   | "close-dispositions"
+  | "review-revalidation"
   | "finish-step"
   | "mark-readiness"
   | "human-gate"
@@ -310,6 +311,12 @@ const DECISION_STILL_FORBIDDEN: Record<DecisionType, readonly string[]> = {
     "Converter o PR para Ready",
     "Exercer o Human Gate",
     "Criar o gate artifact",
+    "Fazer merge",
+  ],
+  "review-revalidation": [
+    "Alterar ou reescrever o review original",
+    "Declarar readiness do checkpoint",
+    "Exercer o Human Gate",
     "Fazer merge",
   ],
   "human-gate": [
@@ -631,20 +638,26 @@ export function deriveWorkNextAction(
     );
   }
 
-  // AWAIT_REVALIDATION → close-dispositions (decisão da owner pós-revalidação).
+  // AWAIT_REVALIDATION → recomendação+decisão humana quando review obrigatório
+  // stale; close-dispositions apenas depois de a lane estar resolvida.
   if (mode === "await_revalidation") {
     const open = object.findings ?? [];
     const reviewPending = requiredReviewsPending(facts).length > 0;
     return decisionNextAction(
-      "close-dispositions",
-      !reviewPending,
-      "Após a revalidação independente, a owner encerra os problemas revalidados da auditoria técnica (close-dispositions).",
+      reviewPending ? "review-revalidation" : "close-dispositions",
+      true,
+      reviewPending
+        ? "O sistema analisa o delta e recomenda dispensar ou repetir a revalidação; a owner decide."
+        : "Após a revalidação independente, a owner encerra os problemas revalidados da auditoria técnica (close-dispositions).",
       [
         ...open.map(
           (f) => `${f.qualified}: ${f.disposition} · resolution fixed (ref ${f.ref ?? "?"})`
         ),
         ...(reviewPending
-          ? ["review obrigatório pendente — a revalidação independente precede o encerramento."]
+          ? [
+              "review obrigatório stale/pendente — consultar review-revalidation antes de repetir a revisão.",
+              "a recomendação do sistema não escreve nem dispensa nada sem confirmação humana.",
+            ]
           : []),
         "o implementador NÃO fecha disposition; só a owner/reviewer (close-dispositions).",
       ]

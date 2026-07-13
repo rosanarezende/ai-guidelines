@@ -190,6 +190,7 @@ export function makeDecisionSnapshot(over: Partial<DecisionSnapshot> = {}): Deci
     openFindings: findings,
     closedFindingsCount: 0,
     lanes: over.lanes ?? [makeLane()],
+    reviewRevalidations: [],
     gateExists: false,
     gateFile: null,
     steps: over.steps ?? makeSteps(),
