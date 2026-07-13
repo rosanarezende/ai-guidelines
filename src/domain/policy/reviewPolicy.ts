@@ -44,10 +44,16 @@ export interface ReviewLanePolicy {
  * somente com autorização humana explícita.
  */
 /** Autorização do ciclo do artefato canônico (commit/push review-only). */
+export const REVIEW_PUBLICATION_COMPANION_IDS = ["governance-graph-snapshot"] as const;
+
+export type ReviewPublicationCompanionId = (typeof REVIEW_PUBLICATION_COMPANION_IDS)[number];
+
 export interface CanonicalArtifactPolicy {
   readonly commitPolicy: string;
   readonly pushPolicy: string;
   readonly mixedDiff: string;
+  /** Projeções determinísticas que compõem o envelope atômico da publicação. */
+  readonly deterministicCompanions: readonly ReviewPublicationCompanionId[];
 }
 
 export interface ReviewPublicationPolicy {

@@ -9,6 +9,8 @@ import {
   ReviewLanePolicy,
   CanonicalArtifactPolicy,
   ReviewPublicationPolicy,
+  REVIEW_PUBLICATION_COMPANION_IDS,
+  ReviewPublicationCompanionId,
   ReviewRequirementLevel,
   REQUIREMENT_LEVELS,
   ReviewTypePolicy,
@@ -58,6 +60,19 @@ function nonNegativeInt(v: unknown, where: string): number {
 function stringList(v: unknown, where: string): string[] {
   if (!Array.isArray(v)) throw new ReviewPolicyParseError(`${where} must be a list`);
   return v.map((item, i) => str(item, `${where}[${i}]`));
+}
+
+function publicationCompanions(v: unknown, where: string): ReviewPublicationCompanionId[] {
+  const values = v === undefined || v === null ? [] : stringList(v, where);
+  const allowed = new Set<string>(REVIEW_PUBLICATION_COMPANION_IDS);
+  for (const value of values) {
+    if (!allowed.has(value)) {
+      throw new ReviewPolicyParseError(
+        `${where} contains unsupported companion "${value}"; allowed: ${REVIEW_PUBLICATION_COMPANION_IDS.join(", ")}`
+      );
+    }
+  }
+  return values as ReviewPublicationCompanionId[];
 }
 
 function rolePolicy(raw: unknown, where: string): ReviewRolePolicy {
@@ -315,6 +330,10 @@ export function parseReviewPolicy(yamlText: string): ReviewPolicy {
         commitPolicy: str(rawCa.commit_policy, "publication.canonical_artifact.commit_policy"),
         pushPolicy: str(rawCa.push_policy, "publication.canonical_artifact.push_policy"),
         mixedDiff: str(rawCa.mixed_diff, "publication.canonical_artifact.mixed_diff"),
+        deterministicCompanions: publicationCompanions(
+          rawCa.deterministic_companions,
+          "publication.canonical_artifact.deterministic_companions"
+        ),
       };
     }
     publication = {

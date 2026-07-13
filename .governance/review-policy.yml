@@ -185,10 +185,14 @@ publication:
   # Autorização do ARTEFATO CANÔNICO ≠ autorização de publicação no GitHub.
   # Pedido humano explícito de review ("Faça o Technical Audit...") = autorização
   # capability-scoped para o ciclo completo e LIMITADO daquele review: criar o
-  # artefato, selar, validar, commit EXCLUSIVO e push normal — nada além.
+  # artefato, selar, validar e publicar em um commit atomicamente isolado. O
+  # envelope pode incluir apenas projeções determinísticas declaradas abaixo;
+  # código, docs arbitrários ou um segundo artefato continuam proibidos.
   canonical_artifact:
     commit_policy: allowed-on-explicit-review-request
     push_policy: allowed-on-explicit-review-request
-    mixed_diff: block # qualquer path fora do artefato esperado bloqueia
+    mixed_diff: block
+    deterministic_companions:
+      - governance-graph-snapshot
   github_comments: forbidden-by-default
   github_exception: explicit-owner-authorization

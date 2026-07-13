@@ -1,6 +1,8 @@
 import { isReviewPublicationOnlyDelta, isReviewPublicationPath } from "./reviewFreshness.js";
 
 const REVIEWS_DIR = ".governance/specs/0024-context-architecture/reviews";
+const SNAPSHOT =
+  ".governance/specs/0024-context-architecture/assets/governance-graph-snapshot.json";
 
 describe("reviewFreshness · deltas de publicação governada", () => {
   it("review aprovado no HEAD X + delta só de review event continua review-only", () => {
@@ -40,6 +42,16 @@ describe("reviewFreshness · deltas de publicação governada", () => {
         REVIEWS_DIR
       )
     ).toBe(false);
+  });
+
+  it("review + projeção determinística declarada continuam não funcionais", () => {
+    expect(
+      isReviewPublicationOnlyDelta(
+        [`${REVIEWS_DIR}/events/c-co-enforcement-technical_audit-EV3.yml`, SNAPSHOT],
+        REVIEWS_DIR
+      )
+    ).toBe(true);
+    expect(isReviewPublicationOnlyDelta([SNAPSHOT], REVIEWS_DIR)).toBe(true);
   });
 
   it("normaliza paths Windows dentro do envelope de reviews", () => {

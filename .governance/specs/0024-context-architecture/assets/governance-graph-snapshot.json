@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "7d974e99ca88",
+  "snapshot_fingerprint": "ec16212a89bf",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -130,11 +130,11 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-      "hash": "d456f4ddf71e"
+      "hash": "e939e582aa3c"
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-      "hash": "ccc68476daf4"
+      "hash": "c3df3d97e81c"
     },
     {
       "path": ".governance/specs/0024-context-architecture/decision-brief.md",
@@ -623,6 +623,10 @@
     {
       "path": ".governance/specs/0024-context-architecture/reviews/c-graph-core-technical_audit.yml",
       "hash": "62ace879cf98"
+    },
+    {
+      "path": ".governance/specs/0024-context-architecture/reviews/c-internal-architecture-refactor-ddd-bdd-technical_audit.yml",
+      "hash": "5ff196c3314e"
     },
     {
       "path": ".governance/specs/0024-context-architecture/reviews/c-npm-toolchain-architectural_review.yml",
@@ -2786,7 +2790,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-        "hash": "ccc68476daf4"
+        "hash": "c3df3d97e81c"
       }
     },
     {
@@ -2798,7 +2802,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-        "hash": "d456f4ddf71e"
+        "hash": "e939e582aa3c"
       }
     },
     {
@@ -4264,6 +4268,19 @@
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/reviews/c-graph-core-technical_audit.yml",
         "hash": "62ace879cf98"
+      }
+    },
+    {
+      "id": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-technical_audit",
+      "type": "review",
+      "label": "technical_audit · internal-architecture-refactor-ddd-bdd",
+      "attributes": {
+        "role": "technical_audit",
+        "decision": "approved"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/reviews/c-internal-architecture-refactor-ddd-bdd-technical_audit.yml",
+        "hash": "5ff196c3314e"
       }
     },
     {
@@ -6238,6 +6255,11 @@
       "from": "review:0024-context-architecture/graph-core-technical_audit",
       "type": "verifies",
       "to": "checkpoint:0024-context-architecture/checkpoint-graph-core"
+    },
+    {
+      "from": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-technical_audit",
+      "type": "verifies",
+      "to": "checkpoint:0024-context-architecture/checkpoint-internal-architecture-refactor-ddd-bdd"
     },
     {
       "from": "review:0024-context-architecture/npm-toolchain-architectural_review",

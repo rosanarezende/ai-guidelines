@@ -28,7 +28,7 @@ const defaultLogger: Logger = {
 
 const SPEC_DIR = "0024-context-architecture";
 const SPEC_REL = `.governance/specs/${SPEC_DIR}`;
-const SNAPSHOT_REL = `${SPEC_REL}/assets/governance-graph-snapshot.json`;
+export const GOVERNANCE_GRAPH_SNAPSHOT_REL = `${SPEC_REL}/assets/governance-graph-snapshot.json`;
 const ADRS_REL = ".core/governance/adrs";
 const CONSTRAINTS_REL = ".core/constraints/constraints.yml";
 const INSIGHTS_REL = ".governance/runtime/insights";
@@ -260,17 +260,18 @@ async function formatSnapshot(
   snapshot: GovernanceGraphSnapshot
 ): Promise<string> {
   const prettier = await import("prettier");
-  const config = (await prettier.resolveConfig(path.join(repoRoot, SNAPSHOT_REL))) ?? {};
+  const config =
+    (await prettier.resolveConfig(path.join(repoRoot, GOVERNANCE_GRAPH_SNAPSHOT_REL))) ?? {};
   return prettier.format(`${JSON.stringify(snapshot, null, 2)}\n`, { ...config, parser: "json" });
 }
 
 export async function runBuild(repoRoot: string, logger: Logger = defaultLogger): Promise<number> {
   const snapshot = deriveGovernanceGraphSnapshot(collectGovernanceGraphInput(repoRoot));
-  const abs = path.join(repoRoot, SNAPSHOT_REL);
+  const abs = path.join(repoRoot, GOVERNANCE_GRAPH_SNAPSHOT_REL);
   fs.mkdirSync(path.dirname(abs), { recursive: true });
   fs.writeFileSync(abs, await formatSnapshot(repoRoot, snapshot));
   logger.info(
-    `✅ governance-graph:build — ${SNAPSHOT_REL} regenerado (${snapshot.nodes.length} nós · ${snapshot.edges.length} arestas · fp ${snapshot.snapshot_fingerprint}).`
+    `✅ governance-graph:build — ${GOVERNANCE_GRAPH_SNAPSHOT_REL} regenerado (${snapshot.nodes.length} nós · ${snapshot.edges.length} arestas · fp ${snapshot.snapshot_fingerprint}).`
   );
   return 0;
 }
@@ -278,7 +279,7 @@ export async function runBuild(repoRoot: string, logger: Logger = defaultLogger)
 export async function runCheck(repoRoot: string, logger: Logger = defaultLogger): Promise<number> {
   const snapshot = deriveGovernanceGraphSnapshot(collectGovernanceGraphInput(repoRoot));
   const expected = await formatSnapshot(repoRoot, snapshot);
-  const abs = path.join(repoRoot, SNAPSHOT_REL);
+  const abs = path.join(repoRoot, GOVERNANCE_GRAPH_SNAPSHOT_REL);
   const current = fs.existsSync(abs) ? fs.readFileSync(abs, "utf-8") : "";
   if (current === expected) {
     logger.info(
@@ -286,7 +287,9 @@ export async function runCheck(repoRoot: string, logger: Logger = defaultLogger)
     );
     return 0;
   }
-  logger.error(`❌ governance-graph:check — ${SNAPSHOT_REL} está stale em relação às fontes.`);
+  logger.error(
+    `❌ governance-graph:check — ${GOVERNANCE_GRAPH_SNAPSHOT_REL} está stale em relação às fontes.`
+  );
   logger.error("   Rode: npm run governance-graph:build");
   return 1;
 }

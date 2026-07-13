@@ -2,17 +2,22 @@
  * Freshness FUNCIONAL dos reviews (CO-4, rodada 7 — extraído na rodada 8 para
  * consumo compartilhado por briefing e handoff sem ciclo de import):
  *
- * A cabeça auditável é o último commit que altera algo fora do diretório
- * CANÔNICO de reviews da spec, e a working tree é classificada pelos mesmos
- * paths. `git log` ignora o que não foi commitado — por isso a classificação
- * da tree existe: funcional-sujo bloqueia em vez de fingir current.
+ * A cabeça auditável é o último commit que altera algo fora do envelope
+ * CANÔNICO de publicação: reviews/eventos e suas projeções determinísticas
+ * declaradas. A working tree é classificada pelos mesmos paths. `git log`
+ * ignora o que não foi commitado — por isso a classificação da tree existe:
+ * funcional-sujo bloqueia em vez de fingir current.
  */
 import { execFileSync } from "node:child_process";
+import {
+  isReviewPublicationEnvelopePath,
+  reviewPublicationProjectionPaths,
+} from "../app/reviews/reviewPublicationPolicy.js";
 
 /**
  * Estado da working tree relativo ao objeto AUDITÁVEL:
  *   clean            → nada não-commitado;
- *   review-only      → só artefatos de review (paths canônicos da spec);
+ *   review-only      → só o envelope canônico de publicação de review;
  *   functional-dirty → mudanças funcionais não commitadas ⇒ review bloqueado;
  *   unknown          → git indisponível.
  */
@@ -74,7 +79,7 @@ export function isReviewPublicationOnlyDelta(
 ): boolean {
   return (
     changedFiles.length > 0 &&
-    changedFiles.every((filePath) => isReviewPublicationPath(filePath, reviewsDirRel))
+    changedFiles.every((filePath) => isReviewPublicationEnvelopePath(filePath, reviewsDirRel))
   );
 }
 
@@ -82,6 +87,11 @@ export function collectFunctionalFreshness(
   repoRoot: string,
   reviewsDirRel: string
 ): FunctionalFreshness {
+  const normalizedReviewsDir = reviewsDirRel.replace(/\\/g, "/").replace(/\/+$/, "");
+  const excludedPublicationPaths = [
+    `${normalizedReviewsDir}/`,
+    ...reviewPublicationProjectionPaths(reviewsDirRel),
+  ];
   const effectiveFunctionalHead = gitOrNull(repoRoot, [
     "log",
     "-n",
@@ -89,7 +99,7 @@ export function collectFunctionalFreshness(
     "--format=%h",
     "--",
     ".",
-    `:(exclude)${reviewsDirRel.replace(/\\/g, "/").replace(/\/+$/, "")}/`,
+    ...excludedPublicationPaths.map((filePath) => `:(exclude)${filePath}`),
   ]);
 
   const porcelain = gitPorcelain(repoRoot);
@@ -108,7 +118,9 @@ export function collectFunctionalFreshness(
     };
   }
   const paths = porcelainPaths(porcelain);
-  const functionalDirtyFiles = paths.filter((p) => !isReviewPublicationPath(p, reviewsDirRel));
+  const functionalDirtyFiles = paths.filter(
+    (p) => !isReviewPublicationEnvelopePath(p, reviewsDirRel)
+  );
   return {
     effectiveFunctionalHead: effectiveFunctionalHead || null,
     workingTreeState: isReviewPublicationOnlyDelta(paths, reviewsDirRel)

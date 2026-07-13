@@ -366,7 +366,7 @@ profiles:
         category: governance
         mutates: true
         consumers: [human]
-        description: Commit exclusivo + push do artefato de review sob autorizacao capability-scoped (fail-closed; diff review-only).
+        description: Commit atomicamente isolado + push do review e de projecoes deterministicas declaradas, sob autorizacao capability-scoped (fail-closed; mixed diff bloqueado).
       - name: review:seal
         command: npm run build && node dist/cli/bin.js review-seal
         category: governance

@@ -149,6 +149,40 @@ review_lanes:
   });
 });
 
+describe("publicação canônica de reviews", () => {
+  it("declara apenas companions determinísticos suportados", () => {
+    const parsed = policy(`
+publication:
+  canonical: spec-artifact
+  canonical_artifact:
+    commit_policy: allowed-on-explicit-review-request
+    push_policy: allowed-on-explicit-review-request
+    mixed_diff: block
+    deterministic_companions: [governance-graph-snapshot]
+  github_comments: forbidden-by-default
+`);
+
+    expect(parsed.publication?.canonicalArtifact?.deterministicCompanions).toEqual([
+      "governance-graph-snapshot",
+    ]);
+  });
+
+  it("rejeita companion não reconhecido em vez de abrir o mixed diff", () => {
+    expect(() =>
+      policy(`
+publication:
+  canonical: spec-artifact
+  canonical_artifact:
+    commit_policy: allowed-on-explicit-review-request
+    push_policy: allowed-on-explicit-review-request
+    mixed_diff: block
+    deterministic_companions: [arquivo-arbitrario]
+  github_comments: forbidden-by-default
+`)
+    ).toThrow(/unsupported companion/);
+  });
+});
+
 describe("requirements — defaults, regras, prioridade e conflito [CO-4 r8]", () => {
   const RULES = `
 review_requirements:
