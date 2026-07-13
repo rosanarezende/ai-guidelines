@@ -1366,8 +1366,8 @@
             "npm run research-index:check"
           ],
           "gates": [
-            "Technical Audit: required; a auditoria inicial aprovou o HEAD 85ec13be. A correção funcional do envelope de publicação nasceu do dogfood pós-auditoria e exige verificação sobre o HEAD funcional final antes de Ready/Human Gate.",
-            "Architectural Review: required e pendente no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate.",
+            "Technical Audit: required; aprovada e revalidada até a cabeça funcional b4d0c834. O delta final que corrige os findings arquiteturais exige verificação técnica direcionada antes de Ready/Human Gate.",
+            "Architectural Review: required; aprovada sobre b4d0c834, com três findings não bloqueantes. Os três foram corrigidos no delta funcional final e exigem verificação arquitetural direcionada antes de Ready/Human Gate.",
             "Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.",
             "Human Gate: pendente — decisão reservada à owner; não é autorização de merge.",
             "Merge: fora do escopo deste PR individual; a stack segue em modo unit."

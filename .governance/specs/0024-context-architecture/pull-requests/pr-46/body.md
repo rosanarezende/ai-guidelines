@@ -95,6 +95,7 @@ Os aprendizados do incubador `work-graph-model` (`model.yml`, `tracker.md`, `fea
 - **Aprendizados do work-graph-model preservados:** matriz de lentes e alinhamento com `model.yml` v3 rastreiam o que foi aplicado ao framework, migrado para Guilda, preservado como evidência ou roteado para falsificação/revisão final.
 - **G01 fechado no framework:** `[DEC-0024-G31]` registra a gramática operacional materializada; resíduos de escala consumidor, promoção/projeções e `terminus` permanecem roteados, sem encerramento global por decreto.
 - **Publicação de reviews sem deadlock:** `review:publish` passou a publicar o artefato canônico e o `governance-graph-snapshot.json` sincronizado no mesmo envelope atômico declarado pela policy. O commit continua isolado, rejeita qualquer path arbitrário e não avança a cabeça funcional usada pela freshness da própria review.
+- **Findings arquiteturais corrigidos no código:** o briefing de review agora consome o mesmo `review_plan` situado que `pr-ready` e `handoff`; os guards compartilham um grafo de dependências que cobre imports, reexports, imports dinâmicos e `require`; e a garantia offline do graph snapshot percorre todo o fechamento transitivo da derivação.
 
 <details>
 <summary><strong>Prompt final — valor entregue</strong></summary>
@@ -163,6 +164,7 @@ npm run governance-graph:check
 npm run artifact-kind:check
 npm run research-index:check
 npm run test:ts -- --runInBand src/app/reviews/reviewPublicationPolicy.test.ts src/app/reviews/reviewRequirements.test.ts src/cli/reviewFreshness.test.ts src/cli/reviewPublish.test.ts
+npm run test:ts -- --runInBand src/cli/reviewBrief.test.ts src/test-utils/sourceDependencyGraph.test.ts src/test-utils/Boundaries.test.ts src/test-utils/LayerBoundaries.test.ts src/app/projections/governanceGraphSnapshot.test.ts
 ```
 
 Refactor behavior-preserving: cada movimentação estrutural deve manter os testes existentes verdes; comportamento só muda com teste e justificativa registrada.
@@ -171,8 +173,8 @@ Refactor behavior-preserving: cada movimentação estrutural deve manter os test
 
 ### Evidências e gates
 
-- Technical Audit: **required**; a auditoria inicial aprovou o HEAD `85ec13be`. A correção funcional do envelope de publicação nasceu do dogfood pós-auditoria e exige verificação sobre o HEAD funcional final antes de Ready/Human Gate.
-- Architectural Review: **required e pendente** no `review_plan` do nó ativo; deve estar current+approved antes de Ready/Human Gate.
+- Technical Audit: **required**; aprovada e revalidada até a cabeça funcional `b4d0c834`. O delta final que corrige os findings arquiteturais exige verificação técnica direcionada antes de Ready/Human Gate.
+- Architectural Review: **required**; aprovada sobre `b4d0c834`, com três findings não bloqueantes. Os três foram corrigidos no delta funcional final e exigem verificação arquitetural direcionada antes de Ready/Human Gate.
 - Security Review: **waived** por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.
 - Human Gate: pendente — decisão reservada à owner; não é autorização de merge.
 - Merge: fora do escopo deste PR individual; a stack segue em modo unit.
@@ -180,7 +182,7 @@ Refactor behavior-preserving: cada movimentação estrutural deve manter os test
 ### Checklist operacional
 
 - [x] Formatação verde
-- [x] Validação canônica verde (`npm run validate`: 225 suítes / 2.378 testes + checks governados)
+- [x] Validação canônica verde (`npm run validate`: 226 suítes / 2.381 testes + checks governados)
 - [x] Commits atômicos
 - [x] Sem secrets, credenciais ou contexto pessoal vazado
 - [x] PR body atualizado com estado real

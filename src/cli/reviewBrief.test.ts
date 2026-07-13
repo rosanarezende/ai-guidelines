@@ -716,6 +716,43 @@ function fakeLogger(): {
 }
 
 describe("reviewBrief · comando integrado [CO-4]", () => {
+  it("plano situado obrigatório vence o default do repositório no briefing", () => {
+    const repo = tempRepo();
+    const statePath = path.join(
+      repo,
+      ".governance",
+      "specs",
+      "0024-context-architecture",
+      "state.yml"
+    );
+    const state = fs
+      .readFileSync(statePath, "utf8")
+      .replace(
+        "        checkpoints:\n          - checkpoint-co-knowledge",
+        [
+          "        checkpoints:",
+          "          - checkpoint-co-knowledge",
+          "        review_plan:",
+          "          architectural_review:",
+          "            system_recommendation: recommended",
+          "            owner_decision: required",
+          "            actor: owner",
+          "            reason: refactor arquitetural exige review antes de Ready",
+        ].join("\n")
+      );
+    fs.writeFileSync(statePath, state);
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    commitAll(repo);
+
+    const collected = collectReviewBrief(repo, "architectural_review", { remote: null });
+
+    expect(collected.brief.effectiveStatus).toMatchObject({
+      requirement: "required",
+      requirementSource: expect.stringContaining("node-override"),
+      blocking: true,
+    });
+  });
+
   it("18 — o comando É um ato de carga: recibo escrito do MESMO snapshot (anti-TOCTOU)", () => {
     const repo = tempRepo();
     initGitOnBranch(repo, "feat/spec-0024-co-knowledge");

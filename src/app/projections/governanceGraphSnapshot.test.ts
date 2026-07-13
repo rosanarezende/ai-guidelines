@@ -1,6 +1,10 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
+  collectSourceDependencyGraph,
+  transitiveSourceFiles,
+} from "../../test-utils/sourceDependencyGraph.js";
+import {
   collectGraphViolations,
   deriveGovernanceGraphSnapshot,
   FORBIDDEN_NODE_TYPES,
@@ -253,10 +257,30 @@ describe("governanceGraphSnapshot · contrato §8", () => {
     ).toBe(true);
   });
 
-  it("offline: o módulo de derivação não usa rede/processos (só crypto determinístico)", () => {
-    const source = fs.readFileSync(path.join(__dirname, "governanceGraphSnapshot.ts"), "utf-8");
-    for (const banned of ["execFileSync", "child_process", "fetch(", "node:https", "node:http"]) {
-      expect(source.includes(banned)).toBe(false);
+  it("offline: o fechamento transitivo da derivação não usa rede/processos", () => {
+    const sourceRoot = path.resolve(__dirname, "..", "..");
+    const entryFile = path.join(__dirname, "governanceGraphSnapshot.ts");
+    const graph = collectSourceDependencyGraph(sourceRoot);
+    const closure = transitiveSourceFiles(graph, entryFile);
+    const closureSet = new Set(closure);
+
+    expect(closure).toContain(path.join(sourceRoot, "app", "workflow", "frenteProgression.ts"));
+    expect(closure.length).toBeGreaterThan(1);
+
+    const forbiddenModules = new Set([
+      "child_process",
+      "node:child_process",
+      "http",
+      "node:http",
+      "https",
+      "node:https",
+    ]);
+    for (const reference of graph.references.filter((item) => closureSet.has(item.sourceFile))) {
+      expect(forbiddenModules.has(reference.specifier)).toBe(false);
+    }
+    for (const file of closure) {
+      const source = fs.readFileSync(file, "utf-8");
+      expect(source).not.toMatch(/\b(?:fetch|execFileSync)\s*\(/);
     }
   });
 });

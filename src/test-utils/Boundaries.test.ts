@@ -1,5 +1,5 @@
-import * as fs from "node:fs";
 import * as path from "node:path";
+import { collectSourceDependencyGraph } from "./sourceDependencyGraph.js";
 
 /**
  * Blueprint Integrity Lock — Boundary Enforcement.
@@ -12,15 +12,13 @@ import * as path from "node:path";
  *   - `src/app/**` só toca infraestrutura através de ports declarados em
  *     `src/app/ports/**`; nunca importa `src/infrastructure/**` direto.
  *
- * Implementação atual — provisória e deliberadamente simples:
- *   - lê cada `.ts` de produção (testes excluídos);
- *   - extrai imports relativos via regex;
+ * Implementação atual:
+ *   - lê fontes TypeScript de produção (testes excluídos);
+ *   - extrai imports, reexports, imports dinâmicos e require via leitor compartilhado;
  *   - resolve o destino e classifica origem/destino em domain/app/infra/other;
  *   - reporta como violação qualquer aresta proibida.
  *
  * Limitações conhecidas:
- *   - Não cobre `import("...")` dinâmico nem `require()`.
- *   - Não acompanha re-exports indiretos cross-camada.
  *   - Não classifica imports de pacote (ex.: `node:fs`); aceitos por
  *     padrão — boundaries são entre camadas, não contra a stdlib.
  *
@@ -29,33 +27,6 @@ import * as path from "node:path";
  * já tivermos um pipeline AST consolidado [DEC-0021-C01].
  */
 const SRC_ROOT = path.resolve(__dirname, "..");
-
-interface ImportEdge {
-  from: string;
-  to: string;
-}
-
-const IMPORT_RE = /(?:^|\n)\s*import[^"';]*?from\s+["']([^"']+)["']/g;
-
-function listTsFiles(dir: string): string[] {
-  const out: string[] = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      out.push(...listTsFiles(full));
-    } else if (entry.isFile() && entry.name.endsWith(".ts")) {
-      out.push(full);
-    }
-  }
-  return out;
-}
-
-function resolveImportTarget(fromFile: string, spec: string): string | null {
-  if (!spec.startsWith(".")) return null;
-  const fromDir = path.dirname(fromFile);
-  const noExt = spec.replace(/\.js$/, "");
-  return path.normalize(path.resolve(fromDir, noExt));
-}
 
 type Layer = "domain" | "app" | "infra" | "other";
 
@@ -67,23 +38,10 @@ function classify(file: string): Layer {
   return "other";
 }
 
-function collectEdges(): ImportEdge[] {
-  const files = listTsFiles(SRC_ROOT).filter((f) => !f.endsWith(".test.ts"));
-  const edges: ImportEdge[] = [];
-  for (const file of files) {
-    const src = fs.readFileSync(file, "utf8");
-    let m: RegExpExecArray | null;
-    IMPORT_RE.lastIndex = 0;
-    while ((m = IMPORT_RE.exec(src)) !== null) {
-      const target = resolveImportTarget(file, m[1]);
-      if (target) edges.push({ from: file, to: target });
-    }
-  }
-  return edges;
-}
-
 describe("Blueprint Integrity Lock — Boundaries", () => {
-  const edges = collectEdges();
+  const edges = collectSourceDependencyGraph(SRC_ROOT, { excludeTests: true })
+    .references.filter((reference) => reference.targetFile !== null)
+    .map((reference) => ({ from: reference.sourceFile, to: reference.targetFile! }));
 
   it("DADO src/domain/** ENTÃO não deve importar src/app/** nem src/infrastructure/**", () => {
     const violations = edges

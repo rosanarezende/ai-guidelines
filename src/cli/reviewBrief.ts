@@ -649,7 +649,15 @@ export function collectReviewBrief(
         labels: facts.pullRequest?.labels ?? null,
         changedPaths: null,
       },
-      ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+      ...(nodeCtx?.overrides || nodeCtx?.reviewPlanOverrides
+        ? {
+            nodeOverrides: {
+              ...(nodeCtx.overrides ?? {}),
+              ...(nodeCtx.reviewPlanOverrides ?? {}),
+            },
+          }
+        : {}),
+      ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
       observed: observedReviewStates(artifacts, cursor.checkpoint),
       functionalHead: freshness.effectiveFunctionalHead,
     });
