@@ -32,7 +32,7 @@ import {
   buildReviewTypeRegistry,
   deriveEffectiveReviewStatuses,
 } from "../app/reviews/reviewRequirements.js";
-import { collectFunctionalFreshness } from "./reviewFreshness.js";
+import { collectFunctionalFreshness, collectRevalidationScopeStates } from "./reviewFreshness.js";
 import {
   HANDOFF_CONTRACT_VERSION,
   HandoffDerived,
@@ -410,6 +410,12 @@ function collectLifecycle(
     artifacts.topologyByCheckpoint?.[cursor.checkpoint] ??
     artifacts.topologyByCheckpoint?.[normalizeCheckpoint(cursor.checkpoint)];
   const freshness = collectFunctionalFreshness(repoRoot, `${specPath}/reviews`);
+  const revalidationScopes = collectRevalidationScopeStates(
+    repoRoot,
+    nodeCtx?.reviewPlan,
+    freshness.effectiveFunctionalHead,
+    specPath
+  );
   const statuses = deriveEffectiveReviewStatuses({
     registry: artifacts.registry ?? buildReviewTypeRegistry(null).registry,
     policy: artifacts.reviewPolicy ?? null,
@@ -427,6 +433,7 @@ function collectLifecycle(
         }
       : {}),
     ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
+    revalidationScopes,
     observed: observedReviewStates(artifacts, cursor.checkpoint),
     functionalHead: freshness.effectiveFunctionalHead,
   });

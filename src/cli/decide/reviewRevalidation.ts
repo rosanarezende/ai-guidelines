@@ -56,6 +56,7 @@ interface ReviewRevalidationPayload {
   readonly decisions: readonly {
     role: string;
     ownerDecision: "waived" | "required";
+    functionalHead: string;
     reason: string;
   }[];
 }
@@ -109,6 +110,7 @@ function mutateStateYaml(
     if (!isMap(lane)) throw new Error(`review_plan.${decision.role} não encontrado.`);
     lane.set("revalidation", {
       owner_decision: decision.ownerDecision,
+      analyzed_head: decision.functionalHead,
       actor,
       reason: decision.reason,
     });
@@ -301,6 +303,7 @@ export class ReviewRevalidationDefinition implements HumanDecisionDefinition {
       return {
         role: item.role,
         ownerDecision,
+        functionalHead: item.functionalHead,
         reason:
           `Decisão humana sobre delta ${item.coveredHead}..${item.functionalHead}; ` +
           `recomendação do sistema=${item.advice.recommendation}. ${item.advice.reasons.join(" ")}`,

@@ -13,6 +13,7 @@ import {
   isReviewPublicationEnvelopePath,
   reviewPublicationProjectionPaths,
 } from "../app/reviews/reviewPublicationPolicy.js";
+import type { NodeReviewPlanEntry } from "../domain/workflow/WorkflowState.js";
 
 /**
  * Estado da working tree relativo ao objeto AUDITÁVEL:
@@ -33,6 +34,11 @@ function gitOrNull(repoRoot: string, args: readonly string[]): string | null {
   } catch {
     return null;
   }
+}
+
+function gitLines(repoRoot: string, args: readonly string[]): string[] | null {
+  const output = gitOrNull(repoRoot, args);
+  return output === null ? null : output.split(/\r?\n/).filter(Boolean);
 }
 
 /** `git status --porcelain` SEM trim (o status XY usa o espaço inicial). */
@@ -66,6 +72,91 @@ export interface FunctionalFreshness {
   readonly effectiveFunctionalHead: string | null;
   readonly workingTreeState: WorkingTreeState;
   readonly functionalDirtyFiles: string[];
+}
+
+export interface RevalidationScopeState {
+  readonly current: boolean;
+  readonly reason: string;
+}
+
+export function isRevalidationDecisionCommit(
+  subject: string,
+  changedFiles: readonly string[],
+  specPath: string
+): boolean {
+  const normalizedSpecPath = specPath.replace(/\\/g, "/").replace(/\/+$/, "");
+  const allowed = new Set([
+    `${normalizedSpecPath}/state.yml`,
+    `${normalizedSpecPath}/assets/governed-work-map-data.json`,
+    `${normalizedSpecPath}/assets/governed-work-map.html`,
+    `${normalizedSpecPath}/assets/governance-graph-snapshot.json`,
+  ]);
+  return (
+    /^docs\(spec-\d+\): registra decisão sobre revalidação de reviews$/.test(subject) &&
+    changedFiles.length > 0 &&
+    changedFiles.every((file) => allowed.has(file.replace(/\\/g, "/")))
+  );
+}
+
+/**
+ * Uma dispensa nova vale somente para o delta analisado. O commit atômico que
+ * registra a própria decisão pode avançar o HEAD, mas qualquer outro commit
+ * funcional posterior invalida a dispensa e reabre a decisão humana.
+ */
+export function collectRevalidationScopeStates(
+  repoRoot: string,
+  reviewPlan: Readonly<Record<string, NodeReviewPlanEntry>> | undefined,
+  functionalHead: string | null,
+  specPath: string
+): Readonly<Record<string, RevalidationScopeState>> {
+  const result: Record<string, RevalidationScopeState> = {};
+  for (const [role, entry] of Object.entries(reviewPlan ?? {})) {
+    const analyzedHead = entry.revalidation?.analyzed_head;
+    if (!analyzedHead) continue; // compatibilidade com decisões anteriores à decisão situada por delta
+    if (!functionalHead) {
+      result[role] = { current: false, reason: "functional HEAD indisponível" };
+      continue;
+    }
+    if (analyzedHead === functionalHead) {
+      result[role] = { current: true, reason: `delta permanece em ${analyzedHead}` };
+      continue;
+    }
+    const commits = gitLines(repoRoot, [
+      "rev-list",
+      "--reverse",
+      `${analyzedHead}..${functionalHead}`,
+    ]);
+    if (!commits || commits.length === 0) {
+      result[role] = {
+        current: false,
+        reason: `não foi possível provar o intervalo ${analyzedHead}..${functionalHead}`,
+      };
+      continue;
+    }
+    const onlyDecisionCommits = commits.every((commit) => {
+      const subject = gitOrNull(repoRoot, ["show", "-s", "--format=%s", commit]);
+      const changedFiles = gitLines(repoRoot, [
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "-r",
+        commit,
+      ]);
+      return Boolean(
+        subject && changedFiles && isRevalidationDecisionCommit(subject, changedFiles, specPath)
+      );
+    });
+    result[role] = onlyDecisionCommits
+      ? {
+          current: true,
+          reason: `apenas o envelope da decisão avançou após ${analyzedHead}`,
+        }
+      : {
+          current: false,
+          reason: `há mudança funcional posterior ao delta analisado em ${analyzedHead}`,
+        };
+  }
+  return result;
 }
 
 export function isReviewPublicationPath(filePath: string, reviewsDirRel: string): boolean {

@@ -40,7 +40,7 @@ import {
 } from "../app/readiness/readiness.js";
 import { parseSteps } from "../app/handoff/handoffFacts.js";
 import { deriveFrenteProgression } from "../app/workflow/frenteProgression.js";
-import { collectFunctionalFreshness } from "./reviewFreshness.js";
+import { collectFunctionalFreshness, collectRevalidationScopeStates } from "./reviewFreshness.js";
 import { derivePrReadyFlow, prReadyFlowFactsFromReadySnapshot } from "./flow/GovernedFlow.js";
 
 export interface ReadyCheckPr {
@@ -295,6 +295,12 @@ function collectCheckpoint(
     artifacts.topologyByCheckpoint?.[cursor] ??
     artifacts.topologyByCheckpoint?.[normalizeCheckpoint(cursor)];
   const freshness = collectFunctionalFreshness(repoRoot, `.governance/specs/${specDir}/reviews`);
+  const revalidationScopes = collectRevalidationScopeStates(
+    repoRoot,
+    nodeCtx?.reviewPlan,
+    freshness.effectiveFunctionalHead,
+    `.governance/specs/${specDir}`
+  );
   const statuses = deriveEffectiveReviewStatuses({
     registry: artifacts.registry ?? buildReviewTypeRegistry(null).registry,
     policy: artifacts.reviewPolicy ?? null,
@@ -312,6 +318,7 @@ function collectCheckpoint(
         }
       : {}),
     ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
+    revalidationScopes,
     observed: observedReviewStates(artifacts, cursor),
     functionalHead: freshness.effectiveFunctionalHead,
   });

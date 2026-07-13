@@ -55,7 +55,11 @@ import {
   loadHandoffSnapshot,
 } from "./handoff.js";
 import { discover, observedReviewStates } from "./reviewCheck.js";
-import { WorkingTreeState, collectFunctionalFreshness } from "./reviewFreshness.js";
+import {
+  WorkingTreeState,
+  collectFunctionalFreshness,
+  collectRevalidationScopeStates,
+} from "./reviewFreshness.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -658,6 +662,12 @@ export function collectReviewBrief(
           }
         : {}),
       ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
+      revalidationScopes: collectRevalidationScopeStates(
+        repoRoot,
+        nodeCtx?.reviewPlan,
+        freshness.effectiveFunctionalHead,
+        facts.spec.path
+      ),
       observed: observedReviewStates(artifacts, cursor.checkpoint),
       functionalHead: freshness.effectiveFunctionalHead,
     });

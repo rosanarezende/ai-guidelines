@@ -430,6 +430,41 @@ describe("review_plan — recomendação do sistema + decisão humana [CO-4 r9]"
     expect(ta.blocking).toBe(true);
   });
 
+  it("dispensa de revalidação volta a bloquear quando o HEAD analisado ficou para trás", () => {
+    const p = policy("");
+    const { registry } = buildReviewTypeRegistry(p);
+    const plan = {
+      technical_audit: {
+        system_recommendation: "recommended" as const,
+        owner_decision: "required" as const,
+        actor: "owner",
+        reason: "PR exigiu auditoria técnica.",
+        revalidation: {
+          owner_decision: "waived" as const,
+          analyzed_head: "abc1111",
+          actor: "owner",
+          reason: "Dispensa limitada ao delta analisado.",
+        },
+      },
+    };
+    const statuses = deriveEffectiveReviewStatuses({
+      registry,
+      policy: p,
+      ctx: CTX,
+      nodeOverrides: reviewPlanToNodeOverrides(plan),
+      reviewPlan: plan,
+      revalidationScopes: {
+        technical_audit: { current: false, reason: "há mudança funcional posterior" },
+      },
+      observed: { technical_audit: { latestSubjectRef: "aaa0000", decision: "approved" } },
+      functionalHead: "def2222",
+    });
+    const ta = statuses.find((s) => s.typeId === "technical_audit")!;
+    expect(ta.revalidationWaived).toBe(false);
+    expect(ta.blocking).toBe(true);
+    expect(ta.notes.join(" ")).toContain("revalidation waiver stale");
+  });
+
   it("revalidação pending aparece como pendência de Ready", () => {
     const issues = reviewPlanDecisionIssues({
       technical_audit: {

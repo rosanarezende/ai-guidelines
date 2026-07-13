@@ -691,6 +691,8 @@ export interface EffectiveStatusInput {
     Record<string, { latestSubjectRef: string | null; decision: string | null }>
   >;
   readonly functionalHead: string | null;
+  /** Validade situada da decisão de revalidação contra o HEAD atual. */
+  readonly revalidationScopes?: Readonly<Record<string, { current: boolean; reason: string }>>;
 }
 
 /**
@@ -719,11 +721,13 @@ export function deriveEffectiveReviewStatuses(
     // Não aplicável ⇒ requirement não opera (disabled-equivalente no contexto).
     const effectiveLevel = applicability.value === "no" ? "disabled" : requirement.level;
     const revalidationDecision = input.reviewPlan?.[type.id]?.revalidation;
+    const revalidationScope = input.revalidationScopes?.[type.id];
     const revalidationWaived =
       effectiveLevel === "required" &&
       state === "stale" &&
       observed.decision === "approved" &&
-      revalidationDecision?.owner_decision === "waived";
+      revalidationDecision?.owner_decision === "waived" &&
+      revalidationScope?.current !== false;
     const notes = [...requirement.notes];
     if (revalidationWaived) {
       notes.push(
@@ -738,6 +742,14 @@ export function deriveEffectiveReviewStatuses(
       notes.push(
         `revalidation required${revalidationDecision.actor ? ` by ${revalidationDecision.actor}` : ""}: ${revalidationDecision.reason ?? "sem motivo declarado"}`
       );
+    } else if (
+      effectiveLevel === "required" &&
+      state === "stale" &&
+      observed.decision === "approved" &&
+      revalidationDecision?.owner_decision === "waived" &&
+      revalidationScope?.current === false
+    ) {
+      notes.push(`revalidation waiver stale: ${revalidationScope.reason}`);
     }
     const requiredSatisfied = state === "current" && observed.decision === "approved";
     const blocking = effectiveLevel === "required" && !requiredSatisfied && !revalidationWaived;

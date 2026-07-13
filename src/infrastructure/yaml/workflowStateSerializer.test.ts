@@ -185,6 +185,7 @@ ${active}
             actor: "owner"
             revalidation:
               owner_decision: waived
+              analyzed_head: abc1234
               reason: "Delta posterior só fecha cleanup low/advisory."
               actor: "owner"
           security_review:
@@ -196,6 +197,7 @@ ${active}
       const plan = state.topology?.prs.active[0].review_plan;
       expect(plan?.technical_audit.owner_decision).toBe("required");
       expect(plan?.technical_audit.revalidation?.owner_decision).toBe("waived");
+      expect(plan?.technical_audit.revalidation?.analyzed_head).toBe("abc1234");
       expect(plan?.security_review.system_recommendation).toBe("optional");
       const reparsed = parseWorkflowState(serializeWorkflowState(state));
       expect(reparsed.topology?.prs.active[0].review_plan).toEqual(plan);

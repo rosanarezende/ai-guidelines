@@ -137,6 +137,7 @@ describe("review-revalidation · efeito governado", () => {
     );
     expect(node.review_plan.technical_audit.revalidation).toMatchObject({
       owner_decision: "waived",
+      analyzed_head: "ec0d9b12",
       actor: "@rosanarezende",
     });
     expect(node.review_plan.architectural_review.revalidation.owner_decision).toBe("waived");
