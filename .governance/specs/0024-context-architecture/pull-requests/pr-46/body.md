@@ -87,12 +87,68 @@ Os aprendizados do incubador `work-graph-model` (`model.yml`, `tracker.md`, `fea
 
 ## Valor entregue
 
-<!--
-Preencher ao final, antes de entregar para revisão final / Human Gate.
-Em Draft este slot permanece como placeholder.
--->
+- **Fronteiras internas protegidas:** guard de camadas para impedir novas dependências indevidas entre domínio, aplicação, infraestrutura e CLI, com baseline explícita para violações legadas.
+- **Derivações centrais consolidadas:** `frenteProgression` virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por `pr-ready`, `handoff`, `humanGate`, `advanceEligibility` e superfícies relacionadas.
+- **Policy de reviews no domínio:** a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável.
+- **Graph snapshot derivado:** `governance-graph:build/check` materializa `governance-graph-snapshot.json` como projeção versionada, determinística, regenerável, offline e derived-only, usando `governed-work` em vez de `spec` como conceito público.
+- **Débitos do snapshot fechados:** `active.yml.updated_at` foi normalizado fora do fingerprint, `generated-at/source-commit` foram decididos como fora do snapshot v1 por determinismo, e ids de tarefas deixaram de ser line-based.
+- **Aprendizados do work-graph-model preservados:** matriz de lentes e alinhamento com `model.yml` v3 rastreiam o que foi aplicado ao framework, migrado para Guilda, preservado como evidência ou roteado para falsificação/revisão final.
+- **G01 disposto:** a gramática operacional do framework foi fechada/roteada em artefato próprio, sem declarar encerramento global de temas que pertencem a checkpoints posteriores.
 
-_(placeholder — preenchido ao final do checkpoint)_
+<details>
+<summary><strong>Prompt final — valor entregue</strong></summary>
+
+```text
+LANGUAGE CONSTRAINT: every visible word inside the generated image must be in Brazilian Portuguese (pt-BR). Do not render English labels. Keep code identifiers, branch names, file names, PR numbers and DEC/ADR ids exactly as written.
+
+Generate a clean technical 16:9 infographic for PR #46 of ai-guidelines, titled "PR #46 — Valor entregue".
+
+Visual goal: show that the internal architecture refactor moved from "code organized by accidental surfaces" to "governed work with explicit boundaries, canonical derivations and derived graph projection". The image must communicate delivery evidence, not a future plan.
+
+Layout: one central spine labeled "Trabalho governado" with three stacked layers and evidence chips.
+
+TOP LAYER — "Fronteiras protegidas"
+Show four boxes with clear boundaries:
+- "Domínio"
+- "Aplicação"
+- "Infraestrutura"
+- "CLI"
+Add guard rails around them labeled "guard de camadas" and "baseline explícita para legado".
+
+MIDDLE LAYER — "Derivações canônicas"
+Render one highlighted node labeled "frenteProgression" feeding five smaller surfaces:
+- "pr-ready"
+- "handoff"
+- "humanGate"
+- "advanceEligibility"
+- "workBrief"
+Add a callout: "uma pergunta importante, uma derivação".
+
+BOTTOM LAYER — "Projeções derivadas"
+Render a versioned graph snapshot card labeled "governance-graph-snapshot.json" with nodes, edges, source_refs and fingerprint. Add three chips:
+- "determinístico"
+- "regenerável"
+- "offline"
+Add a warning crossed out: "segunda SSOT".
+
+RIGHT SIDE — "Evidência preservada"
+Show a compact list:
+- "matriz de lentes"
+- "model.yml v3 rastreado"
+- "G01 fechado ou roteado"
+- "review_plan: TA e AR obrigatórias"
+- "Security dispensada por escopo"
+
+BOTTOM AUTHORITY RAIL:
+Use three small labels:
+- "state.yml continua estrutural"
+- "snapshot/mapas são projeções"
+- "Human Gate decide"
+
+Style: precise engineering documentation, light background, readable typography, restrained green/grafite/latão palette, compact diagram, no mascot, no product marketing composition, no decorative gradients, no vendor logos. The result should look like evidence for maintainers reviewing a framework checkpoint.
+```
+
+</details>
 
 ## Test plan
 
@@ -101,7 +157,9 @@ npm run build
 npm run test
 npm run validate:changed
 npm run governed-work-map:check
-# checks específicos do graph snapshot quando implementados
+npm run governance-graph:check
+npm run artifact-kind:check
+npm run research-index:check
 ```
 
 Refactor behavior-preserving: cada movimentação estrutural deve manter os testes existentes verdes; comportamento só muda com teste e justificativa registrada.
@@ -110,7 +168,9 @@ Refactor behavior-preserving: cada movimentação estrutural deve manter os test
 
 ### Evidências e gates
 
-- Technical Audit / Architectural Review: plano situado de revisões será registrado em `state.yml § topology...review_plan` antes de Ready (decisão da owner).
+- Technical Audit: **required** no `review_plan` do nó ativo; deve estar current+approved antes de Ready/Human Gate.
+- Architectural Review: **required** no `review_plan` do nó ativo; deve estar current+approved antes de Ready/Human Gate.
+- Security Review: **waived** por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.
 - Human Gate: pendente — decisão reservada à owner; não é autorização de merge.
 - Merge: fora do escopo deste PR individual; a stack segue em modo unit.
 
@@ -120,7 +180,7 @@ Refactor behavior-preserving: cada movimentação estrutural deve manter os test
 - [ ] Validação canônica verde
 - [ ] Commits atômicos
 - [ ] Sem secrets, credenciais ou contexto pessoal vazado
-- [ ] PR body atualizado com estado real
+- [x] PR body atualizado com estado real
 - [x] Fora de escopo registrado
 
 ## Cross-refs

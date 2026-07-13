@@ -255,20 +255,25 @@ topology:
         sequence: 13
         checkpoints:
           - checkpoint-internal-architecture-refactor-ddd-bdd # PR #46: refactor DDD/BDD behavior-preserving + gramatica operacional G01 + contrato do graph snapshot derivado
-        # Plano situado de revisoes (DEC-0024-G29): o sistema RECOMENDA; a decisao e
-        # da owner. `pending` bloqueia Ready por honestidade sem tornar nada
-        # obrigatorio automaticamente — a owner grava a decisao final (com
-        # actor+reason) quando escolher.
+        # Plano situado de revisoes (DEC-0024-G29): decisao da owner registrada
+        # antes de Ready. TA/AR sao obrigatorias para este recorte; Security foi
+        # dispensada por escopo, com reabertura possivel se TA/AR acharem risco.
         review_plan:
           technical_audit:
             system_recommendation: recommended
-            owner_decision: pending
+            owner_decision: required
+            actor: owner
+            reason: "PR #46 mexe em runtime critico, readiness, graph snapshot, derivacao de fluxo, validate e checks governados; Technical Audit deve estar current+approved antes de Ready/Human Gate."
           architectural_review:
             system_recommendation: recommended
-            owner_decision: pending
+            owner_decision: required
+            actor: owner
+            reason: "PR #46 e um refactor arquitetural DDD/BDD que reorganiza fronteiras, projecoes e gramatica operacional; Architectural Review deve validar a direcao antes do Human Gate."
           security_review:
             system_recommendation: optional
-            owner_decision: pending
+            owner_decision: waived
+            actor: owner
+            reason: "Escopo atual e interno ao framework, sem nova superficie de auth, secrets, rede, permissao externa ou execucao remota; TA/AR podem reabrir risco se encontrarem evidencia."
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
