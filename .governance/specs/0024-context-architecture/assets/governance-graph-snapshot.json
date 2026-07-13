@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "ec16212a89bf",
+  "snapshot_fingerprint": "a999101d2c57",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -711,6 +711,10 @@
     {
       "path": ".governance/specs/0024-context-architecture/reviews/events/c-co-projection-technical_audit-EV1.yml",
       "hash": "74fa24e99ff2"
+    },
+    {
+      "path": ".governance/specs/0024-context-architecture/reviews/events/c-internal-architecture-refactor-ddd-bdd-technical_audit-EV1.yml",
+      "hash": "30089cd8c2b0"
     },
     {
       "path": ".governance/specs/0024-context-architecture/reviews/events/c-npm-toolchain-architectural_review-EV1.yml",
@@ -3970,6 +3974,20 @@
       }
     },
     {
+      "id": "review-event:0024-context-architecture/internal-architecture-refactor-ddd-bdd-technical_audit-EV1",
+      "type": "review-event",
+      "label": "technical_audit EV1 · internal-architecture-refactor-ddd-bdd",
+      "attributes": {
+        "kind": "verification",
+        "scope": "review",
+        "decision": "approved"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/reviews/events/c-internal-architecture-refactor-ddd-bdd-technical_audit-EV1.yml",
+        "hash": "30089cd8c2b0"
+      }
+    },
+    {
       "id": "review-event:0024-context-architecture/npm-toolchain-architectural_review-EV1",
       "type": "review-event",
       "label": "architectural_review EV1 · npm-toolchain",
@@ -6115,6 +6133,11 @@
       "from": "review-event:0024-context-architecture/co-projection-technical_audit-EV1",
       "type": "verifies",
       "to": "review:0024-context-architecture/co-projection-technical_audit"
+    },
+    {
+      "from": "review-event:0024-context-architecture/internal-architecture-refactor-ddd-bdd-technical_audit-EV1",
+      "type": "verifies",
+      "to": "review:0024-context-architecture/internal-architecture-refactor-ddd-bdd-technical_audit"
     },
     {
       "from": "review-event:0024-context-architecture/npm-toolchain-architectural_review-EV1",

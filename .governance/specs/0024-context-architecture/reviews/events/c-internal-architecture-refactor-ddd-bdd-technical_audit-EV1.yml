@@ -1,0 +1,27 @@
+checkpoint: "internal-architecture-refactor-ddd-bdd"
+role: technical_audit
+event_id: EV1
+kind: verification
+executor:
+  platform: antigravity
+  model: gemini-3.1-pro-high
+decision: approved
+scope: review
+review_fingerprint: 4be1d6ae8afb
+previous_subject_ref: "origin/feat/spec-0024-artifact-taxonomy-and-model-review-contract..85ec13be"
+subject_ref: "85ec13be..b4d0c834"
+audit_evidence:
+  coverage:
+    - src/app/reviews/reviewPublicationPolicy.ts
+    - src/app/reviews/reviewPublicationPolicy.test.ts
+    - src/cli/reviewPublish.ts
+    - src/domain/policy/reviewPolicy.ts
+    - src/infrastructure/yaml/reviewPolicyReader.ts
+  scope: "Revalidação do commit isolado review_publish (deadlock fix) via envelope
+    atômico determinístico"
+  basis: "Implementação testada: publication policy restringe explicitamente
+    companion files a deterministicCompanions do contrato. O check bloqueia se
+    arquivos funcionais ou desconhecidos entrarem no diff. Em caso de falha de
+    I/O, backup reverte projections. Comportamento base inalterado. Não vaza
+    limites de escopo (guilda, dualroot)."
+event_fingerprint: "f792cf668243"
