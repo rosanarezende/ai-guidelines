@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "6169fd3851b8",
+  "snapshot_fingerprint": "50282b7e37de",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -730,7 +730,7 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/state.yml",
-      "hash": "f71d3da146c2"
+      "hash": "794c3b229257"
     },
     {
       "path": ".governance/specs/0024-context-architecture/tasks.md",
@@ -997,7 +997,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1009,7 +1009,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1021,7 +1021,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1033,7 +1033,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1045,7 +1045,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1057,7 +1057,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1069,7 +1069,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1081,7 +1081,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1093,7 +1093,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1105,7 +1105,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1117,7 +1117,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1129,7 +1129,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1141,7 +1141,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1153,7 +1153,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1165,7 +1165,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1177,7 +1177,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1189,7 +1189,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1201,7 +1201,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1213,7 +1213,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1225,7 +1225,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1237,7 +1237,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1249,7 +1249,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1261,7 +1261,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1273,7 +1273,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1285,7 +1285,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1297,7 +1297,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1309,7 +1309,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1321,7 +1321,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1333,7 +1333,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1345,7 +1345,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1357,7 +1357,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1369,7 +1369,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1381,7 +1381,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1393,7 +1393,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1405,7 +1405,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1417,7 +1417,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1429,7 +1429,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1441,7 +1441,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1453,7 +1453,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1465,7 +1465,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1477,7 +1477,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1489,7 +1489,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1501,7 +1501,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1513,7 +1513,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1525,7 +1525,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -1537,7 +1537,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -2647,7 +2647,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4827,7 +4827,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4844,7 +4844,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4861,7 +4861,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4878,7 +4878,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4895,7 +4895,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4912,7 +4912,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4929,7 +4929,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4946,7 +4946,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4963,7 +4963,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4980,7 +4980,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -4997,7 +4997,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5014,7 +5014,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5031,7 +5031,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5048,7 +5048,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5065,7 +5065,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5082,7 +5082,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5099,7 +5099,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5116,7 +5116,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5133,7 +5133,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     },
     {
@@ -5150,7 +5150,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "f71d3da146c2"
+        "hash": "794c3b229257"
       }
     }
   ],
