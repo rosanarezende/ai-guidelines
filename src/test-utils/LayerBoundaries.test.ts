@@ -5,19 +5,14 @@ import * as path from "node:path";
  * Guarda ARQUITETURAL das fronteiras de camada (Spec 0024 · PR #46,
  * checkpoint internal-architecture-refactor-ddd-bdd, fatia 1).
  *
- * Rede de segurança ANTES da reorganização behavior-preserving de `src/cli`:
- * congela as violações de fronteira existentes como BASELINE e falha em
- * qualquer violação NOVA. As regras (direção permitida de dependência):
+ * Rede de segurança behavior-preserving de `src/cli`. As regras de direção:
  *
  *   - `src/domain`         não importa `app`, `infrastructure` nem `cli`;
  *   - `src/app`            não importa `cli`;
  *   - `src/infrastructure` não importa `cli`.
  *
- * A BASELINE lista as violações conhecidas na criação do guard (ver
- * pre-coding-review 2026-07-12, PCR-F1/PCR-F2). Elas serão resolvidas nas
- * fatias seguintes do refactor; remover uma entrada daqui exige que o import
- * tenha REALMENTE sumido (o teste também falha se a baseline ficar órfã —
- * anti-lixo: baseline não é lista de exceção permanente).
+ * O checkpoint eliminou a baseline inicial. Qualquer aresta proibida agora
+ * falha sem exceção: o guard não é uma lista permanente de débitos aceitos.
  */
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const SRC_ROOT = path.join(REPO_ROOT, "src");
@@ -35,20 +30,6 @@ const FORBIDDEN: Readonly<Record<string, readonly string[]>> = {
   app: ["cli"],
   infrastructure: ["cli"],
 };
-
-/**
- * Violações conhecidas quando o guard nasceu (baseline congelada).
- * Formato: "<arquivo relativo a src/> -> <camada proibida>".
- */
-const BASELINE = new Set<string>([
-  "app/constraints/RegistryCommandSurfaceResolver.ts -> cli",
-  "app/constraints/compileConstraints.test.ts -> cli",
-  "app/constraints/surfaceResolvers.test.ts -> cli",
-  "domain/templates/TasksEvidenceDrivenEquivalence.test.ts -> app",
-  "domain/templates/TasksEvidenceDrivenEquivalence.test.ts -> infrastructure",
-  "domain/workspace/WorkspaceDiscovery.test.ts -> app",
-  "infrastructure/ast/SkipGuard.test.ts -> cli",
-]);
 
 function extractModuleSpecifiers(content: string): string[] {
   const re = /\b(?:from|import|require)\b\s*\(?\s*["']([^"']+)["']/g;
@@ -93,16 +74,10 @@ function collectViolations(): Set<string> {
   return violations;
 }
 
-describe("fronteiras de camada (guarda arquitetural · PR #46 fatia 1)", () => {
+describe("fronteiras de camada (guarda arquitetural · PR #46)", () => {
   const violations = collectViolations();
 
-  it("nenhuma violação NOVA de fronteira além da baseline congelada", () => {
-    const novel = [...violations].filter((v) => !BASELINE.has(v)).sort();
-    expect(novel).toEqual([]);
-  });
-
-  it("baseline não contém entradas órfãs (violação resolvida sai da baseline)", () => {
-    const orphans = [...BASELINE].filter((b) => !violations.has(b)).sort();
-    expect(orphans).toEqual([]);
+  it("nenhuma camada importa uma camada proibida", () => {
+    expect([...violations].sort()).toEqual([]);
   });
 });

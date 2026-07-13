@@ -1,4 +1,7 @@
 import { CommandRegistry } from "./CommandRegistry.js";
+import type { RegistryCommandDescriptor } from "../../app/constraints/RegistryCommandDescriptor.js";
+
+export type { RegistryCommandDescriptor } from "../../app/constraints/RegistryCommandDescriptor.js";
 
 /**
  * Descriptor read-only de um comando do registry — projeção PURA para
@@ -7,11 +10,6 @@ import { CommandRegistry } from "./CommandRegistry.js";
  * declarados. Não duplica um segundo catálogo manual — deriva do `CommandRegistry`
  * real (SSOT do dispatch).
  */
-export interface RegistryCommandDescriptor {
-  readonly name: string;
-  readonly subcommands: readonly string[];
-}
-
 /** `CommandRegistry` → descriptors canônicos ordenados (determinístico). */
 export function describeRegistryCommands(
   registry: CommandRegistry

@@ -1,6 +1,6 @@
 import { GovernanceError } from "../../domain/shared/errors.js";
 import { formatSurfaceRef, SurfaceRef } from "../../domain/constraints/SurfaceRef.js";
-import { RegistryCommandDescriptor } from "../../cli/registry/describeCommands.js";
+import type { RegistryCommandDescriptor } from "./RegistryCommandDescriptor.js";
 import { ResolvedSurface, SurfaceResolver } from "./SurfaceResolver.js";
 
 export const REGISTRY_COMMAND_SOURCE = "CommandRegistry";
