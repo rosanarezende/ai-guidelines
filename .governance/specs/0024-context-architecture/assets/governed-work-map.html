@@ -9,9 +9,9 @@
         color-scheme: light;
         --bg: #f7f4ef;
         --surface: #fffaf2;
-        --surface-2: #eee8dd;
+        --surface-strong: #ffffff;
         --ink: #142321;
-        --muted: #66716d;
+        --muted: #64706b;
         --green: #0d3b31;
         --sage: #8fa99a;
         --brass: #c19a4b;
@@ -33,34 +33,71 @@
       body {
         margin: 0;
         background:
-          radial-gradient(circle at 18% 18%, rgba(193, 154, 75, 0.16), transparent 32rem),
-          radial-gradient(circle at 82% 10%, rgba(13, 59, 49, 0.12), transparent 36rem), var(--bg);
+          radial-gradient(circle at 14% 12%, rgba(193, 154, 75, 0.14), transparent 32rem),
+          radial-gradient(circle at 86% 8%, rgba(13, 59, 49, 0.12), transparent 34rem), var(--bg);
         color: var(--ink);
       }
       main {
-        max-width: 1440px;
+        max-width: 1480px;
         margin: 0 auto;
         padding: 32px;
       }
       header {
         display: grid;
-        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+        grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
         gap: 24px;
         align-items: stretch;
-        margin-bottom: 24px;
+        margin-bottom: 18px;
       }
       .hero,
       .panel,
+      .brief-card,
       .toolbar,
       .node,
-      .detail {
+      .detail,
+      .table-wrap,
+      .flow-card,
+      .raw-panel {
         border: 1px solid var(--line);
-        background: rgba(255, 250, 242, 0.82);
-        box-shadow: 0 16px 50px rgba(20, 35, 33, 0.08);
         border-radius: 8px;
+        background: rgba(255, 250, 242, 0.88);
+        box-shadow: 0 16px 50px rgba(20, 35, 33, 0.08);
       }
       .hero {
+        position: relative;
+        min-height: 410px;
         padding: 34px;
+        overflow: hidden;
+        display: grid;
+        align-content: space-between;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -18%;
+        bottom: -50%;
+        width: 48%;
+        height: 340px;
+        opacity: 0.32;
+        background:
+          linear-gradient(
+            90deg,
+            transparent 0 12%,
+            rgba(13, 59, 49, 0.18) 12% 13%,
+            transparent 13% 28%,
+            rgba(193, 154, 75, 0.32) 28% 29%,
+            transparent 29% 100%
+          ),
+          radial-gradient(circle at 16% 52%, rgba(13, 59, 49, 0.26) 0 12px, transparent 13px),
+          radial-gradient(circle at 38% 30%, rgba(143, 169, 154, 0.32) 0 20px, transparent 21px),
+          radial-gradient(circle at 58% 60%, rgba(43, 47, 51, 0.18) 0 16px, transparent 17px),
+          radial-gradient(circle at 80% 38%, rgba(13, 59, 49, 0.22) 0 24px, transparent 25px);
+        pointer-events: none;
+        transform: rotate(-2deg);
+      }
+      .hero > * {
+        position: relative;
+        z-index: 1;
       }
       .eyebrow {
         color: var(--green);
@@ -70,72 +107,124 @@
         text-transform: uppercase;
       }
       h1 {
-        font-size: clamp(38px, 5vw, 76px);
-        line-height: 0.94;
+        max-width: 880px;
         margin: 14px 0;
-        max-width: 980px;
+        font-size: clamp(42px, 5vw, 78px);
+        line-height: 0.94;
+        letter-spacing: 0;
       }
       h2 {
         margin: 0 0 10px;
         font-size: 22px;
+      }
+      h3 {
+        margin: 0;
       }
       p {
         color: var(--muted);
         line-height: 1.58;
       }
       .hero p {
-        max-width: 780px;
+        max-width: 760px;
         font-size: 18px;
+      }
+      code {
+        color: var(--green);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+        font-size: 0.92em;
       }
       .metrics {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 10px;
+        max-width: 780px;
         margin-top: 24px;
       }
       .metric {
-        background: rgba(13, 59, 49, 0.06);
+        min-height: 92px;
+        padding: 14px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        padding: 14px;
+        background: rgba(255, 250, 242, 0.88);
       }
       .metric strong {
         display: block;
         color: var(--green);
         font-size: 28px;
       }
+      .metric span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
       .panel {
         padding: 24px;
       }
-      .section-grid {
+      .sources {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 18px;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .source-card {
+        display: grid;
+        gap: 2px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.52);
+      }
+      .source-card strong {
+        color: var(--green);
+        font-size: 13px;
+      }
+      .source-card span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+      }
+      .brief-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
         margin-bottom: 18px;
       }
-      .live-list {
-        margin: 12px 0 0;
-        padding-left: 20px;
-        color: var(--muted);
-        line-height: 1.6;
+      .brief-card {
+        min-height: 154px;
+        padding: 18px;
       }
-      .live-list li + li {
-        margin-top: 8px;
+      .brief-card strong {
+        display: block;
+        margin: 8px 0;
+        color: var(--ink);
+        font-size: 18px;
+        line-height: 1.22;
+        overflow-wrap: anywhere;
+      }
+      .brief-card p {
+        margin: 0;
+        font-size: 14px;
       }
       .toolbar {
         display: grid;
-        grid-template-columns: minmax(240px, 1fr) repeat(4, auto);
+        grid-template-columns: minmax(240px, 1fr) repeat(4, auto) 1px repeat(3, auto);
         gap: 12px;
+        align-items: center;
         padding: 14px;
         margin-bottom: 18px;
       }
+      .separator {
+        width: 1px;
+        height: 28px;
+        background: var(--line);
+      }
       input,
       button {
+        min-height: 42px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--surface);
         color: var(--ink);
-        min-height: 42px;
         padding: 0 14px;
         font: inherit;
       }
@@ -149,17 +238,20 @@
       }
       .layout {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 360px;
+        grid-template-columns: minmax(0, 1fr) 370px;
         gap: 18px;
         align-items: start;
       }
-      .work-map {
-        display: grid;
-        gap: 14px;
+      .view {
+        display: none;
+      }
+      .view.active {
+        display: block;
       }
       .lane {
         display: grid;
         gap: 10px;
+        margin-bottom: 14px;
       }
       .lane-title {
         display: flex;
@@ -177,10 +269,10 @@
         gap: 12px;
       }
       .node {
+        min-height: 174px;
         padding: 16px;
         cursor: pointer;
         position: relative;
-        min-height: 180px;
       }
       .node.active-node {
         outline: 3px solid rgba(193, 154, 75, 0.28);
@@ -188,6 +280,11 @@
       .node h3 {
         margin: 8px 0 4px;
         font-size: 18px;
+        overflow-wrap: anywhere;
+      }
+      .node p {
+        margin: 0;
+        font-size: 14px;
       }
       .chips {
         display: flex;
@@ -198,13 +295,21 @@
       .chip {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        border-radius: 999px;
         border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.58);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.62);
         color: var(--muted);
         font-size: 12px;
         padding: 5px 9px;
+      }
+      .node-summary {
+        margin-top: 10px !important;
+        color: var(--green);
+        font-weight: 700;
+      }
+      .node-note {
+        margin-top: 8px !important;
+        font-size: 13px !important;
       }
       .status-concluded {
         border-left: 5px solid var(--sage);
@@ -232,13 +337,120 @@
       }
       .detail dd {
         margin: 0;
+        overflow-wrap: anywhere;
+      }
+      .detail-section {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+      .detail-section h3 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+      .detail-section p {
+        margin: 0;
+        font-size: 14px;
+      }
+      .mini-list {
+        margin: 8px 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .mini-list li + li {
+        margin-top: 6px;
+      }
+      .progress-line {
+        display: grid;
+        gap: 6px;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .progress-line strong {
+        color: var(--green);
       }
       .checkpoint-list {
         margin: 16px 0 0;
         padding-left: 18px;
       }
+      .checkpoint-list li + li {
+        margin-top: 7px;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        min-width: 1180px;
+        border-collapse: collapse;
+        background: rgba(255, 250, 242, 0.88);
+      }
+      th,
+      td {
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      td {
+        font-size: 14px;
+      }
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .flow-card {
+        min-height: 220px;
+        padding: 18px;
+      }
+      .flow-card > strong {
+        display: block;
+        margin: 8px 0;
+        color: var(--green);
+        font-size: 40px;
+        line-height: 1;
+      }
+      .flow-card ol {
+        margin: 12px 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .raw-panel {
+        margin-top: 18px;
+        padding: 16px 18px;
+      }
+      .raw-panel summary {
+        cursor: pointer;
+        color: var(--green);
+        font-weight: 800;
+      }
+      .raw-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-top: 14px;
+      }
+      .raw-grid ol {
+        margin: 8px 0 0;
+        padding-left: 20px;
+        color: var(--muted);
+        line-height: 1.58;
+      }
+      .raw-grid li + li {
+        margin-top: 8px;
+      }
       .hidden {
-        display: none;
+        display: none !important;
       }
       .empty {
         padding: 24px;
@@ -246,34 +458,22 @@
         border: 1px dashed var(--line);
         border-radius: 8px;
       }
-      .matrix {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .matrix th,
-      .matrix td {
-        padding: 12px;
-        border-bottom: 1px solid var(--line);
-        text-align: left;
-        vertical-align: top;
-      }
-      .matrix th {
-        color: var(--muted);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
       @media (max-width: 980px) {
         main {
           padding: 18px;
         }
         header,
+        .brief-grid,
         .layout,
-        .section-grid {
+        .flow,
+        .raw-grid {
           grid-template-columns: 1fr;
         }
         .toolbar {
           grid-template-columns: 1fr 1fr;
+        }
+        .separator {
+          display: none;
         }
         .metrics {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -288,118 +488,73 @@
     <main>
       <header>
         <section class="hero">
-          <div class="eyebrow">Projeção derivada · não-SSOT</div>
-          <h1>Mapa Vivo do Trabalho Governado</h1>
-          <p>
-            Visão navegável da topologia em <code>state.yml</code>. O mapa mostra todos os nós
-            concluídos, o checkpoint ativo e a cauda planejada sem substituir o contrato governado.
-          </p>
+          <div>
+            <div class="eyebrow">Context Architecture / 0024 · projeção derivada · não-SSOT</div>
+            <h1>Mapa Vivo do Trabalho Governado</h1>
+            <p>
+              Leitura humana da topologia governada: onde a frente está, o que já foi fechado, o que
+              vem depois e quais evidências sustentam cada nó. A decisão continua nos artefatos
+              governados; este mapa só organiza a navegação.
+            </p>
+          </div>
           <div class="metrics" aria-label="Resumo da topologia">
             <div class="metric"><strong>13</strong><span>nós concluídos</span></div>
             <div class="metric"><strong>1</strong><span>nó ativo</span></div>
             <div class="metric"><strong>6</strong><span>nós planejados</span></div>
-            <div class="metric"><strong>46</strong><span>checkpoints</span></div>
+            <div class="metric"><strong>46</strong><span>checkpoints rastreados</span></div>
           </div>
         </section>
         <aside class="panel">
-          <h2>Cursor atual</h2>
+          <div class="eyebrow">Fontes do mapa</div>
+          <h2>O que este HTML pode afirmar</h2>
           <p>
-            <strong>internal-architecture-refactor-ddd-bdd</strong
-            ><br />checkpoint-internal-architecture-refactor-ddd-bdd
+            A visualização é regenerável e comparada por check. Se divergir do estado governado,
+            <code>governed-work-map:check</code> falha.
           </p>
-          <p>Stage: <strong>implementation</strong><br />Gate: <strong>closed</strong></p>
-          <p>Fonte: <code>.governance/specs/0024-context-architecture/state.yml</code></p>
+          <div class="sources">
+            <div class="source-card">
+              <strong>Topologia</strong>
+              <span>.governance/specs/0024-context-architecture/state.yml</span>
+            </div>
+            <div class="source-card">
+              <strong>Checklist</strong>
+              <span>.governance/specs/0024-context-architecture/tasks.md</span>
+            </div>
+            <div class="source-card">
+              <strong>Decisões</strong>
+              <span>.governance/specs/0024-context-architecture/decision-brief.md</span>
+            </div>
+            <div class="source-card">
+              <strong>Evidências</strong>
+              <span>reviews, gates, PRs e projeções versionadas</span>
+            </div>
+          </div>
         </aside>
       </header>
 
-      <section class="section-grid" aria-label="Foco e próximas ações">
-        <article class="panel">
-          <div class="eyebrow">Foco atual</div>
-          <h2>O que este checkpoint está tentando fechar</h2>
-          <ul class="live-list">
-            <li>
-              RECONCILIACAO 2026-06-03 ([DEC-0024-G08], owner): G03 (promotion pipeline) / G04 (casa
-              unica/tri-root) / G05 (projecoes) foram REABERTOS. Os eixos deixados em aberto no
-              Stage 1 mostraram-se necessarios para problemas reais observados no uso (mis-binding
-              da retomada, recuperabilidade, &#039;a resposta estava num ADR esquecido&#039;). A
-              0024 VOLTOU A TRATAR MODELAGEM nesses eixos -- isto e DECISAO, nao drift. Direcao
-              assumida: arquitetura orientada a grafo (entidades + relacoes navegaveis KnowledgeRef
-              + projecoes derivadas). NAO ha 0025 independente (o split foi superado no Checkpoint
-              2; o trabalho mapeia em G03/G04/G05 + candidatas Grupo B). O kernel Knowledge +
-              KnowledgeGraph nucleo + capability Insights JA materializados (PR #34). Motivacao
-              persistida como Insights (PIT-0004..0006).
-            </li>
-            <li>
-              0024 em ABSORCAO OPERACIONAL (pesquisa encerrada). Problema = falta de absorcao, nao
-              falta de decisao: decisoes convergidas ainda nao alteraram o comportamento do sistema
-              (&#039;arquitetura converge enquanto codigo diverge&#039;). Backlog = relatorio de
-              auditoria do Codex (divergencias decisao&lt;-&gt;codigo).
-            </li>
-            <li>
-              Plano executavel CANONICO no repo: plan.md secoes &#039;Sequencia de Checkpoints&#039;
-              + &#039;Topologia operacional&#039;. VOCABULARIO (Checkpoint 2.1): PR/#N = Pull
-              Request real do GitHub; Checkpoint N = unidade de implementacao da spec; Gate = ritual
-              de validacao (Technical Audit -&gt; Architectural Review -&gt; Human).
-            </li>
-            <li>
-              TOPOLOGIA CANONICA (corrigida no Checkpoint 2.1a; modelo da 0023 / ADR 0020 + 0024 /
-              DEC-0023-M01): #32 = PR de governanca/bootstrap + LINHA DE INTEGRACAO da spec; NAO
-              mergeia cedo, e a BASE DA STACK. Checkpoint 3+ = PR real proprio STACKED sobre a linha
-              da spec (NAO off-main, NAO independente). Modo UNIT: merge em main e evento UNICO ao
-              fim (veiculo = PR terminal de implementacao; #32 + intermediarios + Integration PR via
-              landed-via reconciliation; 1 SHA canonico), apos review.md R8. Integration PR =
-              homologacao antes do merge (NAO veiculo).
-            </li>
-            <li>
-              Decisoes cravadas (NAO reabrir): G00/G02/G06; Open abolido/DEC nasce Pendente/Deferred
-              canonico; brief por estado; GG-0001 interno (DOGFOOD-*); WorkflowType removido;
-              proveniencia runtime-scoped (role livre, espinha impl+gate derivada, projecao NAO
-              governanca); GG-0002 antes da remocao.
-            </li>
-            <li>
-              Gate por checkpoint: implementacao -&gt; revisoes exigidas pela
-              .governance/review-policy.yml (quando aplicavel) -&gt; Human Gate (owner) -&gt; AVANCA
-              (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review
-              como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O
-              Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por
-              vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera;
-              mudanca estrutural sim.
-            </li>
-            <li>
-              Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): &#039;ja foi validado
-              empiricamente na 0024?&#039; -&gt; absorver/enforcar/executar. NAO re-modelar o
-              DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram
-              reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a
-              direcao, nao o risco. O &#039;risco dominante&#039; original (modelar em vez de
-              absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho.
-            </li>
-          </ul>
+      <section class="brief-grid" aria-label="Resumo situado">
+        <article class="brief-card">
+          <div class="eyebrow">Onde estamos</div>
+          <strong>internal-architecture-refactor-ddd-bdd</strong>
+          <p>
+            PR 46 · etapa ativa internal-architecture-refactor-ddd-bdd: reorganização
+            behavior-preserving do runtime/testes
+          </p>
         </article>
-        <article class="panel">
-          <div class="eyebrow">Próximas ações derivadas</div>
-          <h2>O que o trabalho governado aponta agora</h2>
-          <ul class="live-list">
-            <li>
-              canonical-next: internal-architecture-refactor-ddd-bdd. PR #45
-              (artifact-taxonomy-and-model-review-contract / seq 12) CONCLUIDO-NA-STACK por Human
-              Gate approved (gates/c-artifact-taxonomy-and-model-review-contract.yml, 2026-07-12);
-              modo unit, SEM merge isolado em main. No ATIVO =
-              internal-architecture-refactor-ddd-bdd (seq 13,
-              checkpoint-internal-architecture-refactor-ddd-bdd; PR #46 Draft stacked sobre #45,
-              aberto via continuation:create-pr conforme DEC-0024-G27). Escopo do recorte:
-              reorganizacao behavior-preserving de src/cli e testes; fechar/dispositionar a
-              gramatica operacional remanescente de G01; definir o contrato do graph snapshot
-              derivado (nodes/edges/source-refs/hashes; deterministico, regeneravel, offline;
-              derived-only, sem 2a SSOT) e explicitar quais projecoes de G05 o snapshot atende
-              (DEC-0024-G23/G28). Insumos obrigatorios antes de fechar gramatica/snapshot:
-              work-graph-model/model.yml, tracker.md, features.md e
-              GUILDA-QRD-PRESERVATION-MATRIX.md (aprendizados estruturais apenas; produto Guilda
-              permanece no repo irmao). Depois: broad-flow-falsification e
-              continuation-review-human-gate. NAO implementar dualroot-collapse (agora seq 14),
-              co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao
-              fisica de .specify neste PR.
-            </li>
-          </ul>
+        <article class="brief-card">
+          <div class="eyebrow">Estado do trabalho</div>
+          <strong>Implementação</strong>
+          <p>Gate atual: Fechado. O cursor vem de <code>state.yml</code>.</p>
+        </article>
+        <article class="brief-card">
+          <div class="eyebrow">Último fechamento</div>
+          <strong>artifact-taxonomy-and-model-review-contract</strong>
+          <p>PR 45 · 1 checkpoint(s).</p>
+        </article>
+        <article class="brief-card">
+          <div class="eyebrow">Próxima cauda</div>
+          <strong>broad-flow-falsification</strong>
+          <p>broad-flow-falsification e continuation-review-human-gate</p>
         </article>
       </section>
 
@@ -409,12 +564,877 @@
         <button type="button" data-filter="concluded">Concluídos</button>
         <button type="button" data-filter="active">Ativo</button>
         <button type="button" data-filter="planned">Planejados</button>
+        <span class="separator" aria-hidden="true"></span>
+        <button type="button" class="active" data-mode="map-view">Mapa</button>
+        <button type="button" data-mode="matrix-view">Matriz</button>
+        <button type="button" data-mode="flow-view">Fluxo</button>
       </section>
 
       <section class="layout">
         <div>
-          <div id="map" class="work-map" aria-live="polite"></div>
+          <section id="map-view" class="view active" aria-label="Mapa por status">
+            <section class="lane" data-lane="concluded">
+              <div class="lane-title"><span>Concluído</span><span>13</span></div>
+              <div class="nodes">
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="base-governance"
+                  data-status="concluded"
+                  data-search="base-governance concluded governance 32 checkpoint-1 checkpoint-2 checkpoint-2.1 checkpoint-2.1a   Checkpoint 1 — active-specs.yml lista a 0024 (Codex A3). ✅ feito + gated (87865ca); Gate completo no #32. Checkpoint 2 — reframe spec/plan/tasks/NEXT → absorção + dobrar a sequência no plan.md (Codex A2/P1/P2). ✅ feito + gated (8b0eec6). Checkpoint 2.1 — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023. ✅ feito + gated (d686d4b). Checkpoint 2.1a — correção arquitetural pós-dogfooding: substitui a topologia incorreta do 2.1 pela canônica da 0023 (unit/_stacked_/merge único ao fim; #32 não mergeia cedo). ✅ feito + gated (fa2c0ae); o Gate de encerr… "
+                  aria-label="Abrir detalhes de base-governance"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>base-governance</h3>
+                  <p>PR 32 · governance · seq n/a</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-1</span><span class="chip">checkpoint-2</span
+                    ><span class="chip">checkpoint-2.1</span
+                    ><span class="chip">checkpoint-2.1a</span>
+                  </div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="ruleset-producibility"
+                  data-status="concluded"
+                  data-search="ruleset-producibility concluded execution 33 checkpoint-2.2 checkpoint-2.2b checkpoint-2.3 checkpoint-2.3a checkpoint-2.3b checkpoint-2.4 checkpoint-2.4a checkpoint-2.4b checkpoint-2.4c checkpoint-2.4d   Checkpoint 2.2 — correção estrutural pós-dogfooding (precede o 3): ruleset:check — producibilidade (PRIMÁRIO, no validate) + paridade (SECUNDÁRIO, detect-only no ruleset-drift.yml) + ruleset-as-code (.github/rulesets/ma… Checkpoint 2.2b — correção da fronteira mecânica (achado Codex no PR #33): extração de gatilhos-base (on: [pull_request, push]) + suporte declarativo a produtores externos, prevenindo órfãos de evento absoluto sem criar… Checkpoint 2.3 — Governance Topology as Data: topologia como dado (SSOT) no state.yml + governance-pr-check valida título/template como projeções; UX do CI (Skipped→Success/Exempt). Em #33. ✅ implementado; o Architectur… "
+                  aria-label="Abrir detalhes de ruleset-producibility"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>ruleset-producibility</h3>
+                  <p>PR 33 · execution · seq 1</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-2.2</span><span class="chip">checkpoint-2.2b</span
+                    ><span class="chip">checkpoint-2.3</span
+                    ><span class="chip">checkpoint-2.3a</span><span class="chip">+6</span>
+                  </div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="insights-in-flight"
+                  data-status="concluded"
+                  data-search="insights-in-flight concluded execution 34 checkpoint-insights checkpoint-knowledge-kernel checkpoint-graph-core   "
+                  aria-label="Abrir detalhes de insights-in-flight"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>insights-in-flight</h3>
+                  <p>PR 34 · execution · seq 2</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-insights</span
+                    ><span class="chip">checkpoint-knowledge-kernel</span
+                    ><span class="chip">checkpoint-graph-core</span>
+                  </div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="pr-cli-cutover"
+                  data-status="concluded"
+                  data-search="pr-cli-cutover concluded execution 35 checkpoint-cli-cutover   "
+                  aria-label="Abrir detalhes de pr-cli-cutover"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>pr-cli-cutover</h3>
+                  <p>PR 35 · execution · seq 3</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-cli-cutover</span></div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="co-reconcile"
+                  data-status="concluded"
+                  data-search="co-reconcile concluded execution 36 checkpoint-co-reconcile   "
+                  aria-label="Abrir detalhes de co-reconcile"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>co-reconcile</h3>
+                  <p>PR 36 · execution · seq 4</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-co-reconcile</span></div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="co-knowledge"
+                  data-status="concluded"
+                  data-search="co-knowledge concluded execution 37 checkpoint-co-knowledge checkpoint-co-knowledge-backfill checkpoint-script-contracts checkpoint-runtime-bootstrap-readiness checkpoint-runtime-ledger-partition checkpoint-review-policy-events   "
+                  aria-label="Abrir detalhes de co-knowledge"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>co-knowledge</h3>
+                  <p>PR 37 · execution · seq 5</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-co-knowledge</span
+                    ><span class="chip">checkpoint-co-knowledge-backfill</span
+                    ><span class="chip">checkpoint-script-contracts</span
+                    ><span class="chip">checkpoint-runtime-bootstrap-readiness</span
+                    ><span class="chip">+2</span>
+                  </div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="bootstrap-compiler"
+                  data-status="concluded"
+                  data-search="bootstrap-compiler concluded execution 38 checkpoint-compiler-ts checkpoint-bootstrap-registry   "
+                  aria-label="Abrir detalhes de bootstrap-compiler"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>bootstrap-compiler</h3>
+                  <p>PR 38 · execution · seq 6</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-compiler-ts</span
+                    ><span class="chip">checkpoint-bootstrap-registry</span>
+                  </div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="toolchain-simplification"
+                  data-status="concluded"
+                  data-search="toolchain-simplification concluded execution 39 checkpoint-npm-toolchain   Checkpoint npm-toolchain (nó toolchain-simplification, seq 7, PR #39) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-11, gates/c-npm-toolchain.yml; PR #39 Ready, HEAD d806a835, CI 11/11; modo unit, sem merge isolado… "
+                  aria-label="Abrir detalhes de toolchain-simplification"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>toolchain-simplification</h3>
+                  <p>PR 39 · execution · seq 7</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-npm-toolchain</span></div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="co-projection"
+                  data-status="concluded"
+                  data-search="co-projection concluded execution 41 checkpoint-co-projection   Checkpoint co-projection (nó co-projection, seq 8 / CO-4, PR #41) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-12, gates/c-co-projection.yml; PR #41 Ready, HEAD 46a7ffe7, CI 11/11; pr-ready:check satisfeito; modo… "
+                  aria-label="Abrir detalhes de co-projection"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>co-projection</h3>
+                  <p>PR 41 · execution · seq 8</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-co-projection</span></div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="co-enforcement"
+                  data-status="concluded"
+                  data-search="co-enforcement concluded execution 42 checkpoint-co-enforcement   Checkpoint co-enforcement (nó co-enforcement, seq 9 / CO-3, PR #42) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-16, gates/c-co-enforcement.yml; PR #42 Ready, HEAD 46ff89b, CI 11/11; pr-ready:check satisfeito; mod… "
+                  aria-label="Abrir detalhes de co-enforcement"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>co-enforcement</h3>
+                  <p>PR 42 · execution · seq 9</p>
+                  <p class="node-summary">5/5 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-co-enforcement</span></div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="co-flow-convergence"
+                  data-status="concluded"
+                  data-search="co-flow-convergence concluded execution 43 checkpoint-co-flow-convergence   Checkpoint co-flow-convergence (nó co-flow-convergence, seq 10) — ativo após Human Gate do co-enforcement e planejado por [DEC-0024-G10] (2026-06-16), antes de co-capture: convergência do fluxo ponta a ponta da Spec 002… "
+                  aria-label="Abrir detalhes de co-flow-convergence"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>co-flow-convergence</h3>
+                  <p>PR 43 · execution · seq 10</p>
+                  <p class="node-summary">7/7 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-co-flow-convergence</span></div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="co-flow-continuation"
+                  data-status="concluded"
+                  data-search="co-flow-continuation concluded execution 44 checkpoint-co-flow-continuation reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado "
+                  aria-label="Abrir detalhes de co-flow-continuation"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>co-flow-continuation</h3>
+                  <p>PR 44 · execution · seq 11</p>
+                  <p class="node-summary">3/6 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">
+                    Etapa ativa: internal-architecture-refactor-ddd-bdd — reorganização
+                    behavior-preserving do runtime/testes
+                  </p>
+                  <div class="chips"><span class="chip">checkpoint-co-flow-continuation</span></div>
+                </article>
+                <article
+                  class="node status-concluded filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="artifact-taxonomy-and-model-review-contract"
+                  data-status="concluded"
+                  data-search='artifact-taxonomy-and-model-review-contract concluded execution 45 checkpoint-artifact-taxonomy-and-model-review-contract reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Checkpoint artifact-taxonomy-and-model-review-contract — ✅ CONCLUÍDO + gated (Human Gate approved 2026-07-12, gates/c-artifact-taxonomy-and-model-review-contract.yml; PR #45 Ready, HEAD 1cc96dd1, CI verde; modo unit, se… Este PR consolida a frente da Spec 0024 que modela o trabalho como grafo tipado e agora separa com clareza duas coisas que tinham se misturado: o framework ai-guidelines e o produto Guilda que nasceu como incubação dentro de work-graph-model/governance-demo. Artifact taxonomy e model-review contract permanecem como entrega viva do framework. [DEC-0024-G25] reconciliou a linguagem: "Spec" permanece como invólucro histórico/caminho físico, enquanto novas projeções usam "trabalho governado" e "work graph". assets/spec-0024-map-v5.html preserva a leitura humana/manual do PR #45, e assets/governed-work-map-data.json + assets/governed-work-map.html viram projeção gerada de state.yml, validada por npm run governed-work-map:check. pr-ready:check deve bloquear enquanto revisão decidida como obrigatória no review_plan não estiver current+approved, exceto quando a lane já estiver efetivamente approved e a owner tiver dispensado revalidação do delta posterior em review_plan..revalidation c… Human Gate: pendente — decisão reservada à owner; não é autorização de merge. Merge: fora do escopo deste PR individual; a stack segue em modo unit.'
+                  aria-label="Abrir detalhes de artifact-taxonomy-and-model-review-contract"
+                >
+                  <span class="chip">Concluído</span>
+                  <h3>artifact-taxonomy-and-model-review-contract</h3>
+                  <p>PR 45 · execution · seq 12</p>
+                  <p class="node-summary">3/6 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">
+                    Etapa ativa: internal-architecture-refactor-ddd-bdd — reorganização
+                    behavior-preserving do runtime/testes
+                  </p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-artifact-taxonomy-and-model-review-contract</span>
+                  </div>
+                </article>
+              </div>
+            </section>
+            <section class="lane" data-lane="active">
+              <div class="lane-title"><span>Ativo</span><span>1</span></div>
+              <div class="nodes">
+                <article
+                  class="node status-active filterable active-node"
+                  tabindex="0"
+                  role="button"
+                  data-node="internal-architecture-refactor-ddd-bdd"
+                  data-status="active"
+                  data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: guard de camadas para impedir novas dependências indevidas entre domínio, aplicação, infraestrutura e CLI, com baseline explícita para violações legadas. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Architectural Review: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
+                  aria-label="Abrir detalhes de internal-architecture-refactor-ddd-bdd"
+                >
+                  <span class="chip">Ativo</span>
+                  <h3>internal-architecture-refactor-ddd-bdd</h3>
+                  <p>PR 46 · execution · seq 13</p>
+                  <p class="node-summary">3/6 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">
+                    Etapa ativa: internal-architecture-refactor-ddd-bdd — reorganização
+                    behavior-preserving do runtime/testes
+                  </p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-internal-architecture-refactor-ddd-bdd</span>
+                  </div>
+                </article>
+              </div>
+            </section>
+            <section class="lane" data-lane="planned">
+              <div class="lane-title"><span>Planejado</span><span>6</span></div>
+              <div class="nodes">
+                <article
+                  class="node status-planned filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="dualroot-collapse"
+                  data-status="planned"
+                  data-search="dualroot-collapse planned execution  checkpoint-dualroot-collapse   "
+                  aria-label="Abrir detalhes de dualroot-collapse"
+                >
+                  <span class="chip">Planejado</span>
+                  <h3>dualroot-collapse</h3>
+                  <p>PR futuro · execution · seq 14</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-dualroot-collapse</span></div>
+                </article>
+                <article
+                  class="node status-planned filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="co-capture"
+                  data-status="planned"
+                  data-search="co-capture planned execution  checkpoint-co-capture   "
+                  aria-label="Abrir detalhes de co-capture"
+                >
+                  <span class="chip">Planejado</span>
+                  <h3>co-capture</h3>
+                  <p>PR futuro · execution · seq 15</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-co-capture</span></div>
+                </article>
+                <article
+                  class="node status-planned filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="co-events"
+                  data-status="planned"
+                  data-search="co-events planned execution  checkpoint-co-events   "
+                  aria-label="Abrir detalhes de co-events"
+                >
+                  <span class="chip">Planejado</span>
+                  <h3>co-events</h3>
+                  <p>PR futuro · execution · seq 16</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">checkpoint-co-events</span></div>
+                </article>
+                <article
+                  class="node status-planned filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="housekeeping"
+                  data-status="planned"
+                  data-search="housekeeping planned execution  checkpoint-taxonomy-removal checkpoint-agents-sync checkpoint-gg-0002 checkpoint-decouple-brief checkpoint-doc-cleanup   "
+                  aria-label="Abrir detalhes de housekeeping"
+                >
+                  <span class="chip">Planejado</span>
+                  <h3>housekeeping</h3>
+                  <p>PR futuro · execution · seq 17</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-taxonomy-removal</span
+                    ><span class="chip">checkpoint-agents-sync</span
+                    ><span class="chip">checkpoint-gg-0002</span
+                    ><span class="chip">checkpoint-decouple-brief</span><span class="chip">+1</span>
+                  </div>
+                </article>
+                <article
+                  class="node status-planned filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="knowledge-readiness"
+                  data-status="planned"
+                  data-search="knowledge-readiness planned execution  checkpoint-knowledge-health checkpoint-knowledge-backfill-wide checkpoint-co-knowledge-promotion   "
+                  aria-label="Abrir detalhes de knowledge-readiness"
+                >
+                  <span class="chip">Planejado</span>
+                  <h3>knowledge-readiness</h3>
+                  <p>PR futuro · execution · seq 18</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips">
+                    <span class="chip">checkpoint-knowledge-health</span
+                    ><span class="chip">checkpoint-knowledge-backfill-wide</span
+                    ><span class="chip">checkpoint-co-knowledge-promotion</span>
+                  </div>
+                </article>
+                <article
+                  class="node status-planned filterable"
+                  tabindex="0"
+                  role="button"
+                  data-node="integration-final"
+                  data-status="planned"
+                  data-search="integration-final planned integration  review-and-merge   "
+                  aria-label="Abrir detalhes de integration-final"
+                >
+                  <span class="chip">Planejado</span>
+                  <h3>integration-final</h3>
+                  <p>PR futuro · integration · seq n/a</p>
+                  <p class="node-summary">0/0 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
+                  <p class="node-note">Sem detalhe adicional no body versionado.</p>
+                  <div class="chips"><span class="chip">review-and-merge</span></div>
+                </article>
+              </div>
+            </section>
+          </section>
+          <section id="matrix-view" class="view" aria-label="Matriz de nós">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nó</th>
+                    <th>Status</th>
+                    <th>PR</th>
+                    <th>Papel</th>
+                    <th>Etapas</th>
+                    <th>Tarefas</th>
+                    <th>PR body</th>
+                    <th>Checkpoints</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="base-governance concluded governance 32 checkpoint-1 checkpoint-2 checkpoint-2.1 checkpoint-2.1a   Checkpoint 1 — active-specs.yml lista a 0024 (Codex A3). ✅ feito + gated (87865ca); Gate completo no #32. Checkpoint 2 — reframe spec/plan/tasks/NEXT → absorção + dobrar a sequência no plan.md (Codex A2/P1/P2). ✅ feito + gated (8b0eec6). Checkpoint 2.1 — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023. ✅ feito + gated (d686d4b). Checkpoint 2.1a — correção arquitetural pós-dogfooding: substitui a topologia incorreta do 2.1 pela canônica da 0023 (unit/_stacked_/merge único ao fim; #32 não mergeia cedo). ✅ feito + gated (fa2c0ae); o Gate de encerr… "
+                    data-node="base-governance"
+                  >
+                    <td><strong>base-governance</strong></td>
+                    <td>Concluído</td>
+                    <td>32</td>
+                    <td>governance</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 4</td>
+                    <td>sem body</td>
+                    <td>checkpoint-1, checkpoint-2, checkpoint-2.1, checkpoint-2.1a</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="ruleset-producibility concluded execution 33 checkpoint-2.2 checkpoint-2.2b checkpoint-2.3 checkpoint-2.3a checkpoint-2.3b checkpoint-2.4 checkpoint-2.4a checkpoint-2.4b checkpoint-2.4c checkpoint-2.4d   Checkpoint 2.2 — correção estrutural pós-dogfooding (precede o 3): ruleset:check — producibilidade (PRIMÁRIO, no validate) + paridade (SECUNDÁRIO, detect-only no ruleset-drift.yml) + ruleset-as-code (.github/rulesets/ma… Checkpoint 2.2b — correção da fronteira mecânica (achado Codex no PR #33): extração de gatilhos-base (on: [pull_request, push]) + suporte declarativo a produtores externos, prevenindo órfãos de evento absoluto sem criar… Checkpoint 2.3 — Governance Topology as Data: topologia como dado (SSOT) no state.yml + governance-pr-check valida título/template como projeções; UX do CI (Skipped→Success/Exempt). Em #33. ✅ implementado; o Architectur… "
+                    data-node="ruleset-producibility"
+                  >
+                    <td><strong>ruleset-producibility</strong></td>
+                    <td>Concluído</td>
+                    <td>33</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 3</td>
+                    <td>sem body</td>
+                    <td>
+                      checkpoint-2.2, checkpoint-2.2b, checkpoint-2.3, checkpoint-2.3a,
+                      checkpoint-2.3b, checkpoint-2.4, checkpoint-2.4a, checkpoint-2.4b,
+                      checkpoint-2.4c, checkpoint-2.4d
+                    </td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="insights-in-flight concluded execution 34 checkpoint-insights checkpoint-knowledge-kernel checkpoint-graph-core   "
+                    data-node="insights-in-flight"
+                  >
+                    <td><strong>insights-in-flight</strong></td>
+                    <td>Concluído</td>
+                    <td>34</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>checkpoint-insights, checkpoint-knowledge-kernel, checkpoint-graph-core</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="pr-cli-cutover concluded execution 35 checkpoint-cli-cutover   "
+                    data-node="pr-cli-cutover"
+                  >
+                    <td><strong>pr-cli-cutover</strong></td>
+                    <td>Concluído</td>
+                    <td>35</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>checkpoint-cli-cutover</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="co-reconcile concluded execution 36 checkpoint-co-reconcile   "
+                    data-node="co-reconcile"
+                  >
+                    <td><strong>co-reconcile</strong></td>
+                    <td>Concluído</td>
+                    <td>36</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>checkpoint-co-reconcile</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="co-knowledge concluded execution 37 checkpoint-co-knowledge checkpoint-co-knowledge-backfill checkpoint-script-contracts checkpoint-runtime-bootstrap-readiness checkpoint-runtime-ledger-partition checkpoint-review-policy-events   "
+                    data-node="co-knowledge"
+                  >
+                    <td><strong>co-knowledge</strong></td>
+                    <td>Concluído</td>
+                    <td>37</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>
+                      checkpoint-co-knowledge, checkpoint-co-knowledge-backfill,
+                      checkpoint-script-contracts, checkpoint-runtime-bootstrap-readiness,
+                      checkpoint-runtime-ledger-partition, checkpoint-review-policy-events
+                    </td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="bootstrap-compiler concluded execution 38 checkpoint-compiler-ts checkpoint-bootstrap-registry   "
+                    data-node="bootstrap-compiler"
+                  >
+                    <td><strong>bootstrap-compiler</strong></td>
+                    <td>Concluído</td>
+                    <td>38</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>checkpoint-compiler-ts, checkpoint-bootstrap-registry</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="toolchain-simplification concluded execution 39 checkpoint-npm-toolchain   Checkpoint npm-toolchain (nó toolchain-simplification, seq 7, PR #39) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-11, gates/c-npm-toolchain.yml; PR #39 Ready, HEAD d806a835, CI 11/11; modo unit, sem merge isolado… "
+                    data-node="toolchain-simplification"
+                  >
+                    <td><strong>toolchain-simplification</strong></td>
+                    <td>Concluído</td>
+                    <td>39</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 1</td>
+                    <td>sem body</td>
+                    <td>checkpoint-npm-toolchain</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="co-projection concluded execution 41 checkpoint-co-projection   Checkpoint co-projection (nó co-projection, seq 8 / CO-4, PR #41) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-12, gates/c-co-projection.yml; PR #41 Ready, HEAD 46a7ffe7, CI 11/11; pr-ready:check satisfeito; modo… "
+                    data-node="co-projection"
+                  >
+                    <td><strong>co-projection</strong></td>
+                    <td>Concluído</td>
+                    <td>41</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 1</td>
+                    <td>sem body</td>
+                    <td>checkpoint-co-projection</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="co-enforcement concluded execution 42 checkpoint-co-enforcement   Checkpoint co-enforcement (nó co-enforcement, seq 9 / CO-3, PR #42) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-16, gates/c-co-enforcement.yml; PR #42 Ready, HEAD 46ff89b, CI 11/11; pr-ready:check satisfeito; mod… "
+                    data-node="co-enforcement"
+                  >
+                    <td><strong>co-enforcement</strong></td>
+                    <td>Concluído</td>
+                    <td>42</td>
+                    <td>execution</td>
+                    <td>5/5 concluídas</td>
+                    <td>0 aberta(s) de 1</td>
+                    <td>sem body</td>
+                    <td>checkpoint-co-enforcement</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="co-flow-convergence concluded execution 43 checkpoint-co-flow-convergence   Checkpoint co-flow-convergence (nó co-flow-convergence, seq 10) — ativo após Human Gate do co-enforcement e planejado por [DEC-0024-G10] (2026-06-16), antes de co-capture: convergência do fluxo ponta a ponta da Spec 002… "
+                    data-node="co-flow-convergence"
+                  >
+                    <td><strong>co-flow-convergence</strong></td>
+                    <td>Concluído</td>
+                    <td>43</td>
+                    <td>execution</td>
+                    <td>7/7 concluídas</td>
+                    <td>0 aberta(s) de 1</td>
+                    <td>sem body</td>
+                    <td>checkpoint-co-flow-convergence</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search="co-flow-continuation concluded execution 44 checkpoint-co-flow-continuation reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado "
+                    data-node="co-flow-continuation"
+                  >
+                    <td><strong>co-flow-continuation</strong></td>
+                    <td>Concluído</td>
+                    <td>44</td>
+                    <td>execution</td>
+                    <td>3/6 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>checkpoint-co-flow-continuation</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="concluded"
+                    data-search='artifact-taxonomy-and-model-review-contract concluded execution 45 checkpoint-artifact-taxonomy-and-model-review-contract reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Checkpoint artifact-taxonomy-and-model-review-contract — ✅ CONCLUÍDO + gated (Human Gate approved 2026-07-12, gates/c-artifact-taxonomy-and-model-review-contract.yml; PR #45 Ready, HEAD 1cc96dd1, CI verde; modo unit, se… Este PR consolida a frente da Spec 0024 que modela o trabalho como grafo tipado e agora separa com clareza duas coisas que tinham se misturado: o framework ai-guidelines e o produto Guilda que nasceu como incubação dentro de work-graph-model/governance-demo. Artifact taxonomy e model-review contract permanecem como entrega viva do framework. [DEC-0024-G25] reconciliou a linguagem: "Spec" permanece como invólucro histórico/caminho físico, enquanto novas projeções usam "trabalho governado" e "work graph". assets/spec-0024-map-v5.html preserva a leitura humana/manual do PR #45, e assets/governed-work-map-data.json + assets/governed-work-map.html viram projeção gerada de state.yml, validada por npm run governed-work-map:check. pr-ready:check deve bloquear enquanto revisão decidida como obrigatória no review_plan não estiver current+approved, exceto quando a lane já estiver efetivamente approved e a owner tiver dispensado revalidação do delta posterior em review_plan..revalidation c… Human Gate: pendente — decisão reservada à owner; não é autorização de merge. Merge: fora do escopo deste PR individual; a stack segue em modo unit.'
+                    data-node="artifact-taxonomy-and-model-review-contract"
+                  >
+                    <td><strong>artifact-taxonomy-and-model-review-contract</strong></td>
+                    <td>Concluído</td>
+                    <td>45</td>
+                    <td>execution</td>
+                    <td>3/6 concluídas</td>
+                    <td>0 aberta(s) de 1</td>
+                    <td>
+                      Este PR consolida a frente da Spec 0024 que modela o trabalho como grafo
+                      tipado e agora separa com clareza duas coisas que tinham se misturado: o
+                      framework ai-guidelines e o produto Guilda que nasceu como incubação dentro de
+                      work-graph-model/governance-demo.
+                    </td>
+                    <td>checkpoint-artifact-taxonomy-and-model-review-contract</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="active"
+                    data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: guard de camadas para impedir novas dependências indevidas entre domínio, aplicação, infraestrutura e CLI, com baseline explícita para violações legadas. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Architectural Review: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
+                    data-node="internal-architecture-refactor-ddd-bdd"
+                  >
+                    <td><strong>internal-architecture-refactor-ddd-bdd</strong></td>
+                    <td>Ativo</td>
+                    <td>46</td>
+                    <td>execution</td>
+                    <td>3/6 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>
+                      Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó
+                      seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização
+                      behavior-preserving de src/cli e dos testes para que o próprio framework seja
+                      legível e sustentável por humanos, sem alterar comportamento nem conteúdo de
+                      produto.
+                    </td>
+                    <td>checkpoint-internal-architecture-refactor-ddd-bdd</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="planned"
+                    data-search="dualroot-collapse planned execution  checkpoint-dualroot-collapse   "
+                    data-node="dualroot-collapse"
+                  >
+                    <td><strong>dualroot-collapse</strong></td>
+                    <td>Planejado</td>
+                    <td>planejado</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>checkpoint-dualroot-collapse</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="planned"
+                    data-search="co-capture planned execution  checkpoint-co-capture   "
+                    data-node="co-capture"
+                  >
+                    <td><strong>co-capture</strong></td>
+                    <td>Planejado</td>
+                    <td>planejado</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>checkpoint-co-capture</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="planned"
+                    data-search="co-events planned execution  checkpoint-co-events   "
+                    data-node="co-events"
+                  >
+                    <td><strong>co-events</strong></td>
+                    <td>Planejado</td>
+                    <td>planejado</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>checkpoint-co-events</td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="planned"
+                    data-search="housekeeping planned execution  checkpoint-taxonomy-removal checkpoint-agents-sync checkpoint-gg-0002 checkpoint-decouple-brief checkpoint-doc-cleanup   "
+                    data-node="housekeeping"
+                  >
+                    <td><strong>housekeeping</strong></td>
+                    <td>Planejado</td>
+                    <td>planejado</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>
+                      checkpoint-taxonomy-removal, checkpoint-agents-sync, checkpoint-gg-0002,
+                      checkpoint-decouple-brief, checkpoint-doc-cleanup
+                    </td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="planned"
+                    data-search="knowledge-readiness planned execution  checkpoint-knowledge-health checkpoint-knowledge-backfill-wide checkpoint-co-knowledge-promotion   "
+                    data-node="knowledge-readiness"
+                  >
+                    <td><strong>knowledge-readiness</strong></td>
+                    <td>Planejado</td>
+                    <td>planejado</td>
+                    <td>execution</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>
+                      checkpoint-knowledge-health, checkpoint-knowledge-backfill-wide,
+                      checkpoint-co-knowledge-promotion
+                    </td>
+                  </tr>
+                  <tr
+                    class="filterable"
+                    data-status="planned"
+                    data-search="integration-final planned integration  review-and-merge   "
+                    data-node="integration-final"
+                  >
+                    <td><strong>integration-final</strong></td>
+                    <td>Planejado</td>
+                    <td>planejado</td>
+                    <td>integration</td>
+                    <td>0/0 concluídas</td>
+                    <td>0 aberta(s) de 0</td>
+                    <td>sem body</td>
+                    <td>review-and-merge</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <section id="flow-view" class="view" aria-label="Fluxo macro">
+            <div class="flow">
+              <article class="flow-card">
+                <div class="eyebrow">Stack concluída</div>
+                <strong>13</strong>
+                <p>O que já passou por decisão humana e fica como trilha de evidência.</p>
+                <ol>
+                  <li><code>base-governance</code></li>
+                  <li><code>ruleset-producibility</code></li>
+                  <li><code>insights-in-flight</code></li>
+                  <li><code>pr-cli-cutover</code></li>
+                  <li><code>co-reconcile</code></li>
+                  <li><code>co-knowledge</code></li>
+                  <li><code>bootstrap-compiler</code></li>
+                  <li><code>toolchain-simplification</code></li>
+                  <li>+5 nó(s)</li>
+                </ol>
+              </article>
+              <article class="flow-card">
+                <div class="eyebrow">Ativo agora</div>
+                <strong>1</strong>
+                <p>O checkpoint em implementação/revisão; CI verde sozinho não conclui a frente.</p>
+                <ol>
+                  <li><code>internal-architecture-refactor-ddd-bdd</code></li>
+                </ol>
+              </article>
+              <article class="flow-card">
+                <div class="eyebrow">Planejado depois</div>
+                <strong>6</strong>
+                <p>
+                  A cauda futura, que só deve abrir quando o fechamento anterior estiver honesto.
+                </p>
+                <ol>
+                  <li><code>dualroot-collapse</code></li>
+                  <li><code>co-capture</code></li>
+                  <li><code>co-events</code></li>
+                  <li><code>housekeeping</code></li>
+                  <li><code>knowledge-readiness</code></li>
+                  <li><code>integration-final</code></li>
+                </ol>
+              </article>
+            </div>
+          </section>
           <div id="empty" class="empty hidden">Nenhum nó encontrado para os filtros atuais.</div>
+          <details class="raw-panel">
+            <summary>Fonte bruta derivada do estado governado</summary>
+            <div class="raw-grid">
+              <section>
+                <div class="eyebrow">Focus</div>
+                <ol>
+                  <li>
+                    RECONCILIACAO 2026-06-03 ([DEC-0024-G08], owner): G03 (promotion pipeline) / G04
+                    (casa unica/tri-root) / G05 (projecoes) foram REABERTOS. Os eixos deixados em
+                    aberto no Stage 1 mostraram-se necessarios para problemas reais observados no
+                    uso (mis-binding da retomada, recuperabilidade, &#039;a resposta estava num ADR
+                    esquecido&#039;). A 0024 VOLTOU A TRATAR MODELAGEM nesses eixos -- isto e
+                    DECISAO, nao drift. Direcao assumida: arquitetura orientada a grafo (entidades +
+                    relacoes navegaveis KnowledgeRef + projecoes derivadas). NAO ha 0025
+                    independente (o split foi superado no Checkpoint 2; o trabalho mapeia em
+                    G03/G04/G05 + candidatas Grupo B). O kernel Knowledge + KnowledgeGraph nucleo +
+                    capability Insights JA materializados (PR #34). Motivacao persistida como
+                    Insights (PIT-0004..0006).
+                  </li>
+                  <li>
+                    0024 em ABSORCAO OPERACIONAL (pesquisa encerrada). Problema = falta de absorcao,
+                    nao falta de decisao: decisoes convergidas ainda nao alteraram o comportamento
+                    do sistema (&#039;arquitetura converge enquanto codigo diverge&#039;). Backlog =
+                    relatorio de auditoria do Codex (divergencias decisao&lt;-&gt;codigo).
+                  </li>
+                  <li>
+                    Plano executavel CANONICO no repo: plan.md secoes &#039;Sequencia de
+                    Checkpoints&#039; + &#039;Topologia operacional&#039;. VOCABULARIO (Checkpoint
+                    2.1): PR/#N = Pull Request real do GitHub; Checkpoint N = unidade de
+                    implementacao da spec; Gate = ritual de validacao (Technical Audit -&gt;
+                    Architectural Review -&gt; Human).
+                  </li>
+                  <li>
+                    TOPOLOGIA CANONICA (corrigida no Checkpoint 2.1a; modelo da 0023 / ADR 0020 +
+                    0024 / DEC-0023-M01): #32 = PR de governanca/bootstrap + LINHA DE INTEGRACAO da
+                    spec; NAO mergeia cedo, e a BASE DA STACK. Checkpoint 3+ = PR real proprio
+                    STACKED sobre a linha da spec (NAO off-main, NAO independente). Modo UNIT: merge
+                    em main e evento UNICO ao fim (veiculo = PR terminal de implementacao; #32 +
+                    intermediarios + Integration PR via landed-via reconciliation; 1 SHA canonico),
+                    apos review.md R8. Integration PR = homologacao antes do merge (NAO veiculo).
+                  </li>
+                  <li>
+                    Decisoes cravadas (NAO reabrir): G00/G02/G06; Open abolido/DEC nasce
+                    Pendente/Deferred canonico; brief por estado; GG-0001 interno (DOGFOOD-*);
+                    WorkflowType removido; proveniencia runtime-scoped (role livre, espinha
+                    impl+gate derivada, projecao NAO governanca); GG-0002 antes da remocao.
+                  </li>
+                  <li>
+                    Gate por checkpoint: implementacao -&gt; revisoes exigidas pela
+                    .governance/review-policy.yml (quando aplicavel) -&gt; Human Gate (owner) -&gt;
+                    AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit +
+                    Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal
+                    para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em
+                    main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver
+                    pronto. Correcao local pequena nao espera; mudanca estrutural sim.
+                  </li>
+                  <li>
+                    Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): &#039;ja foi validado
+                    empiricamente na 0024?&#039; -&gt; absorver/enforcar/executar. NAO re-modelar o
+                    DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram
+                    reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar
+                    e a direcao, nao o risco. O &#039;risco dominante&#039; original (modelar em vez
+                    de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o
+                    trabalho.
+                  </li>
+                </ol>
+              </section>
+              <section>
+                <div class="eyebrow">Next</div>
+                <ol>
+                  <li>
+                    canonical-next: internal-architecture-refactor-ddd-bdd. PR #45
+                    (artifact-taxonomy-and-model-review-contract / seq 12) CONCLUIDO-NA-STACK por
+                    Human Gate approved (gates/c-artifact-taxonomy-and-model-review-contract.yml,
+                    2026-07-12); modo unit, SEM merge isolado em main. No ATIVO =
+                    internal-architecture-refactor-ddd-bdd (seq 13,
+                    checkpoint-internal-architecture-refactor-ddd-bdd; PR #46 Draft stacked sobre
+                    #45, aberto via continuation:create-pr conforme DEC-0024-G27). Escopo do
+                    recorte: reorganizacao behavior-preserving de src/cli e testes;
+                    fechar/dispositionar a gramatica operacional remanescente de G01; definir o
+                    contrato do graph snapshot derivado (nodes/edges/source-refs/hashes;
+                    deterministico, regeneravel, offline; derived-only, sem 2a SSOT) e explicitar
+                    quais projecoes de G05 o snapshot atende (DEC-0024-G23/G28). Insumos
+                    obrigatorios antes de fechar gramatica/snapshot: work-graph-model/model.yml,
+                    tracker.md, features.md e GUILDA-QRD-PRESERVATION-MATRIX.md (aprendizados
+                    estruturais apenas; produto Guilda permanece no repo irmao). Depois:
+                    broad-flow-falsification e continuation-review-human-gate. NAO implementar
+                    dualroot-collapse (agora seq 14), co-capture, co-events, Ready/Human Gate
+                    automatico, merge em main ou movimentacao fisica de .specify neste PR.
+                  </li>
+                </ol>
+              </section>
+            </div>
+          </details>
         </div>
         <aside id="detail" class="detail"></aside>
       </section>
@@ -422,7 +1442,7 @@
 
     <script id="governed-work-data" type="application/json">
       {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "title": "Mapa Vivo do Trabalho Governado",
         "subtitle": "Context Architecture / 0024",
         "source": {
@@ -458,7 +1478,122 @@
             "terminal": false,
             "sequence": null,
             "checkpoints": ["checkpoint-1", "checkpoint-2", "checkpoint-2.1", "checkpoint-2.1a"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 4,
+                "done": 4,
+                "open": 0,
+                "samples": [
+                  "Checkpoint 1 — active-specs.yml lista a 0024 (Codex A3). ✅ feito + gated (87865ca); Gate completo no #32.",
+                  "Checkpoint 2 — reframe spec/plan/tasks/NEXT → absorção + dobrar a sequência no plan.md (Codex A2/P1/P2). ✅ feito + gated (8b0eec6).",
+                  "Checkpoint 2.1 — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023. ✅ feito + gated (d686d4b).",
+                  "Checkpoint 2.1a — correção arquitetural pós-dogfooding: substitui a topologia incorreta do 2.1 pela canônica da 0023 (unit/_stacked_/merge único ao fim; #32 não mergeia cedo). ✅ feito + gated (fa2c0ae); o Gate de encerr…"
+                ],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-1",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint 1 — active-specs.yml lista a 0024 (Codex A3). ✅ feito + gated (87865ca); Gate completo no #32."
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint 2 — reframe spec/plan/tasks/NEXT → absorção + dobrar a sequência no plan.md (Codex A2/P1/P2). ✅ feito + gated (8b0eec6)."
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.1",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint 2.1 — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023. ✅ feito + gated (d686d4b)."
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.1a",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint 2.1a — correção arquitetural pós-dogfooding: substitui a topologia incorreta do 2.1 pela canônica da 0023 (unit/_stacked_/merge único ao fim; #32 não mergeia cedo). ✅ feito + gated (fa2c0ae); o Gate de encerr…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "ruleset-producibility",
@@ -479,7 +1614,239 @@
               "checkpoint-2.4c",
               "checkpoint-2.4d"
             ],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 3,
+                "done": 3,
+                "open": 0,
+                "samples": [
+                  "Checkpoint 2.2 — correção estrutural pós-dogfooding (precede o 3): ruleset:check — producibilidade (PRIMÁRIO, no validate) + paridade (SECUNDÁRIO, detect-only no ruleset-drift.yml) + ruleset-as-code (.github/rulesets/ma…",
+                  "Checkpoint 2.2b — correção da fronteira mecânica (achado Codex no PR #33): extração de gatilhos-base (on: [pull_request, push]) + suporte declarativo a produtores externos, prevenindo órfãos de evento absoluto sem criar…",
+                  "Checkpoint 2.3 — Governance Topology as Data: topologia como dado (SSOT) no state.yml + governance-pr-check valida título/template como projeções; UX do CI (Skipped→Success/Exempt). Em #33. ✅ implementado; o Architectur…"
+                ],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-2.2",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint 2.2 — correção estrutural pós-dogfooding (precede o 3): ruleset:check — producibilidade (PRIMÁRIO, no validate) + paridade (SECUNDÁRIO, detect-only no ruleset-drift.yml) + ruleset-as-code (.github/rulesets/ma…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.2b",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint 2.2b — correção da fronteira mecânica (achado Codex no PR #33): extração de gatilhos-base (on: [pull_request, push]) + suporte declarativo a produtores externos, prevenindo órfãos de evento absoluto sem criar…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.3",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint 2.3 — Governance Topology as Data: topologia como dado (SSOT) no state.yml + governance-pr-check valida título/template como projeções; UX do CI (Skipped→Success/Exempt). Em #33. ✅ implementado; o Architectur…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.3a",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.3b",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.4",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.4a",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.4b",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.4c",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-2.4d",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "insights-in-flight",
@@ -493,7 +1860,89 @@
               "checkpoint-knowledge-kernel",
               "checkpoint-graph-core"
             ],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-insights",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-knowledge-kernel",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-graph-core",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "pr-cli-cutover",
@@ -503,7 +1952,49 @@
             "terminal": false,
             "sequence": 3,
             "checkpoints": ["checkpoint-cli-cutover"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-cli-cutover",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "co-reconcile",
@@ -513,7 +2004,49 @@
             "terminal": false,
             "sequence": 4,
             "checkpoints": ["checkpoint-co-reconcile"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-co-reconcile",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "co-knowledge",
@@ -530,7 +2063,149 @@
               "checkpoint-runtime-ledger-partition",
               "checkpoint-review-policy-events"
             ],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-co-knowledge",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-co-knowledge-backfill",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-script-contracts",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-runtime-bootstrap-readiness",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-runtime-ledger-partition",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-review-policy-events",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "bootstrap-compiler",
@@ -540,7 +2215,69 @@
             "terminal": false,
             "sequence": 6,
             "checkpoints": ["checkpoint-compiler-ts", "checkpoint-bootstrap-registry"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-compiler-ts",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-bootstrap-registry",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "toolchain-simplification",
@@ -550,7 +2287,53 @@
             "terminal": false,
             "sequence": 7,
             "checkpoints": ["checkpoint-npm-toolchain"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 1,
+                "done": 1,
+                "open": 0,
+                "samples": [
+                  "Checkpoint npm-toolchain (nó toolchain-simplification, seq 7, PR #39) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-11, gates/c-npm-toolchain.yml; PR #39 Ready, HEAD d806a835, CI 11/11; modo unit, sem merge isolado…"
+                ],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-npm-toolchain",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint npm-toolchain (nó toolchain-simplification, seq 7, PR #39) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-11, gates/c-npm-toolchain.yml; PR #39 Ready, HEAD d806a835, CI 11/11; modo unit, sem merge isolado…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "co-projection",
@@ -560,7 +2343,53 @@
             "terminal": false,
             "sequence": 8,
             "checkpoints": ["checkpoint-co-projection"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 1,
+                "done": 1,
+                "open": 0,
+                "samples": [
+                  "Checkpoint co-projection (nó co-projection, seq 8 / CO-4, PR #41) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-12, gates/c-co-projection.yml; PR #41 Ready, HEAD 46a7ffe7, CI 11/11; pr-ready:check satisfeito; modo…"
+                ],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-co-projection",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint co-projection (nó co-projection, seq 8 / CO-4, PR #41) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-12, gates/c-co-projection.yml; PR #41 Ready, HEAD 46a7ffe7, CI 11/11; pr-ready:check satisfeito; modo…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "co-enforcement",
@@ -570,7 +2399,53 @@
             "terminal": false,
             "sequence": 9,
             "checkpoints": ["checkpoint-co-enforcement"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 1,
+                "done": 1,
+                "open": 0,
+                "samples": [
+                  "Checkpoint co-enforcement (nó co-enforcement, seq 9 / CO-3, PR #42) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-16, gates/c-co-enforcement.yml; PR #42 Ready, HEAD 46ff89b, CI 11/11; pr-ready:check satisfeito; mod…"
+                ],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 5,
+                "done": 5,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 1,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-co-enforcement",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint co-enforcement (nó co-enforcement, seq 9 / CO-3, PR #42) — ✅ CONCLUÍDO + gated (Human Gate approved 2026-06-16, gates/c-co-enforcement.yml; PR #42 Ready, HEAD 46ff89b, CI 11/11; pr-ready:check satisfeito; mod…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 5,
+                    "done": 5,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 1,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "co-flow-convergence",
@@ -580,7 +2455,53 @@
             "terminal": false,
             "sequence": 10,
             "checkpoints": ["checkpoint-co-flow-convergence"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 1,
+                "done": 1,
+                "open": 0,
+                "samples": [
+                  "Checkpoint co-flow-convergence (nó co-flow-convergence, seq 10) — ativo após Human Gate do co-enforcement e planejado por [DEC-0024-G10] (2026-06-16), antes de co-capture: convergência do fluxo ponta a ponta da Spec 002…"
+                ],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 7,
+                "done": 7,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-co-flow-convergence",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint co-flow-convergence (nó co-flow-convergence, seq 10) — ativo após Human Gate do co-enforcement e planejado por [DEC-0024-G10] (2026-06-16), antes de co-capture: convergência do fluxo ponta a ponta da Spec 002…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 7,
+                    "done": 7,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "co-flow-continuation",
@@ -590,7 +2511,69 @@
             "terminal": false,
             "sequence": 11,
             "checkpoints": ["checkpoint-co-flow-continuation"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 6,
+                "done": 3,
+                "active": 1,
+                "pending": 2,
+                "readyForTransition": 0,
+                "activeStep": {
+                  "id": "internal-architecture-refactor-ddd-bdd",
+                  "title": "reorganização behavior-preserving do runtime/testes",
+                  "line": 131,
+                  "readiness": false
+                },
+                "nextPending": {
+                  "id": "broad-flow-falsification",
+                  "title": "falsificação ampla do lifecycle governado",
+                  "line": 132,
+                  "readiness": false
+                },
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-co-flow-continuation",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 6,
+                    "done": 3,
+                    "active": 1,
+                    "pending": 2,
+                    "readyForTransition": 0,
+                    "activeStep": {
+                      "id": "internal-architecture-refactor-ddd-bdd",
+                      "title": "reorganização behavior-preserving do runtime/testes",
+                      "line": 131,
+                      "readiness": false
+                    },
+                    "nextPending": {
+                      "id": "broad-flow-falsification",
+                      "title": "falsificação ampla do lifecycle governado",
+                      "line": 132,
+                      "readiness": false
+                    },
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "artifact-taxonomy-and-model-review-contract",
@@ -600,7 +2583,118 @@
             "terminal": false,
             "sequence": 12,
             "checkpoints": ["checkpoint-artifact-taxonomy-and-model-review-contract"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 1,
+                "done": 1,
+                "open": 0,
+                "samples": [
+                  "Checkpoint artifact-taxonomy-and-model-review-contract — ✅ CONCLUÍDO + gated (Human Gate approved 2026-07-12, gates/c-artifact-taxonomy-and-model-review-contract.yml; PR #45 Ready, HEAD 1cc96dd1, CI verde; modo unit, se…"
+                ],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 6,
+                "done": 3,
+                "active": 1,
+                "pending": 2,
+                "readyForTransition": 0,
+                "activeStep": {
+                  "id": "internal-architecture-refactor-ddd-bdd",
+                  "title": "reorganização behavior-preserving do runtime/testes",
+                  "line": 131,
+                  "readiness": false
+                },
+                "nextPending": {
+                  "id": "broad-flow-falsification",
+                  "title": "falsificação ampla do lifecycle governado",
+                  "line": 132,
+                  "readiness": false
+                },
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-artifact-taxonomy-and-model-review-contract",
+                  "taskSummary": {
+                    "total": 1,
+                    "done": 1,
+                    "open": 0,
+                    "samples": [
+                      "Checkpoint artifact-taxonomy-and-model-review-contract — ✅ CONCLUÍDO + gated (Human Gate approved 2026-07-12, gates/c-artifact-taxonomy-and-model-review-contract.yml; PR #45 Ready, HEAD 1cc96dd1, CI verde; modo unit, se…"
+                    ],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 6,
+                    "done": 3,
+                    "active": 1,
+                    "pending": 2,
+                    "readyForTransition": 0,
+                    "activeStep": {
+                      "id": "internal-architecture-refactor-ddd-bdd",
+                      "title": "reorganização behavior-preserving do runtime/testes",
+                      "line": 131,
+                      "readiness": false
+                    },
+                    "nextPending": {
+                      "id": "broad-flow-falsification",
+                      "title": "falsificação ampla do lifecycle governado",
+                      "line": 132,
+                      "readiness": false
+                    },
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": {
+                "sourcePath": ".governance/specs/0024-context-architecture/pull-requests/pr-45/body.md",
+                "intendedVision": "!Visão pretendida do PR #45 — taxonomia de artefatos e revisão antes do código",
+                "summary": "Este PR consolida a frente da Spec 0024 que modela o trabalho como grafo tipado e agora separa com clareza duas coisas que tinham se misturado: o framework ai-guidelines e o produto Guilda que nasceu como incubação dentro de work-graph-model/governance-demo.",
+                "deliveredValue": [
+                  "Artifact taxonomy e model-review contract permanecem como entrega viva do framework.",
+                  "[DEC-0024-G25] reconciliou a linguagem: \"Spec\" permanece como invólucro histórico/caminho físico, enquanto novas projeções usam \"trabalho governado\" e \"work graph\".",
+                  "assets/spec-0024-map-v5.html preserva a leitura humana/manual do PR #45, e assets/governed-work-map-data.json + assets/governed-work-map.html viram projeção gerada de state.yml, validada por npm run governed-work-map:check.",
+                  "A incubação Guilda foi extraída da superfície executável do ai-guidelines e preservada em _archive/guilda-incubation-2026-07/.",
+                  "governance-demo/ virou tombstone, não workspace.",
+                  "package.json, package-lock.json e script contracts deixam de carregar workspaces/scripts da antiga demo.",
+                  "model.yml, tracker.md, features.md, catálogo de integrações e docs de arquivo passam a apontar a incubação como evidência histórica."
+                ],
+                "inScope": [
+                  "Decisão de vocabulário ([DEC-0024-G22]): adotar Spec › Frente › Checkpoint › Etapa › Tarefa (Frente no lugar de Fase, como leitura derivada de state.yml — não SSOT); reconciliar a tensão estrutural do #45 (sequence: 12 ⇒ é nó topológico ativo); projetar isso…",
+                  "Implementar a entrega nomeada do checkpoint: taxonomia de artefatos, contrato de model-review/pre-coding review, research index, governança de PR body e mapa vivo do trabalho governado.",
+                  "Materializar o checkpoint checkpoint-artifact-taxonomy-and-model-review-contract.",
+                  "Trabalhar somente o nó artifact-taxonomy-and-model-review-contract.",
+                  "Arquivar a sim file-first que nasceu em work-graph-model/governance-demo/ para work-graph-model/_archive/guilda-incubation-2026-07/, preservando repos acme adotados, código MVP, contextos publicados, repo-work ack, registry de contratos, outcomes, trust-polic…",
+                  "Manter work-graph-model/governance-demo/README.md como tombstone, apontando para o repo Guilda e para o arquivo histórico."
+                ],
+                "outOfScope": [
+                  "Merge em main.",
+                  "Human Gate automático.",
+                  "Backend transacional write-capable para SQLite/Neo4j/Mongo.",
+                  "Backend transacional multi-store write-capable além da sim file-first.",
+                  "Tornar qualquer ferramenta externa SSOT ou autoridade de mutação.",
+                  "Automação que decide gate sem humano."
+                ],
+                "testPlan": [
+                  "npm run build",
+                  "npm run script-contracts:check",
+                  "npm run artifact-kind:check",
+                  "npm run research-index:check",
+                  "npm run governed-work-map:check",
+                  "npm run validate:changed",
+                  "npm run validate",
+                  "git commit   # pre-commit: lint-staged + script-contracts/runtime sync + build + test:unit"
+                ],
+                "gates": [
+                  "pr-ready:check deve bloquear enquanto revisão decidida como obrigatória no review_plan não estiver current+approved, exceto quando a lane já estiver efetivamente approved e a owner tiver dispensado revalidação do delta posterior em review_plan..revalidation c…",
+                  "Human Gate: pendente — decisão reservada à owner; não é autorização de merge.",
+                  "Merge: fora do escopo deste PR individual; a stack segue em modo unit.",
+                  "CI: estado do PR reconciliado via GitHub nesta revisão — governance-pr-check, validate-changed, repo-validation, smoke, osv-scan/OSV-Scanner e Cloudflare Pages verdes; scan-full-advisory e validate-os aparecem como skipped esperado. Repetir a reconciliação no…"
+                ]
+              }
+            }
           },
           {
             "id": "internal-architecture-refactor-ddd-bdd",
@@ -610,7 +2704,105 @@
             "terminal": false,
             "sequence": 13,
             "checkpoints": ["checkpoint-internal-architecture-refactor-ddd-bdd"],
-            "isCursor": true
+            "isCursor": true,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 6,
+                "done": 3,
+                "active": 1,
+                "pending": 2,
+                "readyForTransition": 0,
+                "activeStep": {
+                  "id": "internal-architecture-refactor-ddd-bdd",
+                  "title": "reorganização behavior-preserving do runtime/testes",
+                  "line": 131,
+                  "readiness": false
+                },
+                "nextPending": {
+                  "id": "broad-flow-falsification",
+                  "title": "falsificação ampla do lifecycle governado",
+                  "line": 132,
+                  "readiness": false
+                },
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-internal-architecture-refactor-ddd-bdd",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 6,
+                    "done": 3,
+                    "active": 1,
+                    "pending": 2,
+                    "readyForTransition": 0,
+                    "activeStep": {
+                      "id": "internal-architecture-refactor-ddd-bdd",
+                      "title": "reorganização behavior-preserving do runtime/testes",
+                      "line": 131,
+                      "readiness": false
+                    },
+                    "nextPending": {
+                      "id": "broad-flow-falsification",
+                      "title": "falsificação ampla do lifecycle governado",
+                      "line": 132,
+                      "readiness": false
+                    },
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": {
+                "sourcePath": ".governance/specs/0024-context-architecture/pull-requests/pr-46/body.md",
+                "intendedVision": "",
+                "summary": "Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto.",
+                "deliveredValue": [
+                  "Fronteiras internas protegidas: guard de camadas para impedir novas dependências indevidas entre domínio, aplicação, infraestrutura e CLI, com baseline explícita para violações legadas.",
+                  "Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta \"qual é o próximo movimento?\", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas.",
+                  "Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável.",
+                  "Graph snapshot derivado: governance-graph:build/check materializa governance-graph-snapshot.json como projeção versionada, determinística, regenerável, offline e derived-only, usando governed-work em vez de spec como conceito público.",
+                  "Débitos do snapshot fechados: active.yml.updated_at foi normalizado fora do fingerprint, generated-at/source-commit foram decididos como fora do snapshot v1 por determinismo, e ids de tarefas deixaram de ser line-based.",
+                  "Aprendizados do work-graph-model preservados: matriz de lentes e alinhamento com model.yml v3 rastreiam o que foi aplicado ao framework, migrado para Guilda, preservado como evidência ou roteado para falsificação/revisão final.",
+                  "G01 disposto: a gramática operacional do framework foi fechada/roteada em artefato próprio, sem declarar encerramento global de temas que pertencem a checkpoints posteriores."
+                ],
+                "inScope": [
+                  "Reorganização behavior-preserving de src/cli e testes (domínio ≠ CLI ≠ projeções ≠ testes), coberta por testes existentes/novos.",
+                  "Fechar ou dispositionar a gramática operacional remanescente de G01, sem reabrir a gramática de artefatos/evidências fechada no PR #45.",
+                  "Definir o contrato do graph snapshot derivado: quais nós, arestas, source-refs e hashes existem; como regenerar; como validar; como impedir segunda SSOT.",
+                  "Explicitar quais projeções de G05 o snapshot atende e quais ficam para consumidores posteriores.",
+                  "Registrar disposição dos aprendizados relevantes da matriz Guilda: aplicado no framework, migrado ao repo Guilda, preservado como legado/evidência ou rebaixado com justificativa."
+                ],
+                "outOfScope": [
+                  "Merge em main (stack modo unit; merge é evento único no nó terminal).",
+                  "dualroot-collapse (agora seq 14) e qualquer movimentação física de .specify/.ai-guidelines.",
+                  "broad-flow-falsification (G03/F-014 seguem roteados para lá, salvo decisão explícita).",
+                  "Adapter de banco de grafo e identidade cross-repo (spike futuro).",
+                  "Reativar a Guilda Governance como produto dentro deste repo.",
+                  "Ready/Human Gate automático."
+                ],
+                "testPlan": [],
+                "gates": [
+                  "Technical Audit: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate.",
+                  "Architectural Review: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate.",
+                  "Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.",
+                  "Human Gate: pendente — decisão reservada à owner; não é autorização de merge.",
+                  "Merge: fora do escopo deste PR individual; a stack segue em modo unit."
+                ]
+              }
+            }
           },
           {
             "id": "dualroot-collapse",
@@ -620,7 +2812,49 @@
             "terminal": false,
             "sequence": 14,
             "checkpoints": ["checkpoint-dualroot-collapse"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-dualroot-collapse",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "co-capture",
@@ -630,7 +2864,49 @@
             "terminal": false,
             "sequence": 15,
             "checkpoints": ["checkpoint-co-capture"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-co-capture",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "co-events",
@@ -640,7 +2916,49 @@
             "terminal": false,
             "sequence": 16,
             "checkpoints": ["checkpoint-co-events"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-co-events",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "housekeeping",
@@ -656,7 +2974,129 @@
               "checkpoint-decouple-brief",
               "checkpoint-doc-cleanup"
             ],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-taxonomy-removal",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-agents-sync",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-gg-0002",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-decouple-brief",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-doc-cleanup",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "knowledge-readiness",
@@ -670,7 +3110,89 @@
               "checkpoint-knowledge-backfill-wide",
               "checkpoint-co-knowledge-promotion"
             ],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "checkpoint-knowledge-health",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-knowledge-backfill-wide",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                },
+                {
+                  "checkpoint": "checkpoint-co-knowledge-promotion",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           },
           {
             "id": "integration-final",
@@ -680,130 +3202,258 @@
             "terminal": true,
             "sequence": null,
             "checkpoints": ["review-and-merge"],
-            "isCursor": false
+            "isCursor": false,
+            "evidence": {
+              "tasks": {
+                "total": 0,
+                "done": 0,
+                "open": 0,
+                "samples": [],
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "steps": {
+                "total": 0,
+                "done": 0,
+                "active": 0,
+                "pending": 0,
+                "readyForTransition": 0,
+                "activeStep": null,
+                "nextPending": null,
+                "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+              },
+              "checkpoints": [
+                {
+                  "checkpoint": "review-and-merge",
+                  "taskSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "open": 0,
+                    "samples": [],
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  },
+                  "stepSummary": {
+                    "total": 0,
+                    "done": 0,
+                    "active": 0,
+                    "pending": 0,
+                    "readyForTransition": 0,
+                    "activeStep": null,
+                    "nextPending": null,
+                    "sourcePath": ".governance/specs/0024-context-architecture/tasks.md"
+                  }
+                }
+              ],
+              "prBody": null
+            }
           }
         ]
       }
     </script>
     <script>
       const data = JSON.parse(document.getElementById("governed-work-data").textContent);
-      const byStatus = ["concluded", "active", "planned"];
       const labels = { concluded: "Concluído", active: "Ativo", planned: "Planejado" };
-      const map = document.getElementById("map");
       const detail = document.getElementById("detail");
-      const empty = document.getElementById("empty");
       const search = document.getElementById("search");
+      const empty = document.getElementById("empty");
       let currentFilter = "all";
       let selectedId = data.cursor.pr;
 
-      function textMatch(node, term) {
+      function h(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function matchesSearch(node, term) {
         if (!term) return true;
+        const prBody = node.evidence.prBody || {};
         const haystack = [
           node.id,
           node.status,
           node.role,
           String(node.githubPr ?? ""),
           ...node.checkpoints,
+          node.evidence.steps.activeStep?.title || "",
+          node.evidence.steps.nextPending?.title || "",
+          ...(node.evidence.tasks.samples || []),
+          prBody.intendedVision || "",
+          prBody.summary || "",
+          ...(prBody.deliveredValue || []),
+          ...(prBody.inScope || []),
+          ...(prBody.outOfScope || []),
+          ...(prBody.gates || []),
         ]
           .join(" ")
           .toLowerCase();
         return haystack.includes(term.toLowerCase());
       }
 
-      function filteredNodes() {
+      function applyFilters() {
         const term = search.value.trim();
-        return data.nodes.filter((node) => {
-          const filterOk = currentFilter === "all" || node.status === currentFilter;
-          return filterOk && textMatch(node, term);
-        });
-      }
-
-      function render() {
-        const nodes = filteredNodes();
-        map.innerHTML = "";
-        empty.classList.toggle("hidden", nodes.length > 0);
-        for (const status of byStatus) {
-          const laneNodes = nodes.filter((node) => node.status === status);
-          if (laneNodes.length === 0) continue;
-          const lane = document.createElement("section");
-          lane.className = "lane";
-          lane.innerHTML = `
-          <div class="lane-title">
-            <span>${labels[status]}</span>
-            <span>${laneNodes.length}</span>
-          </div>
-          <div class="nodes"></div>
-        `;
-          const list = lane.querySelector(".nodes");
-          for (const node of laneNodes) list.appendChild(renderNode(node));
-          map.appendChild(lane);
+        let visibleCount = 0;
+        for (const element of document.querySelectorAll(".filterable")) {
+          const status = element.dataset.status;
+          const node = data.nodes.find((item) => item.id === element.dataset.node);
+          const filterOk = currentFilter === "all" || status === currentFilter;
+          const searchOk = node
+            ? matchesSearch(node, term)
+            : (element.dataset.search || "").toLowerCase().includes(term.toLowerCase());
+          const visible = filterOk && searchOk;
+          element.classList.toggle("hidden", !visible);
+          if (visible && element.matches(".node, tr")) visibleCount += 1;
         }
-        const selected =
-          data.nodes.find((node) => node.id === selectedId) ?? nodes[0] ?? data.nodes[0];
-        renderDetail(selected);
-      }
-
-      function renderNode(node) {
-        const button = document.createElement("article");
-        button.className = `node status-${node.status}${node.id === selectedId ? " active-node" : ""}`;
-        button.tabIndex = 0;
-        button.setAttribute("role", "button");
-        button.setAttribute("aria-label", `Abrir detalhes de ${node.id}`);
-        button.innerHTML = `
-        <span class="chip">${labels[node.status]}</span>
-        <h3>${node.id}</h3>
-        <p>PR ${node.githubPr ?? "futuro"} · ${node.role} · seq ${node.sequence ?? "n/a"}</p>
-        <div class="chips">
-          ${node.checkpoints
-            .slice(0, 4)
-            .map((cp) => `<span class="chip">${cp}</span>`)
-            .join("")}
-          ${node.checkpoints.length > 4 ? `<span class="chip">+${node.checkpoints.length - 4}</span>` : ""}
-        </div>
-      `;
-        const select = () => {
-          selectedId = node.id;
-          render();
-        };
-        button.addEventListener("click", select);
-        button.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            select();
-          }
-        });
-        return button;
+        for (const lane of document.querySelectorAll(".lane")) {
+          const hasVisibleNode = lane.querySelector(".node:not(.hidden)") !== null;
+          lane.classList.toggle("hidden", !hasVisibleNode);
+        }
+        empty.classList.toggle("hidden", visibleCount > 0);
       }
 
       function renderDetail(node) {
-        detail.innerHTML = `
-        <h2>${node.id}</h2>
-        <dl>
-          <dt>Status</dt><dd>${labels[node.status]}</dd>
-          <dt>PR</dt><dd>${node.githubPr ?? "planejado"}</dd>
-          <dt>Papel</dt><dd>${node.role}</dd>
-          <dt>Sequência</dt><dd>${node.sequence ?? "n/a"}</dd>
-          <dt>Terminal</dt><dd>${node.terminal ? "sim" : "não"}</dd>
-          <dt>Cursor</dt><dd>${node.isCursor ? "sim" : "não"}</dd>
-        </dl>
-        <h3>Checkpoints</h3>
-        <ol class="checkpoint-list">
-          ${node.checkpoints.map((cp) => `<li><code>${cp}</code></li>`).join("")}
-        </ol>
-      `;
+        if (!node) {
+          detail.innerHTML = "<h2>Sem seleção</h2><p>Nenhum nó disponível.</p>";
+          return;
+        }
+        const prBody = node.evidence.prBody;
+        const activeStep = node.evidence.steps.activeStep;
+        const nextPending = node.evidence.steps.nextPending;
+        detail.innerHTML =
+          "<h2>" +
+          h(node.id) +
+          "</h2>" +
+          "<dl>" +
+          "<dt>Status</dt><dd>" +
+          h(labels[node.status]) +
+          "</dd>" +
+          "<dt>PR</dt><dd>" +
+          h(node.githubPr ?? "planejado") +
+          "</dd>" +
+          "<dt>Papel</dt><dd>" +
+          h(node.role) +
+          "</dd>" +
+          "<dt>Sequência</dt><dd>" +
+          h(node.sequence ?? "n/a") +
+          "</dd>" +
+          "<dt>Terminal</dt><dd>" +
+          h(node.terminal ? "sim" : "não") +
+          "</dd>" +
+          "<dt>Cursor</dt><dd>" +
+          h(node.isCursor ? "sim" : "não") +
+          "</dd>" +
+          "</dl>" +
+          '<section class="detail-section">' +
+          "<h3>Leitura situada</h3>" +
+          '<div class="progress-line">' +
+          "<span><strong>Etapas:</strong> " +
+          h(node.evidence.steps.done) +
+          "/" +
+          h(node.evidence.steps.total) +
+          " concluídas · " +
+          h(node.evidence.steps.active) +
+          " ativa(s) · " +
+          h(node.evidence.steps.pending) +
+          " pendente(s)</span>" +
+          "<span><strong>Tarefas:</strong> " +
+          h(node.evidence.tasks.done) +
+          "/" +
+          h(node.evidence.tasks.total) +
+          " concluídas · " +
+          h(node.evidence.tasks.open) +
+          " aberta(s)</span>" +
+          (activeStep
+            ? "<span><strong>Etapa ativa:</strong> " +
+              h(activeStep.id) +
+              " — " +
+              h(activeStep.title) +
+              " (linha " +
+              h(activeStep.line) +
+              ")</span>"
+            : "") +
+          (nextPending
+            ? "<span><strong>Próxima pendente:</strong> " +
+              h(nextPending.id) +
+              " — " +
+              h(nextPending.title) +
+              " (linha " +
+              h(nextPending.line) +
+              ")</span>"
+            : "") +
+          "</div>" +
+          "</section>" +
+          (prBody
+            ? '<section class="detail-section">' +
+              "<h3>PR body versionado</h3>" +
+              (prBody.summary ? "<p>" + h(prBody.summary) + "</p>" : "") +
+              renderMiniList("Valor entregue", prBody.deliveredValue) +
+              renderMiniList("Dentro do escopo", prBody.inScope) +
+              renderMiniList("Evidências e gates", prBody.gates) +
+              '<p class="node-note"><strong>Fonte:</strong> <code>' +
+              h(prBody.sourcePath) +
+              "</code></p>" +
+              "</section>"
+            : '<section class="detail-section"><h3>PR body versionado</h3><p>Sem body versionado associado a este nó.</p></section>') +
+          renderMiniList("Tarefas abertas / próximas", node.evidence.tasks.samples) +
+          "<h3>Checkpoints</h3>" +
+          '<ol class="checkpoint-list">' +
+          node.checkpoints.map((cp) => "<li><code>" + h(cp) + "</code></li>").join("") +
+          "</ol>";
       }
 
-      search.addEventListener("input", render);
+      function renderMiniList(title, items) {
+        if (!items || items.length === 0) return "";
+        return (
+          '<section class="detail-section">' +
+          "<h3>" +
+          h(title) +
+          "</h3>" +
+          '<ul class="mini-list">' +
+          items.map((item) => "<li>" + h(item) + "</li>").join("") +
+          "</ul>" +
+          "</section>"
+        );
+      }
+
       for (const button of document.querySelectorAll("[data-filter]")) {
         button.addEventListener("click", () => {
           currentFilter = button.dataset.filter;
           for (const other of document.querySelectorAll("[data-filter]"))
             other.classList.remove("active");
           button.classList.add("active");
-          render();
+          applyFilters();
         });
       }
-      render();
+      for (const button of document.querySelectorAll("[data-mode]")) {
+        button.addEventListener("click", () => {
+          for (const other of document.querySelectorAll("[data-mode]"))
+            other.classList.remove("active");
+          for (const view of document.querySelectorAll(".view")) view.classList.remove("active");
+          button.classList.add("active");
+          document.getElementById(button.dataset.mode).classList.add("active");
+          applyFilters();
+        });
+      }
+      for (const nodeElement of document.querySelectorAll(".node")) {
+        const select = () => {
+          selectedId = nodeElement.dataset.node;
+          for (const other of document.querySelectorAll(".node"))
+            other.classList.remove("active-node");
+          nodeElement.classList.add("active-node");
+          renderDetail(data.nodes.find((node) => node.id === selectedId));
+        };
+        nodeElement.addEventListener("click", select);
+        nodeElement.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            select();
+          }
+        });
+      }
+      search.addEventListener("input", applyFilters);
+      renderDetail(data.nodes.find((node) => node.id === selectedId) ?? data.nodes[0]);
+      applyFilters();
     </script>
   </body>
 </html>

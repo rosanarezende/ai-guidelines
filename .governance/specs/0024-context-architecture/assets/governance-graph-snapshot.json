@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "00b67390c325",
+  "snapshot_fingerprint": "488ef05fcac3",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -130,11 +130,11 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-      "hash": "e5efa714e007"
+      "hash": "3b2bbea8c0c5"
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-      "hash": "eb15c93827c4"
+      "hash": "1ee064edded6"
     },
     {
       "path": ".governance/specs/0024-context-architecture/decision-brief.md",
@@ -2774,7 +2774,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-        "hash": "eb15c93827c4"
+        "hash": "1ee064edded6"
       }
     },
     {
@@ -2786,7 +2786,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-        "hash": "e5efa714e007"
+        "hash": "3b2bbea8c0c5"
       }
     },
     {
