@@ -84,7 +84,7 @@ offline por comando (`governance-graph:build`/`:check`, espelhando o par do
 | Import quebrado em teste espelhado                                | `npm run build` + suíte jest completa por fatia                                                  |
 | Help/registry divergir após moves                                 | help é derivado do `CommandRegistry` (SSOT); testes do registry                                  |
 | Snapshot virar 2ª SSOT                                            | check de derivação (build+compare, como `governed-work-map:check`); comando decisório nunca o lê |
-| Regressão silenciosa de fronteira durante o refactor              | **fatia 1**: guard de camadas com baseline congelada (falha em violação NOVA)                    |
+| Regressão silenciosa de fronteira durante o refactor              | guard de camadas fail-closed e sem baseline: qualquer aresta proibida falha                      |
 | Selos/fingerprints mudarem por reformatação acidental de artefato | fatias não tocam `.governance/`; `review:check` no validate                                      |
 
 ## 5. Aprendizados estruturais do work-graph-model (matriz Guilda)
@@ -108,27 +108,25 @@ que fica fora por ser política. A fatia 4 deste plano implementa CONTRA o §8.
 
 ## 6. Fatias propostas (ordem de execução)
 
-1. **Guard de fronteira de camadas** (esta rodada): teste arquitetural que
-   proíbe `domain→{app,infrastructure,cli}`, `app→cli`, `infrastructure→cli`,
-   com **baseline congelada** das 4 violações existentes (falha só em violação
-   NOVA; zero mudança de runtime). Rede de segurança antes de mover.
-2. **Descer derivações puras por família** (reviews → readiness → handoff →
-   continuation), um commit por família, jest verde em cada.
-3. **Resolver as 4 violações da baseline** (mover `RegistryCommandDescriptor`
-   para `domain/registry` ou `app`; `discoverTestFiles` para infra) e esvaziar a
-   baseline do guard.
-4. **Grafo operacional + snapshot** (projeção em `app/projections` + comandos
-   build/check + contrato testado: determinismo, regenerabilidade, offline).
-5. **Disposição da gramática G01 remanescente** + disposição item a item da
-   matriz Guilda (aplicado/migrado/legado/rebaixado) — critérios de saída G28.
+1. [x] **Guard de fronteira de camadas:** teste arquitetural que
+       proíbe `domain→{app,infrastructure,cli}`, `app→cli`, `infrastructure→cli`,
+       inicialmente com 7 violações factuais congeladas para impedir regressão
+       durante os moves; ao final, baseline eliminada e tolerância zero.
+2. [x] **Descer derivações puras por família** (reviews → readiness → handoff →
+       continuation), um commit por família, jest verde em cada.
+3. [x] **Resolver as 7 violações da baseline:** contrato do registry em `app`,
+       descoberta de testes em `infrastructure/filesystem`, testes cross-layer
+       reposicionados e teste de workspace separado entre domínio e aplicação.
+4. [x] **Grafo operacional + snapshot** (projeção em `app/projections` + comandos
+       build/check + contrato testado: determinismo, regenerabilidade, offline).
+5. [x] **Disposição da gramática G01 remanescente** + disposição item a item da
+       matriz Guilda (aplicado/migrado/legado/rebaixado) — critérios de saída G28.
 
 ## 7. Findings (advisory)
 
-- **PCR-F1 (médio):** `app/constraints/RegistryCommandSurfaceResolver.ts`
-  importa tipo da CLI em produção — inversão de dependência pendente (fatia 3).
-- **PCR-F2 (baixo):** não existe guard automatizado de camadas; a fronteira
-  DDD atual sobrevive por disciplina, não por enforcement (fatia 1 resolve).
-- **PCR-F3 (baixo):** `descriptionFromRawText` (GovernedFlow) usa marcador
-  ingênuo `**<id> — <title>**` com fallback gracioso; degrada cosmético quando o
-  título usa prefixo `Checkpoint ` — candidata a absorver na fatia 2 da família
-  flow (mesma família do bug corrigido em `stepDeliveryEvidence`).
+- **PCR-F1 (médio) — fechado:** `RegistryCommandDescriptor` agora pertence à
+  aplicação; a CLI reexporta o tipo apenas por compatibilidade pública.
+- **PCR-F2 (baixo) — fechado:** `LayerBoundaries.test.ts` falha em qualquer
+  dependência proibida e não contém baseline de exceções.
+- **PCR-F3 (baixo) — fechado:** `descriptionFromRawText` usa o mesmo contrato
+  tolerante de marcador aceito pelos parsers canônicos.

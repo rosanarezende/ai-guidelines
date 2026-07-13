@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-07-12 — **`[DEC-0024-G30]` registrada**: reviews obrigatórias já aprovadas podem ter revalidação dispensada por decisão humana situada quando um delta posterior é apenas cleanup/advisory; a lane continua `stale` como fato histórico, mas deixa de bloquear Ready com warning explícito. Antes — **`[DEC-0024-G29]` registrada**: eventos de verificação `scope: findings` podem resolver a decisão efetiva de uma lane de review quando cobrem todos os findings emitidos por aquela lane, sem reescrever o review original.
+> Última atualização: 2026-07-13 — **`[DEC-0024-G31]` registrada**: a gramática operacional do framework está fechada por contratos executáveis no PR #46; resíduos de escala consumidor, promoção/projeções e a hipótese `terminus` permanecem roteados, sem fechamento universal por decreto. Antes — **`[DEC-0024-G30]` registrada**: reviews obrigatórias já aprovadas podem ter revalidação dispensada por decisão humana situada quando um delta posterior é apenas cleanup/advisory; a lane continua `stale` como fato histórico, mas deixa de bloquear Ready com warning explícito.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -888,17 +888,45 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G31] Gramática operacional do framework fechada por contrato; G01 residual roteado
+
+**Pergunta:** A gramática operacional remanescente de G01 já está materializada no framework por contratos executáveis, ou ainda existe uma lacuna estrutural que impeça o fechamento do checkpoint `internal-architecture-refactor-ddd-bdd`?
+
+**Modo de gate:** `aceitação` <!-- decisão da owner, 2026-07-13, após o PR #46 materializar fronteiras DDD, derivação canônica de progressão e graph snapshot fail-closed. -->
+
+**Contexto:** `[DEC-0024-G28]` separou a gramática de artefatos/evidências, fechada no PR #45, da gramática operacional do framework, entregue no PR #46. O pre-coding review e a matriz de lentes confrontaram essa entrega com `model.yml` v3, `tracker.md`, `features.md` e a matriz de preservação Guilda. A implementação passou a expressar contenção, tipos ortogonais, estados derivados, relações fechadas, autoridade e vocabulário por contratos testados, sem promover mapas ou snapshots a SSOT. Ao mesmo tempo, G01 também carregava perguntas de escala consumidor e a hipótese `terminus`, que não podem ser encerradas sem falsificação real.
+
+**Decisão (Resolved):**
+
+- A gramática operacional **do framework** fica fechada pelos contratos do PR #46: cadeia `governed-work → topology-node → checkpoint → step → task`; `WorkItemKind` e `artifact-kind` como eixos ortogonais; estados derivados por `frenteProgression`; relações tipadas do graph snapshot; fronteiras DDD fail-closed; e projeções estritamente derived-only.
+- Cada pergunta operacional importante deve ter uma derivação canônica; superfícies de CLI, handoff, readiness e gate apenas coletam fatos ou renderizam a resposta. Testes de paridade protegem essa regra.
+- F-AG01 em escala consumidor, promoção real de work-items e projeções por consumidor seguem para `broad-flow-falsification`, conforme G28. F-003 (`terminus`) permanece finding aberto e não coroado.
+- O fechamento vale para a gramática interna do framework; não declara os sete pilares como estrutura universal de todo consumidor e não cria um shared kernel cross-repo.
+- A decisão não altera a ordem da topologia nem cria nó novo.
+
+**Consequências práticas:**
+
+- O checkpoint pode ser auditado contra contratos concretos, não contra a frase vaga "G01 considerado".
+- `LayerBoundaries.test.ts`, `SurfaceParity.test.ts`, a conformidade do graph snapshot e os checks de projeção são evidência mecânica do fechamento.
+- Os resíduos permanecem visíveis em destinos governados e devem ser falsificados ou rebaixados explicitamente antes do Human Gate da continuação; não viram débito silencioso.
+
+**O que NÃO está sendo decidido:** implementar `GovernedRefV1`, `RepoWorkExecution`, `WorkBinding`, `CommandResult` ou aliases Guilda Flow; adotar banco de grafo; fechar `terminus`; criar nó topológico; executar `broad-flow-falsification`; declarar Ready; exercer Human Gate; fazer merge.
+
+**Status:** Resolved (2026-07-13) / @rosanarezende — gramática operacional do framework fechada por contrato; G01 residual roteado com casa explícita.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
 
-| Tema                                            | Finding            | Por que ainda é pesquisa                                                                                                        |
-| :---------------------------------------------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| Estrutura/gramática (ex-`G01`)                  | `F-AG01` / `F-003` | artefatos/evidências fecham no #45; gramática operacional vai para `internal-architecture-refactor-ddd-bdd` por G28             |
-| Pipeline de promoção (ex-`G03`)                 | `F-AG03`           | reconciliar promoção de work-item (ADR 0010) × promoção contextual — critério de `broad-flow-falsification` por G28             |
-| Contrato de boilerplate / casa única (ex-`G04`) | `F-AG04`           | modelo de fonte única (tri-root → SSOT) em aberto; o **drift-guard** já vira enforcement (§ 4)                                  |
-| Projeções por consumidor (ex-`G05`, resíduo)    | `F-AG05`           | projeções como não-autoridade fecham no #45; graph snapshot vai para refactor; consumidores reais vão para falsificação por G28 |
-| Explicação do comportamento não-linear          | `F-014`            | baixa prioridade, mas com casa explícita: mapa/projeção viva ou jornada em `broad-flow-falsification` por G28                   |
+| Tema                                              | Finding            | Por que ainda é pesquisa                                                                                                        |
+| :------------------------------------------------ | :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| Escala consumidor / `terminus` (resíduo de `G01`) | `F-AG01` / `F-003` | gramática do framework fechada por G31; universalização dos pilares e `terminus` exigem falsificação, não decreto               |
+| Pipeline de promoção (ex-`G03`)                   | `F-AG03`           | reconciliar promoção de work-item (ADR 0010) × promoção contextual — critério de `broad-flow-falsification` por G28             |
+| Contrato de boilerplate / casa única (ex-`G04`)   | `F-AG04`           | modelo de fonte única (tri-root → SSOT) em aberto; o **drift-guard** já vira enforcement (§ 4)                                  |
+| Projeções por consumidor (ex-`G05`, resíduo)      | `F-AG05`           | projeções como não-autoridade fecham no #45; graph snapshot vai para refactor; consumidores reais vão para falsificação por G28 |
+| Explicação do comportamento não-linear            | `F-014`            | baixa prioridade, mas com casa explícita: mapa/projeção viva ou jornada em `broad-flow-falsification` por G28                   |
 
 ---
 
@@ -942,7 +970,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | ID histórico | Tema                                                                       | Estado atual                                                                                                                                                                                 |
 | :----------- | :------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `G00`        | identidade (transformação)                                                 | **Decidido** — § 1 (Resolved 2026-05-31)                                                                                                                                                     |
-| `G01`        | estrutura/gramática                                                        | **Aberto** — § 2 (`F-AG01`)                                                                                                                                                                  |
+| `G01`        | estrutura/gramática                                                        | **Fechado no framework por G31**; resíduos de escala consumidor e `terminus` permanecem abertos em § 2                                                                                       |
 | `G02`        | taxonomia → bloco + propriedade                                            | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                                                                                                   |
 | `G03`        | promotion pipeline                                                         | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`                                                                                 |
 | `G04`        | contrato de boilerplate / casa única                                       | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                                                                                          |
@@ -972,6 +1000,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G28`        | disposição de temas estruturais residuais                                  | **Decidido** — § 1 (Resolved 2026-07-11, owner); `G01/G03/G05/F-014` roteados explicitamente para #45, refactor, falsificação e revisão final sem debt silencioso                            |
 | `G29`        | decisão efetiva de lane por verificação completa de findings               | **Decidido** — § 1 (Resolved 2026-07-11, owner); eventos `scope: findings` aprovados e completos podem resolver a decisão efetiva sem reescrever o review original                           |
 | `G30`        | dispensa governada de revalidação de review stale+approved                 | **Decidido** — § 1 (Resolved 2026-07-12, owner); `review_plan.<type>.revalidation` permite `pending/waived/required` com actor+reason e warning no Ready check                               |
+| `G31`        | gramática operacional do framework + disposição de G01 residual            | **Decidido** — § 1 (Resolved 2026-07-13, owner); contratos do PR #46 fecham a gramática interna, com resíduos roteados para falsificação/pesquisa                                            |
 
 ---
 
@@ -1006,6 +1035,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G28]` — Resolved 2026-07-11 / @rosanarezende
 - [x] `[DEC-0024-G29]` — Resolved 2026-07-11 / @rosanarezende
 - [x] `[DEC-0024-G30]` — Resolved 2026-07-12 / @rosanarezende
+- [x] `[DEC-0024-G31]` — Resolved 2026-07-13 / @rosanarezende
 
 ---
 

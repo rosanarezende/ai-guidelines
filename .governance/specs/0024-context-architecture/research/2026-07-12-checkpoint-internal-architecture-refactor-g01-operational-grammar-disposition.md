@@ -2,13 +2,13 @@
 artifact-kind: inventory
 subject: "Disposição da gramática operacional remanescente de G01 (F-AG01/F-003) no checkpoint internal-architecture-refactor-ddd-bdd (PR #46)"
 date: 2026-07-12
-disposition: living
+disposition: evidence
 ---
 
 # Disposição de G01 (gramática operacional) — PR #46
 
-> **Autoridade:** nenhuma (inventário). O fechamento formal é DECISÃO HUMANA —
-> a proposta de DEC está na §4 para a owner aceitar, ajustar ou rejeitar.
+> **Autoridade:** nenhuma (inventário/evidência). O fechamento formal vive na
+> decisão humana `[DEC-0024-G31]`; este artefato preserva a prova e o roteamento.
 > **Contexto:** `[DEC-0024-G28]` dividiu G01: a gramática de
 > artefatos/evidências FECHOU no PR #45; a **gramática operacional do work
 > graph/runtime** é critério de saída DESTE checkpoint. Este documento prova
@@ -54,11 +54,9 @@ reenquadramento que o próprio finding sugeria, agora como código com guarda.
 | **Eixos F-AE\* (projeções por consumidor)**                                                                | `broad-flow-falsification` (G05 resíduo, por DEC-G28)                | o snapshot atende CLI/mapa; consumidores reais são critério da falsificação  |
 | **F-AD\*/F-AA\*/F-AB\*/F-AF\*** (promoção/seleção/persistência/governança)                                 | seguem findings de pesquisa; entram como insumos de G03/falsificação | são perguntas de investigação, não contratos prontos para fechar por decreto |
 
-## 4. Proposta de DEC para a owner (fechamento formal — DECISÃO SUA)
+## 4. Decisão humana registrada
 
-> Minuta para `decision-brief.md`; registrar somente com o seu aceite.
-
-**[DEC-0024-G30] Gramática operacional do framework fechada por contrato; G01 residual roteado**
+**[DEC-0024-G31] Gramática operacional do framework fechada por contrato; G01 residual roteado**
 
 - A gramática operacional do work graph DO FRAMEWORK está fechada pelos
   contratos do PR #46: cadeia de contenção + tipagem ortogonal + estados
@@ -74,5 +72,5 @@ reenquadramento que o próprio finding sugeria, agora como código com guarda.
 
 A review final NÃO deve aceitar "G01 considerado": deve verificar (a) cada
 linha da §2 tem o enforcement citado vivo; (b) cada linha da §3 aparece como
-critério no checkpoint de destino; (c) a DEC proposta na §4 foi registrada,
-ajustada ou rejeitada pela owner — qualquer outra saída é GG-0005.
+critério no checkpoint de destino; (c) `[DEC-0024-G31]` permanece coerente com
+a implementação auditada — qualquer outra saída é GG-0005.

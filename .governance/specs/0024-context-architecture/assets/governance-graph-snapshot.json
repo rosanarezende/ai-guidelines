@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "488ef05fcac3",
+  "snapshot_fingerprint": "7d974e99ca88",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -130,15 +130,15 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-      "hash": "3b2bbea8c0c5"
+      "hash": "d456f4ddf71e"
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-      "hash": "1ee064edded6"
+      "hash": "ccc68476daf4"
     },
     {
       "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-      "hash": "c36876b9ebe4"
+      "hash": "fb4cd1668330"
     },
     {
       "path": ".governance/specs/0024-context-architecture/gates/c-artifact-taxonomy-and-model-review-contract.yml",
@@ -506,11 +506,11 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-g01-operational-grammar-disposition.md",
-      "hash": "454afd4316ba"
+      "hash": "07f348314d1b"
     },
     {
       "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-pre-coding-review.md",
-      "hash": "7fd69c07e342"
+      "hash": "6081a0ab3a61"
     },
     {
       "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-work-graph-lens-matrix.md",
@@ -722,7 +722,7 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/tasks.md",
-      "hash": "0d2179d59ed9"
+      "hash": "38049b648f48"
     }
   ],
   "nodes": [
@@ -1548,7 +1548,7 @@
       "attributes": {},
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1558,7 +1558,7 @@
       "attributes": {},
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1570,7 +1570,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1582,7 +1582,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1594,7 +1594,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1606,7 +1606,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1618,7 +1618,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1630,7 +1630,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1642,7 +1642,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1654,7 +1654,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1666,7 +1666,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1678,7 +1678,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1690,7 +1690,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1702,7 +1702,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1714,7 +1714,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1726,7 +1726,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1738,7 +1738,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1750,7 +1750,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1762,7 +1762,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1774,7 +1774,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1786,7 +1786,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1798,7 +1798,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1810,7 +1810,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1822,7 +1822,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1834,7 +1834,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -1846,7 +1846,19 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/decision-brief.md",
-        "hash": "c36876b9ebe4"
+        "hash": "fb4cd1668330"
+      }
+    },
+    {
+      "id": "decision:0024-context-architecture/DEC-0024-G31",
+      "type": "decision",
+      "label": "Gramática operacional do framework fechada por contrato; G01 residual roteado",
+      "attributes": {
+        "status": "Resolved"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/decision-brief.md",
+        "hash": "fb4cd1668330"
       }
     },
     {
@@ -2774,7 +2786,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-        "hash": "1ee064edded6"
+        "hash": "ccc68476daf4"
       }
     },
     {
@@ -2786,7 +2798,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-        "hash": "3b2bbea8c0c5"
+        "hash": "d456f4ddf71e"
       }
     },
     {
@@ -3666,7 +3678,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-g01-operational-grammar-disposition.md",
-        "hash": "454afd4316ba"
+        "hash": "07f348314d1b"
       }
     },
     {
@@ -3678,7 +3690,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/research/2026-07-12-checkpoint-internal-architecture-refactor-pre-coding-review.md",
-        "hash": "7fd69c07e342"
+        "hash": "6081a0ab3a61"
       }
     },
     {
@@ -4329,7 +4341,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4342,7 +4354,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4355,7 +4367,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4368,7 +4380,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4381,7 +4393,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4394,7 +4406,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4407,7 +4419,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4420,7 +4432,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4433,7 +4445,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4446,7 +4458,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4459,7 +4471,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4472,7 +4484,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4485,7 +4497,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4499,7 +4511,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4512,7 +4524,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4525,7 +4537,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4538,7 +4550,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4551,7 +4563,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4564,7 +4576,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4577,7 +4589,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4590,7 +4602,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4603,7 +4615,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4616,7 +4628,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4629,7 +4641,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4642,7 +4654,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4655,7 +4667,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4668,7 +4680,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4681,7 +4693,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4694,7 +4706,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -4707,7 +4719,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "0d2179d59ed9"
+        "hash": "38049b648f48"
       }
     },
     {
@@ -5388,7 +5400,7 @@
       "to": "research-artifact:0024-context-architecture/2026-07-07-pr-continuation-protocol"
     },
     {
-      "from": "decision:0024-context-architecture/DEC-0024-G30",
+      "from": "decision:0024-context-architecture/DEC-0024-G31",
       "type": "supported-by",
       "to": "research-artifact:0024-context-architecture/findings"
     },

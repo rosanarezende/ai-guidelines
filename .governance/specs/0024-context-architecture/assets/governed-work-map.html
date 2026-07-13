@@ -824,7 +824,7 @@
                   role="button"
                   data-node="internal-architecture-refactor-ddd-bdd"
                   data-status="active"
-                  data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: guard de camadas para impedir novas dependências indevidas entre domínio, aplicação, infraestrutura e CLI, com baseline explícita para violações legadas. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Architectural Review: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
+                  data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: as sete violações iniciais foram eliminadas; o guard agora falha em qualquer dependência indevida entre domínio, aplicação, infraestrutura e CLI, sem baseline de exceções. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required e pendente no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Architectural Review: required e pendente no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
                   aria-label="Abrir detalhes de internal-architecture-refactor-ddd-bdd"
                 >
                   <span class="chip">Ativo</span>
@@ -1179,7 +1179,7 @@
                   <tr
                     class="filterable"
                     data-status="active"
-                    data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: guard de camadas para impedir novas dependências indevidas entre domínio, aplicação, infraestrutura e CLI, com baseline explícita para violações legadas. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Architectural Review: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
+                    data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: as sete violações iniciais foram eliminadas; o guard agora falha em qualquer dependência indevida entre domínio, aplicação, infraestrutura e CLI, sem baseline de exceções. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required e pendente no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Architectural Review: required e pendente no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate. Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
                     data-node="internal-architecture-refactor-ddd-bdd"
                   >
                     <td><strong>internal-architecture-refactor-ddd-bdd</strong></td>
@@ -2770,13 +2770,13 @@
                 "intendedVision": "",
                 "summary": "Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto.",
                 "deliveredValue": [
-                  "Fronteiras internas protegidas: guard de camadas para impedir novas dependências indevidas entre domínio, aplicação, infraestrutura e CLI, com baseline explícita para violações legadas.",
+                  "Fronteiras internas protegidas: as sete violações iniciais foram eliminadas; o guard agora falha em qualquer dependência indevida entre domínio, aplicação, infraestrutura e CLI, sem baseline de exceções.",
                   "Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta \"qual é o próximo movimento?\", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas.",
                   "Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável.",
                   "Graph snapshot derivado: governance-graph:build/check materializa governance-graph-snapshot.json como projeção versionada, determinística, regenerável, offline e derived-only, usando governed-work em vez de spec como conceito público.",
                   "Débitos do snapshot fechados: active.yml.updated_at foi normalizado fora do fingerprint, generated-at/source-commit foram decididos como fora do snapshot v1 por determinismo, e ids de tarefas deixaram de ser line-based.",
                   "Aprendizados do work-graph-model preservados: matriz de lentes e alinhamento com model.yml v3 rastreiam o que foi aplicado ao framework, migrado para Guilda, preservado como evidência ou roteado para falsificação/revisão final.",
-                  "G01 disposto: a gramática operacional do framework foi fechada/roteada em artefato próprio, sem declarar encerramento global de temas que pertencem a checkpoints posteriores."
+                  "G01 fechado no framework: [DEC-0024-G31] registra a gramática operacional materializada; resíduos de escala consumidor, promoção/projeções e terminus permanecem roteados, sem encerramento global por decreto."
                 ],
                 "inScope": [
                   "Reorganização behavior-preserving de src/cli e testes (domínio ≠ CLI ≠ projeções ≠ testes), coberta por testes existentes/novos.",
@@ -2793,10 +2793,19 @@
                   "Reativar a Guilda Governance como produto dentro deste repo.",
                   "Ready/Human Gate automático."
                 ],
-                "testPlan": [],
+                "testPlan": [
+                  "npm run build",
+                  "npm run test",
+                  "npm run validate",
+                  "npm run validate:changed",
+                  "npm run governed-work-map:check",
+                  "npm run governance-graph:check",
+                  "npm run artifact-kind:check",
+                  "npm run research-index:check"
+                ],
                 "gates": [
-                  "Technical Audit: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate.",
-                  "Architectural Review: required no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate.",
+                  "Technical Audit: required e pendente no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate.",
+                  "Architectural Review: required e pendente no review_plan do nó ativo; deve estar current+approved antes de Ready/Human Gate.",
                   "Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.",
                   "Human Gate: pendente — decisão reservada à owner; não é autorização de merge.",
                   "Merge: fora do escopo deste PR individual; a stack segue em modo unit."

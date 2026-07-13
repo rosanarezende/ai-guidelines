@@ -87,13 +87,13 @@ Os aprendizados do incubador `work-graph-model` (`model.yml`, `tracker.md`, `fea
 
 ## Valor entregue
 
-- **Fronteiras internas protegidas:** guard de camadas para impedir novas dependências indevidas entre domínio, aplicação, infraestrutura e CLI, com baseline explícita para violações legadas.
+- **Fronteiras internas protegidas:** as sete violações iniciais foram eliminadas; o guard agora falha em qualquer dependência indevida entre domínio, aplicação, infraestrutura e CLI, sem baseline de exceções.
 - **Derivações centrais consolidadas:** `frenteProgression` virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por `pr-ready`, `handoff`, `humanGate`, `advanceEligibility` e superfícies relacionadas.
 - **Policy de reviews no domínio:** a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável.
 - **Graph snapshot derivado:** `governance-graph:build/check` materializa `governance-graph-snapshot.json` como projeção versionada, determinística, regenerável, offline e derived-only, usando `governed-work` em vez de `spec` como conceito público.
 - **Débitos do snapshot fechados:** `active.yml.updated_at` foi normalizado fora do fingerprint, `generated-at/source-commit` foram decididos como fora do snapshot v1 por determinismo, e ids de tarefas deixaram de ser line-based.
 - **Aprendizados do work-graph-model preservados:** matriz de lentes e alinhamento com `model.yml` v3 rastreiam o que foi aplicado ao framework, migrado para Guilda, preservado como evidência ou roteado para falsificação/revisão final.
-- **G01 disposto:** a gramática operacional do framework foi fechada/roteada em artefato próprio, sem declarar encerramento global de temas que pertencem a checkpoints posteriores.
+- **G01 fechado no framework:** `[DEC-0024-G31]` registra a gramática operacional materializada; resíduos de escala consumidor, promoção/projeções e `terminus` permanecem roteados, sem encerramento global por decreto.
 
 <details>
 <summary><strong>Prompt final — valor entregue</strong></summary>
@@ -113,7 +113,7 @@ Show four boxes with clear boundaries:
 - "Aplicação"
 - "Infraestrutura"
 - "CLI"
-Add guard rails around them labeled "guard de camadas" and "baseline explícita para legado".
+Add guard rails around them labeled "guard de camadas" and "zero exceções congeladas".
 
 MIDDLE LAYER — "Derivações canônicas"
 Render one highlighted node labeled "frenteProgression" feeding five smaller surfaces:
@@ -155,6 +155,7 @@ Style: precise engineering documentation, light background, readable typography,
 ```bash
 npm run build
 npm run test
+npm run validate
 npm run validate:changed
 npm run governed-work-map:check
 npm run governance-graph:check
@@ -168,18 +169,18 @@ Refactor behavior-preserving: cada movimentação estrutural deve manter os test
 
 ### Evidências e gates
 
-- Technical Audit: **required** no `review_plan` do nó ativo; deve estar current+approved antes de Ready/Human Gate.
-- Architectural Review: **required** no `review_plan` do nó ativo; deve estar current+approved antes de Ready/Human Gate.
+- Technical Audit: **required e pendente** no `review_plan` do nó ativo; deve estar current+approved antes de Ready/Human Gate.
+- Architectural Review: **required e pendente** no `review_plan` do nó ativo; deve estar current+approved antes de Ready/Human Gate.
 - Security Review: **waived** por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.
 - Human Gate: pendente — decisão reservada à owner; não é autorização de merge.
 - Merge: fora do escopo deste PR individual; a stack segue em modo unit.
 
 ### Checklist operacional
 
-- [ ] Formatação verde
-- [ ] Validação canônica verde
-- [ ] Commits atômicos
-- [ ] Sem secrets, credenciais ou contexto pessoal vazado
+- [x] Formatação verde
+- [x] Validação canônica verde (`npm run validate`: 224 suítes / 2.369 testes + checks governados)
+- [x] Commits atômicos
+- [x] Sem secrets, credenciais ou contexto pessoal vazado
 - [x] PR body atualizado com estado real
 - [x] Fora de escopo registrado
 
@@ -187,7 +188,7 @@ Refactor behavior-preserving: cada movimentação estrutural deve manter os test
 
 - **Spec**: 0024
 - **ADRs aplicáveis**: ADR 0018, ADR 0021, ADR 0022, ADR 0025, ADR 0026
-- **DECs aplicáveis**: DEC-0024-G21, DEC-0024-G23, DEC-0024-G27, DEC-0024-G28
+- **DECs aplicáveis**: DEC-0024-G21, DEC-0024-G23, DEC-0024-G27, DEC-0024-G28, DEC-0024-G31
 - **Issues/PRs relacionados**: Continuação governada de #45 (pacote `pull-requests/pr-45/continuations/2026-07-11-internal-architecture-refactor-ddd-bdd`); nó anterior: `artifact-taxonomy-and-model-review-contract`; nó ativo: `internal-architecture-refactor-ddd-bdd`
 
 ## Disclosure de IA
