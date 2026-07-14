@@ -1,0 +1,10 @@
+# Human Gate do checkpoint internal-architecture-refactor-ddd-bdd — registrado por guidelines decide.
+# O artefato nasce DEPOIS da decisão humana; NÃO executa transição/merge/abertura de PR.
+checkpoint: "checkpoint-internal-architecture-refactor-ddd-bdd"
+actor: "@rosanarezende"
+ref: "#46"
+date: "2026-07-14"
+decision: approved
+note: "Human Gate do checkpoint internal-architecture-refactor-ddd-bdd APROVADO para avançar. Não autoriza merge, topologia, próximo PR, policy ou outro checkpoint."
+basis: "Decisão registrada DEPOIS da decisão humana, com o estado governado do checkpoint (reviews/findings/CI/validações) projetado pelo briefing. Não executa transição automática."
+next: "Concluir o nó internal-architecture-refactor-ddd-bdd e preparar a abertura do próximo PR (dualroot-collapse). Nenhuma transição é executada automaticamente."
