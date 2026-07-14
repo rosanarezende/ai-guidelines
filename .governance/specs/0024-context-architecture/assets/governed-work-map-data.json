@@ -1087,12 +1087,12 @@
           "done": 3,
           "active": 1,
           "pending": 2,
-          "readyForTransition": 0,
+          "readyForTransition": 1,
           "activeStep": {
             "id": "internal-architecture-refactor-ddd-bdd",
-            "title": "reorganização behavior-preserving do runtime/testes",
+            "title": "`readiness",
             "line": 131,
-            "readiness": false
+            "readiness": true
           },
           "nextPending": {
             "id": "broad-flow-falsification",
@@ -1117,12 +1117,12 @@
               "done": 3,
               "active": 1,
               "pending": 2,
-              "readyForTransition": 0,
+              "readyForTransition": 1,
               "activeStep": {
                 "id": "internal-architecture-refactor-ddd-bdd",
-                "title": "reorganização behavior-preserving do runtime/testes",
+                "title": "`readiness",
                 "line": 131,
-                "readiness": false
+                "readiness": true
               },
               "nextPending": {
                 "id": "broad-flow-falsification",
@@ -1161,12 +1161,12 @@
           "done": 3,
           "active": 1,
           "pending": 2,
-          "readyForTransition": 0,
+          "readyForTransition": 1,
           "activeStep": {
             "id": "internal-architecture-refactor-ddd-bdd",
-            "title": "reorganização behavior-preserving do runtime/testes",
+            "title": "`readiness",
             "line": 131,
-            "readiness": false
+            "readiness": true
           },
           "nextPending": {
             "id": "broad-flow-falsification",
@@ -1193,12 +1193,12 @@
               "done": 3,
               "active": 1,
               "pending": 2,
-              "readyForTransition": 0,
+              "readyForTransition": 1,
               "activeStep": {
                 "id": "internal-architecture-refactor-ddd-bdd",
-                "title": "reorganização behavior-preserving do runtime/testes",
+                "title": "`readiness",
                 "line": 131,
-                "readiness": false
+                "readiness": true
               },
               "nextPending": {
                 "id": "broad-flow-falsification",
@@ -1280,12 +1280,12 @@
           "done": 3,
           "active": 1,
           "pending": 2,
-          "readyForTransition": 0,
+          "readyForTransition": 1,
           "activeStep": {
             "id": "internal-architecture-refactor-ddd-bdd",
-            "title": "reorganização behavior-preserving do runtime/testes",
+            "title": "`readiness",
             "line": 131,
-            "readiness": false
+            "readiness": true
           },
           "nextPending": {
             "id": "broad-flow-falsification",
@@ -1310,12 +1310,12 @@
               "done": 3,
               "active": 1,
               "pending": 2,
-              "readyForTransition": 0,
+              "readyForTransition": 1,
               "activeStep": {
                 "id": "internal-architecture-refactor-ddd-bdd",
-                "title": "reorganização behavior-preserving do runtime/testes",
+                "title": "`readiness",
                 "line": 131,
-                "readiness": false
+                "readiness": true
               },
               "nextPending": {
                 "id": "broad-flow-falsification",
