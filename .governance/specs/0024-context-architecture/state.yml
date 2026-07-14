@@ -266,9 +266,9 @@ topology:
             reason: "PR #46 mexe em runtime critico, readiness, graph snapshot, derivacao de fluxo, validate e checks governados; Technical Audit deve estar current+approved antes de Ready/Human Gate."
             revalidation:
               owner_decision: waived
-              analyzed_head: "01730166"
+              analyzed_head: 7f9a746c
               actor: "@rosanarezende"
-              reason: Decisão humana sobre delta b4d0c834..01730166; recomendação do sistema=revalidate. O delta toca dependências, segurança, permissões ou infraestrutura sensível.
+              reason: Decisão humana sobre delta b4d0c834..7f9a746c; recomendação do sistema=revalidate. O delta toca dependências, segurança, permissões ou infraestrutura sensível.
           architectural_review:
             system_recommendation: recommended
             owner_decision: required
@@ -276,9 +276,9 @@ topology:
             reason: "PR #46 e um refactor arquitetural DDD/BDD que reorganiza fronteiras, projecoes e gramatica operacional; Architectural Review deve validar a direcao antes do Human Gate."
             revalidation:
               owner_decision: waived
-              analyzed_head: "01730166"
+              analyzed_head: 7f9a746c
               actor: "@rosanarezende"
-              reason: Decisão humana sobre delta b4d0c834..01730166; recomendação do sistema=revalidate. O delta toca dependências, segurança, permissões ou infraestrutura sensível.
+              reason: Decisão humana sobre delta b4d0c834..7f9a746c; recomendação do sistema=revalidate. O delta toca dependências, segurança, permissões ou infraestrutura sensível.
           security_review:
             system_recommendation: optional
             owner_decision: waived
