@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "128ca0b1d423",
+  "snapshot_fingerprint": "1fe654923fcb",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -130,11 +130,11 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-      "hash": "756df9006c5f"
+      "hash": "143deece3750"
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-      "hash": "9725c51da9ce"
+      "hash": "17d8ca957dbc"
     },
     {
       "path": ".governance/specs/0024-context-architecture/decision-brief.md",
@@ -2837,7 +2837,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-        "hash": "9725c51da9ce"
+        "hash": "17d8ca957dbc"
       }
     },
     {
@@ -2849,7 +2849,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-        "hash": "756df9006c5f"
+        "hash": "143deece3750"
       }
     },
     {
@@ -4634,7 +4634,7 @@
     {
       "id": "step:0024-context-architecture/internal-architecture-refactor-ddd-bdd",
       "type": "step",
-      "label": "`readiness",
+      "label": "reorganização behavior-preserving do runtime/testes",
       "attributes": {
         "state": "in-progress",
         "line": 131,

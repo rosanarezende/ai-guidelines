@@ -347,7 +347,9 @@ function stepTitle(inlineTitle: string | undefined, tail: string | undefined): s
   if (inline) return inline;
 
   const cleanedTail = (tail ?? "")
+    .replace(READINESS_TOKEN_RE, "")
     .replace(/^[:—\-\s]+/, "")
+    .replace(/\s+\(EM EXECUÇÃO\b.*?\)(?=\s*[:.]\s+|$)/i, "")
     .replace(/\s+/g, " ")
     .trim()
     .replace(/[.]$/, "");

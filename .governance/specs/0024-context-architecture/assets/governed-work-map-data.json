@@ -1090,7 +1090,7 @@
           "readyForTransition": 1,
           "activeStep": {
             "id": "internal-architecture-refactor-ddd-bdd",
-            "title": "`readiness",
+            "title": "reorganização behavior-preserving do runtime/testes",
             "line": 131,
             "readiness": true
           },
@@ -1120,7 +1120,7 @@
               "readyForTransition": 1,
               "activeStep": {
                 "id": "internal-architecture-refactor-ddd-bdd",
-                "title": "`readiness",
+                "title": "reorganização behavior-preserving do runtime/testes",
                 "line": 131,
                 "readiness": true
               },
@@ -1164,7 +1164,7 @@
           "readyForTransition": 1,
           "activeStep": {
             "id": "internal-architecture-refactor-ddd-bdd",
-            "title": "`readiness",
+            "title": "reorganização behavior-preserving do runtime/testes",
             "line": 131,
             "readiness": true
           },
@@ -1196,7 +1196,7 @@
               "readyForTransition": 1,
               "activeStep": {
                 "id": "internal-architecture-refactor-ddd-bdd",
-                "title": "`readiness",
+                "title": "reorganização behavior-preserving do runtime/testes",
                 "line": 131,
                 "readiness": true
               },
@@ -1283,7 +1283,7 @@
           "readyForTransition": 1,
           "activeStep": {
             "id": "internal-architecture-refactor-ddd-bdd",
-            "title": "`readiness",
+            "title": "reorganização behavior-preserving do runtime/testes",
             "line": 131,
             "readiness": true
           },
@@ -1313,7 +1313,7 @@
               "readyForTransition": 1,
               "activeStep": {
                 "id": "internal-architecture-refactor-ddd-bdd",
-                "title": "`readiness",
+                "title": "reorganização behavior-preserving do runtime/testes",
                 "line": 131,
                 "readiness": true
               },

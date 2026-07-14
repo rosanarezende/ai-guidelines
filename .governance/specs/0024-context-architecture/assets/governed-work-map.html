@@ -536,7 +536,10 @@
         <article class="brief-card">
           <div class="eyebrow">Onde estamos</div>
           <strong>internal-architecture-refactor-ddd-bdd</strong>
-          <p>PR 46 · etapa ativa internal-architecture-refactor-ddd-bdd: `readiness</p>
+          <p>
+            PR 46 · etapa ativa internal-architecture-refactor-ddd-bdd: reorganização
+            behavior-preserving do runtime/testes
+          </p>
         </article>
         <article class="brief-card">
           <div class="eyebrow">Estado do trabalho</div>
@@ -776,7 +779,7 @@
                   role="button"
                   data-node="co-flow-continuation"
                   data-status="concluded"
-                  data-search="co-flow-continuation concluded execution 44 checkpoint-co-flow-continuation `readiness falsificação ampla do lifecycle governado "
+                  data-search="co-flow-continuation concluded execution 44 checkpoint-co-flow-continuation reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado "
                   aria-label="Abrir detalhes de co-flow-continuation"
                 >
                   <span class="chip">Concluído</span>
@@ -784,7 +787,8 @@
                   <p>PR 44 · execution · seq 11</p>
                   <p class="node-summary">3/6 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
                   <p class="node-note">
-                    Etapa ativa: internal-architecture-refactor-ddd-bdd — `readiness
+                    Etapa ativa: internal-architecture-refactor-ddd-bdd — reorganização
+                    behavior-preserving do runtime/testes
                   </p>
                   <div class="chips"><span class="chip">checkpoint-co-flow-continuation</span></div>
                 </article>
@@ -794,7 +798,7 @@
                   role="button"
                   data-node="artifact-taxonomy-and-model-review-contract"
                   data-status="concluded"
-                  data-search='artifact-taxonomy-and-model-review-contract concluded execution 45 checkpoint-artifact-taxonomy-and-model-review-contract `readiness falsificação ampla do lifecycle governado Checkpoint artifact-taxonomy-and-model-review-contract — ✅ CONCLUÍDO + gated (Human Gate approved 2026-07-12, gates/c-artifact-taxonomy-and-model-review-contract.yml; PR #45 Ready, HEAD 1cc96dd1, CI verde; modo unit, se… Este PR consolida a frente da Spec 0024 que modela o trabalho como grafo tipado e agora separa com clareza duas coisas que tinham se misturado: o framework ai-guidelines e o produto Guilda que nasceu como incubação dentro de work-graph-model/governance-demo. Artifact taxonomy e model-review contract permanecem como entrega viva do framework. [DEC-0024-G25] reconciliou a linguagem: "Spec" permanece como invólucro histórico/caminho físico, enquanto novas projeções usam "trabalho governado" e "work graph". assets/spec-0024-map-v5.html preserva a leitura humana/manual do PR #45, e assets/governed-work-map-data.json + assets/governed-work-map.html viram projeção gerada de state.yml, validada por npm run governed-work-map:check. pr-ready:check deve bloquear enquanto revisão decidida como obrigatória no review_plan não estiver current+approved, exceto quando a lane já estiver efetivamente approved e a owner tiver dispensado revalidação do delta posterior em review_plan..revalidation c… Human Gate: pendente — decisão reservada à owner; não é autorização de merge. Merge: fora do escopo deste PR individual; a stack segue em modo unit.'
+                  data-search='artifact-taxonomy-and-model-review-contract concluded execution 45 checkpoint-artifact-taxonomy-and-model-review-contract reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Checkpoint artifact-taxonomy-and-model-review-contract — ✅ CONCLUÍDO + gated (Human Gate approved 2026-07-12, gates/c-artifact-taxonomy-and-model-review-contract.yml; PR #45 Ready, HEAD 1cc96dd1, CI verde; modo unit, se… Este PR consolida a frente da Spec 0024 que modela o trabalho como grafo tipado e agora separa com clareza duas coisas que tinham se misturado: o framework ai-guidelines e o produto Guilda que nasceu como incubação dentro de work-graph-model/governance-demo. Artifact taxonomy e model-review contract permanecem como entrega viva do framework. [DEC-0024-G25] reconciliou a linguagem: "Spec" permanece como invólucro histórico/caminho físico, enquanto novas projeções usam "trabalho governado" e "work graph". assets/spec-0024-map-v5.html preserva a leitura humana/manual do PR #45, e assets/governed-work-map-data.json + assets/governed-work-map.html viram projeção gerada de state.yml, validada por npm run governed-work-map:check. pr-ready:check deve bloquear enquanto revisão decidida como obrigatória no review_plan não estiver current+approved, exceto quando a lane já estiver efetivamente approved e a owner tiver dispensado revalidação do delta posterior em review_plan..revalidation c… Human Gate: pendente — decisão reservada à owner; não é autorização de merge. Merge: fora do escopo deste PR individual; a stack segue em modo unit.'
                   aria-label="Abrir detalhes de artifact-taxonomy-and-model-review-contract"
                 >
                   <span class="chip">Concluído</span>
@@ -802,7 +806,8 @@
                   <p>PR 45 · execution · seq 12</p>
                   <p class="node-summary">3/6 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
                   <p class="node-note">
-                    Etapa ativa: internal-architecture-refactor-ddd-bdd — `readiness
+                    Etapa ativa: internal-architecture-refactor-ddd-bdd — reorganização
+                    behavior-preserving do runtime/testes
                   </p>
                   <div class="chips">
                     <span class="chip">checkpoint-artifact-taxonomy-and-model-review-contract</span>
@@ -819,7 +824,7 @@
                   role="button"
                   data-node="internal-architecture-refactor-ddd-bdd"
                   data-status="active"
-                  data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd `readiness falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: as sete violações iniciais foram eliminadas; o guard agora falha em qualquer dependência indevida entre domínio, aplicação, infraestrutura e CLI, sem baseline de exceções. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required; aprovada e revalidada até b4d0c834. Para o delta posterior registrado em state.yml, o sistema recomendou repetir por tocar a política e o fluxo de decisão; a owner dispensou explicitamente a revalidação. A dispensa é situada no HEAD… Architectural Review: required; aprovada sobre b4d0c834, com três findings não bloqueantes já corrigidos. Para o delta posterior registrado em state.yml, o sistema recomendou repetir; a owner dispensou explicitamente a revalidação, limitada ao mesmo HEAD anal… Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
+                  data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: as sete violações iniciais foram eliminadas; o guard agora falha em qualquer dependência indevida entre domínio, aplicação, infraestrutura e CLI, sem baseline de exceções. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required; aprovada e revalidada até b4d0c834. Para o delta posterior registrado em state.yml, o sistema recomendou repetir por tocar a política e o fluxo de decisão; a owner dispensou explicitamente a revalidação. A dispensa é situada no HEAD… Architectural Review: required; aprovada sobre b4d0c834, com três findings não bloqueantes já corrigidos. Para o delta posterior registrado em state.yml, o sistema recomendou repetir; a owner dispensou explicitamente a revalidação, limitada ao mesmo HEAD anal… Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
                   aria-label="Abrir detalhes de internal-architecture-refactor-ddd-bdd"
                 >
                   <span class="chip">Ativo</span>
@@ -827,7 +832,8 @@
                   <p>PR 46 · execution · seq 13</p>
                   <p class="node-summary">3/6 etapa(s) concluída(s) · 0 tarefa(s) aberta(s)</p>
                   <p class="node-note">
-                    Etapa ativa: internal-architecture-refactor-ddd-bdd — `readiness
+                    Etapa ativa: internal-architecture-refactor-ddd-bdd — reorganização
+                    behavior-preserving do runtime/testes
                   </p>
                   <div class="chips">
                     <span class="chip">checkpoint-internal-architecture-refactor-ddd-bdd</span>
@@ -1138,7 +1144,7 @@
                   <tr
                     class="filterable"
                     data-status="concluded"
-                    data-search="co-flow-continuation concluded execution 44 checkpoint-co-flow-continuation `readiness falsificação ampla do lifecycle governado "
+                    data-search="co-flow-continuation concluded execution 44 checkpoint-co-flow-continuation reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado "
                     data-node="co-flow-continuation"
                   >
                     <td><strong>co-flow-continuation</strong></td>
@@ -1153,7 +1159,7 @@
                   <tr
                     class="filterable"
                     data-status="concluded"
-                    data-search='artifact-taxonomy-and-model-review-contract concluded execution 45 checkpoint-artifact-taxonomy-and-model-review-contract `readiness falsificação ampla do lifecycle governado Checkpoint artifact-taxonomy-and-model-review-contract — ✅ CONCLUÍDO + gated (Human Gate approved 2026-07-12, gates/c-artifact-taxonomy-and-model-review-contract.yml; PR #45 Ready, HEAD 1cc96dd1, CI verde; modo unit, se… Este PR consolida a frente da Spec 0024 que modela o trabalho como grafo tipado e agora separa com clareza duas coisas que tinham se misturado: o framework ai-guidelines e o produto Guilda que nasceu como incubação dentro de work-graph-model/governance-demo. Artifact taxonomy e model-review contract permanecem como entrega viva do framework. [DEC-0024-G25] reconciliou a linguagem: "Spec" permanece como invólucro histórico/caminho físico, enquanto novas projeções usam "trabalho governado" e "work graph". assets/spec-0024-map-v5.html preserva a leitura humana/manual do PR #45, e assets/governed-work-map-data.json + assets/governed-work-map.html viram projeção gerada de state.yml, validada por npm run governed-work-map:check. pr-ready:check deve bloquear enquanto revisão decidida como obrigatória no review_plan não estiver current+approved, exceto quando a lane já estiver efetivamente approved e a owner tiver dispensado revalidação do delta posterior em review_plan..revalidation c… Human Gate: pendente — decisão reservada à owner; não é autorização de merge. Merge: fora do escopo deste PR individual; a stack segue em modo unit.'
+                    data-search='artifact-taxonomy-and-model-review-contract concluded execution 45 checkpoint-artifact-taxonomy-and-model-review-contract reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Checkpoint artifact-taxonomy-and-model-review-contract — ✅ CONCLUÍDO + gated (Human Gate approved 2026-07-12, gates/c-artifact-taxonomy-and-model-review-contract.yml; PR #45 Ready, HEAD 1cc96dd1, CI verde; modo unit, se… Este PR consolida a frente da Spec 0024 que modela o trabalho como grafo tipado e agora separa com clareza duas coisas que tinham se misturado: o framework ai-guidelines e o produto Guilda que nasceu como incubação dentro de work-graph-model/governance-demo. Artifact taxonomy e model-review contract permanecem como entrega viva do framework. [DEC-0024-G25] reconciliou a linguagem: "Spec" permanece como invólucro histórico/caminho físico, enquanto novas projeções usam "trabalho governado" e "work graph". assets/spec-0024-map-v5.html preserva a leitura humana/manual do PR #45, e assets/governed-work-map-data.json + assets/governed-work-map.html viram projeção gerada de state.yml, validada por npm run governed-work-map:check. pr-ready:check deve bloquear enquanto revisão decidida como obrigatória no review_plan não estiver current+approved, exceto quando a lane já estiver efetivamente approved e a owner tiver dispensado revalidação do delta posterior em review_plan..revalidation c… Human Gate: pendente — decisão reservada à owner; não é autorização de merge. Merge: fora do escopo deste PR individual; a stack segue em modo unit.'
                     data-node="artifact-taxonomy-and-model-review-contract"
                   >
                     <td><strong>artifact-taxonomy-and-model-review-contract</strong></td>
@@ -1173,7 +1179,7 @@
                   <tr
                     class="filterable"
                     data-status="active"
-                    data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd `readiness falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: as sete violações iniciais foram eliminadas; o guard agora falha em qualquer dependência indevida entre domínio, aplicação, infraestrutura e CLI, sem baseline de exceções. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required; aprovada e revalidada até b4d0c834. Para o delta posterior registrado em state.yml, o sistema recomendou repetir por tocar a política e o fluxo de decisão; a owner dispensou explicitamente a revalidação. A dispensa é situada no HEAD… Architectural Review: required; aprovada sobre b4d0c834, com três findings não bloqueantes já corrigidos. Para o delta posterior registrado em state.yml, o sistema recomendou repetir; a owner dispensou explicitamente a revalidação, limitada ao mesmo HEAD anal… Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
+                    data-search='internal-architecture-refactor-ddd-bdd active execution 46 checkpoint-internal-architecture-refactor-ddd-bdd reorganização behavior-preserving do runtime/testes falsificação ampla do lifecycle governado Este PR materializa o checkpoint internal-architecture-refactor-ddd-bdd (nó seq 13 da Spec 0024, PR #46 stacked sobre #45): reorganização behavior-preserving de src/cli e dos testes para que o próprio framework seja legível e sustentável por humanos, sem alterar comportamento nem conteúdo de produto. Fronteiras internas protegidas: as sete violações iniciais foram eliminadas; o guard agora falha em qualquer dependência indevida entre domínio, aplicação, infraestrutura e CLI, sem baseline de exceções. Derivações centrais consolidadas: frenteProgression virou a derivação canônica para a pergunta "qual é o próximo movimento?", consumida por pr-ready, handoff, humanGate, advanceEligibility e superfícies relacionadas. Policy de reviews no domínio: a política de revisão saiu de uma leitura de infraestrutura para um modelo de domínio reutilizável. Technical Audit: required; aprovada e revalidada até b4d0c834. Para o delta posterior registrado em state.yml, o sistema recomendou repetir por tocar a política e o fluxo de decisão; a owner dispensou explicitamente a revalidação. A dispensa é situada no HEAD… Architectural Review: required; aprovada sobre b4d0c834, com três findings não bloqueantes já corrigidos. Para o delta posterior registrado em state.yml, o sistema recomendou repetir; a owner dispensou explicitamente a revalidação, limitada ao mesmo HEAD anal… Security Review: waived por decisão situada da owner; o escopo é interno ao framework, sem nova superfície de auth, secrets, rede, permissão externa ou execução remota. TA/AR podem reabrir risco se encontrarem evidência.'
                     data-node="internal-architecture-refactor-ddd-bdd"
                   >
                     <td><strong>internal-architecture-refactor-ddd-bdd</strong></td>
@@ -2522,7 +2528,7 @@
                 "readyForTransition": 1,
                 "activeStep": {
                   "id": "internal-architecture-refactor-ddd-bdd",
-                  "title": "`readiness",
+                  "title": "reorganização behavior-preserving do runtime/testes",
                   "line": 131,
                   "readiness": true
                 },
@@ -2552,7 +2558,7 @@
                     "readyForTransition": 1,
                     "activeStep": {
                       "id": "internal-architecture-refactor-ddd-bdd",
-                      "title": "`readiness",
+                      "title": "reorganização behavior-preserving do runtime/testes",
                       "line": 131,
                       "readiness": true
                     },
@@ -2596,7 +2602,7 @@
                 "readyForTransition": 1,
                 "activeStep": {
                   "id": "internal-architecture-refactor-ddd-bdd",
-                  "title": "`readiness",
+                  "title": "reorganização behavior-preserving do runtime/testes",
                   "line": 131,
                   "readiness": true
                 },
@@ -2628,7 +2634,7 @@
                     "readyForTransition": 1,
                     "activeStep": {
                       "id": "internal-architecture-refactor-ddd-bdd",
-                      "title": "`readiness",
+                      "title": "reorganização behavior-preserving do runtime/testes",
                       "line": 131,
                       "readiness": true
                     },
@@ -2715,7 +2721,7 @@
                 "readyForTransition": 1,
                 "activeStep": {
                   "id": "internal-architecture-refactor-ddd-bdd",
-                  "title": "`readiness",
+                  "title": "reorganização behavior-preserving do runtime/testes",
                   "line": 131,
                   "readiness": true
                 },
@@ -2745,7 +2751,7 @@
                     "readyForTransition": 1,
                     "activeStep": {
                       "id": "internal-architecture-refactor-ddd-bdd",
-                      "title": "`readiness",
+                      "title": "reorganização behavior-preserving do runtime/testes",
                       "line": 131,
                       "readiness": true
                     },
