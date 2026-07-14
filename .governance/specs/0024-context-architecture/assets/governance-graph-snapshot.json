@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "37c7dca32d84",
+  "snapshot_fingerprint": "2fc0cb9b6b31",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -179,6 +179,10 @@
     {
       "path": ".governance/specs/0024-context-architecture/gates/c-graph-core.yml",
       "hash": "2082f54c2b83"
+    },
+    {
+      "path": ".governance/specs/0024-context-architecture/gates/c-internal-architecture-refactor-ddd-bdd.yml",
+      "hash": "57fa5a888725"
     },
     {
       "path": ".governance/specs/0024-context-architecture/gates/c-npm-toolchain.yml",
@@ -2602,6 +2606,18 @@
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/gates/c-graph-core.yml",
         "hash": "2082f54c2b83"
+      }
+    },
+    {
+      "id": "gate:0024-context-architecture/internal-architecture-refactor-ddd-bdd",
+      "type": "gate",
+      "label": "gate · internal-architecture-refactor-ddd-bdd",
+      "attributes": {
+        "decision": "approved"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/gates/c-internal-architecture-refactor-ddd-bdd.yml",
+        "hash": "57fa5a888725"
       }
     },
     {
@@ -5380,6 +5396,11 @@
       "from": "checkpoint:0024-context-architecture/checkpoint-graph-core",
       "type": "closed-by",
       "to": "gate:0024-context-architecture/graph-core"
+    },
+    {
+      "from": "checkpoint:0024-context-architecture/checkpoint-internal-architecture-refactor-ddd-bdd",
+      "type": "closed-by",
+      "to": "gate:0024-context-architecture/internal-architecture-refactor-ddd-bdd"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-internal-architecture-refactor-ddd-bdd",
