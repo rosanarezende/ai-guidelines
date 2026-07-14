@@ -1,0 +1,20 @@
+schema_version: 1
+kind: pr-continuation-package
+prepared_at: 2026-07-14
+source:
+  spec: "0024"
+  pr: 46
+  body: ../../body.md
+continuation:
+  slug: broad-flow-falsification
+  title: "[🛠️13️⃣➜] [Spec 0024] Falsificação ampla do lifecycle governado"
+  target: broad-flow-falsification
+  base: feat/spec-0024-internal-architecture-refactor-ddd-bdd
+  head: feat/spec-0024-broad-flow-falsification
+  body_file: body.md
+guardrails:
+  creates_pr_without_confirm: false
+  marks_ready: false
+  records_human_gate: false
+  merges: false
+  advances_topology: false
