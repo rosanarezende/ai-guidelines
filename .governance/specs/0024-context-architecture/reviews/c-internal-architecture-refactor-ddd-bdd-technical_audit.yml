@@ -1,0 +1,24 @@
+checkpoint: "internal-architecture-refactor-ddd-bdd"
+role: technical_audit
+executor:
+  platform: antigravity
+  model: gemini-3.1-pro-high
+decision: approved
+findings_emitted: 0
+subject_ref: "origin/feat/spec-0024-artifact-taxonomy-and-model-review-contract..85ec13be"
+audit_evidence:
+  coverage:
+    - src/app/workflow/frenteProgression.ts
+    - src/app/projections/governanceGraphSnapshot.ts
+    - src/test-utils/LayerBoundaries.test.ts
+    - src/test-utils/SurfaceParity.test.ts
+  scope: "Auditoria do refatoramento DDD, fronteiras arquiteturais, paridade
+    behavior-preserving, derivação canônica da Frente, projeção do work graph e
+    limites negativos (G01/G30/G31)."
+  basis: "Guards arquiteturais passam sem violações (baseline de débitos zerada).
+    Compatibilidade garantida pelos testes de paridade de comandos e templates.
+    A derivação de progressão separa corretamente 'etapa ativa' de 'pendências
+    pós-ativa'. Snapshot implementa o contrato §8 do decision-brief como
+    projeção pura. Regressões e novos testes executam com sucesso. Limites
+    negativos respeitados."
+review_fingerprint: "4be1d6ae8afb"

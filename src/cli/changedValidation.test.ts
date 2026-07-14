@@ -83,6 +83,16 @@ describe("changedValidation", () => {
     ).toContain("Verificar mapa vivo governado");
   });
 
+  it("aciona o check do graph snapshot quando o diff toca conteúdo governado ou o derivador", () => {
+    expect(labels([".governance/specs/0024-context-architecture/research/qualquer.md"])).toContain(
+      "Verificar graph snapshot derivado"
+    );
+    expect(labels(["src/app/projections/governanceGraphSnapshot.ts"])).toContain(
+      "Verificar graph snapshot derivado"
+    );
+    expect(labels(["src/cli/prReadyCheck.ts"])).not.toContain("Verificar graph snapshot derivado");
+  });
+
   it("aciona review:check quando o diff toca reviews/gates", () => {
     expect(
       labels([

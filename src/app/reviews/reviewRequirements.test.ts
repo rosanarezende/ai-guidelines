@@ -18,7 +18,7 @@ import {
   reviewPlanDecisionIssues,
   reviewPlanToNodeOverrides,
 } from "./reviewRequirements.js";
-import { ReviewPolicy, parseReviewPolicy } from "../infrastructure/yaml/reviewPolicyReader.js";
+import { ReviewPolicy, parseReviewPolicy } from "../../infrastructure/yaml/reviewPolicyReader.js";
 
 const MINIMAL_PROFILES = `
 active_profile: solo
@@ -146,6 +146,40 @@ review_lanes:
       "Objetivo customizado da lane legada."
     );
     expect(warnings.some((w) => w.includes("review_lanes é LEGADO"))).toBe(true);
+  });
+});
+
+describe("publicação canônica de reviews", () => {
+  it("declara apenas companions determinísticos suportados", () => {
+    const parsed = policy(`
+publication:
+  canonical: spec-artifact
+  canonical_artifact:
+    commit_policy: allowed-on-explicit-review-request
+    push_policy: allowed-on-explicit-review-request
+    mixed_diff: block
+    deterministic_companions: [governance-graph-snapshot]
+  github_comments: forbidden-by-default
+`);
+
+    expect(parsed.publication?.canonicalArtifact?.deterministicCompanions).toEqual([
+      "governance-graph-snapshot",
+    ]);
+  });
+
+  it("rejeita companion não reconhecido em vez de abrir o mixed diff", () => {
+    expect(() =>
+      policy(`
+publication:
+  canonical: spec-artifact
+  canonical_artifact:
+    commit_policy: allowed-on-explicit-review-request
+    push_policy: allowed-on-explicit-review-request
+    mixed_diff: block
+    deterministic_companions: [arquivo-arbitrario]
+  github_comments: forbidden-by-default
+`)
+    ).toThrow(/unsupported companion/);
   });
 });
 
@@ -394,6 +428,41 @@ describe("review_plan — recomendação do sistema + decisão humana [CO-4 r9]"
     const ta = statuses.find((s) => s.typeId === "technical_audit")!;
     expect(ta.revalidationWaived).toBe(false);
     expect(ta.blocking).toBe(true);
+  });
+
+  it("dispensa de revalidação volta a bloquear quando o HEAD analisado ficou para trás", () => {
+    const p = policy("");
+    const { registry } = buildReviewTypeRegistry(p);
+    const plan = {
+      technical_audit: {
+        system_recommendation: "recommended" as const,
+        owner_decision: "required" as const,
+        actor: "owner",
+        reason: "PR exigiu auditoria técnica.",
+        revalidation: {
+          owner_decision: "waived" as const,
+          analyzed_head: "abc1111",
+          actor: "owner",
+          reason: "Dispensa limitada ao delta analisado.",
+        },
+      },
+    };
+    const statuses = deriveEffectiveReviewStatuses({
+      registry,
+      policy: p,
+      ctx: CTX,
+      nodeOverrides: reviewPlanToNodeOverrides(plan),
+      reviewPlan: plan,
+      revalidationScopes: {
+        technical_audit: { current: false, reason: "há mudança funcional posterior" },
+      },
+      observed: { technical_audit: { latestSubjectRef: "aaa0000", decision: "approved" } },
+      functionalHead: "def2222",
+    });
+    const ta = statuses.find((s) => s.typeId === "technical_audit")!;
+    expect(ta.revalidationWaived).toBe(false);
+    expect(ta.blocking).toBe(true);
+    expect(ta.notes.join(" ")).toContain("revalidation waiver stale");
   });
 
   it("revalidação pending aparece como pendência de Ready", () => {

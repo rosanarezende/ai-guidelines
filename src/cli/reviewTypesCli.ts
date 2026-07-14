@@ -25,10 +25,10 @@ import {
   resolveRequirement,
   resolveReviewType,
   isRequirementLevel,
-} from "./reviewRequirements.js";
+} from "../app/reviews/reviewRequirements.js";
 import { loadReviewGovernance } from "./reviewBrief.js";
 import { discover, observedReviewStates } from "./reviewCheck.js";
-import { collectFunctionalFreshness } from "./reviewFreshness.js";
+import { collectFunctionalFreshness, collectRevalidationScopeStates } from "./reviewFreshness.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -154,6 +154,13 @@ export function runReviewPolicy(repoRoot: string, logger: Logger): number {
     policy: governance.policy,
     ctx,
     ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+    ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
+    revalidationScopes: collectRevalidationScopeStates(
+      repoRoot,
+      nodeCtx?.reviewPlan,
+      freshness.effectiveFunctionalHead,
+      located.specDir
+    ),
     observed: observedReviewStates(artifacts, located.checkpoint),
     functionalHead: freshness.effectiveFunctionalHead,
   });

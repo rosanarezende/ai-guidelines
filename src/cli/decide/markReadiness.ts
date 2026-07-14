@@ -18,7 +18,12 @@ import {
   HumanDecisionTechnicalDetail,
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffStep, parseSteps, resolveStepWork, STEP_READINESS } from "../handoffFacts.js";
+import {
+  HandoffStep,
+  parseSteps,
+  resolveStepWork,
+  STEP_READINESS,
+} from "../../app/handoff/handoffFacts.js";
 import {
   deriveMarkReadinessAvailability,
   markReadinessFactsFromDecisionSnapshot,

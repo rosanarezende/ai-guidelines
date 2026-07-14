@@ -40,7 +40,12 @@ const ALLOWED_NODE_REVIEW_PLAN_KEYS = [
   "actor",
   "revalidation",
 ] as const;
-const ALLOWED_NODE_REVIEW_REVALIDATION_KEYS = ["owner_decision", "reason", "actor"] as const;
+const ALLOWED_NODE_REVIEW_REVALIDATION_KEYS = [
+  "owner_decision",
+  "analyzed_head",
+  "reason",
+  "actor",
+] as const;
 const REQUIREMENT_LEVELS = ["disabled", "optional", "recommended", "required"] as const;
 const REVIEW_PLAN_RECOMMENDATIONS = ["not_needed", "optional", "recommended", "required"] as const;
 const REVIEW_PLAN_DECISIONS = ["pending", "waived", "optional", "recommended", "required"] as const;
@@ -168,6 +173,14 @@ function parseNodeReviewPlan(raw: unknown, where: string): Record<string, NodeRe
       if (r.actor !== undefined && typeof r.actor !== "string") {
         throw new WorkflowStateParseError(`${where}.${typeId}.revalidation.actor must be a string`);
       }
+      if (
+        r.analyzed_head !== undefined &&
+        (typeof r.analyzed_head !== "string" || !/^[0-9a-f]{7,40}$/i.test(r.analyzed_head))
+      ) {
+        throw new WorkflowStateParseError(
+          `${where}.${typeId}.revalidation.analyzed_head must be a git object id`
+        );
+      }
       if (r.owner_decision !== "pending" && (!r.actor || !r.reason)) {
         throw new WorkflowStateParseError(
           `${where}.${typeId}.revalidation: owner_decision "${r.owner_decision}" requires actor and reason`
@@ -177,6 +190,7 @@ function parseNodeReviewPlan(raw: unknown, where: string): Record<string, NodeRe
         owner_decision: r.owner_decision as NonNullable<
           NodeReviewPlanEntry["revalidation"]
         >["owner_decision"],
+        ...(r.analyzed_head !== undefined ? { analyzed_head: r.analyzed_head as string } : {}),
         ...(r.reason !== undefined ? { reason: r.reason } : {}),
         ...(r.actor !== undefined ? { actor: r.actor } : {}),
       };

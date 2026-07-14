@@ -46,7 +46,7 @@ import {
   parseActiveSpecs,
   stringifyActiveSpecs,
 } from "../../infrastructure/yaml/activeSpecsSerializer.js";
-import type { HandoffNodeFact } from "../handoffFacts.js";
+import type { HandoffNodeFact } from "../../app/handoff/handoffFacts.js";
 import type { PrTopologyNode } from "../../domain/workflow/WorkflowState.js";
 import { buildNextNodePrBody } from "../prBodyCreate.js";
 

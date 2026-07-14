@@ -29,7 +29,7 @@ import {
   HumanDecisionTechnicalDetail,
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffFacts, parseSteps } from "../handoffFacts.js";
+import { HandoffFacts, parseSteps } from "../../app/handoff/handoffFacts.js";
 import { resolveStepWork } from "../workBrief.js";
 import {
   ADVANCE_STEP_ID,

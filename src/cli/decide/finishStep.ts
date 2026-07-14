@@ -22,7 +22,7 @@ import {
   HumanDecisionTechnicalDetail,
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffFacts, parseSteps, resolveStepWork } from "../handoffFacts.js";
+import { HandoffFacts, parseSteps, resolveStepWork } from "../../app/handoff/handoffFacts.js";
 import { advanceTransitionPair, deriveAdvanceEligibility } from "./advanceEligibility.js";
 import { advanceStepMarkers } from "./advanceStep.js";
 import {

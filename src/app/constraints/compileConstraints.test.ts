@@ -1,7 +1,7 @@
 import { Constraint, EnforcementBinding } from "../../domain/constraints/Constraint.js";
-import { RegistryCommandDescriptor } from "../../cli/registry/describeCommands.js";
 import { compileConstraints, ConstraintSourceFacts } from "./compileConstraints.js";
 import { NpmScriptContract, NpmScriptSurfaceResolver } from "./NpmScriptSurfaceResolver.js";
+import type { RegistryCommandDescriptor } from "./RegistryCommandDescriptor.js";
 import { RegistryCommandSurfaceResolver } from "./RegistryCommandSurfaceResolver.js";
 import { SurfaceResolverRegistry } from "./SurfaceResolver.js";
 

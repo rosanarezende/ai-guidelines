@@ -16,7 +16,7 @@ import {
 } from "./reviewTypesCli.js";
 import { runReviewBrief, loadReviewGovernance } from "./reviewBrief.js";
 import { discover } from "./reviewCheck.js";
-import { resolveReviewType } from "./reviewRequirements.js";
+import { resolveReviewType } from "../app/reviews/reviewRequirements.js";
 
 function initGitOnBranch(repo: string, branchName: string): void {
   execFileSync("git", ["init", "--quiet"], { cwd: repo, stdio: "ignore" });

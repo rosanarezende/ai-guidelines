@@ -634,6 +634,21 @@ describe("parseSteps + resolveStepWork — sinal de readiness", () => {
     expect(subs.find((s) => s.id === "CO-3.5")!.readiness).toBeUndefined();
   });
 
+  it("parser não confunde readiness com o título de checkpoint sem título inline", () => {
+    const tasks = [
+      "- [ ] **Checkpoint pai**: seção.",
+      "  - [/] **Checkpoint internal-architecture-refactor-ddd-bdd** `readiness: ready-for-transition` — reorganização behavior-preserving do runtime/testes (EM EXECUÇÃO — nó seq 13; PR #46): ativa.",
+    ].join("\n");
+
+    const [step] = parseSteps(tasks, "checkpoint-pai");
+
+    expect(step).toMatchObject({
+      id: "internal-architecture-refactor-ddd-bdd",
+      title: "reorganização behavior-preserving do runtime/testes",
+      readiness: "ready-for-transition",
+    });
+  });
+
   it("parser extrai checkpoints semânticos definidos por slug", () => {
     const tasks = [
       "- [/] **Checkpoint co-flow-continuation** (seq 11)",

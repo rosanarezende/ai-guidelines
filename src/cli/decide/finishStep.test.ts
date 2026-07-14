@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { FinishStepDefinition } from "./finishStep.js";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffStep } from "../handoffFacts.js";
+import { HandoffStep } from "../../app/handoff/handoffFacts.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 
 const def = new FinishStepDefinition();

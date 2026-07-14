@@ -1,6 +1,6 @@
-import { RegistryCommandDescriptor } from "../../cli/registry/describeCommands.js";
 import { GovernanceError } from "../../domain/shared/errors.js";
 import { NpmScriptContract, NpmScriptSurfaceResolver } from "./NpmScriptSurfaceResolver.js";
+import type { RegistryCommandDescriptor } from "./RegistryCommandDescriptor.js";
 import { RegistryCommandSurfaceResolver } from "./RegistryCommandSurfaceResolver.js";
 import { SurfaceResolverRegistry } from "./SurfaceResolver.js";
 

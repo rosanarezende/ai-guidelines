@@ -19,7 +19,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 import { AssembleArtifact } from "../../app/use-cases/AssembleArtifact.js";
-import { NodeRecipeStore } from "../../infrastructure/yaml/NodeRecipeStore.js";
+import { NodeRecipeStore } from "./NodeRecipeStore.js";
 
 const ROOT_DIR = process.cwd();
 const LEGACY_BOILERPLATE_PATH = path.join(

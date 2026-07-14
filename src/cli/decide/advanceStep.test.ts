@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { AdvanceStepDefinition, advanceStepMarkers } from "./advanceStep.js";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffStep } from "../handoffFacts.js";
+import { HandoffStep } from "../../app/handoff/handoffFacts.js";
 import { resolveStepWork } from "../workBrief.js";
 import { renderBrief } from "./render.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";

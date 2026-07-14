@@ -19,7 +19,10 @@ import * as path from "node:path";
 import { CheckLivingDocs } from "../app/use-cases/CheckLivingDocs.js";
 import { GenerateLivingDocs } from "../app/use-cases/GenerateLivingDocs.js";
 import { TypeScriptRuleExtractor } from "../infrastructure/ast/TypeScriptRuleExtractor.js";
+import { discoverTestFiles } from "../infrastructure/filesystem/discoverTestFiles.js";
 import { serializeLivingDocs } from "../infrastructure/yaml/livingDocsSerializer.js";
+
+export { discoverTestFiles } from "../infrastructure/filesystem/discoverTestFiles.js";
 
 const ARTIFACT_PATH_REL = ".governance/living-docs.yml";
 
@@ -32,23 +35,6 @@ const defaultLogger: Logger = {
   info: (msg) => process.stdout.write(`${msg}\n`),
   error: (msg) => process.stderr.write(`${msg}\n`),
 };
-
-/** Encontra arquivos `.test.ts` sob `src/` recursivamente. */
-export function discoverTestFiles(repoRoot: string): string[] {
-  const out: string[] = [];
-  const srcRoot = path.join(repoRoot, "src");
-  if (!fs.existsSync(srcRoot)) return out;
-  const walk = (dir: string): void => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) walk(full);
-      else if (entry.isFile() && entry.name.endsWith(".test.ts")) out.push(full);
-    }
-  };
-  walk(srcRoot);
-  out.sort(); // ordem estável para reproducibilidade
-  return out;
-}
 
 export interface RunOptions {
   readonly repoRoot: string;

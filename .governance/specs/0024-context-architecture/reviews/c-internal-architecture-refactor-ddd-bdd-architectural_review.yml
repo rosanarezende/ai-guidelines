@@ -1,0 +1,80 @@
+checkpoint: "internal-architecture-refactor-ddd-bdd"
+role: architectural_review
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+findings_emitted: 3
+subject_ref: "origin/feat/spec-0024-artifact-taxonomy-and-model-review-contract..b4d0c834"
+review_fingerprint: de1cba346ecd
+findings:
+  - id: F1
+    severity: medium
+    location: "src/cli/reviewBrief.ts#L639-L657"
+    description: "FATO: para o MESMO checkpoint/HEAD, pr-ready:check reporta
+      architectural_review como REVIEW OBRIGATORIO (fonte: node-override
+      (owner)) que BLOQUEIA Ready, enquanto o briefing governado (flow -- review
+      architectural_review) reporta requirement=optional (fonte: repo-default) e
+      'nao bloqueia Ready/gate'. INTERPRETACAO: collectReviewBrief deriva
+      effectiveStatus por deriveEffectiveReviewStatuses lendo nodeOverrides de
+      topologyByCheckpoint[...].overrides, mas a decisao situada da owner vive
+      em state.yml topology.prs.active[].review_plan.<type>.owner_decision,
+      estrutura que essa derivacao NAO consulta; a superficie de readiness
+      (GovernedFlow) le review_plan, o briefing nao. A pergunta operacional
+      'este review e obrigatorio/bloqueante?' tem DUAS derivacoes que discordam
+      — exatamente a classe de divergencia que a tese do no (DEC-0024-G31)
+      declara eliminada. CENARIO: um revisor que consulta so o briefing conclui
+      que a AR e opcional e 'nao bloqueia', desprioriza, e o PR fica travado no
+      pr-ready sem que a superficie que pediu o review tenha avisado que ele era
+      obrigatorio. CONDICAO PRE-EXISTENTE (nao introduzida por #46) e
+      NAO-BLOQUEANTE (pr-ready, superficie autoritativa de readiness, esta
+      correta); mas a consolidacao de derivacao canonica que o #46 entregou para
+      o eixo de FLUXO (frenteProgression) nao alcancou o eixo de
+      REQUISITO-DE-REVIEW. CORRECAO MINIMA: fazer o effectiveStatus do briefing
+      consumir review_plan.<type>.owner_decision (ou projetar a decisao situada
+      da owner nos nodeOverrides lidos), com teste de paridade fixando que
+      briefing e pr-ready concordam sobre requirement/blocking."
+    disposition: accepted
+    fingerprint: 89642fffb173
+  - id: F2
+    severity: low
+    location: "src/test-utils/Boundaries.test.ts#L38"
+    description: "FATO: o guard de fronteira que enforca a regra central de DDD do
+      #46 — 'src/app/** so toca infraestrutura via ports; nunca importa
+      src/infrastructure/** direto' — usa IMPORT_RE =
+      /(?:^|\\n)\\s*import[^\"';]*? from.../ que casa APENAS 'import ... from',
+      nunca 'export ... from'. O outro guard (LayerBoundaries.test.ts) usa regex
+      amplo que casa o token 'from' (logo pegaria 'export ... from'), mas seu
+      mapa FORBIDDEN para app e apenas ['cli'] — nao proibe app->infra.
+      INTERPRETACAO: uma aresta app->infra escrita como re-export ('export { X }
+      from \"../../infrastructure/...\"') escapa de AMBOS os guards — o unico
+      que probe app->infra nao ve re-exports, e o unico que ve re-exports nao
+      probe app->infra. CENARIO: um refactor futuro re-superficia um tipo de
+      infra a partir de src/app via 'export ... from \"../../infrastructure\"';
+      a fronteira hexagonal vaza silenciosamente e nenhum teste falha. Hoje o
+      scan esta LIMPO (nenhuma ocorrencia), entao e lacuna de COBERTURA latente,
+      nao violacao ativa. CORRECAO MINIMA: ampliar IMPORT_RE para tambem casar
+      'export ... from', ou acrescentar em LayerBoundaries uma assercao
+      app->infra que cubra re-exports."
+    disposition: accepted
+    fingerprint: 99f24ac8f288
+  - id: F3
+    severity: low
+    location: "src/app/projections/governanceGraphSnapshot.test.ts#L256-L261"
+    description: "FATO: o teste que garante a propriedade 'offline' do graph
+      snapshot le APENAS o proprio arquivo governanceGraphSnapshot.ts e verifica
+      ausencia de execFileSync/child_process/fetch(/node:https/node:http; nao
+      segue os imports transitivos do modulo de derivacao (ex.:
+      frenteProgression.js). INTERPRETACAO: a garantia 'offline' testada cobre
+      so o modulo de entrada; um helper alcancavel pela derivacao que
+      introduzisse rede/processo nao seria pego por esse teste dedicado.
+      CENARIO: uma futura evolucao de frenteProgression (ou de um helper que ela
+      importe) adiciona uma chamada de rede/processo; a derivacao deixa de ser
+      offline mas o teste continua verde. RISCO MITIGADO estruturalmente pelo
+      boundary app->infra (I/O vive na infraestrutura, fora do alcance de import
+      da app), o que torna a severidade baixa. CORRECAO MINIMA: estender o scan
+      offline ao fecho transitivo de imports internos do modulo de derivacao, ou
+      afirmar a pureza via o mesmo grafo de dependencias usado pelos guards de
+      fronteira."
+    disposition: accepted
+    fingerprint: 298d27a0a02d

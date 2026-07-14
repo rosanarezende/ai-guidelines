@@ -60,6 +60,8 @@ export type NodeReviewRevalidationDecision = "pending" | "waived" | "required";
  */
 export interface NodeReviewPlanRevalidation {
   readonly owner_decision: NodeReviewRevalidationDecision;
+  /** Cabeça funcional analisada. Decisões novas ficam limitadas a este delta. */
+  readonly analyzed_head?: string;
   readonly reason?: string;
   readonly actor?: string;
 }

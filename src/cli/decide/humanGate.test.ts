@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { HumanGateDefinition } from "./humanGate.js";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { deriveHandoff, STEP_READINESS } from "../handoffFacts.js";
+import { deriveHandoff, STEP_READINESS } from "../../app/handoff/handoffFacts.js";
 import { evaluateReadyPreconditions, ReadyCheckSnapshot } from "../prReadyCheck.js";
 import { deriveWorkBrief } from "../workBrief.js";
 import { parseGate } from "../../infrastructure/yaml/reviewArtifactsReader.js";
@@ -360,6 +360,31 @@ describe("human-gate · briefing humano [decide]", () => {
     expect(text).toContain("Integração contínua: 11 ok");
     expect(text).toContain("pr-ready:check: verde");
     expect(text).toContain("Próximo nó planejado: co-flow-convergence.");
+  });
+
+  it("Frente com checkpoints pendentes: próximo passo é o checkpoint da continuação, não o nó topológico", () => {
+    const s = readySnapshot({
+      steps: [
+        {
+          id: "internal-architecture-refactor-ddd-bdd",
+          title: "refactor",
+          state: "in-progress",
+          readiness: STEP_READINESS,
+          line: 1,
+        },
+        { id: "broad-flow-falsification", title: "falsificação ampla", state: "pending", line: 2 },
+        { id: "continuation-review-human-gate", title: "revisão final", state: "pending", line: 3 },
+      ],
+    });
+    const b = def.buildBrief(s, { technical: false });
+    const text = JSON.stringify(b.sections);
+    expect(text).toContain("Pronto para Gate: internal-architecture-refactor-ddd-bdd — refactor");
+    expect(text).toContain(
+      "Próximo checkpoint da Frente: broad-flow-falsification — falsificação ampla."
+    );
+    expect(text).toContain("só abre depois que a Frente fechar");
+    expect(text).toContain("broad-flow-falsification, continuation-review-human-gate");
+    expect(text).not.toContain("Próximo nó planejado: co-flow-convergence.");
   });
 
   it("Human Gate mostra technical_audit current/approved quando verification aprovada é vigente", () => {

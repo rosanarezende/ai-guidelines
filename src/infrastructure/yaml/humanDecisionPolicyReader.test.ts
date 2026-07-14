@@ -16,6 +16,7 @@ describe("humanDecisionPolicyReader [decide]", () => {
     const policy = parseHumanDecisionPolicy(REAL);
     expect(policy.version).toBe(1);
     expect(policy.decisionTypes.map((t) => t.id)).toEqual([
+      "review-revalidation",
       "close-dispositions",
       "finish-step",
       "mark-readiness",
@@ -24,6 +25,21 @@ describe("humanDecisionPolicyReader [decide]", () => {
       "open-next-topology-node",
     ]);
     expect(policy.owner.handle).toBe("@rosanarezende");
+  });
+
+  it("review-revalidation separa recomendação automática de decisão humana", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    const revalidation = findDecisionType(policy, "review-revalidation")!;
+    expect(revalidation.choices.map((choice) => choice.id)).toEqual([
+      "accept-recommendations",
+      "waive-all",
+      "require-all",
+      "keep-pending",
+      "request-explanation",
+      "cancel",
+    ]);
+    expect(revalidation.notAuthorized.join(" ")).toMatch(/automaticamente/);
+    expect(revalidation.requiresOwner).toBe(true);
   });
 
   it("finish-step declara conclusão interna em passo único sem autorizar gate/merge", () => {

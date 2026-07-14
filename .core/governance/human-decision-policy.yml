@@ -33,6 +33,65 @@ owner:
   email: rosanarezende.com@gmail.com
 
 decision_types:
+  review-revalidation:
+    title: Decidir se reviews stale precisam de revalidação
+    purpose: >
+      O sistema analisa o delta posterior à última cobertura de cada review
+      obrigatória aprovada e recomenda dispensar ou repetir a revalidação. A
+      recomendação não altera estado: a owner confirma, substitui ou mantém a
+      decisão pendente. Stale continua sendo fato mesmo quando a repetição é
+      dispensada.
+    requires_owner: true
+    sections:
+      - key: decision_summary
+        heading: O que você está decidindo?
+      - key: system_recommendation
+        heading: O que o sistema recomenda e por quê?
+      - key: observed_delta
+        heading: O que mudou desde a revisão anterior?
+      - key: risks
+        heading: Que riscos ainda exigem atenção humana?
+      - key: consequences
+        heading: O que acontece após a decisão?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: accept-recommendations
+        label: Aceitar as recomendações calculadas pelo sistema
+        mutating: true
+      - id: waive-all
+        label: Dispensar explicitamente todas as revalidações listadas
+        mutating: true
+      - id: require-all
+        label: Exigir explicitamente todas as revalidações listadas
+        mutating: true
+      - id: keep-pending
+        label: Manter a decisão pendente
+        mutating: false
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - Dispensar remove somente o bloqueio de revalidação daquele delta; não torna a review current.
+      - Exigir mantém o bloqueio até uma verificação cobrir a cabeça funcional.
+      - A decisão, o actor, o delta analisado e a justificativa ficam registrados em state.yml.
+    not_authorized:
+      - Alterar ou reescrever o review original.
+      - Declarar readiness do checkpoint.
+      - Converter o PR para Ready.
+      - Exercer Human Gate.
+      - Fazer merge.
+      - Dispensar automaticamente sem confirmação humana.
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available
+
   close-dispositions:
     title: Encerrar problemas revalidados da auditoria técnica
     purpose: >

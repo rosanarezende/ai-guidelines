@@ -21,14 +21,14 @@ import {
   HandoffNodeFact,
   HandoffStep,
   parseSteps,
-} from "../handoffFacts.js";
+} from "../../app/handoff/handoffFacts.js";
 import {
   HandoffLoadSnapshot,
   HandoffOptions,
   ghRemotePrCollector,
   loadHandoffSnapshot,
 } from "../handoff.js";
-import { consolidate, discover } from "../reviewCheck.js";
+import { consolidate, discover, observedReviewStates } from "../reviewCheck.js";
 import { WorkingTreeState, collectFunctionalFreshness } from "../reviewFreshness.js";
 import { parse as parseYaml } from "yaml";
 import { Finding, ReviewArtifact } from "../../infrastructure/yaml/reviewArtifactsReader.js";
@@ -39,6 +39,10 @@ import {
 import { MainOptions as PrReadyMainOptions, main as runPrReadyCheck } from "../prReadyCheck.js";
 import { main as runGateDecidabilityCheck } from "../gateDecidabilityCheck.js";
 import { collectStepDeliveryEvidence, StepDeliveryEvidence } from "../flow/stepDeliveryEvidence.js";
+import {
+  deriveReviewRevalidationAdvice,
+  ReviewRevalidationAdvice,
+} from "../../app/reviews/reviewRevalidation.js";
 
 export const HUMAN_DECISION_POLICY_PATH = ".core/governance/human-decision-policy.yml";
 
@@ -97,6 +101,14 @@ export interface DecisionReviewLane {
   readonly approvedVerifications: readonly DecisionVerification[];
 }
 
+export interface DecisionReviewRevalidation {
+  readonly role: string;
+  readonly coveredHead: string;
+  readonly functionalHead: string;
+  readonly changedPaths: readonly string[];
+  readonly advice: ReviewRevalidationAdvice;
+}
+
 /** Etapa do checkpoint do cursor (fonte única: HandoffFacts/tasks.md). */
 export type DecisionStep = HandoffStep;
 
@@ -138,6 +150,7 @@ export interface DecisionSnapshot {
   readonly openFindings: readonly DecisionFinding[];
   readonly closedFindingsCount: number;
   readonly lanes: readonly DecisionReviewLane[];
+  readonly reviewRevalidations: readonly DecisionReviewRevalidation[];
   readonly gateExists: boolean;
   readonly gateFile: string | null;
   readonly steps: readonly DecisionStep[];
@@ -185,6 +198,25 @@ function refIsValid(repoRoot: string, ref: string, head: string | null): boolean
     return true;
   } catch {
     return false;
+  }
+}
+
+function changedPathsBetween(repoRoot: string, base: string, head: string): string[] | null {
+  try {
+    return execFileSync(
+      "git",
+      ["diff", "--name-only", "--diff-filter=ACMR", `${base}..${head}`, "--"],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }
+    )
+      .split(/\r?\n/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  } catch {
+    return null;
   }
 }
 
@@ -417,6 +449,47 @@ export function collectDecisionSnapshot(
     });
   }
 
+  const observed = checkpoint ? observedReviewStates(artifacts, checkpoint) : {};
+  const reviewStatuses = facts.lifecycle?.reviewStatuses ?? [];
+  const allReviewFindings = reviews.flatMap((review) =>
+    review.findings.map((finding) => ({
+      role: review.role,
+      severity: finding.severity,
+      disposition: finding.disposition,
+      location: finding.location,
+    }))
+  );
+  const reviewRevalidations: DecisionReviewRevalidation[] = [];
+  for (const status of reviewStatuses) {
+    if (
+      status.requirement !== "required" ||
+      status.state !== "stale" ||
+      status.decision !== "approved" ||
+      !status.blocking ||
+      (status.notes ?? []).some((note) => note.includes("revalidation required"))
+    ) {
+      continue;
+    }
+    const subjectRef = observed[status.typeId]?.latestSubjectRef;
+    if (!subjectRef || !head) continue;
+    const coveredHead = refHead(subjectRef);
+    const changedPaths = changedPathsBetween(repoRoot, coveredHead, head);
+    const paths = changedPaths ?? [];
+    reviewRevalidations.push({
+      role: status.typeId,
+      coveredHead,
+      functionalHead: head,
+      changedPaths: paths,
+      advice: deriveReviewRevalidationAdvice({
+        role: status.typeId,
+        changedPaths: paths,
+        findings: allReviewFindings,
+        workingTreeState: freshness.workingTreeState,
+        ci: facts.pullRequest?.checks ?? null,
+      }),
+    });
+  }
+
   // Etapas: fonte única já coletada nos HandoffFacts (tasks.md).
   const steps = facts.steps;
   const activeSteps = steps.filter((s) => s.state === "in-progress");
@@ -462,6 +535,7 @@ export function collectDecisionSnapshot(
     openFindings,
     closedFindingsCount,
     lanes,
+    reviewRevalidations,
     gateExists: gate !== null,
     gateFile: gate?.file ?? null,
     steps,

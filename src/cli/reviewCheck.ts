@@ -44,7 +44,7 @@ import {
   reviewPlanDecisionIssues,
   reviewPlanToNodeOverrides,
   resolveRequirement,
-} from "./reviewRequirements.js";
+} from "../app/reviews/reviewRequirements.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import type { NodeReviewPlanEntry } from "../domain/workflow/WorkflowState.js";
 

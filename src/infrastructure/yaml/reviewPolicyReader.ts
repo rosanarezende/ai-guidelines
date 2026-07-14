@@ -1,128 +1,26 @@
 import { parse } from "yaml";
 
-export interface ReviewRolePolicy {
-  readonly requiredReviewRoles: readonly string[];
-  readonly requiredNativeApprovals: number;
-}
-
-export interface AcceptedFindingsPolicy {
-  readonly requireResolution: boolean;
-  readonly requireVerificationEventForFixed: boolean;
-}
-
-export interface GithubReviewPolicy {
-  readonly minimumApprovingReviews: number;
-  readonly requireCodeOwnerReview: boolean;
-  readonly dismissStaleReviewsOnPush: boolean;
-  readonly requireLastPushApproval: boolean;
-}
-
-export interface ReviewPolicyProfile {
-  readonly implementationPr: ReviewRolePolicy;
-  readonly integrationPr: ReviewRolePolicy;
-  readonly acceptedFindings: AcceptedFindingsPolicy;
-  readonly github: GithubReviewPolicy;
-}
-
-/** Lane de review (CO-4): objetivo + vetores obrigatórios por papel — fonte do briefing situado. */
-export interface ReviewLanePolicy {
-  readonly objective: string;
-  readonly vectors: readonly string[];
-}
-
-/**
- * Política de PUBLICAÇÃO de reviews (CO-4): o canal canônico é o artefato
- * versionado na spec; GitHub é projeção opcional, proibida por default —
- * somente com autorização humana explícita.
- */
-/** Autorização do ciclo do artefato canônico (commit/push review-only). */
-export interface CanonicalArtifactPolicy {
-  readonly commitPolicy: string;
-  readonly pushPolicy: string;
-  readonly mixedDiff: string;
-}
-
-export interface ReviewPublicationPolicy {
-  readonly canonical: string;
-  readonly githubComments: string;
-  readonly githubException?: string;
-  /** Opcional/backward-compatible: ciclo do artefato canônico. */
-  readonly canonicalArtifact?: CanonicalArtifactPolicy;
-}
-
-// ── Catálogo × requisito (CO-4, rodada 8) ────────────────────────────────────
-// `review_types` define O QUE cada review é (catálogo); `review_requirements`
-// define QUANDO e COM QUAL FORÇA é exigido. Conceitos independentes: capacidade
-// disponível não é obrigação.
-
-export type ReviewRequirementLevel = "disabled" | "optional" | "recommended" | "required";
-
-export const REQUIREMENT_LEVELS: readonly ReviewRequirementLevel[] = [
-  "disabled",
-  "optional",
-  "recommended",
-  "required",
-];
-
-/** Entry de `review_types`: identidade do tipo (nativo customizado ou do repositório). */
-export interface ReviewTypePolicy {
-  readonly source?: "framework" | "repository";
-  readonly enabled?: boolean;
-  readonly title?: string;
-  readonly aliases?: readonly string[];
-  readonly objective?: string;
-  readonly vectors?: readonly string[];
-  /** artifact.template — template específico do tipo (fallback: genérico). */
-  readonly template?: string | null;
-}
-
-/** Condições de um selector (AND entre as presentes). Dado ausente ⇒ unknown. */
-export interface ReviewApplicabilitySelector {
-  readonly prProfile?: string;
-  readonly labelsAny?: readonly string[];
-  readonly changedPathsAny?: readonly string[];
-}
-
-/** `review_applicability.<tipo>`: OR de selectors (`any`). */
-export interface ReviewApplicabilityPolicy {
-  readonly any: readonly ReviewApplicabilitySelector[];
-}
-
-export interface ReviewRequirementRule {
-  readonly id: string;
-  readonly priority: number;
-  readonly when: ReviewApplicabilitySelector;
-  readonly set: Readonly<Record<string, ReviewRequirementLevel>>;
-}
-
-export interface ReviewRequirementsPolicy {
-  readonly defaults: Readonly<Record<string, ReviewRequirementLevel>>;
-  readonly rules: readonly ReviewRequirementRule[];
-}
-
-/** Governança dos overrides situados (nó/PR): tightening/relaxation explícitos. */
-export interface ReviewOverridePolicy {
-  readonly allowTightening: boolean;
-  readonly allowRelaxation: boolean;
-  readonly relaxationRequires: readonly string[];
-}
-
-export interface ReviewPolicy {
-  readonly activeProfile: string;
-  readonly profiles: Readonly<Record<string, ReviewPolicyProfile>>;
-  /** LEGADO (CO-4 rodada 8): lanes por papel — absorvido por review_types. */
-  readonly lanes?: Readonly<Record<string, ReviewLanePolicy>>;
-  /** Opcional/backward-compatible: política de publicação. */
-  readonly publication?: ReviewPublicationPolicy;
-  /** Catálogo de tipos de review (nativos customizados + tipos do repositório). */
-  readonly reviewTypes?: Readonly<Record<string, ReviewTypePolicy>>;
-  /** Onde cada tipo FAZ SENTIDO (não confundir com obrigatoriedade). */
-  readonly applicability?: Readonly<Record<string, ReviewApplicabilityPolicy>>;
-  /** Quando/com qual força cada tipo é exigido (defaults + regras). */
-  readonly requirements?: ReviewRequirementsPolicy;
-  /** Governança de overrides situados (tightening/relaxation). */
-  readonly overridePolicy?: ReviewOverridePolicy;
-}
+// Modelo puro da policy: vive em src/domain/policy/reviewPolicy.ts (Blueprint
+// Integrity Lock — app importa do domínio; esta ponte re-exporta para compat).
+import {
+  ReviewPolicy,
+  ReviewPolicyProfile,
+  ReviewRolePolicy,
+  ReviewLanePolicy,
+  CanonicalArtifactPolicy,
+  ReviewPublicationPolicy,
+  REVIEW_PUBLICATION_COMPANION_IDS,
+  ReviewPublicationCompanionId,
+  ReviewRequirementLevel,
+  REQUIREMENT_LEVELS,
+  ReviewTypePolicy,
+  ReviewApplicabilitySelector,
+  ReviewApplicabilityPolicy,
+  ReviewRequirementRule,
+  ReviewRequirementsPolicy,
+  ReviewOverridePolicy,
+} from "../../domain/policy/reviewPolicy.js";
+export * from "../../domain/policy/reviewPolicy.js";
 
 export class ReviewPolicyParseError extends Error {
   constructor(message: string) {
@@ -162,6 +60,19 @@ function nonNegativeInt(v: unknown, where: string): number {
 function stringList(v: unknown, where: string): string[] {
   if (!Array.isArray(v)) throw new ReviewPolicyParseError(`${where} must be a list`);
   return v.map((item, i) => str(item, `${where}[${i}]`));
+}
+
+function publicationCompanions(v: unknown, where: string): ReviewPublicationCompanionId[] {
+  const values = v === undefined || v === null ? [] : stringList(v, where);
+  const allowed = new Set<string>(REVIEW_PUBLICATION_COMPANION_IDS);
+  for (const value of values) {
+    if (!allowed.has(value)) {
+      throw new ReviewPolicyParseError(
+        `${where} contains unsupported companion "${value}"; allowed: ${REVIEW_PUBLICATION_COMPANION_IDS.join(", ")}`
+      );
+    }
+  }
+  return values as ReviewPublicationCompanionId[];
 }
 
 function rolePolicy(raw: unknown, where: string): ReviewRolePolicy {
@@ -419,6 +330,10 @@ export function parseReviewPolicy(yamlText: string): ReviewPolicy {
         commitPolicy: str(rawCa.commit_policy, "publication.canonical_artifact.commit_policy"),
         pushPolicy: str(rawCa.push_policy, "publication.canonical_artifact.push_policy"),
         mixedDiff: str(rawCa.mixed_diff, "publication.canonical_artifact.mixed_diff"),
+        deterministicCompanions: publicationCompanions(
+          rawCa.deterministic_companions,
+          "publication.canonical_artifact.deterministic_companions"
+        ),
       };
     }
     publication = {

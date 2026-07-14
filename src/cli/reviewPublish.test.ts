@@ -200,15 +200,17 @@ function fakeLogger(): {
 
 const REVIEW_PATH =
   ".governance/specs/0024-context-architecture/reviews/c-co-knowledge-technical_audit.yml";
+const SNAPSHOT_PATH =
+  ".governance/specs/0024-context-architecture/assets/governance-graph-snapshot.json";
 
 describe("review:publish · autorização fail-closed [CO-4 rodada 8]", () => {
-  it("4 — autorização AUSENTE: briefing funciona, publicação bloqueada (nenhum commit)", () => {
+  it("4 — autorização AUSENTE: briefing funciona, publicação bloqueada (nenhum commit)", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: REVIEW_PATH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH }, logger, null)).toBe(1);
     expect(lines.join("\n")).toContain("autorização AUSENTE");
     expect(gitIn(repo, ["rev-parse", "--short", "HEAD"])).toBe(head); // nenhum commit
     // briefing continua funcionando sem autorização
@@ -216,11 +218,11 @@ describe("review:publish · autorização fail-closed [CO-4 rodada 8]", () => {
     expect(brief.authorization).toBeNull();
   });
 
-  it("5 — autorização inválida: bloqueada", () => {
+  it("5 — autorização inválida: bloqueada", async () => {
     const { repo } = tempRepoWithRemote();
     const { lines, logger } = fakeLogger();
     expect(
-      runReviewPublish(repo, { file: REVIEW_PATH, authorization: "eu-quero" }, logger, null)
+      await runReviewPublish(repo, { file: REVIEW_PATH, authorization: "eu-quero" }, logger, null)
     ).toBe(1);
     expect(lines.join("\n")).toContain("autorização inválida");
   });
@@ -229,13 +231,13 @@ describe("review:publish · autorização fail-closed [CO-4 rodada 8]", () => {
 describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
   const AUTH = { authorization: "explicit-review-request" };
 
-  it("1/8/21/26/27/28 — TA create approved: commit exclusivo derivado + push real + lane CURRENT", () => {
+  it("1/8/21/26/27/28 — TA create approved: publicação isolada + push real + lane CURRENT", async () => {
     const { repo, remote } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
     const { lines, logger } = fakeLogger();
 
-    const code = runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
+    const code = await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
 
     expect(code).toBe(0);
     const out = lines.join("\n");
@@ -259,11 +261,79 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
     expect(brief.mode).toBe("current");
     // 6: republicar o mesmo arquivo agora bloqueia (nada pendente)
     const again = fakeLogger();
-    expect(runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, again.logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, again.logger, null)).toBe(
+      1
+    );
     expect(again.lines.join("\n")).toContain("não está pendente");
   });
 
-  it("3 — AR create: mensagem derivada da lane arquitetural", () => {
+  it("publica artefato + projeção declarada no mesmo commit sem mover o functional HEAD", async () => {
+    const { repo } = tempRepoWithRemote();
+    fs.mkdirSync(path.dirname(path.join(repo, SNAPSHOT_PATH)), { recursive: true });
+    fs.writeFileSync(path.join(repo, SNAPSHOT_PATH), '{"snapshot":"anterior"}\n');
+    const projectionHead = commitAll(repo, "registra projeção baseline");
+    execFileSync("git", ["push", "--quiet"], { cwd: repo, stdio: "ignore" });
+    const functionalHead = collectReviewBrief(repo, "technical_audit", {
+      remote: null,
+    }).brief.effectiveFunctionalHead!;
+    expect(functionalHead).not.toBe(projectionHead);
+    fs.writeFileSync(
+      path.join(repo, REVIEW_PATH),
+      sealedReviewYaml({ subjectRef: functionalHead })
+    );
+    const { logger } = fakeLogger();
+
+    const code = await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null, () => [
+      {
+        relFile: SNAPSHOT_PATH,
+        synchronize: async (root) => {
+          fs.writeFileSync(path.join(root, SNAPSHOT_PATH), '{"snapshot":"com-review"}\n');
+        },
+      },
+    ]);
+
+    expect(code).toBe(0);
+    const changed = gitIn(repo, ["show", "--name-only", "--format=", "HEAD"])
+      .split(/\r?\n/)
+      .filter(Boolean);
+    expect(changed).toEqual([SNAPSHOT_PATH, REVIEW_PATH].sort());
+    const brief = collectReviewBrief(repo, "technical_audit", { remote: null }).brief;
+    expect(brief.effectiveFunctionalHead).toBe(functionalHead);
+    expect(brief.mode).toBe("current");
+  });
+
+  it("reverte a projeção declarada quando a sincronização falha antes do commit", async () => {
+    const { repo } = tempRepoWithRemote();
+    fs.mkdirSync(path.dirname(path.join(repo, SNAPSHOT_PATH)), { recursive: true });
+    fs.writeFileSync(path.join(repo, SNAPSHOT_PATH), "anterior\n");
+    const head = commitAll(repo, "registra projeção baseline");
+    execFileSync("git", ["push", "--quiet"], { cwd: repo, stdio: "ignore" });
+    const functionalHead = collectReviewBrief(repo, "technical_audit", {
+      remote: null,
+    }).brief.effectiveFunctionalHead!;
+    fs.writeFileSync(
+      path.join(repo, REVIEW_PATH),
+      sealedReviewYaml({ subjectRef: functionalHead })
+    );
+    const { lines, logger } = fakeLogger();
+
+    const code = await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null, () => [
+      {
+        relFile: SNAPSHOT_PATH,
+        synchronize: async (root) => {
+          fs.writeFileSync(path.join(root, SNAPSHOT_PATH), "parcial\n");
+          throw new Error("falha simulada");
+        },
+      },
+    ]);
+
+    expect(code).toBe(1);
+    expect(lines.join("\n")).toContain("alterações derivadas revertidas");
+    expect(fs.readFileSync(path.join(repo, SNAPSHOT_PATH), "utf8")).toBe("anterior\n");
+    expect(gitIn(repo, ["rev-parse", "--short", "HEAD"])).toBe(head);
+  });
+
+  it("3 — AR create: mensagem derivada da lane arquitetural", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     const arPath =
@@ -274,13 +344,13 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
     );
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: arPath, ...AUTH }, logger, null)).toBe(0);
+    expect(await runReviewPublish(repo, { file: arPath, ...AUTH }, logger, null)).toBe(0);
     expect(lines.join("\n")).toContain(
       '"docs(spec-0024): registra architectural review do co-knowledge"'
     );
   });
 
-  it("9 — changes_requested também é publicado (a autorização cobre o julgamento)", () => {
+  it("9 — changes_requested também é publicado (a autorização cobre o julgamento)", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     // review com finding precisa dos selos: gera via fingerprintOf? usa aprovação limpa
@@ -327,11 +397,11 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
     fs.writeFileSync(path.join(repo, REVIEW_PATH), yaml);
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(0);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(0);
     expect(lines.join("\n")).toContain("registra technical audit");
   });
 
-  it("2/30 — e2e verification: review antigo + commit funcional → evento scope=review → publish → CURRENT", () => {
+  it("2/30 — e2e verification: review antigo + commit funcional → evento scope=review → publish → CURRENT", async () => {
     const { repo } = tempRepoWithRemote();
     const oldHead = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     // review original committed cobrindo oldHead
@@ -401,7 +471,7 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
     );
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: eventPath, ...AUTH }, logger, null)).toBe(0);
+    expect(await runReviewPublish(repo, { file: eventPath, ...AUTH }, logger, null)).toBe(0);
     expect(lines.join("\n")).toContain(
       '"docs(spec-0024): registra verification do technical audit"'
     );
@@ -410,7 +480,7 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
     expect(after.mode).toBe("current");
   });
 
-  it("[bug2][1/2/14/15] e2e EV1: VERIFICATION findings (open+resolution) → seal → publish → CURRENT", () => {
+  it("[bug2][1/2/14/15] e2e EV1: VERIFICATION findings (open+resolution) → seal → publish → CURRENT", async () => {
     const { repo, remote } = tempRepoWithRemote();
     const checkpoint = "checkpoint-co-knowledge";
     const role = "technical_audit";
@@ -523,7 +593,7 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
     const { lines, logger } = fakeLogger();
 
     // publish: a lane PROSPECTIVA (com o EV em disco) fecha como CURRENT ⇒ publica.
-    expect(runReviewPublish(repo, { file: eventPath, ...AUTH }, logger, null)).toBe(0);
+    expect(await runReviewPublish(repo, { file: eventPath, ...AUTH }, logger, null)).toBe(0);
     expect(lines.join("\n")).toContain("registra verification do technical audit");
 
     // [14] commit review-only NÃO move o functional HEAD; lane vira CURRENT.
@@ -621,6 +691,28 @@ describe("evaluateProspectiveReviewPublication · contrato prospectivo [bug2]", 
     expect(r.failures.join(" ")).toMatch(/src\/x\.ts/);
   });
 
+  it("aceita somente a projeção companheira explicitamente declarada", () => {
+    const allowed = evaluateProspectiveReviewPublication({
+      facts: facts(),
+      brief: brief("current"),
+      artifact: ARTIFACT,
+      dirtyPaths: [RELFILE, SNAPSHOT_PATH],
+      consolidation: CLEAN,
+      allowedCompanionPaths: [SNAPSHOT_PATH],
+    });
+    const undeclared = evaluateProspectiveReviewPublication({
+      facts: facts(),
+      brief: brief("current"),
+      artifact: ARTIFACT,
+      dirtyPaths: [RELFILE, SNAPSHOT_PATH],
+      consolidation: CLEAN,
+    });
+
+    expect(allowed.ok).toBe(true);
+    expect(undeclared.ok).toBe(false);
+    expect(undeclared.failures.join(" ")).toContain(SNAPSHOT_PATH);
+  });
+
   it("[15] artefato não pendente na working tree → bloqueia", () => {
     const r = evaluateProspectiveReviewPublication({
       facts: facts(),
@@ -682,7 +774,7 @@ describe("evaluateProspectiveReviewPublication · contrato prospectivo [bug2]", 
 describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", () => {
   const AUTH = { authorization: "explicit-review-request" };
 
-  it("10/11 — artefato não selado (placeholder/fingerprint divergente) → bloqueado", () => {
+  it("10/11 — artefato não selado (placeholder/fingerprint divergente) → bloqueado", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(
@@ -690,25 +782,25 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
       sealedReviewYaml({ subjectRef: head, unsealed: true })
     );
     const { lines, logger } = fakeLogger();
-    expect(runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
     expect(lines.join("\n")).toContain("não selado");
   });
 
-  it("14/16 — diff misto (artefato + arquivo funcional) → bloqueado listando paths", () => {
+  it("14/16 — diff misto (artefato + arquivo funcional) → bloqueado listando paths", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
     fs.writeFileSync(path.join(repo, "src.ts"), "export {};\n");
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
     const out = lines.join("\n");
     expect(out).toContain("nenhum commit, nenhum push");
     expect(out).toContain("src.ts");
     expect(gitIn(repo, ["rev-parse", "--short", "HEAD"])).toBe(head);
   });
 
-  it("15/17 — segundo artefato/untracked extra → bloqueado", () => {
+  it("15/17 — segundo artefato/untracked extra → bloqueado", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
@@ -721,22 +813,22 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
     );
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
     expect(lines.join("\n")).toContain("architectural_review.yml");
   });
 
-  it("18 — path fora do canônico → bloqueado", () => {
+  it("18 — path fora do canônico → bloqueado", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     const wrong = ".governance/specs/0024-context-architecture/reviews/meu-review.yml";
     fs.writeFileSync(path.join(repo, wrong), sealedReviewYaml({ subjectRef: head }));
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: wrong, ...AUTH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: wrong, ...AUTH }, logger, null)).toBe(1);
     expect(lines.join("\n")).toContain("fora do canônico");
   });
 
-  it("19 — checkpoint do artefato divergente do cursor → bloqueado", () => {
+  it("19 — checkpoint do artefato divergente do cursor → bloqueado", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(
@@ -745,11 +837,11 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
     );
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
     expect(lines.join("\n")).toContain("checkpoint do artefato");
   });
 
-  it("20 — branch behind do upstream → bloqueado", () => {
+  it("20 — branch behind do upstream → bloqueado", async () => {
     const { repo } = tempRepoWithRemote();
     // avança remoto e regride local
     fs.writeFileSync(path.join(repo, "extra.ts"), "export {};\n");
@@ -760,11 +852,11 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
     expect(lines.join("\n")).toContain("BEHIND");
   });
 
-  it("12 — review:check com violação (referência divergente) → bloqueado", () => {
+  it("12 — review:check com violação (referência divergente) → bloqueado", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
@@ -810,11 +902,11 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
     );
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: eventPath, ...AUTH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: eventPath, ...AUTH }, logger, null)).toBe(1);
     expect(lines.join("\n")).toContain("review:check");
   });
 
-  it("22 — push falha → commit local PRESERVADO e erro claro", () => {
+  it("22 — push falha → commit local PRESERVADO e erro claro", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
@@ -825,7 +917,7 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
     );
     const { lines, logger } = fakeLogger();
 
-    expect(runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
+    expect(await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null)).toBe(1);
     const out = lines.join("\n");
     expect(out).toContain("PUSH FALHOU");
     expect(out).toContain("permanece LOCAL");
@@ -838,13 +930,13 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
 describe("review:publish · advisory-first do recibo de carga [CO-3.4]", () => {
   const AUTH = { authorization: "explicit-review-request" };
 
-  it("missing → advisory 'nenhuma carga registrada' E publicação prossegue (exit 0)", () => {
+  it("missing → advisory 'nenhuma carga registrada' E publicação prossegue (exit 0)", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
     const { lines, logger } = fakeLogger();
 
-    const code = runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
+    const code = await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
 
     expect(code).toBe(0); // advisory-first: recibo ausente NÃO bloqueia review:publish
     expect(lines.join("\n")).toContain(
@@ -852,7 +944,7 @@ describe("review:publish · advisory-first do recibo de carga [CO-3.4]", () => {
     );
   });
 
-  it("fresh → nenhum advisory emitido, publicação prossegue (exit 0)", () => {
+  it("fresh → nenhum advisory emitido, publicação prossegue (exit 0)", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
@@ -864,13 +956,13 @@ describe("review:publish · advisory-first do recibo de carga [CO-3.4]", () => {
     writeReceipt(repo, createLoadReceipt(snap.collected.facts, snap.derived.seal));
     const { lines, logger } = fakeLogger();
 
-    const code = runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
+    const code = await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
 
     expect(code).toBe(0);
     expect(lines.join("\n")).not.toContain("[advisory]");
   });
 
-  it("stale-head → advisory de HEAD E publicação prossegue (exit 0)", () => {
+  it("stale-head → advisory de HEAD E publicação prossegue (exit 0)", async () => {
     const { repo } = tempRepoWithRemote();
     const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
     fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
@@ -885,7 +977,7 @@ describe("review:publish · advisory-first do recibo de carga [CO-3.4]", () => {
     });
     const { lines, logger } = fakeLogger();
 
-    const code = runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
+    const code = await runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
 
     expect(code).toBe(0);
     expect(lines.join("\n")).toMatch(

@@ -1,7 +1,12 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-import { HandoffFacts, deriveNextAction, parseSteps, resolveStepWork } from "./handoffFacts.js";
+import {
+  HandoffFacts,
+  deriveNextAction,
+  parseSteps,
+  resolveStepWork,
+} from "../app/handoff/handoffFacts.js";
 import { deriveWorkBrief } from "./workBrief.js";
 import { parseWorkPolicy } from "../infrastructure/yaml/workPolicyReader.js";
 

@@ -1,7 +1,7 @@
 /**
  * `review:publish` — fechamento operacional SEGURO do artefato de review
- * (CO-4, rodada 8): commit EXCLUSIVO + push normal do review/evento derivado
- * pelo briefing, sob autorização capability-scoped.
+ * (CO-4, rodada 8): commit ATOMICAMENTE ISOLADO + push normal do review/evento
+ * derivado pelo briefing, sob autorização capability-scoped.
  *
  * Contrato de autoridade (review-policy.yml § publication.canonical_artifact):
  * o PEDIDO HUMANO EXPLÍCITO do review já autoriza este ciclo limitado — sem
@@ -11,7 +11,8 @@
  * Human Gate, gate artifact, merge, force-push, --no-verify.
  *
  * Guard EXECUTÁVEL de diff: a working tree deve conter EXATAMENTE o artefato
- * esperado (path canônico da lane/checkpoint do cursor) — qualquer outro path
+ * esperado (path canônico da lane/checkpoint do cursor) e, quando aplicável,
+ * projeções determinísticas declaradas pelo contrato. Qualquer outro path
  * (funcional, docs, segundo artefato, untracked extra) bloqueia ANTES do
  * commit, listando os inesperados. Mensagem de commit é DERIVADA
  * (determinística); hooks preservados; push normal (nunca force; nunca
@@ -22,7 +23,7 @@ import * as path from "node:path";
 import { execFileSync } from "node:child_process";
 import { parseReview, parseReviewEvent } from "../infrastructure/yaml/reviewArtifactsReader.js";
 import { consolidate, discover } from "./reviewCheck.js";
-import { HandoffFacts } from "./handoffFacts.js";
+import { HandoffFacts } from "../app/handoff/handoffFacts.js";
 import { HandoffOptions } from "./handoff.js";
 import {
   ReviewBrief,
@@ -32,6 +33,12 @@ import {
 } from "./reviewBrief.js";
 import { readReceiptText } from "./handoffReceipt.js";
 import { emitReceiptAdvisory } from "./handoff.js";
+import { reviewPublicationProjectionPathsForArtifact } from "../app/reviews/reviewPublicationPolicy.js";
+import {
+  GOVERNANCE_GRAPH_SNAPSHOT_REL,
+  runBuild as buildGovernanceGraph,
+} from "./governanceGraph.js";
+import { ReviewPublicationCompanionId } from "../domain/policy/reviewPolicy.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -136,6 +143,66 @@ export interface ProspectivePublicationContext {
     readonly errors: readonly string[];
     readonly violations: readonly string[];
   };
+  /** Projeções determinísticas declaradas que podem acompanhar o artefato. */
+  readonly allowedCompanionPaths?: readonly string[];
+}
+
+export interface ReviewPublicationProjection {
+  readonly relFile: string;
+  readonly synchronize: (repoRoot: string, logger: Logger) => Promise<void>;
+}
+
+export type ReviewPublicationProjectionResolver = (
+  repoRoot: string,
+  artifactRelFile: string,
+  companions: readonly ReviewPublicationCompanionId[]
+) => readonly ReviewPublicationProjection[];
+
+function defaultProjectionResolver(
+  repoRoot: string,
+  artifactRelFile: string,
+  companions: readonly ReviewPublicationCompanionId[]
+): readonly ReviewPublicationProjection[] {
+  return reviewPublicationProjectionPathsForArtifact(artifactRelFile, companions)
+    .filter(
+      (relFile) =>
+        relFile === GOVERNANCE_GRAPH_SNAPSHOT_REL && fs.existsSync(path.join(repoRoot, relFile))
+    )
+    .map((relFile) => ({
+      relFile,
+      synchronize: async (root: string, logger: Logger): Promise<void> => {
+        const exitCode = await buildGovernanceGraph(root, logger);
+        if (exitCode !== 0) {
+          throw new Error(`falha ao regenerar a projeção declarada ${relFile}`);
+        }
+      },
+    }));
+}
+
+interface FileBackup {
+  readonly relFile: string;
+  readonly existed: boolean;
+  readonly content: Buffer | null;
+}
+
+function backupFiles(repoRoot: string, relFiles: readonly string[]): FileBackup[] {
+  return relFiles.map((relFile) => {
+    const abs = path.join(repoRoot, relFile);
+    const existed = fs.existsSync(abs);
+    return { relFile, existed, content: existed ? fs.readFileSync(abs) : null };
+  });
+}
+
+function restoreFiles(repoRoot: string, backups: readonly FileBackup[]): void {
+  for (const backup of backups) {
+    const abs = path.join(repoRoot, backup.relFile);
+    if (backup.existed && backup.content !== null) {
+      fs.mkdirSync(path.dirname(abs), { recursive: true });
+      fs.writeFileSync(abs, backup.content);
+    } else if (fs.existsSync(abs)) {
+      fs.rmSync(abs);
+    }
+  }
 }
 
 /**
@@ -150,6 +217,9 @@ export function evaluateProspectiveReviewPublication(ctx: ProspectivePublication
 } {
   const { facts, brief, artifact, dirtyPaths, consolidation } = ctx;
   const failures: string[] = [];
+  const allowedCompanionPaths = new Set(
+    (ctx.allowedCompanionPaths ?? []).map((filePath) => toPosix(filePath))
+  );
 
   // 1-3. branch/upstream/behind.
   if (!facts.git.branch) failures.push("branch atual não observável (detached HEAD?).");
@@ -196,11 +266,13 @@ export function evaluateProspectiveReviewPublication(ctx: ProspectivePublication
     );
   }
 
-  // 10/14-17. Guard de diff: working tree EXATAMENTE o artefato candidato.
+  // 10/14-17. Guard de diff: artefato + projeções determinísticas declaradas.
   if (dirtyPaths === null) {
     failures.push("git status indisponível — guard de diff não pôde rodar.");
   } else {
-    const unexpected = dirtyPaths.map(toPosix).filter((p) => p !== artifact.relFile);
+    const unexpected = dirtyPaths
+      .map(toPosix)
+      .filter((p) => p !== artifact.relFile && !allowedCompanionPaths.has(p));
     if (!dirtyPaths.map(toPosix).includes(artifact.relFile)) {
       failures.push(
         `o artefato ${artifact.relFile} não está pendente na working tree (já commitado?).`
@@ -208,7 +280,7 @@ export function evaluateProspectiveReviewPublication(ctx: ProspectivePublication
     }
     if (unexpected.length > 0) {
       failures.push(
-        `diff NÃO é review-only — paths inesperados (mixed_diff: block):\n` +
+        `diff fora do envelope de publicação — paths inesperados (mixed_diff: block):\n` +
           unexpected.map((p) => `    ${p}`).join("\n")
       );
     }
@@ -228,12 +300,13 @@ export function evaluateProspectiveReviewPublication(ctx: ProspectivePublication
   return { ok: failures.length === 0, failures };
 }
 
-export function runReviewPublish(
+export async function runReviewPublish(
   repoRoot: string,
   args: ReviewPublishArgs,
   logger: Logger = defaultLogger,
-  remoteOverride?: HandoffOptions["remote"]
-): number {
+  remoteOverride?: HandoffOptions["remote"],
+  projectionResolver: ReviewPublicationProjectionResolver = defaultProjectionResolver
+): Promise<number> {
   // ── Autorização (fail-closed) ───────────────────────────────────────────────
   const authorization = parseAuthorization(args.authorization);
   if (authorization === null) {
@@ -319,27 +392,66 @@ export function runReviewPublish(
   const { artifacts, errors } = discover(repoRoot);
   const violations = errors.length === 0 ? consolidate(artifacts).violations.map(String) : [];
 
-  const { failures } = evaluateProspectiveReviewPublication({
-    facts,
-    brief,
-    artifact: {
-      role: artifactRole,
-      checkpoint: artifactCheckpoint,
-      kind: artifactKind,
-      eventId,
-      relFile,
-    },
-    dirtyPaths: porcelainPaths(repoRoot),
-    consolidation: { errors: errors.map(String), violations },
-  });
-
-  if (failures.length > 0) {
-    logger.error("❌ review:publish — BLOCKED; nenhum commit, nenhum push. Pré-condições falhas:");
-    for (const f of failures) logger.error(`  - ${f}`);
+  const artifact: CandidateArtifact = {
+    role: artifactRole,
+    checkpoint: artifactCheckpoint,
+    kind: artifactKind,
+    eventId,
+    relFile,
+  };
+  const declaredCompanions = brief.publication?.canonicalArtifact?.deterministicCompanions ?? [];
+  const projections = projectionResolver(repoRoot, relFile, declaredCompanions);
+  const companionPaths = projections.map((projection) => toPosix(projection.relFile));
+  const duplicateCompanions = companionPaths.filter(
+    (candidate, index) => companionPaths.indexOf(candidate) !== index
+  );
+  if (duplicateCompanions.length > 0 || companionPaths.includes(relFile)) {
+    logger.error(
+      "❌ review:publish — contrato inválido de projeções companheiras; nenhum commit, nenhum push."
+    );
     return 1;
   }
 
-  // ── Commit exclusivo (mensagem DERIVADA; hooks preservados) ────────────────
+  const publicationContext = {
+    facts,
+    brief,
+    artifact,
+    dirtyPaths: porcelainPaths(repoRoot),
+    consolidation: { errors: errors.map(String), violations },
+    allowedCompanionPaths: companionPaths,
+  };
+  const initialEvaluation = evaluateProspectiveReviewPublication(publicationContext);
+
+  if (initialEvaluation.failures.length > 0) {
+    logger.error("❌ review:publish — BLOCKED; nenhum commit, nenhum push. Pré-condições falhas:");
+    for (const f of initialEvaluation.failures) logger.error(`  - ${f}`);
+    return 1;
+  }
+
+  const projectionBackups = backupFiles(repoRoot, companionPaths);
+  try {
+    for (const projection of projections) await projection.synchronize(repoRoot, logger);
+  } catch (error) {
+    restoreFiles(repoRoot, projectionBackups);
+    logger.error(
+      `❌ review:publish — sincronização de projeção falhou; alterações derivadas revertidas; ` +
+        `nenhum commit, nenhum push. Detalhe: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return 1;
+  }
+
+  const finalEvaluation = evaluateProspectiveReviewPublication({
+    ...publicationContext,
+    dirtyPaths: porcelainPaths(repoRoot),
+  });
+  if (finalEvaluation.failures.length > 0) {
+    restoreFiles(repoRoot, projectionBackups);
+    logger.error("❌ review:publish — BLOCKED; projeções revertidas; nenhum commit, nenhum push:");
+    for (const failure of finalEvaluation.failures) logger.error(`  - ${failure}`);
+    return 1;
+  }
+
+  // ── Commit atomicamente isolado (artefato + companheiras declaradas) ──────
   const message = deriveReviewCommitMessage(
     brief.specId,
     facts.activeNode?.id ?? cursor?.pr ?? null,
@@ -347,7 +459,7 @@ export function runReviewPublish(
     artifactKind
   );
   try {
-    git(repoRoot, ["add", "--", relFile]);
+    git(repoRoot, ["add", "--", relFile, ...companionPaths]);
     git(repoRoot, ["commit", "-m", message]);
   } catch (e) {
     logger.error(
@@ -356,7 +468,10 @@ export function runReviewPublish(
     return 1;
   }
   const commitSha = gitOrNull(repoRoot, ["rev-parse", "--short", "HEAD"]) ?? "?";
-  logger.info(`✅ commit exclusivo criado: ${commitSha} — "${message}"`);
+  logger.info(
+    `✅ commit de publicação isolada criado: ${commitSha} — "${message}"` +
+      (companionPaths.length > 0 ? ` (projeções companheiras: ${companionPaths.join(", ")})` : "")
+  );
 
   // ── Push normal (nunca force; nunca --no-verify) ───────────────────────────
   try {
@@ -380,6 +495,6 @@ export function main(
   repoRoot: string,
   argv: readonly string[] = [],
   logger: Logger = defaultLogger
-): number {
+): Promise<number> {
   return runReviewPublish(repoRoot, parseArgs(argv), logger);
 }

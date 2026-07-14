@@ -17,7 +17,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { deriveWorkBrief, WorkBrief } from "./workBrief.js";
-import { deriveNextAction, HandoffStep } from "./handoffFacts.js";
+import { deriveNextAction, HandoffStep } from "../app/handoff/handoffFacts.js";
 import { AdvanceStepDefinition } from "./decide/advanceStep.js";
 import { buildDecisionRegistry } from "./decide/registry.js";
 import { parseDecideArgs, runDecide } from "./decide/decide.js";

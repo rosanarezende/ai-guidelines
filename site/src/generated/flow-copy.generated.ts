@@ -614,6 +614,10 @@ export const AI_GUIDELINES_FLOW_COPY = {
       "title": "Encerrar problemas revalidados da auditoria técnica"
     },
     {
+      "id": "review-revalidation",
+      "title": "Decidir se reviews stale precisam de revalidação"
+    },
+    {
       "id": "finish-step",
       "title": "Concluir etapa atual e iniciar a próxima"
     },

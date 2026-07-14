@@ -1,4 +1,4 @@
-import { HandoffFacts } from "./handoffFacts.js";
+import { HandoffFacts } from "../app/handoff/handoffFacts.js";
 import {
   assertFreshHandoffReceipt,
   createLoadReceipt,

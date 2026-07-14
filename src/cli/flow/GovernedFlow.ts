@@ -1,5 +1,6 @@
-import type { HandoffStep } from "../handoffFacts.js";
-import { STEP_READINESS } from "../handoffFacts.js";
+import type { HandoffStep } from "../../app/handoff/handoffFacts.js";
+import { STEP_READINESS } from "../../app/handoff/handoffFacts.js";
+import { deriveFrenteProgression } from "../../app/workflow/frenteProgression.js";
 import type { DecisionAvailability } from "../decide/model.js";
 import type { DecisionSnapshot } from "../decide/snapshot.js";
 import { findDecisionType } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
@@ -13,6 +14,7 @@ import type { StepDeliveryEvidence } from "./stepDeliveryEvidence.js";
 
 export type GovernedFlowActionId =
   | "close-dispositions"
+  | "review-revalidation"
   | "finish-step"
   | "mark-readiness"
   | "advance-step"
@@ -148,6 +150,8 @@ export interface PrReadyFlowFacts {
     readonly gateDecision: "approved" | "changes_requested" | null;
     readonly openBlockingCount: number;
     readonly reviewPlanDecisionReasons?: ReadonlyArray<string>;
+    /** Etapa `[/]` ativa do checkpoint (derivação canônica da Frente); undefined = fato não observável. */
+    readonly activeStep?: { readonly id: string; readonly readiness: string | null } | null;
     readonly reviewStatuses: ReadonlyArray<{
       readonly typeId: string;
       readonly requirement: "disabled" | "optional" | "recommended" | "required";
@@ -462,7 +466,13 @@ export function openNextTopologyNodeFactsFromDecisionSnapshot(
       snapshot.policy !== null &&
       findDecisionType(snapshot.policy, OPEN_NEXT_TOPOLOGY_NODE_ID) !== undefined,
     gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
-    pendingSteps: snapshot.steps.filter((item) => item.state !== "done").map((item) => item.id),
+    // Derivação CANÔNICA da Frente (frenteProgression): unfinishedSteps decide
+    // se o próximo nó topológico é executável — mesma fonte do handoff/humanGate.
+    pendingSteps: deriveFrenteProgression({
+      steps: snapshot.steps,
+      nextPlannedNode: next ? { id: next.id, sequence: next.sequence } : null,
+      gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
+    }).unfinishedSteps.map((item) => item.id),
     activeNode: active
       ? {
           id: active.id,
@@ -710,6 +720,14 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
     for (const reason of checkpoint.reviewPlanDecisionReasons ?? []) {
       failures.push(`plano de revisão do PR: ${reason}`);
     }
+    // Paridade semântica com humanGate/decide (frenteProgression): Ready não é
+    // conclusão só porque CI/tree estão verdes — a etapa ativa precisa ter
+    // declarado readiness de transição.
+    if (checkpoint.activeStep && checkpoint.activeStep.readiness !== STEP_READINESS) {
+      failures.push(
+        `etapa ativa "${checkpoint.activeStep.id}" ainda não declarou readiness "${STEP_READINESS}" em tasks.md — o trabalho do checkpoint segue em implementação; CI/tree verdes não concluem a Frente.`
+      );
+    }
     for (const s of checkpoint.reviewStatuses) {
       for (const e of s.errors) failures.push(`policy de reviews inválida: ${e}`);
       if (s.blocking) {
@@ -722,7 +740,10 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
                 ? `com decisão "${s.decision}" (precisa de approved)`
                 : s.state;
         failures.push(
-          `review OBRIGATÓRIO "${s.typeId}" (${s.source}) ${why} no checkpoint "${checkpoint.id}".`
+          `review OBRIGATÓRIO "${s.typeId}" (${s.source}) ${why} no checkpoint "${checkpoint.id}".` +
+            (s.state === "stale" && s.decision === "approved"
+              ? " Antes de repetir a review, rode `npm run flow -- decide --type review-revalidation --brief-only` para ver a recomendação calculada; a decisão final continua humana."
+              : "")
         );
       } else if (s.requirement === "required" && s.state === "stale" && s.decision === "approved") {
         const note = (s.notes ?? []).find((n) => n.includes("revalidation waived"));
@@ -757,11 +778,13 @@ function commandFor(id: GovernedFlowActionId, mutating: boolean): string {
           ? "advance"
           : id === "close-dispositions"
             ? "accept-all"
-            : id === "human-gate"
-              ? "approve"
-              : id === "open-next-topology-node"
-                ? "open-node"
-                : "<choice>";
+            : id === "review-revalidation"
+              ? "accept-recommendations"
+              : id === "human-gate"
+                ? "approve"
+                : id === "open-next-topology-node"
+                  ? "open-node"
+                  : "<choice>";
   return `npm run flow -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
 }
 
@@ -845,11 +868,19 @@ function extractBetween(value: string, start: string, ends: readonly string[]): 
   return extracted.length > 0 ? extracted : null;
 }
 
-function descriptionFromRawText(sub: HandoffStep): string | null {
+function escapeRe(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function descriptionFromRawText(sub: HandoffStep): string | null {
   if (!sub.text) return null;
-  const marker = `**${sub.id} — ${sub.title}**`;
-  const markerIndex = sub.text.indexOf(marker);
-  const afterMarker = markerIndex >= 0 ? sub.text.slice(markerIndex + marker.length) : sub.text;
+  // Marcador tolerante ao mesmo contrato do parseSteps (LENS-F3): prefixo
+  // `Checkpoint ` opcional, título inline opcional e fechamento do negrito
+  // com sufixos livres (ex.: "(EM EXECUÇÃO …)") — não um literal ingênuo.
+  const markerRe = new RegExp(`\\*\\*(?:Checkpoint\\s+)?${escapeRe(sub.id)}\\b[^*]*\\*\\*`);
+  const match = markerRe.exec(sub.text);
+  const afterMarker =
+    match && match.index >= 0 ? sub.text.slice(match.index + match[0].length) : sub.text;
   const afterColon = afterMarker.replace(/^[:\s]+/, "");
   const objective = extractBetween(afterColon, "", ["**Entradas:**", "**Saída:**"]);
   const cleaned = stripLeadingDecisionClause(objective);
@@ -930,6 +961,10 @@ function deriveHumanSummary(
     missing.push("Falta abrir governadamente o proximo no planejado.");
   } else if (flow.recommended?.id === "close-dispositions") {
     missing.push("Falta fechar findings revalidados.");
+  } else if (flow.recommended?.id === "review-revalidation") {
+    missing.push(
+      "Falta a owner decidir, após a recomendação do sistema, se reviews stale serão revalidados."
+    );
   } else if (flow.blocked.length > 0) {
     const blockedReasons = flow.blocked
       .slice(0, 2)
@@ -980,6 +1015,8 @@ function humanNextAction(
   if (recommendedId === "open-next-topology-node")
     return "Abrir governadamente o próximo nó da topologia.";
   if (recommendedId === "close-dispositions") return "Fechar findings revalidados.";
+  if (recommendedId === "review-revalidation")
+    return "Avaliar a recomendação do sistema sobre revalidação das reviews stale.";
   if (snapshot.workingTreeState !== "clean")
     return "Finalizar as mudanças locais e deixar a working tree limpa.";
   if (ciPending) return "Aguardar a CI terminar.";
@@ -1023,11 +1060,31 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
             reasons: ["Há finding aberto sem resolução fixed revalidada."],
           }
         : { status: "not-applicable", reasons: ["Não há findings abertos."] };
+  const reviewRevalidation: DecisionAvailability =
+    snapshot.reviewRevalidations.length > 0
+      ? {
+          status: "available",
+          reasons: [],
+          hint: `${snapshot.reviewRevalidations.length} review(s) stale aguardam decisão humana assistida.`,
+        }
+      : {
+          status: "not-applicable",
+          reasons: ["Não há review stale+approved aguardando decisão de revalidação."],
+        };
 
   const actions = [
     action("close-dispositions", "Fechar findings revalidados", closeDispositions, [
       "altera artefato de review/resolution conforme decisão humana",
     ]),
+    action(
+      "review-revalidation",
+      "Decidir se reviews stale precisam de revalidação",
+      reviewRevalidation,
+      [
+        "o sistema recomenda a partir do delta e dos findings",
+        "a owner confirma; nenhuma dispensa é automática",
+      ]
+    ),
     action("finish-step", "Concluir etapa atual e iniciar a próxima", finish, [
       "altera somente marcadores de etapas em tasks.md",
       "valida readiness sem exigir commit intermediário",
@@ -1065,6 +1122,7 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   ];
   const priority: GovernedFlowActionId[] = [
     "close-dispositions",
+    "review-revalidation",
     "human-gate",
     "finish-step",
     "mark-readiness",

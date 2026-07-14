@@ -22,6 +22,7 @@
  * EXIBIDO no stdout, nunca persistido como entidade (ADR 0026).
  */
 import { createHash } from "node:crypto";
+import { deriveFrenteProgression } from "../workflow/frenteProgression.js";
 
 /**
  * Versão do contrato derivação+renderer — entra no selo (mudou contrato ⇒ muda
@@ -346,7 +347,9 @@ function stepTitle(inlineTitle: string | undefined, tail: string | undefined): s
   if (inline) return inline;
 
   const cleanedTail = (tail ?? "")
+    .replace(READINESS_TOKEN_RE, "")
     .replace(/^[:—\-\s]+/, "")
+    .replace(/\s+\(EM EXECUÇÃO\b.*?\)(?=\s*[:.]\s+|$)/i, "")
     .replace(/\s+/g, " ")
     .trim()
     .replace(/[.]$/, "");
@@ -437,11 +440,16 @@ export function resolveStepWork(facts: HandoffFacts): StepResolution {
     title: s.title,
     line: s.line,
   });
-  const inProgress = subs.filter((s) => s.state === "in-progress");
-  const pending = subs.filter((s) => s.state === "pending");
-  if (inProgress.length >= 1) {
-    const active = inProgress[0];
-    const pendingAfter = pending.filter((s) => s.line > active.line);
+  // Derivação CANÔNICA (LENS-F2): mesma fonte posicional do advance/humanGate.
+  const progression = deriveFrenteProgression({
+    steps: subs,
+    nextPlannedNode: null,
+    gateApproved: false,
+  });
+  const pending = progression.pendingSteps;
+  if (progression.activeStep) {
+    const active = progression.activeStep;
+    const pendingAfter = progression.pendingAfterActive;
     if (active.readiness === STEP_READINESS && pendingAfter.length >= 1) {
       return {
         kind: "transition",
@@ -696,13 +704,18 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
   }
 
   // 6 — gate do checkpoint aprovado e nó ainda ativo: concluir/abrir o próximo.
+  // Derivação CANÔNICA da progressão da Frente (fonte única; superfícies só rendem).
   if (lifecycle?.gateDecision === "approved" && facts.activeNode) {
-    const next = facts.nextPlannedNode;
-    const pendingSteps = facts.steps.filter((s) => s.state !== "done");
+    const progression = deriveFrenteProgression({
+      steps: facts.steps,
+      nextPlannedNode: facts.nextPlannedNode,
+      gateApproved: true,
+    });
+    const next = progression.nextTopologyNode;
 
-    if (pendingSteps.length > 0) {
-      const first = pendingSteps[0];
-      const pendingStepIds = pendingSteps.map((s) => s.id).join(", ");
+    if (!progression.frenteComplete) {
+      const first = progression.unfinishedSteps[0];
+      const pendingStepIds = progression.unfinishedSteps.map((s) => s.id).join(", ");
       return {
         kind: "conclude-node-open-next",
         description: next

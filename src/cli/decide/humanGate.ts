@@ -27,7 +27,8 @@ import {
   findDecisionType,
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
-import { STEP_READINESS } from "../handoffFacts.js";
+import { STEP_READINESS } from "../../app/handoff/handoffFacts.js";
+import { deriveFrenteProgression } from "../../app/workflow/frenteProgression.js";
 import {
   deriveHumanGateAvailability,
   humanGateFactsFromDecisionSnapshot,
@@ -96,14 +97,16 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
       "o gate é registrado DEPOIS da decisão e não executa transição automática.";
 
     const doneSubs = snapshot.steps.filter((s) => s.state === "done");
-    const terminalReadySub = snapshot.steps.find((s) => {
-      if (s.state !== "in-progress" || s.readiness !== STEP_READINESS) return false;
-      return !snapshot.steps.some((other) => other.state === "pending" && other.line > s.line);
-    });
+    // O Gate avalia a etapa ativa pronta, mesmo quando a Frente ainda possui
+    // checkpoints futuros. A terminalidade da Frente pertence à derivação do
+    // próximo movimento, não à descrição do que este checkpoint entregou.
+    const activeReadySub = snapshot.steps.find(
+      (s) => s.state === "in-progress" && s.readiness === STEP_READINESS
+    );
     const deliveredSubs = [
       ...doneSubs.map((s) => `Concluído: ${s.id} — ${s.title}`),
-      ...(terminalReadySub
-        ? [`Pronto para Gate: ${terminalReadySub.id} — ${terminalReadySub.title}`]
+      ...(activeReadySub
+        ? [`Pronto para Gate: ${activeReadySub.id} — ${activeReadySub.title}`]
         : []),
     ];
     const reviewStatuses = snapshot.facts.lifecycle?.reviewStatuses ?? [];
@@ -136,12 +139,32 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
       residual_risks: [
         "Riscos residuais registrados nos reviews e decisões governadas do checkpoint.",
       ],
-      next_node: snapshot.nextPlannedNode
-        ? [
-            `Próximo nó planejado: ${snapshot.nextPlannedNode.id}.`,
-            "Ele NÃO será iniciado automaticamente por esta decisão.",
-          ]
-        : ["Não há próximo nó planejado derivável; nada é iniciado automaticamente."],
+      // Renderização da derivação CANÔNICA da Frente (frenteProgression):
+      // com checkpoints pendentes, o próximo passo humano é o próximo checkpoint
+      // da continuação — nunca o nó topológico planejado.
+      next_node: (() => {
+        const progression = deriveFrenteProgression({
+          steps: snapshot.steps,
+          nextPlannedNode: snapshot.nextPlannedNode
+            ? { id: snapshot.nextPlannedNode.id, sequence: snapshot.nextPlannedNode.sequence }
+            : null,
+          gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
+        });
+        if (progression.nextSemanticStep) {
+          const first = progression.nextSemanticStep;
+          return [
+            `Próximo checkpoint da Frente: ${first.id} — ${first.title}.`,
+            ...(progression.topologyBlockedSentence ? [progression.topologyBlockedSentence] : []),
+            "Nada será iniciado automaticamente por esta decisão.",
+          ];
+        }
+        return progression.nextTopologyNode
+          ? [
+              `Próximo nó planejado: ${progression.nextTopologyNode.id}.`,
+              "Ele NÃO será iniciado automaticamente por esta decisão.",
+            ]
+          : ["Não há próximo nó planejado derivável; nada é iniciado automaticamente."];
+      })(),
       consequences: policy.consequences,
       not_authorized: policy.notAuthorized,
     };

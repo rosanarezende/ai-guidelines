@@ -46,8 +46,8 @@ import {
   deriveEffectiveReviewStatuses,
   legacyDeprecationWarnings,
   resolveReviewType,
-} from "./reviewRequirements.js";
-import { HandoffFacts } from "./handoffFacts.js";
+} from "../app/reviews/reviewRequirements.js";
+import { HandoffFacts } from "../app/handoff/handoffFacts.js";
 import {
   HandoffLoadSnapshot,
   HandoffOptions,
@@ -55,7 +55,11 @@ import {
   loadHandoffSnapshot,
 } from "./handoff.js";
 import { discover, observedReviewStates } from "./reviewCheck.js";
-import { WorkingTreeState, collectFunctionalFreshness } from "./reviewFreshness.js";
+import {
+  WorkingTreeState,
+  collectFunctionalFreshness,
+  collectRevalidationScopeStates,
+} from "./reviewFreshness.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -649,7 +653,21 @@ export function collectReviewBrief(
         labels: facts.pullRequest?.labels ?? null,
         changedPaths: null,
       },
-      ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+      ...(nodeCtx?.overrides || nodeCtx?.reviewPlanOverrides
+        ? {
+            nodeOverrides: {
+              ...(nodeCtx.overrides ?? {}),
+              ...(nodeCtx.reviewPlanOverrides ?? {}),
+            },
+          }
+        : {}),
+      ...(nodeCtx?.reviewPlan ? { reviewPlan: nodeCtx.reviewPlan } : {}),
+      revalidationScopes: collectRevalidationScopeStates(
+        repoRoot,
+        nodeCtx?.reviewPlan,
+        freshness.effectiveFunctionalHead,
+        facts.spec.path
+      ),
       observed: observedReviewStates(artifacts, cursor.checkpoint),
       functionalHead: freshness.effectiveFunctionalHead,
     });

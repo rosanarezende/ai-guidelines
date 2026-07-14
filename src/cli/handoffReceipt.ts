@@ -25,7 +25,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { execFileSync } from "node:child_process";
-import { HANDOFF_CONTRACT_VERSION, HandoffFacts } from "./handoffFacts.js";
+import { HANDOFF_CONTRACT_VERSION, HandoffFacts } from "../app/handoff/handoffFacts.js";
 
 export interface HandoffLoadReceipt {
   readonly contractVersion: string;

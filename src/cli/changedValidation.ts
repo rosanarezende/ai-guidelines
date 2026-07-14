@@ -32,6 +32,24 @@ const GOVERNED_WORK_MAP_INPUTS = new Set([
   "src/cli/governedWorkMap.ts",
 ]);
 
+/**
+ * O graph snapshot deriva de TODO o conteúdo governado do trabalho (state/tasks/
+ * decision-brief/reviews/gates/research/…) + fontes core (adrs/constraints) +
+ * runtime (insights/active) + o próprio derivador. Qualquer mudança nesses
+ * espaços exige regenerar (a lição: o snapshot ficou stale num commit que só
+ * tocou a matriz de research).
+ */
+function touchesGovernanceGraphInputs(p: string): boolean {
+  return (
+    p.startsWith(".governance/specs/0024-context-architecture/") ||
+    p.startsWith(".governance/runtime/") ||
+    p.startsWith(".core/governance/adrs/") ||
+    p === ".core/constraints/constraints.yml" ||
+    p === "src/cli/governanceGraph.ts" ||
+    p === "src/app/projections/governanceGraphSnapshot.ts"
+  );
+}
+
 function binary(name: "npm" | "npx"): string {
   return name;
 }
@@ -209,6 +227,14 @@ export function planChangedValidation(
       label: "Verificar mapa vivo governado",
       command: binary("npm"),
       args: ["run", "governed-work-map:check"],
+    });
+  }
+
+  if (hasAny(paths, touchesGovernanceGraphInputs)) {
+    steps.push({
+      label: "Verificar graph snapshot derivado",
+      command: binary("npm"),
+      args: ["run", "governance-graph:check"],
     });
   }
 

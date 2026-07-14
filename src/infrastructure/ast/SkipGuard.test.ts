@@ -9,7 +9,7 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { discoverTestFiles } from "../../cli/livingDocs.js";
+import { discoverTestFiles } from "../filesystem/discoverTestFiles.js";
 import { findDecisionTaggedSkips, formatDecisionTaggedSkips } from "./SkipGuard.js";
 
 function mktmp(): string {
