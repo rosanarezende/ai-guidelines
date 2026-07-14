@@ -22,7 +22,11 @@ import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.j
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import { parseInsightsLedger } from "../infrastructure/yaml/insightsLedgerSerializer.js";
 import { ActiveSpecEntry } from "../domain/workflow/ActiveSpecEntry.js";
-import { PrTopologyNode, WorkflowState } from "../domain/workflow/WorkflowState.js";
+import {
+  PrTopologyNode,
+  WorkflowState,
+  topologyPrForCheckpoint,
+} from "../domain/workflow/WorkflowState.js";
 import { recurrenceOf } from "../domain/insight/Insight.js";
 import { isInsightGraduationCandidate } from "../domain/insight/InsightMaturation.js";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
@@ -720,6 +724,8 @@ export function collectHandoffFacts(
   const stateText = readIfExists(repoRoot, `${resolved.specPath}/state.yml`) ?? "";
   const node = activeTopologyNode(state);
   const cursor = state.topology?.cursor ?? null;
+  const situatedPrNumber =
+    node && cursor ? topologyPrForCheckpoint(node, cursor.checkpoint) : (node?.github_pr ?? null);
   const specId = /^(\d{4})/.exec(resolved.label)?.[1];
 
   // Camada 1+2: identidade + contrato global (bootstrap/regras/scripts).
@@ -754,20 +760,20 @@ export function collectHandoffFacts(
 
   // Fonte remota (PR) — nunca inventar estado: falha vira unavailable.
   let pullRequest: HandoffPrFact | null = null;
-  if (node?.github_pr) {
+  if (situatedPrNumber) {
     if (options.remote) {
       try {
-        pullRequest = options.remote(node.github_pr, repoRoot);
+        pullRequest = options.remote(situatedPrNumber, repoRoot);
         sources.push({
           id: "pull-request",
-          origin: `gh api (PR #${node.github_pr})`,
+          origin: `gh api (PR #${situatedPrNumber})`,
           status: "fresh",
           fingerprint: fingerprintSource(JSON.stringify(pullRequest)),
         });
       } catch (error) {
         sources.push({
           id: "pull-request",
-          origin: `gh api (PR #${node.github_pr})`,
+          origin: `gh api (PR #${situatedPrNumber})`,
           status: "unavailable",
           fingerprint: "-",
           detail: error instanceof Error ? error.message.split("\n")[0] : String(error),
@@ -776,7 +782,7 @@ export function collectHandoffFacts(
     } else {
       sources.push({
         id: "pull-request",
-        origin: `gh api (PR #${node.github_pr})`,
+        origin: `gh api (PR #${situatedPrNumber})`,
         status: "unavailable",
         fingerprint: "-",
         detail: "coleta remota não habilitada nesta invocação",
@@ -828,7 +834,7 @@ export function collectHandoffFacts(
   const activeNode: HandoffNodeFact | null = node
     ? {
         id: node.id,
-        githubPr: node.github_pr,
+        githubPr: situatedPrNumber,
         sequence: node.sequence,
         terminal: node.terminal,
       }

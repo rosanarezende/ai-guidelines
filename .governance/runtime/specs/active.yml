@@ -2,10 +2,10 @@ version: 1
 active_specs:
   - id: "0024"
     slug: context-architecture
-    branch: feat/spec-0024-internal-architecture-refactor-ddd-bdd
+    branch: feat/spec-0024-broad-flow-falsification
     stage: implementation
     status: active
     spec_path: .governance/specs/0024-context-architecture
     source_state_path: .governance/specs/0024-context-architecture/state.yml
-    updated_at: 2026-07-12T11:35:40.974-03:00
-    updated_by: "@rosanarezende"
+    updated_at: 2026-07-13T23:46:22.373-03:00
+    updated_by: "@codex"

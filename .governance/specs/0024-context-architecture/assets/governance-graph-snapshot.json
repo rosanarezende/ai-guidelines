@@ -6,7 +6,7 @@
     "authority": "none"
   },
   "governed_work_id": "0024-context-architecture",
-  "snapshot_fingerprint": "2fc0cb9b6b31",
+  "snapshot_fingerprint": "944cfb863df7",
   "source_refs": [
     {
       "path": ".core/constraints/constraints.yml",
@@ -126,15 +126,15 @@
     },
     {
       "path": ".governance/runtime/specs/active.yml",
-      "hash": "c08e154937e8"
+      "hash": "1e855c9ce3cc"
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-      "hash": "143deece3750"
+      "hash": "b4ff22689e86"
     },
     {
       "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-      "hash": "17d8ca957dbc"
+      "hash": "300c39f7e70e"
     },
     {
       "path": ".governance/specs/0024-context-architecture/decision-brief.md",
@@ -195,6 +195,10 @@
     {
       "path": ".governance/specs/0024-context-architecture/pull-requests/pr-45/continuations/2026-07-11-internal-architecture-refactor-ddd-bdd/manifest.yml",
       "hash": "bf38a2c0f164"
+    },
+    {
+      "path": ".governance/specs/0024-context-architecture/pull-requests/pr-46/continuations/2026-07-14-broad-flow-falsification/manifest.yml",
+      "hash": "601914d90308"
     },
     {
       "path": ".governance/specs/0024-context-architecture/research/2026-05-28-pressure-axes-scope.md",
@@ -734,11 +738,11 @@
     },
     {
       "path": ".governance/specs/0024-context-architecture/state.yml",
-      "hash": "80caacf45598"
+      "hash": "afc47fc0339d"
     },
     {
       "path": ".governance/specs/0024-context-architecture/tasks.md",
-      "hash": "2f063c08762f"
+      "hash": "3b6ed2076631"
     }
   ],
   "nodes": [
@@ -1001,7 +1005,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1013,7 +1017,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1025,7 +1029,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1037,7 +1041,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1049,7 +1053,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1061,7 +1065,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1073,7 +1077,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1085,7 +1089,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1097,7 +1101,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1109,7 +1113,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1121,7 +1125,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1133,7 +1137,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1145,7 +1149,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1157,7 +1161,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1169,7 +1173,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1181,7 +1185,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1193,7 +1197,19 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
+      }
+    },
+    {
+      "id": "checkpoint:0024-context-architecture/checkpoint-broad-flow-falsification",
+      "type": "checkpoint",
+      "label": "checkpoint-broad-flow-falsification",
+      "attributes": {
+        "is_cursor": true
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/state.yml",
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1205,7 +1221,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1217,7 +1233,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1229,7 +1245,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1241,7 +1257,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1253,7 +1269,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1265,7 +1281,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1277,7 +1293,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1289,7 +1305,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1301,7 +1317,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1313,7 +1329,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1325,7 +1341,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1337,7 +1353,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1349,7 +1365,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1361,7 +1377,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1373,7 +1389,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1385,7 +1401,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1397,7 +1413,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1409,7 +1425,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1417,11 +1433,11 @@
       "type": "checkpoint",
       "label": "checkpoint-internal-architecture-refactor-ddd-bdd",
       "attributes": {
-        "is_cursor": true
+        "is_cursor": false
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1433,7 +1449,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1445,7 +1461,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1457,7 +1473,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1469,7 +1485,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1481,7 +1497,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1493,7 +1509,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1505,7 +1521,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1517,7 +1533,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1529,7 +1545,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -1541,7 +1557,20 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
+      }
+    },
+    {
+      "id": "continuation-package:0024-context-architecture/broad-flow-falsification",
+      "type": "continuation-package",
+      "label": "broad-flow-falsification",
+      "attributes": {
+        "source_pr": 46,
+        "target": "broad-flow-falsification"
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/pull-requests/pr-46/continuations/2026-07-14-broad-flow-falsification/manifest.yml",
+        "hash": "601914d90308"
       }
     },
     {
@@ -2657,13 +2686,13 @@
         "derived": {
           "frente_complete": false,
           "next_topology_executable": false,
-          "active_step_ready": true,
-          "next_semantic_step": "broad-flow-falsification"
+          "active_step_ready": false,
+          "next_semantic_step": "continuation-review-human-gate"
         }
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -2841,7 +2870,7 @@
       },
       "source_ref": {
         "path": ".governance/runtime/specs/active.yml",
-        "hash": "c08e154937e8"
+        "hash": "1e855c9ce3cc"
       }
     },
     {
@@ -2853,7 +2882,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map.html",
-        "hash": "17d8ca957dbc"
+        "hash": "300c39f7e70e"
       }
     },
     {
@@ -2865,7 +2894,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/assets/governed-work-map-data.json",
-        "hash": "143deece3750"
+        "hash": "b4ff22689e86"
       }
     },
     {
@@ -4448,7 +4477,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4456,12 +4485,12 @@
       "type": "step",
       "label": "falsificação ampla do lifecycle governado",
       "attributes": {
-        "state": "pending",
+        "state": "in-progress",
         "line": 132
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4474,7 +4503,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4487,7 +4516,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4500,7 +4529,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4513,7 +4542,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4526,7 +4555,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4539,7 +4568,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4552,7 +4581,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4565,7 +4594,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4578,7 +4607,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4591,7 +4620,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4604,7 +4633,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4618,7 +4647,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4631,7 +4660,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4644,21 +4673,20 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
       "id": "step:0024-context-architecture/internal-architecture-refactor-ddd-bdd",
       "type": "step",
-      "label": "reorganização behavior-preserving do runtime/testes",
+      "label": "✅ **CONCLUÍDO + gated** (Human Gate approved 2026-07-14, `gates/c-internal-architecture-refactor-ddd-bdd.yml`; **PR #46 Ready**, HEAD `480202a9`, CI verde; modo unit, sem merge isolado)",
       "attributes": {
-        "state": "in-progress",
-        "line": 131,
-        "readiness": "ready-for-transition"
+        "state": "done",
+        "line": 131
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4671,7 +4699,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4684,7 +4712,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4697,7 +4725,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4710,7 +4738,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4723,7 +4751,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4736,7 +4764,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4749,7 +4777,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4762,7 +4790,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4775,7 +4803,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4788,7 +4816,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4801,7 +4829,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4814,7 +4842,20 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
+      }
+    },
+    {
+      "id": "task:0024-context-architecture/internal-architecture-refactor-ddd-bdd-0773b7976948",
+      "type": "task",
+      "label": "**Checkpoint internal-architecture-refactor-ddd-bdd** — ✅ **CONCLUÍDO + gated** (Human Gate approved 2026-07-14, `gates/",
+      "attributes": {
+        "done": true,
+        "line": 131
+      },
+      "source_ref": {
+        "path": ".governance/specs/0024-context-architecture/tasks.md",
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4827,7 +4868,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/tasks.md",
-        "hash": "2f063c08762f"
+        "hash": "3b6ed2076631"
       }
     },
     {
@@ -4836,6 +4877,7 @@
       "label": "artifact-taxonomy-and-model-review-contract",
       "attributes": {
         "github_pr": 45,
+        "continuation_prs": [],
         "sequence": 12,
         "role": "execution",
         "terminal": false,
@@ -4844,7 +4886,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4853,6 +4895,7 @@
       "label": "base-governance",
       "attributes": {
         "github_pr": 32,
+        "continuation_prs": [],
         "sequence": null,
         "role": "governance",
         "terminal": false,
@@ -4861,7 +4904,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4870,6 +4913,7 @@
       "label": "bootstrap-compiler",
       "attributes": {
         "github_pr": 38,
+        "continuation_prs": [],
         "sequence": 6,
         "role": "execution",
         "terminal": false,
@@ -4878,7 +4922,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4887,6 +4931,7 @@
       "label": "co-capture",
       "attributes": {
         "github_pr": null,
+        "continuation_prs": [],
         "sequence": 15,
         "role": "execution",
         "terminal": false,
@@ -4895,7 +4940,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4904,6 +4949,7 @@
       "label": "co-enforcement",
       "attributes": {
         "github_pr": 42,
+        "continuation_prs": [],
         "sequence": 9,
         "role": "execution",
         "terminal": false,
@@ -4912,7 +4958,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4921,6 +4967,7 @@
       "label": "co-events",
       "attributes": {
         "github_pr": null,
+        "continuation_prs": [],
         "sequence": 16,
         "role": "execution",
         "terminal": false,
@@ -4929,7 +4976,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4938,6 +4985,7 @@
       "label": "co-flow-continuation",
       "attributes": {
         "github_pr": 44,
+        "continuation_prs": [],
         "sequence": 11,
         "role": "execution",
         "terminal": false,
@@ -4946,7 +4994,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4955,6 +5003,7 @@
       "label": "co-flow-convergence",
       "attributes": {
         "github_pr": 43,
+        "continuation_prs": [],
         "sequence": 10,
         "role": "execution",
         "terminal": false,
@@ -4963,7 +5012,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4972,6 +5021,7 @@
       "label": "co-knowledge",
       "attributes": {
         "github_pr": 37,
+        "continuation_prs": [],
         "sequence": 5,
         "role": "execution",
         "terminal": false,
@@ -4980,7 +5030,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -4989,6 +5039,7 @@
       "label": "co-projection",
       "attributes": {
         "github_pr": 41,
+        "continuation_prs": [],
         "sequence": 8,
         "role": "execution",
         "terminal": false,
@@ -4997,7 +5048,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5006,6 +5057,7 @@
       "label": "co-reconcile",
       "attributes": {
         "github_pr": 36,
+        "continuation_prs": [],
         "sequence": 4,
         "role": "execution",
         "terminal": false,
@@ -5014,7 +5066,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5023,6 +5075,7 @@
       "label": "dualroot-collapse",
       "attributes": {
         "github_pr": null,
+        "continuation_prs": [],
         "sequence": 14,
         "role": "execution",
         "terminal": false,
@@ -5031,7 +5084,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5040,6 +5093,7 @@
       "label": "housekeeping",
       "attributes": {
         "github_pr": null,
+        "continuation_prs": [],
         "sequence": 17,
         "role": "execution",
         "terminal": false,
@@ -5048,7 +5102,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5057,6 +5111,7 @@
       "label": "insights-in-flight",
       "attributes": {
         "github_pr": 34,
+        "continuation_prs": [],
         "sequence": 2,
         "role": "execution",
         "terminal": false,
@@ -5065,7 +5120,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5074,6 +5129,7 @@
       "label": "integration-final",
       "attributes": {
         "github_pr": null,
+        "continuation_prs": [],
         "sequence": null,
         "role": "integration",
         "terminal": true,
@@ -5082,7 +5138,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5091,6 +5147,13 @@
       "label": "internal-architecture-refactor-ddd-bdd",
       "attributes": {
         "github_pr": 46,
+        "continuation_prs": [
+          {
+            "github_pr": 47,
+            "checkpoint": "checkpoint-broad-flow-falsification",
+            "head": "feat/spec-0024-broad-flow-falsification"
+          }
+        ],
         "sequence": 13,
         "role": "execution",
         "terminal": false,
@@ -5099,7 +5162,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5108,6 +5171,7 @@
       "label": "knowledge-readiness",
       "attributes": {
         "github_pr": null,
+        "continuation_prs": [],
         "sequence": 18,
         "role": "execution",
         "terminal": false,
@@ -5116,7 +5180,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5125,6 +5189,7 @@
       "label": "pr-cli-cutover",
       "attributes": {
         "github_pr": 35,
+        "continuation_prs": [],
         "sequence": 3,
         "role": "execution",
         "terminal": false,
@@ -5133,7 +5198,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5142,6 +5207,7 @@
       "label": "ruleset-producibility",
       "attributes": {
         "github_pr": 33,
+        "continuation_prs": [],
         "sequence": 1,
         "role": "execution",
         "terminal": false,
@@ -5150,7 +5216,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     },
     {
@@ -5159,6 +5225,7 @@
       "label": "toolchain-simplification",
       "attributes": {
         "github_pr": 39,
+        "continuation_prs": [],
         "sequence": 7,
         "role": "execution",
         "terminal": false,
@@ -5167,7 +5234,7 @@
       },
       "source_ref": {
         "path": ".governance/specs/0024-context-architecture/state.yml",
-        "hash": "80caacf45598"
+        "hash": "afc47fc0339d"
       }
     }
   ],
@@ -5256,6 +5323,36 @@
       "from": "checkpoint:0024-context-architecture/checkpoint-bootstrap-registry",
       "type": "closed-by",
       "to": "gate:0024-context-architecture/bootstrap-registry"
+    },
+    {
+      "from": "checkpoint:0024-context-architecture/checkpoint-broad-flow-falsification",
+      "type": "contains",
+      "to": "step:0024-context-architecture/artifact-taxonomy-and-model-review-contract"
+    },
+    {
+      "from": "checkpoint:0024-context-architecture/checkpoint-broad-flow-falsification",
+      "type": "contains",
+      "to": "step:0024-context-architecture/broad-flow-falsification"
+    },
+    {
+      "from": "checkpoint:0024-context-architecture/checkpoint-broad-flow-falsification",
+      "type": "contains",
+      "to": "step:0024-context-architecture/continuation-review-human-gate"
+    },
+    {
+      "from": "checkpoint:0024-context-architecture/checkpoint-broad-flow-falsification",
+      "type": "contains",
+      "to": "step:0024-context-architecture/drift-diagnosis-and-repair"
+    },
+    {
+      "from": "checkpoint:0024-context-architecture/checkpoint-broad-flow-falsification",
+      "type": "contains",
+      "to": "step:0024-context-architecture/internal-architecture-refactor-ddd-bdd"
+    },
+    {
+      "from": "checkpoint:0024-context-architecture/checkpoint-broad-flow-falsification",
+      "type": "contains",
+      "to": "step:0024-context-architecture/lifecycle-model-and-artifact-taxonomy-decision"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-cli-cutover",
@@ -5431,6 +5528,11 @@
       "from": "checkpoint:0024-context-architecture/checkpoint-internal-architecture-refactor-ddd-bdd",
       "type": "contains",
       "to": "step:0024-context-architecture/lifecycle-model-and-artifact-taxonomy-decision"
+    },
+    {
+      "from": "checkpoint:0024-context-architecture/checkpoint-internal-architecture-refactor-ddd-bdd",
+      "type": "contains",
+      "to": "task:0024-context-architecture/internal-architecture-refactor-ddd-bdd-0773b7976948"
     },
     {
       "from": "checkpoint:0024-context-architecture/checkpoint-npm-toolchain",
@@ -6621,6 +6723,11 @@
       "from": "topology-node:0024-context-architecture/integration-final",
       "type": "contains",
       "to": "checkpoint:0024-context-architecture/review-and-merge"
+    },
+    {
+      "from": "topology-node:0024-context-architecture/internal-architecture-refactor-ddd-bdd",
+      "type": "contains",
+      "to": "checkpoint:0024-context-architecture/checkpoint-broad-flow-falsification"
     },
     {
       "from": "topology-node:0024-context-architecture/internal-architecture-refactor-ddd-bdd",

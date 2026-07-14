@@ -13,7 +13,7 @@ import {
   parseSteps,
   STEP_READINESS,
 } from "../app/handoff/handoffFacts.js";
-import { PrTopologyNode } from "../domain/workflow/WorkflowState.js";
+import { PrTopologyNode, topologyPrForCheckpoint } from "../domain/workflow/WorkflowState.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 
 interface Logger {
@@ -133,9 +133,30 @@ export function deriveGovernedWorkMapData(repoRoot: string): GovernedWorkMapData
 
   const cursor = state.topology.cursor;
   const nodes = [
-    ...mapNodes("concluded", state.topology.prs.concluded, cursor.pr, repoRoot, tasksMd),
-    ...mapNodes("active", state.topology.prs.active, cursor.pr, repoRoot, tasksMd),
-    ...mapNodes("planned", state.topology.prs.planned, cursor.pr, repoRoot, tasksMd),
+    ...mapNodes(
+      "concluded",
+      state.topology.prs.concluded,
+      cursor.pr,
+      cursor.checkpoint,
+      repoRoot,
+      tasksMd
+    ),
+    ...mapNodes(
+      "active",
+      state.topology.prs.active,
+      cursor.pr,
+      cursor.checkpoint,
+      repoRoot,
+      tasksMd
+    ),
+    ...mapNodes(
+      "planned",
+      state.topology.prs.planned,
+      cursor.pr,
+      cursor.checkpoint,
+      repoRoot,
+      tasksMd
+    ),
   ];
   const checkpointCount = nodes.reduce((sum, node) => sum + node.checkpoints.length, 0);
 
@@ -167,21 +188,24 @@ function mapNodes(
   status: GovernedWorkNodeStatus,
   nodes: readonly PrTopologyNode[],
   cursorPr: string,
+  cursorCheckpoint: string,
   repoRoot: string,
   tasksMd: string
 ): GovernedWorkNode[] {
   return nodes.map((node) => {
     const checkpoints = [...node.checkpoints];
+    const displayedPr =
+      node.id === cursorPr ? topologyPrForCheckpoint(node, cursorCheckpoint) : node.github_pr;
     return {
       id: node.id,
       status,
-      githubPr: node.github_pr,
+      githubPr: displayedPr,
       role: node.role,
       terminal: node.terminal,
       sequence: node.sequence,
       checkpoints,
       isCursor: node.id === cursorPr,
-      evidence: deriveNodeEvidence(repoRoot, tasksMd, node.id, node.github_pr, checkpoints),
+      evidence: deriveNodeEvidence(repoRoot, tasksMd, node.id, displayedPr, checkpoints),
     };
   });
 }

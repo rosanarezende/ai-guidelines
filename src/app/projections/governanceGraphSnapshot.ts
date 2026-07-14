@@ -347,6 +347,11 @@ export function deriveGovernanceGraphSnapshot(
       label: node.id,
       attributes: {
         github_pr: node.github_pr,
+        continuation_prs: (node.continuation_prs ?? []).map((continuation) => ({
+          github_pr: continuation.github_pr,
+          checkpoint: continuation.checkpoint,
+          head: continuation.head,
+        })),
         sequence: node.sequence,
         role: node.role,
         terminal: node.terminal,
@@ -562,11 +567,14 @@ export function deriveGovernanceGraphSnapshot(
   }
 
   // continuation-package + continues-from
-  const nodeByPr = new Map(
-    allTopologyNodes
-      .filter(({ node }) => node.github_pr !== null)
-      .map(({ node }) => [node.github_pr as number, nid("topology-node", node.id)])
-  );
+  const nodeByPr = new Map<number, string>();
+  for (const { node } of allTopologyNodes) {
+    const topologyId = nid("topology-node", node.id);
+    if (node.github_pr !== null) nodeByPr.set(node.github_pr, topologyId);
+    for (const continuation of node.continuation_prs ?? []) {
+      nodeByPr.set(continuation.github_pr, topologyId);
+    }
+  }
   for (const cont of input.continuations) {
     const contId = nid("continuation-package", cont.slug);
     addNode({

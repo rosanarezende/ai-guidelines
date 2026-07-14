@@ -3,6 +3,7 @@ import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
+import { topologyNodeOwnsPr } from "../domain/workflow/WorkflowState.js";
 
 export interface GovernancePrCheckInput {
   readonly prNumber: number;
@@ -261,7 +262,9 @@ export function runGovernancePrCheck(
 
   const allNodes = [...topology.prs.concluded, ...topology.prs.active, ...topology.prs.planned];
 
-  const node = allNodes.find((n) => n.id === branchScope || n.github_pr === input.prNumber);
+  const node = allNodes.find(
+    (candidate) => candidate.id === branchScope || topologyNodeOwnsPr(candidate, input.prNumber)
+  );
   if (!node) {
     return {
       kind: "fail",

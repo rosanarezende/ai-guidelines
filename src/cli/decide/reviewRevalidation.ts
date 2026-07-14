@@ -53,6 +53,7 @@ const defaultProjectionSynchronizer: ReviewRevalidationProjectionSynchronizer = 
 interface ReviewRevalidationPayload {
   readonly stateFile: string;
   readonly nodeId: string;
+  readonly checkpoint: string;
   readonly decisions: readonly {
     role: string;
     ownerDecision: "waived" | "required";
@@ -103,8 +104,19 @@ function mutateStateYaml(
     (item) => isMap(item) && String(item.get("id") ?? "") === payload.nodeId
   );
   if (!node || !isMap(node)) throw new Error(`Nó ativo ${payload.nodeId} não encontrado.`);
-  const reviewPlan = node.get("review_plan", true);
-  if (!isMap(reviewPlan)) throw new Error(`Nó ${payload.nodeId} não possui review_plan.`);
+  let reviewPlan = node.get("review_plan", true);
+  const continuations = node.get("continuation_prs", true);
+  if (isSeq(continuations)) {
+    const situated = continuations.items.find(
+      (item) => isMap(item) && String(item.get("checkpoint") ?? "") === payload.checkpoint
+    );
+    if (situated && isMap(situated)) reviewPlan = situated.get("review_plan", true);
+  }
+  if (!isMap(reviewPlan)) {
+    throw new Error(
+      `Checkpoint ${payload.checkpoint} do nó ${payload.nodeId} não possui review_plan.`
+    );
+  }
   for (const decision of payload.decisions) {
     const lane = reviewPlan.get(decision.role, true);
     if (!isMap(lane)) throw new Error(`review_plan.${decision.role} não encontrado.`);
@@ -313,6 +325,7 @@ export class ReviewRevalidationDefinition implements HumanDecisionDefinition {
     const payload: ReviewRevalidationPayload = {
       stateFile,
       nodeId: snapshot.facts.activeNode?.id ?? "",
+      checkpoint: snapshot.facts.cursor?.checkpoint ?? "",
       decisions,
     };
     return {

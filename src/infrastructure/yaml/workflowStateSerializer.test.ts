@@ -203,6 +203,65 @@ ${active}
       expect(reparsed.topology?.prs.active[0].review_plan).toEqual(plan);
     });
 
+    it("DADO continuação situada em checkpoint do nó ENTÃO parseia e round-trippa", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        continuation_prs:
+          - github_pr: 47
+            checkpoint: cp-2
+            head: feat/spec-0024-broad-flow-falsification
+            review_plan:
+              technical_audit:
+                system_recommendation: recommended
+                owner_decision: pending
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+          - cp-2`);
+      const state = parseWorkflowState(yaml);
+      const continuation = state.topology?.prs.active[0].continuation_prs?.[0];
+      expect(continuation?.github_pr).toBe(47);
+      expect(continuation?.checkpoint).toBe("cp-2");
+      expect(continuation?.review_plan?.technical_audit.owner_decision).toBe("pending");
+      const reparsed = parseWorkflowState(serializeWorkflowState(state));
+      expect(reparsed.topology?.prs.active[0].continuation_prs).toEqual(
+        state.topology?.prs.active[0].continuation_prs
+      );
+    });
+
+    it("DADO continuação associada a checkpoint externo ao nó ENTÃO rejeita", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        continuation_prs:
+          - github_pr: 47
+            checkpoint: cp-ausente
+            head: feat/spec-0024-broad-flow-falsification
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1`);
+      expect(() => parseWorkflowState(yaml)).toThrow(/não pertence ao nó/);
+    });
+
+    it("DADO PR repetido entre âncora e continuação ENTÃO rejeita", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        continuation_prs:
+          - github_pr: 33
+            checkpoint: cp-2
+            head: feat/spec-0024-broad-flow-falsification
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+          - cp-2`);
+      expect(() => parseWorkflowState(yaml)).toThrow(/duplicate github_pr/);
+    });
+
     it("DADO review_plan com decisão final sem actor/reason ENTÃO rejeita", () => {
       const yaml = withNodes(`      - id: pr-1
         github_pr: 33

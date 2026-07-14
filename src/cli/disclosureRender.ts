@@ -30,7 +30,7 @@ import {
 import { consolidate, SpecArtifacts, ConsolidatedCheckpoint } from "./reviewCheck.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
-import { PrTopologyNode } from "../domain/workflow/WorkflowState.js";
+import { PrTopologyNode, topologyNodeOwnsPr } from "../domain/workflow/WorkflowState.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -235,7 +235,9 @@ function findNode(
 ): PrTopologyNode | null {
   const all = [...topology.prs.concluded, ...topology.prs.active, ...topology.prs.planned];
   return (
-    all.find((n) => n.id === branchScope || (prNumber != null && n.github_pr === prNumber)) ?? null
+    all.find(
+      (node) => node.id === branchScope || (prNumber != null && topologyNodeOwnsPr(node, prNumber))
+    ) ?? null
   );
 }
 
@@ -326,7 +328,7 @@ export function main(repoRoot: string, opts: MainOptions = {}): number {
   const facts = deriveDisclosure(node, byCheckpoint);
 
   logger.error(
-    `# Disclosure derivado — Spec ${parsed.specId}${node.github_pr ? ` · PR #${node.github_pr}` : ""} · checkpoints [${facts.checkpointsInScope.join(", ")}]`
+    `# Disclosure derivado — Spec ${parsed.specId}${opts.prNumber ? ` · PR #${opts.prNumber}` : node.github_pr ? ` · PR #${node.github_pr}` : ""} · checkpoints [${facts.checkpointsInScope.join(", ")}]`
   );
   logger.info(renderDisclosure(facts));
   return 0;

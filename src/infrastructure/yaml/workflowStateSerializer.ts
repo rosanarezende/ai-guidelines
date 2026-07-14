@@ -7,6 +7,7 @@ import {
   NodeReviewPlanEntry,
   NodeReviewRequirementOverride,
   PrTopologyNode,
+  TopologyContinuationPr,
   WorkflowTopology,
 } from "../../domain/workflow/WorkflowState.js";
 
@@ -25,10 +26,18 @@ const ALLOWED_PRS_KEYS = ["concluded", "active", "planned"] as const;
 const ALLOWED_NODE_KEYS = [
   "id",
   "github_pr",
+  "continuation_prs",
   "role",
   "terminal",
   "sequence",
   "checkpoints",
+  "review_plan",
+  "review_requirements",
+] as const;
+const ALLOWED_CONTINUATION_PR_KEYS = [
+  "github_pr",
+  "checkpoint",
+  "head",
   "review_plan",
   "review_requirements",
 ] as const;
@@ -207,6 +216,48 @@ function parseNodeReviewPlan(raw: unknown, where: string): Record<string, NodeRe
   return result;
 }
 
+function parseContinuationPrs(raw: unknown, where: string): TopologyContinuationPr[] {
+  if (!Array.isArray(raw)) {
+    throw new WorkflowStateParseError(`${where} must be a list`);
+  }
+  return raw.map((value, index) => {
+    const itemWhere = `${where}[${index}]`;
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      throw new WorkflowStateParseError(`${itemWhere} must be a mapping`);
+    }
+    const item = value as Record<string, unknown>;
+    for (const key of Object.keys(item)) {
+      if (!(ALLOWED_CONTINUATION_PR_KEYS as readonly string[]).includes(key)) {
+        throw new WorkflowStateParseError(`${itemWhere}: unexpected key "${key}"`);
+      }
+    }
+    if (!Number.isInteger(item.github_pr) || (item.github_pr as number) <= 0) {
+      throw new WorkflowStateParseError(`${itemWhere}.github_pr must be a positive integer`);
+    }
+    if (typeof item.checkpoint !== "string" || item.checkpoint.trim() === "") {
+      throw new WorkflowStateParseError(`${itemWhere}.checkpoint must be a non-empty string`);
+    }
+    if (typeof item.head !== "string" || item.head.trim() === "") {
+      throw new WorkflowStateParseError(`${itemWhere}.head must be a non-empty string`);
+    }
+    const reviewPlan =
+      item.review_plan !== undefined
+        ? parseNodeReviewPlan(item.review_plan, `${itemWhere}.review_plan`)
+        : undefined;
+    const reviewRequirements =
+      item.review_requirements !== undefined
+        ? parseNodeReviewRequirements(item.review_requirements, `${itemWhere}.review_requirements`)
+        : undefined;
+    return {
+      github_pr: item.github_pr as number,
+      checkpoint: item.checkpoint,
+      head: item.head,
+      ...(reviewPlan ? { review_plan: reviewPlan } : {}),
+      ...(reviewRequirements ? { review_requirements: reviewRequirements } : {}),
+    };
+  });
+}
+
 export function parseWorkflowState(yamlText: string): WorkflowState {
   const raw: unknown = parse(yamlText);
   if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
@@ -342,6 +393,13 @@ function parseTopology(raw: unknown): WorkflowTopology {
         nodeObj.checkpoints,
         `topology.prs.${groupName}[${index}].checkpoints`
       );
+      const continuationPrs =
+        nodeObj.continuation_prs !== undefined
+          ? parseContinuationPrs(
+              nodeObj.continuation_prs,
+              `topology.prs.${groupName}[${index}].continuation_prs`
+            )
+          : undefined;
 
       if (ids.has(nodeObj.id)) {
         throw new WorkflowStateParseError(`duplicate PR id "${nodeObj.id}"`);
@@ -378,6 +436,9 @@ function parseTopology(raw: unknown): WorkflowTopology {
       nodes.push({
         id: nodeObj.id,
         github_pr: nodeObj.github_pr as number | null,
+        ...(continuationPrs && continuationPrs.length > 0
+          ? { continuation_prs: continuationPrs }
+          : {}),
         role: nodeObj.role,
         terminal: nodeObj.terminal,
         sequence: nodeObj.sequence as number | null,
@@ -473,12 +534,43 @@ function parseTopology(raw: unknown): WorkflowTopology {
           `planned é para PR ainda não aberto (mova para active/concluded ao abrir o PR)`
       );
     }
+    if ((node.continuation_prs ?? []).length > 0) {
+      throw new WorkflowStateParseError(
+        `node "${node.id}" está em planned mas declara continuation_prs — continuações exigem um nó real ativo ou concluído`
+      );
+    }
   }
-  // Unicidade de github_pr (cada PR real pertence a no máximo um nó).
-  const prNumbers = allTopologyNodes.map((n) => n.github_pr).filter((p): p is number => p !== null);
+  for (const node of allTopologyNodes) {
+    const continuationCheckpoints = new Set<string>();
+    const continuationHeads = new Set<string>();
+    for (const continuation of node.continuation_prs ?? []) {
+      if (!node.checkpoints.includes(continuation.checkpoint)) {
+        throw new WorkflowStateParseError(
+          `node "${node.id}" associa PR #${continuation.github_pr} ao checkpoint "${continuation.checkpoint}", que não pertence ao nó`
+        );
+      }
+      if (continuationCheckpoints.has(continuation.checkpoint)) {
+        throw new WorkflowStateParseError(
+          `node "${node.id}" possui mais de uma continuação para o checkpoint "${continuation.checkpoint}"`
+        );
+      }
+      if (continuationHeads.has(continuation.head)) {
+        throw new WorkflowStateParseError(
+          `node "${node.id}" possui continuation head duplicada "${continuation.head}"`
+        );
+      }
+      continuationCheckpoints.add(continuation.checkpoint);
+      continuationHeads.add(continuation.head);
+    }
+  }
+  // Unicidade global: cada PR real pertence a um único nó/checkpoint.
+  const prNumbers = allTopologyNodes.flatMap((node) => [
+    ...(node.github_pr === null ? [] : [node.github_pr]),
+    ...(node.continuation_prs ?? []).map((continuation) => continuation.github_pr),
+  ]);
   if (new Set(prNumbers).size !== prNumbers.length) {
     throw new WorkflowStateParseError(
-      `topology has a duplicate github_pr; cada PR real pertence a no máximo um nó (got ${prNumbers
+      `topology has a duplicate github_pr; cada PR real pertence a no máximo um nó/checkpoint (got ${prNumbers
         .slice()
         .sort((a, b) => a - b)
         .join(", ")})`
@@ -531,6 +623,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
       plain.topology.prs.concluded = state.topology.prs.concluded.map((n) => ({
         id: n.id,
         github_pr: n.github_pr,
+        ...(n.continuation_prs ? { continuation_prs: n.continuation_prs } : {}),
         role: n.role,
         terminal: n.terminal,
         sequence: n.sequence,
@@ -543,6 +636,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
       plain.topology.prs.active = state.topology.prs.active.map((n) => ({
         id: n.id,
         github_pr: n.github_pr,
+        ...(n.continuation_prs ? { continuation_prs: n.continuation_prs } : {}),
         role: n.role,
         terminal: n.terminal,
         sequence: n.sequence,
@@ -555,6 +649,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
       plain.topology.prs.planned = state.topology.prs.planned.map((n) => ({
         id: n.id,
         github_pr: n.github_pr,
+        ...(n.continuation_prs ? { continuation_prs: n.continuation_prs } : {}),
         role: n.role,
         terminal: n.terminal,
         sequence: n.sequence,

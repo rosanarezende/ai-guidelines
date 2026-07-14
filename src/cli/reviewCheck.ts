@@ -46,7 +46,10 @@ import {
   resolveRequirement,
 } from "../app/reviews/reviewRequirements.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
-import type { NodeReviewPlanEntry } from "../domain/workflow/WorkflowState.js";
+import {
+  NodeReviewPlanEntry,
+  topologyReviewContextForCheckpoint,
+} from "../domain/workflow/WorkflowState.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -525,23 +528,28 @@ export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: 
               ...topology.prs.active,
               ...topology.prs.planned,
             ]) {
-              const reviewPlanOverrides = reviewPlanToNodeOverrides(node.review_plan);
-              const planIssues = reviewPlanDecisionIssues(node.review_plan).map((i) => i.message);
-              const nodeContext: CheckpointTopologyContext = {
-                nodeId: node.id,
-                nodeRole: node.role,
-                ...(node.review_requirements ? { overrides: node.review_requirements } : {}),
-                ...(node.review_plan ? { reviewPlan: node.review_plan } : {}),
-                ...(Object.keys(reviewPlanOverrides).length > 0 ? { reviewPlanOverrides } : {}),
-                ...(planIssues.length > 0 ? { reviewPlanIssues: planIssues } : {}),
-              };
-              const requiredRoles = requiredRolesForNode(
-                { role: node.role, overrides: node.review_requirements },
-                reviewPolicy,
-                registry,
-                errors
-              );
               for (const cp of node.checkpoints) {
+                const situated = topologyReviewContextForCheckpoint(node, cp);
+                const reviewPlanOverrides = reviewPlanToNodeOverrides(situated.review_plan);
+                const planIssues = reviewPlanDecisionIssues(situated.review_plan).map(
+                  (issue) => issue.message
+                );
+                const nodeContext: CheckpointTopologyContext = {
+                  nodeId: node.id,
+                  nodeRole: node.role,
+                  ...(situated.review_requirements
+                    ? { overrides: situated.review_requirements }
+                    : {}),
+                  ...(situated.review_plan ? { reviewPlan: situated.review_plan } : {}),
+                  ...(Object.keys(reviewPlanOverrides).length > 0 ? { reviewPlanOverrides } : {}),
+                  ...(planIssues.length > 0 ? { reviewPlanIssues: planIssues } : {}),
+                };
+                const requiredRoles = requiredRolesForNode(
+                  { role: node.role, overrides: situated.review_requirements },
+                  reviewPolicy,
+                  registry,
+                  errors
+                );
                 allowedCheckpoints.push(cp);
                 topologyByCheckpoint[cp] = nodeContext;
                 topologyByCheckpoint[normalizeCheckpoint(cp)] = nodeContext;

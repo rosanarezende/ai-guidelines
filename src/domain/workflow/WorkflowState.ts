@@ -79,9 +79,24 @@ export interface NodeReviewPlanEntry {
   readonly revalidation?: NodeReviewPlanRevalidation;
 }
 
+/**
+ * PR adicional que materializa um checkpoint do mesmo nó topológico.
+ *
+ * O nó continua sendo a unidade da stack; a continuação é uma superfície de
+ * revisão situada e não ocupa uma nova posição em `sequence`.
+ */
+export interface TopologyContinuationPr {
+  readonly github_pr: number;
+  readonly checkpoint: string;
+  readonly head: string;
+  readonly review_plan?: Readonly<Record<string, NodeReviewPlanEntry>>;
+  readonly review_requirements?: Readonly<Record<string, NodeReviewRequirementOverride>>;
+}
+
 export interface PrTopologyNode {
   readonly id: string;
   readonly github_pr: number | null;
+  readonly continuation_prs?: ReadonlyArray<TopologyContinuationPr>;
   readonly role: TopologyRole;
   readonly terminal: boolean;
   readonly sequence: number | null;
@@ -90,6 +105,40 @@ export interface PrTopologyNode {
   readonly review_plan?: Readonly<Record<string, NodeReviewPlanEntry>>;
   /** Overrides situados por tipo de review (opcional). */
   readonly review_requirements?: Readonly<Record<string, NodeReviewRequirementOverride>>;
+}
+
+export function topologyNodeOwnsPr(node: PrTopologyNode, prNumber: number): boolean {
+  return (
+    node.github_pr === prNumber ||
+    (node.continuation_prs ?? []).some((continuation) => continuation.github_pr === prNumber)
+  );
+}
+
+export function topologyPrForCheckpoint(node: PrTopologyNode, checkpoint: string): number | null {
+  return (
+    (node.continuation_prs ?? []).find((continuation) => continuation.checkpoint === checkpoint)
+      ?.github_pr ?? node.github_pr
+  );
+}
+
+export function topologyReviewContextForCheckpoint(
+  node: PrTopologyNode,
+  checkpoint: string
+): Pick<PrTopologyNode, "review_plan" | "review_requirements"> {
+  const continuation = (node.continuation_prs ?? []).find(
+    (candidate) => candidate.checkpoint === checkpoint
+  );
+  return continuation
+    ? {
+        ...(continuation.review_plan ? { review_plan: continuation.review_plan } : {}),
+        ...(continuation.review_requirements
+          ? { review_requirements: continuation.review_requirements }
+          : {}),
+      }
+    : {
+        ...(node.review_plan ? { review_plan: node.review_plan } : {}),
+        ...(node.review_requirements ? { review_requirements: node.review_requirements } : {}),
+      };
 }
 
 export interface TopologyPrs {

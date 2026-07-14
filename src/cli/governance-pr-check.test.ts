@@ -170,6 +170,55 @@ topology:
     }
   });
 
+  it("DADO um PR de continuação situado em checkpoint do nó ENTÃO valida contra a sequência do nó", () => {
+    fs.addFile(
+      ".governance/specs/0024-context-architecture/state.yml",
+      `
+stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: ruleset-producibility
+    checkpoint: cp-2
+  prs:
+    active:
+      - id: ruleset-producibility
+        github_pr: 33
+        continuation_prs:
+          - github_pr: 47
+            checkpoint: cp-2
+            head: feat/spec-0024-broad-flow-falsification
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+          - cp-2
+    concluded: []
+    planned:
+      - id: integration-final
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - cp-final
+`
+    );
+    const result = runGovernancePrCheck(
+      {
+        ...baseInput,
+        prNumber: 47,
+        prBranch: "feat/spec-0024-broad-flow-falsification",
+      },
+      fs
+    );
+    expect(result.kind).toBe("ok");
+  });
+
   it("DADO um PR com titulo faltando ➜ (terminalidade falsa), ENTÃO falha", () => {
     const input = { ...baseInput, prTitle: "[🛠️1️⃣] [Spec 0024] titulo errado" };
     const result = runGovernancePrCheck(input, fs);

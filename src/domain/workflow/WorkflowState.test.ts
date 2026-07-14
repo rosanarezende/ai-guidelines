@@ -6,6 +6,9 @@ import {
   isExecutionAuthorized,
   isGateStatus,
   isWorkflowStage,
+  topologyNodeOwnsPr,
+  topologyPrForCheckpoint,
+  topologyReviewContextForCheckpoint,
 } from "./WorkflowState.js";
 
 describe("Domínio — WorkflowState [BR-WORKFLOW-DOMAIN]", () => {
@@ -85,6 +88,61 @@ describe("Domínio — WorkflowState [BR-WORKFLOW-DOMAIN]", () => {
         next: [],
       };
       expect(isExecutionAuthorized(state, false)).toBe(false);
+    });
+  });
+
+  describe("PRs de continuação situados por checkpoint", () => {
+    const node = {
+      id: "architecture",
+      github_pr: 46,
+      role: "execution" as const,
+      terminal: false,
+      sequence: 13,
+      checkpoints: ["checkpoint-architecture", "checkpoint-falsification"],
+      review_plan: {
+        technical_audit: {
+          system_recommendation: "recommended" as const,
+          owner_decision: "required" as const,
+          actor: "owner",
+          reason: "Refactor estrutural.",
+        },
+      },
+      continuation_prs: [
+        {
+          github_pr: 47,
+          checkpoint: "checkpoint-falsification",
+          head: "feat/spec-0024-broad-flow-falsification",
+          review_plan: {
+            technical_audit: {
+              system_recommendation: "recommended" as const,
+              owner_decision: "pending" as const,
+            },
+          },
+        },
+      ],
+    };
+
+    it("reconhece o PR âncora e o PR de continuação como pertencentes ao mesmo nó", () => {
+      expect(topologyNodeOwnsPr(node, 46)).toBe(true);
+      expect(topologyNodeOwnsPr(node, 47)).toBe(true);
+      expect(topologyNodeOwnsPr(node, 48)).toBe(false);
+    });
+
+    it("projeta o PR situado no checkpoint sem alterar a posição topológica", () => {
+      expect(topologyPrForCheckpoint(node, "checkpoint-architecture")).toBe(46);
+      expect(topologyPrForCheckpoint(node, "checkpoint-falsification")).toBe(47);
+      expect(node.sequence).toBe(13);
+    });
+
+    it("isola o plano de reviews da continuação do plano histórico do PR âncora", () => {
+      expect(
+        topologyReviewContextForCheckpoint(node, "checkpoint-architecture").review_plan
+          ?.technical_audit.owner_decision
+      ).toBe("required");
+      expect(
+        topologyReviewContextForCheckpoint(node, "checkpoint-falsification").review_plan
+          ?.technical_audit.owner_decision
+      ).toBe("pending");
     });
   });
 });
