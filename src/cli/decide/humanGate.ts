@@ -97,14 +97,16 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
       "o gate é registrado DEPOIS da decisão e não executa transição automática.";
 
     const doneSubs = snapshot.steps.filter((s) => s.state === "done");
-    const terminalReadySub = snapshot.steps.find((s) => {
-      if (s.state !== "in-progress" || s.readiness !== STEP_READINESS) return false;
-      return !snapshot.steps.some((other) => other.state === "pending" && other.line > s.line);
-    });
+    // O Gate avalia a etapa ativa pronta, mesmo quando a Frente ainda possui
+    // checkpoints futuros. A terminalidade da Frente pertence à derivação do
+    // próximo movimento, não à descrição do que este checkpoint entregou.
+    const activeReadySub = snapshot.steps.find(
+      (s) => s.state === "in-progress" && s.readiness === STEP_READINESS
+    );
     const deliveredSubs = [
       ...doneSubs.map((s) => `Concluído: ${s.id} — ${s.title}`),
-      ...(terminalReadySub
-        ? [`Pronto para Gate: ${terminalReadySub.id} — ${terminalReadySub.title}`]
+      ...(activeReadySub
+        ? [`Pronto para Gate: ${activeReadySub.id} — ${activeReadySub.title}`]
         : []),
     ];
     const reviewStatuses = snapshot.facts.lifecycle?.reviewStatuses ?? [];

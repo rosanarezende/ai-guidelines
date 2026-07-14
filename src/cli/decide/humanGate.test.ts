@@ -378,6 +378,7 @@ describe("human-gate · briefing humano [decide]", () => {
     });
     const b = def.buildBrief(s, { technical: false });
     const text = JSON.stringify(b.sections);
+    expect(text).toContain("Pronto para Gate: internal-architecture-refactor-ddd-bdd — refactor");
     expect(text).toContain(
       "Próximo checkpoint da Frente: broad-flow-falsification — falsificação ampla."
     );
