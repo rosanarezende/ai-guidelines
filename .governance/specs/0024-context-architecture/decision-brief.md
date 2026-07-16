@@ -916,6 +916,27 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G32] Encerramento da Spec 0024 por extração — superseded-by-extraction
+
+**Modo de gate:** `aceitação`.
+
+**O que está sendo aceito:**
+
+- A Spec 0024 encerra com disposição **superseded-by-extraction**: o Guilda Flow será **recriado no monorepo `guilda`**, contract-first sobre a baseline semântica V1 do shared kernel, aprovada por Human Gate em 2026-07-16 e integrada à `main` do guilda (guilda PR #33, merge `6959ba51`).
+- Este repositório é rebaixado a **fonte de extração**: o tooling comprovado (review-como-artefato com fingerprints, fluxo de continuation, handoff derivado, drift doctor, consumer harness) será portado seletivamente, **por adoção explícita contra a gramática canônica do kernel** — nunca cópia cega.
+- O Draft PR #47 **não retoma**; fecha sem merge. O stack #32–#46 permanece como histórico preservado; fechá-los ou mantê-los abertos é escolha da owner, registrada em task própria do trabalho receptor.
+- O **arquivamento formal** do repositório só acontece após paridade essencial, decidida por gate humano no trabalho `works/delivery/guilda-flow-v1` do monorepo guilda.
+
+**Autoridade e registro upstream:** QRD-FLOW-001 (`guilda:.governance/works/delivery/guilda-flow-v1/deliberations/qrd-flow-001.md`, guilda PR #34), decidida pela owner em 2026-07-16. O pacote factual selado (`flow-factual-package.md`, commit de artefatos `bace06f7`) permanece o único insumo autorizado para o Flow recriado; o `work-graph-model/` local segue proveniência congelada.
+
+**Por que não é débito silencioso (coerente com G21):** as frentes que permaneciam abertas (dualroot-collapse, co-capture, co-events, housekeeping, knowledge-readiness, integration-final) não são abandonadas sem registro — são supersedidas por decisão explícita: os problemas que resolveriam deixam de existir no monorepo (dualroot-collapse: não há mais transporte cross-repo a colapsar) ou renascem contra a gramática canônica (a falsificação vive no checkpoint `shared-kernel-contract-falsification`, relocado ao guilda por QRD-FLOW-001). O protocolo do `NEXT.md` (deletar no encerramento pré-merge + migrar débitos ao backlog local) **não** é executado, por decisão: o receptor dos aprendizados é o trabalho `guilda-flow-v1`, não o roadmap deste repositório; os débitos ficam congelados como histórico.
+
+**O que NÃO está sendo decidido:** merge de qualquer PR do stack; arquivamento imediato do repositório; a disposição individual dos PRs #32–#46; qualquer implementação no monorepo.
+
+**Status:** Resolved (2026-07-16) / @rosanarezende — registrado pelo implementador (Claude) por autorização explícita da owner.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -1001,6 +1022,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G29`        | decisão efetiva de lane por verificação completa de findings               | **Decidido** — § 1 (Resolved 2026-07-11, owner); eventos `scope: findings` aprovados e completos podem resolver a decisão efetiva sem reescrever o review original                           |
 | `G30`        | dispensa governada de revalidação de review stale+approved                 | **Decidido** — § 1 (Resolved 2026-07-12, owner); `review_plan.<type>.revalidation` permite `pending/waived/required` com actor+reason e warning no Ready check                               |
 | `G31`        | gramática operacional do framework + disposição de G01 residual            | **Decidido** — § 1 (Resolved 2026-07-13, owner); contratos do PR #46 fecham a gramática interna, com resíduos roteados para falsificação/pesquisa                                            |
+| `G32`        | encerramento da spec por extração (superseded-by-extraction)               | **Decidido** — § 1 (Resolved 2026-07-16, owner); Flow recriado no monorepo guilda sobre a baseline V1 (QRD-FLOW-001); PR #47 fecha sem merge; este repositório vira fonte de extração        |
 
 ---
 
@@ -1036,6 +1058,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G29]` — Resolved 2026-07-11 / @rosanarezende
 - [x] `[DEC-0024-G30]` — Resolved 2026-07-12 / @rosanarezende
 - [x] `[DEC-0024-G31]` — Resolved 2026-07-13 / @rosanarezende
+- [x] `[DEC-0024-G32]` — Resolved 2026-07-16 / @rosanarezende
 
 ---
 

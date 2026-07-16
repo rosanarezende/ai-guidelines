@@ -2,6 +2,10 @@
 
 # NEXT — Spec 0024 Context Architecture
 
+> ## 🛑 Encerramento (2026-07-16) — superseded-by-extraction
+>
+> A Spec 0024 encerrou por `[DEC-0024-G32]` **sem merge do stack**. O protocolo deste arquivo (deletar no encerramento pré-merge + migrar débitos ao backlog local) **não** foi executado, por decisão registrada na própria DEC: o receptor dos aprendizados é o trabalho `guilda:works/delivery/guilda-flow-v1`, não o roadmap deste repositório. Os débitos abaixo permanecem como histórico congelado.
+
 > **Arquivo de acompanhamento contínuo.** Instanciado no setup. Registra itens que extrapolem o escopo da 0024 e precisem sobreviver até o encerramento. **DELETADO no encerramento pré-merge**; itens relevantes migram para `.governance/specs/roadmap/backlog.md`.
 
 > ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2 / Checkpoint 2.1)

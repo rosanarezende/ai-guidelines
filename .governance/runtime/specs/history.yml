@@ -9,3 +9,12 @@ specs_history:
     source_state_path: .governance/specs/0023-workflow-runtime/state.yml
     updated_at: 2026-06-06T00:21:57-03:00
     updated_by: "@rosanarezende"
+  - id: "0024"
+    slug: context-architecture
+    branch: feat/spec-0024-broad-flow-falsification
+    stage: done
+    status: completed
+    spec_path: .governance/specs/0024-context-architecture
+    source_state_path: .governance/specs/0024-context-architecture/state.yml
+    updated_at: 2026-07-16T12:30:28.974-03:00
+    updated_by: "@rosanarezende"
